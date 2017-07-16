@@ -1,13 +1,52 @@
 "use strict";
+
+// @flow
 const assert = require("assert");
 const { getArgumentValues } = require("graphql/execution/values");
 const { getNamedType, isCompositeType } = require("graphql");
 const debug = require("debug")("graphql-parse-resolve-info");
 
+/*::
+import type {
+  GraphQLResolveInfo,
+  GraphQLObjectType,
+  GraphQLField,
+  GraphQLCompositeType,
+  GraphQLInterfaceType,
+} from 'graphql/type/definition';
+import {
+  GraphQLUnionType,
+} from 'graphql/type/definition';
+import type {
+  ASTNode,
+  FieldNode,
+  SelectionNode,
+} from 'graphql/language/ast.js.flow';
+
+type ResolveTree = {
+  name: string,
+  alias: string,
+  args: {
+    [string]: mixed,
+  },
+  fieldsByTypeName: FieldsByTypeName,
+};
+
+type FieldsByTypeName = {
+  [string]: {
+    [string]: ResolveTree,
+  },
+};
+
+
+*/
+
 // Originally based on https://github.com/tjmehta/graphql-parse-fields
 
-function getAliasFromResolveInfo(resolveInfo) {
-  const asts = resolveInfo.fieldASTs || resolveInfo.fieldNodes;
+function getAliasFromResolveInfo(
+  resolveInfo /*: GraphQLResolveInfo */
+) /*: ?string */ {
+  const asts = resolveInfo.fieldNodes || resolveInfo.fieldASTs;
   return asts.reduce(function(alias, val) {
     if (!alias) {
       if (val.kind === "Field") {
@@ -18,8 +57,11 @@ function getAliasFromResolveInfo(resolveInfo) {
   }, null);
 }
 
-function parseResolveInfo(resolveInfo, options = {}) {
-  const fieldNodes = resolveInfo.fieldASTs || resolveInfo.fieldNodes;
+function parseResolveInfo(
+  resolveInfo /*: GraphQLResolveInfo */,
+  options /*: {keepRoot?: boolean, deep?: boolean} */ = {}
+) /*: ResolveTree | FieldsByTypeName | null | void */ {
+  const fieldNodes = resolveInfo.fieldNodes || resolveInfo.fieldASTs;
   const { parentType } = resolveInfo;
   if (!fieldNodes) {
     throw new Error("No fieldNodes provided!");
@@ -39,6 +81,9 @@ function parseResolveInfo(resolveInfo, options = {}) {
   );
   if (!options.keepRoot) {
     const typeKey = firstKey(tree);
+    if (!typeKey) {
+      return null;
+    }
     tree = tree[typeKey];
     const fieldKey = firstKey(tree);
     tree = tree[fieldKey];
@@ -46,21 +91,33 @@ function parseResolveInfo(resolveInfo, options = {}) {
   return tree;
 }
 
-function getFieldFromAST(ast, parentType) {
+function getFieldFromAST(
+  ast /*: ASTNode */,
+  parentType /*: GraphQLCompositeType */
+) /*: ?GraphQLField<*, *> */ {
   if (ast.kind === "Field") {
-    const fieldName = ast.name.value;
-    return parentType.getFields()[fieldName];
+    const fieldNode /*: FieldNode */ = ast;
+    const fieldName = fieldNode.name.value;
+    if (
+      typeof parentType.getFields === "function"
+      /*:: && !(parentType instanceof GraphQLUnionType) */
+    ) {
+      const type /*: GraphQLObjectType | GraphQLInterfaceType */ = parentType;
+      return type.getFields()[fieldName];
+    } else {
+      // XXX: TODO: Handle GraphQLUnionType
+    }
   }
   return;
 }
 
 let iNum = 1;
 function fieldTreeFromAST(
-  inASTs,
-  resolveInfo,
-  initTree,
+  inASTs /*: Array<SelectionNode> | SelectionNode */,
+  resolveInfo /*: GraphQLResolveInfo */,
+  initTree /*: ?FieldsByTypeName */,
   options,
-  parentType,
+  parentType /*: GraphQLCompositeType */,
   depth = ""
 ) {
   const instance = iNum++;
@@ -79,24 +136,30 @@ function fieldTreeFromAST(
   const outerDepth = depth;
   return asts.reduce(function(tree, val, idx) {
     const depth = `${outerDepth}  `;
-    const kind = val.kind;
     debug(
       "%s[%d] Processing AST %d of %d; kind = %s",
       depth,
       instance,
       idx + 1,
       asts.length,
-      kind
+      val.kind
     );
-    const name = val.name && val.name.value;
+    const name = val.kind === "Field" ? val.name && val.name.value : null;
     const isReserved = name && name !== "__id" && name.substr(0, 2) === "__";
-    if (kind === "Field" && !isReserved) {
-      const alias = val.alias ? val.alias.value : name;
+    if (val.kind === "Field" && !isReserved) {
+      const alias /*: string */ =
+        val.alias && val.alias.value ? val.alias.value : val.name.value;
       debug("%s[%d] Field '%s' (alias = '%s')", depth, instance, name, alias);
       const field = getFieldFromAST(val, parentType);
+      if (!field) {
+        return tree;
+      }
       const fieldGqlType = getNamedType(field.type);
+      if (!fieldGqlType) {
+        return tree;
+      }
       const args = getArgumentValues(field, val, variableValues) || {};
-      if (!tree[parentType.name][alias]) {
+      if (parentType.name && !tree[parentType.name][alias]) {
         tree[parentType.name][alias] = {
           alias,
           name,
@@ -122,7 +185,7 @@ function fieldTreeFromAST(
         // No fields to add
         debug("%s[%d] Exiting (no fields to add)", depth, instance);
       }
-    } else if (kind === "FragmentSpread" && options.deep) {
+    } else if (val.kind === "FragmentSpread" && options.deep) {
       debug("%s[%d] Fragment spread '%s'", depth, instance, name);
       const fragment = fragments[name];
       assert(fragment, 'unknown fragment "' + name + '"');
@@ -140,7 +203,7 @@ function fieldTreeFromAST(
           `${depth}  `
         );
       }
-    } else if (kind === "InlineFragment" && options.deep) {
+    } else if (val.kind === "InlineFragment" && options.deep) {
       const fragment = val;
       let fragmentType = parentType;
       if (fragment.typeCondition) {
