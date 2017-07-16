@@ -6,7 +6,7 @@
   "scripts": {
     "flow": "flow",
     "jest": "jest",
-    "test": "flow && jest && markdown-doctest",
+    "test": "flow check && jest && markdown-doctest",
     "test:docs": "markdown-doctest",
     "prepublish": "babel --out-dir lib src"
   },
