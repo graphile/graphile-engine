@@ -9,10 +9,7 @@ if (parseFloat(process.versions.node) < 4) {
 
 const isSymbol = sym => typeof sym === "symbol";
 const isNil = o => o === null || o === undefined;
-const isObject = o => typeof o === "object";
 const debug = require("debug")("pg-sql2");
-
-const isDev = ["development"].indexOf(process.env.NODE_ENV) >= 0;
 
 function debugError(err) {
   debug(err);
@@ -203,26 +200,6 @@ function query(
       return items.concat(makeRawNode(text));
     } else {
       const value = values[i];
-      if (isDev) {
-        // These errors don't give you additional safety, they just catch
-        // mistakes earlier to aid debugging, so they're fine to disable in
-        // production
-        if (!Array.isArray(value) && !isObject(value)) {
-          if (typeof value === "string") {
-            throw new Error(
-              `Raw string passed into SQL query: '${String(value)}'.`
-            );
-          } else if (typeof value === "number") {
-            throw new Error(
-              `Raw number passed into SQL query: '${String(value)}'.`
-            );
-          } else {
-            throw new Error(
-              `Invalid raw value passed into SQL query: '${String(value)}'.`
-            );
-          }
-        }
-      }
       if (Array.isArray(value)) {
         const nodes /*: SQLQuery */ = value.map(enforceValidNode);
         return items.concat(makeRawNode(text), nodes);

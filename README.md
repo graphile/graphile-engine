@@ -61,15 +61,18 @@ API
 
 Builds part of (or the whole of) an SQL query, safely interpretting the embedded expressions. If a non `sql.*` expression is passed in, e.g.:
 
+<!-- skip-example -->
 ```js
 sql.query`select ${1}`
 ```
 
-then an error will be thrown (immediately on development, at `sql.compile` time on production for performance).
+then an error will be thrown.
 
 ### `sql.identifier(ident, ...)`
 
-Represents a safely escaped SQL identifier; if multiple arguments are passed then each will be escaped and then they will be joined with dots (e.g. `"schema"."table"."column"`).
+Represents a safely escaped SQL identifier; if multiple arguments are passed
+then each will be escaped and then they will be joined with dots (e.g.
+`"schema"."table"."column"`).
 
 ### `sql.value(val)`
 
@@ -77,7 +80,9 @@ Represents an SQL value, will be replaced with a placeholder and the value colle
 
 ### `sql.literal(val)`
 
-As sql.value, but in the case of very simple values may write them directly to the SQL statement. Should only be used with trusted data, e.g. for the key arguments to `json_build_object(key, val, key, val, ...)`
+As `sql.value`, but in the case of very simple values may write them directly
+to the SQL statement. Should only be used with trusted data, e.g. for the key
+arguments to `json_build_object(key, val, key, val, ...)`
 
 ### `sql.join(arrayOfFragments, delimeter)`
 
@@ -113,10 +118,6 @@ sql.query`select * from foo ${sql.join(arrayOfSqlInnerJoins, " ")}`
 // select * from foo inner join bar on (bar.foo_id = foo.id) inner join baz on (baz.bar_id = bar.id)
 ```
 
-### `sql.raw(stringValue)`
-
-**DO NOT USE THIS**; honestly outside of the internals I don't think there is any need for this - use `sql.query` instead.
-
 ### `sql.compile(query)`
 
 Compiles the query into an SQL statement and a list of values, ready to be executed
@@ -137,8 +138,8 @@ that was done to it [in
 postgraphql](https://github.com/postgraphql/postgraphql/blob/9c36d7e9b9ad74e665de18964fd2554f9f639903/src/postgres/utils/sql.ts)
 and offering the following enhancements:
 
-- Better development experience for people not using TypeScript (throws errors
-  a lot earlier in development\*, allowing you to catch issues at the source)
+- Better development experience for people not using Flow/TypeScript (throws
+  errors a lot earlier allowing you to catch issues at the source)
 - Slightly more helpful error messages
 - Uses a hidden non-enumerable symbol as the type of the query nodes to protect
   against an object accidentally being inserted verbatim and being treated as
@@ -150,8 +151,3 @@ and offering the following enhancements:
   [`json_build_object(...)`](https://www.postgresql.org/docs/9.6/static/functions-json.html))
   then debugging your SQL becomes a lot easier because fewer placeholders are
   used.
-
-
----
-
-\* Development mode is when `process.env.NODE_ENV` is either `development` or `test`

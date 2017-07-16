@@ -126,28 +126,30 @@ describe("sql.compile", () => {
 
 describe("sqli", () => {
   it("subbing an object of similar layout", () => {
-    const node = sql.query`select ${sql.join(
-      [
-        { type: "VALUE", value: 1 },
-        sql.identifier("foo", "bar"),
-        sql.query`baz.qux(1, 2, 3)`,
-        sql.query`baz.qux(${sql.value(1)}, ${sql.query`2`}, 3)`,
-      ],
-      ", "
-    )}`;
-    expect(() => sql.compile(node)).toThrowErrorMatchingSnapshot();
+    expect(() => {
+      const node = sql.query`select ${sql.join(
+        [
+          { type: "VALUE", value: 1 },
+          sql.identifier("foo", "bar"),
+          sql.query`baz.qux(1, 2, 3)`,
+          sql.query`baz.qux(${sql.value(1)}, ${sql.query`2`}, 3)`,
+        ],
+        ", "
+      )}`;
+    }).toThrowErrorMatchingSnapshot();
   });
 
   it("including a join", () => {
-    const node = sql.query`select ${sql.join(
-      [
-        sql.value(1),
-        sql.identifier("foo", "bar"),
-        sql.query`baz.qux(1, 2, 3)`,
-        sql.query`baz.qux(${sql.value(1)}, ${sql.query`2`}, 3)`,
-      ],
-      ", "
-    )}, ${3}`;
-    expect(() => sql.compile(node)).toThrowErrorMatchingSnapshot();
+    expect(() => {
+      const node = sql.query`select ${sql.join(
+        [
+          sql.value(1),
+          sql.identifier("foo", "bar"),
+          sql.query`baz.qux(1, 2, 3)`,
+          sql.query`baz.qux(${sql.value(1)}, ${sql.query`2`}, 3)`,
+        ],
+        ", "
+      )}, ${3}`;
+    }).toThrowErrorMatchingSnapshot();
   });
 });
