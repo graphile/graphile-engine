@@ -24,20 +24,23 @@ const $$trusted = Symbol("trusted");
 type SQLRawNode = {
   text: string,
   type: 'RAW',
-  [Symbol]: true,
 }
 type SQLIdentifierNode = {
   names: Array<mixed>,
   type: 'IDENTIFIER',
-  [Symbol]: true,
 }
 type SQLValueNode = {
   value: mixed,
   type: 'VALUE',
-  [Symbol]: true,
 }
 
 type SQLNode = SQLRawNode | SQLValueNode | SQLIdentifierNode
+type SQLQuery = Array<SQLNode>
+
+type QueryConfig = {
+  text: string,
+  values: Array<mixed>
+};
 */
 
 function makeTrustedNode /*:: <Node>*/(node /*: Node */) /*: Node */ {
@@ -78,7 +81,7 @@ function ensureNonEmptyArray(array, allowZeroLength = false) {
   return array;
 }
 
-function compile(sql /*: Array<SQLNode> */) {
+function compile(sql /*: SQLQuery | SQLNode */): QueryConfig {
   // Join this to generate the SQL query
   const sqlFragments = [];
 
@@ -95,10 +98,8 @@ function compile(sql /*: Array<SQLNode> */) {
 
   const items = Array.isArray(sql) ? sql : [sql];
 
-  for (const item of items) {
-    if (!item[$$trusted]) {
-      throw new Error(`Expected SQL item, instead received '${String(item)}'.`);
-    }
+  for (const rawItem of items) {
+    const item /*: SQLNode */ = enforceValidNode(rawItem);
     switch (item.type) {
       case "RAW":
         sqlFragments.push(item.text);
@@ -154,6 +155,27 @@ function compile(sql /*: Array<SQLNode> */) {
   };
 }
 
+function enforceValidNode(node /*: mixed */): SQLNode {
+  if (node != null && typeof node === "object") {
+    const isRaw = node.type === "RAW" && typeof node.text === "string";
+    const isIdentifier =
+      node.type === "IDENTIFIER" &&
+      Array.isArray(node.names) &&
+      node.names.every(
+        name => typeof name === "string" || typeof name === "symbol"
+      );
+    const isValue = node.type === "VALUE";
+
+    // $FlowFixMe: flow doesn't like symbols here?
+    const isTrusted = node[$$trusted] === true;
+    if ((isRaw || isIdentifier || isValue) && isTrusted) {
+      // $FlowFixMe: this has been validated
+      return node;
+    }
+  }
+  throw new Error(`Expected SQL item, instead received '${String(node)}'.`);
+}
+
 /**
  * A template string tag that creates a `Sql` query out of some strings and
  * some values. Use this to construct all PostgreSQL queries to avoid SQL
@@ -162,7 +184,7 @@ function compile(sql /*: Array<SQLNode> */) {
  * Note that using this function, the user *must* specify if they are injecting
  * raw text. This makes a SQL injection vulnerability harder to create.
  */
-function query(strings /*: mixed */, ...values /*: Array<mixed> */) {
+function query(strings /*: mixed */, ...values /*: Array<mixed> */): SQLQuery {
   if (!Array.isArray(strings)) {
     throw new Error(
       "sql.query should be used as a template literal, not a function call!"
@@ -198,7 +220,13 @@ function query(strings /*: mixed */, ...values /*: Array<mixed> */) {
           }
         }
       }
-      return items.concat(makeRawNode(text), value);
+      if (Array.isArray(value)) {
+        const nodes /*: SQLQuery */ = value.map(enforceValidNode);
+        return items.concat(makeRawNode(text), nodes);
+      } else {
+        const node /*: SQLNode */ = enforceValidNode(value);
+        return items.concat(makeRawNode(text), node);
+      }
     }
   }, []);
 }
@@ -263,7 +291,13 @@ const join = (rawItems /*: mixed */, rawSeparator /*: mixed */ = "") => {
     throw new Error("Invalid separator - must be a string");
   }
   const separator = rawSeparator;
-  return ensureNonEmptyArray(items, true).reduce((currentItems, item, i) => {
+  return ensureNonEmptyArray(items, true).reduce((currentItems, rawItem, i) => {
+    let item /*: SQLNode | SQLQuery */;
+    if (Array.isArray(rawItem)) {
+      item = rawItem.map(enforceValidNode);
+    } else {
+      item = enforceValidNode(rawItem);
+    }
     if (i === 0 || !separator) {
       return currentItems.concat(item);
     } else {
@@ -291,13 +325,34 @@ function escapeSqlIdentifier(str) {
   return escaped;
 }
 
-exports.query = query;
-exports.fragment = query;
-exports.raw = raw;
-exports.identifier = identifier;
-exports.value = value;
-exports.literal = literal;
-exports.join = join;
-exports.compile = compile;
-exports.null = literal(null);
-exports.blank = query``;
+/*::
+opaque type OpaqueSQLNode = SQLNode;
+opaque type OpaqueSQLQuery = SQLQuery;
+*/
+
+// The types we export are stricter so people get the right hinting
+
+exports.query = (
+  strings /*: string[] */,
+  ...values /*: Array<OpaqueSQLNode | OpaqueSQLQuery> */
+): OpaqueSQLQuery => query(strings, ...values);
+
+exports.fragment = exports.query;
+
+exports.raw = (text /*: string */): OpaqueSQLNode => raw(text);
+
+exports.identifier = (...names /*: Array<string | Symbol> */): OpaqueSQLNode =>
+  identifier(...names);
+
+exports.value = (val /*: mixed */): OpaqueSQLNode => value(val);
+exports.literal = (val /*: mixed */): OpaqueSQLNode => literal(val);
+
+exports.join = (
+  items /*: Array<OpaqueSQLQuery | OpaqueSQLNode> */,
+  separator /*: string */ = ""
+): OpaqueSQLQuery => join(items, separator);
+
+exports.compile = (sql /*: OpaqueSQLQuery */): QueryConfig => compile(sql);
+
+exports.null = exports.literal(null);
+exports.blank = exports.query``;
