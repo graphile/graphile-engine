@@ -81,7 +81,7 @@ function ensureNonEmptyArray(array, allowZeroLength = false) {
   return array;
 }
 
-function compile(sql /*: SQLQuery | SQLNode */): QueryConfig {
+function compile(sql /*: SQLQuery | SQLNode */) /*: QueryConfig*/ {
   // Join this to generate the SQL query
   const sqlFragments = [];
 
@@ -155,7 +155,7 @@ function compile(sql /*: SQLQuery | SQLNode */): QueryConfig {
   };
 }
 
-function enforceValidNode(node /*: mixed */): SQLNode {
+function enforceValidNode(node /*: mixed */) /*: SQLNode */ {
   if (node != null && typeof node === "object") {
     const isRaw = node.type === "RAW" && typeof node.text === "string";
     const isIdentifier =
@@ -184,7 +184,10 @@ function enforceValidNode(node /*: mixed */): SQLNode {
  * Note that using this function, the user *must* specify if they are injecting
  * raw text. This makes a SQL injection vulnerability harder to create.
  */
-function query(strings /*: mixed */, ...values /*: Array<mixed> */): SQLQuery {
+function query(
+  strings /*: mixed */,
+  ...values /*: Array<mixed> */
+) /*: SQLQuery */ {
   if (!Array.isArray(strings)) {
     throw new Error(
       "sql.query should be used as a template literal, not a function call!"
@@ -332,27 +335,44 @@ opaque type OpaqueSQLQuery = SQLQuery;
 
 // The types we export are stricter so people get the right hinting
 
-exports.query = (
+exports.query = function sqlQuery(
   strings /*: string[] */,
   ...values /*: Array<OpaqueSQLNode | OpaqueSQLQuery> */
-): OpaqueSQLQuery => query(strings, ...values);
+) /*: OpaqueSQLQuery */ {
+  return query(strings, ...values);
+};
 
 exports.fragment = exports.query;
 
-exports.raw = (text /*: string */): OpaqueSQLNode => raw(text);
+exports.raw = function sqlRaw(text /*: string */) /*: OpaqueSQLNode */ {
+  return raw(text);
+};
 
-exports.identifier = (...names /*: Array<string | Symbol> */): OpaqueSQLNode =>
-  identifier(...names);
+exports.identifier = function sqlIdentifier(
+  ...names /*: Array<string | Symbol> */
+) /*: OpaqueSQLNode */ {
+  return identifier(...names);
+};
 
-exports.value = (val /*: mixed */): OpaqueSQLNode => value(val);
-exports.literal = (val /*: mixed */): OpaqueSQLNode => literal(val);
+exports.value = function sqlValue(val /*: mixed */) /*: OpaqueSQLNode */ {
+  return value(val);
+};
+exports.literal = function sqlLiteral(val /*: mixed */) /*: OpaqueSQLNode */ {
+  return literal(val);
+};
 
-exports.join = (
+exports.join = function sqlJoin(
   items /*: Array<OpaqueSQLQuery | OpaqueSQLNode> */,
   separator /*: string */ = ""
-): OpaqueSQLQuery => join(items, separator);
+) /*: OpaqueSQLQuery */ {
+  return join(items, separator);
+};
 
-exports.compile = (sql /*: OpaqueSQLQuery */): QueryConfig => compile(sql);
+exports.compile = function sqlCompile(
+  sql /*: OpaqueSQLQuery */
+) /*: QueryConfig */ {
+  return compile(sql);
+};
 
 exports.null = exports.literal(null);
 exports.blank = exports.query``;
