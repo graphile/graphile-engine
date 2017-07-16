@@ -6,6 +6,7 @@
   "scripts": {
     "flow": "flow",
     "jest": "jest",
+    "lint": "eslint .",
     "test": "flow check && jest && markdown-doctest",
     "test:docs": "markdown-doctest",
     "prepublish": "babel --out-dir lib src"
@@ -33,11 +34,17 @@
   "homepage": "https://github.com/benjie/graphql-build#readme",
   "devDependencies": {
     "babel-cli": "^6.24.1",
+    "babel-eslint": "^7.2.3",
     "babel-preset-env": "^1.6.0",
     "babel-preset-flow": "^6.23.0",
+    "eslint": "^4.2.0",
+    "eslint-config-prettier": "^2.3.0",
+    "eslint-plugin-jest": "^20.0.3",
+    "eslint-plugin-prettier": "^2.1.2",
     "flow-bin": "^0.50.0",
     "jest": "20.0.4",
-    "markdown-doctest": "^0.9.1"
+    "markdown-doctest": "^0.9.1",
+    "prettier": "^1.5.3"
   },
   "jest": {
     "testRegex": "__tests__/.*\\.test\\.js$"
