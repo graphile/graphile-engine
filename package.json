@@ -7,7 +7,7 @@
     "flow": "flow",
     "jest": "jest",
     "lint": "eslint .",
-    "test": "eslint . && flow check && jest && markdown-doctest",
+    "test": "node index.js && eslint . && flow check && jest && markdown-doctest",
     "test:docs": "markdown-doctest",
     "prepublish": "babel --out-dir lib src"
   },
