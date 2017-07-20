@@ -26,7 +26,7 @@ import type {
   SelectionNode,
   FragmentSpreadNode,
   InlineFragmentNode,
-} from 'graphql/language/ast.js.flow';
+} from 'graphql/language/ast';
 
 type FieldsByTypeName = {
   [string]: {
@@ -67,6 +67,7 @@ function parseResolveInfo(
 ) /*: ResolveTree | FieldsByTypeName | null | void */ {
   const fieldNodes /*: Array<FieldNode> */ =
     resolveInfo.fieldNodes || resolveInfo.fieldASTs;
+
   const { parentType } = resolveInfo;
   if (!fieldNodes) {
     throw new Error("No fieldNodes provided!");
@@ -117,8 +118,8 @@ function getFieldFromAST(
 }
 
 let iNum = 1;
-function fieldTreeFromAST(
-  inASTs /*: Array<SelectionNode> | SelectionNode */,
+function fieldTreeFromAST /*:: <T: SelectionNode> */(
+  inASTs /*: Array<T> | T */,
   resolveInfo /*: GraphQLResolveInfo */,
   initTree /*: FieldsByTypeName */ = {},
   options = {},
@@ -134,9 +135,7 @@ function fieldTreeFromAST(
   );
   let { variableValues } = resolveInfo;
   const fragments = resolveInfo.fragments || {};
-  const asts /*: Array<SelectionNode> */ = Array.isArray(inASTs)
-    ? inASTs
-    : [inASTs];
+  const asts /*: Array<T> */ = Array.isArray(inASTs) ? inASTs : [inASTs];
   initTree[parentType.name] = initTree[parentType.name] || {};
   const outerDepth = depth;
   return asts.reduce(function(tree, selectionVal /*: SelectionNode */, idx) {
