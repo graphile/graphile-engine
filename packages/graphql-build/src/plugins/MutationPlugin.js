@@ -1,4 +1,7 @@
-export default async function MutationPlugin(builder) {
+// @flow
+import type SchemaBuilder, { Plugin } from "../SchemaBuilder";
+
+const MutationPlugin: Plugin = async function MutationPlugin(builder) {
   builder.hook(
     "GraphQLSchema",
     (schema, { newWithHooks, extend, graphql: { GraphQLObjectType } }) => {
@@ -21,4 +24,5 @@ export default async function MutationPlugin(builder) {
       }
     }
   );
-}
+};
+export default MutationPlugin;

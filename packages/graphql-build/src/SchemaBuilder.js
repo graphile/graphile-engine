@@ -3,6 +3,7 @@ import debugFactory from "debug";
 import makeNewBuild from "./makeNewBuild";
 import { bindAll } from "./utils";
 import { GraphQLSchema } from "graphql";
+import * as graphql from "graphql";
 import type { GraphQLType } from "graphql";
 import EventEmitter from "events";
 
@@ -18,8 +19,15 @@ export type Plugin = (
 type TriggerChangeType = () => void;
 
 type Build = {
+  graphql: typeof graphql,
   extend(base: Object, ...sources: Array<Object>): Object,
   getTypeByName(typeName: string): ?GraphQLType,
+  newWithHooks(
+    Class<GraphQLType>,
+    spec: {},
+    scope: {},
+    returnNullOnInvalid: ?boolean
+  ): ?GraphQLType,
   [string]: mixed,
 };
 
@@ -199,7 +207,7 @@ class SchemaBuilder extends EventEmitter {
   }
 
   createBuild() {
-    const initialBuild = makeNewBuild(this);
+    const initialBuild: Build = makeNewBuild(this);
     const build = this.applyHooks(initialBuild, "build", initialBuild, {
       scope: {},
     });
