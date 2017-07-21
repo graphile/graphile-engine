@@ -1,4 +1,9 @@
-export default function ClientMutationIdDescriptionPlugin(builder) {
+// @flow
+import type SchemaBuilder, { Plugin } from "../SchemaBuilder";
+
+const ClientMutationIdDescriptionPlugin: Plugin = function ClientMutationIdDescriptionPlugin(
+  builder: SchemaBuilder
+) {
   builder.hook(
     "inputField",
     (field, { extend }, { scope: { isMutationInput, fieldName } }) => {
@@ -47,4 +52,6 @@ export default function ClientMutationIdDescriptionPlugin(builder) {
       });
     }
   );
-}
+};
+
+export default ClientMutationIdDescriptionPlugin;

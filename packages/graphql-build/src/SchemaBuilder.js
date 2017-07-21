@@ -3,6 +3,7 @@ import debugFactory from "debug";
 import makeNewBuild from "./makeNewBuild";
 import { bindAll } from "./utils";
 import { GraphQLSchema } from "graphql";
+import type { GraphQLType } from "graphql";
 import EventEmitter from "events";
 
 const debug = debugFactory("graphql-builder");
@@ -16,13 +17,19 @@ export type Plugin = (
 
 type TriggerChangeType = () => void;
 
-type Build = {};
-
-type Context = {
-  scope: {},
+type Build = {
+  extend(base: Object, ...sources: Array<Object>): Object,
+  getTypeByName(typeName: string): ?GraphQLType,
+  [string]: mixed,
 };
 
-type Hook = (newObject: mixed, build: Build, context: Context) => Object;
+type Context = {
+  scope: {
+    [string]: mixed,
+  },
+};
+
+type Hook = (newObject: Object, build: Build, context: Context) => Object;
 
 type WatchUnwatch = (triggerChange: TriggerChangeType) => void;
 
@@ -106,7 +113,7 @@ class SchemaBuilder extends EventEmitter {
     };
   }
 
-  _setPluginName(name: string) {
+  _setPluginName(name: ?string) {
     this._currentPluginName = name;
   }
 
@@ -132,7 +139,7 @@ class SchemaBuilder extends EventEmitter {
   }
 
   applyHooks(
-    build: Build = {},
+    build: Build,
     hookName: string,
     oldObj: Object,
     context: Context,
@@ -192,7 +199,8 @@ class SchemaBuilder extends EventEmitter {
   }
 
   createBuild() {
-    const build = this.applyHooks(undefined, "build", makeNewBuild(this), {
+    const initialBuild = makeNewBuild(this);
+    const build = this.applyHooks(initialBuild, "build", initialBuild, {
       scope: {},
     });
     // Bind all functions so they can be dereferenced

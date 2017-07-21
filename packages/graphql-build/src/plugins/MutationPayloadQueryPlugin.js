@@ -1,4 +1,9 @@
-export default function MutationPayloadQueryPlugin(builder) {
+// @flow
+import type { Plugin } from "../SchemaBuilder";
+
+const MutationPayloadQueryPlugin: Plugin = function MutationPayloadQueryPlugin(
+  builder
+) {
   builder.hook(
     "GraphQLObjectType:fields",
     (
@@ -22,4 +27,5 @@ export default function MutationPayloadQueryPlugin(builder) {
       });
     }
   );
-}
+};
+export default MutationPayloadQueryPlugin;
