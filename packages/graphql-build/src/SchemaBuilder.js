@@ -1,15 +1,53 @@
+// @flow
 import debugFactory from "debug";
-const debug = debugFactory("graphql-builder");
 import makeNewBuild from "./makeNewBuild";
 import { bindAll } from "./utils";
 import { GraphQLSchema } from "graphql";
 import EventEmitter from "events";
 
+const debug = debugFactory("graphql-builder");
+
 const INDENT = "  ";
 
+export type Plugin = (
+  builder: SchemaBuilder,
+  options: {}
+) => Promise<void> | void;
+
+type TriggerChangeType = () => void;
+
+type Build = {};
+
+type Context = {
+  scope: {},
+};
+
+type Hook = (newObject: mixed, build: Build, context: Context) => Object;
+
+type WatchUnwatch = (triggerChange: TriggerChangeType) => void;
+
+type SchemaListener = (newSchema: GraphQLSchema) => void;
+
 class SchemaBuilder extends EventEmitter {
+  watchers: Array<WatchUnwatch>;
+  unwatchers: Array<WatchUnwatch>;
+  triggerChange: ?TriggerChangeType;
+  depth: number;
+  hooks: {
+    [string]: Array<Hook>,
+  };
+
+  _currentPluginName: ?string;
+  _generatedSchema: ?GraphQLSchema;
+  _explicitSchemaListener: ?SchemaListener;
+  _busy: boolean;
+  _watching: boolean;
+
   constructor() {
     super();
+
+    this._busy = false;
+    this._watching = false;
 
     this.watchers = [];
     this.unwatchers = [];
@@ -68,8 +106,8 @@ class SchemaBuilder extends EventEmitter {
     };
   }
 
-  _setPluginName(name) {
-    this.currentPluginName = name;
+  _setPluginName(name: string) {
+    this._currentPluginName = name;
   }
 
   /*
@@ -80,20 +118,26 @@ class SchemaBuilder extends EventEmitter {
    *
    * The function must either return a replacement object for `obj` or `obj` itself
    */
-  hook(hookName, fn) {
+  hook(hookName: string, fn: Hook) {
     if (!this.hooks[hookName]) {
       throw new Error(`Sorry, '${hookName}' is not a supported hook`);
     }
-    if (this.currentPluginName && !fn.displayName) {
+    if (this._currentPluginName && !fn.displayName) {
       fn.displayName = `${this
-        .currentPluginName}/${hookName}/${fn.displayName ||
+        ._currentPluginName}/${hookName}/${fn.displayName ||
         fn.name ||
         "anonymous"}`;
     }
     this.hooks[hookName].push(fn);
   }
 
-  applyHooks(build, hookName, oldObj, context, debugStr = "") {
+  applyHooks(
+    build: Build = {},
+    hookName: string,
+    oldObj: Object,
+    context: Context,
+    debugStr: string = ""
+  ): Object {
     this.depth++;
     try {
       debug(`${INDENT.repeat(this.depth)}[${hookName}${debugStr}]: Running...`);
@@ -103,7 +147,7 @@ class SchemaBuilder extends EventEmitter {
         throw new Error(`Sorry, '${hookName}' is not a registered hook`);
       }
 
-      let newObj = oldObj;
+      let newObj: Object = oldObj || {};
       for (const hook of hooks) {
         this.depth++;
         try {
@@ -139,7 +183,7 @@ class SchemaBuilder extends EventEmitter {
     }
   }
 
-  registerWatcher(listen, unlisten) {
+  registerWatcher(listen: WatchUnwatch, unlisten: WatchUnwatch) {
     if (!listen || !unlisten) {
       throw new Error("You must provide both a listener and an unlistener");
     }
@@ -148,35 +192,37 @@ class SchemaBuilder extends EventEmitter {
   }
 
   createBuild() {
-    const build = this.applyHooks(null, "build", makeNewBuild(this));
+    const build = this.applyHooks(undefined, "build", makeNewBuild(this), {
+      scope: {},
+    });
     // Bind all functions so they can be dereferenced
     bindAll(
       build,
       Object.keys(build).filter(key => typeof build[key] === "function")
     );
     Object.freeze(build);
-    this.applyHooks(build, "init", {});
+    this.applyHooks(build, "init", {}, { scope: {} });
     return build;
   }
 
   buildSchema() {
-    if (!this.generatedSchema) {
+    if (!this._generatedSchema) {
       const build = this.createBuild();
-      this.generatedSchema = build.newWithHooks(GraphQLSchema, {});
+      this._generatedSchema = build.newWithHooks(GraphQLSchema, {});
     }
-    return this.generatedSchema;
+    return this._generatedSchema;
   }
 
-  async watchSchema(listener) {
-    if (this.watching || this.busy) {
+  async watchSchema(listener: SchemaListener) {
+    if (this._watching || this._busy) {
       throw new Error("We're already watching this schema!");
     }
     try {
-      this.busy = true;
-      this.watching = true;
-      this.explicitSchemaListener = listener;
+      this._busy = true;
+      this._watching = true;
+      this._explicitSchemaListener = listener;
       this.triggerChange = () => {
-        this.generatedSchema = null;
+        this._generatedSchema = null;
         // XXX: optionally debounce
         this.emit("schema", this.buildSchema());
       };
@@ -188,28 +234,30 @@ class SchemaBuilder extends EventEmitter {
       }
       this.emit("schema", this.buildSchema());
     } finally {
-      this.busy = false;
+      this._busy = false;
     }
   }
 
   async unwatchSchema() {
-    if (!this.watching || this.busy) {
+    if (!this._watching || this._busy) {
       throw new Error("We're not watching this schema!");
     }
-    this.busy = true;
+    this._busy = true;
     try {
-      const listener = this.explicitSchemaListener;
-      this.explicitSchemaListener = null;
+      const listener = this._explicitSchemaListener;
+      this._explicitSchemaListener = null;
       if (listener) {
-        this.removeEventListener("schema", listener);
+        this.removeListener("schema", listener);
       }
-      for (const fn of this.unwatchers) {
-        await fn(this.triggerChange);
+      if (this.triggerChange) {
+        for (const fn of this.unwatchers) {
+          await fn(this.triggerChange);
+        }
       }
       this.triggerChange = null;
-      this.watching = false;
+      this._watching = false;
     } finally {
-      this.busy = false;
+      this._busy = false;
     }
   }
 }
