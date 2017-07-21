@@ -374,8 +374,7 @@ export default function makeProcField(
               );
 
               const { text, values } = sql.compile(query);
-              if (debugSql.enabled)
-                debugSql(require("sql-formatter").format(text));
+              if (debugSql.enabled) debugSql(text);
               const { rows } = await pgClient.query(text, values);
               const [row] = rows;
               const result = (() => {

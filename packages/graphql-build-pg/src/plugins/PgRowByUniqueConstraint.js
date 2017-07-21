@@ -117,8 +117,7 @@ export default async function PgRowByUniqueConstraint(
                           }
                         );
                         const { text, values } = sql.compile(query);
-                        if (debugSql.enabled)
-                          debugSql(require("sql-formatter").format(text));
+                        if (debugSql.enabled) debugSql(text);
                         const { rows: [row] } = await pgClient.query(
                           text,
                           values

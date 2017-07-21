@@ -138,8 +138,7 @@ export default async function PgMutationUpdateDeletePlugin(
                       `;
                   }
                   const { text, values } = sql.compile(queryWithMutation);
-                  if (debugSql.enabled)
-                    debugSql(require("sql-formatter").format(text));
+                  if (debugSql.enabled) debugSql(text);
                   const { rows: [row] } = await pgClient.query(text, values);
                   if (!row) {
                     throw new Error(
