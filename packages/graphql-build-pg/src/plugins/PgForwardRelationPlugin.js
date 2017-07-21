@@ -1,5 +1,7 @@
-const debug = require("debug")("graphql-build-pg");
-const queryFromResolveData = require("../queryFromResolveData");
+import debugFactory from "debug";
+import queryFromResolveData from "../queryFromResolveData";
+
+const debug = debugFactory("graphql-build-pg");
 
 module.exports = function PgForwardRelationPlugin(
   builder,

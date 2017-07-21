@@ -1,5 +1,6 @@
-const queryFromResolveData = require("../queryFromResolveData");
-const debugSql = require("debug")("graphql-build-pg:sql");
+import queryFromResolveData from "../queryFromResolveData";
+import debugFactory from "debug";
+const debugSql = debugFactory("graphql-build-pg:sql");
 
 module.exports = async function PgRowByUniqueConstraint(
   builder,

@@ -1,6 +1,8 @@
-const debug = require("debug")("graphql-build-pg");
-const queryFromResolveData = require("../queryFromResolveData");
-const addStartEndCursor = require("./addStartEndCursor");
+import debugFactory from "debug";
+import queryFromResolveData from "../queryFromResolveData";
+import addStartEndCursor from "./addStartEndCursor";
+
+const debug = debugFactory("graphql-build-pg");
 
 module.exports = function PgBackwardRelationPlugin(
   builder,

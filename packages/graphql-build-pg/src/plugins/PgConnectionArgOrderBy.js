@@ -1,4 +1,4 @@
-const isString = require("lodash/isString");
+import isString from 'lodash/isString';
 
 module.exports = function PgConnectionArgOrderBy(
   builder,

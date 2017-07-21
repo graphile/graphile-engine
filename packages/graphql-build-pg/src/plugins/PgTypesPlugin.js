@@ -1,18 +1,6 @@
-const {
-  GraphQLNonNull,
-  GraphQLString,
-  GraphQLInt,
-  GraphQLFloat,
-  GraphQLBoolean,
-  GraphQLList,
-  GraphQLEnumType,
-  GraphQLObjectType,
-  GraphQLInputObjectType,
-  GraphQLScalarType,
-  isInputType,
-} = require("graphql");
-const { Kind } = require("graphql/language");
-const { types: pgTypes } = require("pg");
+import { GraphQLNonNull, GraphQLString, GraphQLInt, GraphQLFloat, GraphQLBoolean, GraphQLList, GraphQLEnumType, GraphQLObjectType, GraphQLInputObjectType, GraphQLScalarType, isInputType } from 'graphql';
+import { Kind } from 'graphql/language';
+import { types as pgTypes } from 'pg';
 const stringType = (name, description) =>
   new GraphQLScalarType({
     name,
@@ -26,8 +14,8 @@ const stringType = (name, description) =>
       return ast.value;
     },
   });
-const rawParseInterval = require("postgres-interval");
-const LRU = require("lru-cache");
+import rawParseInterval from 'postgres-interval';
+import LRU from 'lru-cache';
 /*
 const {
   GraphQLDate,

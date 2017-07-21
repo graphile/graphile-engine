@@ -1,12 +1,14 @@
-const graphql = require("graphql");
-const {
+import graphql from "graphql";
+import {
   parseResolveInfo,
   simplifyParsedResolveInfoFragmentWithType,
   getAliasFromResolveInfo,
-} = require("graphql-parse-resolve-info");
+} from "graphql-parse-resolve-info";
+import debugFactory from "debug";
+
 const isString = str => typeof str === "string";
 const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
-const debug = require("debug")("graphql-build");
+const debug = debugFactory("graphql-build");
 
 const {
   GraphQLSchema,

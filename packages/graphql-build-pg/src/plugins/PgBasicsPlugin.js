@@ -1,4 +1,4 @@
-const sql = require("pg-sql2");
+import sql from 'pg-sql2';
 
 module.exports = function PgBasicsPlugin(
   builder,

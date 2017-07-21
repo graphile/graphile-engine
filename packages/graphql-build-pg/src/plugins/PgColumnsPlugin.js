@@ -1,5 +1,5 @@
-const { GraphQLNonNull, GraphQLString } = require("graphql");
-const queryFromResolveData = require("../queryFromResolveData");
+import { GraphQLNonNull, GraphQLString } from 'graphql';
+import queryFromResolveData from '../queryFromResolveData';
 
 const nullableIf = (condition, Type) =>
   condition ? Type : new GraphQLNonNull(Type);

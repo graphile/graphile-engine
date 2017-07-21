@@ -1,6 +1,8 @@
-const queryFromResolveData = require("../queryFromResolveData");
-const debugSql = require("debug")("graphql-build-pg:sql");
-const addStartEndCursor = require("./addStartEndCursor");
+import queryFromResolveData from "../queryFromResolveData";
+import debugFactory from "debug";
+import addStartEndCursor from "./addStartEndCursor";
+
+const debugSql = debugFactory("graphql-build-pg:sql");
 
 module.exports = async function PgAllRows(
   builder,

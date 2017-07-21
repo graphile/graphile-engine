@@ -1,7 +1,7 @@
-const pluralize = require("pluralize");
-const upperFirstAll = require("lodash/upperFirst");
-const lowerFirstAll = require("lodash/lowerFirst");
-const camelCaseAll = require("lodash/camelCase");
+import pluralize from 'pluralize';
+import upperFirstAll from 'lodash/upperFirst';
+import lowerFirstAll from 'lodash/lowerFirst';
+import camelCaseAll from 'lodash/camelCase';
 
 const constantCaseAll = str =>
   lowerFirst(str.replace(/^[^a-z0-9_]+/gi, ""))

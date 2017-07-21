@@ -1,4 +1,4 @@
-const makeProcField = require("./makeProcField");
+import makeProcField from './makeProcField';
 
 module.exports = function PgMutationProceduresPlugin(builder) {
   builder.hook(

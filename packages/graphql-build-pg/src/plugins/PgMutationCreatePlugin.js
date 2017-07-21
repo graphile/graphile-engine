@@ -1,6 +1,8 @@
-const queryFromResolveData = require("../queryFromResolveData");
-const debugSql = require("debug")("graphql-build-pg:sql");
-const debug = require("debug")("graphql-build-pg");
+import queryFromResolveData from "../queryFromResolveData";
+import debugFactory from "debug";
+
+const debug = debugFactory("graphql-build-pg");
+const debugSql = debugFactory("graphql-build-pg:sql");
 
 module.exports = function PgMutationCreatePlugin(
   builder,

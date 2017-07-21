@@ -1,9 +1,11 @@
-const queryFromResolveData = require("../queryFromResolveData");
-const debugSql = require("debug")("graphql-build-pg:sql");
-const debug = require("debug")("graphql-build-pg");
+import queryFromResolveData from "../queryFromResolveData";
+import debugFactory from "debug";
+import camelCase from "lodash/camelCase";
+import pluralize from "pluralize";
+
+const debugSql = debugFactory("graphql-build-pg:sql");
+const debug = debugFactory("graphql-build-pg");
 const base64Decode = str => new Buffer(String(str), "base64").toString("utf8");
-const camelCase = require("lodash/camelCase");
-const pluralize = require("pluralize");
 
 module.exports = async function PgMutationUpdateDeletePlugin(
   builder,
