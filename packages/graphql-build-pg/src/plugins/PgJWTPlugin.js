@@ -107,7 +107,7 @@ export default function PgJWTPlugin(
       return _;
     }
   );
-};
+}
 
 function parseTypeIdentifier(typeIdentifier) {
   const match = typeIdentifier.match(

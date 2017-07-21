@@ -60,4 +60,4 @@ export const defaultPlugins = [
   PgMutationPayloadEdgePlugin,
 ];
 
-export const inflections = inflections;
+export { inflections };

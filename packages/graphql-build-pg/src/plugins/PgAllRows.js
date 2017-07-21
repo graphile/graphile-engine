@@ -4,10 +4,7 @@ import addStartEndCursor from "./addStartEndCursor";
 
 const debugSql = debugFactory("graphql-build-pg:sql");
 
-export default async function PgAllRows(
-  builder,
-  { pgInflection: inflection }
-) {
+export default async function PgAllRows(builder, { pgInflection: inflection }) {
   builder.hook(
     "GraphQLObjectType:fields",
     (
@@ -127,4 +124,4 @@ export default async function PgAllRows(
       );
     }
   );
-};
+}

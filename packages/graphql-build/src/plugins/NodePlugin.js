@@ -149,4 +149,4 @@ export default function NodePlugin(builder, { nodeIdFieldName = "nodeId" }) {
       },
     });
   });
-};
+}

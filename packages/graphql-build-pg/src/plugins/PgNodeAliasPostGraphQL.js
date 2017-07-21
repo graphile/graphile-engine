@@ -16,4 +16,4 @@ export default async function PgNodeAliasPostGraphQL(builder) {
       return object;
     }
   );
-};
+}

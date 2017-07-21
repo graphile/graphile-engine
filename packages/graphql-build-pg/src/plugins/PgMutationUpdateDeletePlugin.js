@@ -480,4 +480,4 @@ export default async function PgMutationUpdateDeletePlugin(
       );
     }
   );
-};
+}

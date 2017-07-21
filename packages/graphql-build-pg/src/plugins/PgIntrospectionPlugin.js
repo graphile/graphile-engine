@@ -265,4 +265,4 @@ export default async function PgIntrospectionPlugin(
       pgIntrospectionResultsByKind: introspectionResultsByKind,
     });
   });
-};
+}

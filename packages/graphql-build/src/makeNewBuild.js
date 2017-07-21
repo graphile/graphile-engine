@@ -486,4 +486,4 @@ export default function makeNewBuild(builder) {
       return Self;
     },
   };
-};
+}

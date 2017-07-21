@@ -546,4 +546,4 @@ export default function PgTypesPlugin(
       pgTweaksByTypeId,
     });
   });
-};
+}

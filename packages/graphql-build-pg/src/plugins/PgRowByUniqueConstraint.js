@@ -135,4 +135,4 @@ export default async function PgRowByUniqueConstraint(
       );
     }
   );
-};
+}

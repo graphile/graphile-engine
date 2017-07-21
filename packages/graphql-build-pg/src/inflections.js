@@ -174,11 +174,15 @@ export const defaultInflection = {
   },
 };
 
-export const postGraphQLInflection = Object.assign({}, exports.defaultInflection, {
-  enumName(value) {
-    return constantCase(value);
-  },
-});
+export const postGraphQLInflection = Object.assign(
+  {},
+  exports.defaultInflection,
+  {
+    enumName(value) {
+      return constantCase(value);
+    },
+  }
+);
 
 export const postGraphQLClassicIdsInflection = Object.assign(
   {},
