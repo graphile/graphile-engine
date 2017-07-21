@@ -1,9 +1,9 @@
-import debugFactory from 'debug';
+import debugFactory from "debug";
 const debug = debugFactory("graphql-builder");
-import makeNewBuild from './makeNewBuild';
-import { bindAll } from './utils';
-import { GraphQLSchema } from 'graphql';
-import EventEmitter from 'events';
+import makeNewBuild from "./makeNewBuild";
+import { bindAll } from "./utils";
+import { GraphQLSchema } from "graphql";
+import EventEmitter from "events";
 
 const INDENT = "  ";
 

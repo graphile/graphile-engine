@@ -1,5 +1,5 @@
-import { GraphQLNonNull, GraphQLString } from 'graphql';
-import queryFromResolveData from '../queryFromResolveData';
+import { GraphQLNonNull, GraphQLString } from "graphql";
+import queryFromResolveData from "../queryFromResolveData";
 
 const nullableIf = (condition, Type) =>
   condition ? Type : new GraphQLNonNull(Type);

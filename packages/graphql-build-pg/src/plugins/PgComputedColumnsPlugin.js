@@ -1,4 +1,4 @@
-import makeProcField from './makeProcField';
+import makeProcField from "./makeProcField";
 
 module.exports = function PgComputedColumnsPlugin(builder) {
   builder.hook(

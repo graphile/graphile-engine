@@ -1,5 +1,5 @@
-import SchemaBuilder from './SchemaBuilder';
-import localPlugins from './plugins';
+import SchemaBuilder from "./SchemaBuilder";
+import localPlugins from "./plugins";
 
 const getBuilder = async (plugins, options = {}) => {
   const builder = new SchemaBuilder(options);

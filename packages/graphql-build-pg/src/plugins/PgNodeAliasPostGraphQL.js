@@ -1,6 +1,6 @@
 // Use of this plugin is not recommended; it's only included for backwards compatibility with PostGraphQL
 
-import pluralize from 'pluralize';
+import pluralize from "pluralize";
 
 module.exports = async function PgNodeAliasPostGraphQL(builder) {
   builder.hook(

@@ -1,5 +1,8 @@
-import { defaultPlugins, getBuilder } from 'graphql-build';
-import { defaultPlugins as pgDefaultPlugins, inflections } from 'graphql-build-pg';
+import { defaultPlugins, getBuilder } from "graphql-build";
+import {
+  defaultPlugins as pgDefaultPlugins,
+  inflections,
+} from "graphql-build-pg";
 
 const ensureValidPlugins = (name, arr) => {
   if (!Array.isArray(arr)) {

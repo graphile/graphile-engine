@@ -1,6 +1,6 @@
-import QueryBuilder from './QueryBuilder';
-import sql from 'pg-sql2';
-import isSafeInteger from 'lodash/isSafeInteger';
+import QueryBuilder from "./QueryBuilder";
+import sql from "pg-sql2";
+import isSafeInteger from "lodash/isSafeInteger";
 
 module.exports = (from, fromAlias, resolveData, options, withBuilder) => {
   const {

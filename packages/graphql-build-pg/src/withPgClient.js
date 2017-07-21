@@ -1,5 +1,5 @@
-import pg from 'pg';
-import debugFactory from 'debug';
+import pg from "pg";
+import debugFactory from "debug";
 const debug = debugFactory("graphql-build-pg");
 
 const withPgClient = async (pgConfig = process.env.DATABASE_URL, fn) => {

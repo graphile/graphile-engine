@@ -1,4 +1,4 @@
-import sql from 'pg-sql2';
+import sql from "pg-sql2";
 
 exports.sqlJsonBuildObjectFromFragments = fragments => {
   return sql.fragment`

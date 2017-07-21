@@ -1,4 +1,4 @@
-import { sign as signJwt } from 'jsonwebtoken';
+import { sign as signJwt } from "jsonwebtoken";
 
 module.exports = function PgJWTPlugin(
   builder,

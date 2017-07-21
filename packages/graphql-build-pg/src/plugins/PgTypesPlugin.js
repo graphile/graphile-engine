@@ -1,6 +1,18 @@
-import { GraphQLNonNull, GraphQLString, GraphQLInt, GraphQLFloat, GraphQLBoolean, GraphQLList, GraphQLEnumType, GraphQLObjectType, GraphQLInputObjectType, GraphQLScalarType, isInputType } from 'graphql';
-import { Kind } from 'graphql/language';
-import { types as pgTypes } from 'pg';
+import {
+  GraphQLNonNull,
+  GraphQLString,
+  GraphQLInt,
+  GraphQLFloat,
+  GraphQLBoolean,
+  GraphQLList,
+  GraphQLEnumType,
+  GraphQLObjectType,
+  GraphQLInputObjectType,
+  GraphQLScalarType,
+  isInputType,
+} from "graphql";
+import { Kind } from "graphql/language";
+import { types as pgTypes } from "pg";
 const stringType = (name, description) =>
   new GraphQLScalarType({
     name,
@@ -14,8 +26,8 @@ const stringType = (name, description) =>
       return ast.value;
     },
   });
-import rawParseInterval from 'postgres-interval';
-import LRU from 'lru-cache';
+import rawParseInterval from "postgres-interval";
+import LRU from "lru-cache";
 /*
 const {
   GraphQLDate,
