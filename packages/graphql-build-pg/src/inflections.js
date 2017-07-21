@@ -174,19 +174,15 @@ export const defaultInflection = {
   },
 };
 
-export const postGraphQLInflection = Object.assign(
-  {},
-  exports.defaultInflection,
-  {
-    enumName(value) {
-      return constantCase(value);
-    },
-  }
-);
+export const postGraphQLInflection = Object.assign({}, defaultInflection, {
+  enumName(value) {
+    return constantCase(value);
+  },
+});
 
 export const postGraphQLClassicIdsInflection = Object.assign(
   {},
-  exports.postGraphQLInflection,
+  postGraphQLInflection,
   {
     column(name, _table, _schema) {
       return name === "id" ? "rowId" : camelCase(name);

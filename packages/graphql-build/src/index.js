@@ -1,5 +1,12 @@
 import SchemaBuilder from "./SchemaBuilder";
-import localPlugins from "./plugins";
+import {
+  StandardTypesPlugin,
+  NodePlugin,
+  QueryPlugin,
+  MutationPlugin,
+  ClientMutationIdDescriptionPlugin,
+  MutationPayloadQueryPlugin,
+} from "./plugins";
 
 const getBuilder = async (plugins, options = {}) => {
   const builder = new SchemaBuilder(options);
@@ -17,13 +24,21 @@ const buildSchema = async (plugins, options = {}) => {
 };
 
 const defaultPlugins = [
-  localPlugins.StandardTypesPlugin,
-  localPlugins.NodePlugin,
-  localPlugins.QueryPlugin,
-  localPlugins.MutationPlugin,
-  localPlugins.ClientMutationIdDescriptionPlugin,
-  localPlugins.MutationPayloadQueryPlugin,
+  StandardTypesPlugin,
+  NodePlugin,
+  QueryPlugin,
+  MutationPlugin,
+  ClientMutationIdDescriptionPlugin,
+  MutationPayloadQueryPlugin,
 ];
 
-Object.assign(exports, localPlugins);
+export {
+  StandardTypesPlugin,
+  NodePlugin,
+  QueryPlugin,
+  MutationPlugin,
+  ClientMutationIdDescriptionPlugin,
+  MutationPayloadQueryPlugin,
+};
+
 export { getBuilder, buildSchema, defaultPlugins };
