@@ -1,4 +1,3 @@
-// @flow
 import type SchemaBuilder, { Plugin } from "../SchemaBuilder";
 
 const ClientMutationIdDescriptionPlugin: Plugin = function ClientMutationIdDescriptionPlugin(

@@ -1,4 +1,3 @@
-// @flow
 import type { Plugin } from "../SchemaBuilder";
 
 const MutationPayloadQueryPlugin: Plugin = function MutationPayloadQueryPlugin(

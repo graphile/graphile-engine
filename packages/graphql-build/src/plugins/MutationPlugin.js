@@ -1,4 +1,3 @@
-// @flow
 import type SchemaBuilder, { Plugin } from "../SchemaBuilder";
 
 const MutationPlugin: Plugin = async function MutationPlugin(builder) {

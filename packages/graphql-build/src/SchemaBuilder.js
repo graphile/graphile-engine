@@ -37,11 +37,7 @@ export type Context = {
   },
 };
 
-export type Hook = {
-  <T: Array<mixed> | Object>(input: T, build: Build, context: Context): T,
-  displayName?: string,
-  name?: string,
-};
+export type Hook = <T>(input: T, build: Build, context: Context) => T;
 
 export type WatchUnwatch = (triggerChange: TriggerChangeType) => void;
 
@@ -137,7 +133,7 @@ class SchemaBuilder extends EventEmitter {
    *
    * The function must either return a replacement object for `obj` or `obj` itself
    */
-  hook<T: Hook>(hookName: string, fn: Hook) {
+  hook(hookName: string, fn: Hook) {
     if (!this.hooks[hookName]) {
       throw new Error(`Sorry, '${hookName}' is not a supported hook`);
     }
