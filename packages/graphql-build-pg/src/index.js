@@ -27,7 +27,7 @@ import PgMutationUpdateDeletePlugin from "./plugins/PgMutationUpdateDeletePlugin
 import PgMutationProceduresPlugin from "./plugins/PgMutationProceduresPlugin";
 import PgMutationPayloadEdgePlugin from "./plugins/PgMutationPayloadEdgePlugin";
 
-import inflections from "./inflections";
+import * as inflections from "./inflections";
 
 export const defaultPlugins = [
   PgBasicsPlugin,
