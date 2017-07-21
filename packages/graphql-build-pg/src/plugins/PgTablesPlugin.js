@@ -1,6 +1,6 @@
 const base64 = str => new Buffer(String(str)).toString("base64");
 
-module.exports = function PgTablesPlugin(
+export default function PgTablesPlugin(
   builder,
   { pgInflection: inflection }
 ) {

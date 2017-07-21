@@ -1,6 +1,6 @@
 import sql from "pg-sql2";
 
-module.exports = function PgBasicsPlugin(
+export default function PgBasicsPlugin(
   builder,
   { pgInflection, pgStrictFunctions = false }
 ) {

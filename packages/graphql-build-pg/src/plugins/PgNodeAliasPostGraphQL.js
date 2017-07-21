@@ -2,7 +2,7 @@
 
 import pluralize from "pluralize";
 
-module.exports = async function PgNodeAliasPostGraphQL(builder) {
+export default async function PgNodeAliasPostGraphQL(builder) {
   builder.hook(
     "GraphQLObjectType",
     (

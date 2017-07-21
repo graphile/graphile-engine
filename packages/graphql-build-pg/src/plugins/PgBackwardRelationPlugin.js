@@ -4,7 +4,7 @@ import addStartEndCursor from "./addStartEndCursor";
 
 const debug = debugFactory("graphql-build-pg");
 
-module.exports = function PgBackwardRelationPlugin(
+export default function PgBackwardRelationPlugin(
   builder,
   { pgInflection: inflection }
 ) {

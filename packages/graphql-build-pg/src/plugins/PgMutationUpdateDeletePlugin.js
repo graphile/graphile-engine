@@ -7,7 +7,7 @@ const debugSql = debugFactory("graphql-build-pg:sql");
 const debug = debugFactory("graphql-build-pg");
 const base64Decode = str => new Buffer(String(str), "base64").toString("utf8");
 
-module.exports = async function PgMutationUpdateDeletePlugin(
+export default async function PgMutationUpdateDeletePlugin(
   builder,
   { pgInflection: inflection, pgDisableDefaultMutations }
 ) {

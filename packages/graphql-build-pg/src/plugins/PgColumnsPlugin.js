@@ -4,7 +4,7 @@ import queryFromResolveData from "../queryFromResolveData";
 const nullableIf = (condition, Type) =>
   condition ? Type : new GraphQLNonNull(Type);
 
-module.exports = function PgColumnsPlugin(
+export default function PgColumnsPlugin(
   builder,
   { pgInflection: inflection }
 ) {

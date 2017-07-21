@@ -3,7 +3,7 @@ import queryFromResolveData from "../queryFromResolveData";
 
 const debug = debugFactory("graphql-build-pg");
 
-module.exports = function PgForwardRelationPlugin(
+export default function PgForwardRelationPlugin(
   builder,
   { pgInflection: inflection }
 ) {

@@ -4,7 +4,7 @@ import debugFactory from "debug";
 const debug = debugFactory("graphql-build-pg");
 const debugSql = debugFactory("graphql-build-pg:sql");
 
-module.exports = function PgMutationCreatePlugin(
+export default function PgMutationCreatePlugin(
   builder,
   { pgInflection: inflection, pgDisableDefaultMutations }
 ) {

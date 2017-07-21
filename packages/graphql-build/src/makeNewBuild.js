@@ -57,7 +57,7 @@ if (["development", "test"].indexOf(process.env.NODE_ENV) >= 0) {
   };
 }
 
-module.exports = function makeNewBuild(builder) {
+export default function makeNewBuild(builder) {
   const allTypes = {};
 
   // Every object type gets fieldData associated with each of its

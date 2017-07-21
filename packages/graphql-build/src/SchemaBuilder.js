@@ -214,4 +214,4 @@ class SchemaBuilder extends EventEmitter {
   }
 }
 
-module.exports = SchemaBuilder;
+export default SchemaBuilder;

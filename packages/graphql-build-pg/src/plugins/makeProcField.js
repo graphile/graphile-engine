@@ -13,7 +13,7 @@ const firstValue = obj => {
   return obj[firstKey];
 };
 
-module.exports = function makeProcField(
+export default function makeProcField(
   fieldName,
   proc,
   {

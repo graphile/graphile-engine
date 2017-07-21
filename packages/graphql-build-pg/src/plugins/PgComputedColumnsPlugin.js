@@ -1,6 +1,6 @@
 import makeProcField from "./makeProcField";
 
-module.exports = function PgComputedColumnsPlugin(builder) {
+export default function PgComputedColumnsPlugin(builder) {
   builder.hook(
     "GraphQLObjectType:fields",
     (

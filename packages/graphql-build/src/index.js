@@ -26,6 +26,4 @@ const defaultPlugins = [
 ];
 
 Object.assign(exports, localPlugins);
-exports.getBuilder = getBuilder;
-exports.buildSchema = buildSchema;
-exports.defaultPlugins = defaultPlugins;
+export { getBuilder, buildSchema, defaultPlugins };

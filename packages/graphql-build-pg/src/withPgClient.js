@@ -46,4 +46,4 @@ const withPgClient = async (pgConfig = process.env.DATABASE_URL, fn) => {
   return result;
 };
 
-module.exports = withPgClient;
+export default withPgClient;

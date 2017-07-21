@@ -4,7 +4,7 @@ import debugFactory from "debug";
 const base64Decode = str => new Buffer(String(str), "base64").toString("utf8");
 const debugSql = debugFactory("graphql-build-pg:sql");
 
-module.exports = async function PgRowByUniqueConstraint(
+export default async function PgRowByUniqueConstraint(
   builder,
   { pgInflection: inflection }
 ) {

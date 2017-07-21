@@ -1,7 +1,7 @@
 import { Kind } from "graphql/language";
 import GraphQLJSON from "graphql-type-json";
 
-module.exports = function StandardTypesPlugin(builder) {
+export default function StandardTypesPlugin(builder) {
   // XXX: this should be in an "init" plugin, but PgTypesPlugin requires it in build - fix that, then fix this
   builder.hook("build", build => {
     const stringType = (name, description) =>

@@ -85,7 +85,7 @@ const pgRangeParser = {
   },
 };
 
-module.exports = function PgTypesPlugin(
+export default function PgTypesPlugin(
   builder,
   { pgExtendedTypes = true, pgInflection: inflection }
 ) {

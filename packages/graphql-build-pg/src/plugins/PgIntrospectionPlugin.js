@@ -15,7 +15,7 @@ function readFile(filename, encoding) {
   });
 }
 
-module.exports = async function PgIntrospectionPlugin(
+export default async function PgIntrospectionPlugin(
   builder,
   { pgConfig, pgSchemas: schemas }
 ) {

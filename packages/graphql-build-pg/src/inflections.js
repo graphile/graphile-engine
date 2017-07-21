@@ -20,7 +20,7 @@ const lowerFirst = formatInsideUnderscores(lowerFirstAll);
 const camelCase = formatInsideUnderscores(camelCaseAll);
 const constantCase = formatInsideUnderscores(constantCaseAll);
 
-exports.defaultInflection = {
+export const defaultInflection = {
   pluralize,
   argument(name, index) {
     return camelCase(name || `arg${index}`);
@@ -174,13 +174,13 @@ exports.defaultInflection = {
   },
 };
 
-exports.postGraphQLInflection = Object.assign({}, exports.defaultInflection, {
+export const postGraphQLInflection = Object.assign({}, exports.defaultInflection, {
   enumName(value) {
     return constantCase(value);
   },
 });
 
-exports.postGraphQLClassicIdsInflection = Object.assign(
+export const postGraphQLClassicIdsInflection = Object.assign(
   {},
   exports.postGraphQLInflection,
   {

@@ -1,6 +1,6 @@
 import isString from "lodash/isString";
 
-module.exports = function PgMutationPayloadEdgePlugin(
+export default function PgMutationPayloadEdgePlugin(
   builder,
   { pgInflection: inflection }
 ) {
