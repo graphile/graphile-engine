@@ -22,12 +22,12 @@ export type Build = {
   graphql: typeof graphql,
   extend(base: Object, ...sources: Array<Object>): Object,
   getTypeByName(typeName: string): ?GraphQLType,
-  newWithHooks(
-    Class<GraphQLType>,
+  newWithHooks<T: GraphQLType | GraphQLSchema>(
+    Class<T>,
     spec: {},
     scope: {},
-    returnNullOnInvalid: ?boolean
-  ): ?GraphQLType,
+    returnNullOnInvalid?: boolean
+  ): ?T,
   [string]: mixed,
 };
 
@@ -37,11 +37,11 @@ export type Context = {
   },
 };
 
-export type Hook = (
-  newObject: Object,
-  build: Build,
-  context: Context
-) => Object;
+export type Hook = {
+  <T: Array<mixed> | Object>(input: T, build: Build, context: Context): T,
+  displayName?: string,
+  name?: string,
+};
 
 export type WatchUnwatch = (triggerChange: TriggerChangeType) => void;
 
@@ -137,7 +137,7 @@ class SchemaBuilder extends EventEmitter {
    *
    * The function must either return a replacement object for `obj` or `obj` itself
    */
-  hook(hookName: string, fn: Hook) {
+  hook<T: Hook>(hookName: string, fn: Hook) {
     if (!this.hooks[hookName]) {
       throw new Error(`Sorry, '${hookName}' is not a supported hook`);
     }
@@ -150,13 +150,13 @@ class SchemaBuilder extends EventEmitter {
     this.hooks[hookName].push(fn);
   }
 
-  applyHooks(
+  applyHooks<T: Array<mixed> | Object>(
     build: Build,
     hookName: string,
-    oldObj: Object,
+    input: T,
     context: Context,
     debugStr: string = ""
-  ): Object {
+  ): T {
     this.depth++;
     try {
       debug(`${INDENT.repeat(this.depth)}[${hookName}${debugStr}]: Running...`);
@@ -166,7 +166,7 @@ class SchemaBuilder extends EventEmitter {
         throw new Error(`Sorry, '${hookName}' is not a registered hook`);
       }
 
-      let newObj: Object = oldObj || {};
+      let newObj = input;
       for (const hook of hooks) {
         this.depth++;
         try {
@@ -225,10 +225,14 @@ class SchemaBuilder extends EventEmitter {
     return build;
   }
 
-  buildSchema() {
+  buildSchema(): ?GraphQLSchema {
     if (!this._generatedSchema) {
       const build = this.createBuild();
-      this._generatedSchema = build.newWithHooks(GraphQLSchema, {});
+      this._generatedSchema = build.newWithHooks(
+        GraphQLSchema,
+        {},
+        { isSchema: true }
+      );
     }
     return this._generatedSchema;
   }

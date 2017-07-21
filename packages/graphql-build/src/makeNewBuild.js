@@ -6,6 +6,8 @@ import {
 } from "graphql-parse-resolve-info";
 import debugFactory from "debug";
 
+import type SchemaBuilder, { Build } from "./SchemaBuilder";
+
 const isString = str => typeof str === "string";
 const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
 const debug = debugFactory("graphql-build");
@@ -57,7 +59,7 @@ if (["development", "test"].indexOf(process.env.NODE_ENV) >= 0) {
   };
 }
 
-export default function makeNewBuild(builder: *): * {
+export default function makeNewBuild(builder: SchemaBuilder): Build {
   const allTypes = {};
 
   // Every object type gets fieldData associated with each of its
