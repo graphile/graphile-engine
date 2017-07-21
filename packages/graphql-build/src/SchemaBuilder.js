@@ -18,7 +18,7 @@ export type Plugin = (
 
 type TriggerChangeType = () => void;
 
-type Build = {
+export type Build = {
   graphql: typeof graphql,
   extend(base: Object, ...sources: Array<Object>): Object,
   getTypeByName(typeName: string): ?GraphQLType,
@@ -31,17 +31,21 @@ type Build = {
   [string]: mixed,
 };
 
-type Context = {
+export type Context = {
   scope: {
     [string]: mixed,
   },
 };
 
-type Hook = (newObject: Object, build: Build, context: Context) => Object;
+export type Hook = (
+  newObject: Object,
+  build: Build,
+  context: Context
+) => Object;
 
-type WatchUnwatch = (triggerChange: TriggerChangeType) => void;
+export type WatchUnwatch = (triggerChange: TriggerChangeType) => void;
 
-type SchemaListener = (newSchema: GraphQLSchema) => void;
+export type SchemaListener = (newSchema: GraphQLSchema) => void;
 
 class SchemaBuilder extends EventEmitter {
   watchers: Array<WatchUnwatch>;
