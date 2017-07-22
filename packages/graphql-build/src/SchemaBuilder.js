@@ -218,9 +218,9 @@ class SchemaBuilder extends EventEmitter {
     this.unwatchers.push(unlisten);
   }
 
-  createBuild() {
+  createBuild(): Build {
     const initialBuild: Build = makeNewBuild(this);
-    const build = this.applyHooks(initialBuild, "build", initialBuild, {
+    const build: Build = this.applyHooks(initialBuild, "build", initialBuild, {
       scope: {},
     });
     // Bind all functions so they can be dereferenced
