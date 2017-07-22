@@ -37,7 +37,7 @@ export type Context = {
   },
 };
 
-export type Hook = <T>(input: T, build: Build, context: Context) => T;
+export type Hook<T> = (input: T, build: Build, context: Context) => T;
 
 export type WatchUnwatch = (triggerChange: TriggerChangeType) => void;
 
@@ -49,7 +49,7 @@ class SchemaBuilder extends EventEmitter {
   triggerChange: ?TriggerChangeType;
   depth: number;
   hooks: {
-    [string]: Array<Hook>,
+    [string]: Array<Hook<mixed>>,
   };
 
   _currentPluginName: ?string;
@@ -133,7 +133,7 @@ class SchemaBuilder extends EventEmitter {
    *
    * The function must either return a replacement object for `obj` or `obj` itself
    */
-  hook(hookName: string, fn: Hook) {
+  hook(hookName: string, fn: Hook<mixed>) {
     if (!this.hooks[hookName]) {
       throw new Error(`Sorry, '${hookName}' is not a supported hook`);
     }
@@ -146,7 +146,7 @@ class SchemaBuilder extends EventEmitter {
     this.hooks[hookName].push(fn);
   }
 
-  applyHooks<T: Array<mixed> | Object>(
+  applyHooks<T: Array<Object> | Object>(
     build: Build,
     hookName: string,
     input: T,
