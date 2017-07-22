@@ -6,6 +6,11 @@ import { GraphQLSchema } from "graphql";
 import * as graphql from "graphql";
 import type { GraphQLType } from "graphql";
 import EventEmitter from "events";
+import type {
+  parseResolveInfo,
+  simplifyParsedResolveInfoFragmentWithType,
+  getAliasFromResolveInfo,
+} from "graphql-parse-resolve-info";
 
 const debug = debugFactory("graphql-builder");
 
@@ -13,7 +18,7 @@ const INDENT = "  ";
 
 export type Plugin = (
   builder: SchemaBuilder,
-  options: {}
+  options: Object
 ) => Promise<void> | void;
 
 type TriggerChangeType = () => void;
@@ -28,7 +33,9 @@ export type Build = {
     scope: {},
     returnNullOnInvalid?: boolean
   ): ?T,
-  [string]: mixed,
+  parseResolveInfo: parseResolveInfo,
+  getAliasFromResolveInfo: getAliasFromResolveInfo,
+  simplifyParsedResolveInfoFragmentWithType: simplifyParsedResolveInfoFragmentWithType,
 };
 
 export type Context = {
@@ -37,7 +44,11 @@ export type Context = {
   },
 };
 
-export type Hook<T> = (input: T, build: Build, context: Context) => T;
+export type Hook<Type: mixed> = (
+  input: Type,
+  build: Build & Object,
+  context: Context
+) => Type;
 
 export type WatchUnwatch = (triggerChange: TriggerChangeType) => void;
 
@@ -49,7 +60,7 @@ class SchemaBuilder extends EventEmitter {
   triggerChange: ?TriggerChangeType;
   depth: number;
   hooks: {
-    [string]: Array<Hook<mixed>>,
+    [string]: Array<Hook<Object> | Hook<Array<Object>>>,
   };
 
   _currentPluginName: ?string;
@@ -133,7 +144,7 @@ class SchemaBuilder extends EventEmitter {
    *
    * The function must either return a replacement object for `obj` or `obj` itself
    */
-  hook(hookName: string, fn: Hook<mixed>) {
+  hook(hookName: string, fn: Hook<Object> | Hook<Array<Object>>) {
     if (!this.hooks[hookName]) {
       throw new Error(`Sorry, '${hookName}' is not a supported hook`);
     }
@@ -157,13 +168,14 @@ class SchemaBuilder extends EventEmitter {
     try {
       debug(`${INDENT.repeat(this.depth)}[${hookName}${debugStr}]: Running...`);
 
-      const hooks = this.hooks[hookName];
+      // $FlowFixMe
+      const hooks: Array<Hook<T>> = this.hooks[hookName];
       if (!hooks) {
         throw new Error(`Sorry, '${hookName}' is not a registered hook`);
       }
 
       let newObj = input;
-      for (const hook of hooks) {
+      for (const hook: Hook<T> of hooks) {
         this.depth++;
         try {
           const hookDisplayName = hook.displayName || hook.name || "anonymous";

@@ -1,3 +1,4 @@
+// @flow
 import type SchemaBuilder, { Plugin } from "../SchemaBuilder";
 
 const ClientMutationIdDescriptionPlugin: Plugin = function ClientMutationIdDescriptionPlugin(
@@ -5,7 +6,11 @@ const ClientMutationIdDescriptionPlugin: Plugin = function ClientMutationIdDescr
 ) {
   builder.hook(
     "inputField",
-    (field, { extend }, { scope: { isMutationInput, fieldName } }) => {
+    (
+      field: Object,
+      { extend },
+      { scope: { isMutationInput, fieldName } }
+    ): Object => {
       if (
         !isMutationInput ||
         fieldName !== "clientMutationId" ||
@@ -22,7 +27,11 @@ const ClientMutationIdDescriptionPlugin: Plugin = function ClientMutationIdDescr
 
   builder.hook(
     "field",
-    (field, { extend }, { scope: { isMutationPayload, fieldName } }) => {
+    (
+      field: Object,
+      { extend },
+      { scope: { isMutationPayload, fieldName } }
+    ) => {
       if (
         !isMutationPayload ||
         fieldName !== "clientMutationId" ||
@@ -39,7 +48,7 @@ const ClientMutationIdDescriptionPlugin: Plugin = function ClientMutationIdDescr
 
   builder.hook(
     "field:args",
-    (args, { extend }, { scope: { isRootMutation } }) => {
+    (args: Object, { extend }, { scope: { isRootMutation } }) => {
       if (!isRootMutation || !args.input || args.input.description) {
         return args;
       }

@@ -1,8 +1,39 @@
+// @flow
+import type SchemaBuilder, { Plugin, Build } from "../SchemaBuilder";
+import type { ResolveTree } from "graphql-parse-resolve-info";
+import type { GraphQLType } from "graphql";
+import type { BuildExtensionQuery } from "./QueryPlugin";
+
 const base64 = str => new Buffer(String(str)).toString("base64");
 const base64Decode = str => new Buffer(String(str), "base64").toString("utf8");
 
-export default function NodePlugin(builder, { nodeIdFieldName = "nodeId" }) {
-  builder.hook("build", build => {
+export type NodeFetcher = (
+  data: mixed,
+  identifiers: Array<mixed>,
+  context: mixed,
+  parsedResolveInfoFragment: ResolveTree,
+  type: GraphQLType
+) => Object;
+
+export type BuildExtensionNode = {
+  nodeIdFieldName: string,
+  $$nodeType: Symbol,
+  nodeFetcherByTypeName: { [string]: NodeFetcher },
+  getNodeIdForTypeAndIdentifiers(
+    Type: GraphQLType,
+    ...identifiers: Array<mixed>
+  ): string,
+  addNodeFetcherForTypeName(typeName: string, fetcher: NodeFetcher): void,
+  getNodeAlias(typeName: string): string,
+  getNodeType(alias: string): GraphQLType,
+  setNodeAlias(typeName: string, alias: string): void,
+};
+
+const NodePlugin: Plugin = function NodePlugin(
+  builder,
+  { nodeIdFieldName = "nodeId" }
+) {
+  builder.hook("build", (build: Build) => {
     const nodeFetcherByTypeName = {};
     const nodeAliasByTypeName = {};
     const nodeTypeNameByAlias = {};
@@ -38,7 +69,7 @@ export default function NodePlugin(builder, { nodeIdFieldName = "nodeId" }) {
   });
 
   builder.hook("init", function defineNodeInterfaceType(
-    _,
+    _: Object,
     {
       $$isQuery,
       $$nodeType,
@@ -52,40 +83,49 @@ export default function NodePlugin(builder, { nodeIdFieldName = "nodeId" }) {
       },
     }
   ) {
-    newWithHooks(GraphQLInterfaceType, {
-      name: "Node",
-      description: "An object with a globally unique `ID`.",
-      resolveType: value => {
-        if (value === $$isQuery) {
-          return getTypeByName("Query");
-        } else if (value[$$nodeType]) {
-          return getNullableType(value[$$nodeType]);
-        }
-      },
-      fields: {
-        [nodeIdFieldName]: {
-          description:
-            "A globally unique identifier. Can be used in various places throughout the system to identify this single value.",
-          type: new GraphQLNonNull(GraphQLID),
+    newWithHooks(
+      GraphQLInterfaceType,
+      {
+        name: "Node",
+        description: "An object with a globally unique `ID`.",
+        resolveType: value => {
+          if (value === $$isQuery) {
+            return getTypeByName("Query");
+          } else if (value[$$nodeType]) {
+            return getNullableType(value[$$nodeType]);
+          }
+        },
+        fields: {
+          [nodeIdFieldName]: {
+            description:
+              "A globally unique identifier. Can be used in various places throughout the system to identify this single value.",
+            type: new GraphQLNonNull(GraphQLID),
+          },
         },
       },
-    });
+      {}
+    );
     return _;
   });
 
   builder.hook("GraphQLObjectType:interfaces", function addNodeIdToQuery(
-    interfaces,
+    interfaces: Array<Object>,
     { getTypeByName },
     { scope: { isRootQuery } }
   ) {
     if (!isRootQuery) {
       return interfaces;
     }
-    return [...interfaces, getTypeByName("Node")];
+    const Type = getTypeByName("Node");
+    if (Type) {
+      return [...interfaces, Type];
+    } else {
+      return interfaces;
+    }
   });
 
   builder.hook("GraphQLObjectType:fields", function addNodeIdToQuery(
-    fields,
+    fields: Object,
     {
       $$isQuery,
       $$nodeType,
@@ -95,9 +135,9 @@ export default function NodePlugin(builder, { nodeIdFieldName = "nodeId" }) {
       nodeFetcherByTypeName,
       getNodeType,
       graphql: { GraphQLNonNull, GraphQLID },
-    },
+    }: Build & BuildExtensionQuery & BuildExtensionNode,
     { scope: { isRootQuery } }
-  ) {
+  ): Object {
     if (!isRootQuery) {
       return fields;
     }
@@ -149,4 +189,6 @@ export default function NodePlugin(builder, { nodeIdFieldName = "nodeId" }) {
       },
     });
   });
-}
+};
+
+export default NodePlugin;

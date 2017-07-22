@@ -1,3 +1,4 @@
+// @flow
 import type { Plugin } from "../SchemaBuilder";
 
 const MutationPayloadQueryPlugin: Plugin = function MutationPayloadQueryPlugin(
@@ -6,10 +7,10 @@ const MutationPayloadQueryPlugin: Plugin = function MutationPayloadQueryPlugin(
   builder.hook(
     "GraphQLObjectType:fields",
     (
-      fields,
+      fields: Object,
       { $$isQuery, extend, getTypeByName },
       { scope: { isMutationPayload } }
-    ) => {
+    ): Object => {
       if (!isMutationPayload) {
         return fields;
       }
