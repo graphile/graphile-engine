@@ -38,6 +38,10 @@ export type Build = {|
   simplifyParsedResolveInfoFragmentWithType: simplifyParsedResolveInfoFragmentWithType,
 |};
 
+export type BuildExtensionQuery = {|
+  $$isQuery: Symbol,
+|};
+
 export type Context = {
   scope: {
     [string]: mixed,

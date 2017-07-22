@@ -17,7 +17,7 @@ export type NodeFetcher = (
 
 export type BuildExtensionNode = {|
   nodeIdFieldName: string,
-  nodeType: Symbol,
+  $$nodeType: Symbol,
   nodeFetcherByTypeName: { [string]: NodeFetcher },
   getNodeIdForTypeAndIdentifiers(
     Type: GraphQLType,
@@ -42,7 +42,7 @@ const NodePlugin: Plugin = function NodePlugin(
     const nodeTypeNameByAlias = {};
     return build.extend(build, {
       nodeIdFieldName,
-      nodeType: Symbol("nodeType"),
+      $$nodeType: Symbol("nodeType"),
       nodeFetcherByTypeName,
       getNodeIdForTypeAndIdentifiers(Type, ...identifiers) {
         return base64(
@@ -75,7 +75,7 @@ const NodePlugin: Plugin = function NodePlugin(
     _: Object,
     {
       $$isQuery,
-      nodeType,
+      $$nodeType,
       getTypeByName,
       newWithHooks,
       graphql: {
@@ -84,7 +84,7 @@ const NodePlugin: Plugin = function NodePlugin(
         GraphQLInterfaceType,
         getNullableType,
       },
-    }: {| ...Build, ...BuildExtensionQuery |}
+    }: {| ...Build, ...BuildExtensionQuery, ...BuildExtensionNode |}
   ) {
     newWithHooks(
       GraphQLInterfaceType,
@@ -94,8 +94,8 @@ const NodePlugin: Plugin = function NodePlugin(
         resolveType: value => {
           if (value === $$isQuery) {
             return getTypeByName("Query");
-          } else if (value[nodeType]) {
-            return getNullableType(value[nodeType]);
+          } else if (value[$$nodeType]) {
+            return getNullableType(value[$$nodeType]);
           }
         },
         fields: {
@@ -133,13 +133,13 @@ const NodePlugin: Plugin = function NodePlugin(
       fields: Object,
       {
         $$isQuery,
-        nodeType,
+        $$nodeType,
         parseResolveInfo,
         getTypeByName,
         extend,
         nodeFetcherByTypeName,
         getNodeType,
-        graphql: { GraphQLNonNull, GraphQLID },
+        graphql: { GraphQLNonNull, GraphQLID, getNamedType },
       }: {| ...Build, ...BuildExtensionQuery, ...BuildExtensionNode |},
       { scope: { isRootQuery } }
     ): Object => {
@@ -172,7 +172,10 @@ const NodePlugin: Plugin = function NodePlugin(
             try {
               const [alias, ...identifiers] = JSON.parse(base64Decode(nodeId));
               const Type = getNodeType(alias);
-              const resolver = nodeFetcherByTypeName[Type.name];
+              if (!Type) {
+                throw new Error("Type not found");
+              }
+              const resolver = nodeFetcherByTypeName[getNamedType(Type).name];
               const parsedResolveInfoFragment = parseResolveInfo(
                 resolveInfo,
                 {},
@@ -185,7 +188,7 @@ const NodePlugin: Plugin = function NodePlugin(
                 parsedResolveInfoFragment,
                 resolveInfo.returnType
               );
-              //node[nodeType] = Type;
+              node[$$nodeType] = Type;
               return node;
             } catch (e) {
               return null;
