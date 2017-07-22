@@ -9,7 +9,11 @@ const MutationPayloadQueryPlugin: Plugin = function MutationPayloadQueryPlugin(
     "GraphQLObjectType:fields",
     (
       fields: Object,
-      { $$isQuery, extend, getTypeByName }: Build & BuildExtensionQuery,
+      {
+        $$isQuery,
+        extend,
+        getTypeByName,
+      }: {| ...Build, ...BuildExtensionQuery |},
       { scope: { isMutationPayload } }
     ): Object => {
       if (!isMutationPayload) {

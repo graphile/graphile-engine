@@ -15,7 +15,7 @@ export type NodeFetcher = (
   type: GraphQLType
 ) => Object;
 
-export type BuildExtensionNode = {
+export type BuildExtensionNode = {|
   nodeIdFieldName: string,
   nodeType: Symbol,
   nodeFetcherByTypeName: { [string]: NodeFetcher },
@@ -27,13 +27,16 @@ export type BuildExtensionNode = {
   getNodeAlias(typeName: string): string,
   getNodeType(alias: string): GraphQLType,
   setNodeAlias(typeName: string, alias: string): void,
-};
+|};
 
 const NodePlugin: Plugin = function NodePlugin(
   builder,
   { nodeIdFieldName = "nodeId" }
 ) {
-  builder.hook("build", (build: Build): Build & BuildExtensionNode => {
+  builder.hook("build", (build: Object): {|
+    ...Build,
+    ...BuildExtensionNode,
+  |} => {
     const nodeFetcherByTypeName = {};
     const nodeAliasByTypeName = {};
     const nodeTypeNameByAlias = {};
@@ -81,7 +84,7 @@ const NodePlugin: Plugin = function NodePlugin(
         GraphQLInterfaceType,
         getNullableType,
       },
-    }: Build & BuildExtensionQuery
+    }: {| ...Build, ...BuildExtensionQuery |}
   ) {
     newWithHooks(
       GraphQLInterfaceType,
@@ -137,7 +140,7 @@ const NodePlugin: Plugin = function NodePlugin(
         nodeFetcherByTypeName,
         getNodeType,
         graphql: { GraphQLNonNull, GraphQLID },
-      }: Build & BuildExtensionQuery & BuildExtensionNode,
+      }: {| ...Build, ...BuildExtensionQuery, ...BuildExtensionNode |},
       { scope: { isRootQuery } }
     ): Object => {
       if (!isRootQuery) {

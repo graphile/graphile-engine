@@ -23,7 +23,7 @@ export type Plugin = (
 
 type TriggerChangeType = () => void;
 
-export type Build = {
+export type Build = {|
   graphql: typeof graphql,
   extend(base: Object, ...sources: Array<Object>): Object,
   getTypeByName(typeName: string): ?GraphQLType,
@@ -36,7 +36,7 @@ export type Build = {
   parseResolveInfo: parseResolveInfo,
   getAliasFromResolveInfo: getAliasFromResolveInfo,
   simplifyParsedResolveInfoFragmentWithType: simplifyParsedResolveInfoFragmentWithType,
-};
+|};
 
 export type Context = {
   scope: {
