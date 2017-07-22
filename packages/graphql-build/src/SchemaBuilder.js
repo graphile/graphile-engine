@@ -46,7 +46,7 @@ export type Context = {
 
 export type Hook<Type: mixed> = (
   input: Type,
-  build: Build & Object,
+  build: $Subtype<Build>,
   context: Context
 ) => Type;
 

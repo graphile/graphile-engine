@@ -17,7 +17,7 @@ export type NodeFetcher = (
 
 export type BuildExtensionNode = {
   nodeIdFieldName: string,
-  $$nodeType: Symbol,
+  nodeType: Symbol,
   nodeFetcherByTypeName: { [string]: NodeFetcher },
   getNodeIdForTypeAndIdentifiers(
     Type: GraphQLType,
@@ -33,13 +33,13 @@ const NodePlugin: Plugin = function NodePlugin(
   builder,
   { nodeIdFieldName = "nodeId" }
 ) {
-  builder.hook("build", (build: Build) => {
+  builder.hook("build", (build: Build): Build & BuildExtensionNode => {
     const nodeFetcherByTypeName = {};
     const nodeAliasByTypeName = {};
     const nodeTypeNameByAlias = {};
     return build.extend(build, {
       nodeIdFieldName,
-      $$nodeType: Symbol("nodeType"),
+      nodeType: Symbol("nodeType"),
       nodeFetcherByTypeName,
       getNodeIdForTypeAndIdentifiers(Type, ...identifiers) {
         return base64(
@@ -72,7 +72,7 @@ const NodePlugin: Plugin = function NodePlugin(
     _: Object,
     {
       $$isQuery,
-      $$nodeType,
+      nodeType,
       getTypeByName,
       newWithHooks,
       graphql: {
@@ -81,7 +81,7 @@ const NodePlugin: Plugin = function NodePlugin(
         GraphQLInterfaceType,
         getNullableType,
       },
-    }
+    }: Build & BuildExtensionQuery
   ) {
     newWithHooks(
       GraphQLInterfaceType,
@@ -91,8 +91,8 @@ const NodePlugin: Plugin = function NodePlugin(
         resolveType: value => {
           if (value === $$isQuery) {
             return getTypeByName("Query");
-          } else if (value[$$nodeType]) {
-            return getNullableType(value[$$nodeType]);
+          } else if (value[nodeType]) {
+            return getNullableType(value[nodeType]);
           }
         },
         fields: {
@@ -124,71 +124,74 @@ const NodePlugin: Plugin = function NodePlugin(
     }
   });
 
-  builder.hook("GraphQLObjectType:fields", function addNodeIdToQuery(
-    fields: Object,
-    {
-      $$isQuery,
-      $$nodeType,
-      parseResolveInfo,
-      getTypeByName,
-      extend,
-      nodeFetcherByTypeName,
-      getNodeType,
-      graphql: { GraphQLNonNull, GraphQLID },
-    }: Build & BuildExtensionQuery & BuildExtensionNode,
-    { scope: { isRootQuery } }
-  ): Object {
-    if (!isRootQuery) {
-      return fields;
-    }
-    return extend(fields, {
-      [nodeIdFieldName]: {
-        description:
-          "The root query type must be a `Node` to work well with Relay 1 mutations. This just resolves to `query`.",
-        type: new GraphQLNonNull(GraphQLID),
-        resolve() {
-          return "query";
-        },
-      },
-      node: {
-        description: "Fetches an object given its globally unique `ID`.",
-        type: getTypeByName("Node"),
-        args: {
-          [nodeIdFieldName]: {
-            description: "The globally unique `ID`.",
-            type: new GraphQLNonNull(GraphQLID),
+  builder.hook(
+    "GraphQLObjectType:fields",
+    (
+      fields: Object,
+      {
+        $$isQuery,
+        nodeType,
+        parseResolveInfo,
+        getTypeByName,
+        extend,
+        nodeFetcherByTypeName,
+        getNodeType,
+        graphql: { GraphQLNonNull, GraphQLID },
+      }: Build & BuildExtensionQuery & BuildExtensionNode,
+      { scope: { isRootQuery } }
+    ): Object => {
+      if (!isRootQuery) {
+        return fields;
+      }
+      return extend(fields, {
+        [nodeIdFieldName]: {
+          description:
+            "The root query type must be a `Node` to work well with Relay 1 mutations. This just resolves to `query`.",
+          type: new GraphQLNonNull(GraphQLID),
+          resolve() {
+            return "query";
           },
         },
-        async resolve(data, args, context, resolveInfo) {
-          const nodeId = args[nodeIdFieldName];
-          if (nodeId === "query") {
-            return $$isQuery;
-          }
-          try {
-            const [alias, ...identifiers] = JSON.parse(base64Decode(nodeId));
-            const Type = getNodeType(alias);
-            const resolver = nodeFetcherByTypeName[Type.name];
-            const parsedResolveInfoFragment = parseResolveInfo(
-              resolveInfo,
-              {},
-              Type
-            );
-            const node = await resolver(
-              data,
-              identifiers,
-              context,
-              parsedResolveInfoFragment,
-              resolveInfo.returnType
-            );
-            node[$$nodeType] = Type;
-            return node;
-          } catch (e) {
-            return null;
-          }
+        node: {
+          description: "Fetches an object given its globally unique `ID`.",
+          type: getTypeByName("Node"),
+          args: {
+            [nodeIdFieldName]: {
+              description: "The globally unique `ID`.",
+              type: new GraphQLNonNull(GraphQLID),
+            },
+          },
+          async resolve(data, args, context, resolveInfo) {
+            const nodeId = args[nodeIdFieldName];
+            if (nodeId === "query") {
+              return $$isQuery;
+            }
+            try {
+              const [alias, ...identifiers] = JSON.parse(base64Decode(nodeId));
+              const Type = getNodeType(alias);
+              const resolver = nodeFetcherByTypeName[Type.name];
+              const parsedResolveInfoFragment = parseResolveInfo(
+                resolveInfo,
+                {},
+                Type
+              );
+              const node = await resolver(
+                data,
+                identifiers,
+                context,
+                parsedResolveInfoFragment,
+                resolveInfo.returnType
+              );
+              //node[nodeType] = Type;
+              return node;
+            } catch (e) {
+              return null;
+            }
+          },
         },
-      },
-    });
-  });
+      });
+    }
+  );
 };
 
 export default NodePlugin;
