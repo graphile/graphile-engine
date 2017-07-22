@@ -1,5 +1,5 @@
 // @flow
-import type SchemaBuilder, { Plugin, Build } from "../SchemaBuilder";
+import type { Plugin, Build } from "../SchemaBuilder";
 import type { ResolveTree } from "graphql-parse-resolve-info";
 import type { GraphQLType } from "graphql";
 import type { BuildExtensionQuery } from "./QueryPlugin";

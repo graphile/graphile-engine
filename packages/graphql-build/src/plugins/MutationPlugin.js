@@ -1,5 +1,5 @@
 // @flow
-import type SchemaBuilder, { Plugin } from "../SchemaBuilder";
+import type { Plugin } from "../SchemaBuilder";
 import type { GraphQLSchema } from "graphql";
 
 const MutationPlugin: Plugin = async function MutationPlugin(builder) {

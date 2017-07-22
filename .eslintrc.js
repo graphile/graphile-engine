@@ -42,4 +42,8 @@ module.exports = {
     "jest/no-focused-tests": 2,
     "jest/no-identical-title": 2,
   },
+  globals: {
+    $Subtype: false, // XXX: Hack to support Flow, remove when unnecessary
+    Class: false, // XXX: Hack to support Flow, remove when unnecessary
+  },
 };

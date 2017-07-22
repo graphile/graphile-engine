@@ -1,5 +1,5 @@
 // @flow
-import type SchemaBuilder, { Plugin, Build } from "../SchemaBuilder";
+import type { Plugin, Build } from "../SchemaBuilder";
 
 export type BuildExtensionQuery = {|
   $$isQuery: Symbol,

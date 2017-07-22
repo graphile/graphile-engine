@@ -27,6 +27,8 @@ export type Build = {|
   graphql: typeof graphql,
   extend(base: Object, ...sources: Array<Object>): Object,
   getTypeByName(typeName: string): ?GraphQLType,
+  // XXX: Hack around eslint
+  /* global T: false */
   newWithHooks<T: GraphQLType | GraphQLSchema>(
     Class<T>,
     spec: {},
