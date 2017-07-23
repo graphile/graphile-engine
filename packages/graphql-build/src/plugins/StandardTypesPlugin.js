@@ -44,37 +44,48 @@ const StandardTypesPlugin: Plugin = function StandardTypesPlugin(builder) {
     ) => {
       // https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
       /* const PageInfo = */
-      newWithHooks(GraphQLObjectType, {
-        name: "PageInfo",
-        description: "Information about pagination in a connection.",
-        fields: ({ fieldWithHooks }) => ({
-          hasNextPage: fieldWithHooks("hasNextPage", ({ addDataGenerator }) => {
-            addDataGenerator(() => {
-              return {
-                calculateHasNextPage: true,
-              };
-            });
-            return {
-              description: "When paginating forwards, are there more items?",
-              type: new GraphQLNonNull(GraphQLBoolean),
-            };
-          }),
-          hasPreviousPage: fieldWithHooks(
-            "hasPreviousPage",
-            ({ addDataGenerator }) => {
-              addDataGenerator(() => {
+      newWithHooks(
+        GraphQLObjectType,
+        {
+          name: "PageInfo",
+          description: "Information about pagination in a connection.",
+          fields: ({ fieldWithHooks }) => ({
+            hasNextPage: fieldWithHooks(
+              "hasNextPage",
+              ({ addDataGenerator }) => {
+                addDataGenerator(() => {
+                  return {
+                    calculateHasNextPage: true,
+                  };
+                });
                 return {
-                  calculateHasPreviousPage: true,
+                  description:
+                    "When paginating forwards, are there more items?",
+                  type: new GraphQLNonNull(GraphQLBoolean),
                 };
-              });
-              return {
-                description: "When paginating backwards, are there more items?",
-                type: new GraphQLNonNull(GraphQLBoolean),
-              };
-            }
-          ),
-        }),
-      });
+              }
+            ),
+            hasPreviousPage: fieldWithHooks(
+              "hasPreviousPage",
+              ({ addDataGenerator }) => {
+                addDataGenerator(() => {
+                  return {
+                    calculateHasPreviousPage: true,
+                  };
+                });
+                return {
+                  description:
+                    "When paginating backwards, are there more items?",
+                  type: new GraphQLNonNull(GraphQLBoolean),
+                };
+              }
+            ),
+          }),
+        },
+        {
+          isPageInfo: true,
+        }
+      );
       return _;
     }
   );
