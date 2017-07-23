@@ -5,10 +5,7 @@ import type { GraphQLSchema } from "graphql";
 const MutationPlugin: Plugin = async function MutationPlugin(builder) {
   builder.hook(
     "GraphQLSchema",
-    (
-      schema: GraphQLSchema,
-      { newWithHooks, extend, graphql: { GraphQLObjectType } }
-    ) => {
+    (schema: {}, { newWithHooks, extend, graphql: { GraphQLObjectType } }) => {
       const Mutation = newWithHooks(
         GraphQLObjectType,
         {

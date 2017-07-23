@@ -3,7 +3,11 @@ import debugFactory from "debug";
 import makeNewBuild from "./makeNewBuild";
 import { bindAll } from "./utils";
 import * as graphql from "graphql";
-import type { GraphQLType, GraphQLNamedType } from "graphql";
+import type {
+  GraphQLType,
+  GraphQLNamedType,
+  GraphQLInterfaceType,
+} from "graphql";
 import EventEmitter from "events";
 import type {
   parseResolveInfo,
@@ -29,6 +33,10 @@ export type Plugin = (
 ) => Promise<void> | void;
 
 type TriggerChangeType = () => void;
+
+export type DataForType = {
+  [string]: Array<mixed>,
+};
 
 export type Build = {|
   graphql: {
@@ -89,16 +97,16 @@ export type Build = {|
   generateDataForType(
     Type: GraphQLType,
     parsedResolveInfoFragment: ResolveTree
-  ): Object,
+  ): DataForType,
   resolveAlias(
-    data: Object,
+    data: {},
     _args: mixed,
     _context: mixed,
     resolveInfo: GraphQLResolveInfo
   ): string,
   addType(type: GraphQLNamedType): void,
   getTypeByName(typeName: string): ?GraphQLType,
-  extend(base: Object, ...sources: Array<Object>): Object,
+  extend(base: {}, ...sources: Array<{}>): {},
   // XXX: Hack around eslint
   /* global T: false */
   newWithHooks<T: GraphQLNamedType | GraphQLSchema>(
@@ -137,7 +145,7 @@ class SchemaBuilder extends EventEmitter {
   triggerChange: ?TriggerChangeType;
   depth: number;
   hooks: {
-    [string]: Array<Hook<Object, *> | Hook<Array<Object>, *>>,
+    [string]: Array<Hook<{}, *> | Hook<Array<GraphQLInterfaceType>, *>>,
   };
 
   _currentPluginName: ?string;
@@ -221,7 +229,10 @@ class SchemaBuilder extends EventEmitter {
    *
    * The function must either return a replacement object for `obj` or `obj` itself
    */
-  hook(hookName: string, fn: Hook<Object, *> | Hook<Array<Object>, *>) {
+  hook(
+    hookName: string,
+    fn: Hook<{}, *> | Hook<Array<GraphQLInterfaceType>, *>
+  ) {
     if (!this.hooks[hookName]) {
       throw new Error(`Sorry, '${hookName}' is not a supported hook`);
     }
@@ -234,7 +245,7 @@ class SchemaBuilder extends EventEmitter {
     this.hooks[hookName].push(fn);
   }
 
-  applyHooks<T: Array<Object> | Object>(
+  applyHooks<T: Array<GraphQLInterfaceType> | {}>(
     build: Build,
     hookName: string,
     input: T,
