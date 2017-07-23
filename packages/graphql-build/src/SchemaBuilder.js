@@ -50,9 +50,9 @@ export type Context = {
   },
 };
 
-export type Hook<Type: mixed> = (
+export type Hook<Type: mixed, BuildExtensions: {}> = (
   input: Type,
-  build: $Subtype<Build>,
+  build: {| ...Build, ...BuildExtensions |},
   context: Context
 ) => Type;
 
@@ -66,7 +66,7 @@ class SchemaBuilder extends EventEmitter {
   triggerChange: ?TriggerChangeType;
   depth: number;
   hooks: {
-    [string]: Array<Hook<Object> | Hook<Array<Object>>>,
+    [string]: Array<Hook<Object, *> | Hook<Array<Object>, *>>,
   };
 
   _currentPluginName: ?string;
@@ -150,7 +150,7 @@ class SchemaBuilder extends EventEmitter {
    *
    * The function must either return a replacement object for `obj` or `obj` itself
    */
-  hook(hookName: string, fn: Hook<Object> | Hook<Array<Object>>) {
+  hook(hookName: string, fn: Hook<Object, *> | Hook<Array<Object>, *>) {
     if (!this.hooks[hookName]) {
       throw new Error(`Sorry, '${hookName}' is not a supported hook`);
     }
@@ -175,13 +175,13 @@ class SchemaBuilder extends EventEmitter {
       debug(`${INDENT.repeat(this.depth)}[${hookName}${debugStr}]: Running...`);
 
       // $FlowFixMe
-      const hooks: Array<Hook<T>> = this.hooks[hookName];
+      const hooks: Array<Hook<T, *>> = this.hooks[hookName];
       if (!hooks) {
         throw new Error(`Sorry, '${hookName}' is not a registered hook`);
       }
 
       let newObj = input;
-      for (const hook: Hook<T> of hooks) {
+      for (const hook: Hook<T, *> of hooks) {
         this.depth++;
         try {
           const hookDisplayName = hook.displayName || hook.name || "anonymous";
