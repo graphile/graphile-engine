@@ -140,9 +140,9 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
       }
       return Object.assign({}, obj, obj2);
     },
-    newWithHooks<T: GraphQLNamedType | GraphQLSchema>(
+    newWithHooks<T: GraphQLNamedType | GraphQLSchema, ConfigType: *>(
       Type: Class<T>,
-      spec: any,
+      spec: ConfigType,
       scope: Scope,
       returnNullOnInvalid = false
     ): ?T {
@@ -484,10 +484,9 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
           `|${newSpec.name}`
         );
       }
-      const finalSpec = newSpec;
+      const finalSpec: ConfigType = newSpec;
 
-      let Self: GraphQLNamedType | GraphQLSchema;
-      Self = new Type(finalSpec);
+      const Self: T = new Type(finalSpec);
       if (!(Self instanceof GraphQLSchema) && returnNullOnInvalid) {
         try {
           if (isCompositeType(Self) && !isAbstractType(Self)) {
