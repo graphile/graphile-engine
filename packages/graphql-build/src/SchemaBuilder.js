@@ -2,7 +2,6 @@
 import debugFactory from "debug";
 import makeNewBuild from "./makeNewBuild";
 import { bindAll } from "./utils";
-import { GraphQLSchema } from "graphql";
 import * as graphql from "graphql";
 import type { GraphQLType, GraphQLNamedType } from "graphql";
 import EventEmitter from "events";
@@ -13,6 +12,8 @@ import type {
 } from "graphql-parse-resolve-info";
 import type { ResolveTree } from "graphql-parse-resolve-info";
 import type { GraphQLResolveInfo } from "graphql/type/definition";
+
+const { GraphQLSchema } = graphql;
 
 const debug = debugFactory("graphql-builder");
 
@@ -26,7 +27,58 @@ export type Plugin = (
 type TriggerChangeType = () => void;
 
 export type Build = {|
-  graphql: typeof graphql,
+  graphql: {
+    GraphQLSchema: typeof graphql.GraphQLSchema,
+    GraphQLScalarType: typeof graphql.GraphQLScalarType,
+    GraphQLObjectType: typeof graphql.GraphQLObjectType,
+    GraphQLInterfaceType: typeof graphql.GraphQLInterfaceType,
+    GraphQLUnionType: typeof graphql.GraphQLUnionType,
+    GraphQLEnumType: typeof graphql.GraphQLEnumType,
+    GraphQLInputObjectType: typeof graphql.GraphQLInputObjectType,
+    GraphQLList: typeof graphql.GraphQLList,
+    GraphQLNonNull: typeof graphql.GraphQLNonNull,
+    GraphQLDirective: typeof graphql.GraphQLDirective,
+    TypeKind: typeof graphql.TypeKind,
+    DirectiveLocation: typeof graphql.DirectiveLocation,
+    GraphQLInt: typeof graphql.GraphQLInt,
+    GraphQLFloat: typeof graphql.GraphQLFloat,
+    GraphQLString: typeof graphql.GraphQLString,
+    GraphQLBoolean: typeof graphql.GraphQLBoolean,
+    GraphQLID: typeof graphql.GraphQLID,
+    specifiedDirectives: typeof graphql.specifiedDirectives,
+    GraphQLIncludeDirective: typeof graphql.GraphQLIncludeDirective,
+    GraphQLSkipDirective: typeof graphql.GraphQLSkipDirective,
+    GraphQLDeprecatedDirective: typeof graphql.GraphQLDeprecatedDirective,
+    DEFAULT_DEPRECATION_REASON: typeof graphql.DEFAULT_DEPRECATION_REASON,
+    SchemaMetaFieldDef: typeof graphql.SchemaMetaFieldDef,
+    TypeMetaFieldDef: typeof graphql.TypeMetaFieldDef,
+    TypeNameMetaFieldDef: typeof graphql.TypeNameMetaFieldDef,
+    __Schema: typeof graphql.__Schema,
+    __Directive: typeof graphql.__Directive,
+    __DirectiveLocation: typeof graphql.__DirectiveLocation,
+    __Type: typeof graphql.__Type,
+    __Field: typeof graphql.__Field,
+    __InputValue: typeof graphql.__InputValue,
+    __EnumValue: typeof graphql.__EnumValue,
+    __TypeKind: typeof graphql.__TypeKind,
+    isType: (type: any) => boolean,
+    isInputType: (type: any) => boolean,
+    isOutputType: (type: any) => boolean,
+    isLeafType: (type: any) => boolean,
+    isCompositeType: (type: any) => boolean,
+    isAbstractType: (type: any) => boolean,
+    isNamedType: (type: any) => boolean,
+    assertType: typeof graphql.assertType,
+    assertInputType: typeof graphql.assertInputType,
+    assertOutputType: typeof graphql.assertOutputType,
+    assertLeafType: typeof graphql.assertLeafType,
+    assertCompositeType: typeof graphql.assertCompositeType,
+    assertAbstractType: typeof graphql.assertAbstractType,
+    assertNamedType: typeof graphql.assertNamedType,
+    //getNullableType<T: GraphQLType>(type: ?T): ?(T & GraphQLNullableType),
+    getNullableType<T: GraphQLType>(type: ?T): mixed,
+    getNamedType: (type: any) => GraphQLNamedType,
+  },
   parseResolveInfo: parseResolveInfo,
   simplifyParsedResolveInfoFragmentWithType: simplifyParsedResolveInfoFragmentWithType,
   getAliasFromResolveInfo: getAliasFromResolveInfo,
