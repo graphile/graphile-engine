@@ -1,5 +1,5 @@
 // @flow
-const bindAll = (obj: Object, keys: Array<string>) => {
+const bindAll = (obj: {}, keys: Array<string>) => {
   keys.forEach(key => {
     obj[key] = obj[key].bind(obj);
   });

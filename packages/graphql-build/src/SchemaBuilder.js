@@ -129,7 +129,9 @@ export type Context = {
   scope: Scope,
 };
 
-export type Hook<Type: mixed, BuildExtensions: {}> = (
+type SupportedHookTypes = {} | Build | Array<GraphQLInterfaceType>;
+
+export type Hook<Type: SupportedHookTypes, BuildExtensions: {}> = (
   input: Type,
   build: {| ...Build, ...BuildExtensions |},
   context: Context
@@ -145,7 +147,7 @@ class SchemaBuilder extends EventEmitter {
   triggerChange: ?TriggerChangeType;
   depth: number;
   hooks: {
-    [string]: Array<Hook<{}, *> | Hook<Array<GraphQLInterfaceType>, *>>,
+    [string]: Array<Hook<*, *>>,
   };
 
   _currentPluginName: ?string;
@@ -229,10 +231,7 @@ class SchemaBuilder extends EventEmitter {
    *
    * The function must either return a replacement object for `obj` or `obj` itself
    */
-  hook(
-    hookName: string,
-    fn: Hook<{}, *> | Hook<Array<GraphQLInterfaceType>, *>
-  ) {
+  hook<T: *>(hookName: string, fn: Hook<T, *>) {
     if (!this.hooks[hookName]) {
       throw new Error(`Sorry, '${hookName}' is not a supported hook`);
     }
@@ -245,7 +244,7 @@ class SchemaBuilder extends EventEmitter {
     this.hooks[hookName].push(fn);
   }
 
-  applyHooks<T: Array<GraphQLInterfaceType> | {}>(
+  applyHooks<T: *>(
     build: Build,
     hookName: string,
     input: T,
@@ -256,7 +255,6 @@ class SchemaBuilder extends EventEmitter {
     try {
       debug(`${INDENT.repeat(this.depth)}[${hookName}${debugStr}]: Running...`);
 
-      // $FlowFixMe
       const hooks: Array<Hook<T, *>> = this.hooks[hookName];
       if (!hooks) {
         throw new Error(`Sorry, '${hookName}' is not a registered hook`);
