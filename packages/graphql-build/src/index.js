@@ -10,11 +10,11 @@ import {
   MutationPayloadQueryPlugin,
 } from "./plugins";
 
-import type { Plugin } from "./SchemaBuilder";
+import type { Plugin, Options } from "./SchemaBuilder";
 
 export type { Plugin };
 
-const getBuilder = async (plugins: Array<Plugin>, options: {} = {}) => {
+const getBuilder = async (plugins: Array<Plugin>, options: Options = {}) => {
   const builder = new SchemaBuilder();
   for (const plugin of plugins) {
     builder._setPluginName(plugin.displayName || plugin.name);

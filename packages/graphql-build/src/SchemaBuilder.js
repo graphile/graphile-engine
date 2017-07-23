@@ -19,9 +19,13 @@ const debug = debugFactory("graphql-builder");
 
 const INDENT = "  ";
 
+export type Options = {
+  [string]: mixed,
+};
+
 export type Plugin = (
   builder: SchemaBuilder,
-  options: Object
+  options: Options
 ) => Promise<void> | void;
 
 type TriggerChangeType = () => void;

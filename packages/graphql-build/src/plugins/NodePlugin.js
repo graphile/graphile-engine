@@ -31,8 +31,11 @@ export type BuildExtensionNode = {|
 
 const NodePlugin: Plugin = function NodePlugin(
   builder,
-  { nodeIdFieldName = "nodeId" }
+  { nodeIdFieldName: inNodeIdFieldName }
 ) {
+  const nodeIdFieldName: string = inNodeIdFieldName
+    ? String(inNodeIdFieldName)
+    : "nodeId";
   builder.hook("build", (build: Object): {|
     ...Build,
     ...BuildExtensionNode,
