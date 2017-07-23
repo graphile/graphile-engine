@@ -1,9 +1,11 @@
+// @flow
+import type { Plugin, Build } from "../SchemaBuilder";
 import { Kind } from "graphql/language";
 import GraphQLJSON from "graphql-type-json";
 
-export default function StandardTypesPlugin(builder) {
+const StandardTypesPlugin: Plugin = function StandardTypesPlugin(builder) {
   // XXX: this should be in an "init" plugin, but PgTypesPlugin requires it in build - fix that, then fix this
-  builder.hook("build", build => {
+  builder.hook("build", (build: Object): Object => {
     const stringType = (name, description) =>
       new build.graphql.GraphQLScalarType({
         name,
@@ -34,7 +36,7 @@ export default function StandardTypesPlugin(builder) {
   builder.hook(
     "init",
     (
-      _,
+      _: Object,
       {
         newWithHooks,
         graphql: { GraphQLNonNull, GraphQLObjectType, GraphQLBoolean },
@@ -76,4 +78,5 @@ export default function StandardTypesPlugin(builder) {
       return _;
     }
   );
-}
+};
+export default StandardTypesPlugin;
