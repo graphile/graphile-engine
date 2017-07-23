@@ -355,7 +355,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
             // Finally, check through all the fields that they've all been processed; any that have not we should do so now.
             for (const fieldName in fieldsSpec) {
               const fieldSpec = fieldsSpec[fieldName];
-              if (!processedFields.indexOf(fieldSpec) >= 0) {
+              if (processedFields.indexOf(fieldSpec) < 0) {
                 // We've not processed this yet; process it now!
                 fieldsSpec[fieldName] = fieldsContext.fieldWithHooks(
                   fieldName,
@@ -432,7 +432,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
             // Finally, check through all the fields that they've all been processed; any that have not we should do so now.
             for (const fieldName in fieldsSpec) {
               const fieldSpec = fieldsSpec[fieldName];
-              if (!processedFields.indexOf(fieldSpec) >= 0) {
+              if (processedFields.indexOf(fieldSpec) < 0) {
                 // We've not processed this yet; process it now!
                 fieldsSpec[fieldName] = fieldsContext.fieldWithHooks(
                   fieldName,
