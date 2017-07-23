@@ -149,6 +149,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
     ): ?T {
       const scope = inScope || {};
       if (!inScope) {
+        // eslint-disable-next-line no-console
         console.warn(
           `No scope was provided to new ${getNameFromType(
             Type
