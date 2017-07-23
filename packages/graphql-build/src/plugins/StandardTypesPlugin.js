@@ -1,11 +1,11 @@
 // @flow
-import type { Plugin, Build } from "../SchemaBuilder";
+import type { Plugin } from "../SchemaBuilder";
 import { Kind } from "graphql/language";
 import GraphQLJSON from "graphql-type-json";
 
 const StandardTypesPlugin: Plugin = function StandardTypesPlugin(builder) {
   // XXX: this should be in an "init" plugin, but PgTypesPlugin requires it in build - fix that, then fix this
-  builder.hook("build", (build: Object): Object => {
+  builder.hook("build", (build: Object) => {
     const stringType = (name, description) =>
       new build.graphql.GraphQLScalarType({
         name,

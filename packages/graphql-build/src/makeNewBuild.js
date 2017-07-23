@@ -1,7 +1,7 @@
 // @flow
 
 import * as graphql from "graphql";
-import type { GraphQLType, GraphQLNamedType } from "graphql";
+import type { GraphQLNamedType } from "graphql";
 import {
   parseResolveInfo,
   simplifyParsedResolveInfoFragmentWithType,
@@ -60,6 +60,7 @@ const knownTypeNames = knownTypes.map(k => k.name);
 const ensureArray = val =>
   val == null ? val : Array.isArray(val) ? val : [val];
 
+// eslint-disable-next-line no-unused-vars
 let ensureName = fn => {};
 if (["development", "test"].indexOf(process.env.NODE_ENV) >= 0) {
   ensureName = fn => {
