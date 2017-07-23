@@ -144,11 +144,16 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
     newWithHooks<T: GraphQLNamedType | GraphQLSchema, ConfigType: *>(
       Type: Class<T>,
       spec: ConfigType,
-      scope: Scope,
+      inScope: Scope,
       returnNullOnInvalid = false
     ): ?T {
-      if (!scope) {
-        throw new Error("No scope provided!");
+      const scope = inScope || {};
+      if (!inScope) {
+        console.warn(
+          `No scope was provided to new ${getNameFromType(
+            Type
+          )}[name=${spec.name}], please check usage of 'newWithHooks'`
+        );
       }
       if (!Type) {
         throw new Error("No type specified!");
