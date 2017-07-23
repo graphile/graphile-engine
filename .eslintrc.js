@@ -4,7 +4,7 @@ module.exports = {
     sourceType: "module",
   },
   extends: ["eslint:recommended", "prettier"],
-  plugins: ["jest", "prettier"],
+  plugins: ["jest", "prettier", "flowtype"],
   env: {
     jest: true,
     node: true,
@@ -41,9 +41,18 @@ module.exports = {
     camelcase: 0,
     "jest/no-focused-tests": 2,
     "jest/no-identical-title": 2,
+    "flowtype/boolean-style": [2, "boolean"],
+    "flowtype/delimiter-dangle": [2, "always-multiline"],
+    "flowtype/no-primitive-constructor-types": 2,
+    "flowtype/no-types-missing-file-annotation": 2,
   },
   globals: {
     $Subtype: false, // XXX: Hack to support Flow, remove when unnecessary
     Class: false, // XXX: Hack to support Flow, remove when unnecessary
+  },
+  settings: {
+    flowtype: {
+      onlyFilesWithFlowAnnotation: true,
+    },
   },
 };

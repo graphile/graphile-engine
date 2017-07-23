@@ -1,6 +1,5 @@
 // @flow
 import type { Plugin } from "../SchemaBuilder";
-import type { GraphQLSchema } from "graphql";
 
 const MutationPlugin: Plugin = async function MutationPlugin(builder) {
   builder.hook(
