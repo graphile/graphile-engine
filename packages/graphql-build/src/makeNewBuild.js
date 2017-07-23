@@ -147,6 +147,9 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
       scope: Scope,
       returnNullOnInvalid = false
     ): ?T {
+      if (!scope) {
+        throw new Error("No scope provided!");
+      }
       if (!Type) {
         throw new Error("No type specified!");
       }
