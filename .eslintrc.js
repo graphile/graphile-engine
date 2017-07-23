@@ -45,6 +45,10 @@ module.exports = {
     "flowtype/delimiter-dangle": [2, "always-multiline"],
     "flowtype/no-primitive-constructor-types": 2,
     "flowtype/no-types-missing-file-annotation": 2,
+    "flowtype/object-type-delimiter": [2, "comma"],
+    "flowtype/require-valid-file-annotation": 2,
+    "flowtype/semi": [2, "always"],
+    "flowtype/use-flow-type": 1,
   },
   globals: {
     $Subtype: false, // XXX: Hack to support Flow, remove when unnecessary
