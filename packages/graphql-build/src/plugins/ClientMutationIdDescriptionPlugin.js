@@ -6,11 +6,7 @@ const ClientMutationIdDescriptionPlugin: Plugin = function ClientMutationIdDescr
 ) {
   builder.hook(
     "inputField",
-    (
-      field: Object,
-      { extend },
-      { scope: { isMutationInput, fieldName } }
-    ): Object => {
+    (field: {}, { extend }, { scope: { isMutationInput, fieldName } }) => {
       if (
         !isMutationInput ||
         fieldName !== "clientMutationId" ||
@@ -27,11 +23,7 @@ const ClientMutationIdDescriptionPlugin: Plugin = function ClientMutationIdDescr
 
   builder.hook(
     "field",
-    (
-      field: Object,
-      { extend },
-      { scope: { isMutationPayload, fieldName } }
-    ) => {
+    (field: {}, { extend }, { scope: { isMutationPayload, fieldName } }) => {
       if (
         !isMutationPayload ||
         fieldName !== "clientMutationId" ||
@@ -48,7 +40,7 @@ const ClientMutationIdDescriptionPlugin: Plugin = function ClientMutationIdDescr
 
   builder.hook(
     "field:args",
-    (args: Object, { extend }, { scope: { isRootMutation } }) => {
+    (args: {}, { extend }, { scope: { isRootMutation } }) => {
       if (!isRootMutation || !args.input || args.input.description) {
         return args;
       }

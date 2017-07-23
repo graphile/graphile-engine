@@ -1,7 +1,7 @@
 // @flow
 import type { Plugin, Build } from "../SchemaBuilder";
 import type { ResolveTree } from "graphql-parse-resolve-info";
-import type { GraphQLType } from "graphql";
+import type { GraphQLType, GraphQLInterfaceType } from "graphql";
 import type { BuildExtensionQuery } from "./QueryPlugin";
 
 const base64 = str => new Buffer(String(str)).toString("base64");
@@ -13,7 +13,7 @@ export type NodeFetcher = (
   context: mixed,
   parsedResolveInfoFragment: ResolveTree,
   type: GraphQLType
-) => Object;
+) => {};
 
 export type BuildExtensionNode = {|
   nodeIdFieldName: string,
@@ -36,10 +36,7 @@ const NodePlugin: Plugin = function NodePlugin(
   const nodeIdFieldName: string = inNodeIdFieldName
     ? String(inNodeIdFieldName)
     : "nodeId";
-  builder.hook("build", (build: Object): {|
-    ...Build,
-    ...BuildExtensionNode,
-  |} => {
+  builder.hook("build", (build: Build): Build & BuildExtensionNode => {
     const nodeFetcherByTypeName = {};
     const nodeAliasByTypeName = {};
     const nodeTypeNameByAlias = {};
@@ -75,7 +72,7 @@ const NodePlugin: Plugin = function NodePlugin(
   });
 
   builder.hook("init", function defineNodeInterfaceType(
-    _: Object,
+    _: {},
     {
       $$isQuery,
       $$nodeType,
@@ -115,7 +112,7 @@ const NodePlugin: Plugin = function NodePlugin(
   });
 
   builder.hook("GraphQLObjectType:interfaces", function addNodeIdToQuery(
-    interfaces: Array<Object>,
+    interfaces: Array<GraphQLInterfaceType>,
     { getTypeByName },
     { scope: { isRootQuery } }
   ) {
@@ -133,7 +130,7 @@ const NodePlugin: Plugin = function NodePlugin(
   builder.hook(
     "GraphQLObjectType:fields",
     (
-      fields: Object,
+      fields: {},
       {
         $$isQuery,
         $$nodeType,
@@ -145,7 +142,7 @@ const NodePlugin: Plugin = function NodePlugin(
         graphql: { GraphQLNonNull, GraphQLID, getNamedType },
       }: {| ...Build, ...BuildExtensionQuery, ...BuildExtensionNode |},
       { scope: { isRootQuery } }
-    ): Object => {
+    ) => {
       if (!isRootQuery) {
         return fields;
       }
@@ -191,7 +188,11 @@ const NodePlugin: Plugin = function NodePlugin(
                 parsedResolveInfoFragment,
                 resolveInfo.returnType
               );
-              node[$$nodeType] = Type;
+              Object.defineProperty(node, $$nodeType, {
+                enumerable: false,
+                configurable: false,
+                value: Type,
+              });
               return node;
             } catch (e) {
               return null;

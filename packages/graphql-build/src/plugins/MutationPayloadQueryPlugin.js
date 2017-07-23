@@ -8,14 +8,14 @@ const MutationPayloadQueryPlugin: Plugin = function MutationPayloadQueryPlugin(
   builder.hook(
     "GraphQLObjectType:fields",
     (
-      fields: Object,
+      fields: {},
       {
         $$isQuery,
         extend,
         getTypeByName,
       }: {| ...Build, ...BuildExtensionQuery |},
       { scope: { isMutationPayload } }
-    ): Object => {
+    ): {} => {
       if (!isMutationPayload) {
         return fields;
       }

@@ -6,10 +6,7 @@ export type BuildExtensionQuery = {|
 |};
 
 const QueryPlugin: Plugin = async function QueryPlugin(builder) {
-  builder.hook("build", (build: Object): {
-    ...Build,
-    ...BuildExtensionQuery,
-  } =>
+  builder.hook("build", (build: Build): Build & BuildExtensionQuery =>
     build.extend(build, {
       $$isQuery: Symbol("isQuery"),
     })
@@ -17,7 +14,7 @@ const QueryPlugin: Plugin = async function QueryPlugin(builder) {
   builder.hook(
     "GraphQLSchema",
     (
-      schema: Object,
+      schema: {},
       {
         $$isQuery,
         newWithHooks,

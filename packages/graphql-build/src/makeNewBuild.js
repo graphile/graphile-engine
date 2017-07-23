@@ -131,15 +131,15 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
     getTypeByName(typeName) {
       return allTypes[typeName];
     },
-    extend(obj, obj2) {
-      const keysA = Object.keys(obj);
-      const keysB = Object.keys(obj2);
+    extend<Obj1: *, Obj2: *>(base: Obj1, extra: Obj2): Obj1 & Obj2 {
+      const keysA = Object.keys(base);
+      const keysB = Object.keys(extra);
       for (const key of keysB) {
         if (keysA.indexOf(key) >= 0) {
           throw new Error(`Overwriting key '${key}' is not allowed!`);
         }
       }
-      return Object.assign({}, obj, obj2);
+      return Object.assign({}, base, extra);
     },
     newWithHooks<T: GraphQLNamedType | GraphQLSchema, ConfigType: *>(
       Type: Class<T>,
