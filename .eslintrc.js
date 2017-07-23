@@ -52,10 +52,6 @@ module.exports = {
     "flowtype/define-flow-type": 1,
     "flowtype/use-flow-type": 1,
   },
-  globals: {
-    $Subtype: false, // XXX: Hack to support Flow, remove when unnecessary
-    Class: false, // XXX: Hack to support Flow, remove when unnecessary
-  },
   settings: {
     flowtype: {
       onlyFilesWithFlowAnnotation: true,

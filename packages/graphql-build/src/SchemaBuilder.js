@@ -107,8 +107,6 @@ export type Build = {|
   addType(type: GraphQLNamedType): void,
   getTypeByName(typeName: string): ?GraphQLType,
   extend<Obj1: *, Obj2: *>(base: Obj1, extra: Obj2): Obj1 & Obj2,
-  // XXX: Hack around eslint
-  /* global T: false */
   newWithHooks<T: GraphQLNamedType | GraphQLSchema>(
     Class<T>,
     spec: {},
