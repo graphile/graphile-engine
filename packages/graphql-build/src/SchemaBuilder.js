@@ -4,13 +4,15 @@ import makeNewBuild from "./makeNewBuild";
 import { bindAll } from "./utils";
 import { GraphQLSchema } from "graphql";
 import * as graphql from "graphql";
-import type { GraphQLType } from "graphql";
+import type { GraphQLType, GraphQLNamedType } from "graphql";
 import EventEmitter from "events";
 import type {
   parseResolveInfo,
   simplifyParsedResolveInfoFragmentWithType,
   getAliasFromResolveInfo,
 } from "graphql-parse-resolve-info";
+import type { ResolveTree } from "graphql-parse-resolve-info";
+import type { GraphQLResolveInfo } from "graphql/type/definition";
 
 const debug = debugFactory("graphql-builder");
 
@@ -25,29 +27,42 @@ type TriggerChangeType = () => void;
 
 export type Build = {|
   graphql: typeof graphql,
-  extend(base: Object, ...sources: Array<Object>): Object,
+  parseResolveInfo: parseResolveInfo,
+  simplifyParsedResolveInfoFragmentWithType: simplifyParsedResolveInfoFragmentWithType,
+  getAliasFromResolveInfo: getAliasFromResolveInfo,
+  generateDataForType(
+    Type: GraphQLType,
+    parsedResolveInfoFragment: ResolveTree
+  ): Object,
+  resolveAlias(
+    data: Object,
+    _args: mixed,
+    _context: mixed,
+    resolveInfo: GraphQLResolveInfo
+  ): string,
+  addType(type: GraphQLNamedType): void,
   getTypeByName(typeName: string): ?GraphQLType,
+  extend(base: Object, ...sources: Array<Object>): Object,
   // XXX: Hack around eslint
   /* global T: false */
-  newWithHooks<T: GraphQLType | GraphQLSchema>(
+  newWithHooks<T: GraphQLNamedType | GraphQLSchema>(
     Class<T>,
     spec: {},
     scope: {},
     returnNullOnInvalid?: boolean
   ): ?T,
-  parseResolveInfo: parseResolveInfo,
-  getAliasFromResolveInfo: getAliasFromResolveInfo,
-  simplifyParsedResolveInfoFragmentWithType: simplifyParsedResolveInfoFragmentWithType,
 |};
 
 export type BuildExtensionQuery = {|
   $$isQuery: Symbol,
 |};
 
+export type Scope = {
+  [string]: mixed,
+};
+
 export type Context = {
-  scope: {
-    [string]: mixed,
-  },
+  scope: Scope,
 };
 
 export type Hook<Type: mixed, BuildExtensions: {}> = (

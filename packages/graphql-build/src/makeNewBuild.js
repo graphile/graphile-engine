@@ -1,4 +1,7 @@
+// @flow
+
 import * as graphql from "graphql";
+import type { GraphQLType, GraphQLNamedType } from "graphql";
 import {
   parseResolveInfo,
   simplifyParsedResolveInfoFragmentWithType,
@@ -6,11 +9,19 @@ import {
 } from "graphql-parse-resolve-info";
 import debugFactory from "debug";
 
-import type SchemaBuilder, { Build } from "./SchemaBuilder";
+import type SchemaBuilder, { Build, Scope } from "./SchemaBuilder";
 
 const isString = str => typeof str === "string";
 const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
 const debug = debugFactory("graphql-build");
+
+function getNameFromType(Type: GraphQLNamedType | GraphQLSchema) {
+  if (Type instanceof GraphQLSchema) {
+    return "schema";
+  } else {
+    return Type.name;
+  }
+}
 
 const {
   GraphQLSchema,
@@ -18,6 +29,8 @@ const {
   GraphQLInputObjectType,
   GraphQLEnumType,
   getNamedType,
+  isCompositeType,
+  isAbstractType,
 } = graphql;
 
 const mergeData = (data, gen, ReturnType, arg) => {
@@ -47,7 +60,7 @@ const knownTypeNames = knownTypes.map(k => k.name);
 const ensureArray = val =>
   val == null ? val : Array.isArray(val) ? val : [val];
 
-let ensureName = () => {};
+let ensureName = fn => {};
 if (["development", "test"].indexOf(process.env.NODE_ENV) >= 0) {
   ensureName = fn => {
     if (isDev && !fn.displayName && !fn.name) {
@@ -111,7 +124,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
       const alias = getAliasFromResolveInfo(resolveInfo);
       return data[alias];
     },
-    addType(type) {
+    addType(type: GraphQLNamedType): void {
       allTypes[type.name] = type;
     },
     getTypeByName(typeName) {
@@ -127,7 +140,12 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
       }
       return Object.assign({}, obj, obj2);
     },
-    newWithHooks(Type, spec, scope = {}, returnNullOnInvalid = false) {
+    newWithHooks<T: GraphQLNamedType | GraphQLSchema>(
+      Type: Class<T>,
+      spec: any,
+      scope: Scope,
+      returnNullOnInvalid = false
+    ): ?T {
       if (!Type) {
         throw new Error("No type specified!");
       }
@@ -154,7 +172,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
         const addDataGeneratorForField = (fieldName, fn) => {
           fn.displayName =
             fn.displayName ||
-            `${Self.name}:${fieldName}[${fn.name || "anonymous"}]`;
+            `${getNameFromType(Self)}:${fieldName}[${fn.name || "anonymous"}]`;
           fieldDataGeneratorsByFieldName[fieldName] =
             fieldDataGeneratorsByFieldName[fieldName] || [];
           fieldDataGeneratorsByFieldName[fieldName].push(fn);
@@ -188,7 +206,9 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
             }
             return results;
           };
-          fn.displayName = `recurseDataGeneratorsForField(${Self.name}:${fieldName})`;
+          fn.displayName = `recurseDataGeneratorsForField(${getNameFromType(
+            Self
+          )}:${fieldName})`;
           addDataGeneratorForField(fieldName, fn);
           // get type from field, get
         };
@@ -222,7 +242,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
               "GraphQLObjectType:interfaces",
               rawInterfaces,
               interfacesContext,
-              `|${Self.name}`
+              `|${getNameFromType(Self)}`
             );
           },
           fields: () => {
@@ -273,7 +293,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                           "Failed to execute argDataGenerator '%s' on %s of %s",
                           gen.displayName || gen.name || "anonymous",
                           fieldName,
-                          Self.name
+                          getNameFromType(Self)
                         );
                         throw e;
                       }
@@ -321,7 +341,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                   "field",
                   newSpec,
                   context,
-                  `|${Self.name}.fields.${fieldName}`
+                  `|${getNameFromType(Self)}.fields.${fieldName}`
                 );
                 newSpec.args = newSpec.args || {};
                 newSpec = Object.assign({}, newSpec, {
@@ -333,7 +353,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                       field: newSpec,
                       returnType: newSpec.type,
                     }),
-                    `|${Self.name}.fields.${fieldName}`
+                    `|${getNameFromType(Self)}.fields.${fieldName}`
                   ),
                 });
                 const finalSpec = newSpec;
@@ -411,7 +431,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                   "inputField",
                   newSpec,
                   context,
-                  `|${Self.name}.fields.${fieldName}`
+                  `|${getNameFromType(Self)}.fields.${fieldName}`
                 );
                 const finalSpec = newSpec;
                 processedFields.push(finalSpec);
@@ -427,7 +447,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
               "GraphQLInputObjectType:fields",
               rawFields,
               fieldsContext,
-              `|${Self.name}`
+              `|${getNameFromType(Self)}`
             );
             // Finally, check through all the fields that they've all been processed; any that have not we should do so now.
             for (const fieldName in fieldsSpec) {
@@ -466,11 +486,13 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
       }
       const finalSpec = newSpec;
 
-      let Self;
+      let Self: GraphQLNamedType | GraphQLSchema;
       Self = new Type(finalSpec);
-      if (returnNullOnInvalid && Self.getFields) {
+      if (!(Self instanceof GraphQLSchema) && returnNullOnInvalid) {
         try {
-          Self.getFields();
+          if (isCompositeType(Self) && !isAbstractType(Self)) {
+            Self.getFields();
+          }
         } catch (e) {
           return null;
         }
