@@ -45,9 +45,11 @@ module.exports = {
     "flowtype/delimiter-dangle": [2, "always-multiline"],
     "flowtype/no-primitive-constructor-types": 2,
     "flowtype/no-types-missing-file-annotation": 2,
+    "flowtype/no-weak-types": 2,
     "flowtype/object-type-delimiter": [2, "comma"],
     "flowtype/require-valid-file-annotation": 2,
     "flowtype/semi": [2, "always"],
+    "flowtype/define-flow-type": 1,
     "flowtype/use-flow-type": 1,
   },
   globals: {
