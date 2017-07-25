@@ -55,6 +55,7 @@
   "files": [
     "src",
     "lib",
-    "index.js"
+    "index.js",
+    "index.js.flow"
   ]
 }
