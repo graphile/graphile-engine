@@ -153,7 +153,7 @@ class QueryBuilder {
     this.checkLock("selectCursor");
     this.data.selectCursor = exprGen;
   }
-  from(expr: SQLGen, alias: SQLAlias = sql.identifier(Symbol())) {
+  from(expr: SQLGen, alias?: SQLAlias = sql.identifier(Symbol())) {
     this.checkLock("from");
     if (!expr) {
       throw new Error("No from table source!");
@@ -204,6 +204,13 @@ class QueryBuilder {
   isOrderUnique() {
     this.lock("orderIsUnique");
     return this.compiledData.orderIsUnique;
+  }
+  getTableExpression(): SQL {
+    this.lock("from");
+    if (!this.compiledData.from) {
+      throw new Error("No from table has been supplied");
+    }
+    return this.compiledData.from[0];
   }
   getTableAlias(): SQL {
     this.lock("from");

@@ -80,7 +80,7 @@ export default (function PgColumnsPlugin(
                           ReturnType
                         );
                         const jsonBuildObject = queryFromResolveData(
-                          Symbol(), // Ignore!
+                          sql.identifier(Symbol()), // Ignore!
                           sql.fragment`(${queryBuilder.getTableAlias()}.${sql.identifier(
                             attr.name
                           )})`, // The brackets are necessary to stop the parser getting confused, ref: https://www.postgresql.org/docs/9.6/static/rowtypes.html#ROWTYPES-ACCESSING

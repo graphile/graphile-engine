@@ -13,7 +13,7 @@ import {
 } from "graphql-parse-resolve-info";
 import debugFactory from "debug";
 
-import type SchemaBuilder, { Build, Scope } from "./SchemaBuilder";
+import type SchemaBuilder, { Build, Scope, DataForType } from "./SchemaBuilder";
 
 const isString = str => typeof str === "string";
 const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
@@ -299,7 +299,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                   getDataFromParsedResolveInfoFragment: (
                     parsedResolveInfoFragment,
                     ReturnType
-                  ) => {
+                  ): DataForType => {
                     const data = {};
 
                     const {

@@ -8,6 +8,8 @@ const debug = debugFactory("graphql-build-pg");
 const INTROSPECTION_PATH = `${__dirname}/../../res/introspection-query.sql`;
 const WATCH_FIXTURES_PATH = `${__dirname}/../../res/watch-fixtures.sql`;
 
+// Ref: https://github.com/postgraphql/postgraphql/tree/master/src/postgres/introspection/object
+
 export type Namespace = {
   kind: "namespace",
   id: string,
