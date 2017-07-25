@@ -317,7 +317,7 @@ class SchemaBuilder extends EventEmitter {
     return build;
   }
 
-  buildSchema(): ?GraphQLSchema {
+  buildSchema(): GraphQLSchema {
     if (!this._generatedSchema) {
       const build = this.createBuild();
       this._generatedSchema = build.newWithHooks(
@@ -325,6 +325,9 @@ class SchemaBuilder extends EventEmitter {
         {},
         { isSchema: true }
       );
+    }
+    if (!this._generatedSchema) {
+      throw new Error("Schema generation failed");
     }
     return this._generatedSchema;
   }
