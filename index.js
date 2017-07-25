@@ -1,4 +1,7 @@
 // @flow
+/*::
+export type * from './src';
+*/
 
 // This script detects if you're running on Node v8 or above; if so it runs the
 // code directly, otherwise it falls back to the babel-compiled version
