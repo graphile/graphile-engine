@@ -523,6 +523,20 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
             Self.getFields();
           }
         } catch (e) {
+          // This is the error we're expecting to handle:
+          // https://github.com/graphql/graphql-js/blob/831598ba76f015078ecb6c5c1fbaf133302f3f8e/src/type/definition.js#L526-L531
+          const isProbablyAnEmptyObjectError = !!e.message.match(
+            /function which returns such an object/
+          );
+          if (!isProbablyAnEmptyObjectError) {
+            // XXX: Improve this
+            // eslint-disable-next-line no-console
+            console.warn(
+              "An error occurred, it might be okay but it doesn't look like the error we were expecting..."
+            );
+            // eslint-disable-next-line no-console
+            console.warn(e);
+          }
           return null;
         }
       }

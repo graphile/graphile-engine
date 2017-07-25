@@ -249,6 +249,9 @@ class SchemaBuilder extends EventEmitter {
     context: Context,
     debugStr: string = ""
   ): T {
+    if (!input) {
+      throw new Error("applyHooks was called with falsy input");
+    }
     this.depth++;
     try {
       debug(`${INDENT.repeat(this.depth)}[${hookName}${debugStr}]: Running...`);
@@ -273,7 +276,7 @@ class SchemaBuilder extends EventEmitter {
             throw new Error(
               `Hook '${hook.displayName ||
                 hook.name ||
-                "anonymous"}' for '${hookName}' returned falsy value`
+                "anonymous"}' for '${hookName}' returned falsy value '${newObj}'`
             );
           }
           debug(
