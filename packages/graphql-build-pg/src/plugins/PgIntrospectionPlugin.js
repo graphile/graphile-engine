@@ -8,6 +8,20 @@ const debug = debugFactory("graphql-build-pg");
 const INTROSPECTION_PATH = `${__dirname}/../../res/introspection-query.sql`;
 const WATCH_FIXTURES_PATH = `${__dirname}/../../res/watch-fixtures.sql`;
 
+export type Proc = {
+  kind: "procedure",
+  name: string,
+  description: ?string,
+  namespaceId: string,
+  isStrict: boolean,
+  returnsSet: boolean,
+  isStable: boolean,
+  returnTypeId: string,
+  argTypeIds: Array<string>,
+  argNames: Array<string>,
+  argDefaultsNum: number,
+};
+
 function readFile(filename, encoding) {
   return new Promise((resolve, reject) => {
     rawReadFile(filename, encoding, (err, res) => {

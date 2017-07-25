@@ -1,7 +1,11 @@
 // @flow
 
 import * as graphql from "graphql";
-import type { GraphQLNamedType } from "graphql";
+import type {
+  GraphQLNamedType,
+  GraphQLField,
+  GraphQLInputField,
+} from "graphql";
 import {
   parseResolveInfo,
   simplifyParsedResolveInfoFragmentWithType,
@@ -14,6 +18,18 @@ import type SchemaBuilder, { Build, Scope } from "./SchemaBuilder";
 const isString = str => typeof str === "string";
 const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
 const debug = debugFactory("graphql-build");
+
+export type FieldWithHooksFunction = (
+  fieldName: string,
+  spec: GraphQLField<*, *>,
+  fieldScope?: {}
+) => GraphQLField<*, *>;
+
+export type InputFieldWithHooksFunction = (
+  fieldName: string,
+  spec: GraphQLInputField,
+  fieldScope?: {}
+) => GraphQLInputField;
 
 function getNameFromType(Type: GraphQLNamedType | GraphQLSchema) {
   if (Type instanceof GraphQLSchema) {
@@ -263,7 +279,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
               recurseDataGeneratorsForField,
               Self,
               GraphQLObjectType: rawSpec,
-              fieldWithHooks: (fieldName, spec, fieldScope = {}) => {
+              fieldWithHooks: ((fieldName, spec, fieldScope = {}) => {
                 if (!isString(fieldName)) {
                   throw new Error(
                     "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
@@ -315,11 +331,15 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                         "It's too early to call this! Call from within resolve"
                       );
                     }
-                    const Type = getNamedType(finalSpec.type);
+                    const Type: GraphQLNamedType = getNamedType(finalSpec.type);
                     const fieldDataGenerators = fieldDataGeneratorsByType.get(
                       Type
                     );
-                    if (fieldDataGenerators) {
+                    if (
+                      fieldDataGenerators &&
+                      isCompositeType(Type) &&
+                      !isAbstractType(Type)
+                    ) {
                       const typeFields = Type.getFields();
                       for (const alias of Object.keys(fields)) {
                         const field = fields[alias];
@@ -353,7 +373,9 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                   context,
                   `|${getNameFromType(Self)}.fields.${fieldName}`
                 );
-                newSpec.args = newSpec.args || {};
+                if (newSpec.args) {
+                  newSpec.args = newSpec.args || {};
+                }
                 newSpec = Object.assign({}, newSpec, {
                   args: builder.applyHooks(
                     this,
@@ -369,7 +391,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                 const finalSpec = newSpec;
                 processedFields.push(finalSpec);
                 return finalSpec;
-              },
+              }: FieldWithHooksFunction),
             };
             let rawFields = rawSpec.fields || {};
             if (typeof rawFields === "function") {
@@ -416,7 +438,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
               scope,
               Self,
               GraphQLObjectType: rawSpec,
-              fieldWithHooks: (fieldName, spec, fieldScope = {}) => {
+              fieldWithHooks: ((fieldName, spec, fieldScope = {}) => {
                 if (!isString(fieldName)) {
                   throw new Error(
                     "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
@@ -446,7 +468,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                 const finalSpec = newSpec;
                 processedFields.push(finalSpec);
                 return finalSpec;
-              },
+              }: InputFieldWithHooksFunction),
             };
             let rawFields = rawSpec.fields;
             if (typeof rawFields === "function") {
