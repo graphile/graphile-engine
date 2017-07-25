@@ -51,8 +51,7 @@ export default (from, fromAlias, resolveData, options, withBuilder) => {
       // Drop the limit, see if there are any records that aren't already in the list we've fetched
       return sql.fragment`exists(
         ${sqlCommon}
-        and (${queryBuilder.data
-          .selectCursor})::text not in (select __cursor::text from ${sqlQueryAlias})
+        and (${queryBuilder.getSelectCursor()})::text not in (select __cursor::text from ${sqlQueryAlias})
         ${offset === 0 ? sql.blank : sql.fragment`offset ${sql.value(offset)}`}
       )`;
     } else {

@@ -212,6 +212,10 @@ class QueryBuilder {
     }
     return this.compiledData.from[1];
   }
+  getSelectCursor() {
+    this.lock("selectCursor");
+    return this.compiledData.selectCursor;
+  }
   getOffset() {
     this.lock("offset");
     return this.compiledData.offset || 0;
