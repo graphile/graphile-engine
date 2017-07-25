@@ -1,2 +1,3 @@
 // @flow
-module.exports = require('./node8plus');
+
+export type * from './node8plus';
