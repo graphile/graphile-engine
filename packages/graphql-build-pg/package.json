@@ -60,6 +60,7 @@
     "node8plus",
     "node7minus",
     "res",
-    "index.js"
+    "index.js",
+    "index.js.flow"
   ]
 }
