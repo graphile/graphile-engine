@@ -1,4 +1,7 @@
-export default function PageInfoStartEndCursor(builder) {
+// @flow
+import type { SchemaBuilder } from "graphql-build";
+
+export default function PageInfoStartEndCursor(builder: SchemaBuilder) {
   builder.hook(
     "GraphQLObjectType:fields",
     (fields, { extend, getTypeByName }, { Self }) => {
