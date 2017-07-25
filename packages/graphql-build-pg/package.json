@@ -42,7 +42,7 @@
     "lodash": ">=4 <5",
     "lru-cache": "4.1.1",
     "pg-range-parser": "^1.0.0",
-    "pg-sql2": "1.0.0-alpha1.2",
+    "pg-sql2": "1.0.0-alpha1.4",
     "pluralize": "^5.0.0"
   },
   "peerDependencies": {
