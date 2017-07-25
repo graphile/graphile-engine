@@ -34,7 +34,6 @@
   "files": [
     "node8plus",
     "node7minus",
-    "index.js",
-    "index.js.flow"
+    "index.js"
   ]
 }
