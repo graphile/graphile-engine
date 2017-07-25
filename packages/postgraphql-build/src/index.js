@@ -39,7 +39,7 @@ type PgConfig = Client | Pool | string;
 const getPostGraphQLBuilder = async (
   pgConfig,
   schemas,
-  options: PostGraphQLOptions
+  options: PostGraphQLOptions = {}
 ) => {
   const { dynamicJson, classicIds, nodeIdFieldName } = options;
   const {
@@ -86,7 +86,7 @@ const getPostGraphQLBuilder = async (
 export const createPostGraphQLSchema = async (
   pgConfig: PgConfig,
   schemas: Array<string> | string,
-  options: PostGraphQLOptions
+  options: PostGraphQLOptions = {}
 ) => {
   const builder = await getPostGraphQLBuilder(pgConfig, schemas, options);
   return builder.buildSchema();
@@ -98,7 +98,7 @@ export const createPostGraphQLSchema = async (
 export const watchPostGraphQLSchema = async (
   pgConfig: PgConfig,
   schemas: Array<string> | string,
-  options: PostGraphQLOptions,
+  options: PostGraphQLOptions = {},
   onNewSchema: SchemaListener
 ) => {
   if (typeof onNewSchema !== "function") {
