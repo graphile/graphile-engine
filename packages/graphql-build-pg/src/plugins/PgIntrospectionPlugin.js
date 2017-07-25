@@ -8,6 +8,13 @@ const debug = debugFactory("graphql-build-pg");
 const INTROSPECTION_PATH = `${__dirname}/../../res/introspection-query.sql`;
 const WATCH_FIXTURES_PATH = `${__dirname}/../../res/watch-fixtures.sql`;
 
+export type Namespace = {
+  kind: "namespace",
+  id: string,
+  name: string,
+  description: string,
+};
+
 export type Proc = {
   kind: "procedure",
   name: string,
@@ -20,6 +27,7 @@ export type Proc = {
   argTypeIds: Array<string>,
   argNames: Array<string>,
   argDefaultsNum: number,
+  namespace: Namespace,
 };
 
 function readFile(filename, encoding) {
