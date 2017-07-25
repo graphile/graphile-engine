@@ -377,6 +377,7 @@ class QueryBuilder {
     this.locks[type] = isDev ? new Error("Initally locked here").stack : true;
     if (type === "cursorComparator") {
       // It's meant to be a function
+      this.compiledData[type] = this.data[type];
     } else if (type === "whereBound") {
       // Handle properties separately
       this.compiledData[type].lower = callIfNecessaryArray(
