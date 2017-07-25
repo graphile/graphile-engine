@@ -176,7 +176,6 @@ const NodePlugin: Plugin = function NodePlugin(
                 throw new Error("Type not found");
               }
               const resolver = nodeFetcherByTypeName[getNamedType(Type).name];
-              // $FlowFixMe: this seems to throw for no reason
               const parsedResolveInfoFragment = parseResolveInfo(
                 resolveInfo,
                 {},
