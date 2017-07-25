@@ -1,9 +1,7 @@
 // @flow
 import type { Plugin } from "graphql-build";
 
-const PageInfoStartEndCursor: Plugin = function PageInfoStartEndCursor(
-  builder
-) {
+export default (function PageInfoStartEndCursor(builder) {
   builder.hook(
     "GraphQLObjectType:fields",
     (fields, { extend, getTypeByName }, { Self }) => {
@@ -23,6 +21,4 @@ const PageInfoStartEndCursor: Plugin = function PageInfoStartEndCursor(
       });
     }
   );
-};
-
-export default PageInfoStartEndCursor;
+}: Plugin);

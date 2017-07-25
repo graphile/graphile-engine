@@ -7,7 +7,7 @@ import type { Plugin } from "graphql-build";
 
 const debugSql = debugFactory("graphql-build-pg:sql");
 
-const PgAllRows: Plugin = async function PgAllRows(
+export default (async function PgAllRows(
   builder,
   { pgInflection: inflection }
 ) {
@@ -129,6 +129,4 @@ const PgAllRows: Plugin = async function PgAllRows(
       );
     }
   );
-};
-
-export default PgAllRows;
+}: Plugin);

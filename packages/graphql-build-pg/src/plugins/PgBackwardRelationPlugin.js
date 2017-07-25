@@ -7,7 +7,7 @@ import type { Plugin } from "graphql-build";
 
 const debug = debugFactory("graphql-build-pg");
 
-const PgBackwardRelationPlugin: Plugin = function PgBackwardRelationPlugin(
+export default (function PgBackwardRelationPlugin(
   builder,
   { pgInflection: inflection }
 ) {
@@ -184,6 +184,4 @@ const PgBackwardRelationPlugin: Plugin = function PgBackwardRelationPlugin(
       );
     }
   );
-};
-
-export default PgBackwardRelationPlugin;
+}: Plugin);
