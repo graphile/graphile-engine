@@ -373,9 +373,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                   context,
                   `|${getNameFromType(Self)}.fields.${fieldName}`
                 );
-                if (newSpec.args) {
-                  newSpec.args = newSpec.args || {};
-                }
+                newSpec.args = newSpec.args || {};
                 newSpec = Object.assign({}, newSpec, {
                   args: builder.applyHooks(
                     this,
