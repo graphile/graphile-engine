@@ -10,11 +10,11 @@ import type {
 } from "graphql";
 import EventEmitter from "events";
 import type {
-  parseResolveInfo,
   simplifyParsedResolveInfoFragmentWithType,
   getAliasFromResolveInfo,
+  ResolveTree,
+  parseResolveInfo,
 } from "graphql-parse-resolve-info";
-import type { ResolveTree } from "graphql-parse-resolve-info";
 import type { GraphQLResolveInfo } from "graphql/type/definition";
 
 const { GraphQLSchema } = graphql;

@@ -25,7 +25,7 @@ export type {
   SchemaListener,
 } from "./SchemaBuilder";
 
-const getBuilder = async (
+export const getBuilder = async (
   plugins: Array<Plugin>,
   options: Options = {}
 ): Promise<SchemaBuilder> => {
@@ -38,7 +38,7 @@ const getBuilder = async (
   return builder;
 };
 
-const buildSchema = async (
+export const buildSchema = async (
   plugins: Array<Plugin>,
   options: Options = {}
 ): Promise<GraphQLSchema> => {
@@ -46,7 +46,7 @@ const buildSchema = async (
   return builder.buildSchema();
 };
 
-const defaultPlugins: Array<Plugin> = [
+export const defaultPlugins: Array<Plugin> = [
   StandardTypesPlugin,
   NodePlugin,
   QueryPlugin,
@@ -63,5 +63,3 @@ export {
   ClientMutationIdDescriptionPlugin,
   MutationPayloadQueryPlugin,
 };
-
-export { getBuilder, buildSchema, defaultPlugins };
