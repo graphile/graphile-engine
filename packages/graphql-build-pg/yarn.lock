@@ -1895,9 +1895,9 @@ pg-range-parser@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/pg-range-parser/-/pg-range-parser-1.0.0.tgz#561e8c4c3dee98a1caa8288c5c7e4300861819bb"
 
-pg-sql2@1.0.0-alpha1.0:
-  version "1.0.0-alpha1.0"
-  resolved "https://registry.yarnpkg.com/pg-sql2/-/pg-sql2-1.0.0-alpha1.0.tgz#13c34041f82fa895bb1fb94eed7ed70a060c394d"
+pg-sql2@1.0.0-alpha1.2:
+  version "1.0.0-alpha1.2"
+  resolved "https://registry.yarnpkg.com/pg-sql2/-/pg-sql2-1.0.0-alpha1.2.tgz#cdc33ee86a47955d410d76b76380e719e4f44244"
   dependencies:
     debug ">=2 <3"
 
