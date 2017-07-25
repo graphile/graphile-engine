@@ -306,15 +306,16 @@ function escapeSqlIdentifier(str) {
 }
 
 /*::
-opaque type OpaqueSQLNode = SQLNode;
-opaque type OpaqueSQLQuery = SQLQuery;
+export opaque type OpaqueSQLNode = SQLNode;
+export opaque type OpaqueSQLQuery = SQLQuery;
+export opaque type SQL = OpaqueSQLNode | OpaqueSQLQuery;
 */
 
 // The types we export are stricter so people get the right hinting
 
 exports.query = function sqlQuery(
   strings /*: string[] */,
-  ...values /*: Array<OpaqueSQLNode | OpaqueSQLQuery> */
+  ...values /*: Array<SQL> */
 ) /*: OpaqueSQLQuery */ {
   return query(strings, ...values);
 };
@@ -339,7 +340,7 @@ exports.literal = function sqlLiteral(val /*: mixed */) /*: OpaqueSQLNode */ {
 };
 
 exports.join = function sqlJoin(
-  items /*: Array<OpaqueSQLQuery | OpaqueSQLNode> */,
+  items /*: Array<SQL> */,
   separator /*: string */ = ""
 ) /*: OpaqueSQLQuery */ {
   return join(items, separator);
