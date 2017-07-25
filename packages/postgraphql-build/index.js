@@ -8,10 +8,6 @@
 export type * from './node8plus';
 */
 
-if (process.versions.node.match(/^([89]|[1-9][0-9]+)\./)) {
-  // Modern node
-  module.exports = require("./node8plus");
-} else {
-  // Older node
-  module.exports = require("./node7minus");
-}
+const isNode8Plus = process.versions.node.match(/^([89]|[1-9][0-9]+)\./);
+// $FlowFixMe: ignore
+module.exports = isNode8Plus ? require("./node8plus") : require("./node7minus");
