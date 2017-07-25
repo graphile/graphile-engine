@@ -6,7 +6,6 @@ import isSafeInteger from "lodash/isSafeInteger";
 const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
 
 type Gen<T> = () => T;
-type MaybeGen<T> = Gen<T> | T;
 
 function callIfNecessary<T>(o: Gen<T> | T): T {
   if (typeof o === "function") {
