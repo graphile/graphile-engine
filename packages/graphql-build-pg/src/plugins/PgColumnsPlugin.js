@@ -1,10 +1,15 @@
+// @flow
 import { GraphQLNonNull, GraphQLString } from "graphql";
 import queryFromResolveData from "../queryFromResolveData";
+import type { Plugin } from "graphql-build";
 
 const nullableIf = (condition, Type) =>
   condition ? Type : new GraphQLNonNull(Type);
 
-export default function PgColumnsPlugin(builder, { pgInflection: inflection }) {
+export default (function PgColumnsPlugin(
+  builder,
+  { pgInflection: inflection }
+) {
   builder.hook(
     "GraphQLObjectType:fields",
     (
@@ -164,4 +169,4 @@ export default function PgColumnsPlugin(builder, { pgInflection: inflection }) {
       );
     }
   );
-}
+}: Plugin);
