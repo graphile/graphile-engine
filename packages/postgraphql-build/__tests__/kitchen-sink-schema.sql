@@ -1,7 +1,5 @@
 -- From https://github.com/postgraphql/postgraphql/blob/master/examples/kitchen-sink/schema.sql
 drop schema if exists a, b, c cascade;
-drop extension if exists tablefunc;
-drop extension if exists postgis;
 
 create schema a;
 create schema b;
@@ -10,7 +8,6 @@ create schema c;
 -- Troublesome extensions install annoying things in our schema; we want to
 -- ensure this doesn't make us crash.
 create extension tablefunc with schema a;
-create extension postgis with schema a;
 
 comment on schema a is 'The a schema.';
 comment on schema b is 'qwerty';
