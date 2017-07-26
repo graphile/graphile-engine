@@ -135,7 +135,7 @@ export default function makeProcField(
           throw new Error(
             `Do not have a connection type '${inflection.connection(
               TableType.name
-            )}' for '${TableType.name}'`
+            )}' for '${TableType.name}' so cannot create procedure field`
           );
         }
         type = new GraphQLNonNull(ConnectionType);
