@@ -61,9 +61,16 @@ export default (function PgQueryProceduresPlugin(builder) {
               proc.name,
               proc.namespace.name
             );
-            memo[fieldName] = makeProcField(fieldName, proc, build, {
-              fieldWithHooks,
-            });
+            try {
+              memo[fieldName] = makeProcField(fieldName, proc, build, {
+                fieldWithHooks,
+              });
+            } catch (e) {
+              console.warn(
+                `Failed to add function '${proc.namespace.name}.${proc.name}':`
+              );
+              console.warn(e);
+            }
             return memo;
           }, {})
       );
