@@ -66,9 +66,11 @@ export default (function PgQueryProceduresPlugin(builder) {
                 fieldWithHooks,
               });
             } catch (e) {
+              // eslint-disable-next-line no-console
               console.warn(
                 `Failed to add function '${proc.namespace.name}.${proc.name}':`
               );
+              // eslint-disable-next-line no-console
               console.warn(e);
             }
             return memo;
