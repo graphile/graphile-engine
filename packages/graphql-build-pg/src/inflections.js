@@ -19,9 +19,7 @@ const formatInsideUnderscores = (fn: (input: string) => string) => (
     throw new Error("Impossible?"); // Satiate Flow
   }
   const [, start, middle, end] = matches;
-  // Because fields starting with double underscore __ are reserved by GraphQL, we'll only preserve one underscore
-  const startWithAtMostUnderscore = start.substr(0, 1);
-  return `${startWithAtMostUnderscore}${fn(middle)}${end}`;
+  return `${start}${fn(middle)}${end}`;
 };
 
 const upperFirst = formatInsideUnderscores(upperFirstAll);
