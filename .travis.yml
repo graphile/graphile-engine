@@ -6,6 +6,9 @@ node_js:
 
 addons:
   postgresql: "9.4"
+  apt:
+    packages:
+    - postgresql-9.4-postgis-2.3
 
 env:
   TEST_DATABASE_URL: postgres://localhost:5432/travis
@@ -31,5 +34,8 @@ matrix:
   include:
     - addons:
         postgresql: 9.5
+        apt:
+          packages:
+          - postgresql-9.5-postgis-2.3
       sudo: required
       dist: trusty
