@@ -75,14 +75,66 @@ export default (async function PgMutationUpdateDeletePlugin(
                     parsedResolveInfoFragment,
                     PayloadType
                   );
-                  const modifiedRowAlias = sql.identifier(Symbol());
-                  const query = queryFromResolveData(
-                    modifiedRowAlias,
-                    modifiedRowAlias,
-                    resolveData,
-                    {}
-                  );
                   let queryWithMutation;
+
+                  const temporaryTableAlias = sql.identifier(
+                    `__temporary_${String(Math.random()).replace(
+                      /[^0-9]+/g,
+                      ""
+                    )}__`
+                  );
+
+                  function performQuery(pgClient, query) {
+                    const { text, values } = sql.compile(query);
+                    if (debugSql.enabled) debugSql(text);
+                    return pgClient.query(text, values);
+                  }
+
+                  /*
+                   * Originally we tried this with a CTE, but:
+                   *
+                   * > The sub-statements in WITH are executed concurrently
+                   * > with each other and with the main query. Therefore, when
+                   * > using data-modifying statements in WITH, the order in
+                   * > which the specified updates actually happen is
+                   * > unpredictable. All the statements are executed with the
+                   * > same snapshot (see Chapter 13), so they cannot "see" one
+                   * > another's effects on the target tables. This alleviates
+                   * > the effects of the unpredictability of the actual order
+                   * > of row updates, and means that RETURNING data is the only
+                   * > way to communicate changes between different WITH
+                   * > sub-statements and the main query.
+                   *
+                   * -- https://www.postgresql.org/docs/9.6/static/queries-with.html
+                   *
+                   * This caused issues with computed columns that themselves
+                   * went off and performed selects - because the data within
+                   * those selects used the old snapshot and thus returned
+                   * stale data. To solve this, we now use temporary tables to
+                   * ensure the mutation and the select execute in different
+                   * statments.
+                   */
+
+                  await performQuery(
+                    pgClient,
+                    sql.query`
+                    create temporary table ${temporaryTableAlias} (
+                      id serial not null,
+                      row ${sql.identifier(
+                        table.namespace.name,
+                        table.name
+                      )} not null
+                    ) on commit drop`
+                  );
+
+                  const mutatedResultsAlias = sql.identifier(Symbol());
+                  const sqlInsertIntoTemporaryTable = sql.query`
+                    insert into ${temporaryTableAlias} (row)
+                    select ${mutatedResultsAlias}::${sql.identifier(
+                    table.namespace.name,
+                    table.name
+                  )} from ${mutatedResultsAlias}`;
+
                   if (mode === "update") {
                     const sqlColumns = [];
                     const sqlValues = [];
@@ -112,36 +164,53 @@ export default (async function PgMutationUpdateDeletePlugin(
                     if (sqlColumns.length === 0) {
                       return null;
                     }
-                    queryWithMutation = sql.query`
-                          with ${modifiedRowAlias} as (
-                            update ${sql.identifier(
-                              table.namespace.name,
-                              table.name
-                            )} set ${sql.join(
-                      sqlColumns.map(
-                        (col, i) => sql.fragment`${col} = ${sqlValues[i]}`
-                      ),
-                      ", "
-                    )}
-                            where ${condition}
-                            returning *
-                          ) ${query}
-                          `;
+                    await performQuery(
+                      pgClient,
+                      sql.query`
+                      with ${mutatedResultsAlias} as (
+                        update ${sql.identifier(
+                          table.namespace.name,
+                          table.name
+                        )} set ${sql.join(
+                        sqlColumns.map(
+                          (col, i) => sql.fragment`${col} = ${sqlValues[i]}`
+                        ),
+                        ", "
+                      )}
+                        where ${condition}
+                        returning *
+                      ) ${sqlInsertIntoTemporaryTable}`
+                    );
                   } else {
-                    queryWithMutation = sql.query`
-                      with ${modifiedRowAlias} as (
+                    await performQuery(
+                      pgClient,
+                      sql.query`
+                      with ${mutatedResultsAlias} as (
                         delete from ${sql.identifier(
                           table.namespace.name,
                           table.name
                         )}
                         where ${condition}
                         returning *
-                      ) ${query}
-                      `;
+                      ) ${sqlInsertIntoTemporaryTable}`
+                    );
                   }
-                  const { text, values } = sql.compile(queryWithMutation);
-                  if (debugSql.enabled) debugSql(text);
-                  const { rows: [row] } = await pgClient.query(text, values);
+
+                  const modifiedRowAlias = sql.identifier(Symbol());
+                  const query = queryFromResolveData(
+                    modifiedRowAlias,
+                    modifiedRowAlias,
+                    resolveData,
+                    {}
+                  );
+                  const { rows: [row] } = await performQuery(
+                    pgClient,
+                    sql.query`
+                    with ${modifiedRowAlias} as (
+                      select (${temporaryTableAlias}.row).* from ${temporaryTableAlias} order by id asc
+                    )
+                    ${query}`
+                  );
                   if (!row) {
                     throw new Error(
                       `No values were deleted in collection '${pluralize(
