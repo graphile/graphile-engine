@@ -382,10 +382,11 @@ export default function makeProcField(
       }
 
       return {
-        description:
-          proc.description ||
-          (isTableLike &&
-            `Reads and enables pagination through a set of \`${TableType.name}\`.`),
+        description: proc.description
+          ? proc.description
+          : isTableLike
+            ? `Reads and enables pagination through a set of \`${TableType.name}\`.`
+            : null,
         type: ReturnType,
         args: args,
         resolve: computed
