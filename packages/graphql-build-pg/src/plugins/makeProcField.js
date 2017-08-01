@@ -425,7 +425,7 @@ export default function makeProcField(
                   functionAlias,
                   functionAlias
                 );
-                const returnType = rawReturnType.arrayItemType || rawReturnType;
+                const returnType = rawReturnType;
                 const intermediateIdentifier = sql.identifier(Symbol());
                 const isVoid = returnType.id === "2278";
                 const isPgClass =
