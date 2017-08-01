@@ -34,47 +34,61 @@ const debugSql = debugFactory("graphql-build-pg:sql");
 
 export default async function viaTemporaryTable(
   pgClient: Client,
-  sqlTypeIdentifier: SQL,
+  sqlTypeIdentifier: ?SQL,
   sqlMutationQuery: SQL,
   sqlResultSourceAlias: SQL,
-  sqlResultQuery: SQL
+  sqlResultQuery: SQL,
+  isTableLike: boolean = true
 ) {
-  function performQuery(pgClient: Client, sqlQuery: OpaqueSQLQuery) {
+  async function performQuery(pgClient: Client, sqlQuery: OpaqueSQLQuery) {
     const { text, values } = sql.compile(sqlQuery);
     if (debugSql.enabled) debugSql(text);
     return pgClient.query(text, values);
   }
 
-  const sqlTemporaryTableAlias = sql.identifier(
-    `__temporary_${String(Math.random()).replace(/[^0-9]+/g, "")}__`
-  );
+  if (!sqlTypeIdentifier) {
+    // It returns void, just perform the query!
+    return await performQuery(
+      pgClient,
+      sql.query`
+      with ${sqlResultSourceAlias} as (
+        ${sqlMutationQuery}
+      ) ${sqlResultQuery}`
+    );
+  } else {
+    const sqlTemporaryTableAlias = sql.identifier(
+      `__temporary_${String(Math.random()).replace(/[^0-9]+/g, "")}__`
+    );
 
-  await performQuery(
-    pgClient,
-    sql.query`
+    await performQuery(
+      pgClient,
+      sql.query`
       create temporary table ${sqlTemporaryTableAlias} (
         id serial not null,
-        row ${sqlTypeIdentifier} not null
+        row ${sqlTypeIdentifier}
       ) on commit drop`
-  );
+    );
 
-  const sqlMutationAlias = sql.identifier(Symbol());
-
-  await performQuery(
-    pgClient,
-    sql.query`
-      with ${sqlMutationAlias} as (
+    await performQuery(
+      pgClient,
+      sql.query`
+      with ${sqlResultSourceAlias} as (
         ${sqlMutationQuery}
       )
       insert into ${sqlTemporaryTableAlias} (row)
-      select ${sqlMutationAlias}::${sqlTypeIdentifier} from ${sqlMutationAlias}`
-  );
-  return await performQuery(
-    pgClient,
-    sql.query`
+      select ${isTableLike
+        ? sqlResultSourceAlias
+        : sql.query`${sqlResultSourceAlias}.${sqlResultSourceAlias}`}::${sqlTypeIdentifier} from ${sqlResultSourceAlias}`
+    );
+    return await performQuery(
+      pgClient,
+      sql.query`
       with ${sqlResultSourceAlias} as (
-        select (${sqlTemporaryTableAlias}.row).* from ${sqlTemporaryTableAlias} order by id asc
+        select ${isTableLike
+          ? sql.query`(${sqlTemporaryTableAlias}.row).*`
+          : sql.query`${sqlTemporaryTableAlias}.row as ${sqlResultSourceAlias}`} from ${sqlTemporaryTableAlias} order by id asc
       )
       ${sqlResultQuery}`
-  );
+    );
+  }
 }
