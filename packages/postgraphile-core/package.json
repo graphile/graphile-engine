@@ -1,5 +1,5 @@
 {
-  "name": "postgraphile-build",
+  "name": "postgraphile-core",
   "version": "0.1.0-alpha.13",
   "description": "",
   "main": "index.js",
