@@ -196,6 +196,7 @@ fragment createPersonPayload on CreatePersonPayload {
     name
     email
     about
+    issue27UserExists: exists(email: "graphql-build.issue.27@example.com")
   }
   a: personEdge(orderBy: PRIMARY_KEY_ASC) { ...peopleEdge }
   b: personEdge(orderBy: PRIMARY_KEY_DESC) { ...peopleEdge }
