@@ -1,12 +1,12 @@
 // @flow
-import type { Plugin } from "graphql-build";
+import type { Plugin } from "graphile-build";
 import queryFromResolveData from "../queryFromResolveData";
 import debugFactory from "debug";
 import camelCase from "lodash/camelCase";
 import pluralize from "pluralize";
 import viaTemporaryTable from "./viaTemporaryTable";
 
-const debug = debugFactory("graphql-build-pg");
+const debug = debugFactory("graphile-build-pg");
 const base64Decode = str => new Buffer(String(str), "base64").toString("utf8");
 
 export default (async function PgMutationUpdateDeletePlugin(

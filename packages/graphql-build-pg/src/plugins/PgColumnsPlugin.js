@@ -1,7 +1,7 @@
 // @flow
 import { GraphQLNonNull, GraphQLString } from "graphql";
 import queryFromResolveData from "../queryFromResolveData";
-import type { Plugin } from "graphql-build";
+import type { Plugin } from "graphile-build";
 
 const nullableIf = (condition, Type) =>
   condition ? Type : new GraphQLNonNull(Type);

@@ -1,11 +1,11 @@
 // @flow
-import { defaultPlugins, getBuilder } from "graphql-build";
+import { defaultPlugins, getBuilder } from "graphile-build";
 import {
   defaultPlugins as pgDefaultPlugins,
   inflections,
-} from "graphql-build-pg";
+} from "graphile-build-pg";
 import type { Pool, Client } from "pg";
-import type { Plugin, Options, SchemaListener } from "graphql-build";
+import type { Plugin, Options, SchemaListener } from "graphile-build";
 
 const ensureValidPlugins = (name, arr) => {
   if (!Array.isArray(arr)) {

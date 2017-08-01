@@ -1,9 +1,9 @@
 // @flow
-import type { Plugin } from "graphql-build";
+import type { Plugin } from "graphile-build";
 import makeProcField from "./makeProcField";
 import debugFactory from "debug";
 
-const debugWarn = debugFactory("graphql-build-pg:warn");
+const debugWarn = debugFactory("graphile-build-pg:warn");
 
 export default (function PgQueryProceduresPlugin(builder) {
   builder.hook(
@@ -72,7 +72,7 @@ export default (function PgQueryProceduresPlugin(builder) {
               // eslint-disable-next-line no-console
               console.warn(
                 `Failed to add function '${proc.namespace
-                  .name}.${proc.name}'; run with 'DEBUG="graphql-build-pg:warn"' to view the error`
+                  .name}.${proc.name}'; run with 'DEBUG="graphile-build-pg:warn"' to view the error`
               );
               debugWarn(e);
             }

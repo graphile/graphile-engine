@@ -4,7 +4,7 @@ const { graphql } = require("graphql");
 const { withPgClient } = require("../helpers");
 const { createPostGraphQLSchema } = require("../..");
 const { printSchema } = require("graphql/utilities");
-const debug = require("debug")("graphql-build:schema");
+const debug = require("debug")("graphile-build:schema");
 
 function readFile(filename, encoding) {
   return new Promise((resolve, reject) => {

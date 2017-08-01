@@ -3,9 +3,9 @@ import queryFromResolveData from "../queryFromResolveData";
 import debugFactory from "debug";
 import addStartEndCursor from "./addStartEndCursor";
 
-import type { Plugin } from "graphql-build";
+import type { Plugin } from "graphile-build";
 
-const debugSql = debugFactory("graphql-build-pg:sql");
+const debugSql = debugFactory("graphile-build-pg:sql");
 
 export default (async function PgAllRows(
   builder,

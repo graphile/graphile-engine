@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/benjie/graphql-build.git"
+    "url": "git+https://github.com/graphile/graphile-build.git"
   },
   "keywords": [
     "graphql",
@@ -22,9 +22,9 @@
   "author": "Benjie Gillam <benjie@jemjie.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/benjie/graphql-build/issues"
+    "url": "https://github.com/graphile/graphile-build/issues"
   },
-  "homepage": "https://github.com/benjie/graphql-build#readme",
+  "homepage": "https://github.com/graphile/graphile-build#readme",
   "peerDependencies": {
     "graphql": ">=0.9 <1"
   },

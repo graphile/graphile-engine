@@ -1,5 +1,5 @@
 // @flow
-import type { Plugin } from "graphql-build";
+import type { Plugin } from "graphile-build";
 import isString from "lodash/isString";
 
 export default (function PgMutationPayloadEdgePlugin(

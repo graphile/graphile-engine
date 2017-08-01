@@ -1,7 +1,7 @@
 // ⚠ NOTE: If running this outside the repository, please replace the contents
 // of the require brackets
-const { buildSchema, defaultPlugins } = require(/*"graphql-build"*/ "..");
-// or import { buildSchema, defaultPlugins } from 'graphql-build';
+const { buildSchema, defaultPlugins } = require(/*"graphile-build"*/ "..");
+// or import { buildSchema, defaultPlugins } from 'graphile-build';
 const { graphql } = require("graphql");
 
 // Create a simple plugin that adds a random field to every GraphQLObject

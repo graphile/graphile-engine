@@ -1,10 +1,10 @@
 // @flow
-import type { Plugin } from "graphql-build";
+import type { Plugin } from "graphile-build";
 import withPgClient from "../withPgClient";
 import { readFile as rawReadFile } from "fs";
 import pg from "pg";
 import debugFactory from "debug";
-const debug = debugFactory("graphql-build-pg");
+const debug = debugFactory("graphile-build-pg");
 const INTROSPECTION_PATH = `${__dirname}/../../res/introspection-query.sql`;
 const WATCH_FIXTURES_PATH = `${__dirname}/../../res/watch-fixtures.sql`;
 

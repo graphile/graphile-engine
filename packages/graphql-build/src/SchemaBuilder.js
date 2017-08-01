@@ -19,7 +19,7 @@ import type { GraphQLResolveInfo } from "graphql/type/definition";
 
 const { GraphQLSchema } = graphql;
 
-const debug = debugFactory("graphql-builder");
+const debug = debugFactory("graphile-builder");
 
 const INDENT = "  ";
 

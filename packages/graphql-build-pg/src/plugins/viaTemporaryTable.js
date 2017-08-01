@@ -5,7 +5,7 @@ import debugFactory from "debug";
 import type { Client } from "pg";
 import type { SQL, OpaqueSQLQuery } from "pg-sql2";
 
-const debugSql = debugFactory("graphql-build-pg:sql");
+const debugSql = debugFactory("graphile-build-pg:sql");
 
 /*
    * Originally we tried this with a CTE, but:

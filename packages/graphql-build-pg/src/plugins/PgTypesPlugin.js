@@ -1,5 +1,5 @@
 // @flow
-import type { Plugin } from "graphql-build";
+import type { Plugin } from "graphile-build";
 import {
   GraphQLNonNull,
   GraphQLString,

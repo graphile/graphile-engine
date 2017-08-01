@@ -4,7 +4,7 @@ const { createPostGraphQLSchema } = require("../..");
 const { readdirSync, readFile: rawReadFile } = require("fs");
 const { resolve: resolvePath } = require("path");
 const { printSchema } = require("graphql/utilities");
-const debug = require("debug")("graphql-build:schema");
+const debug = require("debug")("graphile-build:schema");
 const jwt = require("jsonwebtoken");
 
 function readFile(filename, encoding) {

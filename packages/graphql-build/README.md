@@ -1,4 +1,4 @@
-graphql-build
+graphile-build
 =============
 
 Usage
@@ -9,8 +9,8 @@ The following [runnable example][] creates a plugin that hooks the
 object everywhere (including the root Query).
 
 ```js
-const { buildSchema, defaultPlugins } = require("graphql-build");
-// or import { buildSchema, defaultPlugins } from 'graphql-build';
+const { buildSchema, defaultPlugins } = require("graphile-build");
+// or import { buildSchema, defaultPlugins } from 'graphile-build';
 
 // Create a simple plugin that adds a random field to every GraphQLObject
 function MyRandomFieldPlugin(
@@ -102,7 +102,7 @@ function MyRandomPlugin(builder) {
 Hooks
 -----
 
-[(See hooks in the source)](https://github.com/benjie/graphql-build/blob/996e28f0af68f53e264170bd4528b6500ff3ef25/packages/graphql-build/SchemaBuilder.js#L11-L59)
+[(See hooks in the source)](https://github.com/graphile/graphile-build/blob/996e28f0af68f53e264170bd4528b6500ff3ef25/packages/graphile-build/SchemaBuilder.js#L11-L59)
 
 - `build`: The build object represents the current schema build and is passed
   to all hooks, hook the 'build' event to extend this object.
@@ -148,7 +148,7 @@ Conventions
 
 If you extend the build object (in the `build` event) or add details to the
 scope of a `newWithHooks` or `fieldWithHooks`, please prefix all
-keys with a namespace; for example `graphql-build-pg` uses the `pg` namespace
+keys with a namespace; for example `graphile-build-pg` uses the `pg` namespace
 prefix. Do not pollute other namespaces (unless you have their permission).
 
 [runnable example]: examples/README-1.js

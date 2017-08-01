@@ -17,8 +17,8 @@ import type SchemaBuilder, { Build, Scope, DataForType } from "./SchemaBuilder";
 
 const isString = str => typeof str === "string";
 const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
-const debug = debugFactory("graphql-build");
-const debugWarn = debugFactory("graphql-build:warn");
+const debug = debugFactory("graphile-build");
+const debugWarn = debugFactory("graphile-build:warn");
 
 export type FieldWithHooksFunction = (
   fieldName: string,
@@ -548,7 +548,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
             // XXX: Improve this
             // eslint-disable-next-line no-console
             console.warn(
-              `An error occurred, it might be okay but it doesn't look like the error we were expecting... run with envvar 'DEBUG="graphql-build:warn"' to view the error`
+              `An error occurred, it might be okay but it doesn't look like the error we were expecting... run with envvar 'DEBUG="graphile-build:warn"' to view the error`
             );
             debugWarn(e);
           }

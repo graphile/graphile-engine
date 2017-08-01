@@ -484,7 +484,7 @@ Object {
       "clientMutationId": null,
       "deletedPersonId": "WyJwZW9wbGUiLDZd",
       "person": Object {
-        "email": "graphql-build.issue.27.exists@example.com",
+        "email": "graphile-build.issue.27.exists@example.com",
         "id": 6,
         "issue27UserExists": false,
         "name": "Twenty Seventwo",

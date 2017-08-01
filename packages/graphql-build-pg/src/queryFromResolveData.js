@@ -2,7 +2,7 @@
 import QueryBuilder from "./QueryBuilder";
 import sql from "pg-sql2";
 import type { SQL } from "pg-sql2";
-import type { DataForType } from "graphql-build";
+import type { DataForType } from "graphile-build";
 import isSafeInteger from "lodash/isSafeInteger";
 
 export default (

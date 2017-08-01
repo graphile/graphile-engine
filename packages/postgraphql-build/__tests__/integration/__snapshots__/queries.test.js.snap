@@ -71,7 +71,7 @@ Object {
         Object {
           "cursor": "WyJwcmltYXJ5X2tleV9hc2MiLFs2XV0=",
           "node": Object {
-            "email": "graphql-build.issue.27.exists@example.com",
+            "email": "graphile-build.issue.27.exists@example.com",
             "id": 6,
             "name": "Twenty Seventwo",
           },
@@ -125,7 +125,7 @@ Object {
         Object {
           "cursor": "WyJwcmltYXJ5X2tleV9hc2MiLFs2XV0=",
           "node": Object {
-            "email": "graphql-build.issue.27.exists@example.com",
+            "email": "graphile-build.issue.27.exists@example.com",
             "id": 6,
             "name": "Twenty Seventwo",
           },
@@ -184,7 +184,7 @@ Object {
         Object {
           "cursor": "WyJuYW1lX2FzYyIsWyJUd2VudHkgU2V2ZW50d28iLDZdXQ==",
           "node": Object {
-            "email": "graphql-build.issue.27.exists@example.com",
+            "email": "graphile-build.issue.27.exists@example.com",
             "id": 6,
             "name": "Twenty Seventwo",
           },
@@ -203,7 +203,7 @@ Object {
         Object {
           "cursor": "WyJuYW1lX2Rlc2MiLFsiVHdlbnR5IFNldmVudHdvIiw2XV0=",
           "node": Object {
-            "email": "graphql-build.issue.27.exists@example.com",
+            "email": "graphile-build.issue.27.exists@example.com",
             "id": 6,
             "name": "Twenty Seventwo",
           },
@@ -305,7 +305,7 @@ Object {
         Object {
           "cursor": "WyJwcmltYXJ5X2tleV9hc2MiLFs2XV0=",
           "node": Object {
-            "email": "graphql-build.issue.27.exists@example.com",
+            "email": "graphile-build.issue.27.exists@example.com",
             "id": 6,
             "name": "Twenty Seventwo",
           },

@@ -1,5 +1,5 @@
 // @flow
-import type { Plugin } from "graphql-build";
+import type { Plugin } from "graphile-build";
 
 const base64Decode = str => new Buffer(String(str), "base64").toString("utf8");
 

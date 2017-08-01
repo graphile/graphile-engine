@@ -3,9 +3,9 @@ import debugFactory from "debug";
 import queryFromResolveData from "../queryFromResolveData";
 import addStartEndCursor from "./addStartEndCursor";
 
-import type { Plugin } from "graphql-build";
+import type { Plugin } from "graphile-build";
 
-const debug = debugFactory("graphql-build-pg");
+const debug = debugFactory("graphile-build-pg");
 
 export default (function PgBackwardRelationPlugin(
   builder,

@@ -1,7 +1,7 @@
 // @flow
 import makeProcField from "./makeProcField";
 
-import type { Plugin } from "graphql-build";
+import type { Plugin } from "graphile-build";
 
 export default (function PgComputedColumnsPlugin(builder) {
   builder.hook(

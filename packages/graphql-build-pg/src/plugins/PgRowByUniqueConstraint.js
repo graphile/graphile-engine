@@ -1,8 +1,8 @@
 // @flow
-import type { Plugin } from "graphql-build";
+import type { Plugin } from "graphile-build";
 import queryFromResolveData from "../queryFromResolveData";
 import debugFactory from "debug";
-const debugSql = debugFactory("graphql-build-pg:sql");
+const debugSql = debugFactory("graphile-build-pg:sql");
 
 export default (async function PgRowByUniqueConstraint(
   builder,

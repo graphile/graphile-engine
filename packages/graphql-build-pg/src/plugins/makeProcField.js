@@ -6,11 +6,11 @@ import queryFromResolveData from "../queryFromResolveData";
 import addStartEndCursor from "./addStartEndCursor";
 import viaTemporaryTable from "./viaTemporaryTable";
 
-import type { Build, FieldWithHooksFunction } from "graphql-build";
+import type { Build, FieldWithHooksFunction } from "graphile-build";
 import type { Proc } from "./PgIntrospectionPlugin";
 import type { SQL } from "pg-sql2";
 
-const debugSql = debugFactory("graphql-build-pg:sql");
+const debugSql = debugFactory("graphile-build-pg:sql");
 const firstValue = obj => {
   let firstKey;
   for (const k in obj) {
