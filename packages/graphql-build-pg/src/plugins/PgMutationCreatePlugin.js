@@ -229,11 +229,11 @@ export default (function PgMutationCreatePlugin(
                     ) on commit drop`
                   );
 
-                  const withBlah = sql.identifier(Symbol());
+                  const insertedResultsAlias = sql.identifier(Symbol());
                   await performQuery(
                     pgClient,
                     sql.query`
-                    with ${withBlah} as (
+                    with ${insertedResultsAlias} as (
                       insert into ${sql.identifier(
                         table.namespace.name,
                         table.name
@@ -244,10 +244,10 @@ export default (function PgMutationCreatePlugin(
                       : sql.fragment`default values`} returning *
                     )
                     insert into ${temporaryTableAlias} (row)
-                    select ${withBlah}::${sql.identifier(
+                    select ${insertedResultsAlias}::${sql.identifier(
                       table.namespace.name,
                       table.name
-                    )} from ${withBlah}`
+                    )} from ${insertedResultsAlias}`
                   );
                   const { rows: [row] } = await performQuery(
                     pgClient,
