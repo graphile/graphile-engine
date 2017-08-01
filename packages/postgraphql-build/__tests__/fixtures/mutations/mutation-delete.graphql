@@ -51,6 +51,7 @@ fragment deletePersonPayload on DeletePersonPayload {
     id
     name
     email
+    issue27UserExists: exists(email: "graphql-build.issue.27.exists@example.com")
   }
   query { nodeId }
 }

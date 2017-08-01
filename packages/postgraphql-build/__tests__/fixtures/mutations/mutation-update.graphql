@@ -74,6 +74,7 @@ fragment updatePersonPayload on UpdatePersonPayload {
     name
     email
     about
+    issue27UserExists: exists(email: "graphql-build.issue.27.exists@example.com")
   }
   query { nodeId }
 }
