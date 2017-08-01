@@ -38,7 +38,7 @@ export default async function viaTemporaryTable(
   sqlMutationQuery: SQL,
   sqlResultSourceAlias: SQL,
   sqlResultQuery: SQL,
-  isTableLike: boolean = true
+  isPgClassLike: boolean = true
 ) {
   async function performQuery(pgClient: Client, sqlQuery: OpaqueSQLQuery) {
     const { text, values } = sql.compile(sqlQuery);
@@ -76,7 +76,7 @@ export default async function viaTemporaryTable(
         ${sqlMutationQuery}
       )
       insert into ${sqlTemporaryTableAlias} (row)
-      select ${isTableLike
+      select ${isPgClassLike
         ? sqlResultSourceAlias
         : sql.query`${sqlResultSourceAlias}.${sqlResultSourceAlias}`}::${sqlTypeIdentifier} from ${sqlResultSourceAlias}`
     );
@@ -84,7 +84,7 @@ export default async function viaTemporaryTable(
       pgClient,
       sql.query`
       with ${sqlResultSourceAlias} as (
-        select ${isTableLike
+        select ${isPgClassLike
           ? sql.query`(${sqlTemporaryTableAlias}.row).*`
           : sql.query`${sqlTemporaryTableAlias}.row as ${sqlResultSourceAlias}`} from ${sqlTemporaryTableAlias} order by id asc
       )
