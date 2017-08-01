@@ -179,22 +179,59 @@ export default (function PgMutationCreatePlugin(
                         sqlValues.push(gql2pg(val, attr.type));
                       }
                     });
-                  const queryWithInsert = sql.query`
-                    with ${insertedRowAlias} as (
+                  const temporaryTableAlias = sql.identifier(
+                    `__temporary_${String(Math.random()).replace(
+                      /[^0-9]+/g,
+                      ""
+                    )}__`
+                  );
+
+                  function performQuery(pgClient, query) {
+                    const { text, values } = sql.compile(query);
+                    if (debugSql.enabled) debugSql(text);
+                    return pgClient.query(text, values);
+                  }
+
+                  await performQuery(
+                    pgClient,
+                    sql.query`
+                    create temporary table ${temporaryTableAlias} (
+                      id serial not null,
+                      row ${sql.identifier(
+                        table.namespace.name,
+                        table.name
+                      )} not null
+                    ) on commit drop`
+                  );
+
+                  const withBlah = sql.identifier(Symbol());
+                  await performQuery(
+                    pgClient,
+                    sql.query`
+                    with ${withBlah} as (
                       insert into ${sql.identifier(
                         table.namespace.name,
                         table.name
                       )} ${sqlColumns.length
-                    ? sql.fragment`(
-                        ${sql.join(sqlColumns, ", ")}
-                      ) values(${sql.join(sqlValues, ", ")})`
-                    : sql.fragment`default values`}
-                      returning *
-                    ) ${query}
-                    `;
-                  const { text, values } = sql.compile(queryWithInsert);
-                  if (debugSql.enabled) debugSql(text);
-                  const { rows: [row] } = await pgClient.query(text, values);
+                      ? sql.fragment`(
+                          ${sql.join(sqlColumns, ", ")}
+                        ) values(${sql.join(sqlValues, ", ")})`
+                      : sql.fragment`default values`} returning *
+                    )
+                    insert into ${temporaryTableAlias} (row)
+                    select ${withBlah}::${sql.identifier(
+                      table.namespace.name,
+                      table.name
+                    )} from ${withBlah}`
+                  );
+                  const { rows: [row] } = await performQuery(
+                    pgClient,
+                    sql.query`
+                    with ${insertedRowAlias} as (
+                      select (${temporaryTableAlias}.row).* from ${temporaryTableAlias} order by id asc
+                    )
+                    ${query}`
+                  );
                   return {
                     clientMutationId: input.clientMutationId,
                     data: row,
