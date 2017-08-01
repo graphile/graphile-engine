@@ -75,7 +75,6 @@ export default (async function PgMutationUpdateDeletePlugin(
                     parsedResolveInfoFragment,
                     PayloadType
                   );
-                  let queryWithMutation;
 
                   const temporaryTableAlias = sql.identifier(
                     `__temporary_${String(Math.random()).replace(
