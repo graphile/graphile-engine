@@ -480,6 +480,20 @@ Object {
         "nodeId": "query",
       },
     },
+    "l": Object {
+      "clientMutationId": null,
+      "deletedPersonId": "WyJwZW9wbGUiLDZd",
+      "person": Object {
+        "email": "graphql-build.issue.27.exists@example.com",
+        "id": 6,
+        "issue27UserExists": false,
+        "name": "Twenty Seventwo",
+        "nodeId": "WyJwZW9wbGUiLDZd",
+      },
+      "query": Object {
+        "nodeId": "query",
+      },
+    },
   },
   "errors": Array [
     [GraphQLError: No values were deleted in collection 'posts' because no values were found.],
@@ -630,6 +644,20 @@ Object {
         "issue27UserExists": true,
         "name": "Sarah Smith",
         "nodeId": "WyJwZW9wbGUiLDJd",
+      },
+      "query": Object {
+        "nodeId": "query",
+      },
+    },
+    "j": Object {
+      "clientMutationId": null,
+      "person": Object {
+        "about": null,
+        "email": "somethingelse@example.com",
+        "id": 6,
+        "issue27UserExists": false,
+        "name": "Twenty Seventwo",
+        "nodeId": "WyJwZW9wbGUiLDZd",
       },
       "query": Object {
         "nodeId": "query",
