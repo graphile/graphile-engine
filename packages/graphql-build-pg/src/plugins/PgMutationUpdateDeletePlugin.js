@@ -213,7 +213,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                   );
                   if (!row) {
                     throw new Error(
-                      `No values were deleted in collection '${pluralize(
+                      `No values were ${mode}d in collection '${pluralize(
                         table.name
                       )}' because no values were found.`
                     );
