@@ -80,7 +80,7 @@ export default async function viaTemporaryTable(
         ? sqlResultSourceAlias
         : sql.query`${sqlResultSourceAlias}.${sqlResultSourceAlias}`}::${sqlTypeIdentifier} from ${sqlResultSourceAlias}`
     );
-    return await performQuery(
+    const results = await performQuery(
       pgClient,
       sql.query`
       with ${sqlResultSourceAlias} as (
@@ -90,5 +90,10 @@ export default async function viaTemporaryTable(
       )
       ${sqlResultQuery}`
     );
+    await performQuery(
+      pgClient,
+      sql.query`drop table ${sqlTemporaryTableAlias};`
+    );
+    return results;
   }
 }
