@@ -334,6 +334,11 @@ Object {
         "nodeId": "query",
       },
     },
+    "h": Object {
+      "person": Object {
+        "issue27UserExists": true,
+      },
+    },
   },
 }
 `;
