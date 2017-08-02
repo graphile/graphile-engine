@@ -1,5 +1,5 @@
 // @flow
-import type { Plugin, Build } from "../SchemaBuilder";
+import type { Plugin, Build, DataForType } from "../SchemaBuilder";
 import type { ResolveTree } from "graphql-parse-resolve-info";
 import type { GraphQLType, GraphQLInterfaceType } from "graphql";
 import type { BuildExtensionQuery } from "./QueryPlugin";
@@ -12,7 +12,8 @@ export type NodeFetcher = (
   identifiers: Array<mixed>,
   context: mixed,
   parsedResolveInfoFragment: ResolveTree,
-  type: GraphQLType
+  type: GraphQLType,
+  resolveData: DataForType
 ) => {};
 
 export type BuildExtensionNode = {|
@@ -140,6 +141,7 @@ export default (function NodePlugin(
         nodeFetcherByTypeName,
         getNodeType,
         graphql: { GraphQLNonNull, GraphQLID, getNamedType },
+        generateDataForType,
       }: {| ...Build, ...BuildExtensionQuery, ...BuildExtensionNode |},
       { scope: { isRootQuery } }
     ) => {
@@ -181,12 +183,17 @@ export default (function NodePlugin(
                 {},
                 Type
               );
+              const resolveData = generateDataForType(
+                Type,
+                parsedResolveInfoFragment
+              );
               const node = await resolver(
                 data,
                 identifiers,
                 context,
                 parsedResolveInfoFragment,
-                resolveInfo.returnType
+                resolveInfo.returnType,
+                resolveData
               );
               Object.defineProperty(node, $$nodeType, {
                 enumerable: false,
