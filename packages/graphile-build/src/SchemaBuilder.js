@@ -8,13 +8,11 @@ import type {
   GraphQLNamedType,
   GraphQLInterfaceType,
   GraphQLObjectTypeConfig,
-  GraphQLFieldConfig,
 } from "graphql";
 import EventEmitter from "events";
 import type {
   simplifyParsedResolveInfoFragmentWithType,
   getAliasFromResolveInfo,
-  ResolveTree,
   parseResolveInfo,
 } from "graphql-parse-resolve-info";
 import type { GraphQLResolveInfo } from "graphql/type/definition";
