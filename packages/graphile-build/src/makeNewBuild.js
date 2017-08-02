@@ -6,6 +6,7 @@ import type {
   GraphQLInputField,
   GraphQLFieldResolver,
   GraphQLType,
+  GraphQLOutputType,
 } from "graphql";
 import {
   parseResolveInfo,
@@ -22,6 +23,15 @@ const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
 const debug = debugFactory("graphile-build");
 const debugWarn = debugFactory("graphile-build:warn");
 
+type MetaData = {
+  [string]: Array<mixed>,
+};
+type DataGeneratorFunction = (
+  parsedResolveInfoFragment: ResolveTree,
+  ReturnType: GraphQLType,
+  ...args: Array<mixed>
+) => Array<MetaData>;
+
 type FieldSpecIsh = {
   type?: GraphQLType,
   args?: {},
@@ -34,10 +44,15 @@ export type FieldWithHooksFunction = (
   spec:
     | FieldSpecIsh
     | (({
+        addDataGenerator: DataGeneratorFunction => void,
+        addArgDataGenerator: DataGeneratorFunction => void,
         getDataFromParsedResolveInfoFragment: (
           parsedResolveInfoFragment: ResolveTree,
           Type: GraphQLType
         ) => DataForType,
+        scope: {
+          fieldName: string,
+        },
       }) => FieldSpecIsh),
   fieldScope?: {}
 ) => {};
@@ -66,15 +81,21 @@ const {
   isAbstractType,
 } = graphql;
 
-const mergeData = (data, gen, ReturnType, arg) => {
-  const results = ensureArray(gen(arg, ReturnType, data));
+const mergeData = (
+  data: MetaData,
+  gen: DataGeneratorFunction,
+  ReturnType,
+  arg
+) => {
+  const results: ?Array<MetaData> = ensureArray(gen(arg, ReturnType, data));
   if (!results) {
     return;
   }
-  for (const result of results) {
+  for (const result: MetaData of results) {
     for (const k of Object.keys(result)) {
       data[k] = data[k] || [];
-      const newData = ensureArray(result[k]);
+      const value: mixed = result[k];
+      const newData: ?Array<mixed> = ensureArray(value);
       if (newData) {
         data[k].push(...newData);
       }
@@ -90,8 +111,15 @@ const knownTypes = [
 ];
 const knownTypeNames = knownTypes.map(k => k.name);
 
-const ensureArray = val =>
-  val == null ? val : Array.isArray(val) ? val : [val];
+function ensureArray<T>(val: void | Array<T> | T): void | Array<T> {
+  if (val == null) {
+    return;
+  } else if (Array.isArray(val)) {
+    return val;
+  } else {
+    return [val];
+  }
+}
 
 // eslint-disable-next-line no-unused-vars
 let ensureName = fn => {};
@@ -186,7 +214,10 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
           scope,
         });
       } else if (Type === GraphQLObjectType) {
-        const addDataGeneratorForField = (fieldName, fn) => {
+        const addDataGeneratorForField = (
+          fieldName,
+          fn: DataGeneratorFunction
+        ) => {
           fn.displayName =
             fn.displayName ||
             `${getNameFromType(Self)}:${fieldName}[${fn.name || "anonymous"}]`;
@@ -201,11 +232,15 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
               ReturnType
             );
             const results = [];
-            const StrippedType = getNamedType(ReturnType);
+            const StrippedType: GraphQLNamedType = getNamedType(ReturnType);
             const fieldDataGenerators = fieldDataGeneratorsByType.get(
               StrippedType
             );
-            if (fieldDataGenerators && StrippedType.getFields) {
+            if (
+              fieldDataGenerators &&
+              isCompositeType(StrippedType) &&
+              !isAbstractType(StrippedType)
+            ) {
               const typeFields = StrippedType.getFields();
               for (const alias of Object.keys(fields)) {
                 const field = fields[alias];
@@ -216,7 +251,9 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                     const local = ensureArray(
                       gen(field, typeFields[field.name].type, ...rest)
                     );
-                    results.push(...local);
+                    if (local) {
+                      results.push(...local);
+                    }
                   }
                 }
               }
