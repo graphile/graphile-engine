@@ -3,8 +3,9 @@
 import * as graphql from "graphql";
 import type {
   GraphQLNamedType,
-  GraphQLField,
   GraphQLInputField,
+  GraphQLFieldResolver,
+  GraphQLType,
 } from "graphql";
 import {
   parseResolveInfo,
@@ -12,6 +13,7 @@ import {
   getAliasFromResolveInfo,
 } from "graphql-parse-resolve-info";
 import debugFactory from "debug";
+import type { ResolveTree } from "graphql-parse-resolve-info";
 
 import type SchemaBuilder, { Build, Scope, DataForType } from "./SchemaBuilder";
 
@@ -20,11 +22,25 @@ const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
 const debug = debugFactory("graphile-build");
 const debugWarn = debugFactory("graphile-build:warn");
 
+type FieldSpecIsh = {
+  type?: GraphQLType,
+  args?: {},
+  resolve?: GraphQLFieldResolver<*, *>,
+  deprecationReason?: string,
+  description?: ?string,
+};
 export type FieldWithHooksFunction = (
   fieldName: string,
-  spec: GraphQLField<*, *>,
+  spec:
+    | FieldSpecIsh
+    | (({
+        getDataFromParsedResolveInfoFragment: (
+          parsedResolveInfoFragment: ResolveTree,
+          Type: GraphQLType
+        ) => DataForType,
+      }) => FieldSpecIsh),
   fieldScope?: {}
-) => GraphQLField<*, *>;
+) => {};
 
 export type InputFieldWithHooksFunction = (
   fieldName: string,
@@ -112,32 +128,6 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
     parseResolveInfo,
     simplifyParsedResolveInfoFragmentWithType,
     getAliasFromResolveInfo,
-    generateDataForType(Type, parsedResolveInfoFragment) {
-      const StrippedType = getNamedType(Type);
-      if (!StrippedType) {
-        throw new Error(`Invalid type`);
-      }
-      const { fields } = this.simplifyParsedResolveInfoFragmentWithType(
-        parsedResolveInfoFragment,
-        StrippedType
-      );
-      const fieldDataGenerators =
-        fieldDataGeneratorsByType.get(StrippedType) || {};
-      const data = {};
-      if (fieldDataGenerators) {
-        for (const alias of Object.keys(fields)) {
-          const field = fields[alias];
-          const gens = fieldDataGenerators[field.name];
-          if (gens) {
-            for (const gen of gens) {
-              mergeData(data, gen, StrippedType, field);
-            }
-          }
-        }
-      }
-      return data;
-    },
-
     resolveAlias(data, _args, _context, resolveInfo) {
       const alias = getAliasFromResolveInfo(resolveInfo);
       return data[alias];
@@ -301,6 +291,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                     parsedResolveInfoFragment,
                     ReturnType
                   ): DataForType => {
+                    const Type: GraphQLNamedType = getNamedType(ReturnType);
                     const data = {};
 
                     const {
@@ -332,7 +323,6 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                         "It's too early to call this! Call from within resolve"
                       );
                     }
-                    const Type: GraphQLNamedType = getNamedType(finalSpec.type);
                     const fieldDataGenerators = fieldDataGeneratorsByType.get(
                       Type
                     );
