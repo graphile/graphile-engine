@@ -426,7 +426,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
             const fieldsContext = {
               scope,
               Self,
-              GraphQLObjectType: rawSpec,
+              GraphQLInputObjectType: rawSpec,
               fieldWithHooks: ((fieldName, spec, fieldScope = {}) => {
                 if (!isString(fieldName)) {
                   throw new Error(
