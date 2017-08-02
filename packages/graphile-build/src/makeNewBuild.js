@@ -6,7 +6,6 @@ import type {
   GraphQLInputField,
   GraphQLFieldResolver,
   GraphQLType,
-  GraphQLOutputType,
 } from "graphql";
 import {
   parseResolveInfo,
