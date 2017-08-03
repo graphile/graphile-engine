@@ -8,6 +8,9 @@ It's also suitable for usage in your own application, but please be aware you
 need to bring your own security in the form of an authenticated `pgClient` (see
 below).
 
+For more information about `graphile-build-pg` please see the documentation at
+[graphile.com](https://www.graphile.com/graphile-build-pg/introduction/).
+
 ## `createPostGraphQLSchema(pgConfig, schemas, options)`
 
 This is the function you're most likely to use in production, it will return a
