@@ -20,6 +20,9 @@ cache:
     - packages/postgraphile-core/node_modules
     - packages/graphile-build/node_modules
 
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 0.28.1
+
 install:
   - yarn
   - lerna bootstrap
