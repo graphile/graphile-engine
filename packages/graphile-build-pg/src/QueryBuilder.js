@@ -138,12 +138,14 @@ class QueryBuilder {
     this.data.cursorComparator = fn;
     this.lock("cursorComparator");
   }
-  cursorCondition(cursorValue: CursorValue, isAfter: boolean) {
-    this.lock("cursorComparator");
-    if (!this.compiledData.cursorComparator) {
-      throw new Error("No cursor comparator was set!");
-    }
-    return this.compiledData.cursorComparator(cursorValue, isAfter);
+  addCursorCondition(cursorValue: CursorValue, isAfter: boolean) {
+    this.beforeLock("whereBound", () => {
+      this.lock("cursorComparator");
+      if (!this.compiledData.cursorComparator) {
+        throw new Error("No cursor comparator was set!");
+      }
+      this.compiledData.cursorComparator(cursorValue, isAfter);
+    });
   }
   select(exprGen: SQLGen, alias: RawAlias) {
     this.checkLock("select");
@@ -444,11 +446,13 @@ class QueryBuilder {
     this.lock("from");
     this.lock("flip");
     this.lock("join");
-    this.lock("offset");
     this.lock("limit");
     this.lock("orderBy");
     // We must execute where after orderBy because cursor queries require all orderBy columns
     this.lock("cursorComparator");
+    this.lock("whereBound");
+    // 'offset' must come after 'whereBound' because cursorComparator may influence it
+    this.lock("offset");
     this.lock("where");
     // We must execute select after orderBy otherwise we cannot generate a cursor
     this.lock("selectCursor");

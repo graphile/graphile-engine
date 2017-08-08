@@ -156,7 +156,17 @@ export default (
           )
           `;
         }
-        return sqlFilter;
+        queryBuilder.whereBound(sqlFilter, isAfter);
+      } else if (
+        cursorValue[0] === "natural" &&
+        isSafeInteger(cursorValue[1]) &&
+        cursorValue[1] >= 0
+      ) {
+        if (isAfter) {
+          queryBuilder.offset(cursorValue[1]);
+        } else {
+          throw new Error("Cannot use 'before' with natural orderBy");
+        }
       } else {
         throw new Error("Cannot use cursors without orderBy");
       }
