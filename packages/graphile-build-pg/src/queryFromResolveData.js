@@ -25,7 +25,14 @@ export default (
     pgCalculateTotalCount,
     calculateHasNextPage,
     calculateHasPreviousPage,
+    usesCursor: explicitlyUsesCursor,
   } = resolveData;
+
+  const usesCursor: boolean =
+    (explicitlyUsesCursor && explicitlyUsesCursor.length > 0) ||
+    (calculateHasNextPage && calculateHasNextPage.length > 0) ||
+    (calculateHasPreviousPage && calculateHasPreviousPage.length > 0) ||
+    false;
   const rawCursorPrefix =
     reallyRawCursorPrefix && reallyRawCursorPrefix.filter(_ => _);
 
@@ -99,25 +106,27 @@ export default (
     options.withCursor
   ) {
     // Sometimes we need a __cursor even if it's not a collection; e.g. to get the edge field on a mutation
-    queryBuilder.selectCursor(() => {
-      const orderBy = queryBuilder
-        .getOrderByExpressionsAndDirections()
-        .map(([expr]) => expr);
-      if (orderBy.length > 0) {
-        return sql.fragment`json_build_array(${sql.join(
-          [
-            ...getPgCursorPrefix(),
-            sql.fragment`json_build_array(${sql.join(orderBy, ", ")})`,
-          ],
-          ", "
-        )})`;
-      } else {
-        return sql.fragment`json_build_array(${sql.join(
-          getPgCursorPrefix(),
-          ", "
-        )}, (row_number() over (partition by 1)))`;
-      }
-    });
+    if (usesCursor) {
+      queryBuilder.selectCursor(() => {
+        const orderBy = queryBuilder
+          .getOrderByExpressionsAndDirections()
+          .map(([expr]) => expr);
+        if (orderBy.length > 0) {
+          return sql.fragment`json_build_array(${sql.join(
+            [
+              ...getPgCursorPrefix(),
+              sql.fragment`json_build_array(${sql.join(orderBy, ", ")})`,
+            ],
+            ", "
+          )})`;
+        } else {
+          return sql.fragment`json_build_array(${sql.join(
+            getPgCursorPrefix(),
+            ", "
+          )}, (row_number() over (partition by 1)))`;
+        }
+      });
+    }
   }
   if (options.withPagination || options.withPaginationAsFields) {
     queryBuilder.setCursorComparator((cursorValue, isAfter) => {
