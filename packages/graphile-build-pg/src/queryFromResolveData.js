@@ -127,7 +127,7 @@ export default (
           sql.value(val)
         );
         if (!Array.isArray(sqlCursors)) {
-          return sql.literal(false);
+          queryBuilder.whereBound(sql.literal(false), isAfter);
         }
         let sqlFilter = sql.fragment`false`;
         for (let i = orderByExpressionsAndDirections.length - 1; i >= 0; i--) {
@@ -194,7 +194,7 @@ export default (
           canHaveCursorInWhere,
           queryHasBefore,
           queryHasFirst,
-          queryBuilder.data.offset || 0
+          queryBuilder.getOffset() || 0
         );
     const hasPreviousPage = queryHasZeroLimit
       ? sql.literal(false)
@@ -203,7 +203,7 @@ export default (
           canHaveCursorInWhere,
           queryHasAfter,
           queryHasLast,
-          queryBuilder.data.offset || 0,
+          queryBuilder.getOffset() || 0,
           true
         );
 

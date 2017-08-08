@@ -28,7 +28,7 @@ type SQLAlias = SQL;
 type SQLGen = Gen<SQL> | SQL;
 type NumberGen = Gen<number> | number;
 type CursorValue = {};
-type CursorComparator = (val: CursorValue, isAfter: boolean) => SQL;
+type CursorComparator = (val: CursorValue, isAfter: boolean) => void;
 
 class QueryBuilder {
   locks: {
