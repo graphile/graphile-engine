@@ -31,8 +31,9 @@ type SQLValueNode = {
   type: 'VALUE',
 }
 
-type SQLNode = SQLRawNode | SQLValueNode | SQLIdentifierNode
-type SQLQuery = Array<SQLNode>
+export opaque type SQLNode = SQLRawNode | SQLValueNode | SQLIdentifierNode
+export opaque type SQLQuery = Array<SQLNode>
+export opaque type SQL = SQLNode | SQLQuery;
 
 type QueryConfig = {
   text: string,
@@ -305,50 +306,43 @@ function escapeSqlIdentifier(str) {
   return escaped;
 }
 
-/*::
-export opaque type OpaqueSQLNode = SQLNode;
-export opaque type OpaqueSQLQuery = SQLQuery;
-export opaque type SQL = OpaqueSQLNode | OpaqueSQLQuery;
-*/
-
 // The types we export are stricter so people get the right hinting
 
 exports.query = function sqlQuery(
   strings /*: string[] */,
   ...values /*: Array<SQL> */
-) /*: OpaqueSQLQuery */ {
+) /*: SQLQuery */ {
   return query(strings, ...values);
 };
 
 exports.fragment = exports.query;
 
-exports.raw = function sqlRaw(text /*: string */) /*: OpaqueSQLNode */ {
+exports.raw = function sqlRaw(text /*: string */) /*: SQLNode */ {
   return raw(text);
 };
 
 exports.identifier = function sqlIdentifier(
   ...names /*: Array<string | Symbol> */
-) /*: OpaqueSQLNode */ {
+) /*: SQLNode */ {
   return identifier(...names);
 };
 
-exports.value = function sqlValue(val /*: mixed */) /*: OpaqueSQLNode */ {
+exports.value = function sqlValue(val /*: mixed */) /*: SQLNode */ {
   return value(val);
 };
-exports.literal = function sqlLiteral(val /*: mixed */) /*: OpaqueSQLNode */ {
+
+exports.literal = function sqlLiteral(val /*: mixed */) /*: SQLNode */ {
   return literal(val);
 };
 
 exports.join = function sqlJoin(
   items /*: Array<SQL> */,
   separator /*: string */ = ""
-) /*: OpaqueSQLQuery */ {
+) /*: SQLQuery */ {
   return join(items, separator);
 };
 
-exports.compile = function sqlCompile(
-  sql /*: OpaqueSQLQuery */
-) /*: QueryConfig */ {
+exports.compile = function sqlCompile(sql /*: SQLQuery */) /*: QueryConfig */ {
   return compile(sql);
 };
 

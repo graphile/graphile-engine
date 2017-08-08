@@ -41,7 +41,7 @@
     "eslint-config-prettier": "^2.3.0",
     "eslint-plugin-jest": "^20.0.3",
     "eslint-plugin-prettier": "^2.1.2",
-    "flow-bin": "^0.50.0",
+    "flow-bin": "^0.52.0",
     "jest": "20.0.4",
     "markdown-doctest": "^0.9.1",
     "prettier": "^1.5.3"
