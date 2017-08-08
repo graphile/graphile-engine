@@ -226,16 +226,22 @@ export default (
       ? sql.fragment`with ${sqlQueryAlias} as (${query}), ${sqlSummaryAlias} as (select json_agg(to_json(${sqlQueryAlias})) as data from ${sqlQueryAlias})`
       : sql.fragment``;
     const sqlFrom = sql.fragment``;
-    const fields = [
-      haveFields && [
+    const fields: Array<[SQL, string]> = [];
+    if (haveFields) {
+      fields.push([
         sql.fragment`coalesce((select ${sqlSummaryAlias}.data from ${sqlSummaryAlias}), '[]'::json)`,
         "data",
-      ],
-      haveFields && calculateHasNextPage && [hasNextPage, "hasNextPage"],
-      haveFields &&
-      calculateHasPreviousPage && [hasPreviousPage, "hasPreviousPage"],
-      pgCalculateTotalCount && [totalCount, "totalCount"],
-    ].filter(_ => _);
+      ]);
+      if (calculateHasNextPage) {
+        fields.push([hasNextPage, "hasNextPage"]);
+      }
+      if (calculateHasPreviousPage) {
+        fields.push([hasPreviousPage, "hasPreviousPage"]);
+      }
+    }
+    if (pgCalculateTotalCount) {
+      fields.push([totalCount, "totalCount"]);
+    }
     if (options.withPaginationAsFields) {
       return sql.fragment`${sqlWith} select ${sql.join(
         fields.map(
