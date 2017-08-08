@@ -1691,16 +1691,14 @@ Object {
             "name": "Kathryn Ramirez",
           },
         },
+      ],
+    },
+    "tableSetQueryWithOffset2": Object {
+      "edges": Array [
         Object {
-          "cursor": "WyJuYXR1cmFsIiw1XQ==",
+          "cursor": "WyJuYXR1cmFsIiw0XQ==",
           "node": Object {
-            "name": "Joe Tucker",
-          },
-        },
-        Object {
-          "cursor": "WyJuYXR1cmFsIiw2XQ==",
-          "node": Object {
-            "name": "Twenty Seventwo",
+            "name": "Kathryn Ramirez",
           },
         },
       ],

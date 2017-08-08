@@ -165,7 +165,10 @@ export default (
         if (isAfter) {
           queryBuilder.offset(() => cursorValue[1]);
         } else {
-          throw new Error("Cannot use 'before' with natural orderBy");
+          queryBuilder.limit(() => {
+            const offset = queryBuilder.getOffset();
+            return Math.max(0, cursorValue[1] - offset - 1);
+          });
         }
       } else {
         throw new Error("Cannot use cursors without orderBy");
