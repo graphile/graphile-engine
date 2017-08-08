@@ -51,7 +51,7 @@ class QueryBuilder {
     offset: ?number,
     flip: boolean,
     beforeLock: {
-      [string]: () => void,
+      [string]: Array<() => void>,
     },
     cursorComparator: ?CursorComparator,
   };
@@ -121,7 +121,14 @@ class QueryBuilder {
         this.select(this.compiledData.selectCursor, "__cursor");
       }
     });
+    // 'whereBound' and 'natural' order might set offset/limit
     this.beforeLock("where", () => {
+      this.lock("whereBound");
+    });
+    this.beforeLock("offset", () => {
+      this.lock("whereBound");
+    });
+    this.beforeLock("limit", () => {
       this.lock("whereBound");
     });
   }
@@ -380,7 +387,9 @@ class QueryBuilder {
   }
   lock(type: string) {
     if (this.locks[type]) return;
-    for (const fn of this.data.beforeLock[type] || []) {
+    const beforeLocks = this.data.beforeLock[type];
+    this.data.beforeLock[type] = [];
+    for (const fn of beforeLocks || []) {
       fn();
     }
     this.locks[type] = isDev ? new Error("Initally locked here").stack : true;
@@ -446,14 +455,14 @@ class QueryBuilder {
     this.lock("from");
     this.lock("flip");
     this.lock("join");
-    this.lock("limit");
     this.lock("orderBy");
     // We must execute where after orderBy because cursor queries require all orderBy columns
     this.lock("cursorComparator");
     this.lock("whereBound");
-    // 'offset' must come after 'whereBound' because cursorComparator may influence it
-    this.lock("offset");
     this.lock("where");
+    // 'where' -> 'whereBound' can affect 'offset'/'limit'
+    this.lock("offset");
+    this.lock("limit");
     // We must execute select after orderBy otherwise we cannot generate a cursor
     this.lock("selectCursor");
     this.lock("select");
