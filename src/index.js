@@ -33,7 +33,7 @@ type SQLValueNode = {
 
 export opaque type SQLNode = SQLRawNode | SQLValueNode | SQLIdentifierNode
 export opaque type SQLQuery = Array<SQLNode>
-export opaque type SQL = SQLNode | SQLQuery;
+export type SQL = SQLNode | SQLQuery;
 
 type QueryConfig = {
   text: string,
