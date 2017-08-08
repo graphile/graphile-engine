@@ -185,6 +185,7 @@ export default (
     });
 
     const query = queryBuilder.build(options);
+    const haveFields = queryBuilder.getSelectFieldsCount() > 0;
     const sqlQueryAlias = sql.identifier(Symbol());
     const sqlSummaryAlias = sql.identifier(Symbol());
     const canHaveCursorInWhere =
@@ -221,14 +222,17 @@ export default (
       from ${queryBuilder.getTableExpression()} as ${queryBuilder.getTableAlias()}
       where ${queryBuilder.buildWhereClause(false, false, options)}
     )`;
-    const sqlWith = sql.fragment`with ${sqlQueryAlias} as (${query}), ${sqlSummaryAlias} as (select json_agg(to_json(${sqlQueryAlias})) as data from ${sqlQueryAlias})`;
+    const sqlWith = haveFields
+      ? sql.fragment`with ${sqlQueryAlias} as (${query}), ${sqlSummaryAlias} as (select json_agg(to_json(${sqlQueryAlias})) as data from ${sqlQueryAlias})`
+      : sql.fragment``;
     const sqlFrom = sql.fragment``;
     const fields = [
-      [
+      haveFields && [
         sql.fragment`coalesce((select ${sqlSummaryAlias}.data from ${sqlSummaryAlias}), '[]'::json)`,
         "data",
       ],
-      calculateHasNextPage && [hasNextPage, "hasNextPage"],
+      haveFields && calculateHasNextPage && [hasNextPage, "hasNextPage"],
+      haveFields &&
       calculateHasPreviousPage && [hasPreviousPage, "hasPreviousPage"],
       pgCalculateTotalCount && [totalCount, "totalCount"],
     ].filter(_ => _);
