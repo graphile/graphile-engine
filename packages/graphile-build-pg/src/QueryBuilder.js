@@ -26,6 +26,7 @@ function callIfNecessaryArray<T>(o: Array<Gen<T> | T>): Array<T> {
 type RawAlias = Symbol | string;
 type SQLAlias = SQL;
 type SQLGen = Gen<SQL> | SQL;
+type NumberGen = Gen<number> | number;
 type CursorValue = {};
 type CursorComparator = (val: CursorValue, isAfter: boolean) => SQL;
 
@@ -47,8 +48,8 @@ class QueryBuilder {
     },
     orderBy: Array<[SQLGen, boolean]>,
     orderIsUnique: boolean,
-    limit: ?number,
-    offset: ?number,
+    limit: ?NumberGen,
+    offset: ?NumberGen,
     flip: boolean,
     beforeLock: {
       [string]: Array<() => void>,
@@ -192,15 +193,19 @@ class QueryBuilder {
     this.checkLock("orderBy");
     this.data.orderBy.push([exprGen, ascending]);
   }
-  limit(limit: number) {
+  limit(limitGen: NumberGen) {
     this.checkLock("limit");
-    this.data.limit = Math.max(0, limit);
-    this.lock("limit");
+    if (this.data.limit != null) {
+      throw new Error("Must only set limit once");
+    }
+    this.data.limit = limitGen;
   }
-  offset(offset: number) {
+  offset(offsetGen: NumberGen) {
     this.checkLock("offset");
-    this.data.offset = Math.max(0, offset);
-    this.lock("offset");
+    if (this.data.offset != null) {
+      throw new Error("Must only set offset once");
+    }
+    this.data.offset = offsetGen;
   }
   flip() {
     this.checkLock("flip");
@@ -428,9 +433,9 @@ class QueryBuilder {
     } else if (type === "orderIsUnique") {
       this.compiledData[type] = this.data[type];
     } else if (type === "limit") {
-      this.compiledData[type] = this.data[type];
+      this.compiledData[type] = callIfNecessary(this.data[type]);
     } else if (type === "offset") {
-      this.compiledData[type] = this.data[type];
+      this.compiledData[type] = callIfNecessary(this.data[type]);
     } else if (type === "flip") {
       this.compiledData[type] = this.data[type];
     } else {

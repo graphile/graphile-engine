@@ -163,7 +163,7 @@ export default (
         cursorValue[1] >= 0
       ) {
         if (isAfter) {
-          queryBuilder.offset(cursorValue[1]);
+          queryBuilder.offset(() => cursorValue[1]);
         } else {
           throw new Error("Cannot use 'before' with natural orderBy");
         }
