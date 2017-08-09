@@ -1,7 +1,6 @@
 // @flow
 import pluralize from "pluralize";
 import upperFirstAll from "lodash/upperFirst";
-import lowerFirstAll from "lodash/lowerFirst";
 import camelCaseAll from "lodash/camelCase";
 
 const constantCaseAll = str =>
@@ -25,7 +24,6 @@ const formatInsideUnderscores = (fn: (input: string) => string) => (
 };
 
 const upperFirst = formatInsideUnderscores(upperFirstAll);
-const lowerFirst = formatInsideUnderscores(lowerFirstAll);
 const camelCase = formatInsideUnderscores(camelCaseAll);
 const constantCase = formatInsideUnderscores(constantCaseAll);
 
