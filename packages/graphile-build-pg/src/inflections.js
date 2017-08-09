@@ -5,10 +5,12 @@ import lowerFirstAll from "lodash/lowerFirst";
 import camelCaseAll from "lodash/camelCase";
 
 const constantCaseAll = str =>
-  lowerFirst(str.replace(/^[^a-z0-9_]+/gi, ""))
+  str
+    .replace(/^[^a-z0-9_]+/gi, "")
     .replace(/[^a-z0-9_]+/gi, "_")
-    .replace(/[A-Z]/g, str => `_${str.toLowerCase()}`)
+    .replace(/[A-Z]+/g, str => `_${str.toLowerCase()}`)
     .replace(/__+/g, "_")
+    .replace(/^_+/, "")
     .toUpperCase();
 
 const formatInsideUnderscores = (fn: (input: string) => string) => (
