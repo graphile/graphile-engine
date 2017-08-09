@@ -39,7 +39,7 @@ create table a.post (
 
 create type a.letter as enum ('a', 'b', 'c', 'd');
 create type b.color as enum ('red', 'green', 'blue');
-create type b.enum_caps as enum ('FOO_BAR', 'BAR_FOO', 'BAZ_QUX');
+create type b.enum_caps as enum ('FOO_BAR', 'BAR_FOO', 'BAZ_QUX', '0_BAR');
 
 create type c.compound_type as (
   a int,

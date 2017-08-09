@@ -1353,6 +1353,7 @@ type DeleteTypePayload {
 }
 
 enum EnumCaps {
+  _0_BAR
   BAR_FOO
   BAZ_QUX
   FOO_BAR
@@ -3060,6 +3061,7 @@ enum EdgeCasesOrderBy {
 scalar Email
 
 enum EnumCaps {
+  _0_BAR
   BAR_FOO
   BAZ_QUX
   FOO_BAR

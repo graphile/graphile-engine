@@ -6,11 +6,11 @@ import camelCaseAll from "lodash/camelCase";
 
 const constantCaseAll = str =>
   str
-    .replace(/^[^a-z0-9_]+/gi, "")
-    .replace(/[^a-z0-9_]+/gi, "_")
-    .replace(/[A-Z]+/g, str => `_${str.toLowerCase()}`)
+    .replace(/[^a-zA-Z0-9_]+/g, "_")
+    .replace(/[A-Z]+/g, "_$&")
     .replace(/__+/g, "_")
-    .replace(/^_+/, "")
+    .replace(/^[^a-zA-Z0-9]+/, "")
+    .replace(/^[0-9]/, "_$&") // GraphQL enums must not start with a number
     .toUpperCase();
 
 const formatInsideUnderscores = (fn: (input: string) => string) => (
