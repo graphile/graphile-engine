@@ -4050,6 +4050,8 @@ type Post implements Node {
   body: String
   headline: String!
   headlineTrimmed(length: Int, omission: String): String
+  headlineTrimmedNoDefaults(length: Int, omission: String): String
+  headlineTrimmedStrict(length: Int, omission: String): String
   id: Int!
 
   # A globally unique identifier. Can be used in various places throughout the system to identify this single value.
