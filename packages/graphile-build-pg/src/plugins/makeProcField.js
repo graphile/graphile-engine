@@ -80,15 +80,12 @@ export default function makeProcField(
   }
   const sliceAmount = computed ? 1 : 0;
   const argNames = proc.argTypeIds
-    .map((_, idx) => proc.argNames[idx] || "")
-    .slice(sliceAmount);
+    .slice(sliceAmount)
+    .map((_, idx) => proc.argNames[idx + sliceAmount] || "");
   const argTypes = proc.argTypeIds
     .slice(sliceAmount)
     .map(typeId => introspectionResultsByKind.typeById[typeId]);
-  const requiredArgCount = Math.max(
-    0,
-    argNames.length - sliceAmount - proc.argDefaultsNum
-  );
+  const requiredArgCount = Math.max(0, argNames.length - proc.argDefaultsNum);
   const notNullArgCount =
     proc.isStrict || strictFunctions ? requiredArgCount : 0;
   const argGqlTypes = argTypes.map((type, idx) => {
