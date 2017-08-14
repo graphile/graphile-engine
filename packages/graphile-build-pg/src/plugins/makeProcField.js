@@ -87,9 +87,7 @@ export default function makeProcField(
     .map(typeId => introspectionResultsByKind.typeById[typeId]);
   const requiredArgCount = Math.max(
     0,
-    proc.isStrict
-      ? argNames.length - sliceAmount
-      : argNames.length - sliceAmount - proc.argDefaultsNum
+    argNames.length - sliceAmount - proc.argDefaultsNum
   );
   const notNullArgCount =
     proc.isStrict || strictFunctions ? requiredArgCount : 0;
@@ -212,6 +210,8 @@ export default function makeProcField(
           const gqlArgName = inflection.argument(argName, argIndex);
           return gql2pg(args[gqlArgName], argTypes[argIndex]);
         });
+        // Removes null arguments from end of args list if those arguments have
+        // defaults in SQL.
         while (
           sqlArgValues.length > requiredArgCount &&
           args[argNames[sqlArgValues.length - 1]] == null
