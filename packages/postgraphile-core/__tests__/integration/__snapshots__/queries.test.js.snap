@@ -1796,6 +1796,22 @@ Object {
         },
       ],
     },
+    "tableSetQueryWithOffset3": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwzXQ==",
+          "node": Object {
+            "name": "Budd Deey",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw0XQ==",
+          "node": Object {
+            "name": "Kathryn Ramirez",
+          },
+        },
+      ],
+    },
     "typesQuery": false,
   },
 }
