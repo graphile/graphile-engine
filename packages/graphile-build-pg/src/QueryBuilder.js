@@ -208,12 +208,24 @@ class QueryBuilder {
     this.checkLock("orderBy");
     this.data.orderBy.push([exprGen, ascending]);
   }
-  limit(limitGen: NumberGen) {
+  limit(limitGen: NumberGen, allowOverride: boolean = false) {
     this.checkLock("limit");
-    if (this.data.limit != null) {
-      throw new Error("Must only set limit once");
+
+    const old = this.data.limit;
+    if (old != null) {
+      if (allowOverride) {
+        throw new Error("Must only set limit once");
+      } else {
+        this.data.limit = () => {
+          return Math.min(
+            typeof old === "function" ? old() : old,
+            typeof limitGen === "function" ? limitGen() : limitGen
+          );
+        };
+      }
+    } else {
+      this.data.limit = limitGen;
     }
-    this.data.limit = limitGen;
   }
   offset(offsetGen: NumberGen) {
     this.checkLock("offset");
