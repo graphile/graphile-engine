@@ -577,6 +577,44 @@ Object {
       },
       "totalCount": 6,
     },
+    "q": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJwcmltYXJ5X2tleV9hc2MiLFszXV0=",
+          "node": Object {
+            "email": "budd.deey@email.com",
+            "id": 3,
+            "name": "Budd Deey",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJwcmltYXJ5X2tleV9hc2MiLFszXV0=",
+        "hasNextPage": true,
+        "hasPreviousPage": true,
+        "startCursor": "WyJwcmltYXJ5X2tleV9hc2MiLFszXV0=",
+      },
+      "totalCount": 6,
+    },
+    "r": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJwcmltYXJ5X2tleV9hc2MiLFs2XV0=",
+          "node": Object {
+            "email": "graphile-build.issue.27.exists@example.com",
+            "id": 6,
+            "name": "Twenty Seventwo",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJwcmltYXJ5X2tleV9hc2MiLFs2XV0=",
+        "hasNextPage": false,
+        "hasPreviousPage": true,
+        "startCursor": "WyJwcmltYXJ5X2tleV9hc2MiLFs2XV0=",
+      },
+      "totalCount": 6,
+    },
   },
 }
 `;
