@@ -96,6 +96,8 @@ class QueryBuilder {
       orderIsUnique: false,
       limit: null,
       offset: null,
+      first: null,
+      last: null,
       beforeLock: {},
       cursorComparator: null,
     };
@@ -114,6 +116,8 @@ class QueryBuilder {
       orderIsUnique: false,
       limit: null,
       offset: null,
+      first: null,
+      last: null,
       cursorComparator: null,
     };
     this.beforeLock("select", () => {
