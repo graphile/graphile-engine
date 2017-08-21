@@ -193,10 +193,8 @@ export default (
     const queryHasBefore = queryBuilder.data.whereBound.upper.length > 0;
     const queryHasAfter = queryBuilder.data.whereBound.lower.length > 0;
     const queryHasZeroLimit = queryBuilder.data.limit === 0;
-    const queryHasFirst =
-      isSafeInteger(queryBuilder.data.limit) && !queryBuilder.data.flip;
-    const queryHasLast =
-      isSafeInteger(queryBuilder.data.limit) && queryBuilder.data.flip;
+    const queryHasFirst = isSafeInteger(queryBuilder.data.first);
+    const queryHasLast = isSafeInteger(queryBuilder.data.last);
     const hasNextPage = queryHasZeroLimit
       ? sql.literal(false)
       : generateNextPrevPageSql(
@@ -204,7 +202,7 @@ export default (
           canHaveCursorInWhere,
           queryHasBefore,
           queryHasFirst,
-          queryBuilder.getOffset() || 0
+          queryBuilder.getFinalOffset() || 0
         );
     const hasPreviousPage = queryHasZeroLimit
       ? sql.literal(false)
@@ -213,7 +211,7 @@ export default (
           canHaveCursorInWhere,
           queryHasAfter,
           queryHasLast,
-          queryBuilder.getOffset() || 0,
+          queryBuilder.getFinalOffset() || 0,
           true
         );
 

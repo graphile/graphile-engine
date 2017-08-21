@@ -50,6 +50,8 @@ class QueryBuilder {
     orderIsUnique: boolean,
     limit: ?NumberGen,
     offset: ?NumberGen,
+    first: ?number,
+    last: ?number,
     flip: boolean,
     beforeLock: {
       [string]: Array<() => void>,
@@ -71,6 +73,8 @@ class QueryBuilder {
     orderIsUnique: boolean,
     limit: ?number,
     offset: ?number,
+    first: ?number,
+    last: ?number,
     flip: boolean,
     cursorComparator: ?CursorComparator,
   };
@@ -131,6 +135,14 @@ class QueryBuilder {
     });
     this.beforeLock("limit", () => {
       this.lock("whereBound");
+    });
+    this.beforeLock("first", () => {
+      this.lock("limit");
+      this.lock("offset");
+    });
+    this.beforeLock("last", () => {
+      this.lock("limit");
+      this.lock("offset");
     });
   }
 
@@ -208,24 +220,13 @@ class QueryBuilder {
     this.checkLock("orderBy");
     this.data.orderBy.push([exprGen, ascending]);
   }
-  limit(limitGen: NumberGen, allowOverride: boolean = false) {
+  limit(limitGen: NumberGen) {
     this.checkLock("limit");
 
-    const old = this.data.limit;
-    if (old != null) {
-      if (allowOverride) {
-        throw new Error("Must only set limit once");
-      } else {
-        this.data.limit = () => {
-          return Math.min(
-            typeof old === "function" ? old() : old,
-            typeof limitGen === "function" ? limitGen() : limitGen
-          );
-        };
-      }
-    } else {
-      this.data.limit = limitGen;
+    if (this.data.limit != null) {
+      throw new Error("Must only set limit once");
     }
+    this.data.limit = limitGen;
   }
   offset(offsetGen: NumberGen) {
     this.checkLock("offset");
@@ -233,6 +234,20 @@ class QueryBuilder {
       throw new Error("Must only set offset once");
     }
     this.data.offset = offsetGen;
+  }
+  first(first: number) {
+    this.checkLock("first");
+    if (this.data.first != null) {
+      throw new Error("Must only set first once");
+    }
+    this.data.first = first;
+  }
+  last(last: number) {
+    this.checkLock("last");
+    if (this.data.last != null) {
+      throw new Error("Must only set last once");
+    }
+    this.data.last = last;
   }
   flip() {
     this.checkLock("flip");
@@ -267,6 +282,45 @@ class QueryBuilder {
   getOffset() {
     this.lock("offset");
     return this.compiledData.offset || 0;
+  }
+  getFinalLimitAndOffset() {
+    this.lock("offset");
+    this.lock("limit");
+    this.lock("first");
+    this.lock("last");
+    let limit = this.compiledData.limit;
+    let offset = this.compiledData.offset || 0;
+    if (this.compiledData.first != null) {
+      if (limit != null) {
+        limit = Math.min(limit, this.compiledData.first);
+      } else {
+        limit = this.compiledData.first;
+      }
+    }
+    if (this.compiledData.last != null) {
+      if (offset > 0 && limit != null) {
+        throw new Error(
+          "Issue within pagination, please report your query to graphile-build"
+        );
+      }
+      if (limit != null) {
+        if (this.compiledData.last < limit) {
+          offset = limit - this.compiledData.last;
+          limit = this.compiledData.last;
+        } else {
+          // no need to change anything
+        }
+      } else if (offset > 0) {
+        throw new Error("Cannot combine 'last' and 'offset'");
+      }
+    }
+    return {
+      limit,
+      offset,
+    };
+  }
+  getFinalOffset() {
+    return this.getFinalLimitAndOffset().offset;
   }
   getOrderByExpressionsAndDirections() {
     this.lock("orderBy");
@@ -366,6 +420,7 @@ class QueryBuilder {
     if (onlyJsonField) {
       return this.buildSelectJson({ addNullCase });
     }
+    const { limit, offset } = this.getFinalLimitAndOffset();
     const fields =
       asJson || asJsonAggregate
         ? sql.fragment`${this.buildSelectJson({ addNullCase })} as object`
@@ -389,10 +444,8 @@ class QueryBuilder {
             ","
           )}`
         : ""}
-      ${isSafeInteger(this.compiledData.limit) &&
-        sql.fragment`limit ${sql.literal(this.compiledData.limit)}`}
-      ${this.compiledData.offset &&
-        sql.fragment`offset ${sql.literal(this.compiledData.offset)}`}
+      ${isSafeInteger(limit) && sql.fragment`limit ${sql.literal(limit)}`}
+      ${offset && sql.fragment`offset ${sql.literal(offset)}`}
     `;
     if (this.compiledData.flip && this.compiledData.orderBy.length > 0) {
       const flipAlias = Symbol();
@@ -469,6 +522,10 @@ class QueryBuilder {
       this.compiledData[type] = callIfNecessary(this.data[type]);
     } else if (type === "flip") {
       this.compiledData[type] = this.data[type];
+    } else if (type === "first") {
+      this.compiledData[type] = this.data[type];
+    } else if (type === "last") {
+      this.compiledData[type] = this.data[type];
     } else {
       throw new Error(`Wasn't expecting to lock '${type}'`);
     }
@@ -499,6 +556,8 @@ class QueryBuilder {
     // 'where' -> 'whereBound' can affect 'offset'/'limit'
     this.lock("offset");
     this.lock("limit");
+    this.lock("first");
+    this.lock("last");
     // We must execute select after orderBy otherwise we cannot generate a cursor
     this.lock("selectCursor");
     this.lock("select");
