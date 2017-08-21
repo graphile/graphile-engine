@@ -190,11 +190,12 @@ export default (
     const sqlSummaryAlias = sql.identifier(Symbol());
     const canHaveCursorInWhere =
       queryBuilder.getOrderByExpressionsAndDirections().length > 0;
-    const queryHasBefore = queryBuilder.data.whereBound.upper.length > 0;
-    const queryHasAfter = queryBuilder.data.whereBound.lower.length > 0;
-    const queryHasZeroLimit = queryBuilder.data.limit === 0;
-    const queryHasFirst = isSafeInteger(queryBuilder.data.first);
-    const queryHasLast = isSafeInteger(queryBuilder.data.last);
+    const queryHasBefore =
+      queryBuilder.compiledData.whereBound.upper.length > 0;
+    const queryHasAfter = queryBuilder.compiledData.whereBound.lower.length > 0;
+    const queryHasZeroLimit = queryBuilder.getFinalLimit() === 0;
+    const queryHasFirst = isSafeInteger(queryBuilder.compiledData.first);
+    const queryHasLast = isSafeInteger(queryBuilder.compiledData.last);
     const hasNextPage = queryHasZeroLimit
       ? sql.literal(false)
       : generateNextPrevPageSql(

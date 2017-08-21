@@ -324,6 +324,9 @@ class QueryBuilder {
   getFinalOffset() {
     return this.getFinalLimitAndOffset().offset;
   }
+  getFinalLimit() {
+    return this.getFinalLimitAndOffset().limit;
+  }
   getOrderByExpressionsAndDirections() {
     this.lock("orderBy");
     return this.compiledData.orderBy;
