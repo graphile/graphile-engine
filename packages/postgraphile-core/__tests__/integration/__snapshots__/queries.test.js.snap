@@ -1812,6 +1812,38 @@ Object {
         },
       ],
     },
+    "tableSetQueryWithOffset4": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwxXQ==",
+          "node": Object {
+            "name": "John Smith",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwyXQ==",
+          "node": Object {
+            "name": "Sara Smith",
+          },
+        },
+      ],
+    },
+    "tableSetQueryWithOffset5": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw0XQ==",
+          "node": Object {
+            "name": "Kathryn Ramirez",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw1XQ==",
+          "node": Object {
+            "name": "Joe Tucker",
+          },
+        },
+      ],
+    },
     "typesQuery": false,
   },
 }
