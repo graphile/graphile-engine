@@ -52,7 +52,6 @@ class QueryBuilder {
     offset: ?NumberGen,
     first: ?number,
     last: ?number,
-    flip: boolean,
     beforeLock: {
       [string]: Array<() => void>,
     },
@@ -75,7 +74,6 @@ class QueryBuilder {
     offset: ?number,
     first: ?number,
     last: ?number,
-    flip: boolean,
     cursorComparator: ?CursorComparator,
   };
 
@@ -98,7 +96,6 @@ class QueryBuilder {
       orderIsUnique: false,
       limit: null,
       offset: null,
-      flip: false,
       beforeLock: {},
       cursorComparator: null,
     };
@@ -117,7 +114,6 @@ class QueryBuilder {
       orderIsUnique: false,
       limit: null,
       offset: null,
-      flip: false,
       cursorComparator: null,
     };
     this.beforeLock("select", () => {
@@ -249,11 +245,6 @@ class QueryBuilder {
     }
     this.data.last = last;
   }
-  flip() {
-    this.checkLock("flip");
-    this.data.flip = true;
-    this.lock("flip");
-  }
 
   // ----------------------------------------
 
@@ -290,6 +281,7 @@ class QueryBuilder {
     this.lock("last");
     let limit = this.compiledData.limit;
     let offset = this.compiledData.offset || 0;
+    let flip = false;
     if (this.compiledData.first != null) {
       if (limit != null) {
         limit = Math.min(limit, this.compiledData.first);
@@ -311,12 +303,22 @@ class QueryBuilder {
           // no need to change anything
         }
       } else if (offset > 0) {
+        // eslint-disable-next-line
+        debugger
         throw new Error("Cannot combine 'last' and 'offset'");
+      } else {
+        if (this.compiledData.orderBy.length > 0) {
+          flip = true;
+          limit = this.compiledData.last;
+        } else {
+          throw new Error("Cannot do last of an unordered set");
+        }
       }
     }
     return {
       limit,
       offset,
+      flip,
     };
   }
   getFinalOffset() {
@@ -420,11 +422,12 @@ class QueryBuilder {
     if (onlyJsonField) {
       return this.buildSelectJson({ addNullCase });
     }
-    const { limit, offset } = this.getFinalLimitAndOffset();
+    const { limit, offset, flip } = this.getFinalLimitAndOffset();
     const fields =
       asJson || asJsonAggregate
         ? sql.fragment`${this.buildSelectJson({ addNullCase })} as object`
         : this.buildSelectFields();
+
     let fragment = sql.fragment`
       select ${fields}
       ${this.compiledData.from &&
@@ -436,8 +439,7 @@ class QueryBuilder {
         ? sql.fragment`order by ${sql.join(
             this.compiledData.orderBy.map(
               ([expr, ascending]) =>
-                sql.fragment`${expr} ${Number(ascending) ^
-                Number(this.compiledData.flip)
+                sql.fragment`${expr} ${Number(ascending) ^ Number(flip)
                   ? sql.fragment`ASC`
                   : sql.fragment`DESC`}`
             ),
@@ -447,7 +449,7 @@ class QueryBuilder {
       ${isSafeInteger(limit) && sql.fragment`limit ${sql.literal(limit)}`}
       ${offset && sql.fragment`offset ${sql.literal(offset)}`}
     `;
-    if (this.compiledData.flip && this.compiledData.orderBy.length > 0) {
+    if (flip) {
       const flipAlias = Symbol();
       fragment = sql.fragment`
         with ${sql.identifier(flipAlias)} as (
@@ -520,8 +522,6 @@ class QueryBuilder {
       this.compiledData[type] = callIfNecessary(this.data[type]);
     } else if (type === "offset") {
       this.compiledData[type] = callIfNecessary(this.data[type]);
-    } else if (type === "flip") {
-      this.compiledData[type] = this.data[type];
     } else if (type === "first") {
       this.compiledData[type] = this.data[type];
     } else if (type === "last") {
@@ -546,7 +546,6 @@ class QueryBuilder {
     this._finalize();
     // We must execute everything after `from` so we have the alias to reference
     this.lock("from");
-    this.lock("flip");
     this.lock("join");
     this.lock("orderBy");
     // We must execute where after orderBy because cursor queries require all orderBy columns
