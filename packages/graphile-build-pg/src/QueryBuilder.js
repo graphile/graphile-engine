@@ -394,7 +394,7 @@ class QueryBuilder {
       ${this.compiledData.offset &&
         sql.fragment`offset ${sql.literal(this.compiledData.offset)}`}
     `;
-    if (this.compiledData.flip) {
+    if (this.compiledData.flip && this.compiledData.orderBy.length > 0) {
       const flipAlias = Symbol();
       fragment = sql.fragment`
         with ${sql.identifier(flipAlias)} as (
