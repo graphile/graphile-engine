@@ -187,7 +187,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
         console.warn(
           `No scope was provided to new ${getNameFromType(
             Type
-          )}[name=${spec.name}], please check usage of 'newWithHooks'`
+          )}[name=${spec.name}], it's highly recommended that you add a scope so other hooks can easily reference your object - please check usage of 'newWithHooks'. To mute this message, just pass an empty object.`
         );
       }
       if (!Type) {
