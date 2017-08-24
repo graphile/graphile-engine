@@ -514,6 +514,17 @@ Object {
 }
 `;
 
+exports[`mutation-delete-error.graphql 1`] = `
+Object {
+  "data": Object {
+    "deleteTypeById": null,
+  },
+  "errors": Array [
+    [GraphQLError: Nope.],
+  ],
+}
+`;
+
 exports[`mutation-update.graphql 1`] = `
 Object {
   "data": Object {

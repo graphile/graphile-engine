@@ -148,6 +148,15 @@ create table b.types (
   "nested_compound_type" b.nested_compound_type not null
 );
 
+create function b.throw_error() returns trigger as $$
+begin
+  raise exception 'Nope.';
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger dont_delete before delete on b.types for each row execute procedure b.throw_error();
+
 create function a.add_1_mutation(int, int) returns int as $$ select $1 + $2 $$ language sql volatile strict;
 create function a.add_2_mutation(a int, b int default 2) returns int as $$ select $1 + $2 $$ language sql strict;
 create function a.add_3_mutation(a int, int) returns int as $$ select $1 + $2 $$ language sql volatile;
