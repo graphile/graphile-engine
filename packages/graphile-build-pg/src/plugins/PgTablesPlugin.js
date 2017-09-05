@@ -209,6 +209,8 @@ export default (function PgTablesPlugin(builder, { pgInflection: inflection }) {
               },
             }
           );
+        }
+        if (true) {
           const EdgeType = newWithHooks(
             GraphQLObjectType,
             {
