@@ -1,67 +1,66 @@
 // @flow
 import type { Plugin } from "graphile-build";
+
+const defaultPgColumnFilter = (_table, _build, _context) => true;
+
 export default (function PgConnectionArgCondition(
   builder,
-  { pgInflection: inflection }
+  { pgInflection: inflection, pgColumnFilter = defaultPgColumnFilter }
 ) {
-  builder.hook(
-    "init",
-    (
-      _,
-      {
-        newWithHooks,
-        pgIntrospectionResultsByKind: introspectionResultsByKind,
-        pgGqlInputTypeByTypeId: gqlTypeByTypeId,
-        graphql: { GraphQLInputObjectType, GraphQLString },
-      }
-    ) => {
-      introspectionResultsByKind.class
-        .filter(table => table.isSelectable)
-        .filter(table => !!table.namespace)
-        .forEach(table => {
-          const tableTypeName = inflection.tableType(
-            table.name,
-            table.namespace.name
-          );
-          /* const TableConditionType = */
-          newWithHooks(
-            GraphQLInputObjectType,
-            {
-              description: `A condition to be used against \`${tableTypeName}\` object types. All fields are tested for equality and combined with a logical ‘and.’`,
-              name: inflection.conditionType(
-                inflection.tableType(table.name, table.namespace.name)
-              ),
-              fields: ({ fieldWithHooks }) =>
-                introspectionResultsByKind.attribute
-                  .filter(attr => attr.classId === table.id)
-                  .reduce((memo, attr) => {
-                    const fieldName = inflection.column(
-                      attr.name,
-                      table.name,
-                      table.namespace.name
-                    );
-                    memo[fieldName] = fieldWithHooks(
-                      fieldName,
-                      {
-                        description: `Checks for equality with the object’s \`${fieldName}\` field.`,
-                        type: gqlTypeByTypeId[attr.typeId] || GraphQLString,
-                      },
-                      {
-                        isPgConnectionConditionInputField: true,
-                      }
-                    );
-                    return memo;
-                  }, {}),
-            },
-            {
-              pgIntrospection: table,
-              isPgCondition: true,
-            }
-          );
-        });
-      return _;
-    }
-  );
+  builder.hook("init", (_, build, context) => {
+    const {
+      newWithHooks,
+      pgIntrospectionResultsByKind: introspectionResultsByKind,
+      pgGqlInputTypeByTypeId: gqlTypeByTypeId,
+      graphql: { GraphQLInputObjectType, GraphQLString },
+    } = build;
+    introspectionResultsByKind.class
+      .filter(table => table.isSelectable)
+      .filter(table => !!table.namespace)
+      .filter(table => pgColumnFilter(table, build, context))
+      .forEach(table => {
+        const tableTypeName = inflection.tableType(
+          table.name,
+          table.namespace.name
+        );
+        /* const TableConditionType = */
+        newWithHooks(
+          GraphQLInputObjectType,
+          {
+            description: `A condition to be used against \`${tableTypeName}\` object types. All fields are tested for equality and combined with a logical ‘and.’`,
+            name: inflection.conditionType(
+              inflection.tableType(table.name, table.namespace.name)
+            ),
+            fields: ({ fieldWithHooks }) =>
+              introspectionResultsByKind.attribute
+                .filter(attr => attr.classId === table.id)
+                .reduce((memo, attr) => {
+                  const fieldName = inflection.column(
+                    attr.name,
+                    table.name,
+                    table.namespace.name
+                  );
+                  memo[fieldName] = fieldWithHooks(
+                    fieldName,
+                    {
+                      description: `Checks for equality with the object’s \`${fieldName}\` field.`,
+                      type: gqlTypeByTypeId[attr.typeId] || GraphQLString,
+                    },
+                    {
+                      isPgConnectionConditionInputField: true,
+                    }
+                  );
+                  return memo;
+                }, {}),
+          },
+          {
+            pgIntrospection: table,
+            isPgCondition: true,
+          }
+        );
+      });
+    return _;
+  });
   builder.hook(
     "GraphQLObjectType:fields:field:args",
     (
