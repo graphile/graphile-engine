@@ -672,6 +672,12 @@ Object {
         "nodeId": "query",
       },
     },
+    "k": Object {
+      "defaultValue": Object {
+        "id": 1,
+        "nullValue": null,
+      },
+    },
   },
 }
 `;
