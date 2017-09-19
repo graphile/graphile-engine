@@ -115,7 +115,7 @@ export const newInflector = (
             .join("-and-")}`
         );
       },
-      rowByUniqueKey(detailedKeys: Keys, table: string, schema: ?string) {
+      rowByUniqueKeys(detailedKeys: Keys, table: string, schema: ?string) {
         return camelCase(
           `${this.tableName(table, schema)}-by-${detailedKeys
             .map(key => this.column(key.column, key.table, key.schema))
