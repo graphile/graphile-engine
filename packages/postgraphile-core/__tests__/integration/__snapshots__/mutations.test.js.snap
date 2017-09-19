@@ -714,6 +714,7 @@ Object {
     "add4Mutation": Object {
       "integer": 4,
     },
+    "add4MutationError": null,
     "compoundTypeMutation": Object {
       "compoundType": Object {
         "a": 420,
@@ -808,5 +809,8 @@ Object {
       "boolean": false,
     },
   },
+  "errors": Array [
+    [GraphQLError: Deliberate error],
+  ],
 }
 `;

@@ -346,7 +346,7 @@ export default function makeProcField(
             scope
           )
         );
-        ReturnType = new GraphQLNonNull(PayloadType);
+        ReturnType = PayloadType;
         const InputType = newWithHooks(
           GraphQLInputObjectType,
           {
