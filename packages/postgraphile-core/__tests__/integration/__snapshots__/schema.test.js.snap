@@ -2288,6 +2288,27 @@ type Add3MutationPayload {
   query: Query
 }
 
+# All input for the \`add4MutationError\` mutation.
+input Add4MutationErrorInput {
+  arg0: Int
+  b: Int
+
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+}
+
+# The output of our \`add4MutationError\` mutation.
+type Add4MutationErrorPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+  integer: Int
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
 # All input for the \`add4Mutation\` mutation.
 input Add4MutationInput {
   arg0: Int
@@ -3717,6 +3738,10 @@ type Mutation {
     # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     input: Add4MutationInput!
   ): Add4MutationPayload!
+  add4MutationError(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: Add4MutationErrorInput!
+  ): Add4MutationErrorPayload!
 
   # Reads and enables pagination through a set of \`JwtToken\`.
   authenticate(
