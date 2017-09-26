@@ -11,6 +11,217 @@ const WATCH_FIXTURES_PATH = `${__dirname}/../../res/watch-fixtures.sql`;
 
 // Ref: https://github.com/postgraphql/postgraphql/tree/master/src/postgres/introspection/object
 
+// THIS IS THE BEGINNING - KB 9/26/2017
+// Ref: https://github.com/postgraphql/postgraphql/tree/master/src/postgres/introspection/object
+/**
+ A namespace is the internal name for a schema in PostgreSql.
+ *
+ @see https://www.postgresql.org/docs/9.5/static/catalog-pg-namespace.html
+ */
+// export type PgCatalogNamespace = {
+//   kind: "namespace",
+//   id: string,
+//   name: string,
+//   description: string,
+// };
+/**
+ A procedure is a remote function in Postgres. There is much more information
+ involved with procedures, this is just the information we need to
+ create/call procedures.
+ *
+ @see https://www.postgresql.org/docs/9.6/static/catalog-pg-proc.html
+ */
+// export type PgCatalogProcedure = {
+//   kind: "procedure",
+//   name: string,
+//   description: ?string,
+//   namespaceId: string,
+//   isStrict: boolean,
+//   returnsSet: boolean,
+//   isStable: boolean,
+//   returnTypeId: string,
+//   argTypeIds: Array<string>,
+//   argNames: Array<string>,
+//   argDefaultsNum: number,
+//   namespace: PgCatalogNamespace
+// };
+/**
+ A PostgreSql attribute is exclusively just a single attribute on a class.
+ Most commonly people would know an attribute as a column.
+ *
+ @see https://www.postgresql.org/docs/9.5/static/catalog-pg-attribute.html
+ */
+// export type PgCatalogAttribute = {
+//   kind: 'attribute',
+//   classId: string,
+//   num: number,
+//   name: string,
+//   description: ?string,
+//   typeId: string,
+//   isNotNull: boolean,
+//   hasDefault: boolean,
+//   namespace: PgCatalogNamespace
+// };
+/**
+ Anything in PostgreSQL that has “attributes” (aka columns). Tables are the
+ most prominent example of a PostgreSQL class, but a class could also be a
+ view, index, or composite type.
+ *
+ @see https://www.postgresql.org/docs/9.5/static/catalog-pg-class.html
+ */
+// export type PgCatalogClass = {
+//   kind: 'class',
+//   id: string,
+//   name: string,
+//   description: ?string,
+//   namespaceId: string,
+//   typeId: string,
+//   isSelectable: boolean,
+//   isInsertable: boolean,
+//   isUpdatable: boolean,
+//   isDeletable: boolean,
+//   namespace: PgCatalogNamespace
+// };
+/**
+ A Postgres constraint is any ruleset that can be defined for a class
+ (table). Constraints include check constraints, foreign key constraints,
+ primary key constraints, unique constraints and more. We only care about a
+ few constraint types.
+ *
+ @see https://www.postgresql.org/docs/9.5/static/catalog-pg-constraint.html
+ */
+// export type PgCatalogConstraint =
+//   PgCatalogForeignKeyConstraint |
+//   PgCatalogPrimaryKeyConstraint |
+//   PgCatalogUniqueConstraint
+/**
+ A foreign key constrains the columns of a table to reference the columns of another
+ table.
+ */
+// export type PgCatalogForeignKeyConstraint = PgCatalogBaseConstraint & {
+//   type: 'f',
+//   classId: string,
+//   foreignClassId: string,
+//   keyAttributeNums: Array<number>,
+//   foreignKeyAttributeNums: Array<number>
+// };
+/**
+ A primary key indicates the main columns used to identify a single row in a
+ table.
+ */
+// export type PgCatalogPrimaryKeyConstraint = PgCatalogBaseConstraint & {
+//   type: 'p',
+//   classId: string,
+//   keyAttributeNums: Array<number>
+// };
+/**
+ Enforces a unique constraint on some columns. No distinct duplicate values
+ will be allowed in the columns specified by this constraint.
+ */
+// export type PgCatalogUniqueConstraint = PgCatalogBaseConstraint & {
+//   type: 'u',
+//   classId: string,
+//   keyAttributeNums: Array<number>
+// };
+/**
+ The base constraint type which contains common fields.
+ *
+ @private
+ */
+// type PgCatalogBaseConstraint = {
+//   kind: 'constraint',
+//   name: string
+// };
+/**
+ PgCatalogObject is a type that represents all of the different shapes of objects
+ that may be returned from our introspection query. To see where the data
+ comes from, look at the introspection-query.sql file. The types below are
+ just for statically checking the resulting rows of that query.
+ */
+// export type PgCatalogObject =
+//   PgCatalogNamespace |
+//   PgCatalogClass |
+//   PgCatalogAttribute |
+//   PgCatalogType |
+//   PgCatalogConstraint |
+//   PgCatalogProcedure
+/**
+ A PostgreSql type can be any type within the PostgreSql database. We use a
+ union type so that we can use Typescript’s discriminated union powers.
+ Instead of using interfaces with extend, we’ll instead use the & type
+ operator.
+ *
+ @see https://www.postgresql.org/docs/9.5/static/catalog-pg-type.html
+ */
+// TODO: We should probably make a special case for range types.
+// type PgCatalogType =
+//   PgCatalogCompositeType |
+//   PgCatalogDomainType |
+//   PgCatalogEnumType |
+//   PgCatalogRangeType |
+//   (PgCatalogBaseType & {
+//   type: 'b' | 'p',
+// })
+export default PgCatalogType
+/**
+ A composite type is a type with an associated class. So any type which may
+ have attributes (or fields).
+ */
+// export type PgCatalogCompositeType = PgCatalogBaseType & {
+//   type: 'c',
+//   classId: string
+// }
+/**
+ A domain type is a named alias of another type with some extra constraints
+ added on top. One such constraint is the is_not_null constraint.
+ */
+// export type PgCatalogDomainType = PgCatalogBaseType & {
+//   type: 'd',
+//   domainBaseTypeId: string,
+//   domainIsNotNull: boolean
+// }
+/**
+ An enum type is a type with a set of predefined string values. A value of
+ an enum type may only be one of those values.
+ */
+// export type PgCatalogEnumType = PgCatalogBaseType & {
+//   type: 'e',
+//   enumVariants: Array<string>
+// }
+/**
+ A range type is comprised of two values, a beginning and end. It needs a sub
+ type to know the type of the range bounds.
+ */
+// export type PgCatalogRangeType = PgCatalogBaseType & {
+//   type: 'r',
+//   rangeSubTypeId: string
+// }
+/**
+ The internal type of common properties on all PgTypes. Really you care
+ about PgType, PgType just uses this definition internally to avoid code
+ reuse.
+ *
+ @private
+ */
+// interface PgCatalogBaseType {
+//   kind: 'type',
+//   id: string,
+//   name: string,
+//   description: string | undefined,
+//   namespaceId: string,
+//   namespaceName: string,
+//   arrayItemTypeId: string | null,
+//   // The category property is used by the parser to do implicit type casting.
+//   // This is helpful for us as we don’t need to create catalog types for every
+//   // PostgreSql type. Rather we can group types into “buckets” using this
+//   // property.
+//   //
+//   // @see https://www.postgresql.org/docs/9.5/static/catalog-pg-type.html#CATALOG-TYPCATEGORY-TABLE
+//   category: 'A' | 'B' | 'C' | 'D' | 'E' | 'G' | 'I' | 'N' | 'P' | 'S' | 'T' | 'U' | 'V' | 'X'
+// }
+
+// THIS IS THE END - KB 9/26/2017
+
 export type Namespace = {
   kind: "namespace",
   id: string,
