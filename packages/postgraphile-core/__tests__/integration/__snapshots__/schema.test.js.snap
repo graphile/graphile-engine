@@ -7520,9 +7520,6 @@ input PostCondition {
   # Checks for equality with the object’s \`body\` field.
   body: String
 
-  # Checks for equality with the object’s \`headline\` field.
-  headline: String
-
   # Checks for equality with the object’s \`id\` field.
   id: Int
 }
