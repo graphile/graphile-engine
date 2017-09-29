@@ -19,6 +19,7 @@ export default (function PgOrderAllColumnsPlugin(
         values,
         introspectionResultsByKind.attribute
           .filter(attr => attr.classId === table.id)
+          // todo
           .reduce((memo, attr) => {
             const ascFieldName = inflection.orderByEnum(
               attr.name,

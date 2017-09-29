@@ -45,6 +45,7 @@ export default (async function PgRowByUniqueConstraint(
                 .filter(con => con.type === "u" || con.type === "p");
               const attributes = introspectionResultsByKind.attribute
                 .filter(attr => attr.classId === table.id)
+                // todo
                 .sort((a, b) => a.num - b.num);
               uniqueConstraints.forEach(constraint => {
                 const keys = constraint.keyAttributeNums.map(
