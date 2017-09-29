@@ -738,6 +738,27 @@ Object {
         4,
       ],
     ],
+    "k": Object {
+      "a": 1,
+      "b": 2,
+      "c": 3,
+    },
+    "l": Array [
+      true,
+      42,
+      3.1415,
+      Object {
+        "a": 1,
+        "b": 2,
+        "c": 3,
+      },
+      Array [
+        1,
+        2,
+        3,
+        4,
+      ],
+    ],
   },
 }
 `;
@@ -1783,6 +1804,8 @@ Object {
         },
       ],
     },
+    "jsonIdentity": "{\\"a\\":1,\\"b\\":2,\\"c\\":3}",
+    "jsonbIdentity": "{\\"a\\":1,\\"b\\":2,\\"c\\":3}",
     "noArgsQuery": 2,
     "tableQuery": Object {
       "authorId": 5,
