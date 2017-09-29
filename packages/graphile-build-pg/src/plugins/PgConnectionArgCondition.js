@@ -1,7 +1,7 @@
 // @flow
 import type { Plugin } from "graphile-build";
 
-const defaultPgColumnFilter = (_table, _build, _context) => true;
+const defaultPgColumnFilter = (_attr, _build, _context) => true;
 
 export default (function PgConnectionArgCondition(
   builder,
@@ -17,7 +17,6 @@ export default (function PgConnectionArgCondition(
     introspectionResultsByKind.class
       .filter(table => table.isSelectable)
       .filter(table => !!table.namespace)
-      .filter(table => pgColumnFilter(table, build, context))
       .forEach(table => {
         const tableTypeName = inflection.tableType(
           table.name,
@@ -34,6 +33,7 @@ export default (function PgConnectionArgCondition(
             fields: ({ fieldWithHooks }) =>
               introspectionResultsByKind.attribute
                 .filter(attr => attr.classId === table.id)
+                .filter(attr => pgColumnFilter(attr, build, context))
                 .reduce((memo, attr) => {
                   const fieldName = inflection.column(
                     attr.name,
