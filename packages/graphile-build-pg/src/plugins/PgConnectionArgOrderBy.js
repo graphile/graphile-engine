@@ -2,65 +2,68 @@
 import isString from "lodash/isString";
 import type { Plugin } from "graphile-build";
 
-const defaultPgColumnFilter = (_table, _build, _context) => true;
-
 export default (function PgConnectionArgOrderBy(
   builder,
-  { pgInflection: inflection, pgColumnFilter = defaultPgColumnFilter }
+  { pgInflection: inflection }
 ) {
-  builder.hook("init", (_, build, context) => {
-    const {
-      newWithHooks,
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
-      graphql: { GraphQLEnumType },
-    } = build;
-    introspectionResultsByKind.class
-      .filter(table => table.isSelectable)
-      .filter(table => !!table.namespace)
-      .filter(table => pgColumnFilter(table, build, context))
-      .forEach(table => {
-        const tableTypeName = inflection.tableType(
-          table.name,
-          table.namespace.name
-        );
-        /* const TableOrderByType = */
-        newWithHooks(
-          GraphQLEnumType,
-          {
-            name: inflection.orderByType(tableTypeName),
-            description: `Methods to use when ordering \`${tableTypeName}\`.`,
-            values: {
-              NATURAL: {
-                value: {
-                  alias: null,
-                  specs: [],
+  builder.hook(
+    "init",
+    (
+      _,
+      {
+        newWithHooks,
+        pgIntrospectionResultsByKind: introspectionResultsByKind,
+        graphql: { GraphQLEnumType },
+      }
+    ) => {
+      introspectionResultsByKind.class
+        .filter(table => table.isSelectable)
+        .filter(table => !!table.namespace)
+        .forEach(table => {
+          const tableTypeName = inflection.tableType(
+            table.name,
+            table.namespace.name
+          );
+          /* const TableOrderByType = */
+          newWithHooks(
+            GraphQLEnumType,
+            {
+              name: inflection.orderByType(tableTypeName),
+              description: `Methods to use when ordering \`${tableTypeName}\`.`,
+              values: {
+                NATURAL: {
+                  value: {
+                    alias: null,
+                    specs: [],
+                  },
                 },
               },
             },
-          },
-          {
-            pgIntrospection: table,
-            isPgRowSortEnum: true,
-          }
-        );
-      });
-    return _;
-  });
+            {
+              pgIntrospection: table,
+              isPgRowSortEnum: true,
+            }
+          );
+        });
+      return _;
+    }
+  );
   builder.hook(
     "GraphQLObjectType:fields:field:args",
-    (args, build, context) => {
-      const { extend, getTypeByName, pgSql: sql } = build;
-      const {
+    (
+      args,
+      { extend, getTypeByName, pgSql: sql },
+      {
         scope: { isPgConnectionField, pgIntrospection: table },
         addArgDataGenerator,
-      } = context;
+      }
+    ) => {
       if (
         !isPgConnectionField ||
         !table ||
         table.kind !== "class" ||
         !table.namespace ||
-        !table.isSelectable ||
-        !pgColumnFilter(table, build, context)
+        !table.isSelectable
       ) {
         return args;
       }
