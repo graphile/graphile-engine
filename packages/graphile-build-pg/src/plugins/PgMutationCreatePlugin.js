@@ -8,7 +8,7 @@ const debug = debugFactory("graphile-build-pg");
 
 export default (function PgMutationCreatePlugin(
   builder,
-  { pgInflection: inflection, pgDisableDefaultMutations }
+  { pgInflection: inflection, pgDisableDefaultMutations, pgEnableDefaultMutationTables }
 ) {
   if (pgDisableDefaultMutations) {
     return;
@@ -44,6 +44,11 @@ export default (function PgMutationCreatePlugin(
           .filter(table => !!table.namespace)
           .filter(table => table.isSelectable)
           .filter(table => table.isInsertable)
+          .filter(
+            table =>
+              (pgEnableDefaultMutationTables.length == 0) ||
+              (pgEnableDefaultMutationTables.indexOf(table.name) >= 0)
+          )
           .reduce((memo, table) => {
             const Table = getTypeByName(
               inflection.tableType(table.name, table.namespace.name)

@@ -26,6 +26,7 @@ type PostGraphQLOptions = {
   dynamicJson?: boolean,
   classicIds?: boolean,
   disableDefaultMutations?: string,
+  enableDefaultMutationTables?: Array<string>,
   nodeIdFieldName?: string,
   graphqlBuildOptions?: Options,
   replaceAllPlugins?: Array<Plugin>,
@@ -74,6 +75,7 @@ const getPostGraphQLBuilder = async (
     jwtPgTypeIdentifier,
     jwtSecret,
     disableDefaultMutations,
+    enableDefaultMutationTables,
     graphqlBuildOptions,
     inflector,
   } = options;
@@ -113,6 +115,7 @@ const getPostGraphQLBuilder = async (
         pgJwtTypeIdentifier: jwtPgTypeIdentifier,
         pgJwtSecret: jwtSecret,
         pgDisableDefaultMutations: disableDefaultMutations,
+        pgEnableDefaultMutationTables: enableDefaultMutationTables,
       },
       graphqlBuildOptions
     )
