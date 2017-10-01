@@ -11,7 +11,11 @@ const base64Decode = str => new Buffer(String(str), "base64").toString("utf8");
 
 export default (async function PgMutationUpdateDeletePlugin(
   builder,
-  { pgInflection: inflection, pgDisableDefaultMutations, pgEnableDefaultMutationTables }
+  {
+    pgInflection: inflection,
+    pgDisableDefaultMutations,
+    pgEnableDefaultMutationTables,
+  }
 ) {
   if (pgDisableDefaultMutations) {
     return;
@@ -58,8 +62,8 @@ export default (async function PgMutationUpdateDeletePlugin(
               )
               .filter(
                 table =>
-                  (pgEnableDefaultMutationTables.length == 0) ||
-                  (pgEnableDefaultMutationTables.indexOf(table.name) >= 0)
+                  pgEnableDefaultMutationTables.length == 0 ||
+                  pgEnableDefaultMutationTables.indexOf(table.name) >= 0
               )
               .reduce((memo, table) => {
                 const TableType = getTypeByName(
