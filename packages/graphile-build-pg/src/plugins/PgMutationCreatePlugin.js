@@ -17,6 +17,9 @@ export default (function PgMutationCreatePlugin(
   if (pgDisableDefaultMutations) {
     return;
   }
+  if (!Array.isArray(pgEnableDefaultMutationTables)) {
+    pgEnableDefaultMutationTables = [];
+  }
   builder.hook(
     "GraphQLObjectType:fields",
     (
@@ -51,7 +54,9 @@ export default (function PgMutationCreatePlugin(
           .filter(
             table =>
               pgEnableDefaultMutationTables.length == 0 ||
-              pgEnableDefaultMutationTables.indexOf(table.name) >= 0
+              pgEnableDefaultMutationTables.indexOf(
+                `${table.namespace.name}.${table.name}`
+              ) >= 0
           )
           .reduce((memo, table) => {
             const Table = getTypeByName(

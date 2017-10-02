@@ -20,6 +20,9 @@ export default (async function PgMutationUpdateDeletePlugin(
   if (pgDisableDefaultMutations) {
     return;
   }
+  if (!Array.isArray(pgEnableDefaultMutationTables)) {
+    pgEnableDefaultMutationTables = [];
+  }
   builder.hook(
     "GraphQLObjectType:fields",
     (
@@ -63,7 +66,9 @@ export default (async function PgMutationUpdateDeletePlugin(
               .filter(
                 table =>
                   pgEnableDefaultMutationTables.length == 0 ||
-                  pgEnableDefaultMutationTables.indexOf(table.name) >= 0
+                  pgEnableDefaultMutationTables.indexOf(
+                    `${table.namespace.name}.${table.name}`
+                  ) >= 0
               )
               .reduce((memo, table) => {
                 const TableType = getTypeByName(
