@@ -5,6 +5,7 @@ import debugFactory from "debug";
 import camelCase from "lodash/camelCase";
 import pluralize from "pluralize";
 import viaTemporaryTable from "./viaTemporaryTable";
+import { parseTypeIdentifier } from "./PgJWTPlugin";
 
 const debug = debugFactory("graphile-build-pg");
 const base64Decode = str => new Buffer(String(str), "base64").toString("utf8");
@@ -23,6 +24,11 @@ export default (async function PgMutationUpdateDeletePlugin(
   if (!Array.isArray(pgEnableDefaultMutationTables)) {
     pgEnableDefaultMutationTables = [];
   }
+  pgEnableDefaultMutationTables = pgEnableDefaultMutationTables.map(function(
+    element
+  ) {
+    return parseTypeIdentifier(String(element));
+  });
   builder.hook(
     "GraphQLObjectType:fields",
     (
@@ -66,9 +72,12 @@ export default (async function PgMutationUpdateDeletePlugin(
               .filter(
                 table =>
                   pgEnableDefaultMutationTables.length == 0 ||
-                  pgEnableDefaultMutationTables.indexOf(
-                    `${table.namespace.name}.${table.name}`
-                  ) >= 0
+                  pgEnableDefaultMutationTables.some(function(element) {
+                    return (
+                      element.namespaceName == table.namespace.name &&
+                      element.typeName == table.name
+                    );
+                  })
               )
               .reduce((memo, table) => {
                 const TableType = getTypeByName(
