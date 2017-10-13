@@ -263,7 +263,7 @@ export default (function PgTablesPlugin(builder, { pgInflection: inflection }) {
               return {
                 nodes: {
                   description: `A list of \`${tableTypeName}\` objects.`,
-                  type: new GraphQLNonNull(new GraphQLList(TableType)),
+                  type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(TableType))),
                   resolve(data) {
                     return data.data;
                   },
