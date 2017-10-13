@@ -46,6 +46,7 @@ export default async function viaTemporaryTable(
   isPgClassLike: boolean = true
 ) {
   async function performQuery(pgClient: Client, sqlQuery: SQLQuery) {
+    // TODO: look into rowMode = 'array'
     const { text, values } = sql.compile(sqlQuery);
     if (debugSql.enabled) debugSql(text);
     return pgClient.query(text, values);
