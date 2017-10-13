@@ -30,8 +30,9 @@ export default (function PgConnectionArgCondition(
             name: inflection.conditionType(
               inflection.tableType(table.name, table.namespace.name)
             ),
-            fields: ({ fieldWithHooks }) =>
-              introspectionResultsByKind.attribute
+            fields: context => {
+              const { fieldWithHooks } = context;
+              return introspectionResultsByKind.attribute
                 .filter(attr => attr.classId === table.id)
                 .filter(attr => pgColumnFilter(attr, build, context))
                 .reduce((memo, attr) => {
@@ -51,7 +52,8 @@ export default (function PgConnectionArgCondition(
                     }
                   );
                   return memo;
-                }, {}),
+                }, {});
+            },
           },
           {
             pgIntrospection: table,
@@ -63,20 +65,18 @@ export default (function PgConnectionArgCondition(
   });
   builder.hook(
     "GraphQLObjectType:fields:field:args",
-    (
-      args,
-      {
+    (args, build, context) => {
+      const {
         pgSql: sql,
         gql2pg,
         extend,
         getTypeByName,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
-      },
-      {
+      } = build;
+      const {
         scope: { isPgConnectionField, pgIntrospection: table },
         addArgDataGenerator,
-      }
-    ) => {
+      } = context;
       if (
         !isPgConnectionField ||
         !table ||
@@ -97,6 +97,7 @@ export default (function PgConnectionArgCondition(
             if (condition != null) {
               introspectionResultsByKind.attribute
                 .filter(attr => attr.classId === table.id)
+                .filter(attr => pgColumnFilter(attr, build, context))
                 .forEach(attr => {
                   const fieldName = inflection.column(
                     attr.name,
