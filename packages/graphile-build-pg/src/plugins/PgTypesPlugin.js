@@ -556,7 +556,11 @@ export default (function PgTypesPlugin(
       return gqlTypeByTypeId[type.id];
     };
 
-    introspectionResultsByKind.type.forEach(enforceGqlTypeByPgType);
+    const isTableLike = type =>
+      type.type === "c" && type.category === "C" && type.classId;
+    introspectionResultsByKind.type
+      .filter(type => !isTableLike(type))
+      .forEach(enforceGqlTypeByPgType);
 
     return build.extend(build, {
       pgGqlTypeByTypeId: gqlTypeByTypeId,

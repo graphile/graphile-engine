@@ -29,16 +29,19 @@ export default (function PgTablesPlugin(builder, { pgInflection: inflection }) {
     ) => {
       const Cursor = getTypeByName("Cursor");
       introspectionResultsByKind.class.forEach(table => {
-        const tablePgType = introspectionResultsByKind.type.filter(
+        const tablePgType = introspectionResultsByKind.type.find(
           type =>
             type.type === "c" &&
             type.category === "C" &&
             type.namespaceId === table.namespaceId &&
             type.classId === table.id
-        )[0];
+        );
         if (!tablePgType) {
           throw new Error("Could not determine the type for this table");
         }
+        const arrayTablePgType = introspectionResultsByKind.type.find(
+          type => type.arrayItemTypeId === tablePgType.id
+        );
         if (pg2GqlMapper[tablePgType.id]) {
           // Already handled
           return;
@@ -297,6 +300,12 @@ export default (function PgTablesPlugin(builder, { pgInflection: inflection }) {
         );
         pgGqlTypeByTypeId[tablePgType.id] = TableType;
         pgGqlInputTypeByTypeId[tablePgType.id] = TableInputType;
+        if (arrayTablePgType) {
+          pgGqlTypeByTypeId[arrayTablePgType.id] = new GraphQLList(TableType);
+          pgGqlInputTypeByTypeId[arrayTablePgType.id] = new GraphQLList(
+            TableInputType
+          );
+        }
       });
       return _;
     }
