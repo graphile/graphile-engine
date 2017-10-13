@@ -7,7 +7,7 @@ export default (function PgConnectionArgCondition(
   builder,
   { pgInflection: inflection, pgColumnFilter = defaultPgColumnFilter }
 ) {
-  builder.hook("init", (_, build, context) => {
+  builder.hook("init", (_, build) => {
     const {
       newWithHooks,
       pgIntrospectionResultsByKind: introspectionResultsByKind,
