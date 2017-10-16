@@ -1,0 +1,28 @@
+version: "3"
+services:
+  js: &js
+    build: config/docker/
+    volumes:
+      - .:/gb:rw
+    working_dir: /gb
+    depends_on: [db]
+    environment:
+      TEST_DATABASE_URL: postgres://gb@db:5432/gb
+  yarn:
+    <<: *js
+    entrypoint: ["yarn"]
+  lerna:
+    <<: *js
+    entrypoint: ["lerna"]
+  npm:
+    <<: *js
+    entrypoint: ["npm"]
+  bash:
+    <<: *js
+    entrypoint: ["bash"]
+
+  db:
+    image: postgres:9.6-alpine
+    environment:
+      POSTGRES_USER: gb
+      POSTGRES_PASSWORD: ""
