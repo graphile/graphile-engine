@@ -7,17 +7,23 @@ const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
 
 type Gen<T> = () => T;
 
-function callIfNecessary<T>(o: Gen<T> | T): T {
+function callIfNecessary<T>(
+  o: Gen<T> | T,
+  context: { queryBuilder: QueryBuilder }
+): T {
   if (typeof o === "function") {
-    return o();
+    return o(context);
   } else {
     return o;
   }
 }
 
-function callIfNecessaryArray<T>(o: Array<Gen<T> | T>): Array<T> {
+function callIfNecessaryArray<T>(
+  o: Array<Gen<T> | T>,
+  context: { queryBuilder: QueryBuilder }
+): Array<T> {
   if (Array.isArray(o)) {
-    return o.map(callIfNecessary);
+    return o.map(callIfNecessary, context);
   } else {
     return o;
   }
@@ -495,38 +501,51 @@ class QueryBuilder {
     } else if (type === "whereBound") {
       // Handle properties separately
       this.compiledData[type].lower = callIfNecessaryArray(
-        this.data[type].lower
+        this.data[type].lower,
+        { queryBuilder: this }
       );
       this.compiledData[type].upper = callIfNecessaryArray(
-        this.data[type].upper
+        this.data[type].upper,
+        { queryBuilder: this }
       );
     } else if (type === "select") {
       this.compiledData[type] = this.data[type].map(([a, b]) => [
-        callIfNecessary(a),
+        callIfNecessary(a, { queryBuilder: this }),
         b,
       ]);
     } else if (type === "orderBy") {
       this.compiledData[type] = this.data[type].map(([a, b]) => [
-        callIfNecessary(a),
+        callIfNecessary(a, { queryBuilder: this }),
         b,
       ]);
     } else if (type === "from") {
       if (this.data.from) {
         const f = this.data.from;
-        this.compiledData.from = [callIfNecessary(f[0]), f[1]];
+        this.compiledData.from = [
+          callIfNecessary(f[0], { queryBuilder: this }),
+          f[1],
+        ];
       }
     } else if (type === "join" || type === "where") {
-      this.compiledData[type] = callIfNecessaryArray(this.data[type]);
+      this.compiledData[type] = callIfNecessaryArray(this.data[type], {
+        queryBuilder: this,
+      });
     } else if (type === "selectCursor") {
-      this.compiledData[type] = callIfNecessary(this.data[type]);
+      this.compiledData[type] = callIfNecessary(this.data[type], {
+        queryBuilder: this,
+      });
     } else if (type === "cursorPrefix") {
       this.compiledData[type] = this.data[type];
     } else if (type === "orderIsUnique") {
       this.compiledData[type] = this.data[type];
     } else if (type === "limit") {
-      this.compiledData[type] = callIfNecessary(this.data[type]);
+      this.compiledData[type] = callIfNecessary(this.data[type], {
+        queryBuilder: this,
+      });
     } else if (type === "offset") {
-      this.compiledData[type] = callIfNecessary(this.data[type]);
+      this.compiledData[type] = callIfNecessary(this.data[type], {
+        queryBuilder: this,
+      });
     } else if (type === "first") {
       this.compiledData[type] = this.data[type];
     } else if (type === "last") {
