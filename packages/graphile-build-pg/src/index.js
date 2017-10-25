@@ -8,6 +8,7 @@ import PgConnectionArgFirstLastBeforeAfter from "./plugins/PgConnectionArgFirstL
 import PgConnectionArgOrderBy from "./plugins/PgConnectionArgOrderBy";
 import PgConnectionArgCondition from "./plugins/PgConnectionArgCondition";
 import PgAllRows from "./plugins/PgAllRows";
+import PgViewPlugin from "./plugins/PgViewPlugin";
 import PgColumnsPlugin from "./plugins/PgColumnsPlugin";
 import PgForwardRelationPlugin from "./plugins/PgForwardRelationPlugin";
 import PgBackwardRelationPlugin from "./plugins/PgBackwardRelationPlugin";
@@ -53,6 +54,7 @@ export const defaultPlugins = [
   PgScalarFunctionConnectionPlugin, // For PostGraphQL compatibility
   PageInfoStartEndCursor, // For PostGraphQL compatibility
   PgConnectionTotalCount,
+  PgViewPlugin,
 
   // Mutations
   PgMutationCreatePlugin,
@@ -86,6 +88,7 @@ export {
   PgScalarFunctionConnectionPlugin,
   PageInfoStartEndCursor,
   PgConnectionTotalCount,
+  PgViewPlugin,
   PgMutationCreatePlugin,
   PgMutationUpdateDeletePlugin,
   PgMutationProceduresPlugin,
