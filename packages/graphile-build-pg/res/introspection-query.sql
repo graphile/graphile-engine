@@ -192,6 +192,18 @@ with
         pg_catalog.pg_type as typ
         left join pg_catalog.pg_description as dsc on dsc.objoid = typ.oid
         left join pg_catalog.pg_namespace as nsp on nsp.oid = typ.typnamespace
+      where
+        -- only get types that are in exposed namespaces
+        typ.typnamespace in (select "id" from namespace)
+        -- include global types
+        OR typ.typnamespace in (
+          select
+            nsp.oid as "id"
+          from
+            pg_catalog.pg_namespace as nsp
+          where
+            nsp.nspname = 'pg_catalog'
+        )
     )
     select
       *
