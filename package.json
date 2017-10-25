@@ -18,7 +18,7 @@
     "lint": "eslint packages",
     "flow": "flow",
     "flow:check": "flow check",
-    "test": "lerna run test",
+    "test": "lerna run test && npm run lint",
     "prepublish:all": "for I in packages/*/; do echo \"cd $I && npm run prepublish\" | perl -p -e 's/\\n/\\0/;'; done | xargs -0 node_modules/.bin/concurrently",
     "watch": "for I in packages/*/; do echo \"cd $I && npm run watch\" | perl -p -e 's/\\n/\\0/;'; done | xargs -0 node_modules/.bin/concurrently --kill-others"
   },
@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "babel-plugin-transform-es2015-modules-commonjs": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-flow": "^6.23.0",
     "flow-bin": "^0.52.0",
