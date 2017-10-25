@@ -1,26 +1,13 @@
-"use strict";
+// @flow
+import queryFromResolveData from "../queryFromResolveData";
+import debugFactory from "debug";
+import addStartEndCursor from "./addStartEndCursor";
 
-Object.defineProperty(exports, "__esModule", { value: true });
+import type { Plugin } from "graphile-build";
 
-var _queryFromResolveData = require("../queryFromResolveData");
+const debugSql = debugFactory("graphile-build-pg:sql");
 
-var _queryFromResolveData2 = _interopRequireDefault(_queryFromResolveData);
-
-var _debug = require("debug");
-
-var _debug2 = _interopRequireDefault(_debug);
-
-var _addStartEndCursor = require("./addStartEndCursor");
-
-var _addStartEndCursor2 = _interopRequireDefault(_addStartEndCursor);
-
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
-
-const debugSql = (0, _debug2.default)("graphile-build-pg:sql");
-
-exports.default = async function PgViewPlugin(
+export default (async function PgViewPlugin(
   builder,
   { pgInflection: inflection }
 ) {
@@ -86,10 +73,7 @@ exports.default = async function PgViewPlugin(
                       parsedResolveInfoFragment,
                       resolveInfo.returnType
                     );
-                    const query = (
-                      0,
-                      _queryFromResolveData2.default
-                    )(
+                    const query = queryFromResolveData(
                       sqlFullTableName,
                       undefined,
                       resolveData,
@@ -112,7 +96,7 @@ exports.default = async function PgViewPlugin(
                     const { text, values } = sql.compile(query);
                     if (debugSql.enabled) debugSql(text);
                     const { rows: [row] } = await pgClient.query(text, values);
-                    return (0, _addStartEndCursor2.default)(row);
+                    return addStartEndCursor(row);
                   },
                 };
               },
@@ -128,5 +112,4 @@ exports.default = async function PgViewPlugin(
       return { ...fields, ...views };
     }
   );
-};
-//# sourceMappingURL=PgViewPlugin.js.map
+}: Plugin);
