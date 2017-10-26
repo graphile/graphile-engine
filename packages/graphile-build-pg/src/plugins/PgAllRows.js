@@ -58,9 +58,9 @@ export default (async function PgAllRows(
                 num => attributes.filter(attr => attr.num === num)[0]
               );
             const isView = t => t.classKind === "v";
-            const uniqueIdAttribute = attributes.filter(
+            const uniqueIdAttribute = attributes.find(
               attr => attr.name === "uniqueId" || attr.name === "unique_id"
-            )[0];
+            );
             if (!ConnectionType) {
               throw new Error(
                 `Could not find GraphQL connection type for table '${table.name}'`
