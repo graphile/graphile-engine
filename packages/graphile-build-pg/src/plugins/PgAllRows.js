@@ -58,7 +58,9 @@ export default (async function PgAllRows(
                 num => attributes.filter(attr => attr.num === num)[0]
               );
             const isView = t => t.classKind === "v";
-            const hasUniqueId = a => !!a.find(elem => elem.name === "uniqueId");
+            const uniqueIdAttribute = attributes.filter(
+              attr => attr.name === "uniqueId" || attr.name === "unique_id"
+            )[0];
             if (!ConnectionType) {
               throw new Error(
                 `Could not find GraphQL connection type for table '${table.name}'`
@@ -107,12 +109,12 @@ export default (async function PgAllRows(
                                 builder.setOrderIsUnique();
                               }
                             });
-                          } else if (isView(table) && hasUniqueId(attributes)) {
+                          } else if (isView(table) && !!uniqueIdAttribute) {
                             builder.beforeLock("orderBy", () => {
                               builder.data.cursorPrefix = ["unique_id_asc"];
                               builder.orderBy(
                                 sql.fragment`${builder.getTableAlias()}.${sql.identifier(
-                                  "uniqueId"
+                                  uniqueIdAttribute.name
                                 )}`,
                                 true
                               );
