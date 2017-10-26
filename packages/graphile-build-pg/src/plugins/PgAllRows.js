@@ -9,7 +9,7 @@ const debugSql = debugFactory("graphile-build-pg:sql");
 
 export default (async function PgAllRows(
   builder,
-  { pgInflection: inflection }
+  { pgInflection: inflection, pgViewUniqueKey: viewUniqueKey }
 ) {
   builder.hook(
     "GraphQLObjectType:fields",
@@ -58,9 +58,9 @@ export default (async function PgAllRows(
                 num => attributes.filter(attr => attr.num === num)[0]
               );
             const isView = t => t.classKind === "v";
-            const uniqueIdAttribute = attributes.find(
-              attr => attr.name === "uniqueId" || attr.name === "unique_id"
-            );
+            const uniqueIdAttribute = viewUniqueKey
+              ? attributes.find(attr => attr.name === viewUniqueKey)
+              : undefined;
             if (!ConnectionType) {
               throw new Error(
                 `Could not find GraphQL connection type for table '${table.name}'`
@@ -111,7 +111,9 @@ export default (async function PgAllRows(
                             });
                           } else if (isView(table) && !!uniqueIdAttribute) {
                             builder.beforeLock("orderBy", () => {
-                              builder.data.cursorPrefix = ["unique_id_asc"];
+                              builder.data.cursorPrefix = [
+                                "view_unique_key_asc",
+                              ];
                               builder.orderBy(
                                 sql.fragment`${builder.getTableAlias()}.${sql.identifier(
                                   uniqueIdAttribute.name

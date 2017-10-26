@@ -34,6 +34,7 @@ type PostGraphQLOptions = {
   jwtPgTypeIdentifier?: string,
   jwtSecret?: string,
   inflector?: Inflector,
+  viewUniqueKey?: string,
 };
 
 type PgConfig = Client | Pool | string;
@@ -76,6 +77,7 @@ const getPostGraphQLBuilder = async (
     disableDefaultMutations,
     graphqlBuildOptions,
     inflector,
+    viewUniqueKey,
   } = options;
   if (replaceAllPlugins) {
     ensureValidPlugins("replaceAllPlugins", replaceAllPlugins);
@@ -113,6 +115,7 @@ const getPostGraphQLBuilder = async (
         pgJwtTypeIdentifier: jwtPgTypeIdentifier,
         pgJwtSecret: jwtSecret,
         pgDisableDefaultMutations: disableDefaultMutations,
+        pgViewUniqueKey: viewUniqueKey,
       },
       graphqlBuildOptions
     )
