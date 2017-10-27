@@ -122,6 +122,11 @@ export default (async function PgAllRows(
                               );
                               builder.setOrderIsUnique();
                             });
+                          } else {
+                            builder.orderBy(
+                              sql.fragment`(row_number() over (partition by 1))`,
+                              true
+                            );
                           }
                         }
                       );
