@@ -10,10 +10,7 @@ type GenContext = {
 };
 type Gen<T> = (context: GenContext) => T;
 
-function callIfNecessary<T>(
-  o: Gen<T> | T,
-  context: GenContext
-): T {
+function callIfNecessary<T>(o: Gen<T> | T, context: GenContext): T {
   if (typeof o === "function") {
     return o(context);
   } else {
