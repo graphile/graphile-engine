@@ -12,7 +12,7 @@ type Gen<T> = (context: GenContext) => T;
 
 function callIfNecessary<T>(
   o: Gen<T> | T,
-  context: { queryBuilder: QueryBuilder }
+  context: GenContext
 ): T {
   if (typeof o === "function") {
     return o(context);
@@ -23,7 +23,7 @@ function callIfNecessary<T>(
 
 function callIfNecessaryArray<T>(
   o: Array<Gen<T> | T>,
-  context: { queryBuilder: QueryBuilder }
+  context: GenContext
 ): Array<T> {
   if (Array.isArray(o)) {
     return o.map(v => callIfNecessary(v, context));
