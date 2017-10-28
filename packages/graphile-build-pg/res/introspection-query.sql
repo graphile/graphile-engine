@@ -104,8 +104,6 @@ with
       left join pg_catalog.pg_description as dsc on dsc.objoid = rel.oid and dsc.objsubid = 0
       left join pg_catalog.pg_namespace as nsp on nsp.oid = rel.relnamespace
     where
-      -- Select classes that are in our namespace, or are referenced in a
-      -- procedure.
       rel.relpersistence in ('p') and
       -- We don't want classes that will clash with GraphQL (treat them as private)
       rel.relname not like '\_\_%' and
