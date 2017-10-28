@@ -109,16 +109,18 @@ export default (async function PgAllRows(
                             });
                           } else if (isView(table) && !!uniqueIdAttribute) {
                             builder.beforeLock("orderBy", () => {
-                              builder.data.cursorPrefix = [
-                                "view_unique_key_asc",
-                              ];
-                              builder.orderBy(
-                                sql.fragment`${builder.getTableAlias()}.${sql.identifier(
-                                  uniqueIdAttribute.name
-                                )}`,
-                                true
-                              );
-                              builder.setOrderIsUnique();
+                              if (!builder.isOrderUnique(false)) {
+                                builder.data.cursorPrefix = [
+                                  "view_unique_key_asc",
+                                ];
+                                builder.orderBy(
+                                  sql.fragment`${builder.getTableAlias()}.${sql.identifier(
+                                    uniqueIdAttribute.name
+                                  )}`,
+                                  true
+                                );
+                                builder.setOrderIsUnique();
+                              }
                             });
                           }
                         }
