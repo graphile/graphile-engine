@@ -15,7 +15,6 @@ export default (function PgOrderByPrimaryKeyPlugin(builder) {
       const attributes = introspectionResultsByKind.attribute.filter(
         attr => attr.classId === table.id
       );
-      // todo
       const primaryKeyConstraint = introspectionResultsByKind.constraint
         .filter(con => con.classId === table.id)
         .filter(con => con.type === "p")[0];
