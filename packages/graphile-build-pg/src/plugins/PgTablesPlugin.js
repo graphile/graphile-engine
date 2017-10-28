@@ -150,7 +150,7 @@ export default (function PgTablesPlugin(builder, { pgInflection: inflection }) {
             );
             cb(TableType);
             const pgInputFields = {};
-            const TableInputType = newWithHooks(
+            newWithHooks(
               GraphQLInputObjectType,
               {
                 description: `An input for mutations affecting \`${tableTypeName}\``,

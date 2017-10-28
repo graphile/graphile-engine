@@ -577,15 +577,6 @@ export default (function PgTypesPlugin(
       return gqlTypeByTypeId[type.id];
     };
 
-    const isTableLike = type =>
-      type.type === "c" && type.category === "C" && type.classId;
-
-    /*
-    introspectionResultsByKind.type
-      .filter(type => !isTableLike(type))
-      .forEach(enforceGqlTypeByPgType);
-      */
-
     function getGqlTypeByTypeId(typeId) {
       if (!gqlInputTypeByTypeIdGenerator[typeId]) {
         const type = introspectionResultsByKind.type.find(t => t.id === typeId);
@@ -651,9 +642,6 @@ export default (function PgTypesPlugin(
             gqlInputTypeByTypeId[type.id] = result;
           }
         }
-      }
-      if (!gqlInputTypeByTypeId[typeId]) {
-        console.log("Did not find input type for ", typeId);
       }
       return gqlInputTypeByTypeId[typeId];
     }
