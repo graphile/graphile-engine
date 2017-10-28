@@ -3,16 +3,29 @@ import type { Plugin } from "graphile-build";
 import queryFromResolveData from "../queryFromResolveData";
 import debugFactory from "debug";
 import viaTemporaryTable from "./viaTemporaryTable";
+import { parseTypeIdentifier } from "./PgJWTPlugin";
 
 const debug = debugFactory("graphile-build-pg");
 
 export default (function PgMutationCreatePlugin(
   builder,
-  { pgInflection: inflection, pgDisableDefaultMutations }
+  {
+    pgInflection: inflection,
+    pgDisableDefaultMutations,
+    pgEnableDefaultMutationTables,
+  }
 ) {
   if (pgDisableDefaultMutations) {
     return;
   }
+  if (!Array.isArray(pgEnableDefaultMutationTables)) {
+    pgEnableDefaultMutationTables = [];
+  }
+  pgEnableDefaultMutationTables = pgEnableDefaultMutationTables.map(function(
+    element
+  ) {
+    return parseTypeIdentifier(String(element));
+  });
   builder.hook(
     "GraphQLObjectType:fields",
     (
@@ -45,6 +58,16 @@ export default (function PgMutationCreatePlugin(
           .filter(table => !!table.namespace)
           .filter(table => table.isSelectable)
           .filter(table => table.isInsertable)
+          .filter(
+            table =>
+              pgEnableDefaultMutationTables.length == 0 ||
+              pgEnableDefaultMutationTables.some(function(element) {
+                return (
+                  element.namespaceName == table.namespace.name &&
+                  element.typeName == table.name
+                );
+              })
+          )
           .reduce((memo, table) => {
             const Table = pgGetGqlTypeByTypeId(table.type.id);
             if (!Table) {

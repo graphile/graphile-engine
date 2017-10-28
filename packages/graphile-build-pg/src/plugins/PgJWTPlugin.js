@@ -118,7 +118,7 @@ export default (function PgJWTPlugin(
   );
 }: Plugin);
 
-function parseTypeIdentifier(typeIdentifier) {
+export function parseTypeIdentifier(typeIdentifier: string) {
   const match = typeIdentifier.match(
     /^(?:([a-zA-Z0-9_]+)|"([^"]*)")\.(?:([a-zA-Z0-9_]+)|"([^"]*)")$/
   );
