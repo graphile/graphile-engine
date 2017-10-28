@@ -14,8 +14,7 @@ export default (function PgJWTPlugin(
         newWithHooks,
         pgSql: sql,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
-        pgGqlTypeByTypeId,
-        pgGqlInputTypeByTypeId,
+        pgRegisterGqlTypeByTypeId,
         pg2GqlMapper,
         pgTweaksByTypeId,
         graphql: { GraphQLScalarType },
@@ -70,6 +69,8 @@ export default (function PgJWTPlugin(
         compositeClass.namespaceName
       );
 
+      // NOTE: we deliberately do not create an input type
+      pgRegisterGqlTypeByTypeId(compositeType.id, cb => {
       const JWTType = newWithHooks(
         GraphQLScalarType,
         {
@@ -92,6 +93,7 @@ export default (function PgJWTPlugin(
           isPgJwtType: true,
         }
       );
+        cb(JWTType);
 
       pg2GqlMapper[compositeType.id] = {
         map: value => {
@@ -109,10 +111,9 @@ export default (function PgJWTPlugin(
         },
       };
 
-      pgGqlTypeByTypeId[compositeType.id] = JWTType;
-      pgGqlInputTypeByTypeId[compositeType.id] = null;
       pgTweaksByTypeId[compositeType.id] = fragment =>
         sql.fragment`to_json(${fragment})`;
+      });
       return _;
     }
   );

@@ -1,7 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`prints a schema with Relay 1 style ids 1`] = `
-"# A signed eight-byte integer. The upper big integer values are greater then the
+"enum AnEnum {
+  AWAITING
+  PUBLISHED
+  REJECTED
+}
+
+# A signed eight-byte integer. The upper big integer values are greater then the
 # max value for a JavaScript number. Therefore all big integers will be output as
 # strings and not numbers.
 scalar BigInt
@@ -125,6 +131,11 @@ type CompoundTypesEdge {
 
   # The \`CompoundType\` at the end of the edge.
   node: CompoundType!
+}
+
+type Comptype {
+  isOptimised: Boolean
+  schedule: Datetime
 }
 
 # All input for the create \`CompoundKey\` mutation.
@@ -455,6 +466,65 @@ type IntSetQueryEdge {
 # A JavaScript object encoded in the JSON format as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 scalar JSON
 
+# All input for the \`jsonbIdentityMutation\` mutation.
+input JsonbIdentityMutationInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+  json: JSON
+}
+
+# The output of our \`jsonbIdentityMutation\` mutation.
+type JsonbIdentityMutationPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+  json: JSON
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
+# All input for the \`jsonbIdentityMutationPlpgsql\` mutation.
+input JsonbIdentityMutationPlpgsqlInput {
+  _theJson: JSON!
+
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+}
+
+# The output of our \`jsonbIdentityMutationPlpgsql\` mutation.
+type JsonbIdentityMutationPlpgsqlPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+  json: JSON
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
+# All input for the \`jsonbIdentityMutationPlpgsqlWithDefault\` mutation.
+input JsonbIdentityMutationPlpgsqlWithDefaultInput {
+  _theJson: JSON
+
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+}
+
+# The output of our \`jsonbIdentityMutationPlpgsqlWithDefault\` mutation.
+type JsonbIdentityMutationPlpgsqlWithDefaultPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+  json: JSON
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
 # All input for the \`jsonIdentityMutation\` mutation.
 input JsonIdentityMutationInput {
   # An arbitrary string value with no semantic meaning. Will be included in the
@@ -531,6 +601,18 @@ type Mutation {
     # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     input: JsonIdentityMutationInput!
   ): JsonIdentityMutationPayload
+  jsonbIdentityMutation(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: JsonbIdentityMutationInput!
+  ): JsonbIdentityMutationPayload
+  jsonbIdentityMutationPlpgsql(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: JsonbIdentityMutationPlpgsqlInput!
+  ): JsonbIdentityMutationPlpgsqlPayload
+  jsonbIdentityMutationPlpgsqlWithDefault(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: JsonbIdentityMutationPlpgsqlWithDefaultInput!
+  ): JsonbIdentityMutationPlpgsqlWithDefaultPayload
   noArgsMutation(
     # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     input: NoArgsMutationInput!
@@ -794,6 +876,8 @@ input PersonPatch {
 type Post {
   authorId: Int
   body: String
+  comptypes: [Comptype]
+  enums: [AnEnum]
   headline: String!
   rowId: Int!
 }
@@ -924,6 +1008,7 @@ type Query implements Node {
     z: Int
   ): IntSetQueryConnection!
   jsonIdentity(json: JSON): JSON
+  jsonbIdentity(json: JSON): JSON
   noArgsQuery: Int
 
   # Fetches an object given its globally unique \`ID\`.
@@ -2330,6 +2415,12 @@ type Add4MutationPayload {
   query: Query
 }
 
+enum AnEnum {
+  AWAITING
+  PUBLISHED
+  REJECTED
+}
+
 scalar AnInt
 
 # A range of \`AnInt\`.
@@ -2611,6 +2702,17 @@ type CompoundTypesEdge {
 
   # The \`CompoundType\` at the end of the edge.
   node: CompoundType!
+}
+
+type Comptype {
+  isOptimised: Boolean
+  schedule: Datetime
+}
+
+# An input for mutations affecting \`Comptype\`
+input ComptypeInput {
+  isOptimised: Boolean
+  schedule: Datetime
 }
 
 # All input for the create \`CompoundKey\` mutation.
@@ -3602,6 +3704,65 @@ type IntSetQueryEdge {
 # A JavaScript object encoded in the JSON format as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 scalar JSON
 
+# All input for the \`jsonbIdentityMutation\` mutation.
+input JsonbIdentityMutationInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+  json: JSON
+}
+
+# The output of our \`jsonbIdentityMutation\` mutation.
+type JsonbIdentityMutationPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+  json: JSON
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
+# All input for the \`jsonbIdentityMutationPlpgsql\` mutation.
+input JsonbIdentityMutationPlpgsqlInput {
+  _theJson: JSON!
+
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+}
+
+# The output of our \`jsonbIdentityMutationPlpgsql\` mutation.
+type JsonbIdentityMutationPlpgsqlPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+  json: JSON
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
+# All input for the \`jsonbIdentityMutationPlpgsqlWithDefault\` mutation.
+input JsonbIdentityMutationPlpgsqlWithDefaultInput {
+  _theJson: JSON
+
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+}
+
+# The output of our \`jsonbIdentityMutationPlpgsqlWithDefault\` mutation.
+type JsonbIdentityMutationPlpgsqlWithDefaultPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+  json: JSON
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
 # All input for the \`jsonIdentityMutation\` mutation.
 input JsonIdentityMutationInput {
   # An arbitrary string value with no semantic meaning. Will be included in the
@@ -3928,6 +4089,18 @@ type Mutation {
     # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     input: JsonIdentityMutationInput!
   ): JsonIdentityMutationPayload
+  jsonbIdentityMutation(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: JsonbIdentityMutationInput!
+  ): JsonbIdentityMutationPayload
+  jsonbIdentityMutationPlpgsql(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: JsonbIdentityMutationPlpgsqlInput!
+  ): JsonbIdentityMutationPlpgsqlPayload
+  jsonbIdentityMutationPlpgsqlWithDefault(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: JsonbIdentityMutationPlpgsqlWithDefaultInput!
+  ): JsonbIdentityMutationPlpgsqlWithDefaultPayload
   mult1(
     # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     input: Mult1Input!
@@ -4402,6 +4575,8 @@ input PersonPatch {
 type Post implements Node {
   authorId: Int
   body: String
+  comptypes: [Comptype]
+  enums: [AnEnum]
   headline: String!
   headlineTrimmed(length: Int, omission: String): String
   headlineTrimmedNoDefaults(length: Int, omission: String): String
@@ -4423,6 +4598,12 @@ input PostCondition {
   # Checks for equality with the object’s \`body\` field.
   body: String
 
+  # Checks for equality with the object’s \`comptypes\` field.
+  comptypes: [ComptypeInput]
+
+  # Checks for equality with the object’s \`enums\` field.
+  enums: [AnEnum]
+
   # Checks for equality with the object’s \`headline\` field.
   headline: String
 
@@ -4434,6 +4615,8 @@ input PostCondition {
 input PostInput {
   authorId: Int
   body: String
+  comptypes: [ComptypeInput]
+  enums: [AnEnum]
   headline: String!
   id: Int
 }
@@ -4442,6 +4625,8 @@ input PostInput {
 input PostPatch {
   authorId: Int
   body: String
+  comptypes: [ComptypeInput]
+  enums: [AnEnum]
   headline: String
   id: Int
 }
@@ -4476,6 +4661,10 @@ enum PostsOrderBy {
   AUTHOR_ID_DESC
   BODY_ASC
   BODY_DESC
+  COMPTYPES_ASC
+  COMPTYPES_DESC
+  ENUMS_ASC
+  ENUMS_DESC
   HEADLINE_ASC
   HEADLINE_DESC
   ID_ASC
@@ -4890,6 +5079,7 @@ type Query implements Node {
     z: Int
   ): IntSetQueryConnection!
   jsonIdentity(json: JSON): JSON
+  jsonbIdentity(json: JSON): JSON
   noArgsQuery: Int
 
   # Fetches an object given its globally unique \`ID\`.
@@ -5981,7 +6171,13 @@ scalar UUID
 `;
 
 exports[`prints a schema without default mutations 1`] = `
-"# A signed eight-byte integer. The upper big integer values are greater then the
+"enum AnEnum {
+  AWAITING
+  PUBLISHED
+  REJECTED
+}
+
+# A signed eight-byte integer. The upper big integer values are greater then the
 # max value for a JavaScript number. Therefore all big integers will be output as
 # strings and not numbers.
 scalar BigInt
@@ -6091,6 +6287,11 @@ type CompoundTypesEdge {
 
   # The \`CompoundType\` at the end of the edge.
   node: CompoundType!
+}
+
+type Comptype {
+  isOptimised: Boolean
+  schedule: Datetime
 }
 
 # A location in a connection that can be used for resuming pagination.
@@ -6230,6 +6431,65 @@ type IntSetQueryEdge {
 # A JavaScript object encoded in the JSON format as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 scalar JSON
 
+# All input for the \`jsonbIdentityMutation\` mutation.
+input JsonbIdentityMutationInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+  json: JSON
+}
+
+# The output of our \`jsonbIdentityMutation\` mutation.
+type JsonbIdentityMutationPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+  json: JSON
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
+# All input for the \`jsonbIdentityMutationPlpgsql\` mutation.
+input JsonbIdentityMutationPlpgsqlInput {
+  _theJson: JSON!
+
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+}
+
+# The output of our \`jsonbIdentityMutationPlpgsql\` mutation.
+type JsonbIdentityMutationPlpgsqlPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+  json: JSON
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
+# All input for the \`jsonbIdentityMutationPlpgsqlWithDefault\` mutation.
+input JsonbIdentityMutationPlpgsqlWithDefaultInput {
+  _theJson: JSON
+
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+}
+
+# The output of our \`jsonbIdentityMutationPlpgsqlWithDefault\` mutation.
+type JsonbIdentityMutationPlpgsqlWithDefaultPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+  json: JSON
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
 # All input for the \`jsonIdentityMutation\` mutation.
 input JsonIdentityMutationInput {
   # An arbitrary string value with no semantic meaning. Will be included in the
@@ -6259,6 +6519,18 @@ type Mutation {
     # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     input: JsonIdentityMutationInput!
   ): JsonIdentityMutationPayload
+  jsonbIdentityMutation(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: JsonbIdentityMutationInput!
+  ): JsonbIdentityMutationPayload
+  jsonbIdentityMutationPlpgsql(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: JsonbIdentityMutationPlpgsqlInput!
+  ): JsonbIdentityMutationPlpgsqlPayload
+  jsonbIdentityMutationPlpgsqlWithDefault(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: JsonbIdentityMutationPlpgsqlWithDefaultInput!
+  ): JsonbIdentityMutationPlpgsqlWithDefaultPayload
   noArgsMutation(
     # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     input: NoArgsMutationInput!
@@ -6470,6 +6742,8 @@ input PersonCondition {
 type Post {
   authorId: Int
   body: String
+  comptypes: [Comptype]
+  enums: [AnEnum]
   headline: String!
   id: Int!
 }
@@ -6597,6 +6871,7 @@ type Query implements Node {
     z: Int
   ): IntSetQueryConnection!
   jsonIdentity(json: JSON): JSON
+  jsonbIdentity(json: JSON): JSON
   noArgsQuery: Int
 
   # Fetches an object given its globally unique \`ID\`.

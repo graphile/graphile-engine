@@ -31,9 +31,10 @@ export default (async function PgMutationUpdateDeletePlugin(
         parseResolveInfo,
         getTypeByName,
         gql2pg,
+        pgGetGqlTypeByTypeId,
+        pgGetGqlInputTypeByTypeId,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
         pgSql: sql,
-        pgGqlInputTypeByTypeId: gqlInputTypeByTypeId,
         getNodeType,
         graphql: {
           GraphQLNonNull,
@@ -58,9 +59,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                   (mode === "delete" && table.isDeletable)
               )
               .reduce((memo, table) => {
-                const TableType = getTypeByName(
-                  inflection.tableType(table.name, table.namespace.name)
-                );
+                const TableType = pgGetGqlTypeByTypeId(table.type.id);
                 async function commonCodeRenameMe(
                   pgClient,
                   resolveInfo,
@@ -180,11 +179,8 @@ export default (async function PgMutationUpdateDeletePlugin(
                   const attributes = introspectionResultsByKind.attribute
                     .filter(attr => attr.classId === table.id)
                     .sort((a, b) => a.num - b.num);
-                  const tableTypeName = inflection.tableType(
-                    table.name,
-                    table.namespace.name
-                  );
-                  const Table = getTypeByName(tableTypeName);
+                  const Table = pgGetGqlTypeByTypeId(table.type.id);
+                  const tableTypeName = Table.name;
                   const TablePatch = getTypeByName(
                     inflection.patchType(Table.name)
                   );
@@ -422,7 +418,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                               )
                             ] = {
                               type: new GraphQLNonNull(
-                                gqlInputTypeByTypeId[key.typeId]
+                                pgGetGqlInputTypeByTypeId(key.typeId)
                               ),
                             };
                             return memo;

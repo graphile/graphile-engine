@@ -30,6 +30,13 @@ create function c.person_exists(person c.person, email b.email) returns boolean 
 select exists(select 1 from c.person where person.email = person_exists.email);
 $$ language sql stable;
 
+create type a.an_enum as enum('awaiting', 'rejected', 'published');
+
+create type a.comptype as (
+  schedule timestamptz,
+  is_optimised boolean
+);
+
 create domain b.guid
   as character varying(15)
   default '000000000000000'::character varying
@@ -43,7 +50,9 @@ create table a.post (
   id serial primary key,
   headline text not null,
   body text,
-  author_id int4 references c.person(id)
+  author_id int4 references c.person(id),
+  enums a.an_enum[],
+  comptypes a.comptype[]
 );
 
 create type a.letter as enum ('a', 'b', 'c', 'd');
@@ -183,6 +192,10 @@ create function b.mult_4(int, int) returns int as $$ select $1 * $2 $$ language 
 
 create function c.json_identity(json json) returns json as $$ select json $$ language sql immutable;
 create function c.json_identity_mutation(json json) returns json as $$ select json $$ language sql;
+create function c.jsonb_identity(json jsonb) returns jsonb as $$ select json $$ language sql immutable;
+create function c.jsonb_identity_mutation(json jsonb) returns jsonb as $$ select json $$ language sql;
+create function c.jsonb_identity_mutation_plpgsql(_the_json jsonb) returns jsonb as $$ declare begin return _the_json; end; $$ language plpgsql strict security definer;
+create function c.jsonb_identity_mutation_plpgsql_with_default(_the_json jsonb default '[]') returns jsonb as $$ declare begin return _the_json; end; $$ language plpgsql strict security definer;
 create function c.types_query(a bigint, b boolean, c varchar, d integer[], e json, f numrange) returns boolean as $$ select false $$ language sql stable strict;
 create function c.types_mutation(a bigint, b boolean, c varchar, d integer[], e json, f numrange) returns boolean as $$ select false $$ language sql strict;
 create function b.compound_type_query(object c.compound_type) returns c.compound_type as $$ select (object.a + 1, object.b, object.c, object.d, object.e, object.f, object.foo_bar)::c.compound_type $$ language sql stable;

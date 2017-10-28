@@ -15,7 +15,7 @@ export default (function PgColumnsPlugin(
   builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
     const {
       extend,
-      pgGqlTypeByTypeId: gqlTypeByTypeId,
+      pgGetGqlTypeByTypeId,
       pgIntrospectionResultsByKind: introspectionResultsByKind,
       pgSql: sql,
       pg2gql,
@@ -60,7 +60,8 @@ export default (function PgColumnsPlugin(
           ] = fieldWithHooks(
             fieldName,
             ({ getDataFromParsedResolveInfoFragment, addDataGenerator }) => {
-              const ReturnType = gqlTypeByTypeId[attr.typeId] || GraphQLString;
+              const ReturnType =
+                pgGetGqlTypeByTypeId(attr.typeId) || GraphQLString;
               addDataGenerator(parsedResolveInfoFragment => {
                 const { alias } = parsedResolveInfoFragment;
                 if (attr.type.type === "c") {
@@ -121,7 +122,7 @@ export default (function PgColumnsPlugin(
   builder.hook("GraphQLInputObjectType:fields", (fields, build, context) => {
     const {
       extend,
-      pgGqlInputTypeByTypeId: gqlInputTypeByTypeId,
+      pgGetGqlInputTypeByTypeId,
       pgIntrospectionResultsByKind: introspectionResultsByKind,
     } = build;
     const {
@@ -155,7 +156,7 @@ export default (function PgColumnsPlugin(
             description: attr.description,
             type: nullableIf(
               isPgPatch || !attr.isNotNull || attr.hasDefault,
-              gqlInputTypeByTypeId[attr.typeId] || GraphQLString
+              pgGetGqlInputTypeByTypeId(attr.typeId) || GraphQLString
             ),
           });
           return memo;
