@@ -7099,6 +7099,23 @@ type Add4MutationPayload {
   query: Query
 }
 
+enum AnEnum {
+  AWAITING
+  PUBLISHED
+  REJECTED
+}
+
+type Comptype {
+  isOptimised: Boolean
+  schedule: Datetime
+}
+
+# An input for mutations affecting \`Comptype\`
+input ComptypeInput {
+  isOptimised: Boolean
+  schedule: Datetime
+}
+
 # All input for the create \`DefaultValue\` mutation.
 input CreateDefaultValueInput {
   # An arbitrary string value with no semantic meaning. Will be included in the
@@ -7246,6 +7263,10 @@ type CreateSimilarTable2Payload {
 
 # A location in a connection that can be used for resuming pagination.
 scalar Cursor
+
+# A point in time as described by the [ISO
+# 8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone.
+scalar Datetime
 
 type DefaultValue implements Node {
   id: Int!
@@ -7778,6 +7799,8 @@ type PageInfo {
 type Post implements Node {
   authorId: Int
   body: String
+  comptypes: [Comptype]
+  enums: [AnEnum]
   headlineTrimmed(length: Int, omission: String): String
   headlineTrimmedNoDefaults(length: Int, omission: String): String
   headlineTrimmedStrict(length: Int, omission: String): String
@@ -7795,6 +7818,12 @@ input PostCondition {
   # Checks for equality with the object’s \`body\` field.
   body: String
 
+  # Checks for equality with the object’s \`comptypes\` field.
+  comptypes: [ComptypeInput]
+
+  # Checks for equality with the object’s \`enums\` field.
+  enums: [AnEnum]
+
   # Checks for equality with the object’s \`id\` field.
   id: Int
 }
@@ -7803,6 +7832,8 @@ input PostCondition {
 input PostInput {
   authorId: Int
   body: String
+  comptypes: [ComptypeInput]
+  enums: [AnEnum]
   id: Int
 }
 
@@ -7810,6 +7841,8 @@ input PostInput {
 input PostPatch {
   authorId: Int
   body: String
+  comptypes: [ComptypeInput]
+  enums: [AnEnum]
   id: Int
 }
 
@@ -7843,6 +7876,10 @@ enum PostsOrderBy {
   AUTHOR_ID_DESC
   BODY_ASC
   BODY_DESC
+  COMPTYPES_ASC
+  COMPTYPES_DESC
+  ENUMS_ASC
+  ENUMS_DESC
   ID_ASC
   ID_DESC
   NATURAL
