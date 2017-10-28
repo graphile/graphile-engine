@@ -11,7 +11,7 @@ export default (function PgConnectionArgCondition(
       {
         newWithHooks,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
-        pgGetGqlTypeByTypeId,
+        pgGetGqlInputTypeByTypeId,
         graphql: { GraphQLInputObjectType, GraphQLString },
       }
     ) => {
@@ -45,7 +45,8 @@ export default (function PgConnectionArgCondition(
                       {
                         description: `Checks for equality with the object’s \`${fieldName}\` field.`,
                         type:
-                          pgGetGqlTypeByTypeId(attr.typeId) || GraphQLString,
+                          pgGetGqlInputTypeByTypeId(attr.typeId) ||
+                          GraphQLString,
                       },
                       {
                         isPgConnectionConditionInputField: true,
