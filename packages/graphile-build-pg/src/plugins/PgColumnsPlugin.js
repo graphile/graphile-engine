@@ -161,7 +161,7 @@ export default (function PgColumnsPlugin(
               description: attr.description,
               type: nullableIf(
                 isPgPatch || !attr.isNotNull || attr.hasDefault,
-                pgGetGqlInputTypeByTypeId(attr.typeId || GraphQLString)
+                pgGetGqlInputTypeByTypeId(attr.typeId) || GraphQLString
               ),
             });
             return memo;

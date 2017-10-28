@@ -35,10 +35,7 @@ export default (async function PgAllRows(
           .filter(table => table.namespace)
           .reduce((memo, table) => {
             const TableType = pgGetGqlTypeByTypeId(table.type.id);
-            const tableTypeName = inflection.tableType(
-              table.name,
-              table.namespace.name
-            );
+            const tableTypeName = TableType.name;
             const ConnectionType = getTypeByName(
               inflection.connection(TableType.name)
             );
