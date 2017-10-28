@@ -188,15 +188,14 @@ export default (
     const haveFields = queryBuilder.getSelectFieldsCount() > 0;
     const sqlQueryAlias = sql.identifier(Symbol());
     const sqlSummaryAlias = sql.identifier(Symbol());
-    // Tables should ALWAYS push their PK onto the order stack, if this
-    // isn't present then we're either dealing with a view or a table
-    // without a PK. Either way, we're going to need something else to
-    // guarantee cursor uniqueness.
     //
-    // If this is used, we DO NOT GUARANTEE in any way that the cursors
-    // will not change value/order!
+    // Tables should ALWAYS push their PK onto the order stack, if this isn't
+    // present then we're either dealing with a view or a table without a PK.
+    // Either way, we don't have anything to guarantee uniqueness so we need to
+    // fall back to limit/offset.
     //
-    // TODO: add a warning if this fires and it's not a view.
+    // TODO: support unique keys in PgAllRows etc
+    // TODO: add a warning for cursor-based pagination when using the fallback
     // TODO: if it is a view maybe add a warning encouraging pgViewUniqueKey
     const canHaveCursorInWhere =
       queryBuilder.getOrderByExpressionsAndDirections().length > 0 &&
