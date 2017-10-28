@@ -8,21 +8,25 @@ const debug = debugFactory("graphile-build-pg");
 
 export default (function PgMutationCreatePlugin(
   builder,
-  { pgInflection: inflection, pgDisableDefaultMutations }
+  {
+    pgInflection: inflection,
+    pgDisableDefaultMutations,
+    pgColumnFilter = (_attr, _build, _context) => true,
+  }
 ) {
   if (pgDisableDefaultMutations) {
     return;
   }
   builder.hook(
     "GraphQLObjectType:fields",
-    (
-      fields,
-      {
+    (fields, build, { scope: { isRootMutation }, fieldWithHooks }) => {
+      const {
         extend,
-        getTypeByName,
         newWithHooks,
         parseResolveInfo,
         pgIntrospectionResultsByKind,
+        pgGetGqlTypeByTypeId,
+        pgGetGqlInputTypeByTypeId,
         pgSql: sql,
         gql2pg,
         graphql: {
@@ -31,9 +35,7 @@ export default (function PgMutationCreatePlugin(
           GraphQLNonNull,
           GraphQLString,
         },
-      },
-      { scope: { isRootMutation }, fieldWithHooks }
-    ) => {
+      } = build;
       if (!isRootMutation) {
         return fields;
       }
@@ -45,9 +47,7 @@ export default (function PgMutationCreatePlugin(
           .filter(table => table.isSelectable)
           .filter(table => table.isInsertable)
           .reduce((memo, table) => {
-            const Table = getTypeByName(
-              inflection.tableType(table.name, table.namespace.name)
-            );
+            const Table = pgGetGqlTypeByTypeId(table.type.id);
             if (!Table) {
               debug(
                 `There was no table type for table '${table.namespace
@@ -55,7 +55,7 @@ export default (function PgMutationCreatePlugin(
               );
               return memo;
             }
-            const TableInput = getTypeByName(inflection.inputType(Table.name));
+            const TableInput = pgGetGqlInputTypeByTypeId(table.type.id);
             if (!TableInput) {
               debug(
                 `There was no input type for table '${table.namespace
@@ -132,11 +132,9 @@ export default (function PgMutationCreatePlugin(
               table.name,
               table.namespace.name
             );
-            memo[
-              fieldName
-            ] = fieldWithHooks(
-              fieldName,
-              ({ getDataFromParsedResolveInfoFragment }) => ({
+            memo[fieldName] = fieldWithHooks(fieldName, context => {
+              const { getDataFromParsedResolveInfoFragment } = context;
+              return {
                 description: `Creates a single \`${tableTypeName}\`.`,
                 type: PayloadType,
                 args: {
@@ -167,6 +165,7 @@ export default (function PgMutationCreatePlugin(
                     ];
                   pgIntrospectionResultsByKind.attribute
                     .filter(attr => attr.classId === table.id)
+                    .filter(attr => pgColumnFilter(attr, build, context))
                     .forEach(attr => {
                       const fieldName = inflection.column(
                         attr.name,
@@ -218,8 +217,8 @@ export default (function PgMutationCreatePlugin(
                     data: row,
                   };
                 },
-              })
-            );
+              };
+            });
             return memo;
           }, {})
       );

@@ -7,6 +7,7 @@ import {
 } from "graphile-build-pg";
 import type { Pool, Client } from "pg";
 import type { Plugin, Options, SchemaListener } from "graphile-build";
+import type { Build, Context } from "graphile-build";
 
 const ensureValidPlugins = (name, arr) => {
   if (!Array.isArray(arr)) {
@@ -34,6 +35,7 @@ type PostGraphQLOptions = {
   jwtPgTypeIdentifier?: string,
   jwtSecret?: string,
   inflector?: Inflector,
+  pgColumnFilter?: (mixed, Build, Context) => boolean,
   viewUniqueKey?: string,
 };
 
@@ -77,6 +79,7 @@ const getPostGraphQLBuilder = async (
     disableDefaultMutations,
     graphqlBuildOptions,
     inflector,
+    pgColumnFilter,
     viewUniqueKey,
   } = options;
   if (replaceAllPlugins) {
@@ -106,6 +109,7 @@ const getPostGraphQLBuilder = async (
         pgConfig: pgConfig,
         pgSchemas: Array.isArray(schemas) ? schemas : [schemas],
         pgExtendedTypes: !!dynamicJson,
+        pgColumnFilter: pgColumnFilter || (() => true),
         pgInflection:
           inflector ||
           (classicIds

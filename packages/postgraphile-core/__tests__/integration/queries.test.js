@@ -32,7 +32,12 @@ beforeAll(() => {
       createPostGraphQLSchema(pgClient, ["a", "b", "c"]),
       createPostGraphQLSchema(pgClient, ["a", "b", "c"], { classicIds: true }),
       createPostGraphQLSchema(pgClient, ["a", "b", "c"], { dynamicJson: true }),
-      createPostGraphQLSchema(pgClient, ["a", "b", "c"], { viewUniqueKey: "testviewid" }),
+      createPostGraphQLSchema(pgClient, ["a", "b", "c"], {
+        pgColumnFilter: attr => attr.name !== "headline",
+      }),
+      createPostGraphQLSchema(pgClient, ["a", "b", "c"], {
+        viewUniqueKey: "testviewid",
+      }),
     ]);
     debug(printSchema(normal));
     return {
@@ -71,7 +76,9 @@ beforeAll(() => {
             "dynamic-json.graphql": gqlSchemas.dynamicJson,
             "view.graphql": gqlSchemas.viewUniqueKey,
           };
-          const gqlSchema = (schemas[fileName]) ? schemas[fileName] : gqlSchemas.normal;
+          const gqlSchema = schemas[fileName]
+            ? schemas[fileName]
+            : gqlSchemas.normal;
 
           // Return the result of our GraphQL query.
           const result = await graphql(gqlSchema, query, null, {

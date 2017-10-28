@@ -2597,7 +2597,7 @@ Object {
     "a": Object {
       "edges": Array [
         Object {
-          "cursor": "WyJ2aWV3X3VuaXF1ZV9rZXlfYXNjIixbMV1d",
+          "cursor": "WyJuYXR1cmFsIixbMV1d",
           "node": Object {
             "col1": 11,
             "col2": 21,
@@ -2605,7 +2605,7 @@ Object {
           },
         },
         Object {
-          "cursor": "WyJ2aWV3X3VuaXF1ZV9rZXlfYXNjIixbMl1d",
+          "cursor": "WyJuYXR1cmFsIixbMl1d",
           "node": Object {
             "col1": 12,
             "col2": 22,
@@ -2613,7 +2613,7 @@ Object {
           },
         },
         Object {
-          "cursor": "WyJ2aWV3X3VuaXF1ZV9rZXlfYXNjIixbM11d",
+          "cursor": "WyJuYXR1cmFsIixbM11d",
           "node": Object {
             "col1": 13,
             "col2": 23,
