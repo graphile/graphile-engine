@@ -11,7 +11,7 @@ export default (function PgConnectionArgCondition(
       {
         newWithHooks,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
-        pgGqlInputTypeByTypeId: gqlTypeByTypeId,
+        pgGetGqlTypeByTypeId,
         graphql: { GraphQLInputObjectType, GraphQLString },
       }
     ) => {
@@ -44,7 +44,8 @@ export default (function PgConnectionArgCondition(
                       fieldName,
                       {
                         description: `Checks for equality with the object’s \`${fieldName}\` field.`,
-                        type: gqlTypeByTypeId[attr.typeId] || GraphQLString,
+                        type:
+                          pgGetGqlTypeByTypeId(attr.typeId) || GraphQLString,
                       },
                       {
                         isPgConnectionConditionInputField: true,
@@ -71,6 +72,7 @@ export default (function PgConnectionArgCondition(
         gql2pg,
         extend,
         getTypeByName,
+        pgGetGqlTypeByTypeId,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
       },
       {
@@ -86,10 +88,9 @@ export default (function PgConnectionArgCondition(
       ) {
         return args;
       }
+      const TableType = pgGetGqlTypeByTypeId(table.type.id);
       const TableConditionType = getTypeByName(
-        inflection.conditionType(
-          inflection.tableType(table.name, table.namespace.name)
-        )
+        inflection.conditionType(TableType.name)
       );
 
       addArgDataGenerator(function connectionCondition({ condition }) {

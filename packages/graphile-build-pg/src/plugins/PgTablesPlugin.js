@@ -14,8 +14,10 @@ export default (function PgTablesPlugin(builder, { pgInflection: inflection }) {
         pgSql: sql,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
         getTypeByName,
-        pgGqlTypeByTypeId,
-        pgGqlInputTypeByTypeId,
+        pgGetGqlTypeByTypeId,
+        pgGetGqlInputTypeByTypeId,
+        pgRegisterGqlTypeByTypeId,
+        pgRegisterGqlInputTypeByTypeId,
         pg2GqlMapper,
         gql2pg,
         graphql: {
@@ -42,10 +44,6 @@ export default (function PgTablesPlugin(builder, { pgInflection: inflection }) {
         const arrayTablePgType = introspectionResultsByKind.type.find(
           type => type.arrayItemTypeId === tablePgType.id
         );
-        if (pg2GqlMapper[tablePgType.id]) {
-          // Already handled
-          return;
-        }
         /*
         table =
           { kind: 'class',
@@ -83,227 +81,259 @@ export default (function PgTablesPlugin(builder, { pgInflection: inflection }) {
           primaryKeys.length
             ? true
             : false;
-        const TableType = newWithHooks(
-          GraphQLObjectType,
-          {
-            description: table.description || tablePgType.description,
-            name: tableTypeName,
-            interfaces: () => {
-              if (shouldHaveNodeId) {
-                return [getTypeByName("Node")];
-              } else {
-                return [];
-              }
-            },
-            fields: ({ addDataGeneratorForField, Self }) => {
-              const fields = {};
-              if (shouldHaveNodeId) {
-                // Enable nodeId interface
-                addDataGeneratorForField(nodeIdFieldName, () => {
-                  return {
-                    pgQuery: queryBuilder => {
-                      queryBuilder.select(
-                        sql.fragment`json_build_array(${sql.join(
-                          primaryKeys.map(
-                            key =>
-                              sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
-                                key.name
-                              )}`
-                          ),
-                          ", "
-                        )})`,
-                        "__identifiers"
-                      );
-                    },
-                  };
-                });
-                fields[nodeIdFieldName] = {
-                  description:
-                    "A globally unique identifier. Can be used in various places throughout the system to identify this single value.",
-                  type: new GraphQLNonNull(GraphQLID),
-                  resolve(data) {
-                    return (
-                      data.__identifiers &&
-                      getNodeIdForTypeAndIdentifiers(
-                        Self,
-                        ...data.__identifiers
-                      )
-                    );
-                  },
-                };
-              }
-              return fields;
-            },
-          },
-          {
-            pgIntrospection: table,
-            isPgRowType: table.isSelectable,
-            isPgCompoundType: !table.isSelectable,
-          }
-        );
-        const pgInputFields = {};
-        const TableInputType = newWithHooks(
-          GraphQLInputObjectType,
-          {
-            description: `An input for mutations affecting \`${tableTypeName}\``,
-            name: inflection.inputType(TableType),
-          },
-          {
-            pgIntrospection: table,
-            isInputType: true,
-            isPgRowType: table.isSelectable,
-            isPgCompoundType: !table.isSelectable,
-            pgAddSubfield(fieldName, attrName, pgType, spec) {
-              pgInputFields[fieldName] = {
-                name: attrName,
-                type: pgType,
-              };
-              return spec;
-            },
-          }
-        );
-
-        pg2GqlMapper[tablePgType.id] = {
-          map: _ => _,
-          unmap: obj => {
-            return sql.fragment`row(${sql.join(
-              attributes.map(attr => {
-                const fieldName = inflection.column(
-                  attr.name,
-                  table.name,
-                  table.namespaceName
-                );
-                const pgInputField = pgInputFields[fieldName];
-                const v = obj[fieldName];
-                if (pgInputField && v != null) {
-                  const { type } = pgInputField;
-                  return sql.fragment`${gql2pg(v, type)}::${sql.identifier(
-                    type.namespaceName,
-                    type.name
-                  )}`;
-                } else {
-                  return sql.null;
-                }
-              }),
-              ","
-            )})::${sql.identifier(
-              tablePgType.namespaceName,
-              tablePgType.name
-            )}`;
-          },
-        };
-
-        if (table.isSelectable) {
-          /* const TablePatchType = */
-          newWithHooks(
-            GraphQLInputObjectType,
-            {
-              description: `Represents an update to a \`${tableTypeName}\`. Fields that are set will be updated.`,
-              name: inflection.patchType(TableType),
-            },
-            {
-              pgIntrospection: table,
-              isPgRowType: table.isSelectable,
-              isPgCompoundType: !table.isSelectable,
-              isPgPatch: true,
-              pgAddSubfield(fieldName, _attrName, _type, spec) {
-                // We don't use this currently
-                return spec;
-              },
+        pgRegisterGqlTypeByTypeId(
+          tablePgType.id,
+          cb => {
+            if (pg2GqlMapper[tablePgType.id]) {
+              // Already handled
+              throw new Error(
+                `Register was called but there's already a mapper in place for '${tablePgType.id}'!`
+              );
             }
-          );
-        }
-        const EdgeType = newWithHooks(
-          GraphQLObjectType,
-          {
-            description: `A \`${tableTypeName}\` edge in the connection.`,
-            name: inflection.edge(TableType.name),
-            fields: ({ fieldWithHooks, recurseDataGeneratorsForField }) => {
-              recurseDataGeneratorsForField("node");
-              return {
-                cursor: fieldWithHooks("cursor", ({ addDataGenerator }) => {
-                  addDataGenerator(() => ({
-                    usesCursor: [true],
-                  }));
+            const TableType = newWithHooks(
+              GraphQLObjectType,
+              {
+                description: table.description || tablePgType.description,
+                name: tableTypeName,
+                interfaces: () => {
+                  if (shouldHaveNodeId) {
+                    return [getTypeByName("Node")];
+                  } else {
+                    return [];
+                  }
+                },
+                fields: ({ addDataGeneratorForField, Self }) => {
+                  const fields = {};
+                  if (shouldHaveNodeId) {
+                    // Enable nodeId interface
+                    addDataGeneratorForField(nodeIdFieldName, () => {
+                      return {
+                        pgQuery: queryBuilder => {
+                          queryBuilder.select(
+                            sql.fragment`json_build_array(${sql.join(
+                              primaryKeys.map(
+                                key =>
+                                  sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
+                                    key.name
+                                  )}`
+                              ),
+                              ", "
+                            )})`,
+                            "__identifiers"
+                          );
+                        },
+                      };
+                    });
+                    fields[nodeIdFieldName] = {
+                      description:
+                        "A globally unique identifier. Can be used in various places throughout the system to identify this single value.",
+                      type: new GraphQLNonNull(GraphQLID),
+                      resolve(data) {
+                        return (
+                          data.__identifiers &&
+                          getNodeIdForTypeAndIdentifiers(
+                            Self,
+                            ...data.__identifiers
+                          )
+                        );
+                      },
+                    };
+                  }
+                  return fields;
+                },
+              },
+              {
+                pgIntrospection: table,
+                isPgRowType: table.isSelectable,
+                isPgCompoundType: !table.isSelectable,
+              }
+            );
+            cb(TableType);
+            const pgInputFields = {};
+            const TableInputType = newWithHooks(
+              GraphQLInputObjectType,
+              {
+                description: `An input for mutations affecting \`${tableTypeName}\``,
+                name: inflection.inputType(TableType),
+              },
+              {
+                pgIntrospection: table,
+                isInputType: true,
+                isPgRowType: table.isSelectable,
+                isPgCompoundType: !table.isSelectable,
+                pgAddSubfield(fieldName, attrName, pgType, spec) {
+                  pgInputFields[fieldName] = {
+                    name: attrName,
+                    type: pgType,
+                  };
+                  return spec;
+                },
+              }
+            );
+            pg2GqlMapper[tablePgType.id] = {
+              map: _ => _,
+              unmap: obj => {
+                return sql.fragment`row(${sql.join(
+                  attributes.map(attr => {
+                    const fieldName = inflection.column(
+                      attr.name,
+                      table.name,
+                      table.namespaceName
+                    );
+                    const pgInputField = pgInputFields[fieldName];
+                    const v = obj[fieldName];
+                    if (pgInputField && v != null) {
+                      const { type } = pgInputField;
+                      return sql.fragment`${gql2pg(v, type)}::${sql.identifier(
+                        type.namespaceName,
+                        type.name
+                      )}`;
+                    } else {
+                      return sql.null;
+                    }
+                  }),
+                  ","
+                )})::${sql.identifier(
+                  tablePgType.namespaceName,
+                  tablePgType.name
+                )}`;
+              },
+            };
+
+            if (table.isSelectable) {
+              /* const TablePatchType = */
+              newWithHooks(
+                GraphQLInputObjectType,
+                {
+                  description: `Represents an update to a \`${tableTypeName}\`. Fields that are set will be updated.`,
+                  name: inflection.patchType(TableType),
+                },
+                {
+                  pgIntrospection: table,
+                  isPgRowType: table.isSelectable,
+                  isPgCompoundType: !table.isSelectable,
+                  isPgPatch: true,
+                  pgAddSubfield(fieldName, _attrName, _type, spec) {
+                    // We don't use this currently
+                    return spec;
+                  },
+                }
+              );
+            }
+            const EdgeType = newWithHooks(
+              GraphQLObjectType,
+              {
+                description: `A \`${tableTypeName}\` edge in the connection.`,
+                name: inflection.edge(TableType.name),
+                fields: ({ fieldWithHooks, recurseDataGeneratorsForField }) => {
+                  recurseDataGeneratorsForField("node");
                   return {
-                    description: "A cursor for use in pagination.",
-                    type: Cursor,
-                    resolve(data) {
-                      return (
-                        data.__cursor && base64(JSON.stringify(data.__cursor))
-                      );
+                    cursor: fieldWithHooks("cursor", ({ addDataGenerator }) => {
+                      addDataGenerator(() => ({
+                        usesCursor: [true],
+                      }));
+                      return {
+                        description: "A cursor for use in pagination.",
+                        type: Cursor,
+                        resolve(data) {
+                          return (
+                            data.__cursor &&
+                            base64(JSON.stringify(data.__cursor))
+                          );
+                        },
+                      };
+                    }),
+                    node: {
+                      description: `The \`${tableTypeName}\` at the end of the edge.`,
+                      type: new GraphQLNonNull(TableType),
+                      resolve(data) {
+                        return data;
+                      },
                     },
                   };
-                }),
-                node: {
-                  description: `The \`${tableTypeName}\` at the end of the edge.`,
-                  type: new GraphQLNonNull(TableType),
-                  resolve(data) {
-                    return data;
-                  },
                 },
-              };
-            },
+              },
+              {
+                isEdgeType: true,
+                isPgRowEdgeType: true,
+                nodeType: TableType,
+                pgIntrospection: table,
+              }
+            );
+            const PageInfo = getTypeByName("PageInfo");
+            /*const ConnectionType = */
+            newWithHooks(
+              GraphQLObjectType,
+              {
+                description: `A connection to a list of \`${tableTypeName}\` values.`,
+                name: inflection.connection(TableType.name),
+                fields: ({ recurseDataGeneratorsForField }) => {
+                  recurseDataGeneratorsForField("edges");
+                  recurseDataGeneratorsForField("nodes");
+                  recurseDataGeneratorsForField("pageInfo");
+                  return {
+                    nodes: {
+                      description: `A list of \`${tableTypeName}\` objects.`,
+                      type: new GraphQLNonNull(new GraphQLList(TableType)),
+                      resolve(data) {
+                        return data.data;
+                      },
+                    },
+                    edges: {
+                      description: `A list of edges which contains the \`${tableTypeName}\` and cursor to aid in pagination.`,
+                      type: new GraphQLNonNull(
+                        new GraphQLList(new GraphQLNonNull(EdgeType))
+                      ),
+                      resolve(data) {
+                        return data.data;
+                      },
+                    },
+                    pageInfo: PageInfo && {
+                      description: "Information to aid in pagination.",
+                      type: new GraphQLNonNull(PageInfo),
+                      resolve(data) {
+                        return data;
+                      },
+                    },
+                  };
+                },
+              },
+              {
+                isConnectionType: true,
+                isPgRowConnectionType: true,
+                edgeType: EdgeType,
+                nodeType: TableType,
+                pgIntrospection: table,
+              }
+            );
           },
-          {
-            isEdgeType: true,
-            isPgRowEdgeType: true,
-            nodeType: TableType,
-            pgIntrospection: table,
-          }
+          true
         );
-        const PageInfo = getTypeByName("PageInfo");
-        /*const ConnectionType = */
-        newWithHooks(
-          GraphQLObjectType,
-          {
-            description: `A connection to a list of \`${tableTypeName}\` values.`,
-            name: inflection.connection(TableType.name),
-            fields: ({ recurseDataGeneratorsForField }) => {
-              recurseDataGeneratorsForField("edges");
-              recurseDataGeneratorsForField("nodes");
-              recurseDataGeneratorsForField("pageInfo");
-              return {
-                nodes: {
-                  description: `A list of \`${tableTypeName}\` objects.`,
-                  type: new GraphQLNonNull(new GraphQLList(TableType)),
-                  resolve(data) {
-                    return data.data;
-                  },
-                },
-                edges: {
-                  description: `A list of edges which contains the \`${tableTypeName}\` and cursor to aid in pagination.`,
-                  type: new GraphQLNonNull(
-                    new GraphQLList(new GraphQLNonNull(EdgeType))
-                  ),
-                  resolve(data) {
-                    return data.data;
-                  },
-                },
-                pageInfo: PageInfo && {
-                  description: "Information to aid in pagination.",
-                  type: new GraphQLNonNull(PageInfo),
-                  resolve(data) {
-                    return data;
-                  },
-                },
-              };
-            },
+        pgRegisterGqlInputTypeByTypeId(
+          tablePgType.id,
+          () => {
+            const TableType = pgGetGqlTypeByTypeId(tablePgType.id);
+            return getTypeByName(inflection.inputType(TableType));
           },
-          {
-            isConnectionType: true,
-            isPgRowConnectionType: true,
-            edgeType: EdgeType,
-            nodeType: TableType,
-            pgIntrospection: table,
-          }
+          true
         );
-        pgGqlTypeByTypeId[tablePgType.id] = TableType;
-        pgGqlInputTypeByTypeId[tablePgType.id] = TableInputType;
+
         if (arrayTablePgType) {
-          pgGqlTypeByTypeId[arrayTablePgType.id] = new GraphQLList(TableType);
-          pgGqlInputTypeByTypeId[arrayTablePgType.id] = new GraphQLList(
-            TableInputType
+          pgRegisterGqlTypeByTypeId(
+            arrayTablePgType.id,
+            () => {
+              const TableType = pgGetGqlTypeByTypeId(tablePgType.id);
+              return new GraphQLList(TableType);
+            },
+            true
+          );
+          pgRegisterGqlInputTypeByTypeId(
+            arrayTablePgType.id,
+            () => {
+              const TableInputType = pgGetGqlInputTypeByTypeId(tablePgType.id);
+              return new GraphQLList(TableInputType);
+            },
+            true
           );
         }
       });
