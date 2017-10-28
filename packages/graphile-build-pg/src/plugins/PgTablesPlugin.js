@@ -319,6 +319,13 @@ export default (function PgTablesPlugin(builder, { pgInflection: inflection }) {
         );
 
         if (arrayTablePgType) {
+          // Note: these do not return
+          //
+          // `new GraphQLList(new GraphQLNonNull(...))`
+          //
+          // because it's possible to return null entries from postgresql
+          // functions. We should probably add a flag to instead export
+          // the non-null version as that's more typical.
           pgRegisterGqlTypeByTypeId(
             arrayTablePgType.id,
             () => {
