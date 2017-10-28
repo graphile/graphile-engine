@@ -192,6 +192,21 @@ with
       *
     from
       type_all as typ
+    where
+      typ.id in (select "typeId" from class) or
+      typ.id in (select "typeId" from attribute) or
+      typ.id in (select "returnTypeId" from procedure) or
+      typ.id in (select unnest("argTypeIds") from procedure) or
+      -- If this type is a base type for *any* domain type, we will include it
+      -- in our selection. This may mean we fetch more types than we need, but
+      -- the alternative is to do some funky SQL recursion which would be hard
+      -- code to read. So we prefer code readability over selecting like 3 or
+      -- 4 less type rows.
+      --
+      -- We also do this for range sub types and array item types.
+      typ.id in (select "domainBaseTypeId" from type_all) or
+      typ.id in (select "rangeSubTypeId" from type_all) or
+      typ.id in (select "arrayItemTypeId" from type_all)
     order by
       "namespaceId", "name"
   ),
