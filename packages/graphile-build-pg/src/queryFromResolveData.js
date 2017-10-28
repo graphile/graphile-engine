@@ -111,7 +111,7 @@ export default (
         const orderBy = queryBuilder
           .getOrderByExpressionsAndDirections()
           .map(([expr]) => expr);
-        if (orderBy.length > 0) {
+        if (queryBuilder.isOrderUnique() && orderBy.length > 0) {
           return sql.fragment`json_build_array(${sql.join(
             [
               ...getPgCursorPrefix(),
@@ -188,8 +188,19 @@ export default (
     const haveFields = queryBuilder.getSelectFieldsCount() > 0;
     const sqlQueryAlias = sql.identifier(Symbol());
     const sqlSummaryAlias = sql.identifier(Symbol());
+    // Tables should ALWAYS push their PK onto the order stack, if this
+    // isn't present then we're either dealing with a view or a table
+    // without a PK. Either way, we're going to need something else to
+    // guarantee cursor uniqueness.
+    //
+    // If this is used, we DO NOT GUARANTEE in any way that the cursors
+    // will not change value/order!
+    //
+    // TODO: add a warning if this fires and it's not a view.
+    // TODO: if it is a view maybe add a warning encouraging pgViewUniqueKey
     const canHaveCursorInWhere =
-      queryBuilder.getOrderByExpressionsAndDirections().length > 0;
+      queryBuilder.getOrderByExpressionsAndDirections().length > 0 &&
+      queryBuilder.isOrderUnique();
     const queryHasBefore =
       queryBuilder.compiledData.whereBound.upper.length > 0;
     const queryHasAfter = queryBuilder.compiledData.whereBound.lower.length > 0;

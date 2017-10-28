@@ -93,7 +93,7 @@ export default (async function PgAllRows(
                         builder => {
                           if (primaryKeys) {
                             builder.beforeLock("orderBy", () => {
-                              if (!builder.isOrderUnique()) {
+                              if (!builder.isOrderUnique(false)) {
                                 // Order by PK if no order specified
                                 builder.data.cursorPrefix = ["primary_key_asc"];
                                 primaryKeys.forEach(key => {
@@ -120,11 +120,6 @@ export default (async function PgAllRows(
                               );
                               builder.setOrderIsUnique();
                             });
-                          } else {
-                            builder.orderBy(
-                              sql.fragment`(row_number() over (partition by 1))`,
-                              true
-                            );
                           }
                         }
                       );
