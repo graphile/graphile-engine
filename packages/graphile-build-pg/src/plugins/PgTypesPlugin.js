@@ -367,8 +367,7 @@ export default (function PgTypesPlugin(
       } catch (e) {
         const error = new Error(
           `Error occurred when processing type '${type.namespaceName}.${type.name}' (type=${type.type}):\n${indent(
-            e.message,
-            2
+            e.message
           )}`
         );
         // $FlowFixMe
