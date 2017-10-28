@@ -133,7 +133,10 @@ export default (function PgTablesPlugin(
                     resolve(data) {
                       return (
                         data.__identifiers &&
-                    getNodeIdForTypeAndIdentifiers(Self, ...data.__identifiers)
+                        getNodeIdForTypeAndIdentifiers(
+                          Self,
+                          ...data.__identifiers
+                        )
                       );
                     },
                   };
