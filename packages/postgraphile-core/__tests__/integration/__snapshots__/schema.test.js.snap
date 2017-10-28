@@ -133,6 +133,11 @@ type CompoundTypesEdge {
   node: CompoundType!
 }
 
+type Comptype {
+  isOptimised: Boolean
+  schedule: Datetime
+}
+
 # All input for the create \`CompoundKey\` mutation.
 input CreateCompoundKeyInput {
   # An arbitrary string value with no semantic meaning. Will be included in the
@@ -871,6 +876,8 @@ input PersonPatch {
 type Post {
   authorId: Int
   body: String
+  comptypes: [Comptype]
+  enums: [AnEnum]
   headline: String!
   rowId: Int!
 }
@@ -6282,6 +6289,11 @@ type CompoundTypesEdge {
   node: CompoundType!
 }
 
+type Comptype {
+  isOptimised: Boolean
+  schedule: Datetime
+}
+
 # A location in a connection that can be used for resuming pagination.
 scalar Cursor
 
@@ -6730,6 +6742,8 @@ input PersonCondition {
 type Post {
   authorId: Int
   body: String
+  comptypes: [Comptype]
+  enums: [AnEnum]
   headline: String!
   id: Int!
 }
