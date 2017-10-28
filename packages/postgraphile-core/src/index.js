@@ -28,7 +28,8 @@ type PostGraphQLOptions = {
   classicIds?: boolean,
   disableDefaultMutations?: string,
   nodeIdFieldName?: string,
-  graphqlBuildOptions?: Options,
+  graphileBuildOptions?: Options,
+  graphqlBuildOptions?: Options, // DEPRECATED!
   replaceAllPlugins?: Array<Plugin>,
   appendPlugins?: Array<Plugin>,
   prependPlugins?: Array<Plugin>,
@@ -76,7 +77,8 @@ const getPostGraphQLBuilder = async (
     jwtPgTypeIdentifier,
     jwtSecret,
     disableDefaultMutations,
-    graphqlBuildOptions,
+    graphileBuildOptions,
+    graphqlBuildOptions, // DEPRECATED!
     inflector,
     pgColumnFilter,
   } = options;
@@ -118,7 +120,8 @@ const getPostGraphQLBuilder = async (
         pgJwtSecret: jwtSecret,
         pgDisableDefaultMutations: disableDefaultMutations,
       },
-      graphqlBuildOptions
+      graphileBuildOptions,
+      graphqlBuildOptions // DEPRECATED!
     )
   );
 };
