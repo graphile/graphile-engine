@@ -184,7 +184,7 @@ mutation {
     }
     query { nodeId }
   }
-  g: createPerso(input: {
+  g: createPerson(input: {
     person: {
       id: 1998
       name: "Budd Deey"
