@@ -24,5 +24,5 @@ mutation {
   returnVoidMutation(input: {}) { __typename }
   guidFn(input: {g: null}) { guid }
   guidFn2: guidFn(input: {g: "0123456789abcde"}) { guid }
-  postMany(input: {posts: [{headline: "headline", body: "body", authorId: 9000, enums: AWAITING, comptypes: {schedule: "2009-10-24 10:23:54+02", isOptimised: true}}]}) { posts { id } }
+  postMany(input: {posts: [{id: 7, headline: "headline", body: "body", authorId: 9000, enums: AWAITING, comptypes: {schedule: "2009-10-24 10:23:54+02", isOptimised: true}}]}) { posts { id headline comptypes { schedule isOptimised } } }
 }
