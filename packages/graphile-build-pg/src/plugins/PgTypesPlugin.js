@@ -126,7 +126,9 @@ export default (function PgTypesPlugin(
         return pg2gql(val, type.domainBaseType);
       } else if (type.arrayItemType) {
         if (!Array.isArray(val)) {
-          throw new Error("Expected array");
+          throw new Error(
+            `Expected array when converting PostgreSQL data into GraphQL; failing type: '${type.namespaceName}.${type.name}'`
+          );
         }
         return val.map(v => pg2gql(v, type.arrayItemType));
       } else {
@@ -143,7 +145,12 @@ export default (function PgTypesPlugin(
         return gql2pg(val, type.domainBaseType);
       } else if (type.arrayItemType) {
         if (!Array.isArray(val)) {
-          throw new Error("Expected array");
+          throw new Error(
+            `Expected array when converting GraphQL data into PostgreSQL data; failing type: '${type.namespaceName}.${type.name}' (type: ${type ===
+            null
+              ? "null"
+              : typeof type})`
+          );
         }
         return sql.fragment`array[${sql.join(
           val.map(v => gql2pg(v, type.arrayItemType)),
@@ -268,10 +275,10 @@ export default (function PgTypesPlugin(
         );
         if (process.env.NODE_ENV === "test") {
           throw error;
-        } else {
-          // eslint-disable-next-line no-console
-          console.error(error);
         }
+        // eslint-disable-next-line no-console
+        console.error(error);
+        return fragment;
       } else {
         return fragment;
       }
