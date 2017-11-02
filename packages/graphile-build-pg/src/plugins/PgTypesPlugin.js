@@ -262,6 +262,16 @@ export default (function PgTypesPlugin(
         return tweaker(fragment);
       } else if (type.domainBaseType) {
         return pgTweakFragmentForType(fragment, type.domainBaseType);
+      } else if (type.arrayItemType) {
+        const error = new Error(
+          "Internal graphile-build-pg error: should not attempt to tweak an array, please process array before tweaking (type: `${type.namespaceName}.${type.name}`)"
+        );
+        if (process.env.NODE_ENV === "test") {
+          throw error;
+        } else {
+          // eslint-disable-next-line no-console
+          console.error(error);
+        }
       } else {
         return fragment;
       }
