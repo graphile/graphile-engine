@@ -71,12 +71,15 @@ export default (function PgColumnsPlugin(
                 const { alias } = parsedResolveInfoFragment;
                 return {
                   pgQuery: queryBuilder => {
-                    const blahForType = (sqlFullName, type) => {
+                    const getSelectValueForFieldAndType = (
+                      sqlFullName,
+                      type
+                    ) => {
                       if (type.arrayItemType) {
                         const ident = sql.identifier(Symbol());
                         return sql.fragment`
                           (
-                            select json_agg(${blahForType(
+                            select json_agg(${getSelectValueForFieldAndType(
                               ident,
                               type.arrayItemType
                             )})
@@ -84,13 +87,6 @@ export default (function PgColumnsPlugin(
                           )
                         `;
                       } else if (type.type === "c") {
-                        // json_build_object
-                        /*
-                          queryBuilder.select(
-                            sql.identifier(queryBuilder.getTableAlias(), name),
-                            alias
-                          );
-                          */
                         const resolveData = getDataFromParsedResolveInfoFragment(
                           parsedResolveInfoFragment,
                           ReturnType
@@ -107,7 +103,7 @@ export default (function PgColumnsPlugin(
                       }
                     };
                     queryBuilder.select(
-                      blahForType(
+                      getSelectValueForFieldAndType(
                         sql.fragment`(${queryBuilder.getTableAlias()}.${sql.identifier(
                           attr.name
                         )})`, // The brackets are necessary to stop the parser getting confused, ref: https://www.postgresql.org/docs/9.6/static/rowtypes.html#ROWTYPES-ACCESSING
