@@ -124,6 +124,11 @@ export default (function PgTypesPlugin(
         return pg2GqlMapper[type.id].map(val);
       } else if (type.domainBaseType) {
         return pg2gql(val, type.domainBaseType);
+      } else if (type.arrayItemType) {
+        if (!Array.isArray(val)) {
+          throw new Error("Expected array");
+        }
+        return val.map(v => pg2gql(v, type.arrayItemType));
       } else {
         return val;
       }
