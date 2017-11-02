@@ -136,6 +136,16 @@ export default (function PgTypesPlugin(
         return pg2GqlMapper[type.id].unmap(val);
       } else if (type.domainBaseType) {
         return gql2pg(val, type.domainBaseType);
+      } else if (type.arrayItemType) {
+        if (!Array.isArray(val)) {
+          throw new Error("Expected array");
+        }
+        return sql.fragment`array[${sql.join(
+          val.map(v => gql2pg(v, type.arrayItemType)),
+          ", "
+        )}]::${sql.identifier(type.namespaceName)}.${sql.identifier(
+          type.name
+        )}`;
       } else {
         return sql.value(val);
       }
