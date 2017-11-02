@@ -351,6 +351,26 @@ Object {
         "nullValue": null,
       },
     },
+    "j": Object {
+      "post": Object {
+        "comptypes": Array [
+          Object {
+            "isOptimised": true,
+            "schedule": "2009-10-24T04:23:54-04:00",
+          },
+          Object {
+            "isOptimised": false,
+            "schedule": "2008-10-24T04:23:54-04:00",
+          },
+          Object {
+            "isOptimised": null,
+            "schedule": "2007-10-24T04:23:54-04:00",
+          },
+        ],
+        "headline": "super headline",
+        "id": 12,
+      },
+    },
   },
 }
 `;
