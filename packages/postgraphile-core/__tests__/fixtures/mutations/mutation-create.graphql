@@ -239,7 +239,7 @@ mutation {
       headline
       comptypes {
         schedule
-        is_optimised: isOptimised
+        isOptimised
       }
     }
   }
