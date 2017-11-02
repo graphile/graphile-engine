@@ -813,6 +813,26 @@ Object {
           "headline": "headline",
           "id": 7,
         },
+        Object {
+          "comptypes": Array [
+            Object {
+              "isOptimised": null,
+              "schedule": "2009-10-24T04:23:54-04:00",
+            },
+          ],
+          "headline": "headline",
+          "id": 8,
+        },
+        Object {
+          "comptypes": Array [
+            Object {
+              "isOptimised": false,
+              "schedule": "2009-10-24T04:23:54-04:00",
+            },
+          ],
+          "headline": "headline",
+          "id": 9,
+        },
       ],
     },
     "returnVoidMutation": Object {
