@@ -6,4 +6,28 @@ const bindAll = (obj: {}, keys: Array<string>) => {
   return obj;
 };
 
-export { bindAll };
+const parseTags = (str: string) => {
+  return str.split(`\n`).reduce((prev, curr) => {
+    const match = curr.match(/^@[a-z]+ ?/);
+    return match &&
+    prev.text === "" &&
+    curr.split(" ")[0] === match[0].split(" ")[0]
+      ? {
+          ...prev,
+          tags: {
+            ...prev.tags,
+            [match[0].substr(1).trim()]:
+              match[0] === curr ? true : curr.replace(match[0], ""),
+          },
+        }
+      : {
+          ...prev,
+          text: prev.text === "" ? curr : `${prev.text}\n${curr}`,
+        };
+  }, {
+    tags: {},
+    text: "",
+  });
+};
+
+export { bindAll, parseTags };
