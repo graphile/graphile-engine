@@ -12,18 +12,15 @@ const parseTags = (str: string) => {
     return match &&
     prev.text === "" &&
     curr.split(" ")[0] === match[0].split(" ")[0]
-      ? {
-          ...prev,
-          tags: {
-            ...prev.tags,
+      ? Object.assign({}, prev, {
+          tags: Object.assign({}, prev.tags, {
             [match[0].substr(1).trim()]:
               match[0] === curr ? true : curr.replace(match[0], ""),
-          },
-        }
-      : {
-          ...prev,
+          }),
+        })
+      : Object.assign({}, prev, {
           text: prev.text === "" ? curr : `${prev.text}\n${curr}`,
-        };
+        });
   }, {
     tags: {},
     text: "",

@@ -7,11 +7,10 @@ export default (function DeprecateFromCommentPlugin(builder: SchemaBuilder) {
     if (typeof field.description !== "string") return field;
     const parsed = parseTags(field.description);
     return parsed.tags.deprecated
-      ? {
-          ...field,
+      ? Object.assign({}, field, {
           description: parsed.text,
           deprecationReason: parsed.tags.deprecated,
-        }
+        })
       : field;
   });
 }: Plugin);
