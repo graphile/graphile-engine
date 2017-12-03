@@ -314,10 +314,21 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
               recurseDataGeneratorsForField,
               Self,
               GraphQLObjectType: rawSpec,
-              fieldWithHooks: ((fieldName, spec, fieldScope = {}) => {
+              fieldWithHooks: ((fieldName, spec, fieldScope) => {
                 if (!isString(fieldName)) {
                   throw new Error(
                     "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
+                  );
+                }
+                if (!fieldScope) {
+                  throw new Error(
+                    "All calls to `fieldWithHooks` must specify a `fieldScope` " +
+                      "argument that gives additional context about the field so " +
+                      "that further plugins may more easily understand the field. " +
+                      "Keys within this object should contain the phrase 'field' " +
+                      "since they will be merged into the parent objects scope and " +
+                      "are not allowed to clash. If you really have no additional " +
+                      "information to give, please just pass `{}`."
                   );
                 }
                 let argDataGenerators = [];
