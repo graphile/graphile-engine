@@ -60,9 +60,7 @@ export default (function PgColumnsPlugin(
               `Two columns produce the same GraphQL field name '${fieldName}' on class '${table.namespaceName}.${table.name}'; one of them is '${attr.name}'`
             );
           }
-          memo[
-            fieldName
-          ] = fieldWithHooks(
+          memo[fieldName] = fieldWithHooks(
             fieldName,
             ({ getDataFromParsedResolveInfoFragment, addDataGenerator }) => {
               const ReturnType =
@@ -125,7 +123,8 @@ export default (function PgColumnsPlugin(
                   return pg2gql(data[alias], attr.type);
                 },
               };
-            }
+            },
+            { pgFieldIntrospection: attr }
           );
           return memo;
         }, {})

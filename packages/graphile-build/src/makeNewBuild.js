@@ -440,10 +440,11 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
               const fieldSpec = fieldsSpec[fieldName];
               if (processedFields.indexOf(fieldSpec) < 0) {
                 // We've not processed this yet; process it now!
-                fieldsSpec[fieldName] = fieldsContext.fieldWithHooks(
-                  fieldName,
-                  fieldSpec
-                );
+                fieldsSpec[
+                  fieldName
+                ] = fieldsContext.fieldWithHooks(fieldName, fieldSpec, {
+                  autoField: true, // We don't have any additional information
+                });
               }
             }
             return fieldsSpec;
@@ -516,10 +517,11 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
               const fieldSpec = fieldsSpec[fieldName];
               if (processedFields.indexOf(fieldSpec) < 0) {
                 // We've not processed this yet; process it now!
-                fieldsSpec[fieldName] = fieldsContext.fieldWithHooks(
-                  fieldName,
-                  fieldSpec
-                );
+                fieldsSpec[
+                  fieldName
+                ] = fieldsContext.fieldWithHooks(fieldName, fieldSpec, {
+                  autoField: true, // We don't have any additional information
+                });
               }
             }
             return fieldsSpec;
