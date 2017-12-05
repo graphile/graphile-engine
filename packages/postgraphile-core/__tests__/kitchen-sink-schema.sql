@@ -28,6 +28,9 @@ create table c.person (
   created_at timestamp default current_timestamp
 );
 
+-- This should not add a query to the schema
+create unique index uniq_person__email_id_3 on c.person (email) where (id = 3);
+
 comment on table c.person is 'Person test comment';
 comment on column c.person.name is 'The person’s name';
 
@@ -60,6 +63,9 @@ create table a.post (
   comptypes a.comptype[]
 );
 
+-- This should not add a query to the schema
+create unique index uniq_post__headline_author_3 on a.post (headline) where (author_id = 3);
+
 create type a.letter as enum ('a', 'b', 'c', 'd');
 create type b.color as enum ('red', 'green', 'blue');
 create type b.enum_caps as enum ('FOO_BAR', 'BAR_FOO', 'BAZ_QUX', '0_BAR');
@@ -80,6 +86,8 @@ create type b.nested_compound_type as (
   b c.compound_type,
   baz_buz int
 );
+
+create type c.floatrange as range (subtype = float8, subtype_diff = float8mi);
 
 comment on type c.compound_type is 'Awesome feature!';
 
@@ -181,6 +189,12 @@ create function a.add_2_query(a int, b int default 2) returns int as $$ select $
 create function a.add_3_query(a int, int) returns int as $$ select $1 + $2 $$ language sql immutable;
 create function a.add_4_query(int, b int default 2) returns int as $$ select $1 + $2 $$ language sql stable;
 
+create function a.optional_missing_middle_1(int, b int default 2, c int default 3) returns int as $$ select $1 + $2 + $3 $$ language sql immutable strict;
+create function a.optional_missing_middle_2(a int, b int default 2, c int default 3) returns int as $$ select $1 + $2 + $3 $$ language sql immutable strict;
+create function a.optional_missing_middle_3(a int, int default 2, c int default 3) returns int as $$ select $1 + $2 + $3 $$ language sql immutable strict;
+create function a.optional_missing_middle_4(int, b int default 2, int default 3) returns int as $$ select $1 + $2 + $3 $$ language sql immutable strict;
+create function a.optional_missing_middle_5(a int, int default 2, int default 3) returns int as $$ select $1 + $2 + $3 $$ language sql immutable strict;
+
 comment on function a.add_1_mutation(int, int) is 'lol, add some stuff 1 mutation';
 comment on function a.add_2_mutation(int, int) is 'lol, add some stuff 2 mutation';
 comment on function a.add_3_mutation(int, int) is 'lol, add some stuff 3 mutation';
@@ -201,8 +215,8 @@ create function c.jsonb_identity(json jsonb) returns jsonb as $$ select json $$ 
 create function c.jsonb_identity_mutation(json jsonb) returns jsonb as $$ select json $$ language sql;
 create function c.jsonb_identity_mutation_plpgsql(_the_json jsonb) returns jsonb as $$ declare begin return _the_json; end; $$ language plpgsql strict security definer;
 create function c.jsonb_identity_mutation_plpgsql_with_default(_the_json jsonb default '[]') returns jsonb as $$ declare begin return _the_json; end; $$ language plpgsql strict security definer;
-create function c.types_query(a bigint, b boolean, c varchar, d integer[], e json, f numrange) returns boolean as $$ select false $$ language sql stable strict;
-create function c.types_mutation(a bigint, b boolean, c varchar, d integer[], e json, f numrange) returns boolean as $$ select false $$ language sql strict;
+create function c.types_query(a bigint, b boolean, c varchar, d integer[], e json, f c.floatrange) returns boolean as $$ select false $$ language sql stable strict;
+create function c.types_mutation(a bigint, b boolean, c varchar, d integer[], e json, f c.floatrange) returns boolean as $$ select false $$ language sql strict;
 create function b.compound_type_query(object c.compound_type) returns c.compound_type as $$ select (object.a + 1, object.b, object.c, object.d, object.e, object.f, object.foo_bar)::c.compound_type $$ language sql stable;
 create function c.compound_type_set_query() returns setof c.compound_type as $$ select (1, '2', 'blue', null, '0_BAR', '', 7)::c.compound_type $$ language sql stable;
 create function b.compound_type_mutation(object c.compound_type) returns c.compound_type as $$ select (object.a + 1, object.b, object.c, object.d, object.e, object.f, object.foo_bar)::c.compound_type $$ language sql;

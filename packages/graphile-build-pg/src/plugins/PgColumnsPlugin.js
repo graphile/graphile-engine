@@ -1,9 +1,8 @@
 // @flow
-import { GraphQLNonNull, GraphQLString } from "graphql";
 import queryFromResolveData from "../queryFromResolveData";
 import type { Plugin } from "graphile-build";
 
-const nullableIf = (condition, Type) =>
+const nullableIf = (GraphQLNonNull, condition, Type) =>
   condition ? Type : new GraphQLNonNull(Type);
 
 const defaultPgColumnFilter = (_attr, _build, _context) => true;
@@ -19,6 +18,7 @@ export default (function PgColumnsPlugin(
       pgIntrospectionResultsByKind: introspectionResultsByKind,
       pgSql: sql,
       pg2gql,
+      graphql: { GraphQLString, GraphQLNonNull },
       getAliasFromResolveInfo,
       pgTweakFragmentForType,
     } = build;
@@ -60,9 +60,7 @@ export default (function PgColumnsPlugin(
               `Two columns produce the same GraphQL field name '${fieldName}' on class '${table.namespaceName}.${table.name}'; one of them is '${attr.name}'`
             );
           }
-          memo[
-            fieldName
-          ] = fieldWithHooks(
+          memo[fieldName] = fieldWithHooks(
             fieldName,
             ({ getDataFromParsedResolveInfoFragment, addDataGenerator }) => {
               const ReturnType =
@@ -117,6 +115,7 @@ export default (function PgColumnsPlugin(
               return {
                 description: attr.description,
                 type: nullableIf(
+                  GraphQLNonNull,
                   !attr.isNotNull && !attr.type.domainIsNotNull,
                   ReturnType
                 ),
@@ -125,7 +124,8 @@ export default (function PgColumnsPlugin(
                   return pg2gql(data[alias], attr.type);
                 },
               };
-            }
+            },
+            { pgFieldIntrospection: attr }
           );
           return memo;
         }, {})
@@ -136,6 +136,7 @@ export default (function PgColumnsPlugin(
       extend,
       pgGetGqlInputTypeByTypeId,
       pgIntrospectionResultsByKind: introspectionResultsByKind,
+      graphql: { GraphQLString, GraphQLNonNull },
     } = build;
     const {
       scope: {
@@ -172,6 +173,7 @@ export default (function PgColumnsPlugin(
           memo[fieldName] = pgAddSubfield(fieldName, attr.name, attr.type, {
             description: attr.description,
             type: nullableIf(
+              GraphQLNonNull,
               isPgPatch ||
                 (!attr.isNotNull && !attr.type.domainIsNotNull) ||
                 attr.hasDefault,

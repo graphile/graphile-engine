@@ -107,8 +107,10 @@ export default function makeProcField(
     );
   }
   let type;
-  const scope = {};
-  scope.pgIntrospection = proc;
+  const fieldScope = {};
+  const payloadTypeScope = {};
+  fieldScope.pgFieldIntrospection = proc;
+  payloadTypeScope.pgIntrospection = proc;
   let returnFirstValueAsValue = false;
   const TableType =
     returnTypeTable && pgGetGqlTypeByTypeId(returnTypeTable.type.id);
@@ -131,15 +133,17 @@ export default function makeProcField(
           );
         }
         type = new GraphQLNonNull(ConnectionType);
-        scope.isPgConnectionField = true;
+        fieldScope.isPgFieldConnection = true;
       }
-      scope.pgIntrospectionTable = returnTypeTable;
+      fieldScope.pgFieldIntrospectionTable = returnTypeTable;
+      payloadTypeScope.pgIntrospectionTable = returnTypeTable;
     } else {
       type = TableType;
       if (rawReturnType.arrayItemType) {
         type = new GraphQLList(type);
       }
-      scope.pgIntrospectionTable = returnTypeTable;
+      fieldScope.pgFieldIntrospectionTable = returnTypeTable;
+      payloadTypeScope.pgIntrospectionTable = returnTypeTable;
     }
   } else {
     const Type = pgGetGqlTypeByTypeId(returnType.id) || GraphQLString;
@@ -156,7 +160,7 @@ export default function makeProcField(
           returnFirstValueAsValue = true;
         } else {
           type = new GraphQLNonNull(ConnectionType);
-          scope.isPgConnectionField = true;
+          fieldScope.isPgFieldConnection = true;
         }
       } else {
         returnFirstValueAsValue = true;
@@ -197,22 +201,27 @@ export default function makeProcField(
       ): SQL {
         const { args: rawArgs = {} } = parsedResolveInfoFragment;
         const args = isMutation ? rawArgs.input : rawArgs;
-        const sqlArgValues = argNames.map((argName, argIndex) => {
+        const sqlArgValues = [];
+        let haveNames = true;
+        for (let argIndex = argNames.length - 1; argIndex >= 0; argIndex--) {
+          const argName = argNames[argIndex];
           const gqlArgName = inflection.argument(argName, argIndex);
-          return gql2pg(args[gqlArgName], argTypes[argIndex]);
-        });
-        // Removes null arguments from end of args list if those arguments have
-        // defaults in SQL.
-        while (
-          sqlArgValues.length > requiredArgCount &&
-          args[
-            inflection.argument(
-              argNames[sqlArgValues.length - 1],
-              sqlArgValues.length - 1
-            )
-          ] == null
-        ) {
-          sqlArgValues.pop();
+          const value = args[gqlArgName];
+          const sqlValue = gql2pg(value, argTypes[argIndex]);
+          if (argIndex + 1 > requiredArgCount && haveNames && value == null) {
+            // No need to pass argument to function
+            continue;
+          } else if (argIndex + 1 > requiredArgCount && haveNames) {
+            const sqlArgName = argName ? sql.identifier(argName) : null;
+            if (sqlArgName) {
+              sqlArgValues.unshift(sql.fragment`${sqlArgName} := ${sqlValue}`);
+            } else {
+              haveNames = false;
+              sqlArgValues.unshift(sqlValue);
+            }
+          } else {
+            sqlArgValues.unshift(sqlValue);
+          }
         }
         return sql.fragment`${sql.identifier(
           proc.namespace.name,
@@ -345,7 +354,7 @@ export default function makeProcField(
             {
               isMutationPayload: true,
             },
-            scope
+            payloadTypeScope
           )
         );
         ReturnType = PayloadType;
@@ -497,6 +506,6 @@ export default function makeProcField(
             },
       };
     },
-    scope
+    fieldScope
   );
 }
