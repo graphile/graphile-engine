@@ -8,7 +8,6 @@ import {
   MutationPlugin,
   ClientMutationIdDescriptionPlugin,
   MutationPayloadQueryPlugin,
-  DeprecateFromCommentPlugin,
 } from "./plugins";
 import type { GraphQLSchema } from "graphql";
 
@@ -54,7 +53,6 @@ export const defaultPlugins: Array<Plugin> = [
   MutationPlugin,
   ClientMutationIdDescriptionPlugin,
   MutationPayloadQueryPlugin,
-  DeprecateFromCommentPlugin,
 ];
 
 export {
@@ -64,5 +62,4 @@ export {
   MutationPlugin,
   ClientMutationIdDescriptionPlugin,
   MutationPayloadQueryPlugin,
-  DeprecateFromCommentPlugin,
 };

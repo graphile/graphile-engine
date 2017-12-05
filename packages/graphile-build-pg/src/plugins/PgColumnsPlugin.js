@@ -113,7 +113,6 @@ export default (function PgColumnsPlugin(
                 };
               });
               return {
-                description: attr.description,
                 type: nullableIf(
                   GraphQLNonNull,
                   !attr.isNotNull && !attr.type.domainIsNotNull,

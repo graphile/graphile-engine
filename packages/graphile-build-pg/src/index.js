@@ -9,6 +9,7 @@ import PgConnectionArgOrderBy from "./plugins/PgConnectionArgOrderBy";
 import PgConnectionArgCondition from "./plugins/PgConnectionArgCondition";
 import PgAllRows from "./plugins/PgAllRows";
 import PgColumnsPlugin from "./plugins/PgColumnsPlugin";
+import PgColumnDescriptionsPlugin from "./plugins/PgColumnDescriptionsPlugin";
 import PgForwardRelationPlugin from "./plugins/PgForwardRelationPlugin";
 import PgBackwardRelationPlugin from "./plugins/PgBackwardRelationPlugin";
 import PgRowByUniqueConstraint from "./plugins/PgRowByUniqueConstraint";
@@ -41,6 +42,7 @@ export const defaultPlugins = [
   PgConnectionArgCondition,
   PgAllRows,
   PgColumnsPlugin,
+  PgColumnDescriptionsPlugin,
   PgForwardRelationPlugin,
   PgBackwardRelationPlugin,
   PgRowByUniqueConstraint,
@@ -74,6 +76,7 @@ export {
   PgConnectionArgCondition,
   PgAllRows,
   PgColumnsPlugin,
+  PgColumnDescriptionsPlugin,
   PgForwardRelationPlugin,
   PgBackwardRelationPlugin,
   PgRowByUniqueConstraint,
