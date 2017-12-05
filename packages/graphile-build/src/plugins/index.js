@@ -1,7 +1,6 @@
 // @flow
 
 import ClientMutationIdDescriptionPlugin from "./ClientMutationIdDescriptionPlugin";
-import DeprecateFromCommentPlugin from "./DeprecateFromCommentPlugin";
 import MutationPayloadQueryPlugin from "./MutationPayloadQueryPlugin";
 import MutationPlugin from "./MutationPlugin";
 import NodePlugin from "./NodePlugin";
@@ -10,7 +9,6 @@ import StandardTypesPlugin from "./StandardTypesPlugin";
 
 export {
   ClientMutationIdDescriptionPlugin,
-  DeprecateFromCommentPlugin,
   MutationPayloadQueryPlugin,
   MutationPlugin,
   NodePlugin,
