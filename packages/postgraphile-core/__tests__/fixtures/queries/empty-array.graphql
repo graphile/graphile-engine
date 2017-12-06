@@ -1,0 +1,12 @@
+query {
+  allPeople {
+    edges {
+      cursor
+      node {
+        id
+        name
+        aliases
+      }
+    }
+  }
+}
