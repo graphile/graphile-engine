@@ -1,6 +1,7 @@
 // @flow
 import type { Plugin } from "graphile-build";
 import withPgClient from "../withPgClient";
+import { parseTags } from "../utils";
 import { readFile as rawReadFile } from "fs";
 import pg from "pg";
 import debugFactory from "debug";
@@ -44,7 +45,7 @@ function readFile(filename, encoding) {
 
 export default (async function PgIntrospectionPlugin(
   builder,
-  { pgConfig, pgSchemas: schemas }
+  { pgConfig, pgSchemas: schemas, pgEnableTags }
 ) {
   async function introspect() {
     return withPgClient(pgConfig, async pgClient => {
@@ -57,6 +58,15 @@ export default (async function PgIntrospectionPlugin(
 
       const introspectionResultsByKind = rows.reduce(
         (memo, { object }) => {
+          if (object.description) {
+            if (pgEnableTags) {
+              const parsed = parseTags(object.description);
+              object.tags = parsed.tags;
+              object.description = parsed.text;
+            } else {
+              object.tags = {};
+            }
+          }
           memo[object.kind].push(object);
           return memo;
         },

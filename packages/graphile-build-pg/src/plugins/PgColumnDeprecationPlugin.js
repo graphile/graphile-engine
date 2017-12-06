@@ -1,8 +1,7 @@
 // @flow
 import type { Plugin } from "graphile-build";
-import { parseTags } from "../utils";
 
-export default (function PgColumnDescriptionsPlugin(builder) {
+export default (function PgColumnDeprecationPlugin(builder) {
   builder.hook("GraphQLObjectType:fields:field", (field, build, context) => {
     const {
       scope: {
@@ -17,18 +16,14 @@ export default (function PgColumnDescriptionsPlugin(builder) {
       !table ||
       table.kind !== "class" ||
       !pgFieldIntrospection ||
-      typeof pgFieldIntrospection.description !== "string"
+      typeof pgFieldIntrospection.tags !== "object"
     ) {
       return field;
     }
-    const parsed = parseTags(pgFieldIntrospection.description);
-    return parsed.tags.deprecated
+    return pgFieldIntrospection.tags.deprecated
       ? Object.assign({}, field, {
-          description: parsed.text,
-          deprecationReason: parsed.tags.deprecated,
+          deprecationReason: pgFieldIntrospection.tags.deprecated,
         })
-      : Object.assign({}, field, {
-          description: parsed.text,
-        });
+      : field;
   });
 }: Plugin);
