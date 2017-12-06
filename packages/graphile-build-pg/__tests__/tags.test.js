@@ -9,6 +9,7 @@ test('tags are removed correctly', () => {
   expect(parseTags(`@foo@bar Baz`).text).toBe(`@foo@bar Baz`)
   expect(parseTags(`Blah blah @deprecated`).text).toBe(`Blah blah @deprecated`)
   expect(parseTags(`Blah blah\n@deprecated`).text).toBe(`Blah blah\n@deprecated`)
+  expect(parseTags(`@jsonField date timestamp\n@jsonField name text\n@jsonField episode enum ONE=1 TWO=2\nBaz`).text).toBe(`Baz`)
 });
 
 test('tags are extracted correctly', () => {
@@ -20,4 +21,5 @@ test('tags are extracted correctly', () => {
   expect(parseTags(`@foo@bar Baz`).tags).toEqual({})
   expect(parseTags(`Blah blah @deprecated`).tags).toEqual({})
   expect(parseTags(`Blah blah\n@deprecated`).tags).toEqual({})
+  expect(parseTags(`@jsonField date timestamp\n@jsonField name text\n@jsonField episode enum ONE=1 TWO=2\nBaz`).tags).toEqual({jsonField: ["date timestamp", "name text", "episode enum ONE=1 TWO=2"]})
 });

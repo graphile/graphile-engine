@@ -47,19 +47,28 @@ export const upperCamelCase = (str: string): string =>
 
 export const parseTags = (str: string) => {
   return str.split(`\n`).reduce((prev, curr) => {
-    const match = curr.match(/^@[a-z]+ ?/);
-    return match &&
-    prev.text === "" &&
-    curr.split(" ")[0] === match[0].split(" ")[0]
-      ? Object.assign({}, prev, {
-          tags: Object.assign({}, prev.tags, {
-            [match[0].substr(1).trim()]:
-              match[0] === curr ? true : curr.replace(match[0], ""),
-          }),
-        })
-      : Object.assign({}, prev, {
-          text: prev.text === "" ? curr : `${prev.text}\n${curr}`,
-        });
+    if (prev.text !== "") {
+      return Object.assign({}, prev, {
+        text: `${prev.text}\n${curr}`,
+      });
+    }
+    const match = curr.match(/^@[a-zA-Z][a-zA-Z0-9_]*($|\s)/);
+    if (!match) {
+      return Object.assign({}, prev, {
+        text: curr,
+      });
+    }
+    const key = match[0].substr(1).trim();
+    const value = match[0] === curr ? true : curr.replace(match[0], "");
+    return Object.assign({}, prev, {
+      tags: Object.assign({}, prev.tags, {
+        [key]: !prev.tags.hasOwnProperty(key)
+          ? value
+          : prev.tags[key].constructor === Array
+            ? [...prev.tags[key], value]
+            : [prev.tags[key], value],
+      }),
+    });
   }, {
     tags: {},
     text: "",
