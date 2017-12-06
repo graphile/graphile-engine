@@ -64,7 +64,7 @@ export const parseTags = (str: string) => {
       tags: Object.assign({}, prev.tags, {
         [key]: !prev.tags.hasOwnProperty(key)
           ? value
-          : prev.tags[key].constructor === Array
+          : Array.isArray(prev.tags[key])
             ? [...prev.tags[key], value]
             : [prev.tags[key], value],
       }),
