@@ -58,15 +58,6 @@ export default (async function PgIntrospectionPlugin(
 
       const introspectionResultsByKind = rows.reduce(
         (memo, { object }) => {
-          if (object.description) {
-            if (pgEnableTags) {
-              const parsed = parseTags(object.description);
-              object.tags = parsed.tags;
-              object.description = parsed.text;
-            } else {
-              object.tags = {};
-            }
-          }
           memo[object.kind].push(object);
           return memo;
         },
@@ -79,6 +70,20 @@ export default (async function PgIntrospectionPlugin(
           procedure: [],
         }
       );
+
+      // Parse tags from comments
+      ["namespace", "class", "attribute", "type", "procedure"].forEach(kind => {
+        introspectionResultsByKind[kind].forEach(object => {
+          if (pgEnableTags && object.description) {
+            const parsed = parseTags(object.description);
+            object.tags = parsed.tags;
+            object.description = parsed.text;
+          } else {
+            object.tags = {};
+          }
+        });
+      });
+
       const xByY = (arrayOfX, attrKey) =>
         arrayOfX.reduce((memo, x) => {
           memo[x[attrKey]] = x;
