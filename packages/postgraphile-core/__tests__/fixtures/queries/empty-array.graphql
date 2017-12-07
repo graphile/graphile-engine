@@ -1,12 +1,9 @@
 query {
-  allPeople {
-    edges {
-      cursor
-      node {
-        id
-        name
-        aliases
-      }
+  allPeople(first: 1) {
+    nodes {
+      id
+      name
+      aliases
     }
   }
 }
