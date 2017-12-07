@@ -16,7 +16,7 @@ export default (function PgColumnDeprecationPlugin(builder) {
       !table ||
       table.kind !== "class" ||
       !pgFieldIntrospection ||
-      typeof pgFieldIntrospection.tags !== "object"
+      !pgFieldIntrospection.tags
     ) {
       return field;
     }
