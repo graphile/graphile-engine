@@ -108,8 +108,12 @@ const getPostGraphQLBuilder = async (
       ? [...prependPlugins, ...replaceAllPlugins, ...appendPlugins]
       : [
           ...prependPlugins,
-          ...defaultPlugins.filter(plugin => !removePlugins.includes(plugin)),
-          ...pgDefaultPlugins.filter(plugin => !removePlugins.includes(plugin)),
+          ...defaultPlugins.filter(
+            plugin => removePlugins.indexOf(plugin) === -1
+          ),
+          ...pgDefaultPlugins.filter(
+            plugin => removePlugins.indexOf(plugin) === -1
+          ),
           ...appendPlugins,
         ],
     Object.assign(
