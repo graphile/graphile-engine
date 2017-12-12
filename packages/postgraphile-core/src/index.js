@@ -33,6 +33,7 @@ type PostGraphQLOptions = {
   replaceAllPlugins?: Array<Plugin>,
   appendPlugins?: Array<Plugin>,
   prependPlugins?: Array<Plugin>,
+  removePlugins?: Array<Plugin>,
   jwtPgTypeIdentifier?: string,
   jwtSecret?: string,
   inflector?: Inflector,
@@ -76,6 +77,7 @@ const getPostGraphQLBuilder = async (
     replaceAllPlugins,
     appendPlugins = [],
     prependPlugins = [],
+    removePlugins = [],
     jwtPgTypeIdentifier,
     jwtSecret,
     disableDefaultMutations,
@@ -90,22 +92,24 @@ const getPostGraphQLBuilder = async (
     ensureValidPlugins("replaceAllPlugins", replaceAllPlugins);
     if (
       (prependPlugins && prependPlugins.length) ||
-      (appendPlugins && appendPlugins.length)
+      (appendPlugins && appendPlugins.length) ||
+      (removePlugins && removePlugins.length)
     ) {
       throw new Error(
-        "When using 'replaceAllPlugins' you must not specify 'appendPlugins'/'prependPlugins'"
+        "When using 'replaceAllPlugins' you must not specify 'appendPlugins'/'prependPlugins'/'removePlugins'"
       );
     }
   }
   ensureValidPlugins("prependPlugins", prependPlugins);
   ensureValidPlugins("appendPlugins", appendPlugins);
+  ensureValidPlugins("removePlugins", removePlugins);
   return getBuilder(
     replaceAllPlugins
       ? [...prependPlugins, ...replaceAllPlugins, ...appendPlugins]
       : [
           ...prependPlugins,
-          ...defaultPlugins,
-          ...pgDefaultPlugins,
+          ...defaultPlugins.filter(plugin => !removePlugins.includes(plugin)),
+          ...pgDefaultPlugins.filter(plugin => !removePlugins.includes(plugin)),
           ...appendPlugins,
         ],
     Object.assign(
