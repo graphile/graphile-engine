@@ -193,7 +193,11 @@ export default (async function PgMutationUpdateDeletePlugin(
                           : "updatePayloadType"
                       ](table.name, table.namespace.name),
                       description: `The output of our ${mode} \`${tableTypeName}\` mutation.`,
-                      fields: ({ recurseDataGeneratorsForField }) => {
+                      fields: ({
+                        recurseDataGeneratorsForField,
+                        addDataGeneratorForField,
+                        fieldWithHooks,
+                      }) => {
                         const tableName = inflection.tableName(
                           table.name,
                           table.namespace.name
