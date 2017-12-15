@@ -229,12 +229,24 @@ export default (function PgTypesPlugin(
       memo[type.id] = type;
       return memo;
     }, {});
+
+    const BigFloat = stringType(
+      "BigFloat",
+      "A floating point number that requires more precision than IEEE 754 binary 64"
+    );
+    const BitString = stringType(
+      "BitString",
+      "A string representing a series of binary bits"
+    );
+    addType(BigFloat);
+    addType(BitString);
+
     const categoryLookup = {
       B: () => GraphQLBoolean,
 
       // Numbers may be too large for GraphQL/JS to handle, so stringify by
       // default.
-      N: () => GraphQLString,
+      N: () => BigFloat,
 
       A: type =>
         new GraphQLList(
@@ -349,8 +361,8 @@ export default (function PgTypesPlugin(
       "3802": JSONType, // jsonb
       "2950": UUIDType, // uuid
 
-      "1560": GraphQLString, // bit
-      "1562": GraphQLString, // varbit
+      "1560": BitString, // bit
+      "1562": BitString, // varbit
     };
     const oidInputLookup = {
       "1186": GQLIntervalInput, // interval
