@@ -49,8 +49,6 @@ fragment deletePersonPayload on DeletePersonPayload {
   clientMutationId
   deletedPersonId
   person {
-    nodeId
-    id
     name
     email
     issue27UserExists: exists(email: "graphile-build.issue.27.exists@example.com")

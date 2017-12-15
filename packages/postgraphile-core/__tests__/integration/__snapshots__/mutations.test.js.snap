@@ -504,10 +504,8 @@ Object {
       "deletedPersonId": "WyJwZW9wbGUiLDNd",
       "person": Object {
         "email": "budd.deey@email.com",
-        "id": 3,
         "issue27UserExists": true,
         "name": "Budd Deey",
-        "nodeId": "WyJwZW9wbGUiLDNd",
       },
       "query": Object {
         "nodeId": "query",
@@ -518,10 +516,8 @@ Object {
       "deletedPersonId": "WyJwZW9wbGUiLDZd",
       "person": Object {
         "email": "graphile-build.issue.27.exists@example.com",
-        "id": 6,
         "issue27UserExists": false,
         "name": "Twenty Seventwo",
-        "nodeId": "WyJwZW9wbGUiLDZd",
       },
       "query": Object {
         "nodeId": "query",
