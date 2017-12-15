@@ -502,11 +502,6 @@ Object {
     "k": Object {
       "clientMutationId": null,
       "deletedPersonId": "WyJwZW9wbGUiLDNd",
-      "person": Object {
-        "email": "budd.deey@email.com",
-        "issue27UserExists": true,
-        "name": "Budd Deey",
-      },
       "query": Object {
         "nodeId": "query",
       },
@@ -516,8 +511,10 @@ Object {
       "deletedPersonId": "WyJwZW9wbGUiLDZd",
       "person": Object {
         "email": "graphile-build.issue.27.exists@example.com",
+        "id": 6,
         "issue27UserExists": false,
         "name": "Twenty Seventwo",
+        "nodeId": "WyJwZW9wbGUiLDZd",
       },
       "query": Object {
         "nodeId": "query",
