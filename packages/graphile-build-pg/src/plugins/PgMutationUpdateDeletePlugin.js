@@ -27,6 +27,7 @@ export default (async function PgMutationUpdateDeletePlugin(
         newWithHooks,
         getNodeIdForTypeAndIdentifiers,
         nodeIdFieldName,
+        fieldDataGeneratorsByType,
         extend,
         parseResolveInfo,
         getTypeByName,
@@ -226,7 +227,21 @@ export default (async function PgMutationUpdateDeletePlugin(
                             ? {
                                 [deletedNodeIdFieldName]: fieldWithHooks(
                                   deletedNodeIdFieldName,
-                                  () => {
+                                  ({ addDataGenerator }) => {
+                                    const fieldDataGeneratorsByTableType = fieldDataGeneratorsByType.get(
+                                      TableType
+                                    );
+
+                                    const gens =
+                                      fieldDataGeneratorsByTableType &&
+                                      fieldDataGeneratorsByTableType[
+                                        nodeIdFieldName
+                                      ];
+                                    if (gens) {
+                                      gens.forEach(gen =>
+                                        addDataGenerator(gen)
+                                      );
+                                    }
                                     return {
                                       type: GraphQLID,
                                       resolve(data) {
