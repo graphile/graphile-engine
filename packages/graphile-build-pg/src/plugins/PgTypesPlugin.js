@@ -347,7 +347,7 @@ export default (function PgTypesPlugin(
       "23": GraphQLInt, // int4
       "700": GraphQLFloat, // float4
       "701": GraphQLFloat, // float8
-      "1700": GraphQLString, // numeric
+      "1700": BigFloat, // numeric
       "790": GraphQLFloat, // money
 
       "1186": GQLInterval, // interval
@@ -363,6 +363,10 @@ export default (function PgTypesPlugin(
 
       "1560": BitString, // bit
       "1562": BitString, // varbit
+
+      "18": GraphQLString, // char
+      "25": GraphQLString, // text
+      "1043": GraphQLString, // varchar
     };
     const oidInputLookup = {
       "1186": GQLIntervalInput, // interval
