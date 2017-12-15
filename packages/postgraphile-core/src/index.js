@@ -92,11 +92,10 @@ const getPostGraphQLBuilder = async (
     ensureValidPlugins("replaceAllPlugins", replaceAllPlugins);
     if (
       (prependPlugins && prependPlugins.length) ||
-      (appendPlugins && appendPlugins.length) ||
-      (removePlugins && removePlugins.length)
+      (appendPlugins && appendPlugins.length)
     ) {
       throw new Error(
-        "When using 'replaceAllPlugins' you must not specify 'appendPlugins'/'prependPlugins'/'removePlugins'"
+        "When using 'replaceAllPlugins' you must not specify 'appendPlugins'/'prependPlugins'"
       );
     }
   }
@@ -104,18 +103,14 @@ const getPostGraphQLBuilder = async (
   ensureValidPlugins("appendPlugins", appendPlugins);
   ensureValidPlugins("removePlugins", removePlugins);
   return getBuilder(
-    replaceAllPlugins
+    (replaceAllPlugins
       ? [...prependPlugins, ...replaceAllPlugins, ...appendPlugins]
       : [
           ...prependPlugins,
-          ...defaultPlugins.filter(
-            plugin => removePlugins.indexOf(plugin) === -1
-          ),
-          ...pgDefaultPlugins.filter(
-            plugin => removePlugins.indexOf(plugin) === -1
-          ),
+          ...defaultPlugins,
+          ...pgDefaultPlugins,
           ...appendPlugins,
-        ],
+        ]).filter(p => removePlugins.indexOf(p) === -1),
     Object.assign(
       {
         pgConfig: pgConfig,
