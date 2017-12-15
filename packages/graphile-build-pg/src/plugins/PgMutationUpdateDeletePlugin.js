@@ -199,6 +199,10 @@ export default (async function PgMutationUpdateDeletePlugin(
                           table.namespace.name
                         );
                         recurseDataGeneratorsForField(tableName);
+                        // This should really be `-node-id` but for compatibility with PostGraphQL v3 we haven't made that change.
+                        const deletedNodeIdFieldName = camelCase(
+                          `deleted-${pluralize.singular(table.name)}-id`
+                        );
                         return Object.assign(
                           {
                             clientMutationId: {
@@ -216,20 +220,26 @@ export default (async function PgMutationUpdateDeletePlugin(
                           },
                           mode === "delete"
                             ? {
-                                [camelCase(
-                                  `deleted-${pluralize.singular(table.name)}-id`
-                                )]: {
-                                  type: GraphQLID,
-                                  resolve(data) {
-                                    return (
-                                      data.data.__identifiers &&
-                                      getNodeIdForTypeAndIdentifiers(
-                                        Table,
-                                        ...data.data.__identifiers
-                                      )
-                                    );
+                                [deletedNodeIdFieldName]: fieldWithHooks(
+                                  deletedNodeIdFieldName,
+                                  () => {
+                                    return {
+                                      type: GraphQLID,
+                                      resolve(data) {
+                                        return (
+                                          data.data.__identifiers &&
+                                          getNodeIdForTypeAndIdentifiers(
+                                            Table,
+                                            ...data.data.__identifiers
+                                          )
+                                        );
+                                      },
+                                    };
                                   },
-                                },
+                                  {
+                                    isPgMutationPayloadDeletedNodeIdField: true,
+                                  }
+                                ),
                               }
                             : null
                         );
