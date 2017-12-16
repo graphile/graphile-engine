@@ -196,7 +196,6 @@ export default (async function PgMutationUpdateDeletePlugin(
                       description: `The output of our ${mode} \`${tableTypeName}\` mutation.`,
                       fields: ({
                         recurseDataGeneratorsForField,
-                        addDataGeneratorForField,
                         fieldWithHooks,
                       }) => {
                         const tableName = inflection.tableName(
