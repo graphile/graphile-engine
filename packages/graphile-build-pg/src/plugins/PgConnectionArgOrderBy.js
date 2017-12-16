@@ -82,8 +82,10 @@ export default (function PgConnectionArgOrderBy(
       addArgDataGenerator(function connectionOrderBy({ orderBy }) {
         return {
           pgCursorPrefix:
-            orderBy && orderBy.map(item => item.alias).join("") !== ""
-              ? sql.literal(orderBy.map(item => item.alias).join("__"))
+            orderBy && orderBy.some(item => item.alias)
+              ? orderBy
+                  .filter(item => item.alias)
+                  .map(item => sql.literal(item.alias))
               : null,
           pgQuery: queryBuilder => {
             if (orderBy != null) {
