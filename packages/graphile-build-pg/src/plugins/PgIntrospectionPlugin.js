@@ -6,6 +6,9 @@ import { readFile as rawReadFile } from "fs";
 import pg from "pg";
 import debugFactory from "debug";
 import chalk from "chalk";
+
+import { version } from "../../package.json";
+
 const debug = debugFactory("graphile-build-pg");
 const INTROSPECTION_PATH = `${__dirname}/../../res/introspection-query.sql`;
 const WATCH_FIXTURES_PATH = `${__dirname}/../../res/watch-fixtures.sql`;
@@ -45,7 +48,12 @@ function readFile(filename, encoding) {
 
 export default (async function PgIntrospectionPlugin(
   builder,
-  { pgConfig, pgSchemas: schemas, pgEnableTags }
+  {
+    pgConfig,
+    pgSchemas: schemas,
+    pgEnableTags,
+    persistentMemoizeWithKey = (key, fn) => fn(),
+  }
 ) {
   async function introspect() {
     return withPgClient(pgConfig, async pgClient => {
@@ -53,21 +61,27 @@ export default (async function PgIntrospectionPlugin(
       if (!Array.isArray(schemas)) {
         throw new Error("Argument 'schemas' (array) is required");
       }
-      const introspectionQuery = await readFile(INTROSPECTION_PATH, "utf8");
-      const { rows } = await pgClient.query(introspectionQuery, [schemas]);
+      const cacheKey = `PgIntrospectionPlugin-introspectionResultsByKind-v${version}`;
+      const introspectionResultsByKind = await persistentMemoizeWithKey(
+        cacheKey,
+        async () => {
+          const introspectionQuery = await readFile(INTROSPECTION_PATH, "utf8");
+          const { rows } = await pgClient.query(introspectionQuery, [schemas]);
 
-      const introspectionResultsByKind = rows.reduce(
-        (memo, { object }) => {
-          memo[object.kind].push(object);
-          return memo;
-        },
-        {
-          namespace: [],
-          class: [],
-          attribute: [],
-          type: [],
-          constraint: [],
-          procedure: [],
+          return rows.reduce(
+            (memo, { object }) => {
+              memo[object.kind].push(object);
+              return memo;
+            },
+            {
+              namespace: [],
+              class: [],
+              attribute: [],
+              type: [],
+              constraint: [],
+              procedure: [],
+            }
+          );
         }
       );
 
