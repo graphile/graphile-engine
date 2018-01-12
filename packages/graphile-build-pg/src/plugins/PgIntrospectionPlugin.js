@@ -62,13 +62,19 @@ export default (async function PgIntrospectionPlugin(
         throw new Error("Argument 'schemas' (array) is required");
       }
       const cacheKey = `PgIntrospectionPlugin-introspectionResultsByKind-v${version}`;
-      const introspectionResultsByKind = await persistentMemoizeWithKey(
-        cacheKey,
-        async () => {
+      const cloneResults = obj => {
+        const result = Object.keys(obj).reduce((memo, k) => {
+          memo[k] = obj[k].map(v => Object.assign({}, v));
+          return memo;
+        }, {});
+        return result;
+      };
+      const introspectionResultsByKind = cloneResults(
+        await persistentMemoizeWithKey(cacheKey, async () => {
           const introspectionQuery = await readFile(INTROSPECTION_PATH, "utf8");
           const { rows } = await pgClient.query(introspectionQuery, [schemas]);
 
-          return rows.reduce(
+          const result = rows.reduce(
             (memo, { object }) => {
               memo[object.kind].push(object);
               return memo;
@@ -82,21 +88,28 @@ export default (async function PgIntrospectionPlugin(
               procedure: [],
             }
           );
-        }
-      );
 
-      // Parse tags from comments
-      ["namespace", "class", "attribute", "type", "procedure"].forEach(kind => {
-        introspectionResultsByKind[kind].forEach(object => {
-          if (pgEnableTags && object.description) {
-            const parsed = parseTags(object.description);
-            object.tags = parsed.tags;
-            object.description = parsed.text;
-          } else {
-            object.tags = {};
+          // Parse tags from comments
+          ["namespace", "class", "attribute", "type", "procedure"].forEach(
+            kind => {
+              result[kind].forEach(object => {
+                if (pgEnableTags && object.description) {
+                  const parsed = parseTags(object.description);
+                  object.tags = parsed.tags;
+                  object.description = parsed.text;
+                } else {
+                  object.tags = {};
+                }
+              });
+            }
+          );
+
+          for (const k in result) {
+            result[k].map(Object.freeze);
           }
-        });
-      });
+          return Object.freeze(result);
+        })
+      );
 
       const xByY = (arrayOfX, attrKey) =>
         arrayOfX.reduce((memo, x) => {
