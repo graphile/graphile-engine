@@ -1,5 +1,5 @@
 // @flow
-import fs from 'fs';
+import fs from "fs";
 import { defaultPlugins, getBuilder } from "graphile-build";
 import {
   defaultPlugins as pgDefaultPlugins,
@@ -43,7 +43,7 @@ type PostGraphQLOptions = {
   enableTags?: boolean,
   readCache?: string,
   writeCache?: string,
-  setWriteCacheCallback?: (fn: Function) => Promise<void>,
+  setWriteCacheCallback?: (fn: () => Promise<void>) => void,
 };
 
 type PgConfig = Client | Pool | string;
@@ -77,7 +77,7 @@ const awaitKeys = async obj => {
     result[k] = await obj[k];
   }
   return result;
-}
+};
 
 const getPostGraphQLBuilder = async (
   pgConfig,
@@ -122,15 +122,17 @@ const getPostGraphQLBuilder = async (
   let memoizeCache = {};
 
   if (readCache) {
-    memoizeCache = JSON.parse(await new Promise((resolve, reject) => {
-      fs.readFile(readCache, 'utf8', (err, data) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
-        }
+    memoizeCache = JSON.parse(
+      await new Promise((resolve, reject) => {
+        fs.readFile(readCache, "utf8", (err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(data);
+          }
+        });
       })
-    }));
+    );
   }
   if (readCache || writeCache) {
     persistentMemoizeWithKey = (key, fn) => {
@@ -144,21 +146,25 @@ const getPostGraphQLBuilder = async (
         }
       }
       return memoizeCache[key];
-    }
+    };
   }
 
   if (writeCache && setWriteCacheCallback) {
-    setWriteCacheCallback(() => awaitKeys(memoizeCache).then((obj) => new Promise((resolve, reject) => {
-      fs.writeFile(writeCache, JSON.stringify(obj), (err) => {
-        memoizeCache = {}
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-
-    })));
+    setWriteCacheCallback(() =>
+      awaitKeys(memoizeCache).then(
+        obj =>
+          new Promise((resolve, reject) => {
+            fs.writeFile(writeCache, JSON.stringify(obj), err => {
+              memoizeCache = {};
+              if (err) {
+                reject(err);
+              } else {
+                resolve();
+              }
+            });
+          })
+      )
+    );
   } else if (writeCache) {
     throw new Error("Cannot write cache without 'setWriteCacheCallback'");
   } else if (setWriteCacheCallback) {
@@ -204,9 +210,11 @@ const getPostGraphQLBuilder = async (
 };
 
 function abort(e) {
+  /* eslint-disable no-console */
   console.error("Error occured whilst writing cache");
   console.error(e);
   process.exit(1);
+  /* eslint-enable */
 }
 
 export const createPostGraphQLSchema = async (
@@ -215,11 +223,15 @@ export const createPostGraphQLSchema = async (
   options: PostGraphQLOptions = {}
 ) => {
   let writeCache;
-  const builder = await getPostGraphQLBuilder(pgConfig, schemas, Object.assign({}, options, {
-    setWriteCacheCallback(fn) {
-      writeCache = fn;
-    }
-  }));
+  const builder = await getPostGraphQLBuilder(
+    pgConfig,
+    schemas,
+    Object.assign({}, options, {
+      setWriteCacheCallback(fn) {
+        writeCache = fn;
+      },
+    })
+  );
   const schema = builder.buildSchema();
   if (writeCache) writeCache().catch(abort);
   return schema;
@@ -243,11 +255,15 @@ export const watchPostGraphQLSchema = async (
     throw new Error("Using readCache in watch mode does not make sense.");
   }
   let writeCache;
-  const builder = await getPostGraphQLBuilder(pgConfig, schemas, Object.assign({}, options, {
-    setWriteCacheCallback(fn) {
-      writeCache = fn;
-    }
-  }));
+  const builder = await getPostGraphQLBuilder(
+    pgConfig,
+    schemas,
+    Object.assign({}, options, {
+      setWriteCacheCallback(fn) {
+        writeCache = fn;
+      },
+    })
+  );
   let released = false;
   function handleNewSchema(...args) {
     if (writeCache) writeCache().catch(abort);
