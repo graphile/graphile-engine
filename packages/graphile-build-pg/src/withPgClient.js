@@ -19,7 +19,7 @@ function quacksLikePgClient(pgConfig) {
   return true;
 }
 
-function quacksLikePgPool(pgConfig) {
+export function quacksLikePgPool(pgConfig) {
   // A diagnosis of exclusion
   if (constructorName(pgConfig) !== "Pool") return false;
   if (!pgConfig.Client) return false;
