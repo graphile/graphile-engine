@@ -87,7 +87,7 @@ export default (function PgMutationPayloadEdgePlugin(
                       if (alias == null) return;
                       aliases.push(alias);
                     });
-                    if (!unique) {
+                    if (!unique && primaryKeys) {
                       // Add PKs
                       primaryKeys.forEach(key => {
                         expressions.push(
@@ -134,7 +134,13 @@ export default (function PgMutationPayloadEdgePlugin(
                     : null;
 
                 if (!order) {
-                  return data.data;
+                  if (data.data.__identifiers) {
+                    return Object.assign({}, data.data, {
+                      __cursor: ["primary_key_asc", data.data.__identifiers],
+                    });
+                  } else {
+                    return data.data;
+                  }
                 }
                 return Object.assign({}, data.data, {
                   __cursor:
