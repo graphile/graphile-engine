@@ -558,6 +558,13 @@ Object {
         "name": "John Smith Sr.",
         "nodeId": "WyJwZW9wbGUiLDFd",
       },
+      "personEdge": Object {
+        "cursor": NOTNULL,
+        "node": Object {
+          "id": 1,
+          "nodeId": "WyJwZW9wbGUiLDFd",
+        },
+      },
       "query": Object {
         "nodeId": "query",
       },
@@ -571,6 +578,13 @@ Object {
         "issue27UserExists": true,
         "name": "Sarah Smith",
         "nodeId": "WyJwZW9wbGUiLDJd",
+      },
+      "personEdge": Object {
+        "cursor": NOTNULL,
+        "node": Object {
+          "id": 2,
+          "nodeId": "WyJwZW9wbGUiLDJd",
+        },
       },
       "query": Object {
         "nodeId": "query",
@@ -586,6 +600,13 @@ Object {
         "name": "Sarah Smith",
         "nodeId": "WyJwZW9wbGUiLDJd",
       },
+      "personEdge": Object {
+        "cursor": NOTNULL,
+        "node": Object {
+          "id": 2,
+          "nodeId": "WyJwZW9wbGUiLDJd",
+        },
+      },
       "query": Object {
         "nodeId": "query",
       },
@@ -600,6 +621,13 @@ Object {
         "name": "Best Pal",
         "nodeId": "WyJwZW9wbGUiLDNd",
       },
+      "personEdge": Object {
+        "cursor": NOTNULL,
+        "node": Object {
+          "id": 3,
+          "nodeId": "WyJwZW9wbGUiLDNd",
+        },
+      },
       "query": Object {
         "nodeId": "query",
       },
@@ -613,6 +641,13 @@ Object {
         "issue27UserExists": true,
         "name": "Kathryn Ramirez",
         "nodeId": "WyJwZW9wbGUiLDRd",
+      },
+      "personEdge": Object {
+        "cursor": NOTNULL,
+        "node": Object {
+          "id": 4,
+          "nodeId": "WyJwZW9wbGUiLDRd",
+        },
       },
       "query": Object {
         "nodeId": "query",
@@ -688,6 +723,13 @@ Object {
         "name": "Sarah Smith",
         "nodeId": "WyJwZW9wbGUiLDJd",
       },
+      "personEdge": Object {
+        "cursor": NOTNULL,
+        "node": Object {
+          "id": 2,
+          "nodeId": "WyJwZW9wbGUiLDJd",
+        },
+      },
       "query": Object {
         "nodeId": "query",
       },
@@ -701,6 +743,13 @@ Object {
         "issue27UserExists": false,
         "name": "Twenty Seventwo",
         "nodeId": "WyJwZW9wbGUiLDZd",
+      },
+      "personEdge": Object {
+        "cursor": NOTNULL,
+        "node": Object {
+          "id": 6,
+          "nodeId": "WyJwZW9wbGUiLDZd",
+        },
       },
       "query": Object {
         "nodeId": "query",
@@ -854,7 +903,7 @@ Object {
         "nodeId": "WyJwb3N0cyIsNV0=",
       },
       "postEdge": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "headline": "Please, Don-Bot… look into your hard drive, and open your mercy file!",
           "id": 5,
