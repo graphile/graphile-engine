@@ -240,6 +240,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
         };
         const recurseDataGeneratorsForField = fieldName => {
           const fn = (parsedResolveInfoFragment, ReturnType, ...rest) => {
+            const { args } = parsedResolveInfoFragment;
             const { fields } = this.simplifyParsedResolveInfoFragmentWithType(
               parsedResolveInfoFragment,
               ReturnType
@@ -249,9 +250,19 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
             const fieldDataGeneratorsByFieldName = fieldDataGeneratorsByFieldNameByType.get(
               StrippedType
             );
-            const fieldArgDataGeneratorsByFieldName = fieldArgDataGeneratorsByFieldNameByType.get(
-              StrippedType
+            const argDataGeneratorsForSelfByFieldName = fieldArgDataGeneratorsByFieldNameByType.get(
+              Self
             );
+            if (argDataGeneratorsForSelfByFieldName) {
+              const argDataGenerators =
+                argDataGeneratorsForSelfByFieldName[fieldName];
+              for (const gen of argDataGenerators) {
+                const local = ensureArray(gen(args));
+                if (local) {
+                  results.push(...local);
+                }
+              }
+            }
             if (
               fieldDataGeneratorsByFieldName &&
               isCompositeType(StrippedType) &&
