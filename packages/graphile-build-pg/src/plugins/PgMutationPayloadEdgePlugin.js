@@ -16,6 +16,7 @@ export default (function PgMutationPayloadEdgePlugin(
         pgGetGqlTypeByTypeId,
         pgSql: sql,
         graphql: { GraphQLList, GraphQLNonNull },
+        pgIntrospectionResultsByKind: introspectionResultsByKind,
       },
       {
         scope: { isMutationPayload, pgIntrospection, pgIntrospectionTable },
@@ -43,6 +44,18 @@ export default (function PgMutationPayloadEdgePlugin(
         return fields;
       }
 
+      const attributes = introspectionResultsByKind.attribute.filter(
+        attr => attr.classId === table.id
+      );
+      const primaryKeyConstraint = introspectionResultsByKind.constraint
+        .filter(con => con.classId === table.id)
+        .filter(con => con.type === "p")[0];
+      const primaryKeys =
+        primaryKeyConstraint &&
+        primaryKeyConstraint.keyAttributeNums.map(
+          num => attributes.filter(attr => attr.num === num)[0]
+        );
+
       const fieldName = inflection.edgeField(table.name, table.namespace.name);
       recurseDataGeneratorsForField(fieldName);
       return extend(fields, {
@@ -55,8 +68,10 @@ export default (function PgMutationPayloadEdgePlugin(
                   if (orderBy != null) {
                     const aliases = [];
                     const expressions = [];
+                    let unique = false;
                     orderBy.forEach(item => {
-                      const { alias, specs } = item;
+                      const { alias, specs, unique: itemIsUnique } = item;
+                      unique = unique || itemIsUnique;
                       const orders = Array.isArray(specs[0]) ? specs : [specs];
                       orders.forEach(([col, _ascending]) => {
                         if (!col) {
@@ -72,6 +87,16 @@ export default (function PgMutationPayloadEdgePlugin(
                       if (alias == null) return;
                       aliases.push(alias);
                     });
+                    if (!unique) {
+                      // Add PKs
+                      primaryKeys.forEach(key => {
+                        expressions.push(
+                          sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
+                            key.name
+                          )}`
+                        );
+                      });
+                    }
                     if (aliases.length) {
                       queryBuilder.select(
                         sql.fragment`json_build_array(${sql.join(
