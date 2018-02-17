@@ -4,13 +4,14 @@ import debugFactory from "debug";
 const debug = debugFactory("graphile-build-pg");
 
 function constructorName(obj) {
-  return obj && obj.constructor && obj.constructor.name;
+  return obj && typeof obj.constructor === "function" && obj.constructor.name;
 }
 
 // Some duck-typing
 
-function quacksLikePgClient(pgConfig) {
+function quacksLikePgClient(pgConfig: mixed): boolean {
   // A diagnosis of exclusion
+  if (!pgConfig || typeof pgConfig !== "object") return false;
   if (constructorName(pgConfig) !== "Client") return false;
   if (typeof pgConfig.connect !== "function") return false;
   if (typeof pgConfig.end !== "function") return false;
@@ -19,8 +20,9 @@ function quacksLikePgClient(pgConfig) {
   return true;
 }
 
-export function quacksLikePgPool(pgConfig) {
+export function quacksLikePgPool(pgConfig: mixed): boolean {
   // A diagnosis of exclusion
+  if (!pgConfig || typeof pgConfig !== "object") return false;
   if (constructorName(pgConfig) !== "Pool") return false;
   if (!pgConfig.Client) return false;
   if (!pgConfig.options) return false;
