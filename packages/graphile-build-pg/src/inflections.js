@@ -89,7 +89,7 @@ export const newInflector = (
       },
       tableName(name: string, _schema: ?string) {
         return camelCase(singularize(name)).replace(
-          /(Input|Patch)$/,
+          /.(?:Input|Patch)$/,
           "$&Record"
         );
       },

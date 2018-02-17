@@ -292,13 +292,25 @@ create function a.post_with_suffix(post a.post,suffix text) returns a.post as $$
   returning *; 
 $$ language sql volatile;
 
+create table a.inputs (
+  id serial primary key
+);
+comment on table a.inputs is 'Should output as Input';
+
+create table a.patchs (
+  id serial primary key
+);
+comment on table a.patchs is 'Should output as Patch';
+
 create table a.reserved (
   id serial primary key
 );
+
 create table a.reserved_input (
   id serial primary key
 );
 comment on table a.reserved_input is '`reserved_input` table should get renamed to ReservedInputRecord to prevent clashes with ReservedInput from `reserved` table';
+
 create table a.reserved_patchs (
   id serial primary key
 );

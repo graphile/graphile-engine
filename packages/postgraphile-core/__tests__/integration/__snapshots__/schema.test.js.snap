@@ -2954,6 +2954,64 @@ type CreateForeignKeyPayload {
   query: Query
 }
 
+# All input for the create \`Input\` mutation.
+input CreateInputInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+
+  # The \`Input\` to be created by this mutation.
+  input: InputInput!
+}
+
+# The output of our create \`Input\` mutation.
+type CreateInputPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+
+  # The \`Input\` that was created by this mutation.
+  input: Input
+
+  # An edge for the type. May be used by Relay 1.
+  inputEdge(
+    # The method to use when ordering \`Input\`.
+    orderBy: InputsOrderBy = PRIMARY_KEY_ASC
+  ): InputsEdge
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
+# All input for the create \`Patch\` mutation.
+input CreatePatchInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+
+  # The \`Patch\` to be created by this mutation.
+  patch: PatchInput!
+}
+
+# The output of our create \`Patch\` mutation.
+type CreatePatchPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+
+  # The \`Patch\` that was created by this mutation.
+  patch: Patch
+
+  # An edge for the type. May be used by Relay 1.
+  patchEdge(
+    # The method to use when ordering \`Patch\`.
+    orderBy: PatchesOrderBy = PRIMARY_KEY_ASC
+  ): PatchesEdge
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
 # All input for the create \`Person\` mutation.
 input CreatePersonInput {
   # An arbitrary string value with no semantic meaning. Will be included in the
@@ -3465,6 +3523,82 @@ type DeleteDefaultValuePayload {
     orderBy: DefaultValuesOrderBy = PRIMARY_KEY_ASC
   ): DefaultValuesEdge
   deletedDefaultValueId: ID
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
+# All input for the \`deleteInputById\` mutation.
+input DeleteInputByIdInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+  id: Int!
+}
+
+# All input for the \`deleteInput\` mutation.
+input DeleteInputInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+
+  # The globally unique \`ID\` which will identify a single \`Input\` to be deleted.
+  nodeId: ID!
+}
+
+# The output of our delete \`Input\` mutation.
+type DeleteInputPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+  deletedInputId: ID
+
+  # The \`Input\` that was deleted by this mutation.
+  input: Input
+
+  # An edge for the type. May be used by Relay 1.
+  inputEdge(
+    # The method to use when ordering \`Input\`.
+    orderBy: InputsOrderBy = PRIMARY_KEY_ASC
+  ): InputsEdge
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
+# All input for the \`deletePatchById\` mutation.
+input DeletePatchByIdInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+  id: Int!
+}
+
+# All input for the \`deletePatch\` mutation.
+input DeletePatchInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+
+  # The globally unique \`ID\` which will identify a single \`Patch\` to be deleted.
+  nodeId: ID!
+}
+
+# The output of our delete \`Patch\` mutation.
+type DeletePatchPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+  deletedPatchId: ID
+
+  # The \`Patch\` that was deleted by this mutation.
+  patch: Patch
+
+  # An edge for the type. May be used by Relay 1.
+  patchEdge(
+    # The method to use when ordering \`Patch\`.
+    orderBy: PatchesOrderBy = PRIMARY_KEY_ASC
+  ): PatchesEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
   query: Query
@@ -4006,6 +4140,63 @@ type GuidFnPayload {
   query: Query
 }
 
+# Should output as Input
+type Input implements Node {
+  id: Int!
+
+  # A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  nodeId: ID!
+}
+
+# A condition to be used against \`Input\` object types. All fields are tested for equality and combined with a logical ‘and.’
+input InputCondition {
+  # Checks for equality with the object’s \`id\` field.
+  id: Int
+}
+
+# An input for mutations affecting \`Input\`
+input InputInput {
+  id: Int
+}
+
+# Represents an update to a \`Input\`. Fields that are set will be updated.
+input InputPatch {
+  id: Int
+}
+
+# A connection to a list of \`Input\` values.
+type InputsConnection {
+  # A list of edges which contains the \`Input\` and cursor to aid in pagination.
+  edges: [InputsEdge!]!
+
+  # A list of \`Input\` objects.
+  nodes: [Input]!
+
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # The count of *all* \`Input\` you could get from the connection.
+  totalCount: Int
+}
+
+# A \`Input\` edge in the connection.
+type InputsEdge {
+  # A cursor for use in pagination.
+  cursor: Cursor
+
+  # The \`Input\` at the end of the edge.
+  node: Input!
+}
+
+# Methods to use when ordering \`Input\`.
+enum InputsOrderBy {
+  ID_ASC
+  ID_DESC
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
 # An interval of time that has passed where the smallest distinct unit is a second.
 type Interval {
   # A quantity of days.
@@ -4342,6 +4533,18 @@ type Mutation {
     input: CreateForeignKeyInput!
   ): CreateForeignKeyPayload
 
+  # Creates a single \`Input\`.
+  createInput(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: CreateInputInput!
+  ): CreateInputPayload
+
+  # Creates a single \`Patch\`.
+  createPatch(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: CreatePatchInput!
+  ): CreatePatchPayload
+
   # Creates a single \`Person\`.
   createPerson(
     # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -4431,6 +4634,30 @@ type Mutation {
     # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     input: DeleteDefaultValueByIdInput!
   ): DeleteDefaultValuePayload
+
+  # Deletes a single \`Input\` using its globally unique id.
+  deleteInput(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: DeleteInputInput!
+  ): DeleteInputPayload
+
+  # Deletes a single \`Input\` using a unique key.
+  deleteInputById(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: DeleteInputByIdInput!
+  ): DeleteInputPayload
+
+  # Deletes a single \`Patch\` using its globally unique id.
+  deletePatch(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: DeletePatchInput!
+  ): DeletePatchPayload
+
+  # Deletes a single \`Patch\` using a unique key.
+  deletePatchById(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: DeletePatchByIdInput!
+  ): DeletePatchPayload
 
   # Deletes a single \`Person\` using its globally unique id.
   deletePerson(
@@ -4649,6 +4876,30 @@ type Mutation {
     # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     input: UpdateDefaultValueByIdInput!
   ): UpdateDefaultValuePayload
+
+  # Updates a single \`Input\` using its globally unique id and a patch.
+  updateInput(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: UpdateInputInput!
+  ): UpdateInputPayload
+
+  # Updates a single \`Input\` using a unique key and a patch.
+  updateInputById(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: UpdateInputByIdInput!
+  ): UpdateInputPayload
+
+  # Updates a single \`Patch\` using its globally unique id and a patch.
+  updatePatch(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: UpdatePatchInput!
+  ): UpdatePatchPayload
+
+  # Updates a single \`Patch\` using a unique key and a patch.
+  updatePatchById(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: UpdatePatchByIdInput!
+  ): UpdatePatchPayload
 
   # Updates a single \`Person\` using its globally unique id and a patch.
   updatePerson(
@@ -4881,6 +5132,63 @@ type PageInfo {
 
   # When paginating backwards, the cursor to continue.
   startCursor: Cursor
+}
+
+# Should output as Patch
+type Patch implements Node {
+  id: Int!
+
+  # A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  nodeId: ID!
+}
+
+# A condition to be used against \`Patch\` object types. All fields are tested for equality and combined with a logical ‘and.’
+input PatchCondition {
+  # Checks for equality with the object’s \`id\` field.
+  id: Int
+}
+
+# A connection to a list of \`Patch\` values.
+type PatchesConnection {
+  # A list of edges which contains the \`Patch\` and cursor to aid in pagination.
+  edges: [PatchesEdge!]!
+
+  # A list of \`Patch\` objects.
+  nodes: [Patch]!
+
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # The count of *all* \`Patch\` you could get from the connection.
+  totalCount: Int
+}
+
+# A \`Patch\` edge in the connection.
+type PatchesEdge {
+  # A cursor for use in pagination.
+  cursor: Cursor
+
+  # The \`Patch\` at the end of the edge.
+  node: Patch!
+}
+
+# Methods to use when ordering \`Patch\`.
+enum PatchesOrderBy {
+  ID_ASC
+  ID_DESC
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+# An input for mutations affecting \`Patch\`
+input PatchInput {
+  id: Int
+}
+
+# Represents an update to a \`Patch\`. Fields that are set will be updated.
+input PatchPatch {
+  id: Int
 }
 
 # A connection to a list of \`Person\` values.
@@ -5401,6 +5709,31 @@ type Query implements Node {
     orderBy: [ForeignKeysOrderBy!] = [NATURAL]
   ): ForeignKeysConnection
 
+  # Reads and enables pagination through a set of \`Input\`.
+  allInputs(
+    # Read all values in the set after (below) this cursor.
+    after: Cursor
+
+    # Read all values in the set before (above) this cursor.
+    before: Cursor
+
+    # A condition to be used in determining which values should be returned by the collection.
+    condition: InputCondition
+
+    # Only read the first \`n\` values of the set.
+    first: Int
+
+    # Only read the last \`n\` values of the set.
+    last: Int
+
+    # Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    # based pagination. May not be used with \`last\`.
+    offset: Int
+
+    # The method to use when ordering \`Input\`.
+    orderBy: [InputsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): InputsConnection
+
   # Reads and enables pagination through a set of \`NonUpdatableView\`.
   allNonUpdatableViews(
     # Read all values in the set after (below) this cursor.
@@ -5425,6 +5758,31 @@ type Query implements Node {
     # The method to use when ordering \`NonUpdatableView\`.
     orderBy: [NonUpdatableViewsOrderBy!] = [NATURAL]
   ): NonUpdatableViewsConnection
+
+  # Reads and enables pagination through a set of \`Patch\`.
+  allPatches(
+    # Read all values in the set after (below) this cursor.
+    after: Cursor
+
+    # Read all values in the set before (above) this cursor.
+    before: Cursor
+
+    # A condition to be used in determining which values should be returned by the collection.
+    condition: PatchCondition
+
+    # Only read the first \`n\` values of the set.
+    first: Int
+
+    # Only read the last \`n\` values of the set.
+    last: Int
+
+    # Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    # based pagination. May not be used with \`last\`.
+    offset: Int
+
+    # The method to use when ordering \`Patch\`.
+    orderBy: [PatchesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PatchesConnection
 
   # Reads and enables pagination through a set of \`Person\`.
   allPeople(
@@ -5796,6 +6154,13 @@ type Query implements Node {
     nodeId: ID!
   ): DefaultValue
   defaultValueById(id: Int!): DefaultValue
+
+  # Reads a single \`Input\` using its globally unique \`ID\`.
+  input(
+    # The globally unique \`ID\` to be used in selecting a single \`Input\`.
+    nodeId: ID!
+  ): Input
+  inputById(id: Int!): Input
   intSetQuery(
     # Read all values in the set after (below) this cursor.
     after: Cursor
@@ -5833,6 +6198,13 @@ type Query implements Node {
   optionalMissingMiddle3(a: Int!, arg1: Int, c: Int): Int
   optionalMissingMiddle4(arg0: Int!, arg2: Int, b: Int): Int
   optionalMissingMiddle5(a: Int!, arg1: Int, arg2: Int): Int
+
+  # Reads a single \`Patch\` using its globally unique \`ID\`.
+  patch(
+    # The globally unique \`ID\` to be used in selecting a single \`Patch\`.
+    nodeId: ID!
+  ): Patch
+  patchById(id: Int!): Patch
 
   # Reads a single \`Person\` using its globally unique \`ID\`.
   person(
@@ -6969,6 +7341,92 @@ type UpdateDefaultValuePayload {
     # The method to use when ordering \`DefaultValue\`.
     orderBy: DefaultValuesOrderBy = PRIMARY_KEY_ASC
   ): DefaultValuesEdge
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
+# All input for the \`updateInputById\` mutation.
+input UpdateInputByIdInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+  id: Int!
+
+  # An object where the defined keys will be set on the \`Input\` being updated.
+  inputPatch: InputPatch!
+}
+
+# All input for the \`updateInput\` mutation.
+input UpdateInputInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+
+  # An object where the defined keys will be set on the \`Input\` being updated.
+  inputPatch: InputPatch!
+
+  # The globally unique \`ID\` which will identify a single \`Input\` to be updated.
+  nodeId: ID!
+}
+
+# The output of our update \`Input\` mutation.
+type UpdateInputPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+
+  # The \`Input\` that was updated by this mutation.
+  input: Input
+
+  # An edge for the type. May be used by Relay 1.
+  inputEdge(
+    # The method to use when ordering \`Input\`.
+    orderBy: InputsOrderBy = PRIMARY_KEY_ASC
+  ): InputsEdge
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
+# All input for the \`updatePatchById\` mutation.
+input UpdatePatchByIdInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+  id: Int!
+
+  # An object where the defined keys will be set on the \`Patch\` being updated.
+  patchPatch: PatchPatch!
+}
+
+# All input for the \`updatePatch\` mutation.
+input UpdatePatchInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+
+  # The globally unique \`ID\` which will identify a single \`Patch\` to be updated.
+  nodeId: ID!
+
+  # An object where the defined keys will be set on the \`Patch\` being updated.
+  patchPatch: PatchPatch!
+}
+
+# The output of our update \`Patch\` mutation.
+type UpdatePatchPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+
+  # The \`Patch\` that was updated by this mutation.
+  patch: Patch
+
+  # An edge for the type. May be used by Relay 1.
+  patchEdge(
+    # The method to use when ordering \`Patch\`.
+    orderBy: PatchesOrderBy = PRIMARY_KEY_ASC
+  ): PatchesEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
   query: Query
@@ -9753,6 +10211,64 @@ type CreateForeignKeyPayload {
   query: Query
 }
 
+# All input for the create \`Input\` mutation.
+input CreateInputInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+
+  # The \`Input\` to be created by this mutation.
+  input: InputInput!
+}
+
+# The output of our create \`Input\` mutation.
+type CreateInputPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+
+  # The \`Input\` that was created by this mutation.
+  input: Input
+
+  # An edge for the type. May be used by Relay 1.
+  inputEdge(
+    # The method to use when ordering \`Input\`.
+    orderBy: InputsOrderBy = PRIMARY_KEY_ASC
+  ): InputsEdge
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
+# All input for the create \`Patch\` mutation.
+input CreatePatchInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+
+  # The \`Patch\` to be created by this mutation.
+  patch: PatchInput!
+}
+
+# The output of our create \`Patch\` mutation.
+type CreatePatchPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+
+  # The \`Patch\` that was created by this mutation.
+  patch: Patch
+
+  # An edge for the type. May be used by Relay 1.
+  patchEdge(
+    # The method to use when ordering \`Patch\`.
+    orderBy: PatchesOrderBy = PRIMARY_KEY_ASC
+  ): PatchesEdge
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
 # All input for the create \`Post\` mutation.
 input CreatePostInput {
   # An arbitrary string value with no semantic meaning. Will be included in the
@@ -10095,6 +10611,82 @@ type DeleteDefaultValuePayload {
   query: Query
 }
 
+# All input for the \`deleteInputById\` mutation.
+input DeleteInputByIdInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+  id: Int!
+}
+
+# All input for the \`deleteInput\` mutation.
+input DeleteInputInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+
+  # The globally unique \`ID\` which will identify a single \`Input\` to be deleted.
+  nodeId: ID!
+}
+
+# The output of our delete \`Input\` mutation.
+type DeleteInputPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+  deletedInputId: ID
+
+  # The \`Input\` that was deleted by this mutation.
+  input: Input
+
+  # An edge for the type. May be used by Relay 1.
+  inputEdge(
+    # The method to use when ordering \`Input\`.
+    orderBy: InputsOrderBy = PRIMARY_KEY_ASC
+  ): InputsEdge
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
+# All input for the \`deletePatchById\` mutation.
+input DeletePatchByIdInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+  id: Int!
+}
+
+# All input for the \`deletePatch\` mutation.
+input DeletePatchInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+
+  # The globally unique \`ID\` which will identify a single \`Patch\` to be deleted.
+  nodeId: ID!
+}
+
+# The output of our delete \`Patch\` mutation.
+type DeletePatchPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+  deletedPatchId: ID
+
+  # The \`Patch\` that was deleted by this mutation.
+  patch: Patch
+
+  # An edge for the type. May be used by Relay 1.
+  patchEdge(
+    # The method to use when ordering \`Patch\`.
+    orderBy: PatchesOrderBy = PRIMARY_KEY_ASC
+  ): PatchesEdge
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
 # All input for the \`deletePostById\` mutation.
 input DeletePostByIdInput {
   # An arbitrary string value with no semantic meaning. Will be included in the
@@ -10422,6 +11014,63 @@ enum ForeignKeysOrderBy {
   PERSON_ID_DESC
 }
 
+# Should output as Input
+type Input implements Node {
+  id: Int!
+
+  # A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  nodeId: ID!
+}
+
+# A condition to be used against \`Input\` object types. All fields are tested for equality and combined with a logical ‘and.’
+input InputCondition {
+  # Checks for equality with the object’s \`id\` field.
+  id: Int
+}
+
+# An input for mutations affecting \`Input\`
+input InputInput {
+  id: Int
+}
+
+# Represents an update to a \`Input\`. Fields that are set will be updated.
+input InputPatch {
+  id: Int
+}
+
+# A connection to a list of \`Input\` values.
+type InputsConnection {
+  # A list of edges which contains the \`Input\` and cursor to aid in pagination.
+  edges: [InputsEdge!]!
+
+  # A list of \`Input\` objects.
+  nodes: [Input]!
+
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # The count of *all* \`Input\` you could get from the connection.
+  totalCount: Int
+}
+
+# A \`Input\` edge in the connection.
+type InputsEdge {
+  # A cursor for use in pagination.
+  cursor: Cursor
+
+  # The \`Input\` at the end of the edge.
+  node: Input!
+}
+
+# Methods to use when ordering \`Input\`.
+enum InputsOrderBy {
+  ID_ASC
+  ID_DESC
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
 # The root mutation type which contains root level fields which mutate data.
 type Mutation {
   # lol, add some stuff 1 mutation
@@ -10463,6 +11112,18 @@ type Mutation {
     # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     input: CreateForeignKeyInput!
   ): CreateForeignKeyPayload
+
+  # Creates a single \`Input\`.
+  createInput(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: CreateInputInput!
+  ): CreateInputPayload
+
+  # Creates a single \`Patch\`.
+  createPatch(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: CreatePatchInput!
+  ): CreatePatchPayload
 
   # Creates a single \`Post\`.
   createPost(
@@ -10523,6 +11184,30 @@ type Mutation {
     # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     input: DeleteDefaultValueByIdInput!
   ): DeleteDefaultValuePayload
+
+  # Deletes a single \`Input\` using its globally unique id.
+  deleteInput(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: DeleteInputInput!
+  ): DeleteInputPayload
+
+  # Deletes a single \`Input\` using a unique key.
+  deleteInputById(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: DeleteInputByIdInput!
+  ): DeleteInputPayload
+
+  # Deletes a single \`Patch\` using its globally unique id.
+  deletePatch(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: DeletePatchInput!
+  ): DeletePatchPayload
+
+  # Deletes a single \`Patch\` using a unique key.
+  deletePatchById(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: DeletePatchByIdInput!
+  ): DeletePatchPayload
 
   # Deletes a single \`Post\` using its globally unique id.
   deletePost(
@@ -10639,6 +11324,30 @@ type Mutation {
     # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     input: UpdateDefaultValueByIdInput!
   ): UpdateDefaultValuePayload
+
+  # Updates a single \`Input\` using its globally unique id and a patch.
+  updateInput(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: UpdateInputInput!
+  ): UpdateInputPayload
+
+  # Updates a single \`Input\` using a unique key and a patch.
+  updateInputById(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: UpdateInputByIdInput!
+  ): UpdateInputPayload
+
+  # Updates a single \`Patch\` using its globally unique id and a patch.
+  updatePatch(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: UpdatePatchInput!
+  ): UpdatePatchPayload
+
+  # Updates a single \`Patch\` using a unique key and a patch.
+  updatePatchById(
+    # The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    input: UpdatePatchByIdInput!
+  ): UpdatePatchPayload
 
   # Updates a single \`Post\` using its globally unique id and a patch.
   updatePost(
@@ -10808,6 +11517,63 @@ type PageInfo {
 
   # When paginating backwards, the cursor to continue.
   startCursor: Cursor
+}
+
+# Should output as Patch
+type Patch implements Node {
+  id: Int!
+
+  # A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  nodeId: ID!
+}
+
+# A condition to be used against \`Patch\` object types. All fields are tested for equality and combined with a logical ‘and.’
+input PatchCondition {
+  # Checks for equality with the object’s \`id\` field.
+  id: Int
+}
+
+# A connection to a list of \`Patch\` values.
+type PatchesConnection {
+  # A list of edges which contains the \`Patch\` and cursor to aid in pagination.
+  edges: [PatchesEdge!]!
+
+  # A list of \`Patch\` objects.
+  nodes: [Patch]!
+
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # The count of *all* \`Patch\` you could get from the connection.
+  totalCount: Int
+}
+
+# A \`Patch\` edge in the connection.
+type PatchesEdge {
+  # A cursor for use in pagination.
+  cursor: Cursor
+
+  # The \`Patch\` at the end of the edge.
+  node: Patch!
+}
+
+# Methods to use when ordering \`Patch\`.
+enum PatchesOrderBy {
+  ID_ASC
+  ID_DESC
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+# An input for mutations affecting \`Patch\`
+input PatchInput {
+  id: Int
+}
+
+# Represents an update to a \`Patch\`. Fields that are set will be updated.
+input PatchPatch {
+  id: Int
 }
 
 type Post implements Node {
@@ -11016,6 +11782,31 @@ type Query implements Node {
     orderBy: [ForeignKeysOrderBy!] = [NATURAL]
   ): ForeignKeysConnection
 
+  # Reads and enables pagination through a set of \`Input\`.
+  allInputs(
+    # Read all values in the set after (below) this cursor.
+    after: Cursor
+
+    # Read all values in the set before (above) this cursor.
+    before: Cursor
+
+    # A condition to be used in determining which values should be returned by the collection.
+    condition: InputCondition
+
+    # Only read the first \`n\` values of the set.
+    first: Int
+
+    # Only read the last \`n\` values of the set.
+    last: Int
+
+    # Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    # based pagination. May not be used with \`last\`.
+    offset: Int
+
+    # The method to use when ordering \`Input\`.
+    orderBy: [InputsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): InputsConnection
+
   # Reads and enables pagination through a set of \`NonUpdatableView\`.
   allNonUpdatableViews(
     # Read all values in the set after (below) this cursor.
@@ -11040,6 +11831,31 @@ type Query implements Node {
     # The method to use when ordering \`NonUpdatableView\`.
     orderBy: [NonUpdatableViewsOrderBy!] = [NATURAL]
   ): NonUpdatableViewsConnection
+
+  # Reads and enables pagination through a set of \`Patch\`.
+  allPatches(
+    # Read all values in the set after (below) this cursor.
+    after: Cursor
+
+    # Read all values in the set before (above) this cursor.
+    before: Cursor
+
+    # A condition to be used in determining which values should be returned by the collection.
+    condition: PatchCondition
+
+    # Only read the first \`n\` values of the set.
+    first: Int
+
+    # Only read the last \`n\` values of the set.
+    last: Int
+
+    # Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    # based pagination. May not be used with \`last\`.
+    offset: Int
+
+    # The method to use when ordering \`Patch\`.
+    orderBy: [PatchesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PatchesConnection
 
   # Reads and enables pagination through a set of \`Post\`.
   allPosts(
@@ -11308,6 +12124,13 @@ type Query implements Node {
   ): DefaultValue
   defaultValueById(id: Int!): DefaultValue
 
+  # Reads a single \`Input\` using its globally unique \`ID\`.
+  input(
+    # The globally unique \`ID\` to be used in selecting a single \`Input\`.
+    nodeId: ID!
+  ): Input
+  inputById(id: Int!): Input
+
   # Fetches an object given its globally unique \`ID\`.
   node(
     # The globally unique \`ID\`.
@@ -11321,6 +12144,13 @@ type Query implements Node {
   optionalMissingMiddle3(a: Int!, arg1: Int, c: Int): Int
   optionalMissingMiddle4(arg0: Int!, arg2: Int, b: Int): Int
   optionalMissingMiddle5(a: Int!, arg1: Int, arg2: Int): Int
+
+  # Reads a single \`Patch\` using its globally unique \`ID\`.
+  patch(
+    # The globally unique \`ID\` to be used in selecting a single \`Patch\`.
+    nodeId: ID!
+  ): Patch
+  patchById(id: Int!): Patch
 
   # Reads a single \`Post\` using its globally unique \`ID\`.
   post(
@@ -11921,6 +12751,92 @@ type UpdateDefaultValuePayload {
     # The method to use when ordering \`DefaultValue\`.
     orderBy: DefaultValuesOrderBy = PRIMARY_KEY_ASC
   ): DefaultValuesEdge
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
+# All input for the \`updateInputById\` mutation.
+input UpdateInputByIdInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+  id: Int!
+
+  # An object where the defined keys will be set on the \`Input\` being updated.
+  inputPatch: InputPatch!
+}
+
+# All input for the \`updateInput\` mutation.
+input UpdateInputInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+
+  # An object where the defined keys will be set on the \`Input\` being updated.
+  inputPatch: InputPatch!
+
+  # The globally unique \`ID\` which will identify a single \`Input\` to be updated.
+  nodeId: ID!
+}
+
+# The output of our update \`Input\` mutation.
+type UpdateInputPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+
+  # The \`Input\` that was updated by this mutation.
+  input: Input
+
+  # An edge for the type. May be used by Relay 1.
+  inputEdge(
+    # The method to use when ordering \`Input\`.
+    orderBy: InputsOrderBy = PRIMARY_KEY_ASC
+  ): InputsEdge
+
+  # Our root query field type. Allows us to run any query from our mutation payload.
+  query: Query
+}
+
+# All input for the \`updatePatchById\` mutation.
+input UpdatePatchByIdInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+  id: Int!
+
+  # An object where the defined keys will be set on the \`Patch\` being updated.
+  patchPatch: PatchPatch!
+}
+
+# All input for the \`updatePatch\` mutation.
+input UpdatePatchInput {
+  # An arbitrary string value with no semantic meaning. Will be included in the
+  # payload verbatim. May be used to track mutations by the client.
+  clientMutationId: String
+
+  # The globally unique \`ID\` which will identify a single \`Patch\` to be updated.
+  nodeId: ID!
+
+  # An object where the defined keys will be set on the \`Patch\` being updated.
+  patchPatch: PatchPatch!
+}
+
+# The output of our update \`Patch\` mutation.
+type UpdatePatchPayload {
+  # The exact same \`clientMutationId\` that was provided in the mutation input,
+  # unchanged and unused. May be used by a client to track mutations.
+  clientMutationId: String
+
+  # The \`Patch\` that was updated by this mutation.
+  patch: Patch
+
+  # An edge for the type. May be used by Relay 1.
+  patchEdge(
+    # The method to use when ordering \`Patch\`.
+    orderBy: PatchesOrderBy = PRIMARY_KEY_ASC
+  ): PatchesEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
   query: Query
