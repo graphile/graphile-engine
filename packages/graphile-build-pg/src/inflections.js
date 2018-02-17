@@ -88,7 +88,10 @@ export const newInflector = (
         return camelCase(`${itemName}-patch`);
       },
       tableName(name: string, _schema: ?string) {
-        return camelCase(singularize(name));
+        return camelCase(singularize(name)).replace(
+          /(Input|Patch)$/,
+          "$&Record"
+        );
       },
       tableNode(name: string, _schema: ?string) {
         return camelCase(singularize(name));
