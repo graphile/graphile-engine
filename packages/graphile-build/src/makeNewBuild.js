@@ -427,10 +427,17 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                     return data;
                   },
                   scope: extend(
-                    extend(scope, {
-                      fieldName,
-                    }),
-                    fieldScope
+                    extend(
+                      scope,
+                      {
+                        fieldName,
+                      },
+                      `Within context for GraphQLObjectType '${rawSpec.name}'`
+                    ),
+                    fieldScope,
+                    `Extending scope for field '${fieldName}' within context for GraphQLObjectType '${
+                      rawSpec.name
+                    }'`
                   ),
                 });
                 if (typeof newSpec === "function") {
@@ -519,10 +526,19 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                 let context = Object.assign({}, commonContext, {
                   Self,
                   scope: extend(
-                    extend(scope, {
-                      fieldName,
-                    }),
-                    fieldScope
+                    extend(
+                      scope,
+                      {
+                        fieldName,
+                      },
+                      `Within context for GraphQLInputObjectType '${
+                        rawSpec.name
+                      }'`
+                    ),
+                    fieldScope,
+                    `Extending scope for field '${fieldName}' within context for GraphQLInputObjectType '${
+                      rawSpec.name
+                    }'`
                   ),
                 });
                 let newSpec = spec;
