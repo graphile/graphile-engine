@@ -6259,6 +6259,23 @@ type Query implements Node {
     nodeId: ID!
   ): SimilarTable2
   similarTable2ById(id: Int!): SimilarTable2
+  staticBigInteger(
+    # Read all values in the set after (below) this cursor.
+    after: Cursor
+
+    # Read all values in the set before (above) this cursor.
+    before: Cursor
+
+    # Only read the first \`n\` values of the set.
+    first: Int
+
+    # Only read the last \`n\` values of the set.
+    last: Int
+
+    # Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    # based pagination. May not be used with \`last\`.
+    offset: Int
+  ): StaticBigIntegerConnection!
 
   # Reads and enables pagination through a set of \`Post\`.
   tableQuery(id: Int): Post
@@ -6649,6 +6666,24 @@ enum SimilarTable2SOrderBy {
   NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+}
+
+# A connection to a list of \`BigInt\` values.
+type StaticBigIntegerConnection {
+  # A list of edges which contains the \`BigInt\` and cursor to aid in pagination.
+  edges: [StaticBigIntegerEdge!]!
+
+  # A list of \`BigInt\` objects.
+  nodes: [BigInt]!
+}
+
+# A \`BigInt\` edge in the connection.
+type StaticBigIntegerEdge {
+  # A cursor for use in pagination.
+  cursor: Cursor
+
+  # The \`BigInt\` at the end of the edge.
+  node: BigInt
 }
 
 type TablefuncCrosstab2 {
@@ -10142,6 +10177,11 @@ enum AnEnum {
   REJECTED
 }
 
+# A signed eight-byte integer. The upper big integer values are greater then the
+# max value for a JavaScript number. Therefore all big integers will be output as
+# strings and not numbers.
+scalar BigInt
+
 type Comptype {
   isOptimised: Boolean
   schedule: Datetime
@@ -12197,6 +12237,23 @@ type Query implements Node {
     nodeId: ID!
   ): SimilarTable2
   similarTable2ById(id: Int!): SimilarTable2
+  staticBigInteger(
+    # Read all values in the set after (below) this cursor.
+    after: Cursor
+
+    # Read all values in the set before (above) this cursor.
+    before: Cursor
+
+    # Only read the first \`n\` values of the set.
+    first: Int
+
+    # Only read the last \`n\` values of the set.
+    last: Int
+
+    # Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    # based pagination. May not be used with \`last\`.
+    offset: Int
+  ): StaticBigIntegerConnection!
 
   # Reads a single \`ViewTable\` using its globally unique \`ID\`.
   viewTable(
@@ -12557,6 +12614,24 @@ enum SimilarTable2SOrderBy {
   NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+}
+
+# A connection to a list of \`BigInt\` values.
+type StaticBigIntegerConnection {
+  # A list of edges which contains the \`BigInt\` and cursor to aid in pagination.
+  edges: [StaticBigIntegerEdge!]!
+
+  # A list of \`BigInt\` objects.
+  nodes: [BigInt]!
+}
+
+# A \`BigInt\` edge in the connection.
+type StaticBigIntegerEdge {
+  # A cursor for use in pagination.
+  cursor: Cursor
+
+  # The \`BigInt\` at the end of the edge.
+  node: BigInt
 }
 
 type TablefuncCrosstab2 {
