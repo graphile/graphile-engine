@@ -6397,8 +6397,7 @@ input ReservedPatch {
   id: Int
 }
 
-# \`reserved_patchs\` table should get renamed to ReservedPatchRecord to prevent
-# clashes with ReservedPatch from \`reserved\` table
+# \`reservedPatchs\` table should get renamed to ReservedPatchRecord to prevent clashes with ReservedPatch from \`reserved\` table
 type ReservedPatchRecord implements Node {
   id: Int!
 
@@ -12345,8 +12344,7 @@ input ReservedPatch {
   id: Int
 }
 
-# \`reserved_patchs\` table should get renamed to ReservedPatchRecord to prevent
-# clashes with ReservedPatch from \`reserved\` table
+# \`reservedPatchs\` table should get renamed to ReservedPatchRecord to prevent clashes with ReservedPatch from \`reserved\` table
 type ReservedPatchRecord implements Node {
   id: Int!
 

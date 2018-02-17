@@ -316,7 +316,7 @@ create table a.reserved_input (
 );
 comment on table a.reserved_input is '`reserved_input` table should get renamed to ReservedInputRecord to prevent clashes with ReservedInput from `reserved` table';
 
-create table a.reserved_patchs (
+create table a."reservedPatchs" (
   id serial primary key
 );
-comment on table a.reserved_patchs is '`reserved_patchs` table should get renamed to ReservedPatchRecord to prevent clashes with ReservedPatch from `reserved` table';
+comment on table a."reservedPatchs" is '`reservedPatchs` table should get renamed to ReservedPatchRecord to prevent clashes with ReservedPatch from `reserved` table';
