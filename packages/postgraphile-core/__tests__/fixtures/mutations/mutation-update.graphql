@@ -66,7 +66,7 @@ mutation {
   }) { ...updateCompoundKeyPayload }
   j: updatePersonByEmail(input: {
     email: "graphile-build.issue.27.exists@example.com"
-    personPatch: {
+    personPatch(orderBy: [EMAIL_DESC]): {
       email: "somethingelse@example.com"
     }
   }) { ...updatePersonPayload }

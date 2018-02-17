@@ -559,7 +559,7 @@ Object {
         "nodeId": "WyJwZW9wbGUiLDFd",
       },
       "personEdge": Object {
-        "cursor": NOTNULL,
+        "cursor": "WyJwcmltYXJ5X2tleV9hc2MiLFsxXV0=",
         "node": Object {
           "id": 1,
           "nodeId": "WyJwZW9wbGUiLDFd",
@@ -580,7 +580,7 @@ Object {
         "nodeId": "WyJwZW9wbGUiLDJd",
       },
       "personEdge": Object {
-        "cursor": NOTNULL,
+        "cursor": "WyJwcmltYXJ5X2tleV9hc2MiLFsyXV0=",
         "node": Object {
           "id": 2,
           "nodeId": "WyJwZW9wbGUiLDJd",
@@ -601,7 +601,7 @@ Object {
         "nodeId": "WyJwZW9wbGUiLDJd",
       },
       "personEdge": Object {
-        "cursor": NOTNULL,
+        "cursor": "WyJwcmltYXJ5X2tleV9hc2MiLFsyXV0=",
         "node": Object {
           "id": 2,
           "nodeId": "WyJwZW9wbGUiLDJd",
@@ -622,7 +622,7 @@ Object {
         "nodeId": "WyJwZW9wbGUiLDNd",
       },
       "personEdge": Object {
-        "cursor": NOTNULL,
+        "cursor": "WyJwcmltYXJ5X2tleV9hc2MiLFszXV0=",
         "node": Object {
           "id": 3,
           "nodeId": "WyJwZW9wbGUiLDNd",
@@ -643,7 +643,7 @@ Object {
         "nodeId": "WyJwZW9wbGUiLDRd",
       },
       "personEdge": Object {
-        "cursor": NOTNULL,
+        "cursor": "WyJwcmltYXJ5X2tleV9hc2MiLFs0XV0=",
         "node": Object {
           "id": 4,
           "nodeId": "WyJwZW9wbGUiLDRd",
@@ -724,7 +724,7 @@ Object {
         "nodeId": "WyJwZW9wbGUiLDJd",
       },
       "personEdge": Object {
-        "cursor": NOTNULL,
+        "cursor": "WyJwcmltYXJ5X2tleV9hc2MiLFsyXV0=",
         "node": Object {
           "id": 2,
           "nodeId": "WyJwZW9wbGUiLDJd",
@@ -745,7 +745,7 @@ Object {
         "nodeId": "WyJwZW9wbGUiLDZd",
       },
       "personEdge": Object {
-        "cursor": NOTNULL,
+        "cursor": "WyJlbWFpbF9kZXNjIixbImdyYXBoaWxlLWJ1aWxkLmlzc3VlLjI3LmV4aXN0c0BleGFtcGxlLmNvbSIsNl1d",
         "node": Object {
           "id": 6,
           "nodeId": "WyJwZW9wbGUiLDZd",
@@ -903,7 +903,7 @@ Object {
         "nodeId": "WyJwb3N0cyIsNV0=",
       },
       "postEdge": Object {
-        "cursor": NOTNULL,
+        "cursor": null,
         "node": Object {
           "headline": "Please, Don-Bot… look into your hard drive, and open your mercy file!",
           "id": 5,
