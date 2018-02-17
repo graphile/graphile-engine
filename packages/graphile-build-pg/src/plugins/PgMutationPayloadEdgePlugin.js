@@ -10,7 +10,13 @@ export default (function PgMutationPayloadEdgePlugin(
     "GraphQLObjectType:fields",
     (
       fields,
-      { extend, getTypeByName, pgGetGqlTypeByTypeId, pgSql: sql },
+      {
+        extend,
+        getTypeByName,
+        pgGetGqlTypeByTypeId,
+        pgSql: sql,
+        graphql: { GraphQLList, GraphQLNonNull },
+      },
       {
         scope: { isMutationPayload, pgIntrospection, pgIntrospectionTable },
         fieldWithHooks,
@@ -45,24 +51,37 @@ export default (function PgMutationPayloadEdgePlugin(
           ({ addArgDataGenerator }) => {
             addArgDataGenerator(function connectionOrderBy({ orderBy }) {
               return {
-                pgCursorPrefix:
-                  orderBy &&
-                  orderBy.alias &&
-                  sql.literal(orderBy && orderBy.alias),
                 pgQuery: queryBuilder => {
                   if (orderBy != null) {
-                    const { specs, unique } = orderBy;
-                    const orders = Array.isArray(specs[0]) ? specs : [specs];
-                    orders.forEach(([col, ascending]) => {
-                      const expr = isString(col)
-                        ? sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
-                            col
-                          )}`
-                        : col;
-                      queryBuilder.orderBy(expr, ascending);
+                    const aliases = [];
+                    const expressions = [];
+                    orderBy.forEach(item => {
+                      const { alias, specs } = item;
+                      const orders = Array.isArray(specs[0]) ? specs : [specs];
+                      orders.forEach(([col, _ascending]) => {
+                        if (!col) {
+                          return;
+                        }
+                        const expr = isString(col)
+                          ? sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
+                              col
+                            )}`
+                          : col;
+                        expressions.push(expr);
+                      });
+                      if (alias == null) return;
+                      aliases.push(alias);
                     });
-                    if (unique) {
-                      queryBuilder.setOrderIsUnique();
+                    if (aliases.length) {
+                      queryBuilder.select(
+                        sql.fragment`json_build_array(${sql.join(
+                          aliases.map(
+                            a => sql.fragment`${sql.literal(a)}::text`
+                          ),
+                          ", "
+                        )}, json_build_array(${sql.join(expressions, ", ")}))`,
+                        "__order_" + aliases.join("|")
+                      );
                     }
                   }
                 },
@@ -79,12 +98,25 @@ export default (function PgMutationPayloadEdgePlugin(
               args: {
                 orderBy: {
                   description: `The method to use when ordering \`${tableTypeName}\`.`,
-                  type: TableOrderByType,
+                  type: new GraphQLList(new GraphQLNonNull(TableOrderByType)),
                   defaultValue: defaultValueEnum && defaultValueEnum.value,
                 },
               },
-              resolve(data) {
-                return data.data;
+              resolve(data, { orderBy }) {
+                const order =
+                  orderBy && orderBy.some(item => item.alias)
+                    ? orderBy.filter(item => item.alias)
+                    : null;
+
+                if (!order) {
+                  return data.data;
+                }
+                return Object.assign({}, data.data, {
+                  __cursor:
+                    data.data[
+                      `__order_${order.map(item => item.alias).join("|")}`
+                    ],
+                });
               },
             };
           },
