@@ -360,6 +360,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
 
                 let newSpec = spec;
                 let context = Object.assign({}, commonContext, {
+                  Self,
                   addDataGenerator(fn) {
                     return addDataGeneratorForField(fieldName, fn);
                   },
@@ -516,6 +517,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
                   );
                 }
                 let context = Object.assign({}, commonContext, {
+                  Self,
                   scope: extend(
                     extend(scope, {
                       fieldName,
