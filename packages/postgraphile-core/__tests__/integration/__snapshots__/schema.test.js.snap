@@ -160,7 +160,7 @@ type CreateCompoundKeyPayload {
   # An edge for the type. May be used by Relay 1.
   compoundKeyEdge(
     # The method to use when ordering \`CompoundKey\`.
-    orderBy: CompoundKeysOrderBy = PRIMARY_KEY_ASC
+    orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysEdge
 
   # Reads a single \`Person\` that is related to this \`CompoundKey\`.
@@ -195,7 +195,7 @@ type CreateEdgeCasePayload {
   # An edge for the type. May be used by Relay 1.
   edgeCaseEdge(
     # The method to use when ordering \`EdgeCase\`.
-    orderBy: EdgeCasesOrderBy = NATURAL
+    orderBy: [EdgeCasesOrderBy!] = [NATURAL]
   ): EdgeCasesEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -224,7 +224,7 @@ type CreatePersonPayload {
   # An edge for the type. May be used by Relay 1.
   personEdge(
     # The method to use when ordering \`Person\`.
-    orderBy: PeopleOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
   ): PeopleEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -269,7 +269,7 @@ type DeleteCompoundKeyPayload {
   # An edge for the type. May be used by Relay 1.
   compoundKeyEdge(
     # The method to use when ordering \`CompoundKey\`.
-    orderBy: CompoundKeysOrderBy = PRIMARY_KEY_ASC
+    orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysEdge
   deletedCompoundKeyId: ID
 
@@ -322,7 +322,7 @@ type DeletePersonPayload {
   # An edge for the type. May be used by Relay 1.
   personEdge(
     # The method to use when ordering \`Person\`.
-    orderBy: PeopleOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
   ): PeopleEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -1107,7 +1107,7 @@ type TableSetMutationPayload {
   # An edge for the type. May be used by Relay 1.
   personEdge(
     # The method to use when ordering \`Person\`.
-    orderBy: PeopleOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
   ): PeopleEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -1177,7 +1177,7 @@ type UpdateCompoundKeyPayload {
   # An edge for the type. May be used by Relay 1.
   compoundKeyEdge(
     # The method to use when ordering \`CompoundKey\`.
-    orderBy: CompoundKeysOrderBy = PRIMARY_KEY_ASC
+    orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysEdge
 
   # Reads a single \`Person\` that is related to this \`CompoundKey\`.
@@ -1237,7 +1237,7 @@ type UpdatePersonPayload {
   # An edge for the type. May be used by Relay 1.
   personEdge(
     # The method to use when ordering \`Person\`.
-    orderBy: PeopleOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
   ): PeopleEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -1477,7 +1477,7 @@ type CreateTypePayload {
   # An edge for the type. May be used by Relay 1.
   typeEdge(
     # The method to use when ordering \`Type\`.
-    orderBy: TypesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
   ): TypesEdge
 }
 
@@ -1506,7 +1506,7 @@ type CreateUpdatableViewPayload {
   # An edge for the type. May be used by Relay 1.
   updatableViewEdge(
     # The method to use when ordering \`UpdatableView\`.
-    orderBy: UpdatableViewsOrderBy = NATURAL
+    orderBy: [UpdatableViewsOrderBy!] = [NATURAL]
   ): UpdatableViewsEdge
 }
 
@@ -1590,7 +1590,7 @@ type DeleteTypePayload {
   # An edge for the type. May be used by Relay 1.
   typeEdge(
     # The method to use when ordering \`Type\`.
-    orderBy: TypesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
   ): TypesEdge
 }
 
@@ -2372,7 +2372,7 @@ type UpdateTypePayload {
   # An edge for the type. May be used by Relay 1.
   typeEdge(
     # The method to use when ordering \`Type\`.
-    orderBy: TypesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
   ): TypesEdge
 }
 
@@ -2848,7 +2848,7 @@ type CreateCompoundKeyPayload {
   # An edge for the type. May be used by Relay 1.
   compoundKeyEdge(
     # The method to use when ordering \`CompoundKey\`.
-    orderBy: CompoundKeysOrderBy = PRIMARY_KEY_ASC
+    orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysEdge
 
   # Reads a single \`Person\` that is related to this \`CompoundKey\`.
@@ -2883,7 +2883,7 @@ type CreateDefaultValuePayload {
   # An edge for the type. May be used by Relay 1.
   defaultValueEdge(
     # The method to use when ordering \`DefaultValue\`.
-    orderBy: DefaultValuesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [DefaultValuesOrderBy!] = [PRIMARY_KEY_ASC]
   ): DefaultValuesEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -2912,7 +2912,7 @@ type CreateEdgeCasePayload {
   # An edge for the type. May be used by Relay 1.
   edgeCaseEdge(
     # The method to use when ordering \`EdgeCase\`.
-    orderBy: EdgeCasesOrderBy = NATURAL
+    orderBy: [EdgeCasesOrderBy!] = [NATURAL]
   ): EdgeCasesEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -2944,7 +2944,7 @@ type CreateForeignKeyPayload {
   # An edge for the type. May be used by Relay 1.
   foreignKeyEdge(
     # The method to use when ordering \`ForeignKey\`.
-    orderBy: ForeignKeysOrderBy = NATURAL
+    orderBy: [ForeignKeysOrderBy!] = [NATURAL]
   ): ForeignKeysEdge
 
   # Reads a single \`Person\` that is related to this \`ForeignKey\`.
@@ -2976,7 +2976,7 @@ type CreatePersonPayload {
   # An edge for the type. May be used by Relay 1.
   personEdge(
     # The method to use when ordering \`Person\`.
-    orderBy: PeopleOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
   ): PeopleEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -3008,7 +3008,7 @@ type CreatePostPayload {
   # An edge for the type. May be used by Relay 1.
   postEdge(
     # The method to use when ordering \`Post\`.
-    orderBy: PostsOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -3040,7 +3040,7 @@ type CreateSimilarTable1Payload {
   # An edge for the type. May be used by Relay 1.
   similarTable1Edge(
     # The method to use when ordering \`SimilarTable1\`.
-    orderBy: SimilarTable1SOrderBy = PRIMARY_KEY_ASC
+    orderBy: [SimilarTable1SOrderBy!] = [PRIMARY_KEY_ASC]
   ): SimilarTable1SEdge
 }
 
@@ -3069,7 +3069,7 @@ type CreateSimilarTable2Payload {
   # An edge for the type. May be used by Relay 1.
   similarTable2Edge(
     # The method to use when ordering \`SimilarTable2\`.
-    orderBy: SimilarTable2SOrderBy = PRIMARY_KEY_ASC
+    orderBy: [SimilarTable2SOrderBy!] = [PRIMARY_KEY_ASC]
   ): SimilarTable2SEdge
 }
 
@@ -3098,7 +3098,7 @@ type CreateTestviewPayload {
   # An edge for the type. May be used by Relay 1.
   testviewEdge(
     # The method to use when ordering \`Testview\`.
-    orderBy: TestviewsOrderBy = NATURAL
+    orderBy: [TestviewsOrderBy!] = [NATURAL]
   ): TestviewsEdge
 }
 
@@ -3127,7 +3127,7 @@ type CreateTypePayload {
   # An edge for the type. May be used by Relay 1.
   typeEdge(
     # The method to use when ordering \`Type\`.
-    orderBy: TypesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
   ): TypesEdge
 }
 
@@ -3156,7 +3156,7 @@ type CreateUpdatableViewPayload {
   # An edge for the type. May be used by Relay 1.
   updatableViewEdge(
     # The method to use when ordering \`UpdatableView\`.
-    orderBy: UpdatableViewsOrderBy = NATURAL
+    orderBy: [UpdatableViewsOrderBy!] = [NATURAL]
   ): UpdatableViewsEdge
 }
 
@@ -3185,7 +3185,7 @@ type CreateViewTablePayload {
   # An edge for the type. May be used by Relay 1.
   viewTableEdge(
     # The method to use when ordering \`ViewTable\`.
-    orderBy: ViewTablesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [ViewTablesOrderBy!] = [PRIMARY_KEY_ASC]
   ): ViewTablesEdge
 }
 
@@ -3331,7 +3331,7 @@ type DeleteCompoundKeyPayload {
   # An edge for the type. May be used by Relay 1.
   compoundKeyEdge(
     # The method to use when ordering \`CompoundKey\`.
-    orderBy: CompoundKeysOrderBy = PRIMARY_KEY_ASC
+    orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysEdge
   deletedCompoundKeyId: ID
 
@@ -3375,7 +3375,7 @@ type DeleteDefaultValuePayload {
   # An edge for the type. May be used by Relay 1.
   defaultValueEdge(
     # The method to use when ordering \`DefaultValue\`.
-    orderBy: DefaultValuesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [DefaultValuesOrderBy!] = [PRIMARY_KEY_ASC]
   ): DefaultValuesEdge
   deletedDefaultValueId: ID
 
@@ -3422,7 +3422,7 @@ type DeletePersonPayload {
   # An edge for the type. May be used by Relay 1.
   personEdge(
     # The method to use when ordering \`Person\`.
-    orderBy: PeopleOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
   ): PeopleEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -3463,7 +3463,7 @@ type DeletePostPayload {
   # An edge for the type. May be used by Relay 1.
   postEdge(
     # The method to use when ordering \`Post\`.
-    orderBy: PostsOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -3504,7 +3504,7 @@ type DeleteSimilarTable1Payload {
   # An edge for the type. May be used by Relay 1.
   similarTable1Edge(
     # The method to use when ordering \`SimilarTable1\`.
-    orderBy: SimilarTable1SOrderBy = PRIMARY_KEY_ASC
+    orderBy: [SimilarTable1SOrderBy!] = [PRIMARY_KEY_ASC]
   ): SimilarTable1SEdge
 }
 
@@ -3542,7 +3542,7 @@ type DeleteSimilarTable2Payload {
   # An edge for the type. May be used by Relay 1.
   similarTable2Edge(
     # The method to use when ordering \`SimilarTable2\`.
-    orderBy: SimilarTable2SOrderBy = PRIMARY_KEY_ASC
+    orderBy: [SimilarTable2SOrderBy!] = [PRIMARY_KEY_ASC]
   ): SimilarTable2SEdge
 }
 
@@ -3580,7 +3580,7 @@ type DeleteTypePayload {
   # An edge for the type. May be used by Relay 1.
   typeEdge(
     # The method to use when ordering \`Type\`.
-    orderBy: TypesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
   ): TypesEdge
 }
 
@@ -3618,7 +3618,7 @@ type DeleteViewTablePayload {
   # An edge for the type. May be used by Relay 1.
   viewTableEdge(
     # The method to use when ordering \`ViewTable\`.
-    orderBy: ViewTablesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [ViewTablesOrderBy!] = [PRIMARY_KEY_ASC]
   ): ViewTablesEdge
 }
 
@@ -4906,7 +4906,7 @@ type PostManyPayload {
   # An edge for the type. May be used by Relay 1.
   postEdge(
     # The method to use when ordering \`Post\`.
-    orderBy: PostsOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsEdge
   posts: [Post]
 
@@ -4989,7 +4989,7 @@ type PostWithSuffixPayload {
   # An edge for the type. May be used by Relay 1.
   postEdge(
     # The method to use when ordering \`Post\`.
-    orderBy: PostsOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -5867,7 +5867,7 @@ type TableMutationPayload {
   # An edge for the type. May be used by Relay 1.
   postEdge(
     # The method to use when ordering \`Post\`.
-    orderBy: PostsOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -5891,7 +5891,7 @@ type TableSetMutationPayload {
   # An edge for the type. May be used by Relay 1.
   personEdge(
     # The method to use when ordering \`Person\`.
-    orderBy: PeopleOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
   ): PeopleEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -6392,7 +6392,7 @@ type UpdateCompoundKeyPayload {
   # An edge for the type. May be used by Relay 1.
   compoundKeyEdge(
     # The method to use when ordering \`CompoundKey\`.
-    orderBy: CompoundKeysOrderBy = PRIMARY_KEY_ASC
+    orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysEdge
 
   # Reads a single \`Person\` that is related to this \`CompoundKey\`.
@@ -6441,7 +6441,7 @@ type UpdateDefaultValuePayload {
   # An edge for the type. May be used by Relay 1.
   defaultValueEdge(
     # The method to use when ordering \`DefaultValue\`.
-    orderBy: DefaultValuesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [DefaultValuesOrderBy!] = [PRIMARY_KEY_ASC]
   ): DefaultValuesEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -6495,7 +6495,7 @@ type UpdatePersonPayload {
   # An edge for the type. May be used by Relay 1.
   personEdge(
     # The method to use when ordering \`Person\`.
-    orderBy: PeopleOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
   ): PeopleEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -6541,7 +6541,7 @@ type UpdatePostPayload {
   # An edge for the type. May be used by Relay 1.
   postEdge(
     # The method to use when ordering \`Post\`.
-    orderBy: PostsOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -6587,7 +6587,7 @@ type UpdateSimilarTable1Payload {
   # An edge for the type. May be used by Relay 1.
   similarTable1Edge(
     # The method to use when ordering \`SimilarTable1\`.
-    orderBy: SimilarTable1SOrderBy = PRIMARY_KEY_ASC
+    orderBy: [SimilarTable1SOrderBy!] = [PRIMARY_KEY_ASC]
   ): SimilarTable1SEdge
 }
 
@@ -6630,7 +6630,7 @@ type UpdateSimilarTable2Payload {
   # An edge for the type. May be used by Relay 1.
   similarTable2Edge(
     # The method to use when ordering \`SimilarTable2\`.
-    orderBy: SimilarTable2SOrderBy = PRIMARY_KEY_ASC
+    orderBy: [SimilarTable2SOrderBy!] = [PRIMARY_KEY_ASC]
   ): SimilarTable2SEdge
 }
 
@@ -6673,7 +6673,7 @@ type UpdateTypePayload {
   # An edge for the type. May be used by Relay 1.
   typeEdge(
     # The method to use when ordering \`Type\`.
-    orderBy: TypesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
   ): TypesEdge
 }
 
@@ -6716,7 +6716,7 @@ type UpdateViewTablePayload {
   # An edge for the type. May be used by Relay 1.
   viewTableEdge(
     # The method to use when ordering \`ViewTable\`.
-    orderBy: ViewTablesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [ViewTablesOrderBy!] = [PRIMARY_KEY_ASC]
   ): ViewTablesEdge
 }
 
@@ -7606,7 +7606,7 @@ type TableSetMutationPayload {
   # An edge for the type. May be used by Relay 1.
   personEdge(
     # The method to use when ordering \`Person\`.
-    orderBy: PeopleOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
   ): PeopleEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -7813,7 +7813,7 @@ type CreateCompoundKeyPayload {
   # An edge for the type. May be used by Relay 1.
   compoundKeyEdge(
     # The method to use when ordering \`CompoundKey\`.
-    orderBy: CompoundKeysOrderBy = PRIMARY_KEY_ASC
+    orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysEdge
 
   # Reads a single \`Person\` that is related to this \`CompoundKey\`.
@@ -7848,7 +7848,7 @@ type CreateEdgeCasePayload {
   # An edge for the type. May be used by Relay 1.
   edgeCaseEdge(
     # The method to use when ordering \`EdgeCase\`.
-    orderBy: EdgeCasesOrderBy = NATURAL
+    orderBy: [EdgeCasesOrderBy!] = [NATURAL]
   ): EdgeCasesEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -7877,7 +7877,7 @@ type CreatePersonPayload {
   # An edge for the type. May be used by Relay 1.
   personEdge(
     # The method to use when ordering \`Person\`.
-    orderBy: PeopleOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
   ): PeopleEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -7922,7 +7922,7 @@ type DeleteCompoundKeyPayload {
   # An edge for the type. May be used by Relay 1.
   compoundKeyEdge(
     # The method to use when ordering \`CompoundKey\`.
-    orderBy: CompoundKeysOrderBy = PRIMARY_KEY_ASC
+    orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysEdge
   deletedCompoundKeyId: ID
 
@@ -7975,7 +7975,7 @@ type DeletePersonPayload {
   # An edge for the type. May be used by Relay 1.
   personEdge(
     # The method to use when ordering \`Person\`.
-    orderBy: PeopleOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
   ): PeopleEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -8766,7 +8766,7 @@ type TableSetMutationPayload {
   # An edge for the type. May be used by Relay 1.
   personEdge(
     # The method to use when ordering \`Person\`.
-    orderBy: PeopleOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
   ): PeopleEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -8836,7 +8836,7 @@ type UpdateCompoundKeyPayload {
   # An edge for the type. May be used by Relay 1.
   compoundKeyEdge(
     # The method to use when ordering \`CompoundKey\`.
-    orderBy: CompoundKeysOrderBy = PRIMARY_KEY_ASC
+    orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysEdge
 
   # Reads a single \`Person\` that is related to this \`CompoundKey\`.
@@ -8896,7 +8896,7 @@ type UpdatePersonPayload {
   # An edge for the type. May be used by Relay 1.
   personEdge(
     # The method to use when ordering \`Person\`.
-    orderBy: PeopleOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
   ): PeopleEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -9067,7 +9067,7 @@ type CreateDefaultValuePayload {
   # An edge for the type. May be used by Relay 1.
   defaultValueEdge(
     # The method to use when ordering \`DefaultValue\`.
-    orderBy: DefaultValuesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [DefaultValuesOrderBy!] = [PRIMARY_KEY_ASC]
   ): DefaultValuesEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -9096,7 +9096,7 @@ type CreateForeignKeyPayload {
   # An edge for the type. May be used by Relay 1.
   foreignKeyEdge(
     # The method to use when ordering \`ForeignKey\`.
-    orderBy: ForeignKeysOrderBy = NATURAL
+    orderBy: [ForeignKeysOrderBy!] = [NATURAL]
   ): ForeignKeysEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -9125,7 +9125,7 @@ type CreatePostPayload {
   # An edge for the type. May be used by Relay 1.
   postEdge(
     # The method to use when ordering \`Post\`.
-    orderBy: PostsOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -9157,7 +9157,7 @@ type CreateSimilarTable1Payload {
   # An edge for the type. May be used by Relay 1.
   similarTable1Edge(
     # The method to use when ordering \`SimilarTable1\`.
-    orderBy: SimilarTable1SOrderBy = PRIMARY_KEY_ASC
+    orderBy: [SimilarTable1SOrderBy!] = [PRIMARY_KEY_ASC]
   ): SimilarTable1SEdge
 }
 
@@ -9186,7 +9186,7 @@ type CreateSimilarTable2Payload {
   # An edge for the type. May be used by Relay 1.
   similarTable2Edge(
     # The method to use when ordering \`SimilarTable2\`.
-    orderBy: SimilarTable2SOrderBy = PRIMARY_KEY_ASC
+    orderBy: [SimilarTable2SOrderBy!] = [PRIMARY_KEY_ASC]
   ): SimilarTable2SEdge
 }
 
@@ -9215,7 +9215,7 @@ type CreateTestviewPayload {
   # An edge for the type. May be used by Relay 1.
   testviewEdge(
     # The method to use when ordering \`Testview\`.
-    orderBy: TestviewsOrderBy = NATURAL
+    orderBy: [TestviewsOrderBy!] = [NATURAL]
   ): TestviewsEdge
 }
 
@@ -9244,7 +9244,7 @@ type CreateViewTablePayload {
   # An edge for the type. May be used by Relay 1.
   viewTableEdge(
     # The method to use when ordering \`ViewTable\`.
-    orderBy: ViewTablesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [ViewTablesOrderBy!] = [PRIMARY_KEY_ASC]
   ): ViewTablesEdge
 }
 
@@ -9350,7 +9350,7 @@ type DeleteDefaultValuePayload {
   # An edge for the type. May be used by Relay 1.
   defaultValueEdge(
     # The method to use when ordering \`DefaultValue\`.
-    orderBy: DefaultValuesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [DefaultValuesOrderBy!] = [PRIMARY_KEY_ASC]
   ): DefaultValuesEdge
   deletedDefaultValueId: ID
 
@@ -9389,7 +9389,7 @@ type DeletePostPayload {
   # An edge for the type. May be used by Relay 1.
   postEdge(
     # The method to use when ordering \`Post\`.
-    orderBy: PostsOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -9430,7 +9430,7 @@ type DeleteSimilarTable1Payload {
   # An edge for the type. May be used by Relay 1.
   similarTable1Edge(
     # The method to use when ordering \`SimilarTable1\`.
-    orderBy: SimilarTable1SOrderBy = PRIMARY_KEY_ASC
+    orderBy: [SimilarTable1SOrderBy!] = [PRIMARY_KEY_ASC]
   ): SimilarTable1SEdge
 }
 
@@ -9468,7 +9468,7 @@ type DeleteSimilarTable2Payload {
   # An edge for the type. May be used by Relay 1.
   similarTable2Edge(
     # The method to use when ordering \`SimilarTable2\`.
-    orderBy: SimilarTable2SOrderBy = PRIMARY_KEY_ASC
+    orderBy: [SimilarTable2SOrderBy!] = [PRIMARY_KEY_ASC]
   ): SimilarTable2SEdge
 }
 
@@ -9506,7 +9506,7 @@ type DeleteViewTablePayload {
   # An edge for the type. May be used by Relay 1.
   viewTableEdge(
     # The method to use when ordering \`ViewTable\`.
-    orderBy: ViewTablesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [ViewTablesOrderBy!] = [PRIMARY_KEY_ASC]
   ): ViewTablesEdge
 }
 
@@ -9927,7 +9927,7 @@ type PostManyPayload {
   # An edge for the type. May be used by Relay 1.
   postEdge(
     # The method to use when ordering \`Post\`.
-    orderBy: PostsOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsEdge
   posts: [Post]
 
@@ -10004,7 +10004,7 @@ type PostWithSuffixPayload {
   # An edge for the type. May be used by Relay 1.
   postEdge(
     # The method to use when ordering \`Post\`.
-    orderBy: PostsOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -10743,7 +10743,7 @@ type UpdateDefaultValuePayload {
   # An edge for the type. May be used by Relay 1.
   defaultValueEdge(
     # The method to use when ordering \`DefaultValue\`.
-    orderBy: DefaultValuesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [DefaultValuesOrderBy!] = [PRIMARY_KEY_ASC]
   ): DefaultValuesEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -10786,7 +10786,7 @@ type UpdatePostPayload {
   # An edge for the type. May be used by Relay 1.
   postEdge(
     # The method to use when ordering \`Post\`.
-    orderBy: PostsOrderBy = PRIMARY_KEY_ASC
+    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsEdge
 
   # Our root query field type. Allows us to run any query from our mutation payload.
@@ -10832,7 +10832,7 @@ type UpdateSimilarTable1Payload {
   # An edge for the type. May be used by Relay 1.
   similarTable1Edge(
     # The method to use when ordering \`SimilarTable1\`.
-    orderBy: SimilarTable1SOrderBy = PRIMARY_KEY_ASC
+    orderBy: [SimilarTable1SOrderBy!] = [PRIMARY_KEY_ASC]
   ): SimilarTable1SEdge
 }
 
@@ -10875,7 +10875,7 @@ type UpdateSimilarTable2Payload {
   # An edge for the type. May be used by Relay 1.
   similarTable2Edge(
     # The method to use when ordering \`SimilarTable2\`.
-    orderBy: SimilarTable2SOrderBy = PRIMARY_KEY_ASC
+    orderBy: [SimilarTable2SOrderBy!] = [PRIMARY_KEY_ASC]
   ): SimilarTable2SEdge
 }
 
@@ -10918,7 +10918,7 @@ type UpdateViewTablePayload {
   # An edge for the type. May be used by Relay 1.
   viewTableEdge(
     # The method to use when ordering \`ViewTable\`.
-    orderBy: ViewTablesOrderBy = PRIMARY_KEY_ASC
+    orderBy: [ViewTablesOrderBy!] = [PRIMARY_KEY_ASC]
   ): ViewTablesEdge
 }
 
