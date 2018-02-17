@@ -257,7 +257,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
               const argDataGenerators =
                 argDataGeneratorsForSelfByFieldName[fieldName];
               for (const gen of argDataGenerators) {
-                const local = ensureArray(gen(args));
+                const local = ensureArray(gen(args, ReturnType, ...rest));
                 if (local) {
                   results.push(...local);
                 }
