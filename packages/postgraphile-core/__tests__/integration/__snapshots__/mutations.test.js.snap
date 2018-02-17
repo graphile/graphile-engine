@@ -114,21 +114,21 @@ Object {
     },
     "b": Object {
       "a": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "John Smith Jr.",
           "nodeId": "WyJwZW9wbGUiLDkwMDBd",
         },
       },
       "b": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "John Smith Jr.",
           "nodeId": "WyJwZW9wbGUiLDkwMDBd",
         },
       },
       "c": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "John Smith Jr.",
           "nodeId": "WyJwZW9wbGUiLDkwMDBd",
@@ -136,28 +136,28 @@ Object {
       },
       "clientMutationId": null,
       "d": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "John Smith Jr.",
           "nodeId": "WyJwZW9wbGUiLDkwMDBd",
         },
       },
       "e": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "John Smith Jr.",
           "nodeId": "WyJwZW9wbGUiLDkwMDBd",
         },
       },
       "f": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "John Smith Jr.",
           "nodeId": "WyJwZW9wbGUiLDkwMDBd",
         },
       },
       "g": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "John Smith Jr.",
           "nodeId": "WyJwZW9wbGUiLDkwMDBd",
@@ -177,21 +177,21 @@ Object {
     },
     "c": Object {
       "a": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "Best Pal",
           "nodeId": "WyJwZW9wbGUiLDIwXQ==",
         },
       },
       "b": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "Best Pal",
           "nodeId": "WyJwZW9wbGUiLDIwXQ==",
         },
       },
       "c": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "Best Pal",
           "nodeId": "WyJwZW9wbGUiLDIwXQ==",
@@ -199,28 +199,28 @@ Object {
       },
       "clientMutationId": "hello",
       "d": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "Best Pal",
           "nodeId": "WyJwZW9wbGUiLDIwXQ==",
         },
       },
       "e": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "Best Pal",
           "nodeId": "WyJwZW9wbGUiLDIwXQ==",
         },
       },
       "f": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "Best Pal",
           "nodeId": "WyJwZW9wbGUiLDIwXQ==",
         },
       },
       "g": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "Best Pal",
           "nodeId": "WyJwZW9wbGUiLDIwXQ==",
@@ -284,21 +284,21 @@ Object {
     },
     "g": Object {
       "a": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "Budd Deey",
           "nodeId": "WyJwZW9wbGUiLDE5OThd",
         },
       },
       "b": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "Budd Deey",
           "nodeId": "WyJwZW9wbGUiLDE5OThd",
         },
       },
       "c": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "Budd Deey",
           "nodeId": "WyJwZW9wbGUiLDE5OThd",
@@ -306,28 +306,28 @@ Object {
       },
       "clientMutationId": null,
       "d": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "Budd Deey",
           "nodeId": "WyJwZW9wbGUiLDE5OThd",
         },
       },
       "e": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "Budd Deey",
           "nodeId": "WyJwZW9wbGUiLDE5OThd",
         },
       },
       "f": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "Budd Deey",
           "nodeId": "WyJwZW9wbGUiLDE5OThd",
         },
       },
       "g": Object {
-        "cursor": null,
+        "cursor": NOTNULL,
         "node": Object {
           "name": "Budd Deey",
           "nodeId": "WyJwZW9wbGUiLDE5OThd",
