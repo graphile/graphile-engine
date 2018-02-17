@@ -62,7 +62,12 @@ export default (function PgMutationPayloadEdgePlugin(
         [fieldName]: fieldWithHooks(
           fieldName,
           ({ addArgDataGenerator }) => {
-            addArgDataGenerator(function connectionOrderBy({ orderBy }) {
+            addArgDataGenerator(function connectionOrderBy({
+              orderBy: rawOrderBy,
+            }) {
+              const orderBy = rawOrderBy
+                ? Array.isArray(rawOrderBy) ? rawOrderBy : [rawOrderBy]
+                : null;
               return {
                 pgQuery: queryBuilder => {
                   if (orderBy != null) {
@@ -127,7 +132,10 @@ export default (function PgMutationPayloadEdgePlugin(
                   defaultValue: defaultValueEnum && defaultValueEnum.value,
                 },
               },
-              resolve(data, { orderBy }) {
+              resolve(data, { orderBy: rawOrderBy }) {
+                const orderBy = rawOrderBy
+                  ? Array.isArray(rawOrderBy) ? rawOrderBy : [rawOrderBy]
+                  : null;
                 const order =
                   orderBy && orderBy.some(item => item.alias)
                     ? orderBy.filter(item => item.alias)
