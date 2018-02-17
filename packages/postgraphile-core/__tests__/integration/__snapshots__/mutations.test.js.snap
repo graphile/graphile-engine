@@ -143,7 +143,7 @@ Object {
         },
       },
       "e": Object {
-        "cursor": "WyJlbWFpbF9hc2MiLFsiam9obm55LmJveS5zbWl0aEBlbWFpbC5jb20iLDkwMDBdXQ=="<Paste>,
+        "cursor": "WyJlbWFpbF9hc2MiLFsiam9obm55LmJveS5zbWl0aEBlbWFpbC5jb20iLDkwMDBdXQ==",
         "node": Object {
           "name": "John Smith Jr.",
           "nodeId": "WyJwZW9wbGUiLDkwMDBd",
@@ -745,7 +745,7 @@ Object {
         "nodeId": "WyJwZW9wbGUiLDZd",
       },
       "personEdge": Object {
-        "cursor": "WyJlbWFpbF9kZXNjIixbImdyYXBoaWxlLWJ1aWxkLmlzc3VlLjI3LmV4aXN0c0BleGFtcGxlLmNvbSIsNl1d",
+        "cursor": "WyJwcmltYXJ5X2tleV9hc2MiLFs2XV0=",
         "node": Object {
           "id": 6,
           "nodeId": "WyJwZW9wbGUiLDZd",
@@ -903,7 +903,7 @@ Object {
         "nodeId": "WyJwb3N0cyIsNV0=",
       },
       "postEdge": Object {
-        "cursor": null,
+        "cursor": "WyJwcmltYXJ5X2tleV9hc2MiLFs1XV0=",
         "node": Object {
           "headline": "Please, Don-Bot… look into your hard drive, and open your mercy file!",
           "id": 5,
