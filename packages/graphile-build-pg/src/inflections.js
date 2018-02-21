@@ -30,7 +30,7 @@ export type Inflector = {
   [string]: (...input: Array<any>) => string,
 };
 
-function preventEmptyResult<A, O: { [key: string]: () => string }>(
+function preventEmptyResult<O: { [key: string]: () => string }>(
   obj
 ): $ObjMap<O, <V>(V) => V> {
   return Object.keys(obj).reduce((memo, key) => {
