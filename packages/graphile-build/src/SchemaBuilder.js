@@ -147,12 +147,12 @@ type SupportedHookTypes = {} | Build | Array<GraphQLInterfaceType>;
 
 export type Hook<
   Type: SupportedHookTypes,
-  BuildExtensions: {},
-  ContextExtensions: {}
+  BuildExtensions: *,
+  ContextExtensions: *
 > = (
   input: Type,
-  build: {| ...Build, ...BuildExtensions |},
-  context: {| ...Context, ...ContextExtensions |}
+  build: { ...Build, ...BuildExtensions },
+  context: { ...Context, ...ContextExtensions }
 ) => Type;
 
 export type WatchUnwatch = (triggerChange: TriggerChangeType) => void;
@@ -261,7 +261,7 @@ class SchemaBuilder extends EventEmitter {
   }
 
   applyHooks<T: *, Context>(
-    build: Build,
+    build: { ...Build },
     hookName: string,
     input: T,
     context: Context,
@@ -324,8 +324,8 @@ class SchemaBuilder extends EventEmitter {
   }
 
   createBuild(): Build {
-    const initialBuild: Build = makeNewBuild(this);
-    const build: Build = this.applyHooks(initialBuild, "build", initialBuild, {
+    const initialBuild = makeNewBuild(this);
+    const build = this.applyHooks(initialBuild, "build", initialBuild, {
       scope: {},
     });
     // Bind all functions so they can be dereferenced
