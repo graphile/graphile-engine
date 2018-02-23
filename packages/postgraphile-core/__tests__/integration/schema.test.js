@@ -41,14 +41,16 @@ const testFixtures = [
       }),
   },
   {
-    name: "prints a schema without parsing tags",
+    name:
+      "prints a schema without parsing tags and with legacy relations omitted",
     createSchema: client =>
       createPostGraphQLSchema(client, "c", {
         enableTags: false,
+        legacyRelations: "omit",
       }),
   },
   {
-    name: "prints a schema without one-to-one support",
+    name: "prints a schema without legacy relations", // will be default in v5
     createSchema: client =>
       createPostGraphQLSchema(client, "c", {
         legacyRelations: "only",
