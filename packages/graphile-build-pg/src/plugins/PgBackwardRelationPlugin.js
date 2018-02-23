@@ -177,6 +177,8 @@ export default (function PgBackwardRelationPlugin(
                           tableAlias,
                           resolveData,
                           {
+                            asJson: true,
+                            addNullCase: true,
                             withPagination: false,
                           },
                           innerQueryBuilder => {
