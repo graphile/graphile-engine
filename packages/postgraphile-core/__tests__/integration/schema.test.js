@@ -44,7 +44,15 @@ const testFixtures = [
     name: "prints a schema without parsing tags",
     createSchema: client =>
       createPostGraphQLSchema(client, "c", {
-        enableTags: false
+        enableTags: false,
+      }),
+  },
+  {
+    name: "prints a schema without one-to-one support",
+    createSchema: client =>
+      createPostGraphQLSchema(client, "c", {
+        legacyRelations: "only",
+        enableTags: false,
       }),
   },
 ];
