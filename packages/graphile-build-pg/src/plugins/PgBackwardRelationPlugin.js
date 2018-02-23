@@ -284,7 +284,8 @@ export default (function PgBackwardRelationPlugin(
                     return addStartEndCursor(data[alias]);
                   },
                   deprecationReason: isDeprecated
-                    ? `Please use ${singleRelationFieldName} instead`
+                    ? // $FlowFixMe
+                      `Please use ${singleRelationFieldName} instead`
                     : undefined,
                 };
               },
