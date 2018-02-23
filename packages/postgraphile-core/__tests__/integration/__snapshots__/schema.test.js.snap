@@ -1381,66 +1381,12 @@ type Person implements Node {
   \\"\\"\\"
   id: ID!
 
-  \\"\\"\\"Reads and enables pagination through a set of \`LeftArm\`.\\"\\"\\"
-  leftArmsByPersonId(
-    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
-    after: Cursor
-
-    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
-    before: Cursor
-
-    \\"\\"\\"
-    A condition to be used in determining which values should be returned by the collection.
-    \\"\\"\\"
-    condition: LeftArmCondition
-
-    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
-    first: Int
-
-    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
-    last: Int
-
-    \\"\\"\\"
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    \\"\\"\\"
-    offset: Int
-
-    \\"\\"\\"The method to use when ordering \`LeftArm\`.\\"\\"\\"
-    orderBy: [LeftArmsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): LeftArmsConnection!
+  leftArmByPersonId: LeftArm
 
   \\"\\"\\"The person’s name\\"\\"\\"
   name: String!
 
-  \\"\\"\\"Reads and enables pagination through a set of \`PersonSecret\`.\\"\\"\\"
-  personSecretsByPersonId(
-    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
-    after: Cursor
-
-    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
-    before: Cursor
-
-    \\"\\"\\"
-    A condition to be used in determining which values should be returned by the collection.
-    \\"\\"\\"
-    condition: PersonSecretCondition
-
-    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
-    first: Int
-
-    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
-    last: Int
-
-    \\"\\"\\"
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    \\"\\"\\"
-    offset: Int
-
-    \\"\\"\\"The method to use when ordering \`PersonSecret\`.\\"\\"\\"
-    orderBy: [PersonSecretsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PersonSecretsConnection!
+  personSecretByPersonId: PersonSecret
   rowId: Int!
   site: WrappedUrl @deprecated(reason: \\"Don’t use me\\")
 }
@@ -7544,34 +7490,7 @@ type Person implements Node {
   ): PeopleConnection!
   id: Int!
 
-  \\"\\"\\"Reads and enables pagination through a set of \`LeftArm\`.\\"\\"\\"
-  leftArmsByPersonId(
-    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
-    after: Cursor
-
-    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
-    before: Cursor
-
-    \\"\\"\\"
-    A condition to be used in determining which values should be returned by the collection.
-    \\"\\"\\"
-    condition: LeftArmCondition
-
-    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
-    first: Int
-
-    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
-    last: Int
-
-    \\"\\"\\"
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    \\"\\"\\"
-    offset: Int
-
-    \\"\\"\\"The method to use when ordering \`LeftArm\`.\\"\\"\\"
-    orderBy: [LeftArmsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): LeftArmsConnection!
+  leftArmByPersonId: LeftArm
 
   \\"\\"\\"The person’s name\\"\\"\\"
   name: String!
@@ -7581,34 +7500,7 @@ type Person implements Node {
   \\"\\"\\"
   nodeId: ID!
 
-  \\"\\"\\"Reads and enables pagination through a set of \`PersonSecret\`.\\"\\"\\"
-  personSecretsByPersonId(
-    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
-    after: Cursor
-
-    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
-    before: Cursor
-
-    \\"\\"\\"
-    A condition to be used in determining which values should be returned by the collection.
-    \\"\\"\\"
-    condition: PersonSecretCondition
-
-    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
-    first: Int
-
-    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
-    last: Int
-
-    \\"\\"\\"
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    \\"\\"\\"
-    offset: Int
-
-    \\"\\"\\"The method to use when ordering \`PersonSecret\`.\\"\\"\\"
-    orderBy: [PersonSecretsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PersonSecretsConnection!
+  personSecretByPersonId: PersonSecret
 
   \\"\\"\\"Reads and enables pagination through a set of \`Post\`.\\"\\"\\"
   postsByAuthorId(
@@ -11655,34 +11547,7 @@ type Person implements Node {
   ): PeopleConnection!
   id: Int!
 
-  \\"\\"\\"Reads and enables pagination through a set of \`LeftArm\`.\\"\\"\\"
-  leftArmsByPersonId(
-    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
-    after: Cursor
-
-    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
-    before: Cursor
-
-    \\"\\"\\"
-    A condition to be used in determining which values should be returned by the collection.
-    \\"\\"\\"
-    condition: LeftArmCondition
-
-    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
-    first: Int
-
-    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
-    last: Int
-
-    \\"\\"\\"
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    \\"\\"\\"
-    offset: Int
-
-    \\"\\"\\"The method to use when ordering \`LeftArm\`.\\"\\"\\"
-    orderBy: [LeftArmsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): LeftArmsConnection!
+  leftArmByPersonId: LeftArm
 
   \\"\\"\\"The person’s name\\"\\"\\"
   name: String!
@@ -11692,34 +11557,7 @@ type Person implements Node {
   \\"\\"\\"
   nodeId: ID!
 
-  \\"\\"\\"Reads and enables pagination through a set of \`PersonSecret\`.\\"\\"\\"
-  personSecretsByPersonId(
-    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
-    after: Cursor
-
-    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
-    before: Cursor
-
-    \\"\\"\\"
-    A condition to be used in determining which values should be returned by the collection.
-    \\"\\"\\"
-    condition: PersonSecretCondition
-
-    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
-    first: Int
-
-    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
-    last: Int
-
-    \\"\\"\\"
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    \\"\\"\\"
-    offset: Int
-
-    \\"\\"\\"The method to use when ordering \`PersonSecret\`.\\"\\"\\"
-    orderBy: [PersonSecretsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PersonSecretsConnection!
+  personSecretByPersonId: PersonSecret
   site: WrappedUrl @deprecated(reason: \\"Don’t use me\\")
 }
 
@@ -13569,34 +13407,7 @@ type Person implements Node {
   ): PeopleConnection!
   id: Int!
 
-  \\"\\"\\"Reads and enables pagination through a set of \`LeftArm\`.\\"\\"\\"
-  leftArmsByPersonId(
-    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
-    after: Cursor
-
-    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
-    before: Cursor
-
-    \\"\\"\\"
-    A condition to be used in determining which values should be returned by the collection.
-    \\"\\"\\"
-    condition: LeftArmCondition
-
-    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
-    first: Int
-
-    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
-    last: Int
-
-    \\"\\"\\"
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    \\"\\"\\"
-    offset: Int
-
-    \\"\\"\\"The method to use when ordering \`LeftArm\`.\\"\\"\\"
-    orderBy: [LeftArmsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): LeftArmsConnection!
+  leftArmByPersonId: LeftArm
 
   \\"\\"\\"The person’s name\\"\\"\\"
   name: String!
@@ -13606,34 +13417,7 @@ type Person implements Node {
   \\"\\"\\"
   nodeId: ID!
 
-  \\"\\"\\"Reads and enables pagination through a set of \`PersonSecret\`.\\"\\"\\"
-  personSecretsByPersonId(
-    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
-    after: Cursor
-
-    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
-    before: Cursor
-
-    \\"\\"\\"
-    A condition to be used in determining which values should be returned by the collection.
-    \\"\\"\\"
-    condition: PersonSecretCondition
-
-    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
-    first: Int
-
-    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
-    last: Int
-
-    \\"\\"\\"
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    \\"\\"\\"
-    offset: Int
-
-    \\"\\"\\"The method to use when ordering \`PersonSecret\`.\\"\\"\\"
-    orderBy: [PersonSecretsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PersonSecretsConnection!
+  personSecretByPersonId: PersonSecret
 
   \\"\\"\\"@deprecated Don’t use me\\"\\"\\"
   site: WrappedUrl
