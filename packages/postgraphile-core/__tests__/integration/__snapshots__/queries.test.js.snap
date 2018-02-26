@@ -2895,7 +2895,7 @@ Object {
     "a": Object {
       "edges": Array [
         Object {
-          "cursor": "WyJuYXR1cmFsIiwxXQ==",
+          "cursor": "WyJ2aWV3X3VuaXF1ZV9rZXlfYXNjIixbMV1d",
           "node": Object {
             "col1": 11,
             "col2": 21,
@@ -2903,7 +2903,7 @@ Object {
           },
         },
         Object {
-          "cursor": "WyJuYXR1cmFsIiwyXQ==",
+          "cursor": "WyJ2aWV3X3VuaXF1ZV9rZXlfYXNjIixbMl1d",
           "node": Object {
             "col1": 12,
             "col2": 22,
@@ -2911,7 +2911,7 @@ Object {
           },
         },
         Object {
-          "cursor": "WyJuYXR1cmFsIiwzXQ==",
+          "cursor": "WyJ2aWV3X3VuaXF1ZV9rZXlfYXNjIixbM11d",
           "node": Object {
             "col1": 13,
             "col2": 23,
@@ -2923,7 +2923,7 @@ Object {
     "b": Object {
       "edges": Array [
         Object {
-          "cursor": "WyJjb2wxX2Rlc2MiLDNd",
+          "cursor": "WyJjb2wxX2Rlc2MiLFsxMywzXV0=",
           "node": Object {
             "col1": 13,
             "col2": 23,
@@ -2931,7 +2931,7 @@ Object {
           },
         },
         Object {
-          "cursor": "WyJjb2wxX2Rlc2MiLDJd",
+          "cursor": "WyJjb2wxX2Rlc2MiLFsxMiwyXV0=",
           "node": Object {
             "col1": 12,
             "col2": 22,
@@ -2939,7 +2939,7 @@ Object {
           },
         },
         Object {
-          "cursor": "WyJjb2wxX2Rlc2MiLDFd",
+          "cursor": "WyJjb2wxX2Rlc2MiLFsxMSwxXV0=",
           "node": Object {
             "col1": 11,
             "col2": 21,
