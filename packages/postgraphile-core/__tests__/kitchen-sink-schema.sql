@@ -50,6 +50,7 @@ comment on table c.left_arm is 'Tracks metadata about the left arms of various p
 create unique index uniq_person__email_id_3 on c.person (email) where (id = 3);
 
 comment on table c.person is 'Person test comment';
+comment on column c.person.id is 'The primary unique identifier for the person';
 comment on column c.person.name is 'The person’s name';
 comment on column c.person.site is '@deprecated Don’t use me';
 
