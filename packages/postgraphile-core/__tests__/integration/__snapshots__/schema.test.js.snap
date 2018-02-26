@@ -106,7 +106,7 @@ type CompoundKeysEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`CompoundKey\` at the end of the edge.\\"\\"\\"
-  node: CompoundKey!
+  node: CompoundKey
 }
 
 \\"\\"\\"Methods to use when ordering \`CompoundKey\`.\\"\\"\\"
@@ -157,7 +157,7 @@ type CompoundTypesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`CompoundType\` at the end of the edge.\\"\\"\\"
-  node: CompoundType!
+  node: CompoundType
 }
 
 type Comptype {
@@ -642,7 +642,7 @@ type EdgeCasesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`EdgeCase\` at the end of the edge.\\"\\"\\"
-  node: EdgeCase!
+  node: EdgeCase
 }
 
 \\"\\"\\"Methods to use when ordering \`EdgeCase\`.\\"\\"\\"
@@ -912,7 +912,7 @@ type LeftArmsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`LeftArm\` at the end of the edge.\\"\\"\\"
-  node: LeftArm!
+  node: LeftArm
 }
 
 \\"\\"\\"Methods to use when ordering \`LeftArm\`.\\"\\"\\"
@@ -1265,7 +1265,7 @@ type PeopleEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Person\` at the end of the edge.\\"\\"\\"
-  node: Person!
+  node: Person
 }
 
 \\"\\"\\"Methods to use when ordering \`Person\`.\\"\\"\\"
@@ -1575,7 +1575,7 @@ type PersonSecretsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`PersonSecret\` at the end of the edge.\\"\\"\\"
-  node: PersonSecret!
+  node: PersonSecret
 }
 
 \\"\\"\\"Methods to use when ordering \`PersonSecret\`.\\"\\"\\"
@@ -3336,7 +3336,7 @@ type TypesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Type\` at the end of the edge.\\"\\"\\"
-  node: Type!
+  node: Type
 }
 
 \\"\\"\\"Methods to use when ordering \`Type\`.\\"\\"\\"
@@ -3467,7 +3467,7 @@ type UpdatableViewsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`UpdatableView\` at the end of the edge.\\"\\"\\"
-  node: UpdatableView!
+  node: UpdatableView
 }
 
 \\"\\"\\"Methods to use when ordering \`UpdatableView\`.\\"\\"\\"
@@ -3986,7 +3986,7 @@ type CompoundKeysEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`CompoundKey\` at the end of the edge.\\"\\"\\"
-  node: CompoundKey!
+  node: CompoundKey
 }
 
 \\"\\"\\"Methods to use when ordering \`CompoundKey\`.\\"\\"\\"
@@ -4073,7 +4073,7 @@ type CompoundTypesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`CompoundType\` at the end of the edge.\\"\\"\\"
-  node: CompoundType!
+  node: CompoundType
 }
 
 type Comptype {
@@ -4884,7 +4884,7 @@ type DefaultValuesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`DefaultValue\` at the end of the edge.\\"\\"\\"
-  node: DefaultValue!
+  node: DefaultValue
 }
 
 \\"\\"\\"Methods to use when ordering \`DefaultValue\`.\\"\\"\\"
@@ -5710,7 +5710,7 @@ type EdgeCasesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`EdgeCase\` at the end of the edge.\\"\\"\\"
-  node: EdgeCase!
+  node: EdgeCase
 }
 
 \\"\\"\\"Methods to use when ordering \`EdgeCase\`.\\"\\"\\"
@@ -5816,7 +5816,7 @@ type ForeignKeysEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`ForeignKey\` at the end of the edge.\\"\\"\\"
-  node: ForeignKey!
+  node: ForeignKey
 }
 
 \\"\\"\\"Methods to use when ordering \`ForeignKey\`.\\"\\"\\"
@@ -5910,7 +5910,7 @@ type InputsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Input\` at the end of the edge.\\"\\"\\"
-  node: Input!
+  node: Input
 }
 
 \\"\\"\\"Methods to use when ordering \`Input\`.\\"\\"\\"
@@ -6206,7 +6206,7 @@ type LeftArmsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`LeftArm\` at the end of the edge.\\"\\"\\"
-  node: LeftArm!
+  node: LeftArm
 }
 
 \\"\\"\\"Methods to use when ordering \`LeftArm\`.\\"\\"\\"
@@ -7276,7 +7276,7 @@ type NonUpdatableViewsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`NonUpdatableView\` at the end of the edge.\\"\\"\\"
-  node: NonUpdatableView!
+  node: NonUpdatableView
 }
 
 \\"\\"\\"Methods to use when ordering \`NonUpdatableView\`.\\"\\"\\"
@@ -7372,7 +7372,7 @@ type PatchesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Patch\` at the end of the edge.\\"\\"\\"
-  node: Patch!
+  node: Patch
 }
 
 \\"\\"\\"Methods to use when ordering \`Patch\`.\\"\\"\\"
@@ -7419,7 +7419,7 @@ type PeopleEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Person\` at the end of the edge.\\"\\"\\"
-  node: Person!
+  node: Person
 }
 
 \\"\\"\\"Methods to use when ordering \`Person\`.\\"\\"\\"
@@ -7787,7 +7787,7 @@ type PersonSecretsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`PersonSecret\` at the end of the edge.\\"\\"\\"
-  node: PersonSecret!
+  node: PersonSecret
 }
 
 \\"\\"\\"Methods to use when ordering \`PersonSecret\`.\\"\\"\\"
@@ -7933,7 +7933,7 @@ type PostsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Post\` at the end of the edge.\\"\\"\\"
-  node: Post!
+  node: Post
 }
 
 \\"\\"\\"Methods to use when ordering \`Post\`.\\"\\"\\"
@@ -8966,7 +8966,7 @@ type ReservedInputRecordsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`ReservedInputRecord\` at the end of the edge.\\"\\"\\"
-  node: ReservedInputRecord!
+  node: ReservedInputRecord
 }
 
 \\"\\"\\"Methods to use when ordering \`ReservedInputRecord\`.\\"\\"\\"
@@ -9043,7 +9043,7 @@ type ReservedPatchRecordsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`ReservedPatchRecord\` at the end of the edge.\\"\\"\\"
-  node: ReservedPatchRecord!
+  node: ReservedPatchRecord
 }
 
 \\"\\"\\"Methods to use when ordering \`ReservedPatchRecord\`.\\"\\"\\"
@@ -9078,7 +9078,7 @@ type ReservedsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Reserved\` at the end of the edge.\\"\\"\\"
-  node: Reserved!
+  node: Reserved
 }
 
 \\"\\"\\"Methods to use when ordering \`Reserved\`.\\"\\"\\"
@@ -9184,7 +9184,7 @@ type SimilarTable1SEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`SimilarTable1\` at the end of the edge.\\"\\"\\"
-  node: SimilarTable1!
+  node: SimilarTable1
 }
 
 \\"\\"\\"Methods to use when ordering \`SimilarTable1\`.\\"\\"\\"
@@ -9273,7 +9273,7 @@ type SimilarTable2SEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`SimilarTable2\` at the end of the edge.\\"\\"\\"
-  node: SimilarTable2!
+  node: SimilarTable2
 }
 
 \\"\\"\\"Methods to use when ordering \`SimilarTable2\`.\\"\\"\\"
@@ -9342,7 +9342,7 @@ type TablefuncCrosstab2SEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`TablefuncCrosstab2\` at the end of the edge.\\"\\"\\"
-  node: TablefuncCrosstab2!
+  node: TablefuncCrosstab2
 }
 
 type TablefuncCrosstab3 {
@@ -9377,7 +9377,7 @@ type TablefuncCrosstab3SEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`TablefuncCrosstab3\` at the end of the edge.\\"\\"\\"
-  node: TablefuncCrosstab3!
+  node: TablefuncCrosstab3
 }
 
 type TablefuncCrosstab4 {
@@ -9413,7 +9413,7 @@ type TablefuncCrosstab4SEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`TablefuncCrosstab4\` at the end of the edge.\\"\\"\\"
-  node: TablefuncCrosstab4!
+  node: TablefuncCrosstab4
 }
 
 \\"\\"\\"All input for the \`tableMutation\` mutation.\\"\\"\\"
@@ -9531,7 +9531,7 @@ type TestviewsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Testview\` at the end of the edge.\\"\\"\\"
-  node: Testview!
+  node: Testview
 }
 
 \\"\\"\\"Methods to use when ordering \`Testview\`.\\"\\"\\"
@@ -9784,7 +9784,7 @@ type TypesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Type\` at the end of the edge.\\"\\"\\"
-  node: Type!
+  node: Type
 }
 
 \\"\\"\\"All input for the \`typesMutation\` mutation.\\"\\"\\"
@@ -9947,7 +9947,7 @@ type UpdatableViewsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`UpdatableView\` at the end of the edge.\\"\\"\\"
-  node: UpdatableView!
+  node: UpdatableView
 }
 
 \\"\\"\\"Methods to use when ordering \`UpdatableView\`.\\"\\"\\"
@@ -10938,7 +10938,7 @@ type ViewTablesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`ViewTable\` at the end of the edge.\\"\\"\\"
-  node: ViewTable!
+  node: ViewTable
 }
 
 \\"\\"\\"Methods to use when ordering \`ViewTable\`.\\"\\"\\"
@@ -11055,7 +11055,7 @@ type CompoundKeysEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`CompoundKey\` at the end of the edge.\\"\\"\\"
-  node: CompoundKey!
+  node: CompoundKey
 }
 
 \\"\\"\\"Methods to use when ordering \`CompoundKey\`.\\"\\"\\"
@@ -11106,7 +11106,7 @@ type CompoundTypesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`CompoundType\` at the end of the edge.\\"\\"\\"
-  node: CompoundType!
+  node: CompoundType
 }
 
 type Comptype {
@@ -11168,7 +11168,7 @@ type EdgeCasesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`EdgeCase\` at the end of the edge.\\"\\"\\"
-  node: EdgeCase!
+  node: EdgeCase
 }
 
 \\"\\"\\"Methods to use when ordering \`EdgeCase\`.\\"\\"\\"
@@ -11423,7 +11423,7 @@ type LeftArmsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`LeftArm\` at the end of the edge.\\"\\"\\"
-  node: LeftArm!
+  node: LeftArm
 }
 
 \\"\\"\\"Methods to use when ordering \`LeftArm\`.\\"\\"\\"
@@ -11573,7 +11573,7 @@ type PeopleEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Person\` at the end of the edge.\\"\\"\\"
-  node: Person!
+  node: Person
 }
 
 \\"\\"\\"Methods to use when ordering \`Person\`.\\"\\"\\"
@@ -11837,7 +11837,7 @@ type PersonSecretsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`PersonSecret\` at the end of the edge.\\"\\"\\"
-  node: PersonSecret!
+  node: PersonSecret
 }
 
 \\"\\"\\"Methods to use when ordering \`PersonSecret\`.\\"\\"\\"
@@ -12337,7 +12337,7 @@ type CompoundKeysEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`CompoundKey\` at the end of the edge.\\"\\"\\"
-  node: CompoundKey!
+  node: CompoundKey
 }
 
 \\"\\"\\"Methods to use when ordering \`CompoundKey\`.\\"\\"\\"
@@ -12388,7 +12388,7 @@ type CompoundTypesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`CompoundType\` at the end of the edge.\\"\\"\\"
-  node: CompoundType!
+  node: CompoundType
 }
 
 type Comptype {
@@ -12873,7 +12873,7 @@ type EdgeCasesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`EdgeCase\` at the end of the edge.\\"\\"\\"
-  node: EdgeCase!
+  node: EdgeCase
 }
 
 \\"\\"\\"Methods to use when ordering \`EdgeCase\`.\\"\\"\\"
@@ -13144,7 +13144,7 @@ type LeftArmsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`LeftArm\` at the end of the edge.\\"\\"\\"
-  node: LeftArm!
+  node: LeftArm
 }
 
 \\"\\"\\"Methods to use when ordering \`LeftArm\`.\\"\\"\\"
@@ -13497,7 +13497,7 @@ type PeopleEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Person\` at the end of the edge.\\"\\"\\"
-  node: Person!
+  node: Person
 }
 
 \\"\\"\\"Methods to use when ordering \`Person\`.\\"\\"\\"
@@ -13807,7 +13807,7 @@ type PersonSecretsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`PersonSecret\` at the end of the edge.\\"\\"\\"
-  node: PersonSecret!
+  node: PersonSecret
 }
 
 \\"\\"\\"Methods to use when ordering \`PersonSecret\`.\\"\\"\\"
@@ -14582,7 +14582,7 @@ type CompoundKeysEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`CompoundKey\` at the end of the edge.\\"\\"\\"
-  node: CompoundKey!
+  node: CompoundKey
 }
 
 \\"\\"\\"Methods to use when ordering \`CompoundKey\`.\\"\\"\\"
@@ -14633,7 +14633,7 @@ type CompoundTypesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`CompoundType\` at the end of the edge.\\"\\"\\"
-  node: CompoundType!
+  node: CompoundType
 }
 
 type Comptype {
@@ -15118,7 +15118,7 @@ type EdgeCasesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`EdgeCase\` at the end of the edge.\\"\\"\\"
-  node: EdgeCase!
+  node: EdgeCase
 }
 
 \\"\\"\\"Methods to use when ordering \`EdgeCase\`.\\"\\"\\"
@@ -15389,7 +15389,7 @@ type LeftArmsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`LeftArm\` at the end of the edge.\\"\\"\\"
-  node: LeftArm!
+  node: LeftArm
 }
 
 \\"\\"\\"Methods to use when ordering \`LeftArm\`.\\"\\"\\"
@@ -15742,7 +15742,7 @@ type PeopleEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Person\` at the end of the edge.\\"\\"\\"
-  node: Person!
+  node: Person
 }
 
 \\"\\"\\"Methods to use when ordering \`Person\`.\\"\\"\\"
@@ -16000,7 +16000,7 @@ type PersonSecretsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`PersonSecret\` at the end of the edge.\\"\\"\\"
-  node: PersonSecret!
+  node: PersonSecret
 }
 
 \\"\\"\\"Methods to use when ordering \`PersonSecret\`.\\"\\"\\"
@@ -17332,7 +17332,7 @@ type DefaultValuesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`DefaultValue\` at the end of the edge.\\"\\"\\"
-  node: DefaultValue!
+  node: DefaultValue
 }
 
 \\"\\"\\"Methods to use when ordering \`DefaultValue\`.\\"\\"\\"
@@ -17877,7 +17877,7 @@ type ForeignKeysEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`ForeignKey\` at the end of the edge.\\"\\"\\"
-  node: ForeignKey!
+  node: ForeignKey
 }
 
 \\"\\"\\"Methods to use when ordering \`ForeignKey\`.\\"\\"\\"
@@ -17944,7 +17944,7 @@ type InputsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Input\` at the end of the edge.\\"\\"\\"
-  node: Input!
+  node: Input
 }
 
 \\"\\"\\"Methods to use when ordering \`Input\`.\\"\\"\\"
@@ -18503,7 +18503,7 @@ type NonUpdatableViewsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`NonUpdatableView\` at the end of the edge.\\"\\"\\"
-  node: NonUpdatableView!
+  node: NonUpdatableView
 }
 
 \\"\\"\\"Methods to use when ordering \`NonUpdatableView\`.\\"\\"\\"
@@ -18597,7 +18597,7 @@ type PatchesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Patch\` at the end of the edge.\\"\\"\\"
-  node: Patch!
+  node: Patch
 }
 
 \\"\\"\\"Methods to use when ordering \`Patch\`.\\"\\"\\"
@@ -18731,7 +18731,7 @@ type PostsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Post\` at the end of the edge.\\"\\"\\"
-  node: Post!
+  node: Post
 }
 
 \\"\\"\\"Methods to use when ordering \`Post\`.\\"\\"\\"
@@ -19445,7 +19445,7 @@ type ReservedInputRecordsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`ReservedInputRecord\` at the end of the edge.\\"\\"\\"
-  node: ReservedInputRecord!
+  node: ReservedInputRecord
 }
 
 \\"\\"\\"Methods to use when ordering \`ReservedInputRecord\`.\\"\\"\\"
@@ -19522,7 +19522,7 @@ type ReservedPatchRecordsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`ReservedPatchRecord\` at the end of the edge.\\"\\"\\"
-  node: ReservedPatchRecord!
+  node: ReservedPatchRecord
 }
 
 \\"\\"\\"Methods to use when ordering \`ReservedPatchRecord\`.\\"\\"\\"
@@ -19557,7 +19557,7 @@ type ReservedsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Reserved\` at the end of the edge.\\"\\"\\"
-  node: Reserved!
+  node: Reserved
 }
 
 \\"\\"\\"Methods to use when ordering \`Reserved\`.\\"\\"\\"
@@ -19663,7 +19663,7 @@ type SimilarTable1SEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`SimilarTable1\` at the end of the edge.\\"\\"\\"
-  node: SimilarTable1!
+  node: SimilarTable1
 }
 
 \\"\\"\\"Methods to use when ordering \`SimilarTable1\`.\\"\\"\\"
@@ -19752,7 +19752,7 @@ type SimilarTable2SEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`SimilarTable2\` at the end of the edge.\\"\\"\\"
-  node: SimilarTable2!
+  node: SimilarTable2
 }
 
 \\"\\"\\"Methods to use when ordering \`SimilarTable2\`.\\"\\"\\"
@@ -19821,7 +19821,7 @@ type TablefuncCrosstab2SEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`TablefuncCrosstab2\` at the end of the edge.\\"\\"\\"
-  node: TablefuncCrosstab2!
+  node: TablefuncCrosstab2
 }
 
 type TablefuncCrosstab3 {
@@ -19856,7 +19856,7 @@ type TablefuncCrosstab3SEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`TablefuncCrosstab3\` at the end of the edge.\\"\\"\\"
-  node: TablefuncCrosstab3!
+  node: TablefuncCrosstab3
 }
 
 type TablefuncCrosstab4 {
@@ -19892,7 +19892,7 @@ type TablefuncCrosstab4SEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`TablefuncCrosstab4\` at the end of the edge.\\"\\"\\"
-  node: TablefuncCrosstab4!
+  node: TablefuncCrosstab4
 }
 
 type Testview {
@@ -19946,7 +19946,7 @@ type TestviewsEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`Testview\` at the end of the edge.\\"\\"\\"
-  node: Testview!
+  node: Testview
 }
 
 \\"\\"\\"Methods to use when ordering \`Testview\`.\\"\\"\\"
@@ -20595,7 +20595,7 @@ type ViewTablesEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`ViewTable\` at the end of the edge.\\"\\"\\"
-  node: ViewTable!
+  node: ViewTable
 }
 
 \\"\\"\\"Methods to use when ordering \`ViewTable\`.\\"\\"\\"
