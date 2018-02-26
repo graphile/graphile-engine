@@ -356,3 +356,11 @@ create table a."reservedPatchs" (
   id serial primary key
 );
 comment on table a."reservedPatchs" is '`reservedPatchs` table should get renamed to ReservedPatchRecord to prevent clashes with ReservedPatch from `reserved` table';
+
+create function c.badly_behaved_function() returns setof c.person as $$
+begin
+  return query select * from c.person order by id asc limit 1;
+  return next null;
+  return query select * from c.person order by id desc limit 1;
+end;
+$$ language plpgsql stable;

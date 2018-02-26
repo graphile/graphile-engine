@@ -2,6 +2,18 @@
 import type { Plugin } from "graphile-build";
 const base64 = str => new Buffer(String(str)).toString("base64");
 
+function handleNullRow(row) {
+  if (
+    Object.keys(row)
+      .filter(str => !str.startsWith("__"))
+      .some(key => row[key] !== null)
+  ) {
+    return row;
+  } else {
+    return null;
+  }
+}
+
 export default (function PgTablesPlugin(
   builder,
   { pgInflection: inflection, pgForbidSetofFunctionsToReturnNull = false }
@@ -266,7 +278,7 @@ export default (function PgTablesPlugin(
                       TableType
                     ),
                     resolve(data) {
-                      return data;
+                      return handleNullRow(data);
                     },
                   },
                 };
@@ -295,7 +307,7 @@ export default (function PgTablesPlugin(
                     description: `A list of \`${tableTypeName}\` objects.`,
                     type: new GraphQLNonNull(new GraphQLList(TableType)),
                     resolve(data) {
-                      return data.data;
+                      return data.data.map(handleNullRow);
                     },
                   },
                   edges: {
