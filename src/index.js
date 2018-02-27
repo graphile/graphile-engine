@@ -191,25 +191,27 @@ function query(
       "sql.query should be used as a template literal, not a function call!"
     );
   }
-  return strings.reduce((items, text, i) => {
+  const items = [];
+  strings.forEach((text, i) => {
     if (typeof text !== "string") {
       throw new Error(
         "sql.query should be used as a template literal, not a function call."
       );
     }
     if (!values[i]) {
-      return items.concat(makeRawNode(text));
+      items.push(makeRawNode(text));
     } else {
       const value = values[i];
       if (Array.isArray(value)) {
         const nodes /*: SQLQuery */ = value.map(enforceValidNode);
-        return items.concat(makeRawNode(text), nodes);
+        items.push(makeRawNode(text), ...nodes);
       } else {
         const node /*: SQLNode */ = enforceValidNode(value);
-        return items.concat(makeRawNode(text), node);
+        items.push(makeRawNode(text), node);
       }
     }
-  }, []);
+  });
+  return items;
 }
 
 /**
@@ -272,19 +274,21 @@ const join = (rawItems /*: mixed */, rawSeparator /*: mixed */ = "") => {
     throw new Error("Invalid separator - must be a string");
   }
   const separator = rawSeparator;
-  return ensureNonEmptyArray(items, true).reduce((currentItems, rawItem, i) => {
-    let item /*: SQLNode | SQLQuery */;
+  const currentItems = [];
+  ensureNonEmptyArray(items, true).forEach((rawItem, i) => {
+    let items /*: SQLNode | SQLQuery */;
     if (Array.isArray(rawItem)) {
-      item = rawItem.map(enforceValidNode);
+      items = rawItem.map(enforceValidNode);
     } else {
-      item = enforceValidNode(rawItem);
+      items = [enforceValidNode(rawItem)];
     }
     if (i === 0 || !separator) {
-      return currentItems.concat(item);
+      currentItems.push(...items);
     } else {
-      return currentItems.concat(makeRawNode(separator), item);
+      currentItems.push(makeRawNode(separator), ...items);
     }
-  }, []);
+  });
+  return currentItems;
 };
 
 // Copied from https://github.com/brianc/node-postgres/blob/860cccd53105f7bc32fed8b1de69805f0ecd12eb/lib/client.js#L285-L302
