@@ -1,4 +1,4 @@
-const sql = require("..");
+const sql = require("../src");
 
 it("sql.value", () => {
   const node = sql.value({ foo: { bar: 1 } });
