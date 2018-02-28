@@ -41,11 +41,11 @@
     "eslint": "^4.2.0",
     "eslint-config-prettier": "^2.3.0",
     "eslint-plugin-jest": "^20.0.3",
-    "eslint-plugin-prettier": "^2.1.2",
-    "flow-bin": "^0.52.0",
+    "eslint-plugin-prettier": "2.6.0",
+    "flow-bin": "0.66.0",
     "jest": "20.0.4",
     "markdown-doctest": "^0.9.1",
-    "prettier": "^1.5.3"
+    "prettier": "1.11.0"
   },
   "jest": {
     "testRegex": "__tests__/.*\\.test\\.js$"
