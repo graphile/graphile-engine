@@ -201,7 +201,7 @@ function query(
         "sql.query should be used as a template literal, not a function call."
       );
     }
-    if (text.length) {
+    if (text.length > 0) {
       items.push(makeRawNode(text));
     }
     if (values[i]) {
