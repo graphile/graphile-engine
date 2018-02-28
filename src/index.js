@@ -169,7 +169,7 @@ function compile(sql /*: SQLQuery | SQLNode */) /*: QueryConfig*/ {
 
 function enforceValidNode(node /*: mixed */) /*: SQLNode */ {
   // $FlowFixMe: flow doesn't like symbols
-  if (node != null && typeof node === "object" && node[$$trusted] === true) {
+  if (node !== null && typeof node === "object" && node[$$trusted] === true) {
     // $FlowFixMe: this has been validated
     return node;
   }
