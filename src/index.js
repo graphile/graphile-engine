@@ -41,29 +41,21 @@ type QueryConfig = {
 };
 */
 
-function makeTrustedNode /*:: <Node>*/(node /*: Node */) /*: Node */ {
-  Object.defineProperty(node, $$trusted, {
-    enumerable: false,
-    value: true,
-    // These next two are set to squeeze out a little more V8 performance
-    configurable: true,
-    writable: true,
-  });
-  return node;
-}
-
 function makeRawNode(text /*: string */) /*: SQLRawNode */ {
-  return makeTrustedNode({ type: "RAW", text });
+  // $FlowFixMe
+  return { type: "RAW", text, [$$trusted]: true };
 }
 
 function makeIdentifierNode(
   names /*: Array<mixed> */
 ) /*: SQLIdentifierNode */ {
-  return makeTrustedNode({ type: "IDENTIFIER", names });
+  // $FlowFixMe
+  return { type: "IDENTIFIER", names, [$$trusted]: true };
 }
 
 function makeValueNode(value /*: mixed */) /*: SQLValueNode */ {
-  return makeTrustedNode({ type: "VALUE", value });
+  // $FlowFixMe
+  return { type: "VALUE", value, [$$trusted]: true };
 }
 
 function ensureNonEmptyArray(array, allowZeroLength = false) {
