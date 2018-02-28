@@ -109,6 +109,9 @@ function compile(sql /*: SQLQuery | SQLNode */) /*: QueryConfig*/ {
     const item /*: SQLNode */ = enforceValidNode(rawItem);
     switch (item.type) {
       case "RAW":
+        if (typeof item.text !== "string") {
+          throw new Error("RAW node expected string");
+        }
         sqlFragments.push(item.text);
         break;
       case "IDENTIFIER":
@@ -121,29 +124,29 @@ function compile(sql /*: SQLQuery | SQLNode */) /*: QueryConfig*/ {
               if (typeof rawName === "string") {
                 const name /*: string */ = rawName;
                 return escapeSqlIdentifier(name);
-              }
-              // $FlowFixMe: flow doesn't like symbols
-              if (typeof rawName !== "symbol") {
+                // $FlowFixMe: flow doesn't like symbols
+              } else if (typeof rawName === "symbol") {
+                const name /*: Symbol */ = /*:: (*/ rawName /*: any) */;
+
+                // Get the correct identifier string for this symbol.
+                let identifier = symbolToIdentifier.get(name);
+
+                // If there is no identifier, create one and set it.
+                if (!identifier) {
+                  identifier = `__local_${nextSymbolId++}__`;
+                  symbolToIdentifier.set(name, identifier);
+                }
+
+                // Return the identifier. Since we create it, we won’t have to
+                // escape it because we know all of the characters are safe.
+                return identifier;
+              } else {
                 throw debugError(
                   new Error(
                     `Expected string or symbol, received '${String(rawName)}'`
                   )
                 );
               }
-              const name /*: Symbol */ = /*:: (*/ rawName /*: any) */;
-
-              // Get the correct identifier string for this symbol.
-              let identifier = symbolToIdentifier.get(name);
-
-              // If there is no identifier, create one and set it.
-              if (!identifier) {
-                identifier = `__local_${nextSymbolId++}__`;
-                symbolToIdentifier.set(name, identifier);
-              }
-
-              // Return the identifier. Since we create it, we won’t have to
-              // escape it because we know all of the characters are safe.
-              return identifier;
             })
             .join(".")
         );
@@ -240,6 +243,10 @@ function value(val /*: mixed */) /*: SQLNode */ {
   return makeValueNode(val);
 }
 
+const trueNode = raw(`TRUE`);
+const falseNode = raw(`FALSE`);
+const nullNode = raw(`NULL`);
+
 /**
  * If the value is simple will inline it into the query, otherwise will defer
  * to value.
@@ -254,13 +261,9 @@ function literal(val /*: mixed */) /*: SQLNode */ {
       return raw(`'${0 + val}'::float`);
     }
   } else if (typeof val === "boolean") {
-    if (val) {
-      return raw(`TRUE`);
-    } else {
-      return raw(`FALSE`);
-    }
+    return val ? trueNode : falseNode;
   } else if (val == null) {
-    return raw(`NULL`);
+    return nullNode;
   } else {
     return makeValueNode(val);
   }
@@ -271,19 +274,16 @@ function literal(val /*: mixed */) /*: SQLNode */ {
  * with lists of Sql items that doesn’t make sense as a Sql query.
  */
 function join(
-  rawItems /*: Array<SQL> */,
+  items /*: Array<SQL> */,
   rawSeparator /*: string */ = ""
 ) /*: SQLQuery */ {
-  if (!Array.isArray(rawItems)) {
-    throw new Error("Items to join must be an array");
-  }
-  const items /*: Array<SQL> */ = rawItems;
+  ensureNonEmptyArray(items, true);
   if (typeof rawSeparator !== "string") {
     throw new Error("Invalid separator - must be a string");
   }
   const separator = rawSeparator;
   const currentItems = [];
-  ensureNonEmptyArray(items, true);
+  const sepNode = makeRawNode(separator);
   for (let i = 0, l = items.length; i < l; i++) {
     const rawItem /*: SQL */ = items[i];
     let itemsToAppend /*: SQLNode | SQLQuery */;
@@ -295,7 +295,7 @@ function join(
     if (i === 0 || !separator) {
       currentItems.push(...itemsToAppend);
     } else {
-      currentItems.push(makeRawNode(separator), ...itemsToAppend);
+      currentItems.push(sepNode, ...itemsToAppend);
     }
   }
   return currentItems;
@@ -336,5 +336,5 @@ exports.join = join;
 
 exports.compile = compile;
 
-exports.null = exports.literal(null);
+exports.null = nullNode;
 exports.blank = exports.query``;
