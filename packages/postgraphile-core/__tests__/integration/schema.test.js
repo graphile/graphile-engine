@@ -20,7 +20,7 @@ const testFixtures = [
     createSchema: client =>
       createPostGraphQLSchema(client, "c", {
         classicIds: true,
-        badlyBehavedFunctions: false,
+        setofFunctionsContainNulls: false,
       }),
   },
   {
@@ -36,7 +36,7 @@ const testFixtures = [
     createSchema: client =>
       createPostGraphQLSchema(client, "c", {
         disableDefaultMutations: true,
-        badlyBehavedFunctions: false,
+        setofFunctionsContainNulls: false,
       }),
   },
   {
@@ -44,7 +44,7 @@ const testFixtures = [
     createSchema: client =>
       createPostGraphQLSchema(client, "a", {
         pgColumnFilter: attr => attr.name !== "headline",
-        badlyBehavedFunctions: false,
+        setofFunctionsContainNulls: false,
       }),
   },
   {
@@ -54,7 +54,7 @@ const testFixtures = [
       createPostGraphQLSchema(client, "c", {
         enableTags: false,
         legacyRelations: "omit",
-        badlyBehavedFunctions: false,
+        setofFunctionsContainNulls: false,
       }),
   },
   {
@@ -64,7 +64,7 @@ const testFixtures = [
         legacyRelations: "only",
         enableTags: false,
         legacyJsonUuid: true,
-        badlyBehavedFunctions: false,
+        setofFunctionsContainNulls: false,
       }),
   },
 ];
