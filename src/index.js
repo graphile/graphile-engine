@@ -203,16 +203,17 @@ function query(
         "sql.query should be used as a template literal, not a function call."
       );
     }
-    if (!values[i]) {
+    if (text.length) {
       items.push(makeRawNode(text));
-    } else {
+    }
+    if (values[i]) {
       const value = values[i];
       if (Array.isArray(value)) {
         const nodes /*: SQLQuery */ = value.map(enforceValidNode);
-        items.push(makeRawNode(text), ...nodes);
+        items.push(...nodes);
       } else {
         const node /*: SQLNode */ = enforceValidNode(value);
-        items.push(makeRawNode(text), node);
+        items.push(node);
       }
     }
   }

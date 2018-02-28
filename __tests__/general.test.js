@@ -39,9 +39,6 @@ describe("sql.query", () => {
       { type: "RAW", text: "1 " },
       { type: "RAW", text: "from " },
       { type: "RAW", text: "foo" },
-      { type: "RAW", text: "" },
-      { type: "RAW", text: "" },
-      { type: "RAW", text: "" },
     ]);
   });
 });
@@ -70,7 +67,6 @@ describe("sql.join", () => {
       { type: "RAW", text: ", " },
       { type: "RAW", text: "2" },
       { type: "RAW", text: ", 3)" },
-      { type: "RAW", text: "" },
     ]);
   });
 });
