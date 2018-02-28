@@ -70,14 +70,16 @@ function ensureNonEmptyArray(array, allowZeroLength = false) {
   if (!Array.isArray(array)) {
     throw debugError(new Error("Expected array"));
   }
-  if (array.length < 1 && !allowZeroLength) {
+  if (!allowZeroLength && array.length < 1) {
     throw debugError(new Error("Expected non-empty array"));
   }
-  array.forEach((entry, idx) => {
-    if (entry == null) {
-      throw debugError(new Error(`Array index ${idx} is ${String(entry)}`));
+  for (let idx = 0, l = array.length; idx < l; idx++) {
+    if (array[idx] == null) {
+      throw debugError(
+        new Error(`Array index ${idx} is ${String(array[idx])}`)
+      );
     }
-  });
+  }
   return array;
 }
 
@@ -194,7 +196,8 @@ function query(
     );
   }
   const items = [];
-  strings.forEach((text, i) => {
+  for (let i = 0, l = strings.length; i < l; i++) {
+    const text = strings[i];
     if (typeof text !== "string") {
       throw new Error(
         "sql.query should be used as a template literal, not a function call."
@@ -212,7 +215,7 @@ function query(
         items.push(makeRawNode(text), node);
       }
     }
-  });
+  }
   return items;
 }
 
@@ -277,19 +280,21 @@ const join = (rawItems /*: mixed */, rawSeparator /*: mixed */ = "") => {
   }
   const separator = rawSeparator;
   const currentItems = [];
-  ensureNonEmptyArray(items, true).forEach((rawItem, i) => {
-    let items /*: SQLNode | SQLQuery */;
+  ensureNonEmptyArray(items, true);
+  for (let i = 0, l = items.length; i < l; i++) {
+    const rawItem = items[i];
+    let itemsToAppend /*: SQLNode | SQLQuery */;
     if (Array.isArray(rawItem)) {
-      items = rawItem.map(enforceValidNode);
+      itemsToAppend = rawItem.map(enforceValidNode);
     } else {
-      items = [enforceValidNode(rawItem)];
+      itemsToAppend = [enforceValidNode(rawItem)];
     }
     if (i === 0 || !separator) {
-      currentItems.push(...items);
+      currentItems.push(...itemsToAppend);
     } else {
-      currentItems.push(makeRawNode(separator), ...items);
+      currentItems.push(makeRawNode(separator), ...itemsToAppend);
     }
-  });
+  }
   return currentItems;
 };
 
