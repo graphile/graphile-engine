@@ -105,7 +105,8 @@ function compile(sql /*: SQLQuery | SQLNode */) /*: QueryConfig*/ {
 
   const items = Array.isArray(sql) ? sql : [sql];
 
-  for (const rawItem of items) {
+  for (let i = 0, l = items.length; i < l; i++) {
+    const rawItem = items[i];
     const item /*: SQLNode */ = enforceValidNode(rawItem);
     switch (item.type) {
       case "RAW":
@@ -306,7 +307,7 @@ function join(
 function escapeSqlIdentifier(str) {
   var escaped = '"';
 
-  for (var i = 0; i < str.length; i++) {
+  for (var i = 0, l = str.length; i < l; i++) {
     var c = str[i];
     if (c === '"') {
       escaped += c + c;
