@@ -108,7 +108,7 @@ const getPostGraphQLBuilder = async (
     writeCache,
     setWriteCacheCallback,
     legacyRelations = "deprecated", // TODO: Change to 'omit' in v5
-    badlyBehavedFunctions = false,
+    badlyBehavedFunctions = true,
     legacyJsonUuid = false,
   } = options;
 
