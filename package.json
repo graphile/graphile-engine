@@ -1,14 +1,13 @@
 {
   "name": "pg-sql2",
-  "version": "1.0.0-beta.7",
+  "version": "1.0.0-beta.3",
   "description": "Generate safe Postgres-compliant SQL with tagged template literals",
-  "main": "lib/index.js",
+  "main": "index.js",
   "scripts": {
     "flow": "flow",
     "jest": "jest",
     "lint": "eslint .",
-    "test": "node src/index.js && eslint . && flow check && jest && markdown-doctest",
-    "test:u": "node src/index.js && eslint . && flow check && jest -u && markdown-doctest",
+    "test": "node index.js && eslint . && flow check && jest && markdown-doctest",
     "test:docs": "markdown-doctest",
     "prepublish": "babel --out-dir lib src"
   },
@@ -41,11 +40,11 @@
     "eslint": "^4.2.0",
     "eslint-config-prettier": "^2.3.0",
     "eslint-plugin-jest": "^20.0.3",
-    "eslint-plugin-prettier": "2.6.0",
-    "flow-bin": "0.66.0",
+    "eslint-plugin-prettier": "^2.1.2",
+    "flow-bin": "^0.52.0",
     "jest": "20.0.4",
     "markdown-doctest": "^0.9.1",
-    "prettier": "1.11.0"
+    "prettier": "^1.5.3"
   },
   "jest": {
     "testRegex": "__tests__/.*\\.test\\.js$"
@@ -57,8 +56,5 @@
     "src",
     "lib",
     "index.js"
-  ],
-  "engines": {
-    "node": ">=8.6"
-  }
+  ]
 }

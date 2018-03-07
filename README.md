@@ -1,10 +1,11 @@
-# pg-sql2
+pg-sql2
+=======
 
 Create SQL in a powerful and flexible manner without opening yourself to SQL
 injection attacks using the power of ES6 tagged template literals.
 
 ```js
-const sql = require("pg-sql2");
+const sql = require('pg-sql2');
 // or import sql from 'pg-sql2';
 
 const tableName = "user";
@@ -19,14 +20,12 @@ const sqlFields = sql.join(
 
 // sql.value will store the value and instead add a placeholder to the SQL
 // statement, to ensure that no SQL injection can occur.
-const sqlConditions = sql.query`created_at > NOW() - interval '3 years' and age > ${sql.value(
-  22
-)}`;
+const sqlConditions =
+  sql.query`created_at > NOW() - interval '3 years' and age > ${sql.value(22)}`;
 
 // This could be a full query, but we're going to embed it in another query safely
-const innerQuery = sql.query`select ${sqlFields} from ${sql.identifier(
-  tableName
-)} where ${sqlConditions}`;
+const innerQuery =
+  sql.query`select ${sqlFields} from ${sql.identifier(tableName)} where ${sqlConditions}`;
 
 // Symbols are automatically assigned unique identifiers
 const sqlAlias = sql.identifier(Symbol());
@@ -55,16 +54,16 @@ console.log(values); // [ 22 ]
 // const { rows } = await pg.query(text, values);
 ```
 
-## API
+API
+---
 
-### `` sql.query`...` ``
+### ``sql.query`...` ``
 
 Builds part of (or the whole of) an SQL query, safely interpretting the embedded expressions. If a non `sql.*` expression is passed in, e.g.:
 
 <!-- skip-example -->
-
 ```js
-sql.query`select ${1}`;
+sql.query`select ${1}`
 ```
 
 then an error will be thrown.
@@ -90,19 +89,15 @@ arguments to `json_build_object(key, val, key, val, ...)`
 Joins an array of sql.query values using the delimeter (which is treated as a raw SQL string); e.g.
 
 ```js
-const arrayOfSqlFields = ["a", "b", "c", "d"].map(n => sql.identifier(n));
-sql.query`select ${sql.join(arrayOfSqlFields, ", ")}`; // -> select "a", "b", "c", "d"
+const arrayOfSqlFields = ['a', 'b', 'c', 'd'].map(n => sql.identifier(n));
+sql.query`select ${sql.join(arrayOfSqlFields, ', ')}` // -> select "a", "b", "c", "d"
 
-const arrayOfSqlConditions = [
-  sql.query`a = 1`,
-  sql.query`b = 2`,
-  sql.query`c = 3`
-];
-sql.query`where (${sql.join(arrayOfSqlConditions, ") and (")})`; // -> where (a = 1) and (b = 2) and (c = 3)
+const arrayOfSqlConditions = [sql.query`a = 1`, sql.query`b = 2`, sql.query`c = 3`];
+sql.query`where (${sql.join(arrayOfSqlConditions, ') and (')})` // -> where (a = 1) and (b = 2) and (c = 3)
 
 const fragments = [
-  { alias: "name", sqlFragment: sql.identifier("user", "name") },
-  { alias: "age", sqlFragment: sql.identifier("user", "age") }
+  {alias: 'name', sqlFragment: sql.identifier('user', 'name')},
+  {alias: 'age', sqlFragment: sql.identifier('user', 'age')},
 ];
 sql.query`
   json_build_object(
@@ -117,9 +112,9 @@ sql.query`
 
 const arrayOfSqlInnerJoins = [
   sql.query`inner join bar on (bar.foo_id = foo.id)`,
-  sql.query`inner join baz on (baz.bar_id = bar.id)`
+  sql.query`inner join baz on (baz.bar_id = bar.id)`,
 ];
-sql.query`select * from foo ${sql.join(arrayOfSqlInnerJoins, " ")}`;
+sql.query`select * from foo ${sql.join(arrayOfSqlInnerJoins, " ")}`
 // select * from foo inner join bar on (bar.foo_id = foo.id) inner join baz on (baz.bar_id = bar.id)
 ```
 
@@ -134,7 +129,8 @@ const { text, values } = sql.compile(query);
 // const { rows } = await pg.query(text, values);
 ```
 
-## History
+History
+-------
 
 This is a replacement for [@calebmer's
 `pg-sql`](https://www.npmjs.com/package/pg-sql), combining the additional work
@@ -142,18 +138,15 @@ that was done to it [in
 postgraphql](https://github.com/postgraphql/postgraphql/blob/9c36d7e9b9ad74e665de18964fd2554f9f639903/src/postgres/utils/sql.ts)
 and offering the following enhancements:
 
-* Better development experience for people not using Flow/TypeScript (throws
+- Better development experience for people not using Flow/TypeScript (throws
   errors a lot earlier allowing you to catch issues at the source)
-* Slightly more helpful error messages
-* Uses a symbol-key on the query nodes to protect against an object
-  accidentally being inserted verbatim and being treated as valid (because
-  every Symbol is unique an attacker would need control of the code to get a
-  reference to the Symbol in order to set it on an object (it cannot be
-  serialised/deserialised via JSON or any other medium), and if the attacker
-  has control of the code then you've already lost)
-* Adds `sql.literal` which is similar to `sql.value` but when used with simple
+- Slightly more helpful error messages
+- Uses a hidden non-enumerable symbol as the type of the query nodes to protect
+  against an object accidentally being inserted verbatim and being treated as
+  valid
+- Adds `sql.literal` which is similar to `sql.value` but when used with simple
   values can write the valid direct to the SQL statement. **USE WITH CAUTION**.
-  The purpose for this is if you are using _trusted_ values (e.g. for the keys
+  The purpose for this is if you are using *trusted* values (e.g. for the keys
   to
   [`json_build_object(...)`](https://www.postgresql.org/docs/9.6/static/functions-json.html))
   then debugging your SQL becomes a lot easier because fewer placeholders are

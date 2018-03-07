@@ -3,7 +3,7 @@
     "flow",
     ["env", {
       "targets": {
-        "node": "8.6"
+        "node": 4
       }
     }]
   ]
