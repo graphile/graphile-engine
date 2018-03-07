@@ -1,12 +1,6 @@
 "use strict";
 // @flow
 
-if (parseFloat(process.versions.node) < 4) {
-  throw new Error(
-    "This library requires Node v4 or above; we've detected v${parseFloat(process.versions.node)}"
-  );
-}
-
 const debug = require("debug")("pg-sql2");
 
 function debugError(err) {
