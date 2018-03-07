@@ -7,8 +7,6 @@ if (parseFloat(process.versions.node) < 4) {
   );
 }
 
-const isSymbol = sym => typeof sym === "symbol";
-const isNil = o => o === null || o === undefined;
 const debug = require("debug")("pg-sql2");
 
 function debugError(err) {
@@ -41,41 +39,52 @@ type QueryConfig = {
 };
 */
 
-function makeTrustedNode /*:: <Node>*/(node /*: Node */) /*: Node */ {
-  Object.defineProperty(node, $$trusted, {
-    enumerable: false,
-    configurable: false,
-    value: true,
-  });
-  return node;
+function makeRawNode(text /*: string */) /*: SQLRawNode */ {
+  if (typeof text !== "string") {
+    throw new Error("Invalid argument to makeRawNode - expected string");
+  }
+  // $FlowFixMe: flow doesn't like symbols
+  return { type: "RAW", text, [$$trusted]: true };
 }
 
-function makeRawNode(text /*: string */) /*: SQLRawNode */ {
-  return makeTrustedNode({ type: "RAW", text });
+function isStringOrSymbol(val) {
+  return typeof val === "string" || typeof val === "symbol";
 }
 
 function makeIdentifierNode(
-  names /*: Array<mixed> */
+  names /*: Array<string | Symbol> */
 ) /*: SQLIdentifierNode */ {
-  return makeTrustedNode({ type: "IDENTIFIER", names });
+  if (!Array.isArray(names) || !names.every(isStringOrSymbol)) {
+    throw new Error(
+      "Invalid argument to makeIdentifierNode - expected array of strings/symbols"
+    );
+  }
+  // $FlowFixMe
+  return { type: "IDENTIFIER", names, [$$trusted]: true };
 }
 
 function makeValueNode(value /*: mixed */) /*: SQLValueNode */ {
-  return makeTrustedNode({ type: "VALUE", value });
+  // $FlowFixMe
+  return { type: "VALUE", value, [$$trusted]: true };
 }
 
-function ensureNonEmptyArray(array, allowZeroLength = false) {
+function ensureNonEmptyArray /*:: <T>*/(
+  array /*: Array<T>*/,
+  allowZeroLength = false
+) /*: Array<T> */ {
   if (!Array.isArray(array)) {
     throw debugError(new Error("Expected array"));
   }
-  if (array.length < 1 && !allowZeroLength) {
+  if (!allowZeroLength && array.length < 1) {
     throw debugError(new Error("Expected non-empty array"));
   }
-  array.forEach((entry, idx) => {
-    if (entry == null) {
-      throw debugError(new Error(`Array index ${idx} is ${String(entry)}`));
+  for (let idx = 0, l = array.length; idx < l; idx++) {
+    if (array[idx] == null) {
+      throw debugError(
+        new Error(`Array index ${idx} is ${String(array[idx])}`)
+      );
     }
-  });
+  }
   return array;
 }
 
@@ -96,10 +105,14 @@ function compile(sql /*: SQLQuery | SQLNode */) /*: QueryConfig*/ {
 
   const items = Array.isArray(sql) ? sql : [sql];
 
-  for (const rawItem of items) {
+  for (let i = 0, l = items.length; i < l; i++) {
+    const rawItem = items[i];
     const item /*: SQLNode */ = enforceValidNode(rawItem);
     switch (item.type) {
       case "RAW":
+        if (typeof item.text !== "string") {
+          throw new Error("RAW node expected string");
+        }
         sqlFragments.push(item.text);
         break;
       case "IDENTIFIER":
@@ -112,28 +125,29 @@ function compile(sql /*: SQLQuery | SQLNode */) /*: QueryConfig*/ {
               if (typeof rawName === "string") {
                 const name /*: string */ = rawName;
                 return escapeSqlIdentifier(name);
-              }
-              if (!isSymbol(rawName)) {
+                // $FlowFixMe: flow doesn't like symbols
+              } else if (typeof rawName === "symbol") {
+                const name /*: Symbol */ = /*:: (*/ rawName /*: any) */;
+
+                // Get the correct identifier string for this symbol.
+                let identifier = symbolToIdentifier.get(name);
+
+                // If there is no identifier, create one and set it.
+                if (!identifier) {
+                  identifier = `__local_${nextSymbolId++}__`;
+                  symbolToIdentifier.set(name, identifier);
+                }
+
+                // Return the identifier. Since we create it, we won’t have to
+                // escape it because we know all of the characters are safe.
+                return identifier;
+              } else {
                 throw debugError(
                   new Error(
                     `Expected string or symbol, received '${String(rawName)}'`
                   )
                 );
               }
-              const name /*: Symbol */ = /*:: (*/ rawName /*: any) */;
-
-              // Get the correct identifier string for this symbol.
-              let identifier = symbolToIdentifier.get(name);
-
-              // If there is no identifier, create one and set it.
-              if (!identifier) {
-                identifier = `__local_${nextSymbolId++}__`;
-                symbolToIdentifier.set(name, identifier);
-              }
-
-              // Return the identifier. Since we create it, we won’t have to
-              // escape it because we know all of the characters are safe.
-              return identifier;
             })
             .join(".")
         );
@@ -154,22 +168,10 @@ function compile(sql /*: SQLQuery | SQLNode */) /*: QueryConfig*/ {
 }
 
 function enforceValidNode(node /*: mixed */) /*: SQLNode */ {
-  if (node != null && typeof node === "object") {
-    const isRaw = node.type === "RAW" && typeof node.text === "string";
-    const isIdentifier =
-      node.type === "IDENTIFIER" &&
-      Array.isArray(node.names) &&
-      node.names.every(
-        name => typeof name === "string" || typeof name === "symbol"
-      );
-    const isValue = node.type === "VALUE";
-
-    // $FlowFixMe: flow doesn't like symbols here?
-    const isTrusted = node[$$trusted] === true;
-    if ((isRaw || isIdentifier || isValue) && isTrusted) {
-      // $FlowFixMe: this has been validated
-      return node;
-    }
+  // $FlowFixMe: flow doesn't like symbols
+  if (node !== null && typeof node === "object" && node[$$trusted] === true) {
+    // $FlowFixMe: this has been validated
+    return node;
   }
   throw new Error(`Expected SQL item, instead received '${String(node)}'.`);
 }
@@ -183,33 +185,37 @@ function enforceValidNode(node /*: mixed */) /*: SQLNode */ {
  * raw text. This makes a SQL injection vulnerability harder to create.
  */
 function query(
-  strings /*: mixed */,
-  ...values /*: Array<mixed> */
+  strings /*: Array<string> */,
+  ...values /*: Array<SQL> */
 ) /*: SQLQuery */ {
   if (!Array.isArray(strings)) {
     throw new Error(
       "sql.query should be used as a template literal, not a function call!"
     );
   }
-  return strings.reduce((items, text, i) => {
+  const items = [];
+  for (let i = 0, l = strings.length; i < l; i++) {
+    const text = strings[i];
     if (typeof text !== "string") {
       throw new Error(
         "sql.query should be used as a template literal, not a function call."
       );
     }
-    if (!values[i]) {
-      return items.concat(makeRawNode(text));
-    } else {
+    if (text.length > 0) {
+      items.push(makeRawNode(text));
+    }
+    if (values[i]) {
       const value = values[i];
       if (Array.isArray(value)) {
         const nodes /*: SQLQuery */ = value.map(enforceValidNode);
-        return items.concat(makeRawNode(text), nodes);
+        items.push(...nodes);
       } else {
         const node /*: SQLNode */ = enforceValidNode(value);
-        return items.concat(makeRawNode(text), node);
+        items.push(node);
       }
     }
-  }, []);
+  }
+  return items;
 }
 
 /**
@@ -217,27 +223,36 @@ function query(
  * method is dangerous though because it involves no escaping, so proceed
  * with caution!
  */
-const raw = (text /*: mixed */) => makeRawNode(String(text));
+function raw(text /*: string */) /*: SQLNode */ {
+  return makeRawNode(String(text));
+}
 
 /**
  * Creates a Sql item for a Sql identifier. A Sql identifier is anything like
  * a table, schema, or column name. An identifier may also have a namespace,
  * thus why many names are accepted.
  */
-const identifier = (...names /*: Array<mixed> */) =>
-  makeIdentifierNode(ensureNonEmptyArray(names));
+function identifier(...names /*: Array<string | Symbol> */) /*: SQLNode */ {
+  return makeIdentifierNode(ensureNonEmptyArray(names));
+}
 
 /**
  * Creates a Sql item for a value that will be included in our final query.
  * This value will be added in a way which avoids Sql injection.
  */
-const value = (val /*: mixed */) => makeValueNode(val);
+function value(val /*: mixed */) /*: SQLNode */ {
+  return makeValueNode(val);
+}
+
+const trueNode = raw(`TRUE`);
+const falseNode = raw(`FALSE`);
+const nullNode = raw(`NULL`);
 
 /**
  * If the value is simple will inline it into the query, otherwise will defer
  * to value.
  */
-const literal = (val /*: mixed */) => {
+function literal(val /*: mixed */) /*: SQLNode */ {
   if (typeof val === "string" && val.match(/^[a-zA-Z0-9_-]*$/)) {
     return raw(`'${val}'`);
   } else if (typeof val === "number" && Number.isFinite(val)) {
@@ -247,52 +262,52 @@ const literal = (val /*: mixed */) => {
       return raw(`'${0 + val}'::float`);
     }
   } else if (typeof val === "boolean") {
-    if (val) {
-      return raw(`TRUE`);
-    } else {
-      return raw(`FALSE`);
-    }
-  } else if (isNil(val)) {
-    return raw(`NULL`);
+    return val ? trueNode : falseNode;
+  } else if (val == null) {
+    return nullNode;
   } else {
     return makeValueNode(val);
   }
-};
+}
 
 /**
  * Join some Sql items together seperated by a string. Useful when dealing
  * with lists of Sql items that doesn’t make sense as a Sql query.
  */
-const join = (rawItems /*: mixed */, rawSeparator /*: mixed */ = "") => {
-  if (!Array.isArray(rawItems)) {
-    throw new Error("Items to join must be an array");
-  }
-  const items = rawItems;
+function join(
+  items /*: Array<SQL> */,
+  rawSeparator /*: string */ = ""
+) /*: SQLQuery */ {
+  ensureNonEmptyArray(items, true);
   if (typeof rawSeparator !== "string") {
     throw new Error("Invalid separator - must be a string");
   }
   const separator = rawSeparator;
-  return ensureNonEmptyArray(items, true).reduce((currentItems, rawItem, i) => {
-    let item /*: SQLNode | SQLQuery */;
+  const currentItems = [];
+  const sepNode = makeRawNode(separator);
+  for (let i = 0, l = items.length; i < l; i++) {
+    const rawItem /*: SQL */ = items[i];
+    let itemsToAppend /*: SQLNode | SQLQuery */;
     if (Array.isArray(rawItem)) {
-      item = rawItem.map(enforceValidNode);
+      itemsToAppend = rawItem.map(enforceValidNode);
     } else {
-      item = enforceValidNode(rawItem);
+      itemsToAppend = [enforceValidNode(rawItem)];
     }
     if (i === 0 || !separator) {
-      return currentItems.concat(item);
+      currentItems.push(...itemsToAppend);
     } else {
-      return currentItems.concat(makeRawNode(separator), item);
+      currentItems.push(sepNode, ...itemsToAppend);
     }
-  }, []);
-};
+  }
+  return currentItems;
+}
 
 // Copied from https://github.com/brianc/node-postgres/blob/860cccd53105f7bc32fed8b1de69805f0ecd12eb/lib/client.js#L285-L302
 // Ported from PostgreSQL 9.2.4 source code in src/interfaces/libpq/fe-exec.c
 function escapeSqlIdentifier(str) {
   var escaped = '"';
 
-  for (var i = 0; i < str.length; i++) {
+  for (var i = 0, l = str.length; i < l; i++) {
     var c = str[i];
     if (c === '"') {
       escaped += c + c;
@@ -306,45 +321,21 @@ function escapeSqlIdentifier(str) {
   return escaped;
 }
 
-// The types we export are stricter so people get the right hinting
-
-exports.query = function sqlQuery(
-  strings /*: string[] */,
-  ...values /*: Array<SQL> */
-) /*: SQLQuery */ {
-  return query(strings, ...values);
-};
+exports.query = query;
 
 exports.fragment = exports.query;
 
-exports.raw = function sqlRaw(text /*: string */) /*: SQLNode */ {
-  return raw(text);
-};
+exports.raw = raw;
 
-exports.identifier = function sqlIdentifier(
-  ...names /*: Array<string | Symbol> */
-) /*: SQLNode */ {
-  return identifier(...names);
-};
+exports.identifier = identifier;
 
-exports.value = function sqlValue(val /*: mixed */) /*: SQLNode */ {
-  return value(val);
-};
+exports.value = value;
 
-exports.literal = function sqlLiteral(val /*: mixed */) /*: SQLNode */ {
-  return literal(val);
-};
+exports.literal = literal;
 
-exports.join = function sqlJoin(
-  items /*: Array<SQL> */,
-  separator /*: string */ = ""
-) /*: SQLQuery */ {
-  return join(items, separator);
-};
+exports.join = join;
 
-exports.compile = function sqlCompile(sql /*: SQLQuery */) /*: QueryConfig */ {
-  return compile(sql);
-};
+exports.compile = compile;
 
-exports.null = exports.literal(null);
+exports.null = nullNode;
 exports.blank = exports.query``;
