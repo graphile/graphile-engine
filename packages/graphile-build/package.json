@@ -29,7 +29,9 @@
   "dependencies": {
     "babel-runtime": ">=6 <7",
     "debug": ">=2 <3",
-    "graphql-parse-resolve-info": "4.0.0-beta.2"
+    "graphql-parse-resolve-info": "4.0.0-beta.2",
+    "lodash": "4.17.5",
+    "pluralize": "7.0.0"
   },
   "engines": {
     "node": ">=8.6"
