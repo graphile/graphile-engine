@@ -2,8 +2,6 @@
 import type { Plugin } from "graphile-build";
 import queryFromResolveData from "../queryFromResolveData";
 import debugFactory from "debug";
-import camelCase from "lodash/camelCase";
-import pluralize from "pluralize";
 import viaTemporaryTable from "./viaTemporaryTable";
 
 const debug = debugFactory("graphile-build-pg");
@@ -41,6 +39,7 @@ export default (async function PgMutationUpdateDeletePlugin(
           GraphQLID,
         },
         pgColumnFilter,
+        inflection: { pluralize, singularize, camelCase },
       } = build;
       if (!isRootMutation) {
         return fields;
@@ -202,7 +201,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                         recurseDataGeneratorsForField(tableName);
                         // This should really be `-node-id` but for compatibility with PostGraphQL v3 we haven't made that change.
                         const deletedNodeIdFieldName = camelCase(
-                          `deleted-${pluralize.singular(table.name)}-id`
+                          `deleted-${singularize(table.name)}-id`
                         );
                         return Object.assign(
                           {

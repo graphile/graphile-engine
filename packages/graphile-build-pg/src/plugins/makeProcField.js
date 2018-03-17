@@ -1,7 +1,5 @@
 // @flow
 import debugFactory from "debug";
-import camelCase from "lodash/camelCase";
-import pluralize from "pluralize";
 import queryFromResolveData from "../queryFromResolveData";
 import addStartEndCursor from "./addStartEndCursor";
 import viaTemporaryTable from "./viaTemporaryTable";
@@ -48,6 +46,7 @@ export default function makeProcField(
       getNamedType,
       isCompositeType,
     },
+    inflection: { pluralize, camelCase },
   }: {| ...Build |},
   {
     fieldWithHooks,

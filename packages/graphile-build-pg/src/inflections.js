@@ -1,6 +1,11 @@
 // @flow
-import pluralize from "pluralize";
-import { upperCamelCase, camelCase, constantCase } from "./utils";
+import {
+  upperCamelCase,
+  camelCase,
+  constantCase,
+  pluralize,
+  singularize,
+} from "graphile-build";
 
 type Keys = Array<{
   column: string,
@@ -21,7 +26,7 @@ export const defaultUtils: InflectorUtils = {
   camelCase,
   upperCamelCase,
   pluralize,
-  singularize: pluralize.singular,
+  singularize,
 };
 
 export type Inflector = {

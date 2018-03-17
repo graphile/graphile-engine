@@ -103,4 +103,4 @@ export {
   PgMutationPayloadEdgePlugin,
 };
 
-export { upperFirst, camelCase, constantCase } from "./utils";
+export { upperFirst, camelCase, constantCase } from "graphile-build";
