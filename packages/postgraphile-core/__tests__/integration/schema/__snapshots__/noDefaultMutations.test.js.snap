@@ -834,6 +834,8 @@ type PersonSecret implements Node {
   \\"\\"\\"Reads a single \`Person\` that is related to this \`PersonSecret\`.\\"\\"\\"
   personByPersonId: Person
   personId: Int!
+
+  \\"\\"\\"A secret held by the associated Person\\"\\"\\"
   secret: String
 }
 

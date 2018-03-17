@@ -21,7 +21,7 @@ create domain b.email as text
 
 create table c.person (
   id serial primary key,
-  name varchar not null,
+  person_full_name varchar not null,
   aliases text[] not null default '{}',
   about text,
   email b.email not null unique,
@@ -32,8 +32,10 @@ create table c.person (
 -- This is to test that "one-to-one" relationships work on primary keys
 create table c.person_secret (
   person_id int not null primary key references c.person on delete cascade,
-  secret text
+  sekrit text
 );
+
+comment on column c.person_secret.sekrit is E'@name secret\nA secret held by the associated Person';
 
 comment on table c.person_secret is 'Tracks the person''s secret';
 
@@ -51,7 +53,7 @@ create unique index uniq_person__email_id_3 on c.person (email) where (id = 3);
 
 comment on table c.person is 'Person test comment';
 comment on column c.person.id is 'The primary unique identifier for the person';
-comment on column c.person.name is 'The person’s name';
+comment on column c.person.person_full_name is E'@name name\nThe person’s name';
 comment on column c.person.site is '@deprecated Don’t use me';
 
 create function c.person_exists(person c.person, email b.email) returns boolean as $$
@@ -132,7 +134,7 @@ comment on type c.compound_type is 'Awesome feature!';
 create view b.updatable_view as
   select
     id as x,
-    name,
+    person_full_name as name,
     about as description,
     2 as constant
   from
@@ -272,7 +274,7 @@ create function c.no_args_query() returns int as $$ select 2 $$ language sql sta
 create function c.no_args_mutation() returns int as $$ select 2 $$ language sql;
 create function a.return_void_mutation() returns void as $$ begin return; end; $$ language plpgsql;
 
-create function c.person_first_name(person c.person) returns text as $$ select split_part(person.name, ' ', 1) $$ language sql stable;
+create function c.person_first_name(person c.person) returns text as $$ select split_part(person.person_full_name, ' ', 1) $$ language sql stable;
 create function c.person_friends(person c.person) returns setof c.person as $$ select friend.* from c.person as friend where friend.id in (person.id + 1, person.id + 2) $$ language sql stable;
 create function c.person_first_post(person c.person) returns a.post as $$ select * from a.post where a.post.author_id = person.id limit 1 $$ language sql stable;
 create function c.compound_type_computed_field(compound_type c.compound_type) returns integer as $$ select compound_type.a + compound_type.foo_bar $$ language sql stable;

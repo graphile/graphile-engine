@@ -1,4 +1,4 @@
-insert into c.person (id, name, email, about, created_at) values
+insert into c.person (id, person_full_name, email, about, created_at) values
   (1, 'John Smith', 'john.smith@email.com', null, null),
   (2, 'Sara Smith', 'sara.smith@email.com', null, null),
   (3, 'Budd Deey', 'budd.deey@email.com', 'Just a friendly human', null),
@@ -8,7 +8,7 @@ insert into c.person (id, name, email, about, created_at) values
 
 alter sequence c.person_id_seq restart with 10;
 
-insert into c.person_secret (person_id, secret) values
+insert into c.person_secret (person_id, sekrit) values
   (2, 'Sara Smith is not really my name!'),
   (3, 'I once got stuck trying to retrieve something embarassing from between two panes of glass'),
   (5, 'My only secret is that I have no secrets!'),
