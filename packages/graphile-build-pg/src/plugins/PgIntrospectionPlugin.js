@@ -92,19 +92,24 @@ export default (async function PgIntrospectionPlugin(
           );
 
           // Parse tags from comments
-          ["namespace", "class", "attribute", "type", "procedure"].forEach(
-            kind => {
-              result[kind].forEach(object => {
-                if (pgEnableTags && object.description) {
-                  const parsed = parseTags(object.description);
-                  object.tags = parsed.tags;
-                  object.description = parsed.text;
-                } else {
-                  object.tags = {};
-                }
-              });
-            }
-          );
+          [
+            "namespace",
+            "class",
+            "attribute",
+            "type",
+            "constraint",
+            "procedure",
+          ].forEach(kind => {
+            result[kind].forEach(object => {
+              if (pgEnableTags && object.description) {
+                const parsed = parseTags(object.description);
+                object.tags = parsed.tags;
+                object.description = parsed.text;
+              } else {
+                object.tags = {};
+              }
+            });
+          });
 
           for (const k in result) {
             result[k].map(Object.freeze);
