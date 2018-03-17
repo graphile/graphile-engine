@@ -4229,6 +4229,8 @@ type PersonSecret implements Node {
   \\"\\"\\"Reads a single \`Person\` that is related to this \`PersonSecret\`.\\"\\"\\"
   personByPersonId: Person
   personId: Int!
+
+  \\"\\"\\"A secret held by the associated Person\\"\\"\\"
   secret: String
 }
 
@@ -4247,6 +4249,8 @@ input PersonSecretCondition {
 \\"\\"\\"An input for mutations affecting \`PersonSecret\`\\"\\"\\"
 input PersonSecretInput {
   personId: Int!
+
+  \\"\\"\\"A secret held by the associated Person\\"\\"\\"
   secret: String
 }
 
@@ -4255,6 +4259,8 @@ Represents an update to a \`PersonSecret\`. Fields that are set will be updated.
 \\"\\"\\"
 input PersonSecretPatch {
   personId: Int
+
+  \\"\\"\\"A secret held by the associated Person\\"\\"\\"
   secret: String
 }
 
