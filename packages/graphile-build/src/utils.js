@@ -38,5 +38,5 @@ export const constantCase = formatInsideUnderscores(constantCaseAll);
 export const upperCamelCase = (str: string): string =>
   upperFirst(camelCase(str));
 
-export const pluralize = str => plz(str);
-export const singularize = str => plz.singular(str);
+export const pluralize = (str: string) => plz(str);
+export const singularize = (str: string) => plz.singular(str);

@@ -2,6 +2,12 @@
 import sql from "pg-sql2";
 import type { Plugin } from "graphile-build";
 import { version } from "../../package.json";
+import type {
+  PgProc,
+  PgType,
+  PgClass,
+  PgAttribute,
+} from "./PgIntrospectionPlugin";
 
 const defaultPgColumnFilter = (_attr, _build, _context) => true;
 type Keys = Array<{
@@ -10,9 +16,10 @@ type Keys = Array<{
   schema: ?string,
 }>;
 
-export function preventEmptyResult<O: { [key: string]: () => string }>(
-  obj
-): $ObjMap<O, <V>(V) => V> {
+export function preventEmptyResult<
+  // eslint-disable-next-line flowtype/no-weak-types
+  O: { [key: string]: (...args: Array<any>) => string }
+>(obj: O): $ObjMap<O, <V>(V) => V> {
   return Object.keys(obj).reduce((memo, key) => {
     const fn = obj[key];
     memo[key] = function(...args) {
@@ -85,34 +92,34 @@ export default (function PgBasicsPlugin(
         // IMPORTANT: do NOT do case transforms here, because detail can be
         // lost, e.g.
         // `constantCase(camelCase('foo_1')) !== constantCase('foo_1')`
-        _functionName(proc: Proc) {
+        _functionName(proc: PgProc) {
           return proc.tags.name || proc.name;
         },
-        _typeName(type: Type) {
+        _typeName(type: PgType) {
           // 'type' introspection result
           return type.tags.name || type.name;
         },
-        _tableName(table: Class) {
+        _tableName(table: PgClass) {
           return table.tags.name || table.name;
         },
-        _singularizedTableName(table: Class): string {
+        _singularizedTableName(table: PgClass): string {
           return this.singularize(this._tableName(table)).replace(
             /.(?:(?:[_-]i|I)nput|(?:[_-]p|P)atch)$/,
             "$&_record"
           );
         },
-        _columnName(attr: Attribute, _options?: object) {
+        _columnName(attr: PgAttribute, _options?: { skipRowId?: boolean }) {
           return attr.tags.name || attr.name;
         },
 
         // From here down, functions are passed database introspection results
-        enumType(type: Type) {
+        enumType(type: PgType) {
           return this.upperCamelCase(this._typeName(type));
         },
         argument(name: ?string, index: number) {
           return this.camelCase(name || `arg${index}`);
         },
-        orderByColumnEnum(attr: Attribute, ascending: boolean) {
+        orderByColumnEnum(attr: PgAttribute, ascending: boolean) {
           const columnName = this._columnName(attr, {
             skipRowId: true, // Because we messed up 😔
           });
@@ -120,7 +127,7 @@ export default (function PgBasicsPlugin(
             `${columnName}_${ascending ? "asc" : "desc"}`
           );
         },
-        domainType(type: Type) {
+        domainType(type: PgType) {
           return this.upperCamelCase(this._typeName(type));
         },
         enumName(inValue: string) {
@@ -205,100 +212,104 @@ export default (function PgBasicsPlugin(
           return value;
         },
 
-        tableNode(table: Class) {
+        tableNode(table: PgClass) {
           return this.camelCase(this._singularizedTableName(table));
         },
-        tableFieldName(table: Class) {
+        tableFieldName(table: PgClass) {
           return this.camelCase(this._singularizedTableName(table));
         },
-        allRows(table: Class) {
+        allRows(table: PgClass) {
           return this.camelCase(
             `all-${this.pluralize(this._singularizedTableName(table))}`
           );
         },
-        functionMutationName(proc: Proc) {
+        functionMutationName(proc: PgProc) {
           return this.camelCase(this._functionName(proc));
         },
-        functionQueryName(proc: Proc) {
+        functionQueryName(proc: PgProc) {
           return this.camelCase(this._functionName(proc));
         },
-        functionPayloadType(proc: Proc) {
+        functionPayloadType(proc: PgProc) {
           return this.upperCamelCase(`${this._functionName(proc)}-payload`);
         },
-        functionInputType(proc: Proc) {
+        functionInputType(proc: PgProc) {
           return this.upperCamelCase(`${this._functionName(proc)}-input`);
         },
-        tableType(table: Class) {
+        tableType(table: PgClass) {
           return this.upperCamelCase(this._singularizedTableName(table));
         },
-        column(attr: Attribute) {
+        column(attr: PgAttribute) {
           return this.camelCase(this._columnName(attr));
         },
-        computedColumn(pseudoColumnName: string, _proc: Proc, _table: Class) {
+        computedColumn(
+          pseudoColumnName: string,
+          _proc: PgProc,
+          _table: PgClass
+        ) {
           return this.camelCase(pseudoColumnName);
         },
-        singleRelationByKeys(detailedKeys: Keys, table: Class) {
+        singleRelationByKeys(detailedKeys: Keys, table: PgClass) {
           return this.camelCase(
             `${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
               .join("-and-")}`
           );
         },
-        rowByUniqueKeys(detailedKeys: Keys, table: Class) {
+        rowByUniqueKeys(detailedKeys: Keys, table: PgClass) {
           return this.camelCase(
             `${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
               .join("-and-")}`
           );
         },
-        updateByKeys(detailedKeys: Keys, table: Class) {
+        updateByKeys(detailedKeys: Keys, table: PgClass) {
           return this.camelCase(
             `update-${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
               .join("-and-")}`
           );
         },
-        deleteByKeys(detailedKeys: Keys, table: Class) {
+        deleteByKeys(detailedKeys: Keys, table: PgClass) {
           return this.camelCase(
             `delete-${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
               .join("-and-")}`
           );
         },
-        updateNode(table: Class) {
+        updateNode(table: PgClass) {
           return this.camelCase(`update-${this._singularizedTableName(table)}`);
         },
-        deleteNode(table: Class) {
+        deleteNode(table: PgClass) {
           return this.camelCase(`delete-${this._singularizedTableName(table)}`);
         },
-        updateByKeysInputType(detailedKeys: Keys, table: Class) {
+        updateByKeysInputType(detailedKeys: Keys, table: PgClass) {
           return this.upperCamelCase(
             `update-${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
               .join("-and-")}-input`
           );
         },
-        deleteByKeysInputType(detailedKeys: Keys, table: Class) {
+        deleteByKeysInputType(detailedKeys: Keys, table: PgClass) {
           return this.upperCamelCase(
             `delete-${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
               .join("-and-")}-input`
           );
         },
-        updateNodeInputType(table: Class) {
+        updateNodeInputType(table: PgClass) {
           return this.upperCamelCase(
             `update-${this._singularizedTableName(table)}-input`
           );
         },
-        deleteNodeInputType(table: Class) {
+        deleteNodeInputType(table: PgClass) {
           return this.upperCamelCase(
             `delete-${this._singularizedTableName(table)}-input`
           );
         },
         manyRelationByKeys(
           detailedKeys: Keys,
-          table: Class,
-          _foreignTable: Class
+          table: PgClass,
+          _foreignTable: PgClass
         ) {
           return this.camelCase(
             `${this.pluralize(
@@ -306,36 +317,36 @@ export default (function PgBasicsPlugin(
             )}-by-${detailedKeys.map(key => this.column(key)).join("-and-")}`
           );
         },
-        edgeField(table: Class) {
+        edgeField(table: PgClass) {
           return this.camelCase(`${this._singularizedTableName(table)}-edge`);
         },
-        scalarFunctionConnection(proc: Proc) {
+        scalarFunctionConnection(proc: PgProc) {
           return this.upperCamelCase(`${this._functionName(proc)}-connection`);
         },
-        scalarFunctionEdge(proc: Proc) {
+        scalarFunctionEdge(proc: PgProc) {
           return this.upperCamelCase(
             `${this.singularize(this._functionName(proc))}-edge`
           );
         },
-        createField(table: Class) {
+        createField(table: PgClass) {
           return this.camelCase(`create-${this._singularizedTableName(table)}`);
         },
-        createInputType(table: Class) {
+        createInputType(table: PgClass) {
           return this.upperCamelCase(
             `create-${this._singularizedTableName(table)}-input`
           );
         },
-        createPayloadType(table: Class) {
+        createPayloadType(table: PgClass) {
           return this.upperCamelCase(
             `create-${this._singularizedTableName(table)}-payload`
           );
         },
-        updatePayloadType(table: Class) {
+        updatePayloadType(table: PgClass) {
           return this.upperCamelCase(
             `update-${this._singularizedTableName(table)}-payload`
           );
         },
-        deletePayloadType(table: Class) {
+        deletePayloadType(table: PgClass) {
           return this.upperCamelCase(
             `delete-${this._singularizedTableName(table)}-payload`
           );

@@ -63,6 +63,10 @@ export type Build = {|
   fieldDataGeneratorsByType: Map<*, *>, // @deprecated - use fieldDataGeneratorsByFieldNameByType instead
   fieldDataGeneratorsByFieldNameByType: Map<*, *>,
   fieldArgDataGeneratorsByFieldNameByType: Map<*, *>,
+  inflection: {
+    // eslint-disable-next-line flowtype/no-weak-types
+    [string]: (...args: Array<any>) => string,
+  },
 |};
 
 export type BuildExtensionQuery = {|

@@ -16,14 +16,15 @@ const WATCH_FIXTURES_PATH = `${__dirname}/../../res/watch-fixtures.sql`;
 
 // Ref: https://github.com/graphile/postgraphile/tree/master/src/postgres/introspection/object
 
-export type Namespace = {
+export type PgNamespace = {
   kind: "namespace",
   id: string,
   name: string,
   description: ?string,
+  tags: { [string]: string },
 };
 
-export type Proc = {
+export type PgProc = {
   kind: "procedure",
   name: string,
   description: ?string,
@@ -35,10 +36,11 @@ export type Proc = {
   argTypeIds: Array<string>,
   argNames: Array<string>,
   argDefaultsNum: number,
-  namespace: Namespace,
+  namespace: PgNamespace,
+  tags: { [string]: string },
 };
 
-export type Class = {
+export type PgClass = {
   kind: "class",
   id: string,
   name: string,
@@ -51,10 +53,11 @@ export type Class = {
   isInsertable: boolean,
   isUpdatable: boolean,
   isDeletable: boolean,
-  namespace: Namespace,
+  namespace: PgNamespace,
+  tags: { [string]: string },
 };
 
-export type Type = {
+export type PgType = {
   kind: "type",
   id: string,
   name: string,
@@ -69,9 +72,10 @@ export type Type = {
   isPgArray: boolean,
   classId: ?string,
   domainBaseTypeId: ?string,
+  tags: { [string]: string },
 };
 
-export type Attribute = {
+export type PgAttribute = {
   kind: "attribute",
   classId: string,
   num: number,
@@ -80,9 +84,10 @@ export type Attribute = {
   typeId: string,
   isNotNull: boolean,
   hasDefault: boolean,
-  class: Class,
-  type: Type,
-  namespace: Namespace,
+  class: PgClass,
+  type: PgType,
+  namespace: PgNamespace,
+  tags: { [string]: string },
 };
 
 function readFile(filename, encoding) {

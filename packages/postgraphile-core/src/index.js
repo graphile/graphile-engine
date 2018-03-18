@@ -81,7 +81,7 @@ export const postGraphileClassicIdsInflection = inflections.newInflector(
  * ABOVE HERE IS DEPRECATED.
  */
 
-export const PostGraphileInflectionPlugin = function(builder) {
+export const PostGraphileInflectionPlugin = (function(builder) {
   builder.hook("inflection", inflection => {
     const previous = inflection.enumName;
     return {
@@ -91,9 +91,9 @@ export const PostGraphileInflectionPlugin = function(builder) {
       },
     };
   });
-};
+}: Plugin);
 
-export const PostGraphileClassicIdsInflectionPlugin = function(builder) {
+export const PostGraphileClassicIdsInflectionPlugin = (function(builder) {
   builder.hook("inflection", inflection => {
     const previous = inflection._columnName;
     return {
@@ -106,7 +106,7 @@ export const PostGraphileClassicIdsInflectionPlugin = function(builder) {
       },
     };
   });
-};
+}: Plugin);
 
 const awaitKeys = async obj => {
   const result = {};
