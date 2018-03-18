@@ -79,16 +79,21 @@ export default (function PgBasicsPlugin(
           return this.upperCamelCase(`${this.pluralize(typeName)}-connection`);
         },
 
-        // Handling overrides via smart comments
+        // These helpers handle overrides via smart comments. They should only
+        // be used in other inflectors, hence the underscore prefix.
+        //
+        // IMPORTANT: do NOT do case transforms here, because detail can be
+        // lost, e.g.
+        // `constantCase(camelCase('foo_1')) !== constantCase('foo_1')`
         _functionName(proc: Proc) {
-          return proc.tags.name || this.camelCase(proc.name);
+          return proc.tags.name || proc.name;
         },
         _typeName(type: Type) {
           // 'type' introspection result
-          return type.tags.name || this.camelCase(type.name);
+          return type.tags.name || type.name;
         },
         _tableName(table: Class) {
-          return table.tags.name || this.camelCase(table.name);
+          return table.tags.name || table.name;
         },
         _singularizedTableName(table: Class): string {
           return this.singularize(this._tableName(table)).replace(
@@ -97,7 +102,7 @@ export default (function PgBasicsPlugin(
           );
         },
         _columnName(attr: Attribute, _options?: object) {
-          return attr.tags.name || this.camelCase(attr.name);
+          return attr.tags.name || attr.name;
         },
 
         // From here down, functions are passed database introspection results
@@ -212,10 +217,10 @@ export default (function PgBasicsPlugin(
           );
         },
         functionMutationName(proc: Proc) {
-          return this._functionName(proc);
+          return this.camelCase(this._functionName(proc));
         },
         functionQueryName(proc: Proc) {
-          return this._functionName(proc);
+          return this.camelCase(this._functionName(proc));
         },
         functionPayloadType(proc: Proc) {
           return this.upperCamelCase(`${this._functionName(proc)}-payload`);
