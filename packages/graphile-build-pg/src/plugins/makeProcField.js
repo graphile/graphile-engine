@@ -5,7 +5,7 @@ import addStartEndCursor from "./addStartEndCursor";
 import viaTemporaryTable from "./viaTemporaryTable";
 
 import type { Build, FieldWithHooksFunction } from "graphile-build";
-import type { Proc } from "./PgIntrospectionPlugin";
+import type { PgProc } from "./PgIntrospectionPlugin";
 import type { SQL } from "pg-sql2";
 
 const debugSql = debugFactory("graphile-build-pg:sql");
@@ -19,7 +19,7 @@ const firstValue = obj => {
 
 export default function makeProcField(
   fieldName: string,
-  proc: Proc,
+  proc: PgProc,
   {
     pgIntrospectionResultsByKind: introspectionResultsByKind,
     pgGetGqlTypeByTypeId,
