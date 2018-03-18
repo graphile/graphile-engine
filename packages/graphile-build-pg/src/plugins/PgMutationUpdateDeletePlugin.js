@@ -403,7 +403,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                     }
                     const fieldName = inflection[
                       mode === "update" ? "updateByKeys" : "deleteByKeys"
-                    ](keys, table);
+                    ](keys, table, constraint);
                     const InputType = newWithHooks(
                       GraphQLInputObjectType,
                       {
@@ -412,7 +412,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                           mode === "update"
                             ? "updateByKeysInputType"
                             : "deleteByKeysInputType"
-                        ](keys, table),
+                        ](keys, table, constraint),
                         fields: Object.assign(
                           {
                             clientMutationId: {

@@ -96,7 +96,12 @@ export default (function PgForwardRelationPlugin(builder) {
             throw new Error("Could not find key columns!");
           }
 
-          const fieldName = inflection.singleRelationByKeys(keys, foreignTable);
+          const fieldName = inflection.singleRelationByKeys(
+            keys,
+            foreignTable,
+            table,
+            constraint
+          );
 
           memo[fieldName] = fieldWithHooks(
             fieldName,

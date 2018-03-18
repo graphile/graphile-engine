@@ -7,6 +7,7 @@ import type {
   PgType,
   PgClass,
   PgAttribute,
+  PgConstraint,
 } from "./PgIntrospectionPlugin";
 
 const defaultPgColumnFilter = (_attr, _build, _context) => true;
@@ -248,32 +249,83 @@ export default (function PgBasicsPlugin(
         ) {
           return this.camelCase(pseudoColumnName);
         },
-        singleRelationByKeys(detailedKeys: Keys, table: PgClass) {
+        singleRelationByKeys(
+          detailedKeys: Keys,
+          table: PgClass,
+          _foreignTable: PgClass,
+          _constraint: PgConstraint
+        ) {
           return this.camelCase(
             `${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
               .join("-and-")}`
           );
         },
-        rowByUniqueKeys(detailedKeys: Keys, table: PgClass) {
+        manyRelationByKeys(
+          detailedKeys: Keys,
+          table: PgClass,
+          _foreignTable: PgClass,
+          _constraint: PgConstraint
+        ) {
+          return this.camelCase(
+            `${this.pluralize(
+              this._singularizedTableName(table)
+            )}-by-${detailedKeys.map(key => this.column(key)).join("-and-")}`
+          );
+        },
+        rowByUniqueKeys(
+          detailedKeys: Keys,
+          table: PgClass,
+          _constraint: PgConstraint
+        ) {
           return this.camelCase(
             `${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
               .join("-and-")}`
           );
         },
-        updateByKeys(detailedKeys: Keys, table: PgClass) {
+        updateByKeys(
+          detailedKeys: Keys,
+          table: PgClass,
+          _constraint: PgConstraint
+        ) {
           return this.camelCase(
             `update-${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
               .join("-and-")}`
           );
         },
-        deleteByKeys(detailedKeys: Keys, table: PgClass) {
+        deleteByKeys(
+          detailedKeys: Keys,
+          table: PgClass,
+          _constraint: PgConstraint
+        ) {
           return this.camelCase(
             `delete-${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
               .join("-and-")}`
+          );
+        },
+        updateByKeysInputType(
+          detailedKeys: Keys,
+          table: PgClass,
+          _constraint: PgConstraint
+        ) {
+          return this.upperCamelCase(
+            `update-${this._singularizedTableName(table)}-by-${detailedKeys
+              .map(key => this.column(key))
+              .join("-and-")}-input`
+          );
+        },
+        deleteByKeysInputType(
+          detailedKeys: Keys,
+          table: PgClass,
+          _constraint: PgConstraint
+        ) {
+          return this.upperCamelCase(
+            `delete-${this._singularizedTableName(table)}-by-${detailedKeys
+              .map(key => this.column(key))
+              .join("-and-")}-input`
           );
         },
         updateNode(table: PgClass) {
@@ -281,20 +333,6 @@ export default (function PgBasicsPlugin(
         },
         deleteNode(table: PgClass) {
           return this.camelCase(`delete-${this._singularizedTableName(table)}`);
-        },
-        updateByKeysInputType(detailedKeys: Keys, table: PgClass) {
-          return this.upperCamelCase(
-            `update-${this._singularizedTableName(table)}-by-${detailedKeys
-              .map(key => this.column(key))
-              .join("-and-")}-input`
-          );
-        },
-        deleteByKeysInputType(detailedKeys: Keys, table: PgClass) {
-          return this.upperCamelCase(
-            `delete-${this._singularizedTableName(table)}-by-${detailedKeys
-              .map(key => this.column(key))
-              .join("-and-")}-input`
-          );
         },
         updateNodeInputType(table: PgClass) {
           return this.upperCamelCase(
@@ -304,17 +342,6 @@ export default (function PgBasicsPlugin(
         deleteNodeInputType(table: PgClass) {
           return this.upperCamelCase(
             `delete-${this._singularizedTableName(table)}-input`
-          );
-        },
-        manyRelationByKeys(
-          detailedKeys: Keys,
-          table: PgClass,
-          _foreignTable: PgClass
-        ) {
-          return this.camelCase(
-            `${this.pluralize(
-              this._singularizedTableName(table)
-            )}-by-${detailedKeys.map(key => this.column(key)).join("-and-")}`
           );
         },
         edgeField(table: PgClass) {

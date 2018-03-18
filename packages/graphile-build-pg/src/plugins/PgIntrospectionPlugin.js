@@ -90,6 +90,19 @@ export type PgAttribute = {
   tags: { [string]: string },
 };
 
+export type PgConstraint = {
+  kind: "constraint",
+  name: string,
+  type: string,
+  classId: string,
+  foreignClassId: ?string,
+  description: ?string,
+  keyAttributeNums: Array<number>,
+  foreignKeyAttributeNums: Array<number>,
+  namespace: PgNamespace,
+  tags: { [string]: string },
+};
+
 function readFile(filename, encoding) {
   return new Promise((resolve, reject) => {
     rawReadFile(filename, encoding, (err, res) => {
