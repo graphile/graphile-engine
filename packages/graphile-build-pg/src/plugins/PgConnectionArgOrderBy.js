@@ -2,10 +2,7 @@
 import isString from "lodash/isString";
 import type { Plugin } from "graphile-build";
 
-export default (function PgConnectionArgOrderBy(
-  builder,
-  { pgInflection: inflection }
-) {
+export default (function PgConnectionArgOrderBy(builder) {
   builder.hook(
     "init",
     (
@@ -14,16 +11,14 @@ export default (function PgConnectionArgOrderBy(
         newWithHooks,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
         graphql: { GraphQLEnumType },
+        inflection,
       }
     ) => {
       introspectionResultsByKind.class
         .filter(table => table.isSelectable)
         .filter(table => !!table.namespace)
         .forEach(table => {
-          const tableTypeName = inflection.tableType(
-            table.name,
-            table.namespace.name
-          );
+          const tableTypeName = inflection.tableType(table);
           /* const TableOrderByType = */
           newWithHooks(
             GraphQLEnumType,
@@ -58,6 +53,7 @@ export default (function PgConnectionArgOrderBy(
         pgGetGqlTypeByTypeId,
         pgSql: sql,
         graphql: { GraphQLList, GraphQLNonNull },
+        inflection,
       },
       {
         scope: { isPgFieldConnection, pgFieldIntrospection: table },

@@ -13,7 +13,7 @@ const ONLY = 2;
 
 export default (function PgBackwardRelationPlugin(
   builder,
-  { pgInflection: inflection, pgLegacyRelations }
+  { pgLegacyRelations }
 ) {
   const legacyRelationMode =
     {
@@ -32,6 +32,7 @@ export default (function PgBackwardRelationPlugin(
         pgSql: sql,
         getAliasFromResolveInfo,
         graphql: { GraphQLNonNull },
+        inflection,
       },
       {
         scope: { isPgRowType, pgIntrospection: foreignTable },
@@ -55,10 +56,7 @@ export default (function PgBackwardRelationPlugin(
         foreignKeyConstraints.reduce((memo, constraint) => {
           const table =
             introspectionResultsByKind.classById[constraint.classId];
-          const tableTypeName = inflection.tableType(
-            table.name,
-            table.namespace.name
-          );
+          const tableTypeName = inflection.tableType(table);
           const gqlTableType = pgGetGqlTypeByTypeId(table.type.id);
           if (!gqlTableType) {
             debug(
@@ -68,10 +66,7 @@ export default (function PgBackwardRelationPlugin(
           }
           const foreignTable =
             introspectionResultsByKind.classById[constraint.foreignClassId];
-          const foreignTableTypeName = inflection.tableType(
-            foreignTable.name,
-            foreignTable.namespace.name
-          );
+          const foreignTableTypeName = inflection.tableType(foreignTable);
           const gqlForeignTableType = pgGetGqlTypeByTypeId(
             foreignTable.type.id
           );
@@ -119,26 +114,13 @@ export default (function PgBackwardRelationPlugin(
 
           const isDeprecated = isUnique && legacyRelationMode === DEPRECATED;
 
-          const simpleKeys = keys.map(k => ({
-            column: k.name,
-            table: k.class.name,
-            schema: k.class.namespace.name,
-          }));
           const manyRelationFieldName = inflection.manyRelationByKeys(
-            simpleKeys,
-            table.name,
-            table.namespace.name,
-            foreignTable.name,
-            foreignTable.namespace.name
+            keys,
+            table,
+            foreignTable
           );
           const singleRelationFieldName = isUnique
-            ? inflection.singleRelationByKeys(
-                simpleKeys,
-                table.name,
-                table.namespace.name,
-                foreignTable.name,
-                foreignTable.namespace.name
-              )
+            ? inflection.singleRelationByKeys(keys, table, foreignTable)
             : null;
 
           const primaryKeyConstraint = introspectionResultsByKind.constraint

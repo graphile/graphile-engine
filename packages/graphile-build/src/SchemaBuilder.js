@@ -140,6 +140,10 @@ class SchemaBuilder extends EventEmitter {
       // all hooks, hook the 'build' event to extend this object:
       build: [],
 
+      // Inflection is used for naming resulting types/fields/args/etc - it's
+      // hookable so that other plugins may extend it or override it
+      inflection: [],
+
       // 'build' phase should not generate any GraphQL objects (because the
       // build object isn't finalised yet so it risks weirdness occurring); so
       // if you need to set up any global types you can do so here.
@@ -274,6 +278,15 @@ class SchemaBuilder extends EventEmitter {
 
   createBuild(): { ...Build } {
     const initialBuild = makeNewBuild(this);
+    // Inflection needs to come first, in case 'build' hooks depend on it
+    initialBuild.inflection = this.applyHooks(
+      initialBuild,
+      "inflection",
+      initialBuild.inflection,
+      {
+        scope: {},
+      }
+    );
     const build = this.applyHooks(initialBuild, "build", initialBuild, {
       scope: {},
     });

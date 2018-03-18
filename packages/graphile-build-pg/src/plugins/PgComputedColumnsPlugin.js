@@ -32,7 +32,7 @@ export default (function PgComputedColumnsPlugin(builder) {
       const {
         extend,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
-        pgInflection: inflection,
+        inflection,
       } = build;
       const tableType = introspectionResultsByKind.type.filter(
         type =>
@@ -82,10 +82,10 @@ export default (function PgComputedColumnsPlugin(builder) {
             }
 
             const pseudoColumnName = proc.name.substr(table.name.length + 1);
-            const fieldName = inflection.column(
+            const fieldName = inflection.computedColumn(
               pseudoColumnName,
-              table.name,
-              table.namespace.name
+              proc,
+              table
             );
             memo[fieldName] = makeProcField(fieldName, proc, build, {
               fieldWithHooks,

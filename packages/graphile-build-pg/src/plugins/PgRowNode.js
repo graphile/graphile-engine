@@ -6,10 +6,7 @@ import debugFactory from "debug";
 const base64Decode = str => new Buffer(String(str), "base64").toString("utf8");
 const debugSql = debugFactory("graphile-build-pg:sql");
 
-export default (async function PgRowByUniqueConstraint(
-  builder,
-  { pgInflection: inflection }
-) {
+export default (async function PgRowByUniqueConstraint(builder) {
   builder.hook(
     "GraphQLObjectType",
     (
@@ -92,6 +89,7 @@ export default (async function PgRowByUniqueConstraint(
         gql2pg,
         getNodeType,
         graphql: { GraphQLNonNull, GraphQLID },
+        inflection,
       },
       { scope: { isRootQuery }, fieldWithHooks }
     ) => {
@@ -123,10 +121,7 @@ export default (async function PgRowByUniqueConstraint(
                 primaryKeyConstraint.keyAttributeNums.map(
                   num => attributes.filter(attr => attr.num === num)[0]
                 );
-              const fieldName = inflection.tableNode(
-                table.name,
-                table.namespace.name
-              );
+              const fieldName = inflection.tableNode(table);
               memo[fieldName] = fieldWithHooks(
                 fieldName,
                 ({ getDataFromParsedResolveInfoFragment }) => {

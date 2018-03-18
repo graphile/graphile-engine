@@ -4,7 +4,7 @@ const base64 = str => new Buffer(String(str)).toString("base64");
 
 export default (function PgTablesPlugin(
   builder,
-  { pgInflection: inflection, pgForbidSetofFunctionsToReturnNull = false }
+  { pgForbidSetofFunctionsToReturnNull = false }
 ) {
   builder.hook(
     "init",
@@ -21,6 +21,7 @@ export default (function PgTablesPlugin(
           GraphQLList,
           GraphQLString,
         },
+        inflection,
       }
     ) => {
       const nullableIf = (condition, Type) =>
@@ -42,10 +43,7 @@ export default (function PgTablesPlugin(
           const EdgeType = newWithHooks(
             GraphQLObjectType,
             {
-              name: inflection.scalarFunctionEdge(
-                proc.name,
-                proc.namespace.name
-              ),
+              name: inflection.scalarFunctionEdge(proc),
               description: `A \`${NodeType.name}\` edge in the connection.`,
               fields: ({ fieldWithHooks }) => {
                 return {
@@ -89,10 +87,7 @@ export default (function PgTablesPlugin(
           newWithHooks(
             GraphQLObjectType,
             {
-              name: inflection.scalarFunctionConnection(
-                proc.name,
-                proc.namespace.name
-              ),
+              name: inflection.scalarFunctionConnection(proc),
               description: `A connection to a list of \`${
                 NodeType.name
               }\` values.`,

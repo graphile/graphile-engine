@@ -9,7 +9,7 @@ const base64Decode = str => new Buffer(String(str), "base64").toString("utf8");
 
 export default (async function PgMutationUpdateDeletePlugin(
   builder,
-  { pgInflection: inflection, pgDisableDefaultMutations }
+  { pgDisableDefaultMutations }
 ) {
   if (pgDisableDefaultMutations) {
     return;
@@ -39,8 +39,9 @@ export default (async function PgMutationUpdateDeletePlugin(
           GraphQLID,
         },
         pgColumnFilter,
-        inflection: { pluralize, singularize, camelCase },
+        inflection,
       } = build;
+      const { pluralize, singularize, camelCase } = inflection;
       if (!isRootMutation) {
         return fields;
       }
@@ -85,19 +86,13 @@ export default (async function PgMutationUpdateDeletePlugin(
                     const sqlValues = [];
                     const inputData =
                       input[
-                        inflection.patchField(
-                          inflection.tableName(table.name, table.namespace.name)
-                        )
+                        inflection.patchField(inflection.tableFieldName(table))
                       ];
                     introspectionResultsByKind.attribute
                       .filter(attr => attr.classId === table.id)
                       .filter(attr => pgColumnFilter(attr, build, context))
                       .forEach(attr => {
-                        const fieldName = inflection.column(
-                          attr.name,
-                          table.name,
-                          table.namespace.name
-                        );
+                        const fieldName = inflection.column(attr);
                         if (
                           fieldName in
                           inputData /* Because we care about null! */
@@ -188,16 +183,13 @@ export default (async function PgMutationUpdateDeletePlugin(
                         mode === "delete"
                           ? "deletePayloadType"
                           : "updatePayloadType"
-                      ](table.name, table.namespace.name),
+                      ](table),
                       description: `The output of our ${mode} \`${tableTypeName}\` mutation.`,
                       fields: ({
                         recurseDataGeneratorsForField,
                         fieldWithHooks,
                       }) => {
-                        const tableName = inflection.tableName(
-                          table.name,
-                          table.namespace.name
-                        );
+                        const tableName = inflection.tableFieldName(table);
                         recurseDataGeneratorsForField(tableName);
                         // This should really be `-node-id` but for compatibility with PostGraphQL v3 we haven't made that change.
                         const deletedNodeIdFieldName = camelCase(
@@ -282,7 +274,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                       );
                     const fieldName = inflection[
                       mode === "update" ? "updateNode" : "deleteNode"
-                    ](table.name, table.namespace.name);
+                    ](table);
                     const InputType = newWithHooks(
                       GraphQLInputObjectType,
                       {
@@ -291,7 +283,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                           mode === "update"
                             ? "updateNodeInputType"
                             : "deleteNodeInputType"
-                        ](table.name, table.namespace.name),
+                        ](table),
                         fields: Object.assign(
                           {
                             clientMutationId: {
@@ -307,10 +299,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                           mode === "update"
                             ? {
                                 [inflection.patchField(
-                                  inflection.tableName(
-                                    table.name,
-                                    table.namespace.name
-                                  )
+                                  inflection.tableFieldName(table)
                                 )]: {
                                   description: `An object where the defined keys will be set on the \`${tableTypeName}\` being ${mode}d.`,
                                   type: new GraphQLNonNull(TablePatch),
@@ -412,14 +401,9 @@ export default (async function PgMutationUpdateDeletePlugin(
                         "Consistency error: could not find an attribute!"
                       );
                     }
-                    const simpleKeys = keys.map(k => ({
-                      column: k.name,
-                      table: k.class.name,
-                      schema: k.class.namespace.name,
-                    }));
                     const fieldName = inflection[
                       mode === "update" ? "updateByKeys" : "deleteByKeys"
-                    ](simpleKeys, table.name, table.namespace.name);
+                    ](keys, table);
                     const InputType = newWithHooks(
                       GraphQLInputObjectType,
                       {
@@ -428,7 +412,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                           mode === "update"
                             ? "updateByKeysInputType"
                             : "deleteByKeysInputType"
-                        ](simpleKeys, table.name, table.namespace.name),
+                        ](keys, table),
                         fields: Object.assign(
                           {
                             clientMutationId: {
@@ -438,10 +422,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                           mode === "update"
                             ? {
                                 [inflection.patchField(
-                                  inflection.tableName(
-                                    table.name,
-                                    table.namespace.name
-                                  )
+                                  inflection.tableFieldName(table)
                                 )]: {
                                   description: `An object where the defined keys will be set on the \`${tableTypeName}\` being ${mode}d.`,
                                   type: new GraphQLNonNull(TablePatch),
@@ -449,13 +430,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                               }
                             : null,
                           keys.reduce((memo, key) => {
-                            memo[
-                              inflection.column(
-                                key.name,
-                                key.class.name,
-                                key.class.namespace.name
-                              )
-                            ] = {
+                            memo[inflection.column(key)] = {
                               description: key.description,
                               type: new GraphQLNonNull(
                                 pgGetGqlInputTypeByTypeId(key.typeId)
@@ -511,13 +486,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                                     sql.fragment`${sql.identifier(
                                       key.name
                                     )} = ${gql2pg(
-                                      input[
-                                        inflection.column(
-                                          key.name,
-                                          key.class.name,
-                                          key.class.namespace.name
-                                        )
-                                      ],
+                                      input[inflection.column(key)],
                                       key.type
                                     )}`
                                 ),
