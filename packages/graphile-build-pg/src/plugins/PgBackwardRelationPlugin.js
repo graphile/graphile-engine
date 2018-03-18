@@ -117,10 +117,16 @@ export default (function PgBackwardRelationPlugin(
           const manyRelationFieldName = inflection.manyRelationByKeys(
             keys,
             table,
-            foreignTable
+            foreignTable,
+            constraint
           );
           const singleRelationFieldName = isUnique
-            ? inflection.singleRelationByKeys(keys, table, foreignTable)
+            ? inflection.singleRelationByKeys(
+                keys,
+                table,
+                foreignTable,
+                constraint
+              )
             : null;
 
           const primaryKeyConstraint = introspectionResultsByKind.constraint

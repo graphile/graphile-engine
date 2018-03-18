@@ -51,7 +51,11 @@ export default (async function PgRowByUniqueConstraint(builder) {
                     "Consistency error: could not find an attribute!"
                   );
                 }
-                const fieldName = inflection.rowByUniqueKeys(keys, table);
+                const fieldName = inflection.rowByUniqueKeys(
+                  keys,
+                  table,
+                  constraint
+                );
                 memo[fieldName] = fieldWithHooks(
                   fieldName,
                   ({ getDataFromParsedResolveInfoFragment }) => {
