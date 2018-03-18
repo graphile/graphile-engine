@@ -4,7 +4,7 @@ const base64 = str => new Buffer(String(str)).toString("base64");
 
 export default (function PgTablesPlugin(
   builder,
-  { pgInflection: inflection, pgForbidSetofFunctionsToReturnNull = false }
+  { pgForbidSetofFunctionsToReturnNull = false }
 ) {
   const handleNullRow = pgForbidSetofFunctionsToReturnNull
     ? row => row
@@ -42,6 +42,7 @@ export default (function PgTablesPlugin(
         GraphQLInputObjectType,
       },
       pgColumnFilter,
+      inflection,
     } = build;
     const nullableIf = (condition, Type) =>
       condition ? Type : new GraphQLNonNull(Type);
@@ -85,10 +86,7 @@ export default (function PgTablesPlugin(
       const attributes = introspectionResultsByKind.attribute
         .filter(attr => attr.classId === table.id)
         .sort((a1, a2) => a1.num - a2.num);
-      const tableTypeName = inflection.tableType(
-        table.name,
-        table.namespaceName
-      );
+      const tableTypeName = inflection.tableType(table);
       const shouldHaveNodeId: boolean =
         nodeIdFieldName &&
         table.isSelectable &&
@@ -182,11 +180,7 @@ export default (function PgTablesPlugin(
                         if (!pgColumnFilter(attr, build, context)) {
                           return sql.null; // TODO: return default instead.
                         }
-                        const fieldName = inflection.column(
-                          attr.name,
-                          table.name,
-                          table.namespaceName
-                        );
+                        const fieldName = inflection.column(attr);
                         const pgInputField = pgInputFields[fieldName];
                         const v = obj[fieldName];
                         if (pgInputField && v != null) {

@@ -5,10 +5,7 @@ import queryFromResolveData from "../queryFromResolveData";
 
 const debug = debugFactory("graphile-build-pg");
 
-export default (function PgForwardRelationPlugin(
-  builder,
-  { pgInflection: inflection }
-) {
+export default (function PgForwardRelationPlugin(builder) {
   builder.hook(
     "GraphQLObjectType:fields",
     (
@@ -19,6 +16,7 @@ export default (function PgForwardRelationPlugin(
         pgGetGqlTypeByTypeId,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
         pgSql: sql,
+        inflection,
       },
       {
         scope: {
@@ -98,16 +96,7 @@ export default (function PgForwardRelationPlugin(
             throw new Error("Could not find key columns!");
           }
 
-          const simpleKeys = keys.map(k => ({
-            column: k.name,
-            table: k.class.name,
-            schema: k.class.namespace.name,
-          }));
-          const fieldName = inflection.singleRelationByKeys(
-            simpleKeys,
-            foreignTable.name,
-            foreignTable.namespace.name
-          );
+          const fieldName = inflection.singleRelationByKeys(keys, foreignTable);
 
           memo[fieldName] = fieldWithHooks(
             fieldName,

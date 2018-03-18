@@ -31,7 +31,6 @@ export default function makeProcField(
     gql2pg,
     pg2gql,
     newWithHooks,
-    pgInflection: inflection,
     pgStrictFunctions: strictFunctions,
     pgTweakFragmentForType,
     graphql: {
@@ -46,7 +45,7 @@ export default function makeProcField(
       getNamedType,
       isCompositeType,
     },
-    inflection: { pluralize, camelCase },
+    inflection,
   }: {| ...Build |},
   {
     fieldWithHooks,
@@ -58,6 +57,7 @@ export default function makeProcField(
     isMutation?: boolean,
   }
 ) {
+  const { pluralize, camelCase } = inflection;
   function getResultFieldName(gqlType, type, returnsSet) {
     const gqlNamedType = getNamedType(gqlType);
     let name;
@@ -149,10 +149,7 @@ export default function makeProcField(
   } else {
     const Type = pgGetGqlTypeByTypeId(returnType.id) || GraphQLString;
     if (proc.returnsSet) {
-      const connectionTypeName = inflection.scalarFunctionConnection(
-        proc.name,
-        proc.namespace.name
-      );
+      const connectionTypeName = inflection.scalarFunctionConnection(proc);
       const ConnectionType = getTypeByName(connectionTypeName);
       if (ConnectionType) {
         if (isMutation) {
@@ -320,13 +317,9 @@ export default function makeProcField(
         PayloadType = newWithHooks(
           GraphQLObjectType,
           {
-            name: inflection.functionPayloadType(
-              proc.name,
-              proc.namespace.name
-            ),
-            description: `The output of our \`${inflection.functionName(
-              proc.name,
-              proc.namespace.name
+            name: inflection.functionPayloadType(proc),
+            description: `The output of our \`${inflection.functionMutationName(
+              proc
             )}\` mutation.`,
             fields: ({ recurseDataGeneratorsForField }) => {
               if (isNotVoid) {
@@ -365,10 +358,9 @@ export default function makeProcField(
         const InputType = newWithHooks(
           GraphQLInputObjectType,
           {
-            name: inflection.functionInputType(proc.name, proc.namespace.name),
-            description: `All input for the \`${inflection.functionName(
-              proc.name,
-              proc.namespace.name
+            name: inflection.functionInputType(proc),
+            description: `All input for the \`${inflection.functionMutationName(
+              proc
             )}\` mutation.`,
             fields: Object.assign(
               {

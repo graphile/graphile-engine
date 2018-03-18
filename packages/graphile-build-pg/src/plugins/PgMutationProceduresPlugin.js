@@ -12,7 +12,7 @@ export default (function PgMutationProceduresPlugin(builder) {
       const {
         extend,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
-        pgInflection: inflection,
+        inflection,
       } = build;
       return extend(
         fields,
@@ -35,10 +35,7 @@ export default (function PgMutationProceduresPlugin(builder) {
                 argDefaultsNum: 0 }
             */
 
-            const fieldName = inflection.functionName(
-              proc.name,
-              proc.namespace.name
-            );
+            const fieldName = inflection.functionMutationName(proc);
             memo[fieldName] = makeProcField(fieldName, proc, build, {
               fieldWithHooks,
               isMutation: true,

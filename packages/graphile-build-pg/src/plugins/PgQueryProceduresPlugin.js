@@ -15,7 +15,7 @@ export default (function PgQueryProceduresPlugin(builder) {
       }
       const {
         extend,
-        pgInflection: inflection,
+        inflection,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
       } = build;
       return extend(
@@ -62,10 +62,7 @@ export default (function PgQueryProceduresPlugin(builder) {
               return memo;
             }
 
-            const fieldName = inflection.functionName(
-              proc.name,
-              proc.namespace.name
-            );
+            const fieldName = inflection.functionQueryName(proc);
             try {
               memo[fieldName] = makeProcField(fieldName, proc, build, {
                 fieldWithHooks,

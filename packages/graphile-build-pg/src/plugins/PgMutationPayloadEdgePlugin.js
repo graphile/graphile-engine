@@ -2,10 +2,7 @@
 import type { Plugin } from "graphile-build";
 import isString from "lodash/isString";
 
-export default (function PgMutationPayloadEdgePlugin(
-  builder,
-  { pgInflection: inflection }
-) {
+export default (function PgMutationPayloadEdgePlugin(builder) {
   builder.hook(
     "GraphQLObjectType:fields",
     (
@@ -17,6 +14,7 @@ export default (function PgMutationPayloadEdgePlugin(
         pgSql: sql,
         graphql: { GraphQLList, GraphQLNonNull },
         pgIntrospectionResultsByKind: introspectionResultsByKind,
+        inflection,
       },
       {
         scope: { isMutationPayload, pgIntrospection, pgIntrospectionTable },
@@ -57,7 +55,7 @@ export default (function PgMutationPayloadEdgePlugin(
           num => attributes.filter(attr => attr.num === num)[0]
         );
 
-      const fieldName = inflection.edgeField(table.name, table.namespace.name);
+      const fieldName = inflection.edgeField(table);
       recurseDataGeneratorsForField(fieldName);
       return extend(
         fields,

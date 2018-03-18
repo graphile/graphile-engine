@@ -4,10 +4,7 @@ import queryFromResolveData from "../queryFromResolveData";
 import debugFactory from "debug";
 const debugSql = debugFactory("graphile-build-pg:sql");
 
-export default (async function PgRowByUniqueConstraint(
-  builder,
-  { pgInflection: inflection }
-) {
+export default (async function PgRowByUniqueConstraint(builder) {
   builder.hook(
     "GraphQLObjectType:fields",
     (
@@ -21,6 +18,7 @@ export default (async function PgRowByUniqueConstraint(
         pgIntrospectionResultsByKind: introspectionResultsByKind,
         pgSql: sql,
         graphql: { GraphQLNonNull },
+        inflection,
       },
       { scope: { isRootQuery }, fieldWithHooks }
     ) => {
@@ -53,16 +51,7 @@ export default (async function PgRowByUniqueConstraint(
                     "Consistency error: could not find an attribute!"
                   );
                 }
-                const simpleKeys = keys.map(k => ({
-                  column: k.name,
-                  table: k.class.name,
-                  schema: k.class.namespace.name,
-                }));
-                const fieldName = inflection.rowByUniqueKeys(
-                  simpleKeys,
-                  table.name,
-                  table.namespace.name
-                );
+                const fieldName = inflection.rowByUniqueKeys(keys, table);
                 memo[fieldName] = fieldWithHooks(
                   fieldName,
                   ({ getDataFromParsedResolveInfoFragment }) => {
@@ -77,13 +66,7 @@ export default (async function PgRowByUniqueConstraint(
                             }' on type '${TableType.name}'`
                           );
                         }
-                        memo[
-                          inflection.column(
-                            key.name,
-                            key.class.name,
-                            key.class.namespace.name
-                          )
-                        ] = {
+                        memo[inflection.column(key)] = {
                           type: new GraphQLNonNull(InputType),
                         };
                         return memo;
@@ -107,13 +90,7 @@ export default (async function PgRowByUniqueConstraint(
                                 sql.fragment`${builder.getTableAlias()}.${sql.identifier(
                                   key.name
                                 )} = ${gql2pg(
-                                  args[
-                                    inflection.column(
-                                      key.name,
-                                      key.class.name,
-                                      key.class.namespace.name
-                                    )
-                                  ],
+                                  args[inflection.column(key)],
                                   key.type
                                 )}`
                               );

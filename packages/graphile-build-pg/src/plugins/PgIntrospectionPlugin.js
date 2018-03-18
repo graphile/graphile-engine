@@ -20,7 +20,7 @@ export type Namespace = {
   kind: "namespace",
   id: string,
   name: string,
-  description: string,
+  description: ?string,
 };
 
 export type Proc = {
@@ -35,6 +35,53 @@ export type Proc = {
   argTypeIds: Array<string>,
   argNames: Array<string>,
   argDefaultsNum: number,
+  namespace: Namespace,
+};
+
+export type Class = {
+  kind: "class",
+  id: string,
+  name: string,
+  description: ?string,
+  classKind: string,
+  namespaceId: string,
+  namespaceName: string,
+  typeId: string,
+  isSelectable: boolean,
+  isInsertable: boolean,
+  isUpdatable: boolean,
+  isDeletable: boolean,
+  namespace: Namespace,
+};
+
+export type Type = {
+  kind: "type",
+  id: string,
+  name: string,
+  description: ?string,
+  namespaceId: string,
+  namespaceName: string,
+  type: string,
+  category: string,
+  domainIsNotNull: boolean,
+  arrayItemTypeId: ?string,
+  typeLength: ?number,
+  isPgArray: boolean,
+  classId: ?string,
+  domainBaseTypeId: ?string,
+};
+
+export type Attribute = {
+  kind: "attribute",
+  classId: string,
+  num: number,
+  name: string,
+  description: ?string,
+  typeId: string,
+  isNotNull: boolean,
+  hasDefault: boolean,
+  class: Class,
+  type: Type,
   namespace: Namespace,
 };
 

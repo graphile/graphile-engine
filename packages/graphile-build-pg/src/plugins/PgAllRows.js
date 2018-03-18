@@ -9,7 +9,7 @@ const debugSql = debugFactory("graphile-build-pg:sql");
 
 export default (async function PgAllRows(
   builder,
-  { pgInflection: inflection, pgViewUniqueKey: viewUniqueKey }
+  { pgViewUniqueKey: viewUniqueKey }
 ) {
   builder.hook(
     "GraphQLObjectType:fields",
@@ -22,6 +22,7 @@ export default (async function PgAllRows(
         pgGetGqlTypeByTypeId,
         pgSql: sql,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
+        inflection,
       },
       { fieldWithHooks, scope: { isRootQuery } }
     ) => {
@@ -69,7 +70,7 @@ export default (async function PgAllRows(
             const schema = table.namespace;
             const sqlFullTableName = sql.identifier(schema.name, table.name);
             if (TableType && ConnectionType) {
-              const fieldName = inflection.allRows(table.name, schema.name);
+              const fieldName = inflection.allRows(table);
               memo[fieldName] = fieldWithHooks(
                 fieldName,
                 ({ getDataFromParsedResolveInfoFragment }) => {
