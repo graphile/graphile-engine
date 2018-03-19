@@ -244,17 +244,20 @@ export default (function PgBasicsPlugin(
         },
         computedColumn(
           pseudoColumnName: string,
-          _proc: PgProc,
+          proc: PgProc,
           _table: PgClass
         ) {
-          return this.camelCase(pseudoColumnName);
+          return proc.tags.fieldName || this.camelCase(pseudoColumnName);
         },
         singleRelationByKeys(
           detailedKeys: Keys,
           table: PgClass,
           _foreignTable: PgClass,
-          _constraint: PgConstraint
+          constraint: PgConstraint
         ) {
+          if (constraint.tags.fieldName) {
+            return constraint.tags.fieldName;
+          }
           return this.camelCase(
             `${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
@@ -265,8 +268,11 @@ export default (function PgBasicsPlugin(
           detailedKeys: Keys,
           table: PgClass,
           _foreignTable: PgClass,
-          _constraint: PgConstraint
+          constraint: PgConstraint
         ) {
+          if (constraint.tags.foreignFieldName) {
+            return constraint.tags.foreignFieldName;
+          }
           return this.camelCase(
             `${this.pluralize(
               this._singularizedTableName(table)
@@ -276,8 +282,11 @@ export default (function PgBasicsPlugin(
         rowByUniqueKeys(
           detailedKeys: Keys,
           table: PgClass,
-          _constraint: PgConstraint
+          constraint: PgConstraint
         ) {
+          if (constraint.tags.fieldName) {
+            return constraint.tags.fieldName;
+          }
           return this.camelCase(
             `${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
@@ -287,8 +296,11 @@ export default (function PgBasicsPlugin(
         updateByKeys(
           detailedKeys: Keys,
           table: PgClass,
-          _constraint: PgConstraint
+          constraint: PgConstraint
         ) {
+          if (constraint.tags.updateFieldName) {
+            return constraint.tags.updateFieldName;
+          }
           return this.camelCase(
             `update-${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
@@ -298,8 +310,11 @@ export default (function PgBasicsPlugin(
         deleteByKeys(
           detailedKeys: Keys,
           table: PgClass,
-          _constraint: PgConstraint
+          constraint: PgConstraint
         ) {
+          if (constraint.tags.deleteFieldName) {
+            return constraint.tags.deleteFieldName;
+          }
           return this.camelCase(
             `delete-${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
@@ -309,8 +324,13 @@ export default (function PgBasicsPlugin(
         updateByKeysInputType(
           detailedKeys: Keys,
           table: PgClass,
-          _constraint: PgConstraint
+          constraint: PgConstraint
         ) {
+          if (constraint.tags.updateFieldName) {
+            return this.upperCamelCase(
+              `${constraint.tags.updateFieldName}-input`
+            );
+          }
           return this.upperCamelCase(
             `update-${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
@@ -320,8 +340,13 @@ export default (function PgBasicsPlugin(
         deleteByKeysInputType(
           detailedKeys: Keys,
           table: PgClass,
-          _constraint: PgConstraint
+          constraint: PgConstraint
         ) {
+          if (constraint.tags.deleteFieldName) {
+            return this.upperCamelCase(
+              `${constraint.tags.deleteFieldName}-input`
+            );
+          }
           return this.upperCamelCase(
             `delete-${this._singularizedTableName(table)}-by-${detailedKeys
               .map(key => this.column(key))
