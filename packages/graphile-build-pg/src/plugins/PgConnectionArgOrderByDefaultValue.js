@@ -18,7 +18,8 @@ export default (function PgConnectionArgOrderByDefaultValue(builder) {
         !table ||
         table.kind !== "class" ||
         !table.namespace ||
-        !table.isSelectable
+        !table.isSelectable ||
+        !args.orderBy
       ) {
         return args;
       }

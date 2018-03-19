@@ -1,5 +1,6 @@
 // @flow
 import type { Plugin } from "graphile-build";
+import omit from "../omit";
 
 export default (function PgConnectionArgCondition(builder) {
   builder.hook("init", (_, build) => {
@@ -12,7 +13,7 @@ export default (function PgConnectionArgCondition(builder) {
       inflection,
     } = build;
     introspectionResultsByKind.class
-      .filter(table => table.isSelectable)
+      .filter(table => table.isSelectable && !omit(table, "filter"))
       .filter(table => !!table.namespace)
       .forEach(table => {
         const tableTypeName = inflection.tableType(table);
@@ -75,7 +76,8 @@ export default (function PgConnectionArgCondition(builder) {
         !isPgFieldConnection ||
         !table ||
         table.kind !== "class" ||
-        !table.namespace
+        !table.namespace ||
+        omit(table, "filter")
       ) {
         return args;
       }
