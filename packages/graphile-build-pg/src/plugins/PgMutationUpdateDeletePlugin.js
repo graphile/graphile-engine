@@ -3,6 +3,7 @@ import type { Plugin } from "graphile-build";
 import queryFromResolveData from "../queryFromResolveData";
 import debugFactory from "debug";
 import viaTemporaryTable from "./viaTemporaryTable";
+import omit from "../omit";
 
 const debug = debugFactory("graphile-build-pg");
 const base64Decode = str => new Buffer(String(str), "base64").toString("utf8");
@@ -53,8 +54,12 @@ export default (async function PgMutationUpdateDeletePlugin(
               .filter(table => !!table.namespace)
               .filter(
                 table =>
-                  (mode === "update" && table.isUpdatable) ||
-                  (mode === "delete" && table.isDeletable)
+                  (mode === "update" &&
+                    table.isUpdatable &&
+                    !omit(table, "update")) ||
+                  (mode === "delete" &&
+                    table.isDeletable &&
+                    !omit(table, "delete"))
               )
               .reduce((memo, table) => {
                 const TableType = pgGetGqlTypeByTypeId(table.type.id);

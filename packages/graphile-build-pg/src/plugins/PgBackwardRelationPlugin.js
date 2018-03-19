@@ -2,6 +2,7 @@
 import debugFactory from "debug";
 import queryFromResolveData from "../queryFromResolveData";
 import addStartEndCursor from "./addStartEndCursor";
+import omit from "../omit";
 
 import type { Plugin } from "graphile-build";
 
@@ -146,7 +147,7 @@ export default (function PgBackwardRelationPlugin(
             legacyRelationMode === DEPRECATED ||
             legacyRelationMode === ONLY;
 
-          if (shouldAddSingleRelation) {
+          if (shouldAddSingleRelation && !omit(table, "read")) {
             memo[singleRelationFieldName] = fieldWithHooks(
               singleRelationFieldName,
               ({ getDataFromParsedResolveInfoFragment, addDataGenerator }) => {
@@ -201,7 +202,7 @@ export default (function PgBackwardRelationPlugin(
               }
             );
           }
-          if (shouldAddManyRelation) {
+          if (shouldAddManyRelation && !omit(table, "many")) {
             memo[manyRelationFieldName] = fieldWithHooks(
               manyRelationFieldName,
               ({ getDataFromParsedResolveInfoFragment, addDataGenerator }) => {

@@ -2,6 +2,7 @@
 import type { Plugin } from "graphile-build";
 import queryFromResolveData from "../queryFromResolveData";
 import debugFactory from "debug";
+import omit from "../omit";
 const debugSql = debugFactory("graphile-build-pg:sql");
 
 export default (async function PgRowByUniqueConstraint(builder) {
@@ -30,6 +31,9 @@ export default (async function PgRowByUniqueConstraint(builder) {
         introspectionResultsByKind.class
           .filter(table => !!table.namespace)
           .reduce((memo, table) => {
+            if (omit(table, "read")) {
+              return memo;
+            }
             const TableType = pgGetGqlTypeByTypeId(table.type.id);
             const sqlFullTableName = sql.identifier(
               table.namespace.name,

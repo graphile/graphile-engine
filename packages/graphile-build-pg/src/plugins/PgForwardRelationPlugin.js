@@ -2,6 +2,7 @@
 import type { Plugin } from "graphile-build";
 import debugFactory from "debug";
 import queryFromResolveData from "../queryFromResolveData";
+import omit from "../omit";
 
 const debug = debugFactory("graphile-build-pg");
 
@@ -78,6 +79,9 @@ export default (function PgForwardRelationPlugin(builder) {
                 constraint.name
               })`
             );
+          }
+          if (omit(foreignTable, "read")) {
+            return memo;
           }
           const foreignSchema = introspectionResultsByKind.namespace.filter(
             n => n.id === foreignTable.namespaceId
