@@ -20,7 +20,7 @@ export default (async function PgRowByUniqueConstraint(builder) {
       },
       { scope: { isPgRowType, pgIntrospection: table } }
     ) => {
-      if (!isPgRowType || !table.namespace) {
+      if (!isPgRowType || !table.namespace || omit(table, "read")) {
         return object;
       }
       const sqlFullTableName = sql.identifier(table.namespace.name, table.name);
