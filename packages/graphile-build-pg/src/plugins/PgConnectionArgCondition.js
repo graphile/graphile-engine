@@ -29,6 +29,9 @@ export default (function PgConnectionArgCondition(builder) {
                 .filter(attr => attr.classId === table.id)
                 .filter(attr => pgColumnFilter(attr, build, context))
                 .reduce((memo, attr) => {
+                  if (omit(attr, "filter")) {
+                    return memo;
+                  }
                   const fieldName = inflection.column(attr);
                   memo[fieldName] = fieldWithHooks(
                     fieldName,
