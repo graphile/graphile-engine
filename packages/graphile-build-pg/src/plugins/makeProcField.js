@@ -58,7 +58,10 @@ export default function makeProcField(
   }
 ) {
   const { pluralize, camelCase } = inflection;
-  function getResultFieldName(gqlType, type, returnsSet) {
+  function getResultFieldName(proc, gqlType, type, returnsSet) {
+    if (proc.tags.resultFieldName) {
+      return proc.tags.resultFieldName;
+    }
     const gqlNamedType = getNamedType(gqlType);
     let name;
     if (gqlNamedType === GraphQLInt) {
@@ -308,6 +311,7 @@ export default function makeProcField(
       }, {});
       if (isMutation) {
         const resultFieldName = getResultFieldName(
+          proc,
           type,
           rawReturnType,
           proc.returnsSet
