@@ -6,6 +6,7 @@ import { readFile as rawReadFile } from "fs";
 import pg from "pg";
 import debugFactory from "debug";
 import chalk from "chalk";
+import throttle from "lodash/throttle";
 import { quacksLikePgPool } from "../withPgClient";
 
 import { version } from "../../package.json";
@@ -388,12 +389,19 @@ export default (async function PgIntrospectionPlugin(
 
     await pgClient.query("listen postgraphile_watch");
 
-    const handleChange = async () => {
-      debug(`Schema change detected: re-inspecting schema...`);
-      introspectionResultsByKind = await introspect();
-      debug(`Schema change detected: re-inspecting schema complete`);
-      triggerRebuild();
-    };
+    const handleChange = throttle(
+      async () => {
+        debug(`Schema change detected: re-inspecting schema...`);
+        introspectionResultsByKind = await introspect();
+        debug(`Schema change detected: re-inspecting schema complete`);
+        triggerRebuild();
+      },
+      750,
+      {
+        leading: true,
+        trailing: true,
+      }
+    );
 
     listener = async notification => {
       if (notification.channel !== "postgraphile_watch") {
