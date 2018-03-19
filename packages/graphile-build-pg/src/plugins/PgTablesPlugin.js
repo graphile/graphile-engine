@@ -12,7 +12,9 @@ export default (function PgTablesPlugin(
         if (
           Object.keys(row)
             .filter(str => !str.startsWith("__"))
-            .some(key => row[key] !== null)
+            .some(key => row[key] !== null) ||
+          (Array.isArray(row.__identifiers) &&
+            row.__identifiers.every(i => i != null))
         ) {
           return row;
         } else {
