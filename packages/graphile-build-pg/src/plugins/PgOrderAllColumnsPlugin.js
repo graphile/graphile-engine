@@ -1,5 +1,6 @@
 // @flow
 import type { Plugin } from "graphile-build";
+import omit from "../omit";
 
 export default (function PgOrderAllColumnsPlugin(builder) {
   builder.hook("GraphQLEnumType:values", (values, build, context) => {
@@ -19,6 +20,9 @@ export default (function PgOrderAllColumnsPlugin(builder) {
         .filter(attr => attr.classId === table.id)
         .filter(attr => pgColumnFilter(attr, build, context))
         .reduce((memo, attr) => {
+          if (omit(attr, "order")) {
+            return memo;
+          }
           const ascFieldName = inflection.orderByColumnEnum(attr, true);
           const descFieldName = inflection.orderByColumnEnum(attr, false);
           memo[ascFieldName] = {
