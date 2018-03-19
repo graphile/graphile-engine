@@ -55,6 +55,7 @@ export type PgClass = {
   isUpdatable: boolean,
   isDeletable: boolean,
   namespace: PgNamespace,
+  type: PgType,
   tags: { [string]: string },
 };
 
