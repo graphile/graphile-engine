@@ -101,7 +101,7 @@ export default (function PgBasicsPlugin(
           return type.tags.name || type.name;
         },
         _tableName(table: PgClass) {
-          return table.tags.name || table.name;
+          return table.tags.name || table.type.tags.name || table.name;
         },
         _singularizedTableName(table: PgClass): string {
           return this.singularize(this._tableName(table)).replace(
