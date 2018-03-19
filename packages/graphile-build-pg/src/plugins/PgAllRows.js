@@ -2,6 +2,7 @@
 import queryFromResolveData from "../queryFromResolveData";
 import debugFactory from "debug";
 import addStartEndCursor from "./addStartEndCursor";
+import omit from "../omit";
 
 import type { Plugin } from "graphile-build";
 
@@ -35,6 +36,9 @@ export default (async function PgAllRows(
           .filter(table => table.isSelectable)
           .filter(table => table.namespace)
           .reduce((memo, table) => {
+            if (omit(table, "all")) {
+              return memo;
+            }
             const TableType = pgGetGqlTypeByTypeId(table.type.id);
             const tableTypeName = TableType.name;
             const ConnectionType = getTypeByName(

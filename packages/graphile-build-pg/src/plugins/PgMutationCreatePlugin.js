@@ -3,6 +3,7 @@ import type { Plugin } from "graphile-build";
 import queryFromResolveData from "../queryFromResolveData";
 import debugFactory from "debug";
 import viaTemporaryTable from "./viaTemporaryTable";
+import omit from "../omit";
 
 const debug = debugFactory("graphile-build-pg");
 
@@ -43,7 +44,7 @@ export default (function PgMutationCreatePlugin(
         pgIntrospectionResultsByKind.class
           .filter(table => !!table.namespace)
           .filter(table => table.isSelectable)
-          .filter(table => table.isInsertable)
+          .filter(table => table.isInsertable && !omit(table, "create"))
           .reduce((memo, table) => {
             const Table = pgGetGqlTypeByTypeId(table.type.id);
             if (!Table) {
