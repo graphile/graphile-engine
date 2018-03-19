@@ -1,6 +1,7 @@
 // @flow
 import queryFromResolveData from "../queryFromResolveData";
 import type { Plugin } from "graphile-build";
+import omit from "../omit";
 
 const nullableIf = (GraphQLNonNull, condition, Type) =>
   condition ? Type : new GraphQLNonNull(Type);
@@ -37,6 +38,9 @@ export default (function PgColumnsPlugin(builder) {
         .filter(attr => attr.classId === table.id)
         .filter(attr => pgColumnFilter(attr, build, context))
         .reduce((memo, attr) => {
+          if (omit(attr, "read")) {
+            return memo;
+          }
           /*
             attr =
               { kind: 'attribute',
@@ -168,6 +172,9 @@ export default (function PgColumnsPlugin(builder) {
         .filter(attr => attr.classId === table.id)
         .filter(attr => pgColumnFilter(attr, build, context))
         .reduce((memo, attr) => {
+          if (omit(attr, isPgPatch ? "update" : "create")) {
+            return memo;
+          }
           const fieldName = inflection.column(attr);
           if (memo[fieldName]) {
             throw new Error(
