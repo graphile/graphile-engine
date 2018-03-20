@@ -36,7 +36,7 @@ export default (function PgConnectionArgOrderByDefaultValue(builder) {
         TableOrderByType.getValues().find(v => v.name === "PRIMARY_KEY_ASC") ||
         TableOrderByType.getValues()[0];
 
-      return Object.assign({}, args, {
+      return extend(args, {
         orderBy: extend(
           args.orderBy,
           {
