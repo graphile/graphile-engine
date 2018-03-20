@@ -1,5 +1,6 @@
 // @flow
 import type { Plugin } from "graphile-build";
+import omit from "../omit";
 const base64 = str => new Buffer(String(str)).toString("base64");
 
 export default (function PgTablesPlugin(
@@ -30,6 +31,7 @@ export default (function PgTablesPlugin(
       introspectionResultsByKind.procedure
         .filter(proc => proc.returnsSet)
         .filter(proc => !!proc.namespace)
+        .filter(proc => !omit(proc, "execute"))
         .forEach(proc => {
           const returnType =
             introspectionResultsByKind.typeById[proc.returnTypeId];
