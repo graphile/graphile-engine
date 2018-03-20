@@ -32,14 +32,7 @@ const aliases = {
   X: EXECUTE,
 };
 
-const PERMISSIONS_THAT_REQUIRE_READ = [
-  UPDATE,
-  CREATE,
-  DELETE,
-  ALL,
-  MANY,
-  EXECUTE,
-];
+const PERMISSIONS_THAT_REQUIRE_READ = [UPDATE, CREATE, DELETE, ALL, MANY];
 
 function parse(arrOrNot, errorPrefix = "Error") {
   if (!arrOrNot) {
