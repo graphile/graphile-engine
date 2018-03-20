@@ -1,5 +1,6 @@
 // @flow
 import makeProcField from "./makeProcField";
+import omit from "../omit";
 
 import type { Plugin } from "graphile-build";
 
@@ -51,6 +52,7 @@ export default (function PgComputedColumnsPlugin(builder) {
           .filter(proc => proc.name.startsWith(`${table.name}_`))
           .filter(proc => proc.argTypeIds.length > 0)
           .filter(proc => proc.argTypeIds[0] === tableType.id)
+          .filter(proc => !omit(proc, "execute"))
           .reduce((memo, proc) => {
             /*
             proc =

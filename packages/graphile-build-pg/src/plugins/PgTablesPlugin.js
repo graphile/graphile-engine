@@ -1,6 +1,5 @@
 // @flow
 import type { Plugin } from "graphile-build";
-import omit from "../omit";
 const base64 = str => new Buffer(String(str)).toString("base64");
 
 export default (function PgTablesPlugin(
@@ -51,9 +50,6 @@ export default (function PgTablesPlugin(
       condition ? Type : new GraphQLNonNull(Type);
     const Cursor = getTypeByName("Cursor");
     introspectionResultsByKind.class.forEach(table => {
-      if (omit(table, "read")) {
-        return;
-      }
       const tablePgType = introspectionResultsByKind.type.find(
         type =>
           type.type === "c" &&

@@ -151,6 +151,7 @@ export default (function PgMutationCreatePlugin(
                     pgIntrospectionResultsByKind.attribute
                       .filter(attr => attr.classId === table.id)
                       .filter(attr => pgColumnFilter(attr, build, context))
+                      .filter(attr => !omit(attr, "create"))
                       .forEach(attr => {
                         const fieldName = inflection.column(attr);
                         const val = inputData[fieldName];

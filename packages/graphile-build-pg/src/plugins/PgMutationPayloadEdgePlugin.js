@@ -69,9 +69,10 @@ export default (function PgMutationPayloadEdgePlugin(builder) {
               addArgDataGenerator(function connectionOrderBy({
                 orderBy: rawOrderBy,
               }) {
-                const orderBy = rawOrderBy
-                  ? Array.isArray(rawOrderBy) ? rawOrderBy : [rawOrderBy]
-                  : null;
+                const orderBy =
+                  canOrderBy && rawOrderBy
+                    ? Array.isArray(rawOrderBy) ? rawOrderBy : [rawOrderBy]
+                    : null;
                 return {
                   pgQuery: queryBuilder => {
                     if (orderBy != null) {
@@ -149,9 +150,10 @@ export default (function PgMutationPayloadEdgePlugin(builder) {
                     }
                   : {},
                 resolve(data, { orderBy: rawOrderBy }) {
-                  const orderBy = rawOrderBy
-                    ? Array.isArray(rawOrderBy) ? rawOrderBy : [rawOrderBy]
-                    : null;
+                  const orderBy =
+                    canOrderBy && rawOrderBy
+                      ? Array.isArray(rawOrderBy) ? rawOrderBy : [rawOrderBy]
+                      : null;
                   const order =
                     orderBy && orderBy.some(item => item.alias)
                       ? orderBy.filter(item => item.alias)
