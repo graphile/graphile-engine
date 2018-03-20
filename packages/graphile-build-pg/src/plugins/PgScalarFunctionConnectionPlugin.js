@@ -3,7 +3,7 @@ import type { Plugin } from "graphile-build";
 import omit from "../omit";
 const base64 = str => new Buffer(String(str)).toString("base64");
 
-export default (function PgTablesPlugin(
+export default (function PgScalarFunctionConnectionPlugin(
   builder,
   { pgForbidSetofFunctionsToReturnNull = false }
 ) {
