@@ -5,7 +5,7 @@ import type {
   PgClass,
   PgAttribute,
   PgConstraint,
-} from "./plugins/PgIntrospection";
+} from "./plugins/PgIntrospectionPlugin";
 
 /*
  * Please only use capitals for aliases and lower case for the values.
