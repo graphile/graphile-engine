@@ -398,6 +398,9 @@ export default (async function PgMutationUpdateDeletePlugin(
 
                   // Unique
                   uniqueConstraints.forEach(constraint => {
+                    if (omit(constraint, mode)) {
+                      return;
+                    }
                     const keys = constraint.keyAttributeNums.map(
                       num => attributes.filter(attr => attr.num === num)[0]
                     );
@@ -405,6 +408,9 @@ export default (async function PgMutationUpdateDeletePlugin(
                       throw new Error(
                         "Consistency error: could not find an attribute!"
                       );
+                    }
+                    if (keys.some(key => omit(key, "read"))) {
+                      return;
                     }
                     const fieldName = inflection[
                       mode === "update" ? "updateByKeys" : "deleteByKeys"

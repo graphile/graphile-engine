@@ -30,10 +30,8 @@ export default (async function PgRowByUniqueConstraint(builder) {
         fields,
         introspectionResultsByKind.class
           .filter(table => !!table.namespace)
+          .filter(table => !omit(table, "read"))
           .reduce((memo, table) => {
-            if (omit(table, "read")) {
-              return memo;
-            }
             const TableType = pgGetGqlTypeByTypeId(table.type.id);
             const sqlFullTableName = sql.identifier(
               table.namespace.name,
