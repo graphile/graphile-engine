@@ -18,6 +18,7 @@ const ALL = "all";
 const MANY = "many";
 const ORDER = "order";
 const FILTER = "filter";
+const EXECUTE = "execute";
 
 const aliases = {
   C: CREATE,
@@ -28,9 +29,17 @@ const aliases = {
   O: ORDER,
   A: ALL,
   M: MANY,
+  X: EXECUTE,
 };
 
-const PERMISSIONS_THAT_REQUIRE_READ = [UPDATE, CREATE, DELETE, ALL, MANY];
+const PERMISSIONS_THAT_REQUIRE_READ = [
+  UPDATE,
+  CREATE,
+  DELETE,
+  ALL,
+  MANY,
+  EXECUTE,
+];
 
 function parse(arrOrNot, errorPrefix = "Error") {
   if (!arrOrNot) {
