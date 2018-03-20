@@ -55,6 +55,9 @@ export default (function PgBackwardRelationPlugin(
       return extend(
         fields,
         foreignKeyConstraints.reduce((memo, constraint) => {
+          if (omit(constraint, "read")) {
+            return memo;
+          }
           const table =
             introspectionResultsByKind.classById[constraint.classId];
           const tableTypeName = inflection.tableType(table);
@@ -100,6 +103,12 @@ export default (function PgBackwardRelationPlugin(
           );
           if (!keys.every(_ => _) || !foreignKeys.every(_ => _)) {
             throw new Error("Could not find key columns!");
+          }
+          if (keys.some(key => omit(key, "read"))) {
+            return memo;
+          }
+          if (foreignKeys.some(key => omit(key, "read"))) {
+            return memo;
           }
           const singleKey = keys.length === 1 ? keys[0] : null;
           const isUnique = !!(

@@ -28,10 +28,8 @@ export default (function PgConnectionArgCondition(builder) {
               return introspectionResultsByKind.attribute
                 .filter(attr => attr.classId === table.id)
                 .filter(attr => pgColumnFilter(attr, build, context))
+                .filter(attr => !omit(attr, "filter"))
                 .reduce((memo, attr) => {
-                  if (omit(attr, "filter")) {
-                    return memo;
-                  }
                   const fieldName = inflection.column(attr);
                   memo[fieldName] = fieldWithHooks(
                     fieldName,
@@ -96,6 +94,7 @@ export default (function PgConnectionArgCondition(builder) {
               introspectionResultsByKind.attribute
                 .filter(attr => attr.classId === table.id)
                 .filter(attr => pgColumnFilter(attr, build, context))
+                .filter(attr => !omit(attr, "filter"))
                 .forEach(attr => {
                   const fieldName = inflection.column(attr);
                   const val = condition[fieldName];

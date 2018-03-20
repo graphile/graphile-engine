@@ -47,9 +47,15 @@ export default (async function PgRowByUniqueConstraint(builder) {
                 .filter(attr => attr.classId === table.id)
                 .sort((a, b) => a.num - b.num);
               uniqueConstraints.forEach(constraint => {
+                if (omit(constraint, "read")) {
+                  return;
+                }
                 const keys = constraint.keyAttributeNums.map(
                   num => attributes.filter(attr => attr.num === num)[0]
                 );
+                if (keys.some(key => omit(key, "read"))) {
+                  return;
+                }
                 if (!keys.every(_ => _)) {
                   throw new Error(
                     "Consistency error: could not find an attribute!"

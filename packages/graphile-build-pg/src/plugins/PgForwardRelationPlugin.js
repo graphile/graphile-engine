@@ -51,6 +51,9 @@ export default (function PgForwardRelationPlugin(builder) {
       return extend(
         fields,
         foreignKeyConstraints.reduce((memo, constraint) => {
+          if (omit(constraint, "read")) {
+            return memo;
+          }
           const gqlTableType = pgGetGqlTypeByTypeId(table.type.id);
           const tableTypeName = gqlTableType.name;
           if (!gqlTableType) {
@@ -98,6 +101,12 @@ export default (function PgForwardRelationPlugin(builder) {
           );
           if (!keys.every(_ => _) || !foreignKeys.every(_ => _)) {
             throw new Error("Could not find key columns!");
+          }
+          if (keys.some(key => omit(key, "read"))) {
+            return memo;
+          }
+          if (foreignKeys.some(key => omit(key, "read"))) {
+            return memo;
           }
 
           const fieldName = inflection.singleRelationByKeys(

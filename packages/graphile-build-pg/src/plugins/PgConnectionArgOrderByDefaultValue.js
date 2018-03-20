@@ -28,6 +28,9 @@ export default (function PgConnectionArgOrderByDefaultValue(builder) {
       const TableOrderByType = getTypeByName(
         inflection.orderByType(tableTypeName)
       );
+      if (!TableOrderByType) {
+        return args;
+      }
 
       const defaultValueEnum =
         TableOrderByType.getValues().find(v => v.name === "PRIMARY_KEY_ASC") ||
