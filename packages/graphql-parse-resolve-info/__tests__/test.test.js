@@ -43,6 +43,12 @@ const query = `
 
   fragment PersonDetails on Person {
     id
+    ...MorePersonDetails @include(if: $include)
+    lastName @include(if: false)
+    bio @skip(if: true)
+  }
+
+  fragment MorePersonDetails on Person {
     name
     firstName
   }
@@ -88,6 +94,12 @@ const Person = new GraphQLObjectType({
       type: GraphQLString,
     },
     firstName: {
+      type: GraphQLString,
+    },
+    lastName: {
+      type: GraphQLString,
+    },
+    bio: {
       type: GraphQLString,
     },
     firstPost: {
@@ -224,5 +236,34 @@ test("basic", async () => {
   );
   expect(parsedResolveInfoFragment).toMatchSnapshot();
   expect(simplifiedFragment).toMatchSnapshot();
-  console.log(parsedResolveInfoFragment);
+});
+
+test("directives", async () => {
+  const variables = {
+    include: false,
+    exclude: true,
+  };
+  const { parsedResolveInfoFragment, simplifiedFragment } = await new Promise(
+    (resolve, reject) => {
+      let o;
+      graphql(
+        Schema,
+        query,
+        null,
+        {
+          test: _o => (o = _o),
+        },
+        variables
+      ).then(d => {
+        console.log(d);
+        if (o) {
+          resolve(o);
+        } else {
+          reject(new Error("test not called?"));
+        }
+      }, reject);
+    }
+  );
+  expect(parsedResolveInfoFragment).toMatchSnapshot();
+  expect(simplifiedFragment).toMatchSnapshot();
 });
