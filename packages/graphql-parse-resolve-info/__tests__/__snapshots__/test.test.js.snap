@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`snapshot 1`] = `
+exports[`basic 1`] = `
 Object {
   "alias": "allPosts",
   "args": Object {},
@@ -192,7 +192,7 @@ Object {
 }
 `;
 
-exports[`snapshot 2`] = `
+exports[`basic 2`] = `
 Object {
   "alias": "allPosts",
   "args": Object {},

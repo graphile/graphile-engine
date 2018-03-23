@@ -16,10 +16,10 @@ const {
 const { Kind } = require("graphql/language");
 
 const query = `
-  {
+  query Test($include: Boolean!, $exclude: Boolean!) {
     allPosts {
       edges {
-        cursor
+        cursor @include(if: $include)
         node {
           ...PostDetails
           author: personByAuthorId {
@@ -30,8 +30,8 @@ const query = `
               nodes {
                 ...PersonDetails
               }
-              totalCount
-              pageInfo {
+              totalCount @include(if: $include)
+              pageInfo @skip(if: $exclude) {
                 startCursor
               }
             }
@@ -50,7 +50,7 @@ const query = `
   fragment PostDetails on Post {
     id
     headline
-    headlineTrimmed
+    headlineTrimmed @skip(if: $exclude)
     author: personByAuthorId {
       ...PersonDetails
     }
@@ -196,8 +196,11 @@ const Schema = new GraphQLSchema({
   query: Query,
 });
 
-test("snapshot", async () => {
-  const variables = {};
+test("basic", async () => {
+  const variables = {
+    include: true,
+    exclude: false,
+  };
   const { parsedResolveInfoFragment, simplifiedFragment } = await new Promise(
     (resolve, reject) => {
       let o;
