@@ -1,9 +1,10 @@
 -- From https://github.com/graphile/postgraphile/blob/master/examples/kitchen-sink/schema.sql
-drop schema if exists a, b, c cascade;
+drop schema if exists a, b, c, d cascade;
 
 create schema a;
 create schema b;
 create schema c;
+create schema d;
 
 -- Troublesome extensions install annoying things in our schema; we want to
 -- ensure this doesn't make us crash.
