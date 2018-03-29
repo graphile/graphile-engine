@@ -406,6 +406,12 @@ create table d.person (
   last_name varchar
 );
 
+create function d.person_full_name(n d.person)
+returns varchar as $$
+  select n.first_name || ' ' || n.last_name;
+$$ language sql stable;
+
+
 create table d.post (
   id serial primary key,
   body text,
