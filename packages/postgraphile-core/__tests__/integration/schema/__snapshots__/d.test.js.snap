@@ -126,8 +126,8 @@ type Query implements Node {
 }
 
 type RenamedTable {
-  col1: Int
   col2: Int
+  colA: Int
 }
 
 \\"\\"\\"
@@ -135,17 +135,17 @@ A condition to be used against \`RenamedTable\` object types. All fields are
 tested for equality and combined with a logical ‘and.’
 \\"\\"\\"
 input RenamedTableCondition {
-  \\"\\"\\"Checks for equality with the object’s \`col1\` field.\\"\\"\\"
-  col1: Int
-
   \\"\\"\\"Checks for equality with the object’s \`col2\` field.\\"\\"\\"
   col2: Int
+
+  \\"\\"\\"Checks for equality with the object’s \`colA\` field.\\"\\"\\"
+  colA: Int
 }
 
 \\"\\"\\"An input for mutations affecting \`RenamedTable\`\\"\\"\\"
 input RenamedTableInput {
-  col1: Int
   col2: Int
+  colA: Int
 }
 
 \\"\\"\\"A connection to a list of \`RenamedTable\` values.\\"\\"\\"
@@ -176,8 +176,8 @@ type RenamedTablesEdge {
 
 \\"\\"\\"Methods to use when ordering \`RenamedTable\`.\\"\\"\\"
 enum RenamedTablesOrderBy {
-  COL1_ASC
-  COL1_DESC
+  COL_A_ASC
+  COL_A_DESC
   COL2_ASC
   COL2_DESC
   NATURAL
