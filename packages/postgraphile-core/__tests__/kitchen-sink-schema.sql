@@ -380,3 +380,9 @@ create table c.my_table (
   id serial primary key,
   json_data jsonb
 );
+
+create function d.original_function() returns int as $$
+  select 1;
+$$ language sql stable;
+
+comment on function d.original_function() is E'@name renamed_function';
