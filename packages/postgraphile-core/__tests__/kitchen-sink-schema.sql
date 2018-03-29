@@ -378,9 +378,10 @@ $$ language plpgsql stable;
 
 -- Begin tests for smart comments
 
+-- Rename table and columns
+
 create table d.original_table (
-  col1 int,
-  col2 int
+  col1 int
 );
 
 comment on table d.original_table is E'@name renamed_table';
