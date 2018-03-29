@@ -407,3 +407,4 @@ create table d.post (
 );
 
 comment on constraint post_author_id_fkey on d.post is E'@foreignFieldName posts';
+comment on constraint person_pkey on d.person is E'@fieldName findPersonById';
