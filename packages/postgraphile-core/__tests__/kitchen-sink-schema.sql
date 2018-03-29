@@ -397,3 +397,16 @@ create function d.original_function() returns int as $$
 $$ language sql stable;
 
 comment on function d.original_function() is E'@name renamed_function';
+
+-- Rename relations
+
+create table d.person (
+  id serial primary key,
+  full_name varchar
+);
+
+create table d.post (
+  id serial primary key,
+  body text,
+  author_id int4 references d.person(id)
+);
