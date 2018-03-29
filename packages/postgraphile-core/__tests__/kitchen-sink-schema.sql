@@ -431,3 +431,5 @@ returns setof d.post as $$
     where
       body ilike ('%' || search || '%')
   $$ language sql stable;
+
+  comment on function d.search_posts(text) is E'@name returnPostsMatching';
