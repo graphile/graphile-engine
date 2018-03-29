@@ -381,8 +381,17 @@ create table c.my_table (
   json_data jsonb
 );
 
+-- Begin tests for smart comments
+
 create function d.original_function() returns int as $$
   select 1;
 $$ language sql stable;
 
 comment on function d.original_function() is E'@name renamed_function';
+
+create table d.original_table (
+  col1 int,
+  col2 int
+);
+
+comment on table d.original_table is E'@name renamed_table';
