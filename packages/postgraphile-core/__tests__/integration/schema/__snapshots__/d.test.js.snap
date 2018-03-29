@@ -440,7 +440,6 @@ input PersonPatch {
 type Post implements Node {
   authorId: Int
   body: String
-  headline: String!
   id: Int!
 
   \\"\\"\\"
@@ -462,9 +461,6 @@ input PostCondition {
   \\"\\"\\"Checks for equality with the object’s \`body\` field.\\"\\"\\"
   body: String
 
-  \\"\\"\\"Checks for equality with the object’s \`headline\` field.\\"\\"\\"
-  headline: String
-
   \\"\\"\\"Checks for equality with the object’s \`id\` field.\\"\\"\\"
   id: Int
 }
@@ -473,7 +469,6 @@ input PostCondition {
 input PostInput {
   authorId: Int
   body: String
-  headline: String!
   id: Int
 }
 
@@ -483,7 +478,6 @@ Represents an update to a \`Post\`. Fields that are set will be updated.
 input PostPatch {
   authorId: Int
   body: String
-  headline: String
   id: Int
 }
 
@@ -519,8 +513,6 @@ enum PostsOrderBy {
   AUTHOR_ID_DESC
   BODY_ASC
   BODY_DESC
-  HEADLINE_ASC
-  HEADLINE_DESC
   ID_ASC
   ID_DESC
   NATURAL
