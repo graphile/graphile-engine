@@ -440,6 +440,7 @@ input PersonPatch {
 type Post implements Node {
   authorId: Int
   body: String
+  headline: String!
   id: Int!
 
   \\"\\"\\"
@@ -461,6 +462,9 @@ input PostCondition {
   \\"\\"\\"Checks for equality with the object’s \`body\` field.\\"\\"\\"
   body: String
 
+  \\"\\"\\"Checks for equality with the object’s \`headline\` field.\\"\\"\\"
+  headline: String
+
   \\"\\"\\"Checks for equality with the object’s \`id\` field.\\"\\"\\"
   id: Int
 }
@@ -469,6 +473,7 @@ input PostCondition {
 input PostInput {
   authorId: Int
   body: String
+  headline: String!
   id: Int
 }
 
@@ -478,6 +483,7 @@ Represents an update to a \`Post\`. Fields that are set will be updated.
 input PostPatch {
   authorId: Int
   body: String
+  headline: String
   id: Int
 }
 
@@ -513,6 +519,8 @@ enum PostsOrderBy {
   AUTHOR_ID_DESC
   BODY_ASC
   BODY_DESC
+  HEADLINE_ASC
+  HEADLINE_DESC
   ID_ASC
   ID_DESC
   NATURAL
@@ -640,6 +648,28 @@ type Query implements Node {
   \\"\\"\\"
   query: Query!
   renamedFunction: Int
+
+  \\"\\"\\"Reads and enables pagination through a set of \`Post\`.\\"\\"\\"
+  searchPosts(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+    search: String
+  ): PostsConnection!
 }
 
 type RenamedTable {
