@@ -1,7 +1,58 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`prints a schema with the default options 1`] = `
-"\\"\\"\\"An object with a globally unique \`ID\`.\\"\\"\\"
+"\\"\\"\\"All input for the create \`RenamedTable\` mutation.\\"\\"\\"
+input CreateRenamedTableInput {
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"The \`RenamedTable\` to be created by this mutation.\\"\\"\\"
+  renamedTable: RenamedTableInput!
+}
+
+\\"\\"\\"The output of our create \`RenamedTable\` mutation.\\"\\"\\"
+type CreateRenamedTablePayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
+
+  \\"\\"\\"The \`RenamedTable\` that was created by this mutation.\\"\\"\\"
+  renamedTable: RenamedTable
+
+  \\"\\"\\"An edge for our \`RenamedTable\`. May be used by Relay 1.\\"\\"\\"
+  renamedTableEdge(
+    \\"\\"\\"The method to use when ordering \`RenamedTable\`.\\"\\"\\"
+    orderBy: [RenamedTablesOrderBy!] = [NATURAL]
+  ): RenamedTablesEdge
+}
+
+\\"\\"\\"A location in a connection that can be used for resuming pagination.\\"\\"\\"
+scalar Cursor
+
+\\"\\"\\"
+The root mutation type which contains root level fields which mutate data.
+\\"\\"\\"
+type Mutation {
+  \\"\\"\\"Creates a single \`RenamedTable\`.\\"\\"\\"
+  createRenamedTable(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: CreateRenamedTableInput!
+  ): CreateRenamedTablePayload
+}
+
+\\"\\"\\"An object with a globally unique \`ID\`.\\"\\"\\"
 interface Node {
   \\"\\"\\"
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
@@ -9,8 +60,52 @@ interface Node {
   nodeId: ID!
 }
 
+\\"\\"\\"Information about pagination in a connection.\\"\\"\\"
+type PageInfo {
+  \\"\\"\\"When paginating forwards, the cursor to continue.\\"\\"\\"
+  endCursor: Cursor
+
+  \\"\\"\\"When paginating forwards, are there more items?\\"\\"\\"
+  hasNextPage: Boolean!
+
+  \\"\\"\\"When paginating backwards, are there more items?\\"\\"\\"
+  hasPreviousPage: Boolean!
+
+  \\"\\"\\"When paginating backwards, the cursor to continue.\\"\\"\\"
+  startCursor: Cursor
+}
+
 \\"\\"\\"The root query type which gives access points into the data universe.\\"\\"\\"
 type Query implements Node {
+  \\"\\"\\"Reads and enables pagination through a set of \`RenamedTable\`.\\"\\"\\"
+  allRenamedTables(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"
+    A condition to be used in determining which values should be returned by the collection.
+    \\"\\"\\"
+    condition: RenamedTableCondition
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+
+    \\"\\"\\"The method to use when ordering \`RenamedTable\`.\\"\\"\\"
+    orderBy: [RenamedTablesOrderBy!] = [NATURAL]
+  ): RenamedTablesConnection
+
   \\"\\"\\"Fetches an object given its globally unique \`ID\`.\\"\\"\\"
   node(
     \\"\\"\\"The globally unique \`ID\`.\\"\\"\\"
@@ -28,6 +123,64 @@ type Query implements Node {
   \\"\\"\\"
   query: Query!
   renamedFunction: Int
+}
+
+type RenamedTable {
+  col1: Int
+  col2: Int
+}
+
+\\"\\"\\"
+A condition to be used against \`RenamedTable\` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+\\"\\"\\"
+input RenamedTableCondition {
+  \\"\\"\\"Checks for equality with the object’s \`col1\` field.\\"\\"\\"
+  col1: Int
+
+  \\"\\"\\"Checks for equality with the object’s \`col2\` field.\\"\\"\\"
+  col2: Int
+}
+
+\\"\\"\\"An input for mutations affecting \`RenamedTable\`\\"\\"\\"
+input RenamedTableInput {
+  col1: Int
+  col2: Int
+}
+
+\\"\\"\\"A connection to a list of \`RenamedTable\` values.\\"\\"\\"
+type RenamedTablesConnection {
+  \\"\\"\\"
+  A list of edges which contains the \`RenamedTable\` and cursor to aid in pagination.
+  \\"\\"\\"
+  edges: [RenamedTablesEdge!]!
+
+  \\"\\"\\"A list of \`RenamedTable\` objects.\\"\\"\\"
+  nodes: [RenamedTable]!
+
+  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
+  pageInfo: PageInfo!
+
+  \\"\\"\\"The count of *all* \`RenamedTable\` you could get from the connection.\\"\\"\\"
+  totalCount: Int
+}
+
+\\"\\"\\"A \`RenamedTable\` edge in the connection.\\"\\"\\"
+type RenamedTablesEdge {
+  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
+  cursor: Cursor
+
+  \\"\\"\\"The \`RenamedTable\` at the end of the edge.\\"\\"\\"
+  node: RenamedTable
+}
+
+\\"\\"\\"Methods to use when ordering \`RenamedTable\`.\\"\\"\\"
+enum RenamedTablesOrderBy {
+  COL1_ASC
+  COL1_DESC
+  COL2_ASC
+  COL2_DESC
+  NATURAL
 }
 "
 `;
