@@ -368,6 +368,7 @@ enum PeopleOrderBy {
 
 type Person implements Node {
   firstName: String
+  fullName: String
   id: Int!
   lastName: String
 
