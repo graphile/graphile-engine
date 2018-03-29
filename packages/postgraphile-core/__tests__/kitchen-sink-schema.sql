@@ -402,7 +402,8 @@ comment on function d.original_function() is E'@name renamed_function';
 
 create table d.person (
   id serial primary key,
-  full_name varchar
+  first_name varchar,
+  last_name varchar
 );
 
 create table d.post (
