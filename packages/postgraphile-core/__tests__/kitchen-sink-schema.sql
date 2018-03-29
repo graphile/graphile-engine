@@ -375,3 +375,9 @@ begin
   return query select * from c.person order by id desc limit 1;
 end;
 $$ language plpgsql stable;
+
+create function d.original_function() returns int as $$
+  select 1;
+$$ language sql stable;
+
+comment on function d.original_function() is E'@name renamed_function';

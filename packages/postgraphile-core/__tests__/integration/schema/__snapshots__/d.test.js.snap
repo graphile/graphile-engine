@@ -27,6 +27,7 @@ type Query implements Node {
   which can only query top level fields if they are in a particular form.
   \\"\\"\\"
   query: Query!
+  renamedFunction: Int
 }
 "
 `;
