@@ -374,7 +374,7 @@ type Person implements Node {
   nodeId: ID!
 
   \\"\\"\\"Reads and enables pagination through a set of \`Post\`.\\"\\"\\"
-  postsByAuthorId(
+  posts(
     \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
     after: Cursor
 
