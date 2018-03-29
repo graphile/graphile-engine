@@ -410,7 +410,6 @@ $$ language sql stable;
 create table d.post (
   id serial primary key,
   body text,
-  headline text not null,
   author_id int4 references d.person(id)
 );
 
@@ -425,6 +424,5 @@ returns setof d.post as $$
     select *
     from d.post
     where
-      headline ilike ('%' || search || '%') or
       body ilike ('%' || search || '%')
   $$ language sql stable;
