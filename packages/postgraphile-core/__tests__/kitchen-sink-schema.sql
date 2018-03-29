@@ -393,7 +393,7 @@ $$ language sql stable;
 
 comment on function d.original_function() is E'@name renamed_function';
 
--- Rename relations
+-- Rename relations and computed column
 
 create table d.person (
   id serial primary key,
@@ -410,9 +410,21 @@ $$ language sql stable;
 create table d.post (
   id serial primary key,
   body text,
+  headline text not null,
   author_id int4 references d.person(id)
 );
 
 comment on constraint post_author_id_fkey on d.post is E'@foreignFieldName posts';
 comment on constraint person_pkey on d.person is E'@fieldName findPersonById';
 comment on function d.person_full_name(d.person) is E'@fieldName name';
+
+-- Rename custom queries
+
+create function d.search_posts(search text)
+returns setof d.post as $$
+    select *
+    from d.post
+    where
+      headline ilike ('%' || search || '%') or
+      body ilike ('%' || search || '%')
+  $$ language sql stable;
