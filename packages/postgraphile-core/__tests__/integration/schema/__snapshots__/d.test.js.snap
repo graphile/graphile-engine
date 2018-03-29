@@ -642,7 +642,7 @@ type Query implements Node {
   renamedFunction: Int
 
   \\"\\"\\"Reads and enables pagination through a set of \`Post\`.\\"\\"\\"
-  searchPosts(
+  returnPostsMatching(
     \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
     after: Cursor
 
