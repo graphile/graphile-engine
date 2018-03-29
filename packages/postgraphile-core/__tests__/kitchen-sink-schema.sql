@@ -410,3 +410,5 @@ create table d.post (
   body text,
   author_id int4 references d.person(id)
 );
+
+comment on constraint post_author_id_fkey on d.post is E'@foreignFieldName posts';
