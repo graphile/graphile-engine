@@ -418,7 +418,7 @@ create table d.post (
   author_id int4 references d.person(id)
 );
 
-comment on constraint post_author_id_fkey on d.post is E'@foreignFieldName posts';
+comment on constraint post_author_id_fkey on d.post is E'@foreignFieldName posts\n@fieldName author';
 comment on constraint person_pkey on d.person is E'@fieldName findPersonById';
 comment on function d.person_full_name(d.person) is E'@fieldName name';
 
