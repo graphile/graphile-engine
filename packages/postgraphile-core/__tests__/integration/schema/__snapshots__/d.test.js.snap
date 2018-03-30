@@ -50,14 +50,14 @@ input CreatePostInput {
 
 \\"\\"\\"The output of our create \`Post\` mutation.\\"\\"\\"
 type CreatePostPayload {
+  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
+  author: Person
+
   \\"\\"\\"
   The exact same \`clientMutationId\` that was provided in the mutation input,
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
-  personByAuthorId: Person
 
   \\"\\"\\"The \`Post\` that was created by this mutation.\\"\\"\\"
   post: Post
@@ -186,15 +186,15 @@ input DeletePostInput {
 
 \\"\\"\\"The output of our delete \`Post\` mutation.\\"\\"\\"
 type DeletePostPayload {
+  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
+  author: Person
+
   \\"\\"\\"
   The exact same \`clientMutationId\` that was provided in the mutation input,
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
   deletedPostId: ID
-
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
-  personByAuthorId: Person
 
   \\"\\"\\"The \`Post\` that was deleted by this mutation.\\"\\"\\"
   post: Post
@@ -476,6 +476,8 @@ input PersonPatch {
 }
 
 type Post implements Node {
+  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
+  author: Person
   authorId: Int
   body: String
   id: Int!
@@ -484,9 +486,6 @@ type Post implements Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   \\"\\"\\"
   nodeId: ID!
-
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
-  personByAuthorId: Person
 }
 
 \\"\\"\\"
@@ -846,14 +845,14 @@ input UpdatePostInput {
 
 \\"\\"\\"The output of our update \`Post\` mutation.\\"\\"\\"
 type UpdatePostPayload {
+  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
+  author: Person
+
   \\"\\"\\"
   The exact same \`clientMutationId\` that was provided in the mutation input,
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
-  personByAuthorId: Person
 
   \\"\\"\\"The \`Post\` that was updated by this mutation.\\"\\"\\"
   post: Post
