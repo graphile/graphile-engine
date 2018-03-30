@@ -433,3 +433,16 @@ returns setof d.post as $$
   $$ language sql stable;
 
   comment on function d.search_posts(text) is E'@name returnPostsMatching';
+
+-- rename custom mutations
+
+create type d.jwt_token as (
+  role text,
+  exp integer,
+  a integer
+);
+
+create function d.authenticate(a integer)
+returns d.jwt_token as $$
+    select ('yay', extract(epoch from '2037-07-12'::timestamp), a)::d.jwt_token
+    $$ language sql;
