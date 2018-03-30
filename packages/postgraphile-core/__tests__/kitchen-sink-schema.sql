@@ -446,3 +446,5 @@ create function d.authenticate(a integer)
 returns d.jwt_token as $$
     select ('yay', extract(epoch from '2037-07-12'::timestamp), a)::d.jwt_token
     $$ language sql;
+
+comment on function d.authenticate(a integer) is E'@name login\n@resultFieldName token'
