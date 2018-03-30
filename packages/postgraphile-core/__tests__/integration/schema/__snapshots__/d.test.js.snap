@@ -1,33 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`prints a schema with the default options 1`] = `
-"\\"\\"\\"All input for the \`authenticate\` mutation.\\"\\"\\"
-input AuthenticateInput {
-  a: Int
-
-  \\"\\"\\"
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  \\"\\"\\"
-  clientMutationId: String
-}
-
-\\"\\"\\"The output of our \`authenticate\` mutation.\\"\\"\\"
-type AuthenticatePayload {
-  \\"\\"\\"
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
-  \\"\\"\\"
-  clientMutationId: String
-  jwtToken: JwtToken
-
-  \\"\\"\\"
-  Our root query field type. Allows us to run any query from our mutation payload.
-  \\"\\"\\"
-  query: Query
-}
-
-\\"\\"\\"All input for the create \`Person\` mutation.\\"\\"\\"
+"\\"\\"\\"All input for the create \`Person\` mutation.\\"\\"\\"
 input CreatePersonInput {
   \\"\\"\\"
   An arbitrary string value with no semantic meaning. Will be included in the
@@ -243,17 +217,36 @@ type JwtToken {
   role: String
 }
 
+\\"\\"\\"All input for the \`login\` mutation.\\"\\"\\"
+input LoginInput {
+  a: Int
+
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+}
+
+\\"\\"\\"The output of our \`login\` mutation.\\"\\"\\"
+type LoginPayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
+  token: JwtToken
+}
+
 \\"\\"\\"
 The root mutation type which contains root level fields which mutate data.
 \\"\\"\\"
 type Mutation {
-  authenticate(
-    \\"\\"\\"
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    \\"\\"\\"
-    input: AuthenticateInput!
-  ): AuthenticatePayload
-
   \\"\\"\\"Creates a single \`Person\`.\\"\\"\\"
   createPerson(
     \\"\\"\\"
@@ -309,6 +302,12 @@ type Mutation {
     \\"\\"\\"
     input: DeletePostByIdInput!
   ): DeletePostPayload
+  login(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: LoginInput!
+  ): LoginPayload
 
   \\"\\"\\"Updates a single \`Person\` using its globally unique id and a patch.\\"\\"\\"
   updatePerson(
