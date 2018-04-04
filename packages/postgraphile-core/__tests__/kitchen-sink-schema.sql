@@ -446,10 +446,21 @@ comment on function d.authenticate(a integer) is E'@name login\n@resultFieldName
 
 -- rename type
 
-CREATE TYPE d.flibble AS (f text);
+create type d.flibble as (f text);
 
-CREATE FUNCTION d.getflamble() RETURNS SETOF d.flibble AS $$
-    SELECT body FROM d.post
-$$ LANGUAGE SQL;
+create function d.getflamble() returns SETOF d.flibble as $$
+    select body from d.post
+$$ language sql;
 
 comment on type d.flibble is E'@name flamble';
+
+-- Begin tests for omit actions
+
+-- Omit actions on a table
+
+create table d.films (
+    code        integer PRIMARY KEY,
+    title       varchar(40)
+);
+
+comment on table d.films is E'@omit create,update,delete';
