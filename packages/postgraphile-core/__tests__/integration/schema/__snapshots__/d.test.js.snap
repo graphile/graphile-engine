@@ -211,7 +211,7 @@ type DeletePostPayload {
   query: Query
 }
 
-type Flibble {
+type Flamble {
   f: String
 }
 
@@ -231,7 +231,7 @@ type GetflamblePayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-  flibbles: [Flibble]
+  flambles: [Flamble]
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -331,7 +331,7 @@ type Mutation {
     input: DeletePostByIdInput!
   ): DeletePostPayload
 
-  \\"\\"\\"Reads and enables pagination through a set of \`Flibble\`.\\"\\"\\"
+  \\"\\"\\"Reads and enables pagination through a set of \`Flamble\`.\\"\\"\\"
   getflamble(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
