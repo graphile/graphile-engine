@@ -484,6 +484,7 @@ create table d.tv_shows (
 
 create table d.tv_episodes (
     code        integer PRIMARY KEY,
-    title       varchar(40)
+    title       varchar(40),
+    show_id     integer references d.tv_shows
 );
 
