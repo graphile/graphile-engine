@@ -463,11 +463,22 @@ create table d.films (
     title       varchar(40)
 );
 
-comment on table d.films is E'@omit create,update,delete';
+
+create table d.studios (
+  id integer PRIMARY KEY,
+  name text
+);
+
 
 create table d.tv_shows (
+    code        integer PRIMARY KEY,
+    title       varchar(40),
+    studio_id   integer references d.studios
+);
+
+
+create table d.tv_episodes (
     code        integer PRIMARY KEY,
     title       varchar(40)
 );
 
-comment on table d.tv_shows is E'@omit';
