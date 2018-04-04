@@ -456,3 +456,5 @@ CREATE TYPE d.flibble AS (f text);
 CREATE FUNCTION d.getflamble() RETURNS SETOF d.flibble AS $$
     SELECT body FROM d.post
 $$ LANGUAGE SQL;
+
+comment on type d.flibble is E'@name flamble';
