@@ -469,3 +469,10 @@ create table d.films (
 );
 
 comment on table d.films is E'@omit create,update,delete';
+
+create table d.tv_shows (
+    code        integer PRIMARY KEY,
+    title       varchar(40)
+);
+
+comment on table d.tv_shows is E'@omit';
