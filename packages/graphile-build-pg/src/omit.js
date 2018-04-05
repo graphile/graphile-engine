@@ -115,7 +115,7 @@ export default function omit(
         throw new Error(
           `Error when processing @omit for ${entity.kind} '${
             entity.name
-          }' - we currently don't support '${bad}' when '${READ}' is forbidden, to solve this add '${bad}' to the @omit clause or use ‘@omit *‘ to omit from everything`
+          }' - we currently don't support '${bad}' when '${READ}' is forbidden, to solve this add '${bad}' to the @omit clause or use ‘@omit‘ to omit from everything`
         );
       }
     }
