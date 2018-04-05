@@ -16,6 +16,11 @@ test("omit delete", core.test(["d"], {}, `
 comment on table d.films is E'@omit delete';
 `));
 
+test("omit read", core.test(["d"], {}, `
+comment on table d.films is E'@omit read,all,update,create,delete,many';
+`));
+
+
 test("omit and omit many", core.test(["d"], {}, `
 comment on table d.tv_shows is E'@omit';
 comment on table d.tv_episodes is E'@omit many';
