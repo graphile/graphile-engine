@@ -26,7 +26,3 @@ comment on table d.films is E'@omit *';
 comment on table d.tv_shows is E'@omit';
 comment on table d.tv_episodes is E'@omit many';
 `));
-
-test("omit on column", core.test(["d"], {}, `
-comment on column d.tv_shows.title is E'@omit create';
-`));
