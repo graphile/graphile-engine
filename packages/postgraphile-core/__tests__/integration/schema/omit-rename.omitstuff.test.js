@@ -26,3 +26,7 @@ comment on table d.films is E'@omit *';
 comment on table d.tv_shows is E'@omit';
 comment on table d.tv_episodes is E'@omit many';
 `));
+
+test("omit order on table", core.test(["d"], {}, `
+comment on table d.tv_shows is E'@omit order';
+`));
