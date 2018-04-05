@@ -20,3 +20,7 @@ comment on column d.tv_episodes.title is E'@omit';
 test("omit order on column", core.test(["d"], {}, `
 comment on column d.tv_episodes.title is E'@omit order';
 `));
+
+test("omit execute on computed column", core.test(["d"], {}, `
+comment on function d.person_full_name(d.person) is E'@omit execute';
+`));
