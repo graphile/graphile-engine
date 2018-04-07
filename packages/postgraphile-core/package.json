@@ -18,14 +18,10 @@
     "url": "https://github.com/graphile/graphile-build/issues"
   },
   "dependencies": {
-    "babel-runtime": ">=6 <7",
     "graphile-build": "4.0.0-beta.2",
     "graphile-build-pg": "4.0.0-beta.2"
   },
   "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "flow-copy-source": "^1.2.0",
-    "jest": "20.0.4",
     "jsonwebtoken": "^8.1.1"
   },
   "jest": {

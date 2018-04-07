@@ -27,17 +27,11 @@
   },
   "homepage": "https://github.com/graphile/graphile-build#readme",
   "dependencies": {
-    "babel-runtime": ">=6 <7",
     "debug": ">=2 <3",
     "graphql-parse-resolve-info": "4.0.0-beta.2"
   },
   "engines": {
     "node": ">=8.6"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "flow-copy-source": "^1.2.0",
-    "jest": "^20.0.4"
   },
   "peerDependencies": {
     "graphql": ">=0.9 <0.14"
