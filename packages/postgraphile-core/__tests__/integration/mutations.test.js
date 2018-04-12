@@ -28,9 +28,10 @@ let mutationResults = [];
 beforeAll(() => {
   // Get a GraphQL schema instance that we can query.
   const gqlSchemaPromise = withPgClient(async pgClient => {
-    const schema = await createPostGraphileSchema(pgClient, ["a", "b", "c"]);
-    debug(printSchema(schema));
-    return schema;
+    return await Promise.all([
+      createPostGraphileSchema(pgClient, ["a", "b", "c"]),
+      createPostGraphileSchema(pgClient, ["d"]),
+    ])
   });
 
   // Execute all of the mutations in parallel. We will not wait for them to
@@ -41,7 +42,7 @@ beforeAll(() => {
   mutationResults = mutationFileNames.map(async fileName => {
     // Wait for the schema to resolve. We need the schema to be introspected
     // before we can do anything else!
-    let gqlSchema = await gqlSchemaPromise;
+    let [gqlSchema, dSchema] = await gqlSchemaPromise;
     // Get a new Postgres client and run the mutation.
     return await withPgClient(async pgClient => {
       // Read the mutation from the file system.
@@ -53,8 +54,13 @@ beforeAll(() => {
       // Add data to the client instance we are using.
       await pgClient.query(await kitchenSinkData());
 
+      const schemaToUse =
+        fileName.startsWith("d.")
+        ? dSchema
+        : gqlSchema;
+
       // Return the result of our GraphQL query.
-      const result = await graphql(gqlSchema, mutation, null, {
+      const result = await graphql(schemaToUse, mutation, null, {
         pgClient: pgClient,
       });
       if (result.errors) {
