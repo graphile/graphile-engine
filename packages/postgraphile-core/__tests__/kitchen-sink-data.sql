@@ -110,3 +110,7 @@ insert into a.view_table (id, col1, col2) values
   (1, 11, 21),
   (2, 12, 22),
   (3, 13, 23);
+
+insert into d.person (id, first_name, last_name) values
+  (1, 'John', 'Smith'),
+  (2, 'Sara', 'Smith');

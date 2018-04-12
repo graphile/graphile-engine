@@ -1,5 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`d.updatePerson.graphql 1`] = `
+Object {
+  "data": Object {
+    "updatePersonById": Object {
+      "person": Object {
+        "firstName": "John",
+        "id": 1,
+        "lastName": "Doe",
+        "name": "John Doe",
+      },
+    },
+  },
+}
+`;
+
 exports[`mutation-create.graphql 1`] = `
 Object {
   "data": Object {
