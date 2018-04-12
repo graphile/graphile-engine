@@ -34,6 +34,7 @@ beforeAll(() => {
       dynamicJson,
       pgColumnFilter,
       viewUniqueKey,
+      dSchema,
     ] = await Promise.all([
       createPostGraphileSchema(pgClient, ["a", "b", "c"]),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], { classicIds: true }),
@@ -49,6 +50,7 @@ beforeAll(() => {
         viewUniqueKey: "testviewid",
         setofFunctionsContainNulls: true,
       }),
+      createPostGraphileSchema(pgClient, ["d"], {}),
     ]);
     debug(printSchema(normal));
     return {
@@ -57,6 +59,7 @@ beforeAll(() => {
       dynamicJson,
       pgColumnFilter,
       viewUniqueKey,
+      dSchema,
     };
   });
 
@@ -91,7 +94,9 @@ beforeAll(() => {
           };
           const gqlSchema = schemas[fileName]
             ? schemas[fileName]
-            : gqlSchemas.normal;
+            : fileName.substr(0, 2) === "d."
+              ? gqlSchemas.dSchema
+              : gqlSchemas.normal;
 
           // Return the result of our GraphQL query.
           const result = await graphql(gqlSchema, query, null, {
