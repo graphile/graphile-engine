@@ -117,3 +117,7 @@ insert into c.my_table(id, json_data) values
   (3, '{"stringField":"notTest"}');
 
 alter sequence c.my_table_id_seq restart with 10;
+
+insert into d.person (id, first_name, last_name) values
+  (1, 'John', 'Smith'),
+  (2, 'Sara', 'Smith');

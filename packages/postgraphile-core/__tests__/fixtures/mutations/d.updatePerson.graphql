@@ -1,0 +1,15 @@
+mutation {
+  updatePersonById(input:{
+    id:1
+    personPatch:{
+      lastName:"Doe"
+    }
+  }) {
+    person{
+      id
+      firstName
+      lastName
+      name
+    }
+  }
+}
