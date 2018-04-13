@@ -110,3 +110,8 @@ insert into a.view_table (id, col1, col2) values
   (1, 11, 21),
   (2, 12, 22),
   (3, 13, 23);
+
+insert into c.my_table(json_data) values
+  ('{"stringField":"test"}'),
+  ('{"stringField":"test","otherField":"whatever"}'),
+  ('{"stringField":"notTest"}');
