@@ -8,7 +8,6 @@ Object {
         "firstName": "John",
         "id": 1,
         "lastName": "Doe",
-        "name": "John Doe",
       },
     },
   },

@@ -9,7 +9,6 @@ mutation {
       id
       firstName
       lastName
-      name
     }
   }
 }

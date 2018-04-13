@@ -22,9 +22,15 @@ let queryResults = [];
 const kitchenSinkData = () =>
   readFile(`${__dirname}/../kitchen-sink-data.sql`, "utf8");
 
+const dSchemaComments = () =>
+  readFile(`${__dirname}/../kitchen-sink-d-schema-comments.sql`, "utf8");
+
 beforeAll(() => {
   // Get a few GraphQL schema instance that we can query.
   const gqlSchemasPromise = withPgClient(async pgClient => {
+    // A selection of omit/rename comments on the d schema
+    await pgClient.query(await dSchemaComments());
+
     // Different fixtures need different schemas with different configurations.
     // Make all of the different schemas with different configurations that we
     // need and wait for them to be created in parallel.

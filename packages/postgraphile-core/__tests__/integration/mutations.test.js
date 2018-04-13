@@ -21,6 +21,9 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 20;
 const kitchenSinkData = () =>
   readFile(`${__dirname}/../kitchen-sink-data.sql`, "utf8");
 
+const dSchemaComments = () =>
+  readFile(`${__dirname}/../kitchen-sink-d-schema-comments.sql`, "utf8");
+
 const mutationsDir = `${__dirname}/../fixtures/mutations`;
 const mutationFileNames = readdirSync(mutationsDir);
 let mutationResults = [];
@@ -28,10 +31,13 @@ let mutationResults = [];
 beforeAll(() => {
   // Get a GraphQL schema instance that we can query.
   const gqlSchemaPromise = withPgClient(async pgClient => {
+    // A selection of omit/rename comments on the d schema
+    await pgClient.query(await dSchemaComments());
+
     return await Promise.all([
       createPostGraphileSchema(pgClient, ["a", "b", "c"]),
       createPostGraphileSchema(pgClient, ["d"]),
-    ])
+    ]);
   });
 
   // Execute all of the mutations in parallel. We will not wait for them to
@@ -54,10 +60,7 @@ beforeAll(() => {
       // Add data to the client instance we are using.
       await pgClient.query(await kitchenSinkData());
 
-      const schemaToUse =
-        fileName.startsWith("d.")
-        ? dSchema
-        : gqlSchema;
+      const schemaToUse = fileName.startsWith("d.") ? dSchema : gqlSchema;
 
       // Return the result of our GraphQL query.
       const result = await graphql(schemaToUse, mutation, null, {
