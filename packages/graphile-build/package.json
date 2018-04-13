@@ -5,7 +5,7 @@
   "main": "node8plus/index.js",
   "scripts": {
     "test": "jest",
-    "prepublish": "mkdir -p node8plus && babel -s true --out-dir node8plus src && ../../node_modules/.bin/flow-copy-source src node8plus",
+    "prepublish": "mkdir -p node8plus && babel -s true --out-dir node8plus src && flow-copy-source src node8plus",
     "watch": "mkdir -p node8plus && babel -s true --watch --out-dir node8plus src"
   },
   "repository": {
@@ -32,6 +32,11 @@
   },
   "engines": {
     "node": ">=8.6"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "flow-copy-source": "^1.2.0",
+    "jest": "^20.0.4"
   },
   "peerDependencies": {
     "graphql": ">=0.9 <0.14"
