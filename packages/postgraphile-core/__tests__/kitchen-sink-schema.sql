@@ -403,8 +403,23 @@ comment on function d.original_function() is E'@name renamed_function';
 create table d.person (
   id serial primary key,
   first_name varchar,
-  last_name varchar
+  last_name varchar,
+  col_no_create text,
+  col_no_update text,
+  col_no_order text,
+  col_no_filter text,
+  col_no_create_update text,
+  col_no_create_update_order_filter text,
+  col_no_anything text
 );
+
+comment on column d.person.col_no_create is E'@omit create';
+comment on column d.person.col_no_update is E'@omit update';
+comment on column d.person.col_no_order is E'@omit order';
+comment on column d.person.col_no_filter is E'@omit filter';
+comment on column d.person.col_no_create_update is E'@omit create,update';
+comment on column d.person.col_no_create_update_order_filter is E'@omit create,update,order,filter';
+comment on column d.person.col_no_anything is E'@omit';
 
 create function d.person_full_name(n d.person)
 returns varchar as $$
