@@ -5,6 +5,12 @@ Object {
   "data": Object {
     "updatePersonById": Object {
       "person": Object {
+        "colNoCreate": "update2",
+        "colNoCreateUpdate": null,
+        "colNoCreateUpdateOrderFilter": null,
+        "colNoFilter": "update3",
+        "colNoOrder": "update1",
+        "colNoUpdate": null,
         "firstName": "John",
         "id": 1,
         "lastName": "Doe",
