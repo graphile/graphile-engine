@@ -124,4 +124,13 @@ insert into d.person (id, first_name, last_name) values
   (1, 'John', 'Smith'),
   (2, 'Sara', 'Smith');
 
+update d.person set
+  col_no_create = col_no_create || id::text,
+  col_no_update = col_no_update || id::text,
+  col_no_order = col_no_order || id::text,
+  col_no_filter = col_no_filter || id::text,
+  col_no_create_update = col_no_create_update || id::text,
+  col_no_create_update_order_filter = col_no_create_update_order_filter || id::text,
+  col_no_anything = col_no_anything || id::text;
+
 alter sequence d.person_id_seq restart with 10;

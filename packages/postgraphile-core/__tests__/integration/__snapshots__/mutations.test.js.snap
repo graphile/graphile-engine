@@ -5,9 +5,9 @@ Object {
   "data": Object {
     "createPerson": Object {
       "person": Object {
-        "colNoCreate": null,
-        "colNoCreateUpdate": null,
-        "colNoCreateUpdateOrderFilter": null,
+        "colNoCreate": "col_no_create",
+        "colNoCreateUpdate": "col_no_create_update",
+        "colNoCreateUpdateOrderFilter": "col_no_create_update_order_filter",
         "colNoFilter": "create3",
         "colNoOrder": "create1",
         "colNoUpdate": "create2",
@@ -25,12 +25,12 @@ Object {
   "data": Object {
     "deletePersonById": Object {
       "person": Object {
-        "colNoCreate": null,
-        "colNoCreateUpdate": null,
-        "colNoCreateUpdateOrderFilter": null,
-        "colNoFilter": null,
-        "colNoOrder": null,
-        "colNoUpdate": null,
+        "colNoCreate": "col_no_create1",
+        "colNoCreateUpdate": "col_no_create_update1",
+        "colNoCreateUpdateOrderFilter": "col_no_create_update_order_filter1",
+        "colNoFilter": "col_no_filter1",
+        "colNoOrder": "col_no_order1",
+        "colNoUpdate": "col_no_update1",
         "firstName": "John",
         "id": 1,
         "lastName": "Smith",
@@ -46,11 +46,11 @@ Object {
     "updatePersonById": Object {
       "person": Object {
         "colNoCreate": "update2",
-        "colNoCreateUpdate": null,
-        "colNoCreateUpdateOrderFilter": null,
+        "colNoCreateUpdate": "col_no_create_update1",
+        "colNoCreateUpdateOrderFilter": "col_no_create_update_order_filter1",
         "colNoFilter": "update3",
         "colNoOrder": "update1",
-        "colNoUpdate": null,
+        "colNoUpdate": "col_no_update1",
         "firstName": "John",
         "id": 1,
         "lastName": "Doe",

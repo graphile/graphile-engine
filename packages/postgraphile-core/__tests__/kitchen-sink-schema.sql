@@ -404,13 +404,13 @@ create table d.person (
   id serial primary key,
   first_name varchar,
   last_name varchar,
-  col_no_create text,
-  col_no_update text,
-  col_no_order text,
-  col_no_filter text,
-  col_no_create_update text,
-  col_no_create_update_order_filter text,
-  col_no_anything text
+  col_no_create text default 'col_no_create',
+  col_no_update text default 'col_no_update',
+  col_no_order text default 'col_no_order',
+  col_no_filter text default 'col_no_filter',
+  col_no_create_update text default 'col_no_create_update',
+  col_no_create_update_order_filter text default 'col_no_create_update_order_filter',
+  col_no_anything text default 'col_no_anything'
 );
 
 comment on column d.person.col_no_create is E'@omit create';
