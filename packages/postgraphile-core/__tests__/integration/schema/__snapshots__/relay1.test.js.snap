@@ -134,6 +134,17 @@ type CompoundType {
   fooBar: Int
 }
 
+\\"\\"\\"An input for mutations affecting \`CompoundType\`\\"\\"\\"
+input CompoundTypeInput {
+  a: Int
+  b: String
+  c: Color
+  d: UUID
+  e: EnumCaps
+  f: EnumWithEmptyString
+  fooBar: Int
+}
+
 \\"\\"\\"A connection to a list of \`CompoundType\` values.\\"\\"\\"
 type CompoundTypesConnection {
   \\"\\"\\"
@@ -1545,6 +1556,7 @@ type Person implements Node {
     \\"\\"\\"The method to use when ordering \`CompoundKey\`.\\"\\"\\"
     orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysConnection!
+  computedCompoundTypeArray(object: CompoundTypeInput): [CompoundType]
   createdAt: Datetime
   email: Email!
   exists(email: Email): Boolean

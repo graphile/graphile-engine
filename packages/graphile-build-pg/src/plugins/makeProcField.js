@@ -250,6 +250,8 @@ export default function makeProcField(
             withPagination: !isMutation && proc.returnsSet,
             withPaginationAsFields: !isMutation && proc.returnsSet && !computed,
             asJson: !proc.returnsSet && computed && !returnFirstValueAsValue,
+            asJsonAggregate:
+              !proc.returnsSet && computed && rawReturnType.isPgArray,
             addNullCase:
               !proc.returnsSet && !rawReturnType.isPgArray && isTableLike,
           },

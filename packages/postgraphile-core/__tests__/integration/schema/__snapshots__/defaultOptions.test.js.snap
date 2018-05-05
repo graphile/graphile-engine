@@ -4258,6 +4258,7 @@ type Person implements Node {
     \\"\\"\\"The method to use when ordering \`CompoundKey\`.\\"\\"\\"
     orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysConnection!
+  computedCompoundTypeArray(object: CompoundTypeInput): [CompoundType]
   createdAt: Datetime
   email: Email!
   exists(email: Email): Boolean
