@@ -914,28 +914,12 @@ Object {
     "compoundTypeSetMutation": Object {
       "compoundTypes": Array [
         Object {
-          "a": null,
-          "b": null,
-          "c": null,
-          "d": null,
-          "e": null,
-          "fooBar": null,
-        },
-        Object {
           "a": 419,
           "b": "easy cheesy baked potatoes",
           "c": "RED",
           "d": null,
           "e": "FOO_BAR",
           "fooBar": 8,
-        },
-        Object {
-          "a": null,
-          "b": null,
-          "c": null,
-          "d": null,
-          "e": null,
-          "fooBar": null,
         },
         Object {
           "a": 420,
