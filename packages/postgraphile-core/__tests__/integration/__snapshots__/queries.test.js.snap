@@ -2131,6 +2131,26 @@ Object {
     "add2Query": 4,
     "add3Query": null,
     "add4Query": 4,
+    "compoundTypeArrayQuery": Array [
+      Object {
+        "a": 419,
+        "b": "easy cheesy baked potatoes",
+        "c": "RED",
+        "d": null,
+        "e": "BAR_FOO",
+        "f": "_EMPTY_",
+        "fooBar": 8,
+      },
+      Object {
+        "a": 420,
+        "b": "easy cheesy baked potatoes",
+        "c": "RED",
+        "d": null,
+        "e": "BAR_FOO",
+        "f": "_EMPTY_",
+        "fooBar": 8,
+      },
+    ],
     "compoundTypeQuery": Object {
       "a": 420,
       "b": "easy cheesy baked potatoes",

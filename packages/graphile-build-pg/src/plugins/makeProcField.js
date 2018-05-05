@@ -224,10 +224,13 @@ export default function makeProcField(
             sqlArgValues.unshift(sqlValue);
           }
         }
-        return sql.fragment`${sql.identifier(
+        const functionCall = sql.fragment`${sql.identifier(
           proc.namespace.name,
           proc.name
         )}(${sql.join([...implicitArgs, ...sqlArgValues], ", ")})`;
+        return rawReturnType.isPgArray
+          ? sql.fragment`unnest(${functionCall})`
+          : functionCall;
       }
       function makeQuery(
         parsedResolveInfoFragment,
@@ -492,7 +495,7 @@ export default function makeProcField(
                   if (proc.returnsSet && !isMutation) {
                     // Connection
                     return addStartEndCursor(row);
-                  } else if (proc.returnsSet) {
+                  } else if (proc.returnsSet || rawReturnType.isPgArray) {
                     return rows;
                   } else {
                     return row;

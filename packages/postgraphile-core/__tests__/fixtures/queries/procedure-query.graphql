@@ -17,6 +17,7 @@ query {
   empty: typesQuery(a: "50", b: false, c: "", d: [], e: "{}", f: {})
   compoundTypeQuery(object: { a: 419, b: "easy cheesy baked potatoes", c: RED, e: BAR_FOO, f: _EMPTY_, fooBar: 8 }) { a b c d e fooBar }
   compoundTypeSetQuery { edges { cursor node { a b c d e f fooBar } } }
+  compoundTypeArrayQuery(object: { a: 419, b: "easy cheesy baked potatoes", c: RED, e: BAR_FOO, f: _EMPTY_, fooBar: 8 }) { a b c d e f fooBar }
   tableQuery(id: 5) { nodeId id headline authorId }
   tableSetQuery { edges { cursor node { name } } }
   tableSetQueryWithOffset: tableSetQuery(before: "WyJuYXR1cmFsIiw1XQ==", after: "WyJuYXR1cmFsIiwzXQ==") { edges { cursor node { name } } }
