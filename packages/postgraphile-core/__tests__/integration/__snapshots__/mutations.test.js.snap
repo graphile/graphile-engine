@@ -868,14 +868,6 @@ Object {
     "compoundTypeArrayMutation": Object {
       "compoundTypes": Array [
         Object {
-          "a": null,
-          "b": null,
-          "c": null,
-          "d": null,
-          "e": null,
-          "fooBar": null,
-        },
-        Object {
           "a": 419,
           "b": "easy cheesy baked potatoes",
           "c": "RED",

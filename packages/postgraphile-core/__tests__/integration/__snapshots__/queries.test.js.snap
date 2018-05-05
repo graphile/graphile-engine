@@ -1808,15 +1808,6 @@ Object {
         Object {
           "computedCompoundTypeArray": Array [
             Object {
-              "a": null,
-              "b": null,
-              "c": null,
-              "d": null,
-              "e": null,
-              "f": null,
-              "fooBar": null,
-            },
-            Object {
               "a": 419,
               "b": "easy cheesy baked potatoes",
               "c": "RED",
@@ -1881,15 +1872,6 @@ Object {
         },
         Object {
           "computedCompoundTypeArray": Array [
-            Object {
-              "a": null,
-              "b": null,
-              "c": null,
-              "d": null,
-              "e": null,
-              "f": null,
-              "fooBar": null,
-            },
             Object {
               "a": 419,
               "b": "easy cheesy baked potatoes",
@@ -1956,15 +1938,6 @@ Object {
         Object {
           "computedCompoundTypeArray": Array [
             Object {
-              "a": null,
-              "b": null,
-              "c": null,
-              "d": null,
-              "e": null,
-              "f": null,
-              "fooBar": null,
-            },
-            Object {
               "a": 419,
               "b": "easy cheesy baked potatoes",
               "c": "RED",
@@ -2030,15 +2003,6 @@ Object {
         Object {
           "computedCompoundTypeArray": Array [
             Object {
-              "a": null,
-              "b": null,
-              "c": null,
-              "d": null,
-              "e": null,
-              "f": null,
-              "fooBar": null,
-            },
-            Object {
               "a": 419,
               "b": "easy cheesy baked potatoes",
               "c": "RED",
@@ -2096,15 +2060,6 @@ Object {
         Object {
           "computedCompoundTypeArray": Array [
             Object {
-              "a": null,
-              "b": null,
-              "c": null,
-              "d": null,
-              "e": null,
-              "f": null,
-              "fooBar": null,
-            },
-            Object {
               "a": 419,
               "b": "easy cheesy baked potatoes",
               "c": "RED",
@@ -2152,15 +2107,6 @@ Object {
         },
         Object {
           "computedCompoundTypeArray": Array [
-            Object {
-              "a": null,
-              "b": null,
-              "c": null,
-              "d": null,
-              "e": null,
-              "f": null,
-              "fooBar": null,
-            },
             Object {
               "a": 419,
               "b": "easy cheesy baked potatoes",
@@ -2360,15 +2306,6 @@ Object {
     "add3Query": null,
     "add4Query": 4,
     "compoundTypeArrayQuery": Array [
-      Object {
-        "a": null,
-        "b": null,
-        "c": null,
-        "d": null,
-        "e": null,
-        "f": null,
-        "fooBar": null,
-      },
       Object {
         "a": 419,
         "b": "easy cheesy baked potatoes",
