@@ -495,11 +495,13 @@ export default function makeProcField(
                 } else {
                   if (proc.returnsSet && !isMutation) {
                     // Connection
-                    return addStartEndCursor(row);
+                    return addStartEndCursor({
+                      data: row.data.map(row => pg2gql(row, returnType)),
+                    });
                   } else if (proc.returnsSet || rawReturnType.isPgArray) {
-                    return rows;
+                    return rows.map(row => pg2gql(row, returnType));
                   } else {
-                    return row;
+                    return pg2gql(row, returnType);
                   }
                 }
               })();
