@@ -867,6 +867,7 @@ type Query implements Node {
     \\"\\"\\"The method to use when ordering \`UpdatableView\`.\\"\\"\\"
     orderBy: [UpdatableViewsOrderBy!] = [NATURAL]
   ): UpdatableViewsConnection
+  compoundTypeArrayQuery(object: CompoundTypeInput): [CompoundType]
   compoundTypeQuery(object: CompoundTypeInput): CompoundType
 
   \\"\\"\\"Fetches an object given its globally unique \`ID\`.\\"\\"\\"

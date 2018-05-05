@@ -250,7 +250,8 @@ export default function makeProcField(
             withPagination: !isMutation && proc.returnsSet,
             withPaginationAsFields: !isMutation && proc.returnsSet && !computed,
             asJson: !proc.returnsSet && computed && !returnFirstValueAsValue,
-            addNullCase: !proc.returnsSet && isTableLike,
+            addNullCase:
+              !proc.returnsSet && !rawReturnType.isPgArray && isTableLike,
           },
           innerQueryBuilder => {
             if (!isTableLike) {

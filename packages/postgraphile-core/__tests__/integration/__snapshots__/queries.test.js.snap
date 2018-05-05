@@ -2133,6 +2133,15 @@ Object {
     "add4Query": 4,
     "compoundTypeArrayQuery": Array [
       Object {
+        "a": null,
+        "b": null,
+        "c": null,
+        "d": null,
+        "e": null,
+        "f": null,
+        "fooBar": null,
+      },
+      Object {
         "a": 419,
         "b": "easy cheesy baked potatoes",
         "c": "RED",
@@ -2140,6 +2149,15 @@ Object {
         "e": "BAR_FOO",
         "f": "_EMPTY_",
         "fooBar": 8,
+      },
+      Object {
+        "a": null,
+        "b": null,
+        "c": null,
+        "d": null,
+        "e": null,
+        "f": null,
+        "fooBar": null,
       },
       Object {
         "a": 420,
