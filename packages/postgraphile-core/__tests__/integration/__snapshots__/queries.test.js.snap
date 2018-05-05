@@ -1815,6 +1815,11 @@ Object {
               "e": "BAR_FOO",
               "f": "_EMPTY_",
               "fooBar": 8,
+              "g": Object {
+                "hours": 5,
+                "minutes": null,
+                "seconds": null,
+              },
             },
             Object {
               "a": null,
@@ -1824,6 +1829,7 @@ Object {
               "e": null,
               "f": null,
               "fooBar": null,
+              "g": null,
             },
             Object {
               "a": 420,
@@ -1833,6 +1839,11 @@ Object {
               "e": "BAR_FOO",
               "f": "_EMPTY_",
               "fooBar": 8,
+              "g": Object {
+                "hours": 5,
+                "minutes": null,
+                "seconds": null,
+              },
             },
           ],
           "firstName": "John",
@@ -1880,6 +1891,11 @@ Object {
               "e": "BAR_FOO",
               "f": "_EMPTY_",
               "fooBar": 8,
+              "g": Object {
+                "hours": 5,
+                "minutes": null,
+                "seconds": null,
+              },
             },
             Object {
               "a": null,
@@ -1889,6 +1905,7 @@ Object {
               "e": null,
               "f": null,
               "fooBar": null,
+              "g": null,
             },
             Object {
               "a": 420,
@@ -1898,6 +1915,11 @@ Object {
               "e": "BAR_FOO",
               "f": "_EMPTY_",
               "fooBar": 8,
+              "g": Object {
+                "hours": 5,
+                "minutes": null,
+                "seconds": null,
+              },
             },
           ],
           "firstName": "Sara",
@@ -1945,6 +1967,11 @@ Object {
               "e": "BAR_FOO",
               "f": "_EMPTY_",
               "fooBar": 8,
+              "g": Object {
+                "hours": 5,
+                "minutes": null,
+                "seconds": null,
+              },
             },
             Object {
               "a": null,
@@ -1954,6 +1981,7 @@ Object {
               "e": null,
               "f": null,
               "fooBar": null,
+              "g": null,
             },
             Object {
               "a": 420,
@@ -1963,6 +1991,11 @@ Object {
               "e": "BAR_FOO",
               "f": "_EMPTY_",
               "fooBar": 8,
+              "g": Object {
+                "hours": 5,
+                "minutes": null,
+                "seconds": null,
+              },
             },
           ],
           "firstName": "Budd",
@@ -2010,6 +2043,11 @@ Object {
               "e": "BAR_FOO",
               "f": "_EMPTY_",
               "fooBar": 8,
+              "g": Object {
+                "hours": 5,
+                "minutes": null,
+                "seconds": null,
+              },
             },
             Object {
               "a": null,
@@ -2019,6 +2057,7 @@ Object {
               "e": null,
               "f": null,
               "fooBar": null,
+              "g": null,
             },
             Object {
               "a": 420,
@@ -2028,6 +2067,11 @@ Object {
               "e": "BAR_FOO",
               "f": "_EMPTY_",
               "fooBar": 8,
+              "g": Object {
+                "hours": 5,
+                "minutes": null,
+                "seconds": null,
+              },
             },
           ],
           "firstName": "Kathryn",
@@ -2067,6 +2111,11 @@ Object {
               "e": "BAR_FOO",
               "f": "_EMPTY_",
               "fooBar": 8,
+              "g": Object {
+                "hours": 5,
+                "minutes": null,
+                "seconds": null,
+              },
             },
             Object {
               "a": null,
@@ -2076,6 +2125,7 @@ Object {
               "e": null,
               "f": null,
               "fooBar": null,
+              "g": null,
             },
             Object {
               "a": 420,
@@ -2085,6 +2135,11 @@ Object {
               "e": "BAR_FOO",
               "f": "_EMPTY_",
               "fooBar": 8,
+              "g": Object {
+                "hours": 5,
+                "minutes": null,
+                "seconds": null,
+              },
             },
           ],
           "firstName": "Joe",
@@ -2115,6 +2170,11 @@ Object {
               "e": "BAR_FOO",
               "f": "_EMPTY_",
               "fooBar": 8,
+              "g": Object {
+                "hours": 5,
+                "minutes": null,
+                "seconds": null,
+              },
             },
             Object {
               "a": null,
@@ -2124,6 +2184,7 @@ Object {
               "e": null,
               "f": null,
               "fooBar": null,
+              "g": null,
             },
             Object {
               "a": 420,
@@ -2133,6 +2194,11 @@ Object {
               "e": "BAR_FOO",
               "f": "_EMPTY_",
               "fooBar": 8,
+              "g": Object {
+                "hours": 5,
+                "minutes": null,
+                "seconds": null,
+              },
             },
           ],
           "firstName": "Twenty",
@@ -2314,6 +2380,11 @@ Object {
         "e": "BAR_FOO",
         "f": "_EMPTY_",
         "fooBar": 8,
+        "g": Object {
+          "hours": 2,
+          "minutes": 3,
+          "seconds": 12,
+        },
       },
       Object {
         "a": null,
@@ -2323,6 +2394,7 @@ Object {
         "e": null,
         "f": null,
         "fooBar": null,
+        "g": null,
       },
       Object {
         "a": 420,
@@ -2332,6 +2404,11 @@ Object {
         "e": "BAR_FOO",
         "f": "_EMPTY_",
         "fooBar": 8,
+        "g": Object {
+          "hours": 2,
+          "minutes": 3,
+          "seconds": 12,
+        },
       },
     ],
     "compoundTypeQuery": Object {
@@ -2340,7 +2417,13 @@ Object {
       "c": "RED",
       "d": null,
       "e": "BAR_FOO",
+      "f": "_EMPTY_",
       "fooBar": 8,
+      "g": Object {
+        "hours": 2,
+        "minutes": 3,
+        "seconds": 12,
+      },
     },
     "compoundTypeSetQuery": Object {
       "edges": Array [
@@ -2354,6 +2437,11 @@ Object {
             "e": "_0_BAR",
             "f": "_EMPTY_",
             "fooBar": 7,
+            "g": Object {
+              "hours": null,
+              "minutes": null,
+              "seconds": 18,
+            },
           },
         },
       ],

@@ -227,6 +227,7 @@ type CompoundType {
   e: EnumCaps
   f: EnumWithEmptyString
   fooBar: Int
+  g: Interval
 }
 
 \\"\\"\\"All input for the \`compoundTypeArrayMutation\` mutation.\\"\\"\\"
@@ -263,6 +264,7 @@ input CompoundTypeInput {
   e: EnumCaps
   f: EnumWithEmptyString
   fooBar: Int
+  g: IntervalInput
 }
 
 \\"\\"\\"All input for the \`compoundTypeMutation\` mutation.\\"\\"\\"
