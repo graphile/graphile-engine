@@ -1613,6 +1613,7 @@ type Person implements Node {
     orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysConnection!
   computedCompoundTypeArray(object: CompoundTypeInput): [CompoundType]
+  computedTextArray: [String]
   createdAt: Datetime
   email: Email!
   exists(email: Email): Boolean

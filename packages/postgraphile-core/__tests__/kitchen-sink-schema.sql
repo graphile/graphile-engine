@@ -284,6 +284,7 @@ create function c.person_friends(person c.person) returns setof c.person as $$ s
 create function c.person_first_post(person c.person) returns a.post as $$ select * from a.post where a.post.author_id = person.id limit 1 $$ language sql stable;
 create function c.compound_type_computed_field(compound_type c.compound_type) returns integer as $$ select compound_type.a + compound_type.foo_bar $$ language sql stable;
 create function c.person_computed_compound_type_array(person c.person, object c.compound_type) returns c.compound_type[] as $$ select ARRAY[object, (null, null, null, null, null, null, null, null)::c.compound_type, (object.a + 1, object.b, object.c, object.d, object.e, object.f, object.g, object.foo_bar)::c.compound_type]; $$ language sql stable;
+create function c.person_computed_text_array(person c.person) returns text[] as $$ select ARRAY['str1','str2','str3']; $$ language sql stable;
 create function a.post_headline_trimmed(post a.post, length int default 10, omission text default '…') returns text as $$ select substr(post.headline, 0, length) || omission $$ language sql stable;
 create function a.post_headline_trimmed_strict(post a.post, length int default 10, omission text default '…') returns text as $$ select substr(post.headline, 0, length) || omission $$ language sql stable strict;
 create function a.post_headline_trimmed_no_defaults(post a.post, length int, omission text) returns text as $$ select substr(post.headline, 0, length) || omission $$ language sql stable;

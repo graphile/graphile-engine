@@ -1846,6 +1846,11 @@ Object {
               },
             },
           ],
+          "computedTextArray": Array [
+            "str1",
+            "str2",
+            "str2",
+          ],
           "firstName": "John",
           "firstPost": Object {
             "headline": "I hate yogurt. It’s just stuff with bits in.",
@@ -1921,6 +1926,11 @@ Object {
                 "seconds": null,
               },
             },
+          ],
+          "computedTextArray": Array [
+            "str1",
+            "str2",
+            "str3",
           ],
           "firstName": "Sara",
           "firstPost": Object {
@@ -1998,6 +2008,11 @@ Object {
               },
             },
           ],
+          "computedTextArray": Array [
+            "str1",
+            "str2",
+            "str3",
+          ],
           "firstName": "Budd",
           "firstPost": Object {
             "headline": "Stop talking, brain thinking. Hush.",
@@ -2074,6 +2089,11 @@ Object {
               },
             },
           ],
+          "computedTextArray": Array [
+            "str1",
+            "str2",
+            "str3",
+          ],
           "firstName": "Kathryn",
           "firstPost": null,
           "friends": Object {
@@ -2142,6 +2162,11 @@ Object {
               },
             },
           ],
+          "computedTextArray": Array [
+            "str1",
+            "str2",
+            "str3",
+          ],
           "firstName": "Joe",
           "firstPost": Object {
             "headline": "Please, Don-Bot… look into your hard drive, and open your mercy file!",
@@ -2200,6 +2225,11 @@ Object {
                 "seconds": null,
               },
             },
+          ],
+          "computedTextArray": Array [
+            "str1",
+            "str2",
+            "str3",
           ],
           "firstName": "Twenty",
           "firstPost": null,
