@@ -2476,10 +2476,10 @@ Object {
         },
       ],
       "pageInfo": Object {
-        "endCursor": ,
+        "endCursor": "WyJuYXR1cmFsIiwxXQ==",
         "hasNextPage": false,
-        "hasPreviousPage": true,
-        "startCursor": ,
+        "hasPreviousPage": false,
+        "startCursor": "WyJuYXR1cmFsIiwxXQ==",
       },
     },
     "empty": false,
@@ -2711,6 +2711,28 @@ Object {
         "hasNextPage": true,
         "hasPreviousPage": true,
         "startCursor": "WyJuYXR1cmFsIiw0XQ==",
+      },
+    },
+    "tableSetQueryWithOffset6": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwzXQ==",
+          "node": Object {
+            "name": "Budd Deey",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw0XQ==",
+          "node": Object {
+            "name": "Kathryn Ramirez",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw0XQ==",
+        "hasNextPage": true,
+        "hasPreviousPage": true,
+        "startCursor": "WyJuYXR1cmFsIiwzXQ==",
       },
     },
     "typesQuery": false,
