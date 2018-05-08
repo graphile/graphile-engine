@@ -395,6 +395,17 @@ export default function makeProcField(
           },
         };
       }
+      // If this is a table we can process it directly; but if it's a scalar
+      // setof function we must dereference '.value' from it, because this
+      // makes space for '__cursor' to exist alongside it (whereas on a table
+      // the '__cursor' can just be on the table object itself)
+      const scalarAwarePg2gql = v =>
+        isTableLike
+          ? pg2gql(v, returnType)
+          : {
+              ...v,
+              value: pg2gql(v.value, returnType),
+            };
 
       return {
         description: proc.description
@@ -423,17 +434,6 @@ export default function makeProcField(
                   return pg2gql(value, returnType);
                 }
               } else {
-                // If this is a table we can process it directly; but
-                // if it's a scalar setof function we must dereference
-                // '.value' from it, because this makes space for
-                // '__cursor' to exist alongside it (whereas on a table
-                // the '__cursor' can just be on the table object itself)
-                const scalarAwarePg2gql = v =>
-                  isTableLike
-                    ? pg2gql(v, returnType)
-                    : {
-                        value: pg2gql(v.value, returnType),
-                      };
                 if (proc.returnsSet && !isMutation) {
                   return addStartEndCursor({
                     ...value,
@@ -509,10 +509,13 @@ export default function makeProcField(
               const result = (() => {
                 if (returnFirstValueAsValue) {
                   if (proc.returnsSet && !isMutation) {
+                    // EITHER `isMutation` is true, or `ConnectionType` does
+                    // not exist - either way, we're not returning a
+                    // connection.
                     return row.data
                       .map(firstValue)
                       .map(v => pg2gql(v, returnType));
-                  } else if (proc.returnsSet) {
+                  } else if (proc.returnsSet || rawReturnType.isPgArray) {
                     return rows.map(firstValue).map(v => pg2gql(v, returnType));
                   } else {
                     return pg2gql(firstValue(row), returnType);
@@ -522,7 +525,7 @@ export default function makeProcField(
                     // Connection
                     return addStartEndCursor({
                       ...row,
-                      data: row.data.map(row => pg2gql(row, returnType)),
+                      data: row.data.map(scalarAwarePg2gql),
                     });
                   } else if (proc.returnsSet || rawReturnType.isPgArray) {
                     return rows.map(row => pg2gql(row, returnType));
