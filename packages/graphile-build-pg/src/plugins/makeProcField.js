@@ -455,7 +455,7 @@ export default function makeProcField(
                 {}
               );
 
-              let queryResult;
+              let queryResultRows;
               if (isMutation) {
                 const query = makeQuery(
                   parsedResolveInfoFragment,
@@ -469,7 +469,7 @@ export default function makeProcField(
                   !returnFirstValueAsValue || returnTypeTable || false;
                 try {
                   await pgClient.query("SAVEPOINT graphql_mutation");
-                  queryResult = await viaTemporaryTable(
+                  queryResultRows = await viaTemporaryTable(
                     pgClient,
                     isVoid
                       ? null
@@ -502,9 +502,10 @@ export default function makeProcField(
                 );
                 const { text, values } = sql.compile(query);
                 if (debugSql.enabled) debugSql(text);
-                queryResult = await pgClient.query(text, values);
+                const queryResult = await pgClient.query(text, values);
+                queryResultRows = queryResult.rows;
               }
-              const { rows } = queryResult;
+              const rows = queryResultRows;
               const [row] = rows;
               const result = (() => {
                 if (returnFirstValueAsValue) {

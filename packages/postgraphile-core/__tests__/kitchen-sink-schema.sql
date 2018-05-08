@@ -416,6 +416,13 @@ begin
   return null;
 end;
 $$ language plpgsql volatile;
+create function c.issue756_set_mutation() returns setof c.issue756 as $$
+begin
+  return query insert into c.issue756 default values returning *;
+  return next null;
+  return query insert into c.issue756 default values returning *;
+end;
+$$ language plpgsql volatile;
 
 -- Begin tests for smart comments
 

@@ -2821,6 +2821,36 @@ type Issue756SEdge {
   node: Issue756
 }
 
+\\"\\"\\"All input for the \`issue756SetMutation\` mutation.\\"\\"\\"
+input Issue756SetMutationInput {
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+}
+
+\\"\\"\\"The output of our \`issue756SetMutation\` mutation.\\"\\"\\"
+type Issue756SetMutationPayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"An edge for our \`Issue756\`. May be used by Relay 1.\\"\\"\\"
+  issue756Edge(
+    \\"\\"\\"The method to use when ordering \`Issue756\`.\\"\\"\\"
+    orderBy: [Issue756SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Issue756SEdge
+  issue756S: [Issue756]
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
+}
+
 \\"\\"\\"Methods to use when ordering \`Issue756\`.\\"\\"\\"
 enum Issue756SOrderBy {
   ID_ASC
@@ -3698,6 +3728,14 @@ type Mutation {
     \\"\\"\\"
     input: Issue756MutationInput!
   ): Issue756MutationPayload
+
+  \\"\\"\\"Reads and enables pagination through a set of \`Issue756\`.\\"\\"\\"
+  issue756SetMutation(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: Issue756SetMutationInput!
+  ): Issue756SetMutationPayload
   jsonIdentityMutation(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
