@@ -1849,7 +1849,7 @@ Object {
           "computedTextArray": Array [
             "str1",
             "str2",
-            "str2",
+            "str3",
           ],
           "firstName": "John",
           "firstPost": Object {

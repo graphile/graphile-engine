@@ -411,14 +411,21 @@ export default function makeProcField(
                   return value.data
                     .map(firstValue)
                     .map(v => pg2gql(v, returnType));
+                } else if (rawReturnType.isPgArray) {
+                  return value.map(firstValue).map(v => pg2gql(v, returnType));
                 } else {
                   return pg2gql(value, returnType);
                 }
               } else {
                 if (proc.returnsSet && !isMutation) {
-                  return addStartEndCursor(value);
+                  return addStartEndCursor({
+                    ...value,
+                    data: value.data.map(v => pg2gql(v, returnType)),
+                  });
+                } else if (proc.returnsSet || rawReturnType.isPgArray) {
+                  return value.map(v => pg2gql(v, returnType));
                 } else {
-                  return value;
+                  return pg2gql(value, returnType);
                 }
               }
             }
