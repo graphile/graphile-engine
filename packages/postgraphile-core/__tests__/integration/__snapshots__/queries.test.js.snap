@@ -2043,6 +2043,32 @@ Object {
             },
           ],
           "computedIntervalSet": Object {
+            "edges": Array [
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwxXQ==",
+                "node": Object {
+                  "hours": null,
+                  "minutes": null,
+                  "seconds": 12,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwyXQ==",
+                "node": Object {
+                  "hours": 3,
+                  "minutes": null,
+                  "seconds": null,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwzXQ==",
+                "node": Object {
+                  "hours": 9,
+                  "minutes": 36,
+                  "seconds": 7,
+                },
+              },
+            ],
             "nodes": Array [
               Object {
                 "days": null,
@@ -2153,6 +2179,32 @@ Object {
             },
           ],
           "computedIntervalSet": Object {
+            "edges": Array [
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwxXQ==",
+                "node": Object {
+                  "hours": null,
+                  "minutes": null,
+                  "seconds": 12,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwyXQ==",
+                "node": Object {
+                  "hours": 3,
+                  "minutes": null,
+                  "seconds": null,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwzXQ==",
+                "node": Object {
+                  "hours": 9,
+                  "minutes": 36,
+                  "seconds": 7,
+                },
+              },
+            ],
             "nodes": Array [
               Object {
                 "days": null,
@@ -2263,6 +2315,32 @@ Object {
             },
           ],
           "computedIntervalSet": Object {
+            "edges": Array [
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwxXQ==",
+                "node": Object {
+                  "hours": null,
+                  "minutes": null,
+                  "seconds": 12,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwyXQ==",
+                "node": Object {
+                  "hours": 3,
+                  "minutes": null,
+                  "seconds": null,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwzXQ==",
+                "node": Object {
+                  "hours": 9,
+                  "minutes": 36,
+                  "seconds": 7,
+                },
+              },
+            ],
             "nodes": Array [
               Object {
                 "days": null,
@@ -2373,6 +2451,32 @@ Object {
             },
           ],
           "computedIntervalSet": Object {
+            "edges": Array [
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwxXQ==",
+                "node": Object {
+                  "hours": null,
+                  "minutes": null,
+                  "seconds": 12,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwyXQ==",
+                "node": Object {
+                  "hours": 3,
+                  "minutes": null,
+                  "seconds": null,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwzXQ==",
+                "node": Object {
+                  "hours": 9,
+                  "minutes": 36,
+                  "seconds": 7,
+                },
+              },
+            ],
             "nodes": Array [
               Object {
                 "days": null,
@@ -2483,6 +2587,32 @@ Object {
             },
           ],
           "computedIntervalSet": Object {
+            "edges": Array [
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwxXQ==",
+                "node": Object {
+                  "hours": null,
+                  "minutes": null,
+                  "seconds": 12,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwyXQ==",
+                "node": Object {
+                  "hours": 3,
+                  "minutes": null,
+                  "seconds": null,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwzXQ==",
+                "node": Object {
+                  "hours": 9,
+                  "minutes": 36,
+                  "seconds": 7,
+                },
+              },
+            ],
             "nodes": Array [
               Object {
                 "days": null,
@@ -2593,6 +2723,32 @@ Object {
             },
           ],
           "computedIntervalSet": Object {
+            "edges": Array [
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwxXQ==",
+                "node": Object {
+                  "hours": null,
+                  "minutes": null,
+                  "seconds": 12,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwyXQ==",
+                "node": Object {
+                  "hours": 3,
+                  "minutes": null,
+                  "seconds": null,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwzXQ==",
+                "node": Object {
+                  "hours": 9,
+                  "minutes": 36,
+                  "seconds": 7,
+                },
+              },
+            ],
             "nodes": Array [
               Object {
                 "days": null,
@@ -2703,6 +2859,32 @@ Object {
             },
           ],
           "computedIntervalSet": Object {
+            "edges": Array [
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwxXQ==",
+                "node": Object {
+                  "hours": null,
+                  "minutes": null,
+                  "seconds": 12,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwyXQ==",
+                "node": Object {
+                  "hours": 3,
+                  "minutes": null,
+                  "seconds": null,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwzXQ==",
+                "node": Object {
+                  "hours": 9,
+                  "minutes": 36,
+                  "seconds": 7,
+                },
+              },
+            ],
             "nodes": Array [
               Object {
                 "days": null,
@@ -2813,6 +2995,32 @@ Object {
             },
           ],
           "computedIntervalSet": Object {
+            "edges": Array [
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwxXQ==",
+                "node": Object {
+                  "hours": null,
+                  "minutes": null,
+                  "seconds": 12,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwyXQ==",
+                "node": Object {
+                  "hours": 3,
+                  "minutes": null,
+                  "seconds": null,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwzXQ==",
+                "node": Object {
+                  "hours": 9,
+                  "minutes": 36,
+                  "seconds": 7,
+                },
+              },
+            ],
             "nodes": Array [
               Object {
                 "days": null,
@@ -2923,6 +3131,32 @@ Object {
             },
           ],
           "computedIntervalSet": Object {
+            "edges": Array [
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwxXQ==",
+                "node": Object {
+                  "hours": null,
+                  "minutes": null,
+                  "seconds": 12,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwyXQ==",
+                "node": Object {
+                  "hours": 3,
+                  "minutes": null,
+                  "seconds": null,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwzXQ==",
+                "node": Object {
+                  "hours": 9,
+                  "minutes": 36,
+                  "seconds": 7,
+                },
+              },
+            ],
             "nodes": Array [
               Object {
                 "days": null,
@@ -3033,6 +3267,32 @@ Object {
             },
           ],
           "computedIntervalSet": Object {
+            "edges": Array [
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwxXQ==",
+                "node": Object {
+                  "hours": null,
+                  "minutes": null,
+                  "seconds": 12,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwyXQ==",
+                "node": Object {
+                  "hours": 3,
+                  "minutes": null,
+                  "seconds": null,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwzXQ==",
+                "node": Object {
+                  "hours": 9,
+                  "minutes": 36,
+                  "seconds": 7,
+                },
+              },
+            ],
             "nodes": Array [
               Object {
                 "days": null,
@@ -3143,6 +3403,32 @@ Object {
             },
           ],
           "computedIntervalSet": Object {
+            "edges": Array [
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwxXQ==",
+                "node": Object {
+                  "hours": null,
+                  "minutes": null,
+                  "seconds": 12,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwyXQ==",
+                "node": Object {
+                  "hours": 3,
+                  "minutes": null,
+                  "seconds": null,
+                },
+              },
+              Object {
+                "cursor": "WyJuYXR1cmFsIiwzXQ==",
+                "node": Object {
+                  "hours": 9,
+                  "minutes": 36,
+                  "seconds": 7,
+                },
+              },
+            ],
             "nodes": Array [
               Object {
                 "days": null,
@@ -3412,6 +3698,32 @@ Object {
       },
     ],
     "queryIntervalSet": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwxXQ==",
+          "node": Object {
+            "hours": null,
+            "minutes": null,
+            "seconds": 12,
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwyXQ==",
+          "node": Object {
+            "hours": 3,
+            "minutes": null,
+            "seconds": null,
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwzXQ==",
+          "node": Object {
+            "hours": 9,
+            "minutes": 36,
+            "seconds": 7,
+          },
+        },
+      ],
       "nodes": Array [
         Object {
           "days": null,
