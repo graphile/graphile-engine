@@ -972,6 +972,7 @@ Object {
         6,
       ],
     },
+    "issue756Mutation": null,
     "jsonIdentityMutation": Object {
       "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3}",
     },
