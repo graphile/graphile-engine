@@ -12,7 +12,9 @@ const debugSql = debugFactory("graphile-build-pg:sql");
 const firstValue = obj => {
   let firstKey;
   for (const k in obj) {
-    firstKey = k;
+    if (k[0] !== "_" && k[1] !== "_") {
+      firstKey = k;
+    }
   }
   return obj[firstKey];
 };

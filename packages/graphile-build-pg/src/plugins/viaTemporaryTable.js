@@ -54,13 +54,14 @@ export default async function viaTemporaryTable(
 
   if (!sqlTypeIdentifier) {
     // It returns void, just perform the query!
-    return await performQuery(
+    const { rows } = await performQuery(
       pgClient,
       sql.query`
       with ${sqlResultSourceAlias} as (
         ${sqlMutationQuery}
       ) ${sqlResultQuery}`
     );
+    return rows;
   } else {
     /*
      * In this code we're converting the rows to a string representation within
@@ -85,23 +86,32 @@ export default async function viaTemporaryTable(
       select (${selectionField})::text from ${sqlResultSourceAlias}`
     );
     const { rows } = result;
-    const firstRow = rows[0];
+    const firstNonNullRow = rows.find(row => row !== null);
     // TODO: we should be able to have `pg` not interpret the results as
     // objects and instead just return them as arrays - then we can just do
     // `row[0]`. PR welcome!
-    const firstKey = firstRow && Object.keys(firstRow)[0];
-    const values = rows.map(row => row[firstKey]);
+    const firstKey = firstNonNullRow && Object.keys(firstNonNullRow)[0];
+    const rawValues = rows.map(row => row && row[firstKey]);
+    const values = rawValues.filter(rawValue => rawValue !== null);
     const convertFieldBack = isPgClassLike
       ? sql.query`(str::${sqlTypeIdentifier}).*`
       : sql.query`str::${sqlTypeIdentifier} as ${sqlResultSourceAlias}`;
-    return await performQuery(
-      pgClient,
-      sql.query`
+    const { rows: filteredValuesResults } =
+      values.length > 0
+        ? await performQuery(
+            pgClient,
+            sql.query`
       with ${sqlResultSourceAlias} as (
         select ${convertFieldBack}
         from unnest((${sql.value(values)})::text[]) str
       )
       ${sqlResultQuery}`
+          )
+        : { rows: [] };
+    const finalRows = rawValues.map(
+      rawValue =>
+        rawValue === null ? { __isNull: true } : filteredValuesResults.shift()
     );
+    return finalRows;
   }
 }

@@ -406,7 +406,7 @@ create table c.my_table (
 
 
 -- https://github.com/graphile/postgraphile/issues/756
-create domain c.not_null_timestamp timestamptz not null default now();
+create domain c.not_null_timestamp timestamptz not null default '1999-06-11T00:00:00Z';
 create table c.issue756 (
   id serial primary key,
   ts c.not_null_timestamp
