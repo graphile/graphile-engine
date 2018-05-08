@@ -1806,51 +1806,6 @@ Object {
     "allPeople": Object {
       "nodes": Array [
         Object {
-          "computedCompoundTypeArray": Array [
-            Object {
-              "a": 419,
-              "b": "easy cheesy baked potatoes",
-              "c": "RED",
-              "d": null,
-              "e": "BAR_FOO",
-              "f": "_EMPTY_",
-              "fooBar": 8,
-              "g": Object {
-                "hours": 5,
-                "minutes": null,
-                "seconds": null,
-              },
-            },
-            Object {
-              "a": null,
-              "b": null,
-              "c": null,
-              "d": null,
-              "e": null,
-              "f": null,
-              "fooBar": null,
-              "g": null,
-            },
-            Object {
-              "a": 420,
-              "b": "easy cheesy baked potatoes",
-              "c": "RED",
-              "d": null,
-              "e": "BAR_FOO",
-              "f": "_EMPTY_",
-              "fooBar": 8,
-              "g": Object {
-                "hours": 5,
-                "minutes": null,
-                "seconds": null,
-              },
-            },
-          ],
-          "computedTextArray": Array [
-            "str1",
-            "str2",
-            "str3",
-          ],
           "firstName": "John",
           "firstPost": Object {
             "headline": "I hate yogurt. It’s just stuff with bits in.",
@@ -1887,51 +1842,6 @@ Object {
           "name": "John Smith",
         },
         Object {
-          "computedCompoundTypeArray": Array [
-            Object {
-              "a": 419,
-              "b": "easy cheesy baked potatoes",
-              "c": "RED",
-              "d": null,
-              "e": "BAR_FOO",
-              "f": "_EMPTY_",
-              "fooBar": 8,
-              "g": Object {
-                "hours": 5,
-                "minutes": null,
-                "seconds": null,
-              },
-            },
-            Object {
-              "a": null,
-              "b": null,
-              "c": null,
-              "d": null,
-              "e": null,
-              "f": null,
-              "fooBar": null,
-              "g": null,
-            },
-            Object {
-              "a": 420,
-              "b": "easy cheesy baked potatoes",
-              "c": "RED",
-              "d": null,
-              "e": "BAR_FOO",
-              "f": "_EMPTY_",
-              "fooBar": 8,
-              "g": Object {
-                "hours": 5,
-                "minutes": null,
-                "seconds": null,
-              },
-            },
-          ],
-          "computedTextArray": Array [
-            "str1",
-            "str2",
-            "str3",
-          ],
           "firstName": "Sara",
           "firstPost": Object {
             "headline": "No… It’s a thing; it’s like a plan, but with more greatness.",
@@ -1968,51 +1878,6 @@ Object {
           "name": "Sara Smith",
         },
         Object {
-          "computedCompoundTypeArray": Array [
-            Object {
-              "a": 419,
-              "b": "easy cheesy baked potatoes",
-              "c": "RED",
-              "d": null,
-              "e": "BAR_FOO",
-              "f": "_EMPTY_",
-              "fooBar": 8,
-              "g": Object {
-                "hours": 5,
-                "minutes": null,
-                "seconds": null,
-              },
-            },
-            Object {
-              "a": null,
-              "b": null,
-              "c": null,
-              "d": null,
-              "e": null,
-              "f": null,
-              "fooBar": null,
-              "g": null,
-            },
-            Object {
-              "a": 420,
-              "b": "easy cheesy baked potatoes",
-              "c": "RED",
-              "d": null,
-              "e": "BAR_FOO",
-              "f": "_EMPTY_",
-              "fooBar": 8,
-              "g": Object {
-                "hours": 5,
-                "minutes": null,
-                "seconds": null,
-              },
-            },
-          ],
-          "computedTextArray": Array [
-            "str1",
-            "str2",
-            "str3",
-          ],
           "firstName": "Budd",
           "firstPost": Object {
             "headline": "Stop talking, brain thinking. Hush.",
@@ -2049,51 +1914,6 @@ Object {
           "name": "Budd Deey",
         },
         Object {
-          "computedCompoundTypeArray": Array [
-            Object {
-              "a": 419,
-              "b": "easy cheesy baked potatoes",
-              "c": "RED",
-              "d": null,
-              "e": "BAR_FOO",
-              "f": "_EMPTY_",
-              "fooBar": 8,
-              "g": Object {
-                "hours": 5,
-                "minutes": null,
-                "seconds": null,
-              },
-            },
-            Object {
-              "a": null,
-              "b": null,
-              "c": null,
-              "d": null,
-              "e": null,
-              "f": null,
-              "fooBar": null,
-              "g": null,
-            },
-            Object {
-              "a": 420,
-              "b": "easy cheesy baked potatoes",
-              "c": "RED",
-              "d": null,
-              "e": "BAR_FOO",
-              "f": "_EMPTY_",
-              "fooBar": 8,
-              "g": Object {
-                "hours": 5,
-                "minutes": null,
-                "seconds": null,
-              },
-            },
-          ],
-          "computedTextArray": Array [
-            "str1",
-            "str2",
-            "str3",
-          ],
           "firstName": "Kathryn",
           "firstPost": null,
           "friends": Object {
@@ -2122,51 +1942,6 @@ Object {
           "name": "Kathryn Ramirez",
         },
         Object {
-          "computedCompoundTypeArray": Array [
-            Object {
-              "a": 419,
-              "b": "easy cheesy baked potatoes",
-              "c": "RED",
-              "d": null,
-              "e": "BAR_FOO",
-              "f": "_EMPTY_",
-              "fooBar": 8,
-              "g": Object {
-                "hours": 5,
-                "minutes": null,
-                "seconds": null,
-              },
-            },
-            Object {
-              "a": null,
-              "b": null,
-              "c": null,
-              "d": null,
-              "e": null,
-              "f": null,
-              "fooBar": null,
-              "g": null,
-            },
-            Object {
-              "a": 420,
-              "b": "easy cheesy baked potatoes",
-              "c": "RED",
-              "d": null,
-              "e": "BAR_FOO",
-              "f": "_EMPTY_",
-              "fooBar": 8,
-              "g": Object {
-                "hours": 5,
-                "minutes": null,
-                "seconds": null,
-              },
-            },
-          ],
-          "computedTextArray": Array [
-            "str1",
-            "str2",
-            "str3",
-          ],
           "firstName": "Joe",
           "firstPost": Object {
             "headline": "Please, Don-Bot… look into your hard drive, and open your mercy file!",
@@ -2186,51 +1961,6 @@ Object {
           "name": "Joe Tucker",
         },
         Object {
-          "computedCompoundTypeArray": Array [
-            Object {
-              "a": 419,
-              "b": "easy cheesy baked potatoes",
-              "c": "RED",
-              "d": null,
-              "e": "BAR_FOO",
-              "f": "_EMPTY_",
-              "fooBar": 8,
-              "g": Object {
-                "hours": 5,
-                "minutes": null,
-                "seconds": null,
-              },
-            },
-            Object {
-              "a": null,
-              "b": null,
-              "c": null,
-              "d": null,
-              "e": null,
-              "f": null,
-              "fooBar": null,
-              "g": null,
-            },
-            Object {
-              "a": 420,
-              "b": "easy cheesy baked potatoes",
-              "c": "RED",
-              "d": null,
-              "e": "BAR_FOO",
-              "f": "_EMPTY_",
-              "fooBar": 8,
-              "g": Object {
-                "hours": 5,
-                "minutes": null,
-                "seconds": null,
-              },
-            },
-          ],
-          "computedTextArray": Array [
-            "str1",
-            "str2",
-            "str3",
-          ],
           "firstName": "Twenty",
           "firstPost": null,
           "friends": Object {
