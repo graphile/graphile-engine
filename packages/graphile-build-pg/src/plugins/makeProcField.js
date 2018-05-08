@@ -497,6 +497,7 @@ export default function makeProcField(
                   if (proc.returnsSet && !isMutation) {
                     // Connection
                     return addStartEndCursor({
+                      ...row,
                       data: row.data.map(row => pg2gql(row, returnType)),
                     });
                   } else if (proc.returnsSet || rawReturnType.isPgArray) {

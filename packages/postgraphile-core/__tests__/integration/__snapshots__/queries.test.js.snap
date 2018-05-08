@@ -2475,6 +2475,12 @@ Object {
           },
         },
       ],
+      "pageInfo": Object {
+        "endCursor": ,
+        "hasNextPage": false,
+        "hasPreviousPage": true,
+        "startCursor": ,
+      },
     },
     "empty": false,
     "intSetQuery": Object {
@@ -2602,6 +2608,12 @@ Object {
           },
         },
       ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw2XQ==",
+        "hasNextPage": false,
+        "hasPreviousPage": false,
+        "startCursor": "WyJuYXR1cmFsIiwxXQ==",
+      },
     },
     "tableSetQueryWithOffset": Object {
       "edges": Array [
@@ -2612,6 +2624,12 @@ Object {
           },
         },
       ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw0XQ==",
+        "hasNextPage": false,
+        "hasPreviousPage": true,
+        "startCursor": "WyJuYXR1cmFsIiw0XQ==",
+      },
     },
     "tableSetQueryWithOffset2": Object {
       "edges": Array [
@@ -2622,6 +2640,12 @@ Object {
           },
         },
       ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw0XQ==",
+        "hasNextPage": false,
+        "hasPreviousPage": true,
+        "startCursor": "WyJuYXR1cmFsIiw0XQ==",
+      },
     },
     "tableSetQueryWithOffset3": Object {
       "edges": Array [
@@ -2638,6 +2662,12 @@ Object {
           },
         },
       ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw0XQ==",
+        "hasNextPage": false,
+        "hasPreviousPage": true,
+        "startCursor": "WyJuYXR1cmFsIiwzXQ==",
+      },
     },
     "tableSetQueryWithOffset4": Object {
       "edges": Array [
@@ -2654,6 +2684,12 @@ Object {
           },
         },
       ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiwyXQ==",
+        "hasNextPage": true,
+        "hasPreviousPage": false,
+        "startCursor": "WyJuYXR1cmFsIiwxXQ==",
+      },
     },
     "tableSetQueryWithOffset5": Object {
       "edges": Array [
@@ -2670,6 +2706,12 @@ Object {
           },
         },
       ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw1XQ==",
+        "hasNextPage": true,
+        "hasPreviousPage": true,
+        "startCursor": "WyJuYXR1cmFsIiw0XQ==",
+      },
     },
     "typesQuery": false,
   },
