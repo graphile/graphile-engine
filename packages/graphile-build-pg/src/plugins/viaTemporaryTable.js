@@ -74,7 +74,7 @@ export default async function viaTemporaryTable(
      * there are a log of potential pitfalls!
      */
     const selectionField = isPgClassLike
-      ? sqlResultSourceAlias
+      ? sql.query`(case when ${sqlResultSourceAlias} is null then null else ${sqlResultSourceAlias} end)`
       : sql.query`(${sqlResultSourceAlias}.${sqlResultSourceAlias})::${sqlTypeIdentifier}`;
     const result = await performQuery(
       pgClient,
