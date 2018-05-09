@@ -75,7 +75,14 @@ export default async function viaTemporaryTable(
      * there are a log of potential pitfalls!
      */
     const selectionField = isPgClassLike
-      ? sql.query`(case when ${sqlResultSourceAlias} is null then null else ${sqlResultSourceAlias} end)`
+      ? /*
+         * This `when foo is null then null` check might *seem* redundant, but it
+         * is not - e.g. the compound type `(,,,,,,,)::my_type` and
+         * `null::my_type` differ; however the former also returns true to `foo
+         * is null`. We use this check to coalesce both into the canonical `null`
+         * representation to make it easier to deal with below.
+         */
+        sql.query`(case when ${sqlResultSourceAlias} is null then null else ${sqlResultSourceAlias} end)`
       : sql.query`(${sqlResultSourceAlias}.${sqlResultSourceAlias})::${sqlTypeIdentifier}`;
     const result = await performQuery(
       pgClient,
@@ -100,16 +107,23 @@ export default async function viaTemporaryTable(
       values.length > 0
         ? await performQuery(
             pgClient,
-            sql.query`
-      with ${sqlResultSourceAlias} as (
-        select ${convertFieldBack}
-        from unnest((${sql.value(values)})::text[]) str
-      )
-      ${sqlResultQuery}`
+            sql.query`\
+              with ${sqlResultSourceAlias} as (
+                select ${convertFieldBack}
+                from unnest((${sql.value(values)})::text[]) str
+              )
+              ${sqlResultQuery}
+              `
           )
         : { rows: [] };
     const finalRows = rawValues.map(
       rawValue =>
+        /*
+         * We can't simply return 'null' here because this is expected to have
+         * come from PG, and that would never return 'null' for a row - only
+         * the fields within said row. Using `__isNull` here is a simple
+         * workaround to this, that's caught by `pg2gql`.
+         */
         rawValue === null ? { __isNull: true } : filteredValuesResults.shift()
     );
     return finalRows;
