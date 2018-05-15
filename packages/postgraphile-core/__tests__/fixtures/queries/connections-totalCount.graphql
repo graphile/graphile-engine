@@ -9,4 +9,7 @@ query {
       }
     }
   }
+  c: tableSetQuery {
+    totalCount
+  }
 }
