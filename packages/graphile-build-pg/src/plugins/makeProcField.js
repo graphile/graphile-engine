@@ -439,7 +439,7 @@ export default function makeProcField(
                 if (proc.returnsSet && !isMutation) {
                   return addStartEndCursor({
                     ...value,
-                    data: value.data ? value.data.map(scalarAwarePg2gql) : undefined,
+                    data: value.data ? value.data.map(scalarAwarePg2gql) : null,
                   });
                 } else if (proc.returnsSet || rawReturnType.isPgArray) {
                   return value.map(v => pg2gql(v, returnType));
