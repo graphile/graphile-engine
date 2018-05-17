@@ -42,7 +42,8 @@ beforeAll(() => {
       viewUniqueKey,
       dSchema,
       simpleCollections,
-      simpleRelations,
+      simpleRelationsHead,
+      simpleRelationsTail,
     ] = await Promise.all([
       createPostGraphileSchema(pgClient, ["a", "b", "c"]),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], { classicIds: true }),
@@ -60,7 +61,8 @@ beforeAll(() => {
       }),
       createPostGraphileSchema(pgClient, ["d"], {}),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], { simpleCollections: "both" }),
-      createPostGraphileSchema(pgClient, ["a", "b", "c"], { simpleRelations: "both" }),
+      createPostGraphileSchema(pgClient, ["a", "b", "c"], { simpleRelationsHead: "both" }),
+      createPostGraphileSchema(pgClient, ["a", "b", "c"], { simpleRelationsTail: "both" }),
 
     ]);
     debug(printSchema(normal));
@@ -72,7 +74,8 @@ beforeAll(() => {
       viewUniqueKey,
       dSchema,
       simpleCollections,
-      simpleRelations,
+      simpleRelationsHead,
+      simpleRelationsTail,
     };
   });
 
@@ -107,7 +110,8 @@ beforeAll(() => {
             "view.graphql": gqlSchemas.viewUniqueKey,
             "badlyBehavedFunction.graphql": gqlSchemas.viewUniqueKey,
             "simple-collections.graphql": gqlSchemas.simpleCollections,
-            "simple-relations.graphql": gpqlSchemas.simpleRelations,
+            "simple-relations-head-tail.graphql": gpqlSchemas.simpleRelationsHead,
+            "simple-relations-tail-head.graphql": gpqlSchemas.simpleRelationsTail,
 
           };
           const gqlSchema = schemas[fileName]
