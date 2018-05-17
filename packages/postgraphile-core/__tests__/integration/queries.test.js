@@ -110,8 +110,8 @@ beforeAll(() => {
             "view.graphql": gqlSchemas.viewUniqueKey,
             "badlyBehavedFunction.graphql": gqlSchemas.viewUniqueKey,
             "simple-collections.graphql": gqlSchemas.simpleCollections,
-            "simple-relations-head-tail.graphql": gpqlSchemas.simpleRelationsHead,
-            "simple-relations-tail-head.graphql": gpqlSchemas.simpleRelationsTail,
+            "simple-relations-head-tail.graphql": gqlSchemas.simpleRelationsHead,
+            "simple-relations-tail-head.graphql": gqlSchemas.simpleRelationsTail,
 
           };
           const gqlSchema = schemas[fileName]
