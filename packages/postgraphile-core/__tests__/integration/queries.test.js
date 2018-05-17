@@ -41,6 +41,8 @@ beforeAll(() => {
       pgColumnFilter,
       viewUniqueKey,
       dSchema,
+      simpleCollections,
+      simpleRelations,
     ] = await Promise.all([
       createPostGraphileSchema(pgClient, ["a", "b", "c"]),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], { classicIds: true }),
@@ -57,6 +59,9 @@ beforeAll(() => {
         setofFunctionsContainNulls: true,
       }),
       createPostGraphileSchema(pgClient, ["d"], {}),
+      createPostGraphileSchema(pgClient, ["a", "b", "c"], { simpleCollections: "both" }),
+      createPostGraphileSchema(pgClient, ["a", "b", "c"], { simpleRelations: "both" }),
+
     ]);
     debug(printSchema(normal));
     return {
@@ -66,6 +71,8 @@ beforeAll(() => {
       pgColumnFilter,
       viewUniqueKey,
       dSchema,
+      simpleCollections,
+      simpleRelations,
     };
   });
 
@@ -99,6 +106,9 @@ beforeAll(() => {
               gqlSchemas.dynamicJson,
             "view.graphql": gqlSchemas.viewUniqueKey,
             "badlyBehavedFunction.graphql": gqlSchemas.viewUniqueKey,
+            "simple-collections.graphql": gqlSchemas.simpleCollections,
+            "simple-relations.graphql": gpqlSchemas.simpleRelations,
+
           };
           const gqlSchema = schemas[fileName]
             ? schemas[fileName]

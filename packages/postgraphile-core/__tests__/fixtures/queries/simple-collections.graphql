@@ -1,0 +1,25 @@
+query {
+  a: allPeopleList { ...personList }
+  b: allPeopleList(first: 2) { ...personList }
+	d: allPeopleList(orderBy: NAME_ASC) { ...personList }
+  e: allPeopleList(orderBy: NAME_DESC) { ...personList }
+  j: allPostsList(condition: { authorId: 2 }) { ...postList }
+	k: allPostsList(first: 2, condition: { authorId: 2 }) { ...postList }
+  m: allPeopleList(first: 3, offset: 1) { ...personList }
+  n: allPeopleList(first: 0) { ...personList }
+  q: allPeopleList(orderBy: PRIMARY_KEY_ASC) { ...personList }
+  s: allPeopleList(condition: { about: null }) { ...personList }
+  t: allPostsList(orderBy: [AUTHOR_ID_DESC, HEADLINE_DESC], first: 3) { ...postList }
+
+}
+
+fragment personList on Person {
+  id
+  name
+  email
+}
+
+fragment postList on Post {
+  headline
+  authorId
+}
