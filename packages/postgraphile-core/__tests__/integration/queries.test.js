@@ -107,7 +107,7 @@ beforeAll(() => {
             "simple-relations-head-tail.graphql": gqlSchemas.simpleCollections,
             "simple-relations-tail-head.graphql": gqlSchemas.simpleCollections,
             "simple-procedure-computed-fields.graphql": gqlSchemas.simpleCollections,
-
+            "simple-procedure-query.graphql": gqlSchemas.simpleCollections,
           };
           const gqlSchema = schemas[fileName]
             ? schemas[fileName]
