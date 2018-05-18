@@ -4671,21 +4671,929 @@ Object {
 }
 `;
 
+exports[`simple-procedure-computed-fields.graphql 1`] = `
+Object {
+  "data": Object {
+    "allPeopleList": Array [
+      Object {
+        "firstName": "John",
+        "friends": Object {
+          "nodes": Array [
+            Object {
+              "firstName": "Sara",
+              "friends": Object {
+                "nodes": Array [
+                  Object {
+                    "firstName": "Budd",
+                    "name": "Budd Deey",
+                  },
+                ],
+              },
+              "name": "Sara Smith",
+            },
+            Object {
+              "firstName": "Budd",
+              "friends": Object {
+                "nodes": Array [
+                  Object {
+                    "firstName": "Kathryn",
+                    "name": "Kathryn Ramirez",
+                  },
+                ],
+              },
+              "name": "Budd Deey",
+            },
+          ],
+        },
+        "name": "John Smith",
+      },
+      Object {
+        "firstName": "Sara",
+        "friends": Object {
+          "nodes": Array [
+            Object {
+              "firstName": "Budd",
+              "friends": Object {
+                "nodes": Array [
+                  Object {
+                    "firstName": "Kathryn",
+                    "name": "Kathryn Ramirez",
+                  },
+                ],
+              },
+              "name": "Budd Deey",
+            },
+            Object {
+              "firstName": "Kathryn",
+              "friends": Object {
+                "nodes": Array [
+                  Object {
+                    "firstName": "Joe",
+                    "name": "Joe Tucker",
+                  },
+                ],
+              },
+              "name": "Kathryn Ramirez",
+            },
+          ],
+        },
+        "name": "Sara Smith",
+      },
+      Object {
+        "firstName": "Budd",
+        "friends": Object {
+          "nodes": Array [
+            Object {
+              "firstName": "Kathryn",
+              "friends": Object {
+                "nodes": Array [
+                  Object {
+                    "firstName": "Joe",
+                    "name": "Joe Tucker",
+                  },
+                ],
+              },
+              "name": "Kathryn Ramirez",
+            },
+            Object {
+              "firstName": "Joe",
+              "friends": Object {
+                "nodes": Array [
+                  Object {
+                    "firstName": "Twenty",
+                    "name": "Twenty Seventwo",
+                  },
+                ],
+              },
+              "name": "Joe Tucker",
+            },
+          ],
+        },
+        "name": "Budd Deey",
+      },
+      Object {
+        "firstName": "Kathryn",
+        "friends": Object {
+          "nodes": Array [
+            Object {
+              "firstName": "Joe",
+              "friends": Object {
+                "nodes": Array [
+                  Object {
+                    "firstName": "Twenty",
+                    "name": "Twenty Seventwo",
+                  },
+                ],
+              },
+              "name": "Joe Tucker",
+            },
+            Object {
+              "firstName": "Twenty",
+              "friends": Object {
+                "nodes": Array [],
+              },
+              "name": "Twenty Seventwo",
+            },
+          ],
+        },
+        "name": "Kathryn Ramirez",
+      },
+      Object {
+        "firstName": "Joe",
+        "friends": Object {
+          "nodes": Array [
+            Object {
+              "firstName": "Twenty",
+              "friends": Object {
+                "nodes": Array [],
+              },
+              "name": "Twenty Seventwo",
+            },
+          ],
+        },
+        "name": "Joe Tucker",
+      },
+      Object {
+        "firstName": "Twenty",
+        "friends": Object {
+          "nodes": Array [],
+        },
+        "name": "Twenty Seventwo",
+      },
+    ],
+  },
+}
+`;
+
+exports[`simple-procedure-query.graphql 1`] = `
+Object {
+  "data": Object {
+    "add1Query": 3,
+    "add2Query": 4,
+    "add3Query": null,
+    "add4Query": 4,
+    "compoundTypeArrayQuery": Array [
+      Object {
+        "a": 419,
+        "b": "easy cheesy baked potatoes",
+        "c": "RED",
+        "d": null,
+        "e": "BAR_FOO",
+        "f": "_EMPTY_",
+        "fooBar": 8,
+        "g": Object {
+          "hours": 2,
+          "minutes": 3,
+          "seconds": 12,
+        },
+      },
+      Object {
+        "a": null,
+        "b": null,
+        "c": null,
+        "d": null,
+        "e": null,
+        "f": null,
+        "fooBar": null,
+        "g": null,
+      },
+      Object {
+        "a": 420,
+        "b": "easy cheesy baked potatoes",
+        "c": "RED",
+        "d": null,
+        "e": "BAR_FOO",
+        "f": "_EMPTY_",
+        "fooBar": 8,
+        "g": Object {
+          "hours": 2,
+          "minutes": 3,
+          "seconds": 12,
+        },
+      },
+    ],
+    "compoundTypeQuery": Object {
+      "a": 420,
+      "b": "easy cheesy baked potatoes",
+      "c": "RED",
+      "d": null,
+      "e": "BAR_FOO",
+      "f": "_EMPTY_",
+      "fooBar": 8,
+      "g": Object {
+        "hours": 2,
+        "minutes": 3,
+        "seconds": 12,
+      },
+    },
+    "compoundTypeSetQuery": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwxXQ==",
+          "node": Object {
+            "a": 1,
+            "b": "2",
+            "c": "BLUE",
+            "d": null,
+            "e": "_0_BAR",
+            "f": "_EMPTY_",
+            "fooBar": 7,
+            "g": Object {
+              "hours": null,
+              "minutes": null,
+              "seconds": 18,
+            },
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiwxXQ==",
+        "hasNextPage": false,
+        "hasPreviousPage": false,
+        "startCursor": "WyJuYXR1cmFsIiwxXQ==",
+      },
+    },
+    "empty": false,
+    "intSetQuery": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwxXQ==",
+          "node": 1,
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwyXQ==",
+          "node": 2,
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwzXQ==",
+          "node": 3,
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw0XQ==",
+          "node": 4,
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw1XQ==",
+          "node": 5,
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw2XQ==",
+          "node": null,
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw3XQ==",
+          "node": 6,
+        },
+      ],
+    },
+    "jsonIdentity": "{\\"a\\":1,\\"b\\":2,\\"c\\":3}",
+    "jsonIdentityIssue85": "[{\\"amount\\":\\"44\\"},{\\"amount\\":null}]",
+    "jsonbIdentity": "{\\"a\\":1,\\"b\\":2,\\"c\\":3}",
+    "jsonbIdentityIssue85": "[{\\"amount\\":\\"44\\"},{\\"amount\\":null}]",
+    "noArgsQuery": 2,
+    "optionalMissingMiddle1": 10,
+    "optionalMissingMiddle1_2": 16,
+    "optionalMissingMiddle2": 10,
+    "optionalMissingMiddle3": 10,
+    "optionalMissingMiddle4": null,
+    "optionalMissingMiddle5": null,
+    "queryCompoundTypeArray": Array [
+      Object {
+        "a": 419,
+        "b": "easy cheesy baked potatoes",
+        "c": "RED",
+        "d": null,
+        "e": "BAR_FOO",
+        "f": "_EMPTY_",
+        "fooBar": 8,
+        "g": Object {
+          "hours": 5,
+          "minutes": null,
+          "seconds": null,
+        },
+      },
+      Object {
+        "a": null,
+        "b": null,
+        "c": null,
+        "d": null,
+        "e": null,
+        "f": null,
+        "fooBar": null,
+        "g": null,
+      },
+      Object {
+        "a": 420,
+        "b": "easy cheesy baked potatoes",
+        "c": "RED",
+        "d": null,
+        "e": "BAR_FOO",
+        "f": "_EMPTY_",
+        "fooBar": 8,
+        "g": Object {
+          "hours": 5,
+          "minutes": null,
+          "seconds": null,
+        },
+      },
+    ],
+    "queryIntervalArray": Array [
+      Object {
+        "days": null,
+        "hours": null,
+        "minutes": null,
+        "months": null,
+        "seconds": 12,
+        "years": null,
+      },
+      Object {
+        "days": null,
+        "hours": 3,
+        "minutes": null,
+        "months": null,
+        "seconds": null,
+        "years": null,
+      },
+      Object {
+        "days": null,
+        "hours": 9,
+        "minutes": 36,
+        "months": null,
+        "seconds": 7,
+        "years": null,
+      },
+    ],
+    "queryIntervalSet": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwxXQ==",
+          "node": Object {
+            "hours": null,
+            "minutes": null,
+            "seconds": 12,
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwyXQ==",
+          "node": Object {
+            "hours": 3,
+            "minutes": null,
+            "seconds": null,
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwzXQ==",
+          "node": Object {
+            "hours": 9,
+            "minutes": 36,
+            "seconds": 7,
+          },
+        },
+      ],
+      "nodes": Array [
+        Object {
+          "days": null,
+          "hours": null,
+          "minutes": null,
+          "months": null,
+          "seconds": 12,
+          "years": null,
+        },
+        Object {
+          "days": null,
+          "hours": 3,
+          "minutes": null,
+          "months": null,
+          "seconds": null,
+          "years": null,
+        },
+        Object {
+          "days": null,
+          "hours": 9,
+          "minutes": 36,
+          "months": null,
+          "seconds": 7,
+          "years": null,
+        },
+      ],
+    },
+    "queryTextArray": Array [
+      "str1",
+      "str2",
+      "str3",
+    ],
+    "staticBigInteger": Object {
+      "edges": Array [
+        Object {
+          "node": "30894622507013190",
+        },
+        Object {
+          "node": "30894622507013191",
+        },
+        Object {
+          "node": "30894622507013192",
+        },
+        Object {
+          "node": "30894622507013193",
+        },
+        Object {
+          "node": "30894622507013194",
+        },
+        Object {
+          "node": "30894622507013195",
+        },
+        Object {
+          "node": "30894622507013196",
+        },
+        Object {
+          "node": "30894622507013197",
+        },
+        Object {
+          "node": "30894622507013198",
+        },
+        Object {
+          "node": "30894622507013199",
+        },
+        Object {
+          "node": "30894622507013200",
+        },
+      ],
+    },
+    "tableQuery": Object {
+      "authorId": 5,
+      "headline": "Please, Don-Bot… look into your hard drive, and open your mercy file!",
+      "id": 5,
+      "nodeId": "WyJwb3N0cyIsNV0=",
+    },
+    "tableSetQuery": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwxXQ==",
+          "node": Object {
+            "name": "John Smith",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwyXQ==",
+          "node": Object {
+            "name": "Sara Smith",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwzXQ==",
+          "node": Object {
+            "name": "Budd Deey",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw0XQ==",
+          "node": Object {
+            "name": "Kathryn Ramirez",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw1XQ==",
+          "node": Object {
+            "name": "Joe Tucker",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw2XQ==",
+          "node": Object {
+            "name": "Twenty Seventwo",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw2XQ==",
+        "hasNextPage": false,
+        "hasPreviousPage": false,
+        "startCursor": "WyJuYXR1cmFsIiwxXQ==",
+      },
+    },
+    "tableSetQueryWithOffset": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw0XQ==",
+          "node": Object {
+            "name": "Kathryn Ramirez",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw0XQ==",
+        "hasNextPage": false,
+        "hasPreviousPage": true,
+        "startCursor": "WyJuYXR1cmFsIiw0XQ==",
+      },
+    },
+    "tableSetQueryWithOffset2": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw0XQ==",
+          "node": Object {
+            "name": "Kathryn Ramirez",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw0XQ==",
+        "hasNextPage": false,
+        "hasPreviousPage": true,
+        "startCursor": "WyJuYXR1cmFsIiw0XQ==",
+      },
+    },
+    "tableSetQueryWithOffset3": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwzXQ==",
+          "node": Object {
+            "name": "Budd Deey",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw0XQ==",
+          "node": Object {
+            "name": "Kathryn Ramirez",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw0XQ==",
+        "hasNextPage": false,
+        "hasPreviousPage": true,
+        "startCursor": "WyJuYXR1cmFsIiwzXQ==",
+      },
+    },
+    "tableSetQueryWithOffset4": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwxXQ==",
+          "node": Object {
+            "name": "John Smith",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwyXQ==",
+          "node": Object {
+            "name": "Sara Smith",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiwyXQ==",
+        "hasNextPage": true,
+        "hasPreviousPage": false,
+        "startCursor": "WyJuYXR1cmFsIiwxXQ==",
+      },
+    },
+    "tableSetQueryWithOffset5": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw0XQ==",
+          "node": Object {
+            "name": "Kathryn Ramirez",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw1XQ==",
+          "node": Object {
+            "name": "Joe Tucker",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw1XQ==",
+        "hasNextPage": true,
+        "hasPreviousPage": true,
+        "startCursor": "WyJuYXR1cmFsIiw0XQ==",
+      },
+    },
+    "tableSetQueryWithOffset6": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwzXQ==",
+          "node": Object {
+            "name": "Budd Deey",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw0XQ==",
+          "node": Object {
+            "name": "Kathryn Ramirez",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw0XQ==",
+        "hasNextPage": true,
+        "hasPreviousPage": true,
+        "startCursor": "WyJuYXR1cmFsIiwzXQ==",
+      },
+    },
+    "typesQuery": false,
+  },
+}
+`;
+
 exports[`simple-relations-head-tail.graphql 1`] = `
 Object {
-  "errors": Array [
-    [GraphQLError: Cannot query field "allPeopleList" on type "Query". Did you mean "allPeople" or "allPersonSecrets"?],
-    [GraphQLError: Cannot query field "allCompoundKeysList" on type "Query". Did you mean "allCompoundKeys" or "compoundKey"?],
-  ],
+  "data": Object {
+    "allCompoundKeysList": Array [
+      Object {
+        "personId1": 1,
+        "personId2": 2,
+      },
+      Object {
+        "personId1": 2,
+        "personId2": 1,
+      },
+      Object {
+        "personId1": 2,
+        "personId2": 3,
+      },
+      Object {
+        "personId1": 2,
+        "personId2": 5,
+      },
+      Object {
+        "personId1": 4,
+        "personId2": 3,
+      },
+      Object {
+        "personId1": 4,
+        "personId2": 4,
+      },
+    ],
+    "allPeopleList": Array [
+      Object {
+        "compoundKeysByPersonId1List": Array [
+          Object {
+            "personId1": 1,
+            "personId2": 2,
+          },
+        ],
+        "compoundKeysByPersonId2List": Array [
+          Object {
+            "personId1": 2,
+            "personId2": 1,
+          },
+        ],
+        "id": 1,
+        "name": "John Smith",
+        "postsByAuthorIdList": Array [
+          Object {
+            "authorId": 1,
+            "headline": "I hate yogurt. It’s just stuff with bits in.",
+          },
+          Object {
+            "authorId": 1,
+            "headline": "Is that a cooking show?",
+          },
+        ],
+        "roundOnePost": Array [
+          Object {
+            "authorId": 1,
+            "headline": "Large bet on myself in round one.",
+          },
+        ],
+      },
+      Object {
+        "compoundKeysByPersonId1List": Array [
+          Object {
+            "personId1": 2,
+            "personId2": 1,
+          },
+          Object {
+            "personId1": 2,
+            "personId2": 3,
+          },
+          Object {
+            "personId1": 2,
+            "personId2": 5,
+          },
+        ],
+        "compoundKeysByPersonId2List": Array [
+          Object {
+            "personId1": 1,
+            "personId2": 2,
+          },
+        ],
+        "id": 2,
+        "name": "Sara Smith",
+        "postsByAuthorIdList": Array [
+          Object {
+            "authorId": 2,
+            "headline": "No… It’s a thing; it’s like a plan, but with more greatness.",
+          },
+          Object {
+            "authorId": 2,
+            "headline": "It’s a fez. I wear a fez now. Fezes are cool.",
+          },
+        ],
+        "roundOnePost": Array [],
+      },
+      Object {
+        "compoundKeysByPersonId1List": Array [],
+        "compoundKeysByPersonId2List": Array [
+          Object {
+            "personId1": 2,
+            "personId2": 3,
+          },
+          Object {
+            "personId1": 4,
+            "personId2": 3,
+          },
+        ],
+        "id": 3,
+        "name": "Budd Deey",
+        "postsByAuthorIdList": Array [
+          Object {
+            "authorId": 3,
+            "headline": "Stop talking, brain thinking. Hush.",
+          },
+          Object {
+            "authorId": 3,
+            "headline": "You know how I sometimes have really brilliant ideas?",
+          },
+        ],
+        "roundOnePost": Array [],
+      },
+      Object {
+        "compoundKeysByPersonId1List": Array [
+          Object {
+            "personId1": 4,
+            "personId2": 3,
+          },
+          Object {
+            "personId1": 4,
+            "personId2": 4,
+          },
+        ],
+        "compoundKeysByPersonId2List": Array [
+          Object {
+            "personId1": 4,
+            "personId2": 4,
+          },
+        ],
+        "id": 4,
+        "name": "Kathryn Ramirez",
+        "postsByAuthorIdList": Array [],
+        "roundOnePost": Array [],
+      },
+      Object {
+        "compoundKeysByPersonId1List": Array [],
+        "compoundKeysByPersonId2List": Array [
+          Object {
+            "personId1": 2,
+            "personId2": 5,
+          },
+        ],
+        "id": 5,
+        "name": "Joe Tucker",
+        "postsByAuthorIdList": Array [
+          Object {
+            "authorId": 5,
+            "headline": "Please, Don-Bot… look into your hard drive, and open your mercy file!",
+          },
+        ],
+        "roundOnePost": Array [],
+      },
+      Object {
+        "compoundKeysByPersonId1List": Array [],
+        "compoundKeysByPersonId2List": Array [],
+        "id": 6,
+        "name": "Twenty Seventwo",
+        "postsByAuthorIdList": Array [],
+        "roundOnePost": Array [],
+      },
+    ],
+  },
 }
 `;
 
 exports[`simple-relations-tail-head.graphql 1`] = `
 Object {
-  "errors": Array [
-    [GraphQLError: Cannot query field "allCompoundKeysList" on type "Query". Did you mean "allCompoundKeys" or "compoundKey"?],
-    [GraphQLError: Cannot query field "allForeignKeysList" on type "Query". Did you mean "allForeignKeys"?],
-  ],
+  "data": Object {
+    "allCompoundKeysList": Array [
+      Object {
+        "extra": null,
+        "personByPersonId1": Object {
+          "email": "john.smith@email.com",
+          "name": "John Smith",
+        },
+        "personByPersonId2": Object {
+          "email": "sara.smith@email.com",
+          "name": "Sara Smith",
+        },
+        "personId1": 1,
+        "personId2": 2,
+      },
+      Object {
+        "extra": false,
+        "personByPersonId1": Object {
+          "email": "sara.smith@email.com",
+          "name": "Sara Smith",
+        },
+        "personByPersonId2": Object {
+          "email": "john.smith@email.com",
+          "name": "John Smith",
+        },
+        "personId1": 2,
+        "personId2": 1,
+      },
+      Object {
+        "extra": null,
+        "personByPersonId1": Object {
+          "email": "sara.smith@email.com",
+          "name": "Sara Smith",
+        },
+        "personByPersonId2": Object {
+          "email": "budd.deey@email.com",
+          "name": "Budd Deey",
+        },
+        "personId1": 2,
+        "personId2": 3,
+      },
+      Object {
+        "extra": true,
+        "personByPersonId1": Object {
+          "email": "sara.smith@email.com",
+          "name": "Sara Smith",
+        },
+        "personByPersonId2": Object {
+          "email": "joe.tucker@email.com",
+          "name": "Joe Tucker",
+        },
+        "personId1": 2,
+        "personId2": 5,
+      },
+      Object {
+        "extra": true,
+        "personByPersonId1": Object {
+          "email": "kathryn.ramirez@email.com",
+          "name": "Kathryn Ramirez",
+        },
+        "personByPersonId2": Object {
+          "email": "budd.deey@email.com",
+          "name": "Budd Deey",
+        },
+        "personId1": 4,
+        "personId2": 3,
+      },
+      Object {
+        "extra": false,
+        "personByPersonId1": Object {
+          "email": "kathryn.ramirez@email.com",
+          "name": "Kathryn Ramirez",
+        },
+        "personByPersonId2": Object {
+          "email": "kathryn.ramirez@email.com",
+          "name": "Kathryn Ramirez",
+        },
+        "personId1": 4,
+        "personId2": 4,
+      },
+    ],
+    "allForeignKeysList": Array [
+      Object {
+        "compoundKey1": 2,
+        "compoundKey2": 1,
+        "compoundKeyByCompoundKey1AndCompoundKey2": Object {
+          "extra": false,
+          "personId1": 2,
+          "personId2": 1,
+        },
+        "personByPersonId": Object {
+          "email": "joe.tucker@email.com",
+          "name": "Joe Tucker",
+        },
+        "personId": 5,
+      },
+      Object {
+        "compoundKey1": 4,
+        "compoundKey2": 4,
+        "compoundKeyByCompoundKey1AndCompoundKey2": Object {
+          "extra": false,
+          "personId1": 4,
+          "personId2": 4,
+        },
+        "personByPersonId": null,
+        "personId": null,
+      },
+      Object {
+        "compoundKey1": 2,
+        "compoundKey2": 1,
+        "compoundKeyByCompoundKey1AndCompoundKey2": Object {
+          "extra": false,
+          "personId1": 2,
+          "personId2": 1,
+        },
+        "personByPersonId": null,
+        "personId": null,
+      },
+    ],
+  },
 }
 `;
 
