@@ -45,7 +45,7 @@ export type Build = {|
   simplifyParsedResolveInfoFragmentWithType: simplifyParsedResolveInfoFragmentWithType,
   // DEPRECATED: getAliasFromResolveInfo: (resolveInfo: GraphQLResolveInfo) => string,
   getSafeAliasFromResolveInfo: (resolveInfo: GraphQLResolveInfo) => string,
-  getSafeFieldAliasFromAlias: (alias: string) => string,
+  getSafeAliasFromAlias: (alias: string) => string,
   resolveAlias(
     data: {},
     _args: mixed,
