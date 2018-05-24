@@ -3,6 +3,9 @@
 Create SQL in a powerful and flexible manner without opening yourself to SQL
 injection attacks using the power of ES6 tagged template literals.
 
+A key aim of this library is to be very fast, if you think you can improve
+performance further please open a PR!
+
 ```js
 const sql = require("pg-sql2");
 // or import sql from 'pg-sql2';
@@ -82,8 +85,10 @@ Represents an SQL value, will be replaced with a placeholder and the value colle
 ### `sql.literal(val)`
 
 As `sql.value`, but in the case of very simple values may write them directly
-to the SQL statement. Should only be used with trusted data, e.g. for the key
-arguments to `json_build_object(key, val, key, val, ...)`
+to the SQL statement rather than using a placeholder. Should only be used with
+data that is not sensitive and is trusted (not user-provided data), e.g. for
+the key arguments to `json_build_object(key, val, key, val, ...)` which you
+have produced.
 
 ### `sql.join(arrayOfFragments, delimeter)`
 
