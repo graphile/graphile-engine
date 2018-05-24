@@ -12,3 +12,4 @@ cache:
 
 install:
   - yarn
+  - yarn prepack
