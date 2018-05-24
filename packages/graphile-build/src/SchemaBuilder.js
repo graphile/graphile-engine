@@ -44,7 +44,9 @@ export type Build = {|
   graphql: *,
   parseResolveInfo: parseResolveInfo,
   simplifyParsedResolveInfoFragmentWithType: simplifyParsedResolveInfoFragmentWithType,
-  getAliasFromResolveInfo: getAliasFromResolveInfo,
+  // DEPRECATED: getAliasFromResolveInfo: (resolveInfo: GraphQLResolveInfo) => string,
+  getSafeAliasFromResolveInfo: (resolveInfo: GraphQLResolveInfo) => string,
+  getSafeFieldAliasFromAlias: (alias: string) => string,
   resolveAlias(
     data: {},
     _args: mixed,

@@ -10,7 +10,7 @@ import type {
 import {
   parseResolveInfo,
   simplifyParsedResolveInfoFragmentWithType,
-  getAliasFromResolveInfo,
+  getAliasFromResolveInfo as rawGetAliasFromResolveInfo,
 } from "graphql-parse-resolve-info";
 import debugFactory from "debug";
 import type { ResolveTree } from "graphql-parse-resolve-info";
@@ -25,6 +25,7 @@ import type SchemaBuilder, {
 } from "./SchemaBuilder";
 
 import extend from "./extend";
+import { createHash } from "crypto";
 
 import { version } from "../package.json";
 
@@ -32,6 +33,67 @@ const isString = str => typeof str === "string";
 const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
 const debug = debugFactory("graphile-build");
 const debugWarn = debugFactory("graphile-build:warn");
+
+/*
+ * This is to avoid people causing deliberate conflicts; it won't eradicate the
+ * risk entirely but it's at least a good first step.
+ *
+ * If this ever turns out to be an actual problem we can just regenerate this
+ * value every 10,000 hashes or whatever; but we'll need to be careful to
+ * ensure that we don't break the GraphQL queries that are being executed
+ * during switch-over.
+ *
+ * If someone manages to achieve a conflict the worst that's going to happen is
+ * the GraphQL query will fail with an error - they're effectively only causing
+ * themselves grief.
+ */
+const aliasRandomSeed = String(Math.random());
+
+/*
+ * This function must never return a string longer than 56 characters.
+ *
+ * This function must stick to alphanumeric and underscore characters.
+ *
+ * Collisions in SHA1 aren't problematic here (except for the user deliberately
+ * causing them!), so we'll happily take the performance boost over SHA256.
+ *
+ * Note: I don't care about prefix attacks here.
+ */
+function hashFieldAlias(str) {
+  return createHash("sha1")
+    .update(aliasRandomSeed + str)
+    .digest("hex");
+}
+
+/*
+ * This function returns a version of `alias` (a valid GraphQL identifier) that:
+ *
+ *   1. won't conflict with normal GraphQL field names (because it contains an @)
+ *   2. won't be over 60 characters long (allows for systems with alias length limits, such as PG)
+ *   3. will be consistent during the run-time of a single GraphQL query
+ *   4. only contains characters that are either the @ symbol or are valid in a GraphQL identifier
+ *
+ * It does not guarantee that this alias will be human readable!
+ */
+function getSafeAliasFromAlias(alias) {
+  if (alias.length < 50 && !alias.startsWith("@")) {
+    // Use the `@` to prevent conflicting with normal GraphQL field names, but otherwise let it through verbatim.
+    return `@${alias}`;
+  } else if (alias.length > 1024) {
+    throw new Error(
+      `GraphQL alias '${alias}' is too long, use shorter aliases (max length 1024).`
+    );
+  } else {
+    // No alias that passes the above check can have a double underscore prefix.
+    return `@@${hashFieldAlias(alias)}`;
+  }
+}
+
+// This prevents the aliases ever going above
+function getSafeAliasFromResolveInfo(resolveInfo) {
+  const alias = rawGetAliasFromResolveInfo(resolveInfo);
+  return getSafeAliasFromAlias(alias);
+}
 
 type MetaData = {
   [string]: Array<mixed>,
@@ -167,9 +229,11 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
     graphql,
     parseResolveInfo,
     simplifyParsedResolveInfoFragmentWithType,
-    getAliasFromResolveInfo,
+    getSafeAliasFromAlias,
+    getAliasFromResolveInfo: getSafeAliasFromResolveInfo, // DEPRECATED: do not use this!
+    getSafeAliasFromResolveInfo,
     resolveAlias(data, _args, _context, resolveInfo) {
-      const alias = getAliasFromResolveInfo(resolveInfo);
+      const alias = getSafeAliasFromResolveInfo(resolveInfo);
       return data[alias];
     },
     addType(type: GraphQLNamedType): void {
