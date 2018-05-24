@@ -15,6 +15,7 @@ import {
 import debugFactory from "debug";
 import type { ResolveTree } from "graphql-parse-resolve-info";
 import pluralize from "pluralize";
+import LRUCache from "lru-cache";
 import { upperCamelCase, camelCase, constantCase } from "./utils";
 
 import type SchemaBuilder, {
@@ -35,43 +36,44 @@ const debug = debugFactory("graphile-build");
 const debugWarn = debugFactory("graphile-build:warn");
 
 /*
- * This is to avoid people causing deliberate conflicts; it won't eradicate the
- * risk entirely but it's at least a good first step.
- *
- * If this ever turns out to be an actual problem we can just regenerate this
- * value every 10,000 hashes or whatever; but we'll need to be careful to
- * ensure that we don't break the GraphQL queries that are being executed
- * during switch-over.
- *
- * If someone manages to achieve a conflict the worst that's going to happen is
- * the GraphQL query will fail with an error - they're effectively only causing
- * themselves grief.
+ * This should be more than enough for normal usage. If you come under a
+ * sophisticated attack then the attacker can empty this of useful values (with
+ * a lot of work) but because we use SHA1 hashes under the covers the aliases
+ * will still be consistent even after the LRU cache is exhausted. And SHA1 can
+ * produce half a million hashes per second on my machine, the LRU only gives
+ * us a 10x speedup!
  */
-const aliasRandomSeed = String(Math.random());
+const hashCache = LRUCache(100000);
 
 /*
  * This function must never return a string longer than 56 characters.
  *
- * This function must stick to alphanumeric and underscore characters.
+ * This function must only output alphanumeric and underscore characters.
  *
- * Collisions in SHA1 aren't problematic here (except for the user deliberately
- * causing them!), so we'll happily take the performance boost over SHA256.
- *
- * Note: I don't care about prefix attacks here.
+ * Collisions in SHA1 aren't problematic here (for us; they will be problematic
+ * for the user deliberately causing them, but that's their own fault!), so
+ * we'll happily take the performance boost over SHA256.
  */
 function hashFieldAlias(str) {
-  return createHash("sha1")
-    .update(aliasRandomSeed + str)
+  const precomputed = hashCache.get(str);
+  if (precomputed) return precomputed;
+  const hash = createHash("sha1")
+    .update(str)
     .digest("hex");
+  hashCache.set(str, hash);
+  return hash;
 }
 
 /*
- * This function returns a version of `alias` (a valid GraphQL identifier) that:
+ * This function may be replaced at any time, but all versions of it will
+ * always return a representation of `alias` (a valid GraphQL identifier)
+ * that:
  *
- *   1. won't conflict with normal GraphQL field names (because it contains an @)
+ *   1. won't conflict with normal GraphQL field names
  *   2. won't be over 60 characters long (allows for systems with alias length limits, such as PG)
- *   3. will be consistent during the run-time of a single GraphQL query
- *   4. only contains characters that are either the @ symbol or are valid in a GraphQL identifier
+ *   3. will give the same value when called multiple times within the same GraphQL query
+ *   4. matches the regex /^[@_A-Za-z0-9]+$/
+ *   5. will not be prefixed with `__` (as that will conflict with other Graphile internals)
  *
  * It does not guarantee that this alias will be human readable!
  */
@@ -84,7 +86,6 @@ function getSafeAliasFromAlias(alias) {
       `GraphQL alias '${alias}' is too long, use shorter aliases (max length 1024).`
     );
   } else {
-    // No alias that passes the above check can have a double underscore prefix.
     return `@@${hashFieldAlias(alias)}`;
   }
 }
