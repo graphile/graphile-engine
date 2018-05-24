@@ -72,7 +72,7 @@ function hashFieldAlias(str) {
  *   1. won't conflict with normal GraphQL field names
  *   2. won't be over 60 characters long (allows for systems with alias length limits, such as PG)
  *   3. will give the same value when called multiple times within the same GraphQL query
- *   4. matches the regex /^[@_A-Za-z0-9]+$/
+ *   4. matches the regex /^[@!-_A-Za-z0-9]+$/
  *   5. will not be prefixed with `__` (as that will conflict with other Graphile internals)
  *
  * It does not guarantee that this alias will be human readable!
