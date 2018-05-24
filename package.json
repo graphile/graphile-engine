@@ -10,7 +10,7 @@
     "test": "node src/index.js && eslint . && flow check && jest && markdown-doctest",
     "test:u": "node src/index.js && eslint . && flow check && jest -u && markdown-doctest",
     "test:docs": "markdown-doctest",
-    "prepublish": "babel --out-dir lib src"
+    "prepack": "babel --out-dir lib src"
   },
   "repository": {
     "type": "git",
