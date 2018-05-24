@@ -78,7 +78,7 @@ function hashFieldAlias(str) {
  * It does not guarantee that this alias will be human readable!
  */
 function getSafeAliasFromAlias(alias) {
-  if (alias.length < 50 && !alias.startsWith("@")) {
+  if (alias.length <= 60 && !alias.startsWith("@")) {
     // Use the `@` to prevent conflicting with normal GraphQL field names, but otherwise let it through verbatim.
     return `@${alias}`;
   } else if (alias.length > 1024) {
