@@ -124,7 +124,7 @@ export default (function PgColumnsPlugin(builder) {
                   !attr.isNotNull && !attr.type.domainIsNotNull,
                   ReturnType
                 ),
-                resolve: (data, _args, _context, resolveInfo) => {
+                resolve: (data, _args, _context, _resolveInfo) => {
                   return pg2gql(data[fieldName], attr.type);
                 },
               };
