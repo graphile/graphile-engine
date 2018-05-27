@@ -365,7 +365,7 @@ class QueryBuilder {
       ? sql.fragment`json_build_object(${sql.join(
           this.compiledData.select.map(
             ([sqlFragment, alias]) =>
-              sql.fragment`${sql.literal(alias)}, ${sqlFragment}`
+              sql.fragment`${sql.literal(alias)}::text, ${sqlFragment}`
           ),
           ", "
         )})`
