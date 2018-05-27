@@ -90,7 +90,11 @@ function getSafeAliasFromAlias(alias) {
   }
 }
 
-// This prevents the aliases ever going above
+/*
+ * This provides a "safe" version of the alias from ResolveInfo, guaranteed to
+ * never be longer than 60 characters. This makes it suitable as a PostgreSQL
+ * identifier.
+ */
 function getSafeAliasFromResolveInfo(resolveInfo) {
   const alias = rawGetAliasFromResolveInfo(resolveInfo);
   return getSafeAliasFromAlias(alias);
