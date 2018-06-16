@@ -750,6 +750,9 @@ export default (function PgTypesPlugin(
       if (!gqlTypeByTypeIdAndModifier[typeId]) {
         gqlTypeByTypeIdAndModifier[typeId] = {};
       }
+      if (!gqlInputTypeByTypeIdAndModifier[typeId]) {
+        gqlInputTypeByTypeIdAndModifier[typeId] = {};
+      }
       if (!gqlTypeByTypeIdAndModifier[typeId][typeModifierKey]) {
         const type = introspectionResultsByKind.type.find(t => t.id === typeId);
         if (!type) {
@@ -793,6 +796,12 @@ export default (function PgTypesPlugin(
         const type = introspectionResultsByKind.type.find(t => t.id === typeId);
         enforceGqlTypeByPgType(type, typeModifier);
         return gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey];
+      }
+      if (!gqlTypeByTypeIdAndModifier[typeId]) {
+        gqlTypeByTypeIdAndModifier[typeId] = {};
+      }
+      if (!gqlInputTypeByTypeIdAndModifier[typeId]) {
+        gqlInputTypeByTypeIdAndModifier[typeId] = {};
       }
       if (!gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey]) {
         const type = introspectionResultsByKind.type.find(t => t.id === typeId);
