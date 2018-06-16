@@ -121,6 +121,7 @@ with
       att.attname as "name",
       dsc.description as "description",
       att.atttypid as "typeId",
+      nullif(att.atttypmod, -1) as "typeModifier",
       att.attnotnull as "isNotNull",
       att.atthasdef as "hasDefault"
     from

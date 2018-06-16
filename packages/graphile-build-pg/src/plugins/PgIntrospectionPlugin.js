@@ -84,6 +84,7 @@ export type PgAttribute = {
   name: string,
   description: ?string,
   typeId: string,
+  typeModifier: number,
   isNotNull: boolean,
   hasDefault: boolean,
   class: PgClass,
