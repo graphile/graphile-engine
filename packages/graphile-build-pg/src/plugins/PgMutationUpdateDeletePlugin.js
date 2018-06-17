@@ -10,7 +10,7 @@ const base64Decode = str => new Buffer(String(str), "base64").toString("utf8");
 
 export default (async function PgMutationUpdateDeletePlugin(
   builder,
-  { pgDisableDefaultMutations }
+  { pgDisableDefaultMutations, pgIncludeExtensionConfigurationTables = false }
 ) {
   if (pgDisableDefaultMutations) {
     return;
@@ -53,6 +53,11 @@ export default (async function PgMutationUpdateDeletePlugin(
             .filter(table => !!table.namespace)
             .filter(
               table =>
+                pgIncludeExtensionConfigurationTables ||
+                !table.isExtensionConfigurationTable
+            )
+            .filter(
+              table =>
                 (mode === "update" &&
                   table.isUpdatable &&
                   !omit(table, "update")) ||
@@ -65,6 +70,9 @@ export default (async function PgMutationUpdateDeletePlugin(
                 table.type.id,
                 null
               );
+              if (!TableType) {
+                return memo;
+              }
               async function commonCodeRenameMe(
                 pgClient,
                 resolveInfo,
