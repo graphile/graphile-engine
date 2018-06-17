@@ -137,6 +137,7 @@ export default (async function PgIntrospectionPlugin(
     pgEnableTags,
     persistentMemoizeWithKey = (key, fn) => fn(),
     pgThrowOnMissingSchema = false,
+    pgIncludeExtensionResources = false,
   }
 ) {
   async function introspect() {
@@ -156,7 +157,10 @@ export default (async function PgIntrospectionPlugin(
       await persistentMemoizeWithKey(cacheKey, () =>
         withPgClient(pgConfig, async pgClient => {
           const introspectionQuery = await readFile(INTROSPECTION_PATH, "utf8");
-          const { rows } = await pgClient.query(introspectionQuery, [schemas]);
+          const { rows } = await pgClient.query(introspectionQuery, [
+            schemas,
+            pgIncludeExtensionResources,
+          ]);
 
           const result = rows.reduce(
             (memo, { object }) => {

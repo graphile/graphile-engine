@@ -2,8 +2,8 @@
 -- @see https://github.com/graphile/postgraphile/blob/master/resources/introspection-query.sql
 --
 -- ## Parameters
--- - `$1`: An array of strings that represent the namespaces we are
---   introspecting.
+-- - `$1`: An array of strings that represent the namespaces we are introspecting.
+-- - `$2`: set true to include functions/tables/etc that come from extensions
 with
   -- @see https://www.postgresql.org/docs/9.5/static/catalog-pg-namespace.html
   namespace as (
@@ -69,7 +69,12 @@ with
       -- twice. This leads to duplicate fields in the API which throws an
       -- error. In the future we may support this case. For now though, it is
       -- too complex.
-      (select count(pro2.*) from pg_catalog.pg_proc as pro2 where pro2.pronamespace = pro.pronamespace and pro2.proname = pro.proname) = 1
+      (select count(pro2.*) from pg_catalog.pg_proc as pro2 where pro2.pronamespace = pro.pronamespace and pro2.proname = pro.proname) = 1 and
+      ($2 is true or not exists(
+        select 1
+        from pg_catalog.pg_depend
+        where pg_depend.refclassid = 'pg_catalog.pg_extension'::pg_catalog.regclass and pg_depend.deptype = 'e' and pg_depend.objid = pro.oid
+      ))
     order by
       pro.pronamespace, pro.proname
   ),
@@ -108,7 +113,12 @@ with
       rel.relpersistence in ('p') and
       -- We don't want classes that will clash with GraphQL (treat them as private)
       rel.relname not like E'\\_\\_%' and
-      rel.relkind in ('r', 'v', 'm', 'c', 'f')
+      rel.relkind in ('r', 'v', 'm', 'c', 'f') and
+      ($2 is true or not exists(
+        select 1
+        from pg_catalog.pg_depend
+        where pg_depend.refclassid = 'pg_catalog.pg_extension'::pg_catalog.regclass and pg_depend.deptype = 'e' and pg_depend.objid = rel.oid
+      ))
     order by
       rel.relnamespace, rel.relname
   ),
