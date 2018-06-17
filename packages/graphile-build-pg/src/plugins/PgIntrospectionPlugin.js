@@ -375,8 +375,7 @@ export default (async function PgIntrospectionPlugin(
       "configurationClasses",
       "configurationClassIds",
       introspectionResultsByKind.classById,
-      true, // Because the configuration table could be a defined in a different namespace
-      true
+      true // Because the configuration table could be a defined in a different namespace
     );
 
     return introspectionResultsByKind;
