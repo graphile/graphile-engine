@@ -5,10 +5,7 @@ import debugFactory from "debug";
 import omit from "../omit";
 const debugSql = debugFactory("graphile-build-pg:sql");
 
-export default (async function PgRowByUniqueConstraint(
-  builder,
-  { pgIncludeExtensionConfigurationTables = false }
-) {
+export default (async function PgRowByUniqueConstraint(builder) {
   builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
     const {
       extend,
@@ -30,11 +27,6 @@ export default (async function PgRowByUniqueConstraint(
       introspectionResultsByKind.class
         .filter(table => !!table.namespace)
         .filter(table => !omit(table, "read"))
-        .filter(
-          table =>
-            pgIncludeExtensionConfigurationTables ||
-            !table.isExtensionConfigurationTable
-        )
         .reduce((memo, table) => {
           const TableType = pgGetGqlTypeByTypeIdAndModifier(
             table.type.id,

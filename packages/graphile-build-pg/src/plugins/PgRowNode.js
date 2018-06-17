@@ -7,10 +7,7 @@ import omit from "../omit";
 const base64Decode = str => new Buffer(String(str), "base64").toString("utf8");
 const debugSql = debugFactory("graphile-build-pg:sql");
 
-export default (async function PgRowNode(
-  builder,
-  { pgIncludeExtensionConfigurationTables = false }
-) {
+export default (async function PgRowNode(builder) {
   builder.hook("GraphQLObjectType", (object, build, context) => {
     const {
       addNodeFetcherForTypeName,
@@ -96,11 +93,6 @@ export default (async function PgRowNode(
       introspectionResultsByKind.class
         .filter(table => !!table.namespace)
         .filter(table => !omit(table, "read"))
-        .filter(
-          table =>
-            pgIncludeExtensionConfigurationTables ||
-            !table.isExtensionConfigurationTable
-        )
         .reduce((memo, table) => {
           const TableType = pgGetGqlTypeByTypeIdAndModifier(
             table.type.id,

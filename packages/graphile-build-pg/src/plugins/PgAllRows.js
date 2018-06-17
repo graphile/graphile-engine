@@ -10,11 +10,7 @@ const debugSql = debugFactory("graphile-build-pg:sql");
 
 export default (async function PgAllRows(
   builder,
-  {
-    pgViewUniqueKey: viewUniqueKey,
-    pgSimpleCollections,
-    pgIncludeExtensionConfigurationTables = false,
-  }
+  { pgViewUniqueKey: viewUniqueKey, pgSimpleCollections }
 ) {
   const hasConnections = pgSimpleCollections !== "only";
   const hasSimpleCollections =
@@ -39,11 +35,6 @@ export default (async function PgAllRows(
       introspectionResultsByKind.class
         .filter(table => table.isSelectable)
         .filter(table => table.namespace)
-        .filter(
-          table =>
-            pgIncludeExtensionConfigurationTables ||
-            !table.isExtensionConfigurationTable
-        )
         .reduce((memo, table) => {
           if (omit(table, "all")) {
             return memo;

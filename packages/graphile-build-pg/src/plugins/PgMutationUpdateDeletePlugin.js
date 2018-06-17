@@ -10,7 +10,7 @@ const base64Decode = str => new Buffer(String(str), "base64").toString("utf8");
 
 export default (async function PgMutationUpdateDeletePlugin(
   builder,
-  { pgDisableDefaultMutations, pgIncludeExtensionConfigurationTables = false }
+  { pgDisableDefaultMutations }
 ) {
   if (pgDisableDefaultMutations) {
     return;
@@ -51,11 +51,6 @@ export default (async function PgMutationUpdateDeletePlugin(
         (outerMemo, mode) =>
           introspectionResultsByKind.class
             .filter(table => !!table.namespace)
-            .filter(
-              table =>
-                pgIncludeExtensionConfigurationTables ||
-                !table.isExtensionConfigurationTable
-            )
             .filter(
               table =>
                 (mode === "update" &&
