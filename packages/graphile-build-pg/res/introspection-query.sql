@@ -242,6 +242,23 @@ with
       con.contype in ('f', 'p', 'u')
     order by
       con.conrelid, con.conkey, con.confrelid, con.confkey, con.conname
+  ),
+  -- @see https://www.postgresql.org/docs/9.5/static/catalog-pg-extension.html
+  "extension" as (
+    select
+      'extension' as "kind",
+      ext.oid as "id",
+      ext.extname as "name",
+      ext.extnamespace as "namespaceId",
+      ext.extrelocatable as "relocatable",
+      ext.extversion as "version",
+      ext.extconfig as "configurationClassIds",
+      dsc.description as "description"
+    from
+      pg_catalog.pg_extension as ext
+      left join pg_catalog.pg_description as dsc on dsc.objoid = ext.oid
+    order by
+      ext.extname, ext.oid
   )
 select row_to_json(x) as object from namespace as x
 union all
@@ -254,4 +271,6 @@ union all
 select row_to_json(x) as object from "constraint" as x
 union all
 select row_to_json(x) as object from procedure as x
+union all
+select row_to_json(x) as object from extension as x
 ;

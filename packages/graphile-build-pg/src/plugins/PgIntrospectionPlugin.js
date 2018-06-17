@@ -7,6 +7,7 @@ import pg from "pg";
 import debugFactory from "debug";
 import chalk from "chalk";
 import throttle from "lodash/throttle";
+import flatMap from "lodash/flatMap";
 import { quacksLikePgPool } from "../withPgClient";
 
 import { version } from "../../package.json";
@@ -54,6 +55,7 @@ export type PgClass = {
   isInsertable: boolean,
   isUpdatable: boolean,
   isDeletable: boolean,
+  isExtensionConfigurationTable: boolean,
   namespace: PgNamespace,
   type: PgType,
   tags: { [string]: string },
@@ -103,6 +105,18 @@ export type PgConstraint = {
   keyAttributeNums: Array<number>,
   foreignKeyAttributeNums: Array<number>,
   namespace: PgNamespace,
+  tags: { [string]: string },
+};
+
+export type PgExtension = {
+  kind: "extension",
+  id: string,
+  name: string,
+  namespaceId: string,
+  relocatable: boolean,
+  version: string,
+  configurationClassIds?: Array<string>,
+  description: ?string,
   tags: { [string]: string },
 };
 
@@ -156,6 +170,7 @@ export default (async function PgIntrospectionPlugin(
               type: [],
               constraint: [],
               procedure: [],
+              extension: [],
             }
           );
 
@@ -167,6 +182,7 @@ export default (async function PgIntrospectionPlugin(
             "type",
             "constraint",
             "procedure",
+            "extension",
           ].forEach(kind => {
             result[kind].forEach(object => {
               if (pgEnableTags && object.description) {
@@ -177,6 +193,15 @@ export default (async function PgIntrospectionPlugin(
                 object.tags = {};
               }
             });
+          });
+
+          const extensionConfigurationClassIds = flatMap(
+            result.extension,
+            e => e.configurationClassIds
+          );
+          result.class.forEach(klass => {
+            klass.isExtensionConfigurationTable =
+              extensionConfigurationClassIds.indexOf(klass.id) >= 0;
           });
 
           for (const k in result) {
@@ -230,22 +255,45 @@ export default (async function PgIntrospectionPlugin(
       "classId",
       "num"
     );
+    introspectionResultsByKind.extensionById = xByY(
+      introspectionResultsByKind.extension,
+      "id"
+    );
 
     const relate = (array, newAttr, lookupAttr, lookup, missingOk = false) => {
       array.forEach(entry => {
         const key = entry[lookupAttr];
-        const result = lookup[key];
-        if (key && !result) {
-          if (missingOk) {
-            return;
+        if (Array.isArray(key)) {
+          entry[newAttr] = key
+            .map(innerKey => {
+              const result = lookup[innerKey];
+              if (innerKey && !result) {
+                if (missingOk) {
+                  return;
+                }
+                throw new Error(
+                  `Could not look up '${newAttr}' by '${lookupAttr}' ('${innerKey}') on '${JSON.stringify(
+                    entry
+                  )}'`
+                );
+              }
+              return result;
+            })
+            .filter(_ => _);
+        } else {
+          const result = lookup[key];
+          if (key && !result) {
+            if (missingOk) {
+              return;
+            }
+            throw new Error(
+              `Could not look up '${newAttr}' by '${lookupAttr}' on '${JSON.stringify(
+                entry
+              )}'`
+            );
           }
-          throw new Error(
-            `Could not look up '${newAttr}' by '${lookupAttr}' on '${JSON.stringify(
-              entry
-            )}'`
-          );
+          entry[newAttr] = result;
         }
-        entry[newAttr] = result;
       });
     };
 
@@ -307,6 +355,23 @@ export default (async function PgIntrospectionPlugin(
       "arrayItemTypeId",
       introspectionResultsByKind.typeById,
       true // Because not all types are arrays
+    );
+
+    relate(
+      introspectionResultsByKind.extension,
+      "namespace",
+      "namespaceId",
+      introspectionResultsByKind.namespaceById,
+      true // Because the extension could be a defined in a different namespace
+    );
+
+    relate(
+      introspectionResultsByKind.extension,
+      "configurationClasses",
+      "configurationClassIds",
+      introspectionResultsByKind.classById,
+      true, // Because the configuration table could be a defined in a different namespace
+      true
     );
 
     return introspectionResultsByKind;
