@@ -297,10 +297,15 @@ export default (function PgTypesPlugin(
         ),
     };
 
-    const pgTweakFragmentForTypeAndModifier = (fragment, type, modifier) => {
+    const pgTweakFragmentForTypeAndModifier = (
+      fragment,
+      type,
+      typeModifier = null
+    ) => {
+      const typeModifierKey = typeModifier != null ? typeModifier : -1;
       const tweaker =
         (pgTweaksByTypeIdAndModifer[type.id] &&
-          pgTweaksByTypeIdAndModifer[type.id][modifier]) ||
+          pgTweaksByTypeIdAndModifer[type.id][typeModifierKey]) ||
         pgTweaksByTypeId[type.id];
       if (tweaker) {
         return tweaker(fragment);
@@ -524,7 +529,7 @@ export default (function PgTypesPlugin(
       if (!gqlInputTypeByTypeIdAndModifier[type.id]) {
         gqlInputTypeByTypeIdAndModifier[type.id] = {};
       }
-      const typeModifierKey = typeModifier ? typeModifier : -1;
+      const typeModifierKey = typeModifier != null ? typeModifier : -1;
       // Explicit overrides
       if (!gqlTypeByTypeIdAndModifier[type.id][typeModifierKey]) {
         const gqlType = oidLookup[type.id];
@@ -742,7 +747,7 @@ export default (function PgTypesPlugin(
     };
 
     function getGqlTypeByTypeIdAndModifier(typeId, typeModifier = null) {
-      const typeModifierKey = typeModifier ? typeModifier : -1;
+      const typeModifierKey = typeModifier != null ? typeModifier : -1;
       if (!gqlInputTypeByTypeIdGenerator[typeId]) {
         const type = introspectionResultsByKind.type.find(t => t.id === typeId);
         return enforceGqlTypeByPgType(type, typeModifier);
@@ -790,8 +795,8 @@ export default (function PgTypesPlugin(
       }
       return gqlTypeByTypeIdAndModifier[typeId][typeModifierKey];
     }
-    function getGqlInputTypeByTypeIdAndModifier(typeId, typeModifier) {
-      const typeModifierKey = typeModifier ? typeModifier : -1;
+    function getGqlInputTypeByTypeIdAndModifier(typeId, typeModifier = null) {
+      const typeModifierKey = typeModifier != null ? typeModifier : -1;
       if (!gqlInputTypeByTypeIdGenerator[typeId]) {
         const type = introspectionResultsByKind.type.find(t => t.id === typeId);
         enforceGqlTypeByPgType(type, typeModifier);
@@ -874,26 +879,32 @@ export default (function PgTypesPlugin(
     }
 
     // DEPRECATIONS!
-    function getGqlTypeByTypeId(typeId) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        "DEPRECATION WARNING: getGqlTypeByTypeId should not be used - for some columns we also require typeModifier to be specified. Please update your code ASAP to pass `attribute.typeModifier` through as the second parameter (or null if it's not available)."
-      );
-      return getGqlTypeByTypeIdAndModifier(typeId, null);
+    function getGqlTypeByTypeId(typeId, typeModifier) {
+      if (typeModifier === undefined) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          "DEPRECATION WARNING: getGqlTypeByTypeId should not be used - for some columns we also require typeModifier to be specified. Please update your code ASAP to pass `attribute.typeModifier` through as the second parameter (or null if it's not available)."
+        );
+      }
+      return getGqlTypeByTypeIdAndModifier(typeId, typeModifier);
     }
-    function getGqlInputTypeByTypeId(typeId) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        "DEPRECATION WARNING: getGqlInputTypeByTypeId should not be used - for some columns we also require typeModifier to be specified. Please update your code ASAP to pass `attribute.typeModifier` through as the second parameter (or null if it's not available)."
-      );
-      return getGqlInputTypeByTypeIdAndModifier(typeId, null);
+    function getGqlInputTypeByTypeId(typeId, typeModifier) {
+      if (typeModifier === undefined) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          "DEPRECATION WARNING: getGqlInputTypeByTypeId should not be used - for some columns we also require typeModifier to be specified. Please update your code ASAP to pass `attribute.typeModifier` through as the second parameter (or null if it's not available)."
+        );
+      }
+      return getGqlInputTypeByTypeIdAndModifier(typeId, typeModifier);
     }
-    function pgTweakFragmentForType(fragment, type) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        "DEPRECATION WARNING: pgTweakFragmentForType should not be used - for some columns we also require typeModifier to be specified. Please update your code ASAP to pass `attribute.typeModifier` through as the third parameter (or null if it's not available)."
-      );
-      return pgTweakFragmentForTypeAndModifier(fragment, type, null);
+    function pgTweakFragmentForType(fragment, type, typeModifier) {
+      if (typeModifier === undefined) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          "DEPRECATION WARNING: pgTweakFragmentForType should not be used - for some columns we also require typeModifier to be specified. Please update your code ASAP to pass `attribute.typeModifier` through as the third parameter (or null if it's not available)."
+        );
+      }
+      return pgTweakFragmentForTypeAndModifier(fragment, type, typeModifier);
     }
     // END OF DEPRECATIONS!
 
