@@ -170,6 +170,7 @@ with
         (typ.typelem <> 0 and typ.typlen = -1) as "isPgArray",
         nullif(typ.typrelid, 0) as "classId",
         nullif(typ.typbasetype, 0) as "domainBaseTypeId",
+        nullif(typ.typtypmod, -1) as "domainTypeModifier",
         -- If this type is an enum type, let’s select all of its enum variants.
         --
         -- @see https://www.postgresql.org/docs/9.5/static/catalog-pg-enum.html

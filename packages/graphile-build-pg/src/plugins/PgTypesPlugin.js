@@ -309,7 +309,7 @@ export default (function PgTypesPlugin(
         return pgTweakFragmentForTypeAndModifier(
           fragment,
           type.domainBaseType,
-          null
+          type.domainBaseTypeModifier
         );
       } else if (type.isPgArray) {
         const error = new Error(
@@ -805,7 +805,11 @@ export default (function PgTypesPlugin(
       }
       if (!gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey]) {
         const type = introspectionResultsByKind.type.find(t => t.id === typeId);
+
+        // Calling the output type generator might be necessary for the input
+        // type - typically output types should be defined first
         getGqlTypeByTypeIdAndModifier(typeId, typeModifier);
+
         if (!type) {
           throw new Error(
             `Type '${typeId}' not present in introspection results`

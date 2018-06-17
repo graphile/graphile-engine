@@ -76,6 +76,7 @@ export type PgType = {
   isPgArray: boolean,
   classId: ?string,
   domainBaseTypeId: ?string,
+  domainTypeModifier: ?number,
   tags: { [string]: string },
 };
 
