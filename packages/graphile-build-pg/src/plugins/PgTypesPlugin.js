@@ -300,7 +300,8 @@ export default (function PgTypesPlugin(
     const pgTweakFragmentForTypeAndModifier = (
       fragment,
       type,
-      typeModifier = null
+      typeModifier = null,
+      resolveData
     ) => {
       const typeModifierKey = typeModifier != null ? typeModifier : -1;
       const tweaker =
@@ -308,13 +309,14 @@ export default (function PgTypesPlugin(
           pgTweaksByTypeIdAndModifer[type.id][typeModifierKey]) ||
         pgTweaksByTypeId[type.id];
       if (tweaker) {
-        return tweaker(fragment);
+        return tweaker(fragment, resolveData);
       } else if (type.domainBaseType) {
         // TODO: check that domains don't support atttypemod
         return pgTweakFragmentForTypeAndModifier(
           fragment,
           type.domainBaseType,
-          type.domainBaseTypeModifier
+          type.domainBaseTypeModifier,
+          resolveData
         );
       } else if (type.isPgArray) {
         const error = new Error(
@@ -906,14 +908,19 @@ export default (function PgTypesPlugin(
       }
       return getGqlInputTypeByTypeIdAndModifier(typeId, typeModifier);
     }
-    function pgTweakFragmentForType(fragment, type, typeModifier) {
+    function pgTweakFragmentForType(fragment, type, typeModifier, resolveData) {
       if (typeModifier === undefined) {
         // eslint-disable-next-line no-console
         console.warn(
           "DEPRECATION WARNING: pgTweakFragmentForType should not be used - for some columns we also require typeModifier to be specified. Please update your code ASAP to pass `attribute.typeModifier` through as the third parameter (or null if it's not available)."
         );
       }
-      return pgTweakFragmentForTypeAndModifier(fragment, type, typeModifier);
+      return pgTweakFragmentForTypeAndModifier(
+        fragment,
+        type,
+        typeModifier,
+        resolveData
+      );
     }
     // END OF DEPRECATIONS!
 

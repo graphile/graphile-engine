@@ -282,7 +282,8 @@ export default function makeProcField(
                   pgTweakFragmentForTypeAndModifier(
                     sql.fragment`${functionAlias}`,
                     returnTypeTable.type,
-                    null
+                    null,
+                    resolveData
                   ),
                   "value"
                 );
@@ -291,7 +292,8 @@ export default function makeProcField(
                   pgTweakFragmentForTypeAndModifier(
                     sql.fragment`${functionAlias}.${functionAlias}`,
                     returnType,
-                    null // We can't determine a type modifier for functions
+                    null, // We can't determine a type modifier for functions
+                    resolveData
                   ),
                   "value"
                 );

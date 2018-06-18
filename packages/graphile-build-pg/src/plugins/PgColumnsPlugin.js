@@ -94,24 +94,27 @@ export default (function PgColumnsPlugin(builder) {
                             end
                           )
                         `;
-                      } else if (type.type === "c") {
+                      } else {
                         const resolveData = getDataFromParsedResolveInfoFragment(
                           parsedResolveInfoFragment,
                           ReturnType
                         );
-                        const jsonBuildObject = queryFromResolveData(
-                          sql.identifier(Symbol()), // Ignore!
-                          sqlFullName,
-                          resolveData,
-                          { onlyJsonField: true, addNullCase: true }
-                        );
-                        return jsonBuildObject;
-                      } else {
-                        return pgTweakFragmentForTypeAndModifier(
-                          sqlFullName,
-                          type,
-                          typeModifier
-                        );
+                        if (type.type === "c") {
+                          const jsonBuildObject = queryFromResolveData(
+                            sql.identifier(Symbol()), // Ignore!
+                            sqlFullName,
+                            resolveData,
+                            { onlyJsonField: true, addNullCase: true }
+                          );
+                          return jsonBuildObject;
+                        } else {
+                          return pgTweakFragmentForTypeAndModifier(
+                            sqlFullName,
+                            type,
+                            typeModifier,
+                            resolveData
+                          );
+                        }
                       }
                     };
                     queryBuilder.select(
