@@ -293,7 +293,7 @@ export default (function PgTypesPlugin(
 
       A: type =>
         new GraphQLList(
-          enforceGqlTypeByPgType(pgTypeById[type.arrayItemTypeId], null)
+          getGqlTypeByTypeIdAndModifier(type.arrayItemTypeId, null)
         ),
     };
 
@@ -497,7 +497,14 @@ export default (function PgTypesPlugin(
     // TODO: add more support for geometric types
 
     let depth = 0;
-    const enforceGqlTypeByPgType = (type, typeModifier) => {
+
+    /*
+     * Enforce: this is the fallback when we can't find a specific GraphQL type
+     * for a specific PG type.  Use the generators from
+     * `pgRegisterGqlTypeByTypeId` first, this is a last resort.
+     */
+    const enforceGqlTypeByPgTypeId = (typeId, typeModifier) => {
+      const type = introspectionResultsByKind.type.find(t => t.id === typeId);
       depth++;
       if (depth > 50) {
         throw new Error("Type enforcement went too deep - infinite loop?");
@@ -520,7 +527,7 @@ export default (function PgTypesPlugin(
     const reallyEnforceGqlTypeByPgTypeAndModifier = (type, typeModifier) => {
       if (!type.id) {
         throw new Error(
-          `Invalid argument to enforceGqlTypeByPgType - expected a full type, received '${type}'`
+          `Invalid argument to enforceGqlTypeByPgTypeId - expected a full type, received '${type}'`
         );
       }
       if (!gqlTypeByTypeIdAndModifier[type.id]) {
@@ -570,7 +577,10 @@ export default (function PgTypesPlugin(
       ) {
         const subtype =
           introspectionResultsByKind.typeById[type.rangeSubTypeId];
-        const gqlRangeSubType = enforceGqlTypeByPgType(subtype, typeModifier);
+        const gqlRangeSubType = getGqlTypeByTypeIdAndModifier(
+          subtype.id,
+          typeModifier
+        );
         if (!gqlRangeSubType) {
           throw new Error("Range of unsupported");
         }
@@ -692,8 +702,8 @@ export default (function PgTypesPlugin(
         type.type === "d" &&
         type.domainBaseTypeId
       ) {
-        const baseType = enforceGqlTypeByPgType(
-          type.domainBaseType,
+        const baseType = getGqlTypeByTypeIdAndModifier(
+          type.domainBaseTypeId,
           typeModifier
         );
         const baseInputType =
@@ -746,12 +756,12 @@ export default (function PgTypesPlugin(
       return gqlTypeByTypeIdAndModifier[type.id][typeModifierKey];
     };
 
-    function getGqlTypeByTypeIdAndModifier(typeId, typeModifier = null) {
+    function getGqlTypeByTypeIdAndModifier(
+      typeId,
+      typeModifier = null,
+      useFallback = true
+    ) {
       const typeModifierKey = typeModifier != null ? typeModifier : -1;
-      if (!gqlInputTypeByTypeIdGenerator[typeId]) {
-        const type = introspectionResultsByKind.type.find(t => t.id === typeId);
-        return enforceGqlTypeByPgType(type, typeModifier);
-      }
       if (!gqlTypeByTypeIdAndModifier[typeId]) {
         gqlTypeByTypeIdAndModifier[typeId] = {};
       }
@@ -790,30 +800,29 @@ export default (function PgTypesPlugin(
         !gqlTypeByTypeIdAndModifier[typeId][typeModifierKey] &&
         typeModifierKey > -1
       ) {
-        // Fall back to default
-        return getGqlTypeByTypeIdAndModifier(typeId, null);
+        // Fall back to `null` modifier, but if that still doesn't work, we
+        // still want to pass the modifier to enforceGqlTypeByPgTypeId.
+        const fallback = getGqlTypeByTypeIdAndModifier(typeId, null, false);
+        if (fallback) {
+          return fallback;
+        }
+      }
+      if (useFallback && !gqlTypeByTypeIdAndModifier[typeId][typeModifierKey]) {
+        return enforceGqlTypeByPgTypeId(typeId, typeModifier);
       }
       return gqlTypeByTypeIdAndModifier[typeId][typeModifierKey];
     }
+
     function getGqlInputTypeByTypeIdAndModifier(typeId, typeModifier = null) {
+      // First, load the OUTPUT type (it might register an input type)
+      getGqlTypeByTypeIdAndModifier(typeId, typeModifier);
+
       const typeModifierKey = typeModifier != null ? typeModifier : -1;
-      if (!gqlInputTypeByTypeIdGenerator[typeId]) {
-        const type = introspectionResultsByKind.type.find(t => t.id === typeId);
-        enforceGqlTypeByPgType(type, typeModifier);
-        return gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey];
-      }
-      if (!gqlTypeByTypeIdAndModifier[typeId]) {
-        gqlTypeByTypeIdAndModifier[typeId] = {};
-      }
       if (!gqlInputTypeByTypeIdAndModifier[typeId]) {
         gqlInputTypeByTypeIdAndModifier[typeId] = {};
       }
       if (!gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey]) {
         const type = introspectionResultsByKind.type.find(t => t.id === typeId);
-
-        // Calling the output type generator might be necessary for the input
-        // type - typically output types should be defined first
-        getGqlTypeByTypeIdAndModifier(typeId, typeModifier);
 
         if (!type) {
           throw new Error(
