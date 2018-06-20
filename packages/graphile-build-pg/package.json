@@ -45,7 +45,6 @@
     "postgres-interval": "1.1.1"
   },
   "peerDependencies": {
-    "graphql": ">=0.9 <0.14",
     "pg": ">=6.1.0 <8"
   },
   "devDependencies": {
