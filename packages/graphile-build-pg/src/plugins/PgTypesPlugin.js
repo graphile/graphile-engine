@@ -286,9 +286,9 @@ export default (function PgTypesPlugin(
         return BigFloat;
       },
 
-      A: type =>
+      A: (type, typeModifier) =>
         new GraphQLList(
-          getGqlTypeByTypeIdAndModifier(type.arrayItemTypeId, null)
+          getGqlTypeByTypeIdAndModifier(type.arrayItemTypeId, typeModifier)
         ),
     };
 
@@ -731,7 +731,10 @@ export default (function PgTypesPlugin(
       if (!gqlTypeByTypeIdAndModifier[type.id][typeModifierKey]) {
         const gen = categoryLookup[type.category];
         if (gen) {
-          gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = gen(type);
+          gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = gen(
+            type,
+            typeModifier
+          );
         }
       }
 

@@ -87,7 +87,7 @@ export default (function PgColumnsPlugin(builder) {
                                 select json_agg(${getSelectValueForFieldAndTypeAndModifier(
                                   ident,
                                   type.arrayItemType,
-                                  typeModifier // TODO: check that type does cascade through array?
+                                  typeModifier
                                 )})
                                 from unnest(${sqlFullName}) as ${ident}
                               )
