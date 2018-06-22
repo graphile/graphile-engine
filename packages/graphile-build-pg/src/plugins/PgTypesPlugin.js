@@ -220,11 +220,6 @@ export default (function PgTypesPlugin(
     });
     addType(GQLIntervalInput);
 
-    const pgTypeById = introspectionResultsByKind.type.reduce((memo, type) => {
-      memo[type.id] = type;
-      return memo;
-    }, {});
-
     const stringType = (name, description) =>
       new GraphQLScalarType({
         name,
