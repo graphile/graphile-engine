@@ -228,7 +228,8 @@ export default (function PgTablesPlugin(
                 };
                 return spec;
               },
-            }
+            },
+            true // If no fields, skip type automatically
           );
 
           if (table.isSelectable) {

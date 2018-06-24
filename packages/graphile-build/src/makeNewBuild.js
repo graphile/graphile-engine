@@ -156,6 +156,8 @@ const {
   getNamedType,
   isCompositeType,
   isAbstractType,
+  isInputType,
+  isOutputType,
 } = graphql;
 
 const mergeData = (
@@ -564,13 +566,6 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                 );
               }
             }
-            if (Object.keys(fieldsSpec).length === 0) {
-              throw new Error(
-                `Invalid specification for GraphQLObjectType '${
-                  newSpec.name
-                }' - you must specify at least one field!`
-              );
-            }
             return fieldsSpec;
           },
         });
@@ -660,13 +655,6 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                 );
               }
             }
-            if (Object.keys(fieldsSpec).length === 0) {
-              throw new Error(
-                `Invalid specification for GraphQLInputObjectType '${
-                  newSpec.name
-                }' - you must specify at least one field!`
-              );
-            }
             return fieldsSpec;
           },
         });
@@ -709,8 +697,18 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
       const Self: T = new Type(finalSpec);
       if (!(Self instanceof GraphQLSchema) && returnNullOnInvalid) {
         try {
-          if (isCompositeType(Self) && !isAbstractType(Self)) {
-            Self.getFields();
+          if (
+            (isCompositeType(Self) && !isAbstractType(Self)) ||
+            (isInputType(Self) && !isOutputType(Self))
+          ) {
+            const fields = Self.getFields();
+            if (Object.keys(fields).length === 0) {
+              throw new Error(
+                `Expected at least one field on '${
+                  Self.name
+                }' type; ignoring type.`
+              );
+            }
           }
         } catch (e) {
           // This is the error we're expecting to handle:
