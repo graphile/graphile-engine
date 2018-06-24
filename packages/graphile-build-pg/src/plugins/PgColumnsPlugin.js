@@ -36,10 +36,8 @@ export default (function PgColumnsPlugin(builder) {
       introspectionResultsByKind.attribute
         .filter(attr => attr.classId === table.id)
         .filter(attr => pgColumnFilter(attr, build, context))
+        .filter(attr => !omit(attr, "read"))
         .reduce((memo, attr) => {
-          if (omit(attr, "read")) {
-            return memo;
-          }
           /*
             attr =
               { kind: 'attribute',
@@ -182,10 +180,8 @@ export default (function PgColumnsPlugin(builder) {
       introspectionResultsByKind.attribute
         .filter(attr => attr.classId === table.id)
         .filter(attr => pgColumnFilter(attr, build, context))
+        .filter(attr => !omit(attr, isPgPatch ? "update" : "create"))
         .reduce((memo, attr) => {
-          if (omit(attr, isPgPatch ? "update" : "create")) {
-            return memo;
-          }
           const fieldName = inflection.column(attr);
           if (memo[fieldName]) {
             throw new Error(
