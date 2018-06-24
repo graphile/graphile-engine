@@ -703,11 +703,8 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
           ) {
             const fields = Self.getFields();
             if (Object.keys(fields).length === 0) {
-              throw new Error(
-                `Expected at least one field on '${
-                  Self.name
-                }' type; ignoring type.`
-              );
+              // We require there's at least one field on GraphQLObjectType and GraphQLInputObjectType records
+              return null;
             }
           }
         } catch (e) {

@@ -249,7 +249,8 @@ export default (function PgTablesPlugin(
                   // We don't use this currently
                   return spec;
                 },
-              }
+              },
+              true // Safe to skip this if no fields support updating
             );
           }
           const EdgeType = newWithHooks(
@@ -364,7 +365,10 @@ export default (function PgTablesPlugin(
             tablePgType.id,
             null
           );
-          return getTypeByName(inflection.inputType(TableType));
+          if (TableType) {
+            return getTypeByName(inflection.inputType(TableType));
+          }
+          return null;
         },
         true
       );
@@ -395,7 +399,9 @@ export default (function PgTablesPlugin(
               tablePgType.id,
               null
             );
-            return new GraphQLList(TableInputType);
+            if (TableInputType) {
+              return new GraphQLList(TableInputType);
+            }
           },
           true
         );
