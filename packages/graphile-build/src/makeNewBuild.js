@@ -564,6 +564,13 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                 );
               }
             }
+            if (Object.keys(fieldsSpec).length === 0) {
+              throw new Error(
+                `Invalid specification for GraphQLObjectType '${
+                  newSpec.name
+                }' - you must specify at least one field!`
+              );
+            }
             return fieldsSpec;
           },
         });
@@ -652,6 +659,13 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                   }
                 );
               }
+            }
+            if (Object.keys(fieldsSpec).length === 0) {
+              throw new Error(
+                `Invalid specification for GraphQLInputObjectType '${
+                  newSpec.name
+                }' - you must specify at least one field!`
+              );
             }
             return fieldsSpec;
           },
