@@ -6,6 +6,8 @@ create schema b;
 create schema c;
 create schema d;
 
+alter default privileges revoke execute on functions from public;
+
 -- Troublesome extensions install annoying things in our schema; we want to
 -- ensure this doesn't make us crash.
 create extension tablefunc with schema a;
