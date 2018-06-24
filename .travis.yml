@@ -31,9 +31,11 @@ matrix:
             - postgresql-10
             - postgresql-client-10
         postgresql: 10
-        env:
-          global:
-            - PGPORT=5433
+      env:
+        - PGPORT=5433
+        - TEST_DATABASE_URL=postgres://travis:travis@localhost:5433/travis
       sudo: false
       dist: trusty
+      before_script:
+        - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
 
