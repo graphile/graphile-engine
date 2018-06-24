@@ -40,6 +40,7 @@ export type PgProc = {
   argDefaultsNum: number,
   namespace: PgNamespace,
   tags: { [string]: string },
+  aclExecutable: boolean,
 };
 
 export type PgClass = {
@@ -60,6 +61,10 @@ export type PgClass = {
   type: PgType,
   tags: { [string]: string },
   attributes: [PgAttribute],
+  aclSelectable: boolean,
+  aclInsertable: boolean,
+  aclUpdatable: boolean,
+  aclDeletable: boolean,
 };
 
 export type PgType = {
@@ -95,6 +100,9 @@ export type PgAttribute = {
   type: PgType,
   namespace: PgNamespace,
   tags: { [string]: string },
+  aclSelectable: boolean,
+  aclInsertable: boolean,
+  aclUpdatable: boolean,
 };
 
 export type PgConstraint = {

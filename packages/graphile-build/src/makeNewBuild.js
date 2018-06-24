@@ -150,14 +150,13 @@ function getNameFromType(Type: GraphQLNamedType | GraphQLSchema) {
 
 const {
   GraphQLSchema,
+  GraphQLInterfaceType,
   GraphQLObjectType,
   GraphQLInputObjectType,
   GraphQLEnumType,
   getNamedType,
   isCompositeType,
   isAbstractType,
-  isInputType,
-  isOutputType,
 } = graphql;
 
 const mergeData = (
@@ -698,13 +697,20 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
       if (!(Self instanceof GraphQLSchema) && returnNullOnInvalid) {
         try {
           if (
-            (isCompositeType(Self) && !isAbstractType(Self)) ||
-            (isInputType(Self) && !isOutputType(Self))
+            Self instanceof GraphQLInterfaceType ||
+            Self instanceof GraphQLObjectType ||
+            Self instanceof GraphQLInputObjectType
           ) {
-            const fields = Self.getFields();
-            if (Object.keys(fields).length === 0) {
-              // We require there's at least one field on GraphQLObjectType and GraphQLInputObjectType records
-              return null;
+            const _Self:
+              | GraphQLInterfaceType
+              | GraphQLInputObjectType
+              | GraphQLObjectType = Self;
+            if (typeof _Self.getFields === "function") {
+              const fields = _Self.getFields();
+              if (Object.keys(fields).length === 0) {
+                // We require there's at least one field on GraphQLObjectType and GraphQLInputObjectType records
+                return null;
+              }
             }
           }
         } catch (e) {

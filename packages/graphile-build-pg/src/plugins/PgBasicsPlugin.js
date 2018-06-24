@@ -75,36 +75,38 @@ function omitWithRBACChecks(
     if (permission === EXECUTE && !entity.aclExecutable) {
       return true;
     }
-  } else if (isTableLike(entity)) {
+  } else if (entity.kind === "class" && isTableLike(entity)) {
+    const tableEntity: PgClass = entity;
     if (
       (permission === READ || permission === ALL || permission === MANY) &&
-      !entity.aclSelectable
+      !tableEntity.aclSelectable
     ) {
       return true;
     } else if (
       permission === CREATE &&
-      (!entity.aclInsertable &&
-        !entity.attributes.some(attr => attr.aclInsertable))
+      (!tableEntity.aclInsertable &&
+        !tableEntity.attributes.some(attr => attr.aclInsertable))
     ) {
       return true;
     } else if (
       permission === UPDATE &&
-      (!entity.aclUpdatable &&
-        !entity.attributes.some(attr => attr.aclUpdatable))
+      (!tableEntity.aclUpdatable &&
+        !tableEntity.attributes.some(attr => attr.aclUpdatable))
     ) {
       return true;
-    } else if (permission === DELETE && !entity.aclDeletable) {
+    } else if (permission === DELETE && !tableEntity.aclDeletable) {
       return true;
     }
   } else if (entity.kind === "attribute" && isTableLike(entity.class)) {
+    const attributeEntity: PgAttribute = entity;
     if (
       (permission === READ || permission === FILTER || permission === ORDER) &&
-      !entity.aclSelectable
+      !attributeEntity.aclSelectable
     ) {
       return true;
-    } else if (permission === CREATE && !entity.aclInsertable) {
+    } else if (permission === CREATE && !attributeEntity.aclInsertable) {
       return true;
-    } else if (permission === UPDATE && !entity.aclUpdatable) {
+    } else if (permission === UPDATE && !attributeEntity.aclUpdatable) {
       return true;
     }
   }
