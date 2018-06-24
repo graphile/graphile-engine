@@ -59,6 +59,7 @@ export type PgClass = {
   namespace: PgNamespace,
   type: PgType,
   tags: { [string]: string },
+  attributes: [PgAttribute],
 };
 
 export type PgType = {
@@ -377,6 +378,12 @@ export default (async function PgIntrospectionPlugin(
       introspectionResultsByKind.classById,
       true // Because the configuration table could be a defined in a different namespace
     );
+
+    introspectionResultsByKind.class.forEach(klass => {
+      klass.attributes = introspectionResultsByKind.attribute.filter(
+        attr => attr.classId === klass.id
+      );
+    });
 
     return introspectionResultsByKind;
   }
