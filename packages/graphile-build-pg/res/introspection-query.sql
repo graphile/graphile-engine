@@ -52,7 +52,7 @@ with
       coalesce(pro.proallargtypes, pro.proargtypes) as "argTypeIds",
       coalesce(pro.proargnames, array[]::text[]) as "argNames",
       pro.pronargdefaults as "argDefaultsNum",
-      exists(select 1 from accessible_roles where has_function_privilege(accessible_roles.oid, pro.oid, 'EXECUTE')) as "aclExecute"
+      exists(select 1 from accessible_roles where has_function_privilege(accessible_roles.oid, pro.oid, 'EXECUTE')) as "aclExecutable"
     from
       pg_catalog.pg_proc as pro
       left join pg_catalog.pg_description as dsc on dsc.objoid = pro.oid
