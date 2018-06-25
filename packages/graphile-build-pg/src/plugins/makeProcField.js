@@ -112,8 +112,14 @@ export default function makeProcField(
     // TODO: PG10 doesn't support the equivalent of pg_attribute.atttypemod on function return values, but maybe a later version might
     const variant =
       variantFromTags(proc.tags, idx) || variantFromName(argNames[idx], type);
-    const Type =
-      pgGetGqlInputTypeByTypeIdAndModifier(type.id, variant) || GraphQLString;
+    const Type = pgGetGqlInputTypeByTypeIdAndModifier(type.id, variant);
+    if (!Type) {
+      throw new Error(
+        `Could not determine type for argument ${idx} ('${
+          argNames[idx]
+        }') of function '${proc.name}'`
+      );
+    }
     if (idx >= notNullArgCount) {
       return Type;
     } else {
