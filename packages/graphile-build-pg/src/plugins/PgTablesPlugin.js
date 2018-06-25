@@ -110,6 +110,7 @@ export default (function PgTablesPlugin(
           : false;
       let TableType;
       let TablePatchType;
+      let TableBaseInputType;
       pgRegisterGqlTypeByTypeId(
         tablePgType.id,
         cb => {
@@ -238,6 +239,11 @@ export default (function PgTablesPlugin(
           );
 
           if (table.isSelectable) {
+            // XXX: these don't belong here; but we have to keep them here
+            // because third-party code depends on `getTypeByName` to find
+            // them; so we have to register them ahead of time. A better
+            // approach is to use the modifier to specify the type you need,
+            // 'patch' or 'base', so they can be registered just in time.
             TablePatchType = newWithHooks(
               GraphQLInputObjectType,
               {
@@ -256,7 +262,25 @@ export default (function PgTablesPlugin(
               },
               true // Safe to skip this if no fields support updating
             );
+            TableBaseInputType = newWithHooks(
+              GraphQLInputObjectType,
+              {
+                description: `An input representation of \`${tableTypeName}\` with nullable fields.`,
+                name: inflection.baseInputType(TableType),
+              },
+              {
+                pgIntrospection: table,
+                isPgRowType: table.isSelectable,
+                isPgCompoundType: !table.isSelectable,
+                isPgBaseInput: true,
+                pgAddSubfield(fieldName, _attrName, _type, spec) {
+                  // We don't use this currently
+                  return spec;
+                },
+              }
+            );
           }
+
           const EdgeType = newWithHooks(
             GraphQLObjectType,
             {
@@ -365,13 +389,20 @@ export default (function PgTablesPlugin(
       pgRegisterGqlInputTypeByTypeId(
         tablePgType.id,
         (_set, modifier) => {
-          if (modifier === "patch" && TablePatchType) {
-            return TablePatchType;
-          }
+          // This must come first, it triggers creation of all the types
           const TableType = pgGetGqlTypeByTypeIdAndModifier(
             tablePgType.id,
             null
           );
+          // This must come after the pgGetGqlTypeByTypeIdAndModifier call
+          if (modifier === "patch") {
+            // TODO: v5: move the definition from above down here
+            return TablePatchType;
+          }
+          if (modifier === "base") {
+            // TODO: v5: move the definition from above down here
+            return TableBaseInputType;
+          }
           if (TableType) {
             return getTypeByName(inflection.inputType(TableType));
           }
@@ -401,13 +432,13 @@ export default (function PgTablesPlugin(
         );
         pgRegisterGqlInputTypeByTypeId(
           arrayTablePgType.id,
-          () => {
-            const TableInputType = pgGetGqlInputTypeByTypeIdAndModifier(
+          (_set, modifier) => {
+            const RelevantTableInputType = pgGetGqlInputTypeByTypeIdAndModifier(
               tablePgType.id,
-              null
+              modifier
             );
-            if (TableInputType) {
-              return new GraphQLList(TableInputType);
+            if (RelevantTableInputType) {
+              return new GraphQLList(RelevantTableInputType);
             }
           },
           true

@@ -162,6 +162,7 @@ export default (function PgColumnsPlugin(builder) {
         isPgRowType,
         isPgCompoundType,
         isPgPatch,
+        isPgBaseInput,
         pgIntrospection: table,
         pgAddSubfield,
       },
@@ -180,7 +181,13 @@ export default (function PgColumnsPlugin(builder) {
       introspectionResultsByKind.attribute
         .filter(attr => attr.classId === table.id)
         .filter(attr => pgColumnFilter(attr, build, context))
-        .filter(attr => !omit(attr, isPgPatch ? "update" : "create"))
+        .filter(
+          attr =>
+            !omit(
+              attr,
+              isPgBaseInput ? "base" : isPgPatch ? "update" : "create"
+            )
+        )
         .reduce((memo, attr) => {
           const fieldName = inflection.column(attr);
           if (memo[fieldName]) {
@@ -196,7 +203,8 @@ export default (function PgColumnsPlugin(builder) {
               description: attr.description,
               type: nullableIf(
                 GraphQLNonNull,
-                isPgPatch ||
+                isPgBaseInput ||
+                  isPgPatch ||
                   (!attr.isNotNull && !attr.type.domainIsNotNull) ||
                   attr.hasDefault,
                 pgGetGqlInputTypeByTypeIdAndModifier(

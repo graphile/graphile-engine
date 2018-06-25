@@ -157,6 +157,9 @@ export default (function PgBasicsPlugin(
         patchType(typeName: string) {
           return this.upperCamelCase(`${typeName}-patch`);
         },
+        baseInputType(typeName: string) {
+          return this.upperCamelCase(`${typeName}-base-input`);
+        },
         patchField(itemName: string) {
           return this.camelCase(`${itemName}-patch`);
         },
