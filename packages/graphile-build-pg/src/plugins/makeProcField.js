@@ -117,9 +117,9 @@ export default function makeProcField(
       const hint = type.class
         ? `; you might want to use smart comments, e.g. 'COMMENT ON FUNCTION "${
             proc.namespace.name
-          }"."${proc.name}"(${argTypes.map(
-            t => `"${t.namespaceName}"."${t.name}"`
-          )}) IS E'@arg${idx}variant base';"`
+          }"."${proc.name}"(${argTypes
+            .map(t => `"${t.namespaceName}"."${t.name}"`)
+            .join(", ")}) IS E'@arg${idx}variant base';"`
         : "";
       throw new Error(
         `Could not determine type for argument ${idx} ('${
