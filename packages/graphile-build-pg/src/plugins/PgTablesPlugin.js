@@ -108,9 +108,14 @@ export default (function PgTablesPlugin(
         primaryKeys.length
           ? true
           : false;
+      let TableType;
+      let TablePatchType;
       pgRegisterGqlTypeByTypeId(
         tablePgType.id,
         cb => {
+          if (TableType) {
+            return TableType;
+          }
           if (pg2GqlMapper[tablePgType.id]) {
             // Already handled
             throw new Error(
@@ -119,7 +124,7 @@ export default (function PgTablesPlugin(
               }'!`
             );
           }
-          const TableType = newWithHooks(
+          TableType = newWithHooks(
             GraphQLObjectType,
             {
               description: table.description || tablePgType.description,
@@ -233,8 +238,7 @@ export default (function PgTablesPlugin(
           );
 
           if (table.isSelectable) {
-            /* const TablePatchType = */
-            newWithHooks(
+            TablePatchType = newWithHooks(
               GraphQLInputObjectType,
               {
                 description: `Represents an update to a \`${tableTypeName}\`. Fields that are set will be updated.`,
@@ -360,7 +364,10 @@ export default (function PgTablesPlugin(
       );
       pgRegisterGqlInputTypeByTypeId(
         tablePgType.id,
-        () => {
+        (_set, modifier) => {
+          if (modifier === "patch" && TablePatchType) {
+            return TablePatchType;
+          }
           const TableType = pgGetGqlTypeByTypeIdAndModifier(
             tablePgType.id,
             null
