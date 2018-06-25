@@ -17,6 +17,7 @@ import type { ResolveTree } from "graphql-parse-resolve-info";
 import pluralize from "pluralize";
 import LRUCache from "lru-cache";
 import { upperCamelCase, camelCase, constantCase } from "./utils";
+import swallowError from "./swallowError";
 
 import type SchemaBuilder, {
   Build,
@@ -33,7 +34,6 @@ import { version } from "../package.json";
 const isString = str => typeof str === "string";
 const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
 const debug = debugFactory("graphile-build");
-const debugWarn = debugFactory("graphile-build:warn");
 
 /*
  * This should be more than enough for normal usage. If you come under a
@@ -720,12 +720,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
             /function which returns such an object/
           );
           if (!isProbablyAnEmptyObjectError) {
-            // XXX: Improve this
-            // eslint-disable-next-line no-console
-            console.warn(
-              `An error occurred, it might be okay but it doesn't look like the error we were expecting... run with envvar 'DEBUG="graphile-build:warn"' to view the error`
-            );
-            debugWarn(e);
+            this.swallowError(e);
           }
           return null;
         }
@@ -759,5 +754,6 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
       camelCase,
       constantCase,
     },
+    swallowError,
   };
 }
