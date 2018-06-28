@@ -1,4 +1,5 @@
 import graphqlTag from "graphql-tag";
+import { visit } from "graphql";
 
 const $$embed = Symbol("graphile-embed");
 
@@ -9,37 +10,61 @@ export function isEmbed(obj) {
 export function embed(value) {
   return {
     [$$embed]: true,
-    value,
+    value: {
+      kind: "GraphileEmbed",
+      value,
+    },
   };
 }
 
-export function gql(strings, ...placeholders) {
+export function gql(strings, ...interpolatedValues) {
   const gqlStrings = [];
   const gqlValues = [];
   let currentString = "";
+  const placeholders = {};
+  const createPlaceholderFor = value => {
+    const rand = String(Math.random());
+    placeholders[rand] = value;
+    return `"${rand}"`;
+  };
   for (let idx = 0, length = strings.length; idx < length; idx++) {
     currentString += strings[idx];
     if (idx === length - 1) {
       gqlStrings.push(currentString);
     } else {
-      if (isEmbed(placeholders[idx])) {
-        gqlValues.push(placeholders[idx].value);
-        gqlStrings.push(currentString);
-        currentString = "";
+      if (isEmbed(interpolatedValues[idx])) {
+        currentString += createPlaceholderFor(interpolatedValues[idx].value);
       } else {
-        if (typeof placeholders[idx] !== "string") {
+        if (typeof interpolatedValues[idx] !== "string") {
           throw new Error(
             `Placeholder ${idx +
-              1} is invalid - expected string, but received '${typeof placeholders[
+              1} is invalid - expected string, but received '${typeof interpolatedValues[
               idx
             ]}'. Happened after '${currentString}'`
           );
         }
-        currentString += String(placeholders[idx]);
+        currentString += String(interpolatedValues[idx]);
       }
     }
   }
-  return graphqlTag(gqlStrings, ...gqlValues);
+  const ast = graphqlTag(gqlStrings, ...gqlValues);
+  const visitor = {
+    enter(node, key, parent, path, ancestors) {
+      if (node.kind === "Argument") {
+        if (node.value.kind === "StringValue") {
+          if (placeholders[node.value.value]) {
+            return {
+              ...node,
+              value: placeholders[node.value.value],
+            };
+          }
+        }
+      }
+      return undefined;
+    },
+  };
+  const astWithPlaceholdersReplaced = visit(ast, visitor);
+  return astWithPlaceholdersReplaced;
 }
 
 export function AddInflectorsPlugin(additionalInflectors) {
@@ -108,6 +133,9 @@ export function ExtendSchemaPlugin(generator) {
       return parseFloat(value.value);
     } else if (value.kind === "NullValue") {
       return null;
+    } else if (value.kind === "GraphileEmbed") {
+      // RAW!
+      return value.value;
     } else {
       throw new Error(
         `Value kind '${value.kind}' not supported yet. PRs welcome!`

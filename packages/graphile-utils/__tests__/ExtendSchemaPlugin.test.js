@@ -1,4 +1,4 @@
-import { ExtendSchemaPlugin, AddInflectorsPlugin, gql } from "../src";
+import { ExtendSchemaPlugin, AddInflectorsPlugin, gql, embed } from "../src";
 import {
   buildSchema,
   // defaultPlugins,
@@ -248,6 +248,70 @@ it("supports @scope directive with simple values", async () => {
   expect(scope.intTest).toEqual(42);
   expect(scope.floatTest).toEqual(3.141592);
   expect(scope.nullTest).toEqual(null);
+  expect(scope).toMatchSnapshot();
+  const printedSchema = printSchema(schema);
+  expect(printedSchema).toMatchSnapshot();
+  const { data, errors } = await graphql(
+    schema,
+    `
+      {
+        echo(input: [1, 1, 2, 3, 5, 8])
+      }
+    `
+  );
+  expect(errors).toBeFalsy();
+  expect(data.echo).toEqual([1, 1, 2, 3, 5, 8]);
+});
+
+it("supports @scope directive with variable value", async () => {
+  let scope;
+  function storeScope(_scope) {
+    if (scope) {
+      throw new Error("Scope already stored!");
+    }
+    scope = _scope;
+  }
+  const secret = Symbol("test-secret");
+  const schema = await buildSchema([
+    ...simplePlugins,
+    ExtendSchemaPlugin(build => ({
+      typeDefs: gql`
+        extend type Query {
+          """
+          Gives you back what you put in
+          """
+          echo(input: [Int!]!): [Int!]!
+            @scope(
+              isEchoField: true
+              stringTest: "THIS_IS_A_STRING"
+              intTest: 42
+              floatTest: 3.141592
+              nullTest: null
+              embedTest: ${embed({
+                [secret]: "Fred",
+                sub: [[11, 22], [33, 44]],
+              })}
+            )
+        }
+      `,
+      resolvers,
+    })),
+    TestUtils_ExtractScopePlugin(
+      "GraphQLObjectType:fields:field",
+      "Query",
+      "echo",
+      storeScope
+    ),
+  ]);
+  expect(scope).toBeTruthy();
+  expect(scope.isEchoField).toEqual(true);
+  expect(scope.stringTest).toEqual("THIS_IS_A_STRING");
+  expect(scope.intTest).toEqual(42);
+  expect(scope.floatTest).toEqual(3.141592);
+  expect(scope.nullTest).toEqual(null);
+  expect(scope.embedTest).toBeTruthy();
+  expect(scope.embedTest[secret]).toEqual("Fred");
+  expect(scope.embedTest.sub[1][1]).toEqual(44);
   expect(scope).toMatchSnapshot();
   const printedSchema = printSchema(schema);
   expect(printedSchema).toMatchSnapshot();
