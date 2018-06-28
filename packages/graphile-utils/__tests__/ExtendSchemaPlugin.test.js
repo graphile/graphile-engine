@@ -16,6 +16,14 @@ const simplePlugins = [
   MutationPayloadQueryPlugin,
 ];
 
+const resolvers = {
+  Query: {
+    randomNumber(_query, _args, _context, _info) {
+      return 4; // chosen by fair dice roll. guaranteed to be random. xkcd#221
+    },
+  },
+};
+
 it("allows adding a simple type", async () => {
   const schema = await buildSchema([
     ...simplePlugins,
@@ -28,13 +36,32 @@ it("allows adding a simple type", async () => {
           randomNumber: Int
         }
       `,
-      resolvers: {
-        Query: {
-          randomNumber(_query, _args, _context, _info) {
-            return 4; // chosen by fair dice roll. guaranteed to be random. xkcd#221
-          },
-        },
-      },
+      resolvers,
+    })),
+  ]);
+  const printedSchema = printSchema(schema);
+  expect(printedSchema).toMatchSnapshot();
+  const { data } = await graphql(
+    schema,
+    `
+      {
+        randomNumber
+      }
+    `
+  );
+  expect(data.randomNumber).toEqual(4);
+});
+
+it("allows adding a non-null type", async () => {
+  const schema = await buildSchema([
+    ...simplePlugins,
+    ExtendSchemaPlugin(build => ({
+      typeDefs: gql`
+        extend type Query {
+          randomNumber: Int!
+        }
+      `,
+      resolvers,
     })),
   ]);
   const printedSchema = printSchema(schema);
