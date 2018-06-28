@@ -217,7 +217,7 @@ it("supports @scope directive with simple values", async () => {
   }
   const schema = await buildSchema([
     ...simplePlugins,
-    ExtendSchemaPlugin(build => ({
+    ExtendSchemaPlugin(_build => ({
       typeDefs: gql`
         extend type Query {
           """
@@ -274,7 +274,7 @@ it("supports @scope directive with variable value", async () => {
   const secret = Symbol("test-secret");
   const schema = await buildSchema([
     ...simplePlugins,
-    ExtendSchemaPlugin(build => ({
+    ExtendSchemaPlugin(_build => ({
       typeDefs: gql`
         extend type Query {
           """
