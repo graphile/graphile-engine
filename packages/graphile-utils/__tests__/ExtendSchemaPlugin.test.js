@@ -326,3 +326,71 @@ it("supports @scope directive with variable value", async () => {
   expect(errors).toBeFalsy();
   expect(data.echo).toEqual([1, 1, 2, 3, 5, 8]);
 });
+
+it("supports defining new types", async () => {
+  const schema = await buildSchema([
+    ...simplePlugins,
+    ExtendSchemaPlugin(_build => ({
+      typeDefs: gql`
+        input EchoInput {
+          text: String!
+          int: Int
+          float: Float!
+        }
+
+        type EchoOutput {
+          text: String!
+          int: Int
+          float: Float!
+        }
+
+        extend input EchoInput {
+          intList: [Int!]
+        }
+
+        extend type EchoOutput {
+          intList: [Int!]
+        }
+
+        extend type Query {
+          """
+          Gives you back what you put in
+          """
+          echo(input: EchoInput): EchoOutput
+        }
+      `,
+      resolvers,
+    })),
+  ]);
+  const printedSchema = printSchema(schema);
+  expect(printedSchema).toMatchSnapshot();
+  const { data, errors } = await graphql(
+    schema,
+    `
+      {
+        t1: echo(input: { text: "Hi1", float: 0.23 }) {
+          text
+          int
+          float
+          intList
+        }
+        t2: echo(input: { text: "Hi2", int: 42, float: 1.23 }) {
+          text
+          int
+          float
+          intList
+        }
+        t3: echo(
+          input: { text: "Hi3", int: 88, float: 2.23, intList: [99, 22, 33] }
+        ) {
+          text
+          int
+          float
+          intList
+        }
+      }
+    `
+  );
+  expect(errors).toBeFalsy();
+  expect(data).toMatchSnapshot();
+});
