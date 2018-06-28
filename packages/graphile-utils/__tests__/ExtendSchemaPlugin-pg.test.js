@@ -129,6 +129,7 @@ it("allows adding a custom field returning a list to PG schema", async () => {
                   sql.fragment`a.users`,
                   (tableAlias, sqlBuilder) => {
                     sqlBuilder.orderBy(sql.fragment`random()`);
+                    sqlBuilder.limit(3);
                   }
                 );
                 return rows;
