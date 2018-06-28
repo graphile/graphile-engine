@@ -282,6 +282,12 @@ it("allows adding a simple mutation field to PG schema", async () => {
       {}
     );
     expect(errors).toBeFalsy();
+    expect(data.user1).toBeTruthy();
+    expect(data.user1.user.nodeId).toBeTruthy();
+    expect(data.user1.user.id).toBeTruthy();
+    expect(data.user2.user.nodeId).toBeTruthy();
+    expect(data.user2.user.id).toBeTruthy();
+    expect(data.user1.user.id).not.toEqual(data.user2.user.id);
     expect(clean(data)).toMatchSnapshot();
   } finally {
     pgClient.release();
