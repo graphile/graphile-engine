@@ -7,7 +7,7 @@ import {
   MutationPlugin,
   MutationPayloadQueryPlugin,
 } from "graphile-build";
-import { printSchema } from "graphql";
+import { graphql, printSchema } from "graphql";
 
 const simplePlugins = [
   StandardTypesPlugin,
@@ -28,9 +28,24 @@ it("allows adding a simple type", async () => {
           randomNumber: Int
         }
       `,
+      resolvers: {
+        Query: {
+          randomNumber(_query, _args, _context, _info) {
+            return 4; // chosen by fair dice roll. guaranteed to be random. xkcd#221
+          },
+        },
+      },
     })),
   ]);
   const printedSchema = printSchema(schema);
-
-  console.log(printedSchema);
+  expect(printedSchema).toMatchSnapshot();
+  const { data } = await graphql(
+    schema,
+    `
+      {
+        randomNumber
+      }
+    `
+  );
+  expect(data.randomNumber).toEqual(4);
 });
