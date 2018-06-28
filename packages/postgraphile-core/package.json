@@ -12,7 +12,8 @@
     "type": "git",
     "url": "git+https://github.com/graphile/graphile-build.git"
   },
-  "author": "Benjie Gillam <benjie@jemjie.com>",
+  "author": "Benjie Gillam <code@benjiegillam.com>",
+  "homepage": "https://github.com/graphile/graphile-build/tree/master/packages/postgraphile-core",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/graphile/graphile-build/issues"
