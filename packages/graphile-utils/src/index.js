@@ -1,5 +1,4 @@
-import graphqlTag from "graphql-tag";
-import { visit } from "graphql";
+import { parse, visit } from "graphql";
 
 const $$embed = Symbol("graphile-embed");
 
@@ -19,8 +18,6 @@ export function embed(value) {
 
 export function gql(strings, ...interpolatedValues) {
   const gqlStrings = [];
-  const gqlValues = [];
-  let currentString = "";
   const placeholders = {};
   const createPlaceholderFor = value => {
     const rand = String(Math.random());
@@ -28,26 +25,27 @@ export function gql(strings, ...interpolatedValues) {
     return `"${rand}"`;
   };
   for (let idx = 0, length = strings.length; idx < length; idx++) {
-    currentString += strings[idx];
+    gqlStrings.push(strings[idx]);
     if (idx === length - 1) {
-      gqlStrings.push(currentString);
+      // NOOP: last string, so no matching interpolatedValue.
     } else {
-      if (isEmbed(interpolatedValues[idx])) {
-        currentString += createPlaceholderFor(interpolatedValues[idx].value);
+      const interpolatedValue = interpolatedValues[idx];
+      if (isEmbed(interpolatedValue)) {
+        gqlStrings.push(createPlaceholderFor(interpolatedValue.value));
       } else {
-        if (typeof interpolatedValues[idx] !== "string") {
+        if (typeof interpolatedValue !== "string") {
           throw new Error(
             `Placeholder ${idx +
-              1} is invalid - expected string, but received '${typeof interpolatedValues[
-              idx
-            ]}'. Happened after '${currentString}'`
+              1} is invalid - expected string, but received '${typeof interpolatedValue}'. Happened after '${gqlStrings.join(
+              ""
+            )}'`
           );
         }
-        currentString += String(interpolatedValues[idx]);
+        gqlStrings.push(String(interpolatedValue));
       }
     }
   }
-  const ast = graphqlTag(gqlStrings, ...gqlValues);
+  const ast = parse(gqlStrings.join(""));
   const visitor = {
     enter(node, key, parent, path, ancestors) {
       if (node.kind === "Argument") {

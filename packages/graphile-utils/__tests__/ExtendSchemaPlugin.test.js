@@ -359,7 +359,13 @@ it("supports defining new types", async () => {
           echo(input: EchoInput): EchoOutput
         }
       `,
-      resolvers,
+      resolvers: {
+        Query: {
+          echo(_query, args) {
+            return args.input;
+          },
+        },
+      },
     })),
   ]);
   const printedSchema = printSchema(schema);
