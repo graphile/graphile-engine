@@ -90,10 +90,30 @@ export function ExtendSchemaPlugin(generator) {
   }
 
   function getArguments(args, build) {
-    if (args.length) {
-      throw new Error(
-        `We don't support interfaces via ExtendSchemaPlugin yet; PRs welcome!`
-      );
+    if (args && args.length) {
+      return args.reduce((memo, arg) => {
+        if (arg.kind === "InputValueDefinition") {
+          const name = getName(arg.name);
+          const type = getType(arg.type, build);
+          const description = getDescription(arg.description);
+          if (arg.defaultValue) {
+            throw new Error(
+              `We don't support default values on args yet, PRs welcome!`
+            );
+          }
+          memo[name] = {
+            type,
+            description,
+          };
+        } else {
+          throw new Error(
+            `Unexpected '${
+              arg.kind
+            }', we were expecting an 'InputValueDefinition'`
+          );
+        }
+        return memo;
+      }, {});
     }
     return {};
   }
