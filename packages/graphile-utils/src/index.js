@@ -69,6 +69,8 @@ export function ExtendSchemaPlugin(generator) {
       return build.getTypeByName(getName(type.name));
     } else if (type.kind === "NonNullType") {
       return new build.graphql.GraphQLNonNull(getType(type.type, build));
+    } else if (type.kind === "ListType") {
+      return new build.graphql.GraphQLList(getType(type.type, build));
     } else {
       throw new Error(
         `We don't support AST type definition of kind '${
