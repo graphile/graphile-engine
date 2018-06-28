@@ -195,7 +195,11 @@ export function ExtendSchemaPlugin(generator) {
           }
           memo[name] = {
             type,
-            description,
+            ...(description
+              ? {
+                  description,
+                }
+              : null),
           };
         } else {
           throw new Error(
@@ -210,7 +214,13 @@ export function ExtendSchemaPlugin(generator) {
     return {};
   }
 
-  function getFields(Self, fields, resolvers, fieldWithHooks, build) {
+  function getFields(
+    Self,
+    fields,
+    resolvers,
+    { fieldWithHooks, recurseDataGeneratorsForField },
+    build
+  ) {
     if (fields && fields.length) {
       return fields.reduce((memo, field) => {
         if (field.kind === "FieldDefinition") {
@@ -224,14 +234,32 @@ export function ExtendSchemaPlugin(generator) {
             directives.deprecated && directives.deprecated.reason;
           const resolve =
             (resolvers[Self.name] && resolvers[Self.name][fieldName]) || null;
+          if (directives.recurseDataGenerators) {
+            recurseDataGeneratorsForField(fieldName);
+          }
           memo[fieldName] = fieldWithHooks(
             fieldName,
-            {
-              type,
-              args,
-              resolve,
-              deprecationReason,
-              description,
+            ({ getDataFromParsedResolveInfoFragment }) => {
+              return {
+                type,
+                args,
+                resolve: resolve
+                  ? (parent, args, context, info) =>
+                      resolve(parent, args, context, info, {
+                        getDataFromParsedResolveInfoFragment,
+                      })
+                  : null,
+                ...(deprecationReason
+                  ? {
+                      deprecationReason,
+                    }
+                  : null),
+                ...(description
+                  ? {
+                      description,
+                    }
+                  : null),
+              };
             },
             scope
           );
@@ -258,7 +286,11 @@ export function ExtendSchemaPlugin(generator) {
           memo[fieldName] = {
             type,
             // defaultValue
-            description,
+            ...(description
+              ? {
+                  description,
+                }
+              : null),
           };
         } else {
           throw new Error(
@@ -346,15 +378,23 @@ export function ExtendSchemaPlugin(generator) {
             {
               name,
               interfaces,
-              fields: ({ Self, fieldWithHooks }) =>
+              fields: ({
+                Self,
+                fieldWithHooks,
+                recurseDataGeneratorsForField,
+              }) =>
                 getFields(
                   Self,
                   definition.fields,
                   resolvers,
-                  fieldWithHooks,
+                  { fieldWithHooks, recurseDataGeneratorsForField },
                   build
                 ),
-              description,
+              ...(description
+                ? {
+                    description,
+                  }
+                : null),
             },
             scope
           );
@@ -369,7 +409,11 @@ export function ExtendSchemaPlugin(generator) {
               name,
               fields: ({ Self }) =>
                 getInputFields(Self, definition.fields, build),
-              description,
+              ...(description
+                ? {
+                    description,
+                  }
+                : null),
             },
             scope
           );
@@ -386,7 +430,7 @@ export function ExtendSchemaPlugin(generator) {
         ExtendSchemaPlugin_typeExtensions: typeExtensions,
         ExtendSchemaPlugin_resolvers: resolvers,
       } = build;
-      const { Self, fieldWithHooks } = context;
+      const { Self, fieldWithHooks, recurseDataGeneratorsForField } = context;
       if (typeExtensions.GraphQLObjectType[Self.name]) {
         const newFields = typeExtensions.GraphQLObjectType[Self.name].reduce(
           (memo, extension) => {
@@ -394,7 +438,7 @@ export function ExtendSchemaPlugin(generator) {
               Self,
               extension.fields,
               resolvers,
-              fieldWithHooks,
+              { fieldWithHooks, recurseDataGeneratorsForField },
               build
             );
             return extend(memo, moreFields);
