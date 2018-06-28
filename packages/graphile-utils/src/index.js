@@ -97,6 +97,60 @@ export function ExtendSchemaPlugin(generator) {
     return [];
   }
 
+  function getValue(value) {
+    if (value.kind === "BooleanValue") {
+      return !!value.value;
+    } else if (value.kind === "StringValue") {
+      return value.value;
+    } else if (value.kind === "IntValue") {
+      return parseInt(value.value, 10);
+    } else if (value.kind === "FloatValue") {
+      return parseFloat(value.value);
+    } else if (value.kind === "NullValue") {
+      return null;
+    } else {
+      throw new Error(
+        `Value kind '${value.kind}' not supported yet. PRs welcome!`
+      );
+    }
+  }
+
+  function getDirectives(directives) {
+    return (directives || []).reduce((memo, directive) => {
+      if (directive.kind === "Directive") {
+        const name = getName(directive.name);
+        const value = directive.arguments.reduce((memo, arg) => {
+          if (arg.kind === "Argument") {
+            const argName = getName(arg.name);
+            const argValue = getValue(arg.value);
+            if (memo[name]) {
+              throw new Error(
+                `Argument '${argName}' of directive '${name}' must only be used once.`
+              );
+            }
+            memo[argName] = argValue;
+          } else {
+            throw new Error(
+              `Unexpected '${arg.kind}', we were expecting 'Argument'`
+            );
+          }
+          return memo;
+        }, {});
+        if (memo[name]) {
+          throw new Error(
+            `Directive '${name}' must only be used once per field.`
+          );
+        }
+        memo[name] = value;
+      } else {
+        throw new Error(
+          `Unexpected '${directive.kind}', we were expecting 'Directive'`
+        );
+      }
+      return memo;
+    }, {});
+  }
+
   function getArguments(args, build) {
     if (args && args.length) {
       return args.reduce((memo, arg) => {
@@ -176,10 +230,10 @@ export function ExtendSchemaPlugin(generator) {
                   const fieldName = getName(field.name);
                   const args = getArguments(field.arguments, build);
                   const type = getType(field.type, build);
-                  const scope = {
-                    // TODO: add directives here!
-                  };
-                  const deprecationReason = null; // TODO: extract from directive!
+                  const directives = getDirectives(field.directives);
+                  const scope = directives.scope || {};
+                  const deprecationReason =
+                    directives.deprecated && directives.deprecated.reason;
                   const resolve =
                     (resolvers[Self.name] && resolvers[Self.name][fieldName]) ||
                     null;

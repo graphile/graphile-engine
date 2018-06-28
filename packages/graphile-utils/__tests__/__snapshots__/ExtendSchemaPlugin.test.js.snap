@@ -76,3 +76,30 @@ type Query {
 }
 "
 `;
+
+exports[`supports @scope directive with simple values 1`] = `
+Object {
+  "fieldName": "echo",
+  "floatTest": 3.141592,
+  "intTest": 42,
+  "isEchoField": true,
+  "isRootQuery": true,
+  "nullTest": null,
+  "stringTest": "THIS_IS_A_STRING",
+}
+`;
+
+exports[`supports @scope directive with simple values 2`] = `
+"\\"\\"\\"The root query type which gives access points into the data universe.\\"\\"\\"
+type Query {
+  \\"\\"\\"
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  \\"\\"\\"
+  query: Query!
+
+  \\"\\"\\"Gives you back what you put in\\"\\"\\"
+  echo(input: [Int!]!): [Int!]!
+}
+"
+`;

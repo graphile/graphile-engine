@@ -9,6 +9,33 @@ import {
 } from "graphile-build";
 import { graphql, printSchema } from "graphql";
 
+function TestUtils_ExtractScopePlugin(
+  hook,
+  objectTypeName,
+  fieldNameOrCallback,
+  possiblyCallback
+) {
+  const callback =
+    typeof fieldNameOrCallback === "function" && !possiblyCallback
+      ? fieldNameOrCallback
+      : possiblyCallback;
+  const fieldName = possiblyCallback && fieldNameOrCallback;
+  return builder => {
+    builder.hook(hook, (_, build, context) => {
+      const { Self } = context;
+      const currentObjectTypeName = (Self && Self.name) || _.name;
+      const currentFieldName = Self ? context.scope.fieldName : undefined;
+      if (
+        currentObjectTypeName === objectTypeName &&
+        (!fieldName || fieldName === currentFieldName)
+      ) {
+        callback(context.scope);
+      }
+      return _;
+    });
+  };
+}
+
 const simplePlugins = [
   StandardTypesPlugin,
   QueryPlugin,
@@ -173,6 +200,62 @@ it("allows adding a field with arguments named using a custom inflector", async 
     `
       {
         echo: myCustomEchoFieldName(input: [1, 1, 2, 3, 5, 8])
+      }
+    `
+  );
+  expect(errors).toBeFalsy();
+  expect(data.echo).toEqual([1, 1, 2, 3, 5, 8]);
+});
+
+it("supports @scope directive with simple values", async () => {
+  let scope;
+  function storeScope(_scope) {
+    if (scope) {
+      throw new Error("Scope already stored!");
+    }
+    scope = _scope;
+  }
+  const schema = await buildSchema([
+    ...simplePlugins,
+    ExtendSchemaPlugin(build => ({
+      typeDefs: gql`
+        extend type Query {
+          """
+          Gives you back what you put in
+          """
+          echo(input: [Int!]!): [Int!]!
+            @scope(
+              isEchoField: true
+              stringTest: "THIS_IS_A_STRING"
+              intTest: 42
+              floatTest: 3.141592
+              nullTest: null
+            )
+        }
+      `,
+      resolvers,
+    })),
+    TestUtils_ExtractScopePlugin(
+      "GraphQLObjectType:fields:field",
+      "Query",
+      "echo",
+      storeScope
+    ),
+  ]);
+  expect(scope).toBeTruthy();
+  expect(scope.isEchoField).toEqual(true);
+  expect(scope.stringTest).toEqual("THIS_IS_A_STRING");
+  expect(scope.intTest).toEqual(42);
+  expect(scope.floatTest).toEqual(3.141592);
+  expect(scope.nullTest).toEqual(null);
+  expect(scope).toMatchSnapshot();
+  const printedSchema = printSchema(schema);
+  expect(printedSchema).toMatchSnapshot();
+  const { data, errors } = await graphql(
+    schema,
+    `
+      {
+        echo(input: [1, 1, 2, 3, 5, 8])
       }
     `
   );
