@@ -46,12 +46,7 @@ it("allows us to easily extend a PG schema", async () => {
     disableDefaultMutations: true,
     appendPlugins: [
       ExtendSchemaPlugin(build => {
-        const {
-          pgSql: sql,
-          parseResolveInfo,
-          getTypeByName,
-          pgQueryFromResolveData,
-        } = build;
+        const { pgSql: sql } = build;
         return {
           typeDefs: gql`
             input RegisterUserInput {
@@ -75,35 +70,23 @@ it("allows us to easily extend a PG schema", async () => {
                 args,
                 context,
                 resolveInfo,
-                { getDataFromParsedResolveInfoFragment }
+                { select }
               ) {
                 const { pgClient } = context;
-                const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
-                const PayloadType = getTypeByName("RegisterUserPayload");
-                const resolveData = getDataFromParsedResolveInfoFragment(
-                  parsedResolveInfoFragment,
-                  PayloadType
-                );
                 await pgClient.query("begin");
                 try {
                   const { rows: [user] } = await pgClient.query(
                     `insert into a.users(name, email, bio) values ($1, $2, $3) returning *`,
                     [args.input.name, args.input.email, args.input.bio]
                   );
-                  const tableAlias = sql.identifier(Symbol());
-                  const query = pgQueryFromResolveData(
+                  const [row] = await select(
                     sql.fragment`a.users`,
-                    tableAlias,
-                    resolveData,
-                    {},
-                    sqlBuilder => {
+                    (tableAlias, sqlBuilder) => {
                       sqlBuilder.where(
                         sql.fragment`${tableAlias}.id = ${sql.value(user.id)}`
                       );
                     }
                   );
-                  const { text, values } = sql.compile(query);
-                  const { rows: [row] } = await pgClient.query(text, values);
                   await mockSendEmail(
                     args.input.email,
                     "Welcome to my site",

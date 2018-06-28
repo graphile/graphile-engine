@@ -221,6 +221,41 @@ export function ExtendSchemaPlugin(generator) {
     { fieldWithHooks, recurseDataGeneratorsForField },
     build
   ) {
+    const {
+      getTypeByName,
+      parseResolveInfo,
+      pgQueryFromResolveData,
+      pgSql: sql,
+    } = build;
+    function augmentResolver(resolver, fieldScope) {
+      const { getDataFromParsedResolveInfoFragment } = fieldScope;
+      return (parent, args, context, resolveInfo) => {
+        const select = async (tableFragment, builderCallback) => {
+          const { pgClient } = context;
+          const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
+          const PayloadType = getTypeByName("RegisterUserPayload");
+          const resolveData = getDataFromParsedResolveInfoFragment(
+            parsedResolveInfoFragment,
+            PayloadType
+          );
+          const tableAlias = sql.identifier(Symbol());
+          const query = pgQueryFromResolveData(
+            tableFragment,
+            tableAlias,
+            resolveData,
+            {},
+            sqlBuilder => builderCallback(tableAlias, sqlBuilder)
+          );
+          const { text, values } = sql.compile(query);
+          const { rows } = await pgClient.query(text, values);
+          return rows;
+        };
+        return resolver(parent, args, context, resolveInfo, {
+          ...fieldScope,
+          select,
+        });
+      };
+    }
     if (fields && fields.length) {
       return fields.reduce((memo, field) => {
         if (field.kind === "FieldDefinition") {
@@ -239,16 +274,11 @@ export function ExtendSchemaPlugin(generator) {
           }
           memo[fieldName] = fieldWithHooks(
             fieldName,
-            ({ getDataFromParsedResolveInfoFragment }) => {
+            fieldScope => {
               return {
                 type,
                 args,
-                resolve: resolve
-                  ? (parent, args, context, info) =>
-                      resolve(parent, args, context, info, {
-                        getDataFromParsedResolveInfoFragment,
-                      })
-                  : null,
+                resolve: resolve ? augmentResolver(resolve, fieldScope) : null,
                 ...(deprecationReason
                   ? {
                       deprecationReason,
