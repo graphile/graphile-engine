@@ -47,7 +47,7 @@ export function gql(strings, ...interpolatedValues) {
   }
   const ast = parse(gqlStrings.join(""));
   const visitor = {
-    enter(node, key, parent, path, ancestors) {
+    enter(node, _key, _parent, _path, _ancestors) {
       if (node.kind === "Argument") {
         if (node.value.kind === "StringValue") {
           if (placeholders[node.value.value]) {
@@ -115,7 +115,7 @@ export function ExtendSchemaPlugin(generator) {
     }
   }
 
-  function getInterfaces(interfaces, build) {
+  function getInterfaces(interfaces, _build) {
     if (interfaces.length) {
       throw new Error(
         `We don't support interfaces via ExtendSchemaPlugin yet; PRs welcome!`
@@ -221,12 +221,7 @@ export function ExtendSchemaPlugin(generator) {
     { fieldWithHooks, recurseDataGeneratorsForField },
     build
   ) {
-    const {
-      getTypeByName,
-      parseResolveInfo,
-      pgQueryFromResolveData,
-      pgSql: sql,
-    } = build;
+    const { parseResolveInfo, pgQueryFromResolveData, pgSql: sql } = build;
     function augmentResolver(resolver, fieldScope) {
       const { getDataFromParsedResolveInfoFragment } = fieldScope;
       return (parent, args, context, resolveInfo) => {
