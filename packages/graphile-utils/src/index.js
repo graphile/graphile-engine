@@ -97,7 +97,11 @@ export function ExtendSchemaPlugin(generator) {
 
   function getType(type, build) {
     if (type.kind === "NamedType") {
-      return build.getTypeByName(getName(type.name));
+      const Type = build.getTypeByName(getName(type.name));
+      if (!Type) {
+        throw new Error(`Could not find type named '${getName(type.name)}'.`);
+      }
+      return Type;
     } else if (type.kind === "NonNullType") {
       return new build.graphql.GraphQLNonNull(getType(type.type, build));
     } else if (type.kind === "ListType") {
