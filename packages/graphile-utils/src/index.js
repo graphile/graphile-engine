@@ -233,7 +233,7 @@ export function ExtendSchemaPlugin(generator) {
         const select = async (tableFragment, builderCallback) => {
           const { pgClient } = context;
           const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
-          const PayloadType = getTypeByName("RegisterUserPayload");
+          const PayloadType = resolveInfo.returnType;
           const resolveData = getDataFromParsedResolveInfoFragment(
             parsedResolveInfoFragment,
             PayloadType

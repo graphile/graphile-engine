@@ -13,3 +13,8 @@ create table a.users (
   bio text,
   created_at timestamptz not null default now()
 );
+
+insert into a.users (name, email, bio) values
+  ('Alice', 'alice@example.com', null),
+  ('Bob', 'bob@example.com', 'I''m a thought leader!'),
+  ('Caroline', 'caroline@example.com', 'Saving the world, one disease at a time');

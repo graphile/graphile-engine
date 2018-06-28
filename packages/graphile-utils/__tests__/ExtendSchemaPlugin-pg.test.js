@@ -41,7 +41,70 @@ afterAll(() => {
   }
 });
 
-it("allows us to easily extend a PG schema", async () => {
+it("allows adding a custom single field to PG schema", async () => {
+  const schema = await createPostGraphileSchema(pgPool, ["a"], {
+    disableDefaultMutations: true,
+    appendPlugins: [
+      ExtendSchemaPlugin(build => {
+        const { pgSql: sql } = build;
+        return {
+          typeDefs: gql`
+            extend type Query {
+              randomUser: User
+            }
+          `,
+          resolvers: {
+            Query: {
+              async randomUser(_query, args, context, resolveInfo, { select }) {
+                const rows = await select(
+                  sql.fragment`a.users`,
+                  (tableAlias, sqlBuilder) => {
+                    sqlBuilder.orderBy(sql.fragment`random()`);
+                    sqlBuilder.limit(1);
+                  }
+                );
+                return rows[0];
+              },
+            },
+          },
+        };
+      }),
+    ],
+  });
+  const printedSchema = printSchema(schema);
+  expect(printedSchema).toMatchSnapshot();
+  const pgClient = await pgPool.connect();
+  try {
+    const { data, errors } = await graphql(
+      schema,
+      `
+        query {
+          randomUser {
+            nodeId
+            id
+            name
+            email
+            bio
+          }
+        }
+      `,
+      null,
+      { pgClient },
+      {}
+    );
+    expect(errors).toBeFalsy();
+    expect(data).toBeTruthy();
+    expect(data.randomUser).toBeTruthy();
+    expect(data.randomUser.id).toBeTruthy();
+    expect(data.randomUser.nodeId).toBeTruthy();
+    expect(data.randomUser.name).toBeTruthy();
+    expect(data.randomUser.email).toBeTruthy();
+  } finally {
+    pgClient.release();
+  }
+});
+
+it("allows adding a simple mutation field to PG schema", async () => {
   const schema = await createPostGraphileSchema(pgPool, ["a"], {
     disableDefaultMutations: true,
     appendPlugins: [
