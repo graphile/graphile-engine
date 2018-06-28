@@ -1,4 +1,4 @@
-import { ExtendSchemaPlugin, gql } from "../src";
+import { ExtendSchemaPlugin, AddInflectorsPlugin, gql } from "../src";
 import {
   buildSchema,
   // defaultPlugins,
@@ -139,5 +139,43 @@ it("allows adding a field with arguments", async () => {
       }
     `
   );
+  expect(data.echo).toEqual([1, 1, 2, 3, 5, 8]);
+});
+
+it("allows adding a field with arguments named using a custom inflector", async () => {
+  const schema = await buildSchema([
+    ...simplePlugins,
+    AddInflectorsPlugin({
+      echoFieldName() {
+        return this.camelCase("my-custom-echo-field-name");
+      },
+    }),
+    ExtendSchemaPlugin(build => ({
+      typeDefs: gql`
+        extend type Query {
+          """
+          Gives you back what you put in
+          """
+          ${build.inflection.echoFieldName()}(input: [Int!]!): [Int!]!
+        }
+      `,
+      resolvers: {
+        Query: {
+          [build.inflection.echoFieldName()]: resolvers.Query.echo,
+        },
+      },
+    })),
+  ]);
+  const printedSchema = printSchema(schema);
+  expect(printedSchema).toMatchSnapshot();
+  const { data, errors } = await graphql(
+    schema,
+    `
+      {
+        echo: myCustomEchoFieldName(input: [1, 1, 2, 3, 5, 8])
+      }
+    `
+  );
+  expect(errors).toBeFalsy();
   expect(data.echo).toEqual([1, 1, 2, 3, 5, 8]);
 });

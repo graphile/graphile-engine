@@ -15,6 +15,21 @@ type Query {
 "
 `;
 
+exports[`allows adding a field with arguments named using a custom inflector 1`] = `
+"\\"\\"\\"The root query type which gives access points into the data universe.\\"\\"\\"
+type Query {
+  \\"\\"\\"
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  \\"\\"\\"
+  query: Query!
+
+  \\"\\"\\"Gives you back what you put in\\"\\"\\"
+  myCustomEchoFieldName(input: [Int!]!): [Int!]!
+}
+"
+`;
+
 exports[`allows adding a non-null list of non-null type 1`] = `
 "\\"\\"\\"The root query type which gives access points into the data universe.\\"\\"\\"
 type Query {

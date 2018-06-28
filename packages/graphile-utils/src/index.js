@@ -42,6 +42,14 @@ export function gql(strings, ...placeholders) {
   return graphqlTag(gqlStrings, ...gqlValues);
 }
 
+export function AddInflectorsPlugin(additionalInflectors) {
+  return builder => {
+    builder.hook("inflection", (inflection, build) => {
+      return build.extend(inflection, additionalInflectors);
+    });
+  };
+}
+
 export function ExtendSchemaPlugin(generator) {
   function getName(name) {
     if (name && name.kind === "Name" && name.value) {
