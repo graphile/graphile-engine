@@ -104,6 +104,75 @@ it("allows adding a custom single field to PG schema", async () => {
   }
 });
 
+it("allows adding a custom field returning a list to PG schema", async () => {
+  const schema = await createPostGraphileSchema(pgPool, ["a"], {
+    disableDefaultMutations: true,
+    appendPlugins: [
+      ExtendSchemaPlugin(build => {
+        const { pgSql: sql } = build;
+        return {
+          typeDefs: gql`
+            extend type Query {
+              randomUsers: [User!]
+            }
+          `,
+          resolvers: {
+            Query: {
+              async randomUsers(
+                _query,
+                args,
+                context,
+                resolveInfo,
+                { select }
+              ) {
+                const rows = await select(
+                  sql.fragment`a.users`,
+                  (tableAlias, sqlBuilder) => {
+                    sqlBuilder.orderBy(sql.fragment`random()`);
+                  }
+                );
+                return rows;
+              },
+            },
+          },
+        };
+      }),
+    ],
+  });
+  const printedSchema = printSchema(schema);
+  expect(printedSchema).toMatchSnapshot();
+  const pgClient = await pgPool.connect();
+  try {
+    const { data, errors } = await graphql(
+      schema,
+      `
+        query {
+          randomUsers {
+            nodeId
+            id
+            name
+            email
+            bio
+          }
+        }
+      `,
+      null,
+      { pgClient },
+      {}
+    );
+    expect(errors).toBeFalsy();
+    expect(data).toBeTruthy();
+    expect(data.randomUsers).toBeTruthy();
+    expect(data.randomUsers.length).toEqual(3);
+    expect(data.randomUsers[2].id).toBeTruthy();
+    expect(data.randomUsers[2].nodeId).toBeTruthy();
+    expect(data.randomUsers[2].name).toBeTruthy();
+    expect(data.randomUsers[2].email).toBeTruthy();
+  } finally {
+    pgClient.release();
+  }
+});
+
 it("allows adding a simple mutation field to PG schema", async () => {
   const schema = await createPostGraphileSchema(pgPool, ["a"], {
     disableDefaultMutations: true,
