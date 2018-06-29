@@ -79,6 +79,15 @@ type Query {
 
 exports[`supports @scope directive with simple values 1`] = `
 Object {
+  "fieldDirectives": Object {
+    "scope": Object {
+      "floatTest": 3.141592,
+      "intTest": 42,
+      "isEchoField": true,
+      "nullTest": null,
+      "stringTest": "THIS_IS_A_STRING",
+    },
+  },
   "fieldName": "echo",
   "floatTest": 3.141592,
   "intTest": 42,
@@ -118,6 +127,28 @@ Object {
       ],
     ],
     Symbol(test-secret): "Fred",
+  },
+  "fieldDirectives": Object {
+    "scope": Object {
+      "embedTest": Object {
+        "sub": Array [
+          Array [
+            11,
+            22,
+          ],
+          Array [
+            33,
+            44,
+          ],
+        ],
+        Symbol(test-secret): "Fred",
+      },
+      "floatTest": 3.141592,
+      "intTest": 42,
+      "isEchoField": true,
+      "nullTest": null,
+      "stringTest": "THIS_IS_A_STRING",
+    },
   },
   "fieldName": "echo",
   "floatTest": 3.141592,

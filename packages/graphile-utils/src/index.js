@@ -259,7 +259,10 @@ export function ExtendSchemaPlugin(generator) {
           const args = getArguments(field.arguments, build);
           const type = getType(field.type, build);
           const directives = getDirectives(field.directives);
-          const scope = directives.scope || {};
+          const scope = {
+            fieldDirectives: directives,
+            ...(directives.scope || {}),
+          };
           const deprecationReason =
             directives.deprecated && directives.deprecated.reason;
           const resolve =
@@ -397,7 +400,10 @@ export function ExtendSchemaPlugin(generator) {
           const description = getDescription(definition.description);
           const interfaces = getInterfaces(definition.interfaces);
           const directives = getDirectives(definition.directives);
-          const scope = directives.scope || {};
+          const scope = {
+            directives,
+            ...(directives.scope || {}),
+          };
           newWithHooks(
             type,
             {
@@ -427,7 +433,10 @@ export function ExtendSchemaPlugin(generator) {
           const name = getName(definition.name);
           const description = getDescription(definition.description);
           const directives = getDirectives(definition.directives);
-          const scope = directives.scope || {};
+          const scope = {
+            directives,
+            ...(directives.scope || {}),
+          };
           newWithHooks(
             type,
             {
