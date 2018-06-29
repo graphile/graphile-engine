@@ -216,8 +216,9 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
   const allTypes = {
     Int: graphql.GraphQLInt,
     Float: graphql.GraphQLFloat,
-    Boolean: graphql.GraphQLBoolean,
     String: graphql.GraphQLString,
+    Boolean: graphql.GraphQLBoolean,
+    ID: graphql.GraphQLID,
   };
 
   // Every object type gets fieldData associated with each of its
