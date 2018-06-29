@@ -55,8 +55,8 @@ it("allows adding a custom single field to PG schema", async () => {
           `,
           resolvers: {
             Query: {
-              async randomUser(_query, args, context, resolveInfo, { select }) {
-                const rows = await select(
+              async randomUser(_query, args, context, resolveInfo, { selectGraphQLResultFromTable }) {
+                const rows = await selectGraphQLResultFromTable(
                   sql.fragment`a.users`,
                   (tableAlias, sqlBuilder) => {
                     sqlBuilder.orderBy(sql.fragment`random()`);
@@ -123,9 +123,9 @@ it("allows adding a custom field returning a list to PG schema", async () => {
                 args,
                 context,
                 resolveInfo,
-                { select }
+                { selectGraphQLResultFromTable }
               ) {
-                const rows = await select(
+                const rows = await selectGraphQLResultFromTable(
                   sql.fragment`a.users`,
                   (tableAlias, sqlBuilder) => {
                     sqlBuilder.orderBy(sql.fragment`random()`);
@@ -203,7 +203,7 @@ it("allows adding a simple mutation field to PG schema", async () => {
                 args,
                 context,
                 resolveInfo,
-                { select }
+                { selectGraphQLResultFromTable }
               ) {
                 const { pgClient } = context;
                 await pgClient.query("begin");
@@ -212,7 +212,7 @@ it("allows adding a simple mutation field to PG schema", async () => {
                     `insert into a.users(name, email, bio) values ($1, $2, $3) returning *`,
                     [args.input.name, args.input.email, args.input.bio]
                   );
-                  const [row] = await select(
+                  const [row] = await selectGraphQLResultFromTable(
                     sql.fragment`a.users`,
                     (tableAlias, sqlBuilder) => {
                       sqlBuilder.where(

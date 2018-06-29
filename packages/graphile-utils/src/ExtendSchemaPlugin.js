@@ -322,7 +322,10 @@ function getFields(
   function augmentResolver(resolver, fieldScope) {
     const { getDataFromParsedResolveInfoFragment } = fieldScope;
     return (parent, args, context, resolveInfo) => {
-      const select = async (tableFragment, builderCallback) => {
+      const selectGraphQLResultFromTable = async (
+        tableFragment,
+        builderCallback
+      ) => {
         const { pgClient } = context;
         const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
         const PayloadType = resolveInfo.returnType;
@@ -344,7 +347,7 @@ function getFields(
       };
       return resolver(parent, args, context, resolveInfo, {
         ...fieldScope,
-        select,
+        selectGraphQLResultFromTable,
       });
     };
   }
