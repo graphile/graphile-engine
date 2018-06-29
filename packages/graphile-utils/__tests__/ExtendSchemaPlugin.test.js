@@ -1,4 +1,4 @@
-import { ExtendSchemaPlugin, AddInflectorsPlugin, gql, embed } from "../src";
+import { makeExtendSchemaPlugin, makeAddInflectorsPlugin, gql, embed } from "../src";
 import {
   buildSchema,
   // defaultPlugins,
@@ -60,7 +60,7 @@ const resolvers = {
 it("allows adding a simple type", async () => {
   const schema = await buildSchema([
     ...simplePlugins,
-    ExtendSchemaPlugin(_build => ({
+    makeExtendSchemaPlugin(_build => ({
       typeDefs: gql`
         extend type Query {
           """
@@ -88,7 +88,7 @@ it("allows adding a simple type", async () => {
 it("allows adding a non-null type", async () => {
   const schema = await buildSchema([
     ...simplePlugins,
-    ExtendSchemaPlugin(_build => ({
+    makeExtendSchemaPlugin(_build => ({
       typeDefs: gql`
         extend type Query {
           """
@@ -116,7 +116,7 @@ it("allows adding a non-null type", async () => {
 it("allows adding a non-null list of non-null type", async () => {
   const schema = await buildSchema([
     ...simplePlugins,
-    ExtendSchemaPlugin(_build => ({
+    makeExtendSchemaPlugin(_build => ({
       typeDefs: gql`
         extend type Query {
           """
@@ -144,7 +144,7 @@ it("allows adding a non-null list of non-null type", async () => {
 it("allows adding a field with arguments", async () => {
   const schema = await buildSchema([
     ...simplePlugins,
-    ExtendSchemaPlugin(_build => ({
+    makeExtendSchemaPlugin(_build => ({
       typeDefs: gql`
         extend type Query {
           """
@@ -172,12 +172,12 @@ it("allows adding a field with arguments", async () => {
 it("allows adding a field with arguments named using a custom inflector", async () => {
   const schema = await buildSchema([
     ...simplePlugins,
-    AddInflectorsPlugin({
+    makeAddInflectorsPlugin({
       echoFieldName() {
         return this.camelCase("my-custom-echo-field-name");
       },
     }),
-    ExtendSchemaPlugin(build => ({
+    makeExtendSchemaPlugin(build => ({
       typeDefs: gql`
         extend type Query {
           """
@@ -217,7 +217,7 @@ it("supports @scope directive with simple values", async () => {
   }
   const schema = await buildSchema([
     ...simplePlugins,
-    ExtendSchemaPlugin(_build => ({
+    makeExtendSchemaPlugin(_build => ({
       typeDefs: gql`
         extend type Query {
           """
@@ -274,7 +274,7 @@ it("supports @scope directive with variable value", async () => {
   const secret = Symbol("test-secret");
   const schema = await buildSchema([
     ...simplePlugins,
-    ExtendSchemaPlugin(_build => ({
+    makeExtendSchemaPlugin(_build => ({
       typeDefs: gql`
         extend type Query {
           """
@@ -330,7 +330,7 @@ it("supports @scope directive with variable value", async () => {
 it("supports defining new types", async () => {
   const schema = await buildSchema([
     ...simplePlugins,
-    ExtendSchemaPlugin(_build => ({
+    makeExtendSchemaPlugin(_build => ({
       typeDefs: gql`
         input EchoInput {
           text: String!

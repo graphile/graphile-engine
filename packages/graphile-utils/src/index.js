@@ -1,5 +1,5 @@
 import { embed, gql } from "./gql";
-import AddInflectorsPlugin from "./AddInflectorsPlugin";
-import ExtendSchemaPlugin from "./ExtendSchemaPlugin";
+import makeAddInflectorsPlugin from "./makeAddInflectorsPlugin";
+import makeExtendSchemaPlugin from "./makeExtendSchemaPlugin";
 
-export { embed, gql, AddInflectorsPlugin, ExtendSchemaPlugin };
+export { embed, gql, makeAddInflectorsPlugin, makeExtendSchemaPlugin };

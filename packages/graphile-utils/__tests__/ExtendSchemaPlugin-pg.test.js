@@ -1,7 +1,7 @@
 import pg from "pg";
 import { graphql, printSchema } from "graphql";
 import { createPostGraphileSchema } from "postgraphile-core";
-import { ExtendSchemaPlugin, gql } from "../src";
+import { makeExtendSchemaPlugin, gql } from "../src";
 
 const clean = data => {
   if (Array.isArray(data)) {
@@ -45,7 +45,7 @@ it("allows adding a custom single field to PG schema", async () => {
   const schema = await createPostGraphileSchema(pgPool, ["a"], {
     disableDefaultMutations: true,
     appendPlugins: [
-      ExtendSchemaPlugin(build => {
+      makeExtendSchemaPlugin(build => {
         const { pgSql: sql } = build;
         return {
           typeDefs: gql`
@@ -108,7 +108,7 @@ it("allows adding a custom field returning a list to PG schema", async () => {
   const schema = await createPostGraphileSchema(pgPool, ["a"], {
     disableDefaultMutations: true,
     appendPlugins: [
-      ExtendSchemaPlugin(build => {
+      makeExtendSchemaPlugin(build => {
         const { pgSql: sql } = build;
         return {
           typeDefs: gql`
@@ -178,7 +178,7 @@ it("allows adding a simple mutation field to PG schema", async () => {
   const schema = await createPostGraphileSchema(pgPool, ["a"], {
     disableDefaultMutations: true,
     appendPlugins: [
-      ExtendSchemaPlugin(build => {
+      makeExtendSchemaPlugin(build => {
         const { pgSql: sql } = build;
         return {
           typeDefs: gql`
