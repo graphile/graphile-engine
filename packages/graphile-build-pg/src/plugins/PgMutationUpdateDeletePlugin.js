@@ -99,6 +99,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                   introspectionResultsByKind.attribute
                     .filter(attr => attr.classId === table.id)
                     .filter(attr => pgColumnFilter(attr, build, context))
+                    .filter(attr => !omit(attr, "update"))
                     .forEach(attr => {
                       const fieldName = inflection.column(attr);
                       if (
