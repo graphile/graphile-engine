@@ -1228,6 +1228,16 @@ Object {
 }
 `;
 
+exports[`rbac.deletePerson.graphql 1`] = `
+Object {
+  "data": Object {
+    "deletePersonById": Object {
+      "deletedPersonId": "WyJwZW9wbGUiLDNd",
+    },
+  },
+}
+`;
+
 exports[`rbac.updatePerson.graphql 1`] = `
 Object {
   "data": Object {

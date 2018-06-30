@@ -106,7 +106,7 @@ create table a.post (
   id serial primary key,
   headline text not null,
   body text,
-  author_id int4 default c.current_user_id() references c.person(id),
+  author_id int4 default c.current_user_id() references c.person(id) on delete cascade,
   enums a.an_enum[],
   comptypes a.comptype[]
 );
@@ -155,21 +155,21 @@ comment on column b.updatable_view.constant is 'This is constantly 2';
 create view a.non_updatable_view as select 2;
 
 create table c.compound_key (
-  person_id_2 int references c.person(id),
-  person_id_1 int references c.person(id),
+  person_id_2 int references c.person(id) on delete cascade,
+  person_id_1 int references c.person(id) on delete cascade,
   extra boolean,
   primary key (person_id_1, person_id_2)
 );
 
 create table a.foreign_key (
-  person_id int references c.person(id),
+  person_id int references c.person(id) on delete cascade,
   compound_key_1 int,
   compound_key_2 int,
-  foreign key (compound_key_1, compound_key_2) references c.compound_key(person_id_1, person_id_2)
+  foreign key (compound_key_1, compound_key_2) references c.compound_key(person_id_1, person_id_2) on delete cascade
 );
 
 alter table a.foreign_key add constraint second_fkey
-  foreign key (compound_key_1, compound_key_2) references c.compound_key(person_id_1, person_id_2);
+  foreign key (compound_key_1, compound_key_2) references c.compound_key(person_id_1, person_id_2) on delete cascade;
 
 create table c.edge_case (
   not_null_has_default boolean not null default false,
@@ -480,7 +480,7 @@ $$ language sql stable;
 create table d.post (
   id serial primary key,
   body text,
-  author_id int4 references d.person(id)
+  author_id int4 references d.person(id) on delete cascade
 );
 
 comment on constraint post_author_id_fkey on d.post is E'@foreignFieldName posts\n@fieldName author';
@@ -543,13 +543,13 @@ create table d.studios (
 create table d.tv_shows (
     code        integer PRIMARY KEY,
     title       varchar(40),
-    studio_id   integer references d.studios
+    studio_id   integer references d.studios on delete cascade
 );
 
 
 create table d.tv_episodes (
     code        integer PRIMARY KEY,
     title       varchar(40),
-    show_id     integer references d.tv_shows
+    show_id     integer references d.tv_shows on delete cascade
 );
 
