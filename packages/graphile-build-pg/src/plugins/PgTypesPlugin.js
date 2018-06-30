@@ -142,7 +142,7 @@ export default (function PgTypesPlugin(
         // eslint-disable-next-line no-console
         console.warn(
           "gql2pg should be called with three arguments, the third being the type modifier (or `null`); " +
-            stack
+            (stack || "")
         );
         // Hack for backwards compatibility:
         modifier = null;
