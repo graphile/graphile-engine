@@ -299,6 +299,7 @@ scalar Email
 type LeftArm implements Node {
   id: Int!
   lengthInMetres: Float
+  mood: String!
 
   \\"\\"\\"
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
@@ -320,6 +321,9 @@ input LeftArmCondition {
   \\"\\"\\"Checks for equality with the object’s \`lengthInMetres\` field.\\"\\"\\"
   lengthInMetres: Float
 
+  \\"\\"\\"Checks for equality with the object’s \`mood\` field.\\"\\"\\"
+  mood: String
+
   \\"\\"\\"Checks for equality with the object’s \`personId\` field.\\"\\"\\"
   personId: Int
 }
@@ -333,7 +337,7 @@ input LeftArmInput {
 Represents an update to a \`LeftArm\`. Fields that are set will be updated.
 \\"\\"\\"
 input LeftArmPatch {
-  lengthInMetres: Float
+  mood: String
 }
 
 \\"\\"\\"A connection to a list of \`LeftArm\` values.\\"\\"\\"
@@ -368,6 +372,8 @@ enum LeftArmsOrderBy {
   ID_DESC
   LENGTH_IN_METRES_ASC
   LENGTH_IN_METRES_DESC
+  MOOD_ASC
+  MOOD_DESC
   NATURAL
   PERSON_ID_ASC
   PERSON_ID_DESC
@@ -4203,6 +4209,7 @@ type JwtToken {
 type LeftArm implements Node {
   id: Int!
   lengthInMetres: Float
+  mood: String!
 
   \\"\\"\\"
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
@@ -4224,6 +4231,9 @@ input LeftArmCondition {
   \\"\\"\\"Checks for equality with the object’s \`lengthInMetres\` field.\\"\\"\\"
   lengthInMetres: Float
 
+  \\"\\"\\"Checks for equality with the object’s \`mood\` field.\\"\\"\\"
+  mood: String
+
   \\"\\"\\"Checks for equality with the object’s \`personId\` field.\\"\\"\\"
   personId: Int
 }
@@ -4232,6 +4242,7 @@ input LeftArmCondition {
 input LeftArmInput {
   id: Int
   lengthInMetres: Float
+  mood: String
   personId: Int
 }
 
@@ -4241,6 +4252,7 @@ Represents an update to a \`LeftArm\`. Fields that are set will be updated.
 input LeftArmPatch {
   id: Int
   lengthInMetres: Float
+  mood: String
   personId: Int
 }
 
@@ -4276,6 +4288,8 @@ enum LeftArmsOrderBy {
   ID_DESC
   LENGTH_IN_METRES_ASC
   LENGTH_IN_METRES_DESC
+  MOOD_ASC
+  MOOD_DESC
   NATURAL
   PERSON_ID_ASC
   PERSON_ID_DESC

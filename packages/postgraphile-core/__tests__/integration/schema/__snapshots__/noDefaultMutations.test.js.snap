@@ -557,6 +557,7 @@ type JsonIdentityMutationPayload {
 type LeftArm implements Node {
   id: Int!
   lengthInMetres: Float
+  mood: String!
 
   \\"\\"\\"
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
@@ -577,6 +578,9 @@ input LeftArmCondition {
 
   \\"\\"\\"Checks for equality with the object’s \`lengthInMetres\` field.\\"\\"\\"
   lengthInMetres: Float
+
+  \\"\\"\\"Checks for equality with the object’s \`mood\` field.\\"\\"\\"
+  mood: String
 
   \\"\\"\\"Checks for equality with the object’s \`personId\` field.\\"\\"\\"
   personId: Int
@@ -614,6 +618,8 @@ enum LeftArmsOrderBy {
   ID_DESC
   LENGTH_IN_METRES_ASC
   LENGTH_IN_METRES_DESC
+  MOOD_ASC
+  MOOD_DESC
   NATURAL
   PERSON_ID_ASC
   PERSON_ID_DESC

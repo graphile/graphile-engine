@@ -1178,6 +1178,7 @@ type LeftArm implements Node {
   \\"\\"\\"
   id: ID!
   lengthInMetres: Float
+  mood: String!
 
   \\"\\"\\"Reads a single \`Person\` that is related to this \`LeftArm\`.\\"\\"\\"
   personByPersonId: Person
@@ -1192,6 +1193,9 @@ input LeftArmCondition {
   \\"\\"\\"Checks for equality with the object’s \`lengthInMetres\` field.\\"\\"\\"
   lengthInMetres: Float
 
+  \\"\\"\\"Checks for equality with the object’s \`mood\` field.\\"\\"\\"
+  mood: String
+
   \\"\\"\\"Checks for equality with the object’s \`personId\` field.\\"\\"\\"
   personId: Int
 
@@ -1202,6 +1206,7 @@ input LeftArmCondition {
 \\"\\"\\"An input for mutations affecting \`LeftArm\`\\"\\"\\"
 input LeftArmInput {
   lengthInMetres: Float
+  mood: String
   personId: Int
   rowId: Int
 }
@@ -1211,6 +1216,7 @@ Represents an update to a \`LeftArm\`. Fields that are set will be updated.
 \\"\\"\\"
 input LeftArmPatch {
   lengthInMetres: Float
+  mood: String
   personId: Int
   rowId: Int
 }
@@ -1247,6 +1253,8 @@ enum LeftArmsOrderBy {
   ID_DESC
   LENGTH_IN_METRES_ASC
   LENGTH_IN_METRES_DESC
+  MOOD_ASC
+  MOOD_DESC
   NATURAL
   PERSON_ID_ASC
   PERSON_ID_DESC

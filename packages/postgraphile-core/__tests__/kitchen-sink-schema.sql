@@ -50,7 +50,8 @@ comment on table c.person_secret is 'Tracks the person''s secret';
 create table c.left_arm (
   id serial primary key,
   person_id int not null default c.current_user_id() unique references c.person on delete cascade,
-  length_in_metres float
+  length_in_metres float,
+  mood text not null default 'neutral'
 );
 
 comment on table c.left_arm is 'Tracks metadata about the left arms of various people';
