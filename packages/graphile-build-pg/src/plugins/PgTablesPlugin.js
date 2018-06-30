@@ -198,10 +198,11 @@ export default (function PgTablesPlugin(
               isInputType: true,
               isPgRowType: table.isSelectable,
               isPgCompoundType: !table.isSelectable,
-              pgAddSubfield(fieldName, attrName, pgType, spec) {
+              pgAddSubfield(fieldName, attrName, pgType, spec, typeModifier) {
                 pgCreateInputFields[fieldName] = {
                   name: attrName,
                   type: pgType,
+                  typeModifier,
                 };
                 return spec;
               },
@@ -226,10 +227,11 @@ export default (function PgTablesPlugin(
                 isPgRowType: table.isSelectable,
                 isPgCompoundType: !table.isSelectable,
                 isPgPatch: true,
-                pgAddSubfield(fieldName, attrName, pgType, spec) {
+                pgAddSubfield(fieldName, attrName, pgType, spec, typeModifier) {
                   pgPatchInputFields[fieldName] = {
                     name: attrName,
                     type: pgType,
+                    typeModifier,
                   };
                   return spec;
                 },
@@ -247,10 +249,11 @@ export default (function PgTablesPlugin(
                 isPgRowType: table.isSelectable,
                 isPgCompoundType: !table.isSelectable,
                 isPgBaseInput: true,
-                pgAddSubfield(fieldName, attrName, pgType, spec) {
+                pgAddSubfield(fieldName, attrName, pgType, spec, typeModifier) {
                   pgBaseInputFields[fieldName] = {
                     name: attrName,
                     type: pgType,
+                    typeModifier,
                   };
                   return spec;
                 },
@@ -276,11 +279,11 @@ export default (function PgTablesPlugin(
                 const inputField = fieldLookup[fieldName];
                 const v = obj[fieldName];
                 if (inputField && v != null) {
-                  const { type, modifier } = inputField;
+                  const { type, typeModifier } = inputField;
                   return sql.fragment`${gql2pg(
                     v,
                     type,
-                    modifier
+                    typeModifier
                   )}::${sql.identifier(type.namespaceName, type.name)}`;
                 } else {
                   return sql.null; // TODO: return default instead.

@@ -106,7 +106,9 @@ export default (async function PgMutationUpdateDeletePlugin(
                       ) {
                         const val = inputData[fieldName];
                         sqlColumns.push(sql.identifier(attr.name));
-                        sqlValues.push(gql2pg(val, attr.type));
+                        sqlValues.push(
+                          gql2pg(val, attr.type, attr.typeModifier)
+                        );
                       }
                     });
                   if (sqlColumns.length === 0) {
@@ -277,8 +279,8 @@ export default (async function PgMutationUpdateDeletePlugin(
                   }
                   const primaryKeys =
                     primaryKeyConstraint &&
-                    primaryKeyConstraint.keyAttributeNums.map(
-                      num => attributes.filter(attr => attr.num === num)[0]
+                    primaryKeyConstraint.keyAttributeNums.map(num =>
+                      attributes.find(attr => attr.num === num)
                     );
                   const fieldName = inflection[
                     mode === "update" ? "updateNode" : "deleteNode"
@@ -371,7 +373,11 @@ export default (async function PgMutationUpdateDeletePlugin(
                                   (key, idx) =>
                                     sql.fragment`${sql.identifier(
                                       key.name
-                                    )} = ${gql2pg(identifiers[idx], key.type)}`
+                                    )} = ${gql2pg(
+                                      identifiers[idx],
+                                      key.type,
+                                      key.typeModifier
+                                    )}`
                                 ),
                                 ") and ("
                               )})`,
@@ -399,8 +405,8 @@ export default (async function PgMutationUpdateDeletePlugin(
                   if (omit(constraint, mode)) {
                     return;
                   }
-                  const keys = constraint.keyAttributeNums.map(
-                    num => attributes.filter(attr => attr.num === num)[0]
+                  const keys = constraint.keyAttributeNums.map(num =>
+                    attributes.find(attr => attr.num === num)
                   );
                   if (!keys.every(_ => _)) {
                     throw new Error(
@@ -497,7 +503,8 @@ export default (async function PgMutationUpdateDeletePlugin(
                                     key.name
                                   )} = ${gql2pg(
                                     input[inflection.column(key)],
-                                    key.type
+                                    key.type,
+                                    key.typeModifier
                                   )}`
                               ),
                               ") and ("

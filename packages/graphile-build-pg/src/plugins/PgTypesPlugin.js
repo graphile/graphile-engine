@@ -134,8 +134,15 @@ export default (function PgTypesPlugin(
     const gql2pg = (val, type, modifier) => {
       if (modifier === undefined) {
         // eslint-disable-next-line no-console
+        let stack;
+        try {
+          throw new Error();
+        } catch (e) {
+          stack = e.stack;
+        }
         console.warn(
-          "gql2pg should be called with three arguments, the third being the type modifier (or `null`)"
+          "gql2pg should be called with three arguments, the third being the type modifier (or `null`); " +
+            stack
         );
         // Hack for backwards compatibility:
         modifier = null;
@@ -146,7 +153,7 @@ export default (function PgTypesPlugin(
       if (pg2GqlMapper[type.id]) {
         return pg2GqlMapper[type.id].unmap(val, modifier);
       } else if (type.domainBaseType) {
-        return gql2pg(val, type.domainBaseType, modifier);
+        return gql2pg(val, type.domainBaseType, type.domainTypeModifier);
       } else if (type.isPgArray) {
         if (!Array.isArray(val)) {
           throw new Error(
@@ -670,8 +677,9 @@ export default (function PgTypesPlugin(
           },
           unmap: ({ start, end }) => {
             // Ref: https://www.postgresql.org/docs/9.6/static/rangetypes.html#RANGETYPES-CONSTRUCT
-            const lower = (start && gql2pg(start.value, subtype)) || sql.null;
-            const upper = (end && gql2pg(end.value, subtype)) || sql.null;
+            const lower =
+              (start && gql2pg(start.value, subtype, null)) || sql.null;
+            const upper = (end && gql2pg(end.value, subtype, null)) || sql.null;
             const lowerInclusive = start && !start.inclusive ? "(" : "[";
             const upperInclusive = end && !end.inclusive ? ")" : "]";
             return sql.fragment`${sql.identifier(
