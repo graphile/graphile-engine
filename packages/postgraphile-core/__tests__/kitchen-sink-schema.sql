@@ -295,6 +295,9 @@ create function a.post_headline_trimmed_strict(post a.post, length int default 1
 create function a.post_headline_trimmed_no_defaults(post a.post, length int, omission text) returns text as $$ select substr(post.headline, 0, length) || omission $$ language sql stable;
 create function a.post_many(posts a.post[]) returns setof a.post as $$ declare current_post a.post; begin foreach current_post in array posts loop return next current_post; end loop; end; $$ language plpgsql;
 
+create function c.left_arm_identity(left_arm c.left_arm) returns c.left_arm as $$ select left_arm.*; $$ language sql volatile;
+comment on function c.left_arm_identity(left_arm c.left_arm) is E'@arg0variant base\n@resultFieldName leftArm';
+
 -- Procs -> custom queries
 create function a.query_compound_type_array(object c.compound_type) returns c.compound_type[] as $$ select ARRAY[object, (null, null, null, null, null, null, null, null)::c.compound_type, (object.a + 1, object.b, object.c, object.d, object.e, object.f, object.g, object.foo_bar)::c.compound_type]; $$ language sql stable;
 create function a.query_text_array() returns text[] as $$ select ARRAY['str1','str2','str3']; $$ language sql stable;
