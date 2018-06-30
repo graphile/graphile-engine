@@ -131,14 +131,22 @@ export default (function PgTypesPlugin(
         return val;
       }
     };
-    const gql2pg = (val, type) => {
+    const gql2pg = (val, type, gqlType) => {
+      if (!gqlType) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          "gql2pg should be called with three arguments, the third being the concrete GraphQLInputObjectType or scalar GraphQL type"
+        );
+        // Hack for backwards compatibility:
+        gqlType = getGqlInputTypeByTypeIdAndModifier(type.id, null);
+      }
       if (val == null) {
         return sql.null;
       }
       if (pg2GqlMapper[type.id]) {
-        return pg2GqlMapper[type.id].unmap(val);
+        return pg2GqlMapper[type.id].unmap(val, gqlType);
       } else if (type.domainBaseType) {
-        return gql2pg(val, type.domainBaseType);
+        return gql2pg(val, type.domainBaseType, gqlType);
       } else if (type.isPgArray) {
         if (!Array.isArray(val)) {
           throw new Error(
