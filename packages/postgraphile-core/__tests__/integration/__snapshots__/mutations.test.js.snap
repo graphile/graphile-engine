@@ -1205,3 +1205,26 @@ Object {
   ],
 }
 `;
+
+exports[`rbac.createPerson.graphql 1`] = `
+Object {
+  "data": Object {
+    "createPerson": Object {
+      "person": Object {
+        "about": "Unknown",
+        "aliases": Array [
+          "Jay Doe",
+          "JD",
+        ],
+        "createdAt": "2018-06-30T05:22:51.482372",
+        "email": "jane.doe@example.com",
+        "id": 10,
+        "name": "Jane Doe",
+        "site": Object {
+          "url": "http://example.com",
+        },
+      },
+    },
+  },
+}
+`;
