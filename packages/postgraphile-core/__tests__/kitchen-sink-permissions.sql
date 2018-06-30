@@ -4,6 +4,7 @@ grant usage on schema c to postgraphile_test_authenticator;
 grant usage on schema a,b,c to postgraphile_test_visitor;
 
 grant usage, select on all sequences in schema a,b,c to postgraphile_test_visitor;
+grant execute on function c.current_user_id() to postgraphile_test_visitor;
 
 grant select on c.person to postgraphile_test_visitor;
 grant insert(person_full_name, aliases, about, email, site) on c.person to postgraphile_test_visitor;

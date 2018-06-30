@@ -74,7 +74,7 @@ beforeAll(() => {
       if (fileName.startsWith("d.")) {
         schemaToUse = dSchema;
       } else if (fileName.startsWith("rbac.")) {
-        await pgClient.query("set role postgraphile_test_visitor");
+        await pgClient.query("select set_config('role', 'postgraphile_test_visitor', true), set_config('jwt.claims.user_id', '3', true)");
         schemaToUse = rbacSchema;
       } else {
         schemaToUse = gqlSchema;
