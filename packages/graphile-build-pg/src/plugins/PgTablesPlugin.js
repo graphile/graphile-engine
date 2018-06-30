@@ -260,23 +260,14 @@ export default (function PgTablesPlugin(
 
           pg2GqlMapper[tablePgType.id] = {
             map: _ => _,
-            unmap: (obj, gqlType) => {
-              if (!gqlType) {
-                throw new Error("gql2pg must pass the GraphQL type to unmap");
-              }
+            unmap: (obj, modifier) => {
               let fieldLookup;
-              if (gqlType === TableCreateType) {
-                fieldLookup = pgCreateInputFields;
-              } else if (gqlType === TablePatchType) {
+              if (modifier === "patch") {
                 fieldLookup = pgPatchInputFields;
-              } else if (gqlType === TableBaseInputType) {
+              } else if (modifier === "base") {
                 fieldLookup = pgBaseInputFields;
               } else {
-                throw new Error(
-                  `Do not understand how to convert GraphQL type '${
-                    gqlType.name
-                  }' to SQL`
-                );
+                fieldLookup = pgCreateInputFields;
               }
 
               const attr2sql = attr => {
@@ -285,11 +276,12 @@ export default (function PgTablesPlugin(
                 const inputField = fieldLookup[fieldName];
                 const v = obj[fieldName];
                 if (inputField && v != null) {
-                  const { type } = inputField;
-                  return sql.fragment`${gql2pg(v, type)}::${sql.identifier(
-                    type.namespaceName,
-                    type.name
-                  )}`;
+                  const { type, modifier } = inputField;
+                  return sql.fragment`${gql2pg(
+                    v,
+                    type,
+                    modifier
+                  )}::${sql.identifier(type.namespaceName, type.name)}`;
                 } else {
                   return sql.null; // TODO: return default instead.
                 }
