@@ -311,6 +311,14 @@ type LeftArm implements Node {
   personId: Int!
 }
 
+\\"\\"\\"An input representation of \`LeftArm\` with nullable fields.\\"\\"\\"
+input LeftArmBaseInput {
+  id: Int
+  lengthInMetres: Float
+  mood: String
+  personId: Int
+}
+
 \\"\\"\\"
 A condition to be used against \`LeftArm\` object types. All fields are tested for equality and combined with a logical ‘and.’
 \\"\\"\\"
@@ -326,6 +334,40 @@ input LeftArmCondition {
 
   \\"\\"\\"Checks for equality with the object’s \`personId\` field.\\"\\"\\"
   personId: Int
+}
+
+\\"\\"\\"All input for the \`leftArmIdentity\` mutation.\\"\\"\\"
+input LeftArmIdentityInput {
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+  leftArm: LeftArmBaseInput
+}
+
+\\"\\"\\"The output of our \`leftArmIdentity\` mutation.\\"\\"\\"
+type LeftArmIdentityPayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+  leftArm: LeftArm
+
+  \\"\\"\\"An edge for our \`LeftArm\`. May be used by Relay 1.\\"\\"\\"
+  leftArmEdge(
+    \\"\\"\\"The method to use when ordering \`LeftArm\`.\\"\\"\\"
+    orderBy: [LeftArmsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): LeftArmsEdge
+
+  \\"\\"\\"Reads a single \`Person\` that is related to this \`LeftArm\`.\\"\\"\\"
+  personByPersonId: Person
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
 }
 
 \\"\\"\\"An input for mutations affecting \`LeftArm\`\\"\\"\\"
@@ -472,6 +514,12 @@ type Mutation {
     \\"\\"\\"
     input: DeletePersonSecretByPersonIdInput!
   ): DeletePersonSecretPayload
+  leftArmIdentity(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: LeftArmIdentityInput!
+  ): LeftArmIdentityPayload
 
   \\"\\"\\"Updates a single \`LeftArm\` using its globally unique id and a patch.\\"\\"\\"
   updateLeftArm(
@@ -1017,6 +1065,7 @@ type Query implements Node {
     \\"\\"\\"The method to use when ordering \`Post\`.\\"\\"\\"
     orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsConnection
+  currentUserId: Int
 
   \\"\\"\\"Reads a single \`LeftArm\` using its globally unique \`ID\`.\\"\\"\\"
   leftArm(
@@ -4221,6 +4270,14 @@ type LeftArm implements Node {
   personId: Int!
 }
 
+\\"\\"\\"An input representation of \`LeftArm\` with nullable fields.\\"\\"\\"
+input LeftArmBaseInput {
+  id: Int
+  lengthInMetres: Float
+  mood: String
+  personId: Int
+}
+
 \\"\\"\\"
 A condition to be used against \`LeftArm\` object types. All fields are tested for equality and combined with a logical ‘and.’
 \\"\\"\\"
@@ -4236,6 +4293,40 @@ input LeftArmCondition {
 
   \\"\\"\\"Checks for equality with the object’s \`personId\` field.\\"\\"\\"
   personId: Int
+}
+
+\\"\\"\\"All input for the \`leftArmIdentity\` mutation.\\"\\"\\"
+input LeftArmIdentityInput {
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+  leftArm: LeftArmBaseInput
+}
+
+\\"\\"\\"The output of our \`leftArmIdentity\` mutation.\\"\\"\\"
+type LeftArmIdentityPayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+  leftArm: LeftArm
+
+  \\"\\"\\"An edge for our \`LeftArm\`. May be used by Relay 1.\\"\\"\\"
+  leftArmEdge(
+    \\"\\"\\"The method to use when ordering \`LeftArm\`.\\"\\"\\"
+    orderBy: [LeftArmsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): LeftArmsEdge
+
+  \\"\\"\\"Reads a single \`Person\` that is related to this \`LeftArm\`.\\"\\"\\"
+  personByPersonId: Person
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
 }
 
 \\"\\"\\"An input for mutations affecting \`LeftArm\`\\"\\"\\"
@@ -4996,6 +5087,12 @@ type Mutation {
     \\"\\"\\"
     input: JsonbIdentityMutationPlpgsqlWithDefaultInput!
   ): JsonbIdentityMutationPlpgsqlWithDefaultPayload
+  leftArmIdentity(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: LeftArmIdentityInput!
+  ): LeftArmIdentityPayload
   mult1(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
