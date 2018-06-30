@@ -54,7 +54,6 @@ export default (function PgTablesPlugin(
         GraphQLList,
         GraphQLInputObjectType,
       },
-      pgColumnFilter,
       inflection,
     } = build;
     const nullableIf = (condition, Type) =>
@@ -187,7 +186,7 @@ export default (function PgTablesPlugin(
           const pgCreateInputFields = {};
           const pgPatchInputFields = {};
           const pgBaseInputFields = {};
-          const TableCreateType = newWithHooks(
+          newWithHooks(
             GraphQLInputObjectType,
             {
               description: `An input for mutations affecting \`${tableTypeName}\``,

@@ -133,13 +133,13 @@ export default (function PgTypesPlugin(
     };
     const gql2pg = (val, type, modifier) => {
       if (modifier === undefined) {
-        // eslint-disable-next-line no-console
         let stack;
         try {
           throw new Error();
         } catch (e) {
           stack = e.stack;
         }
+        // eslint-disable-next-line no-console
         console.warn(
           "gql2pg should be called with three arguments, the third being the type modifier (or `null`); " +
             stack
