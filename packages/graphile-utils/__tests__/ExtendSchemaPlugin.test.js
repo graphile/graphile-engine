@@ -188,7 +188,9 @@ it("allows adding a field with arguments named using a custom inflector", async 
       `,
       resolvers: {
         Query: {
-          [build.inflection.echoFieldName()]: resolvers.Query.echo,
+          [build.inflection.echoFieldName()]: {
+            resolve: resolvers.Query.echo,
+          }
         },
       },
     })),
@@ -361,9 +363,11 @@ it("supports defining new types", async () => {
       `,
       resolvers: {
         Query: {
-          echo(_query, args) {
-            return args.input;
-          },
+          echo: {
+            resolve(_query, args) {
+              return args.input;
+            },
+          }
         },
       },
     })),

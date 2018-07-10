@@ -368,18 +368,37 @@ function getFields(
         };
         const deprecationReason =
           directives.deprecated && directives.deprecated.reason;
-        const resolve =
-          (resolvers[Self.name] && resolvers[Self.name][fieldName]) || null;
+        const functionToResolveObject = something =>
+          typeof something === "function" ? { resolve: something } : something;
+        /*
+         * We accept a resolver function directly, or an object which can
+         * define 'resolve', 'subscribe' and other relevant methods.
+         */
+        const rawResolversSpec =
+          functionToResolveObject(
+            resolvers[Self.name] && resolvers[Self.name][fieldName]
+          ) || null;
         if (directives.recurseDataGenerators) {
           recurseDataGeneratorsForField(fieldName);
         }
         memo[fieldName] = fieldWithHooks(
           fieldName,
           fieldScope => {
+            const resolversSpec = Object.keys(rawResolversSpec || {}).reduce(
+              (memo, key) => {
+                if (typeof rawResolversSpec[key] === "function") {
+                  memo[key] = augmentResolver(
+                    rawResolversSpec[key],
+                    fieldScope
+                  );
+                }
+                return memo;
+              },
+              {}
+            );
             return {
               type,
               args,
-              resolve: resolve ? augmentResolver(resolve, fieldScope) : null,
               ...(deprecationReason
                 ? {
                     deprecationReason,
@@ -390,6 +409,7 @@ function getFields(
                     description,
                   }
                 : null),
+              ...resolversSpec,
             };
           },
           scope
