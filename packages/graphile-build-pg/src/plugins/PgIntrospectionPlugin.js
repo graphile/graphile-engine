@@ -17,7 +17,6 @@ const INTROSPECTION_PATH = `${__dirname}/../../res/introspection-query.sql`;
 const WATCH_FIXTURES_PATH = `${__dirname}/../../res/watch-fixtures.sql`;
 
 // Ref: https://github.com/graphile/postgraphile/tree/master/src/postgres/introspection/object
-
 export type PgNamespace = {
   kind: "namespace",
   id: string,
@@ -139,6 +138,312 @@ function readFile(filename, encoding) {
   });
 }
 
+/**
+ * Query the postgres server for the following types of structures in the database:
+ *
+ * namespace - the schemas; from pg_namespace
+ * class - anything `relation-like` (e.g., tables, indices, etc.); from pg_class
+ * attribute - information about table columns; from pg_attribute
+ * type - type information; can be scalars and enums, but are also created for each table in the data base; from pg_type table
+ * constraint - information about the various constraints on the table; from pg_constraints
+ * procedure - information about the aggregate functions as well as custom procedures; from pg_proc
+ * extensions - information about the installed extensions; from pg_extension
+ *
+ * Returns the structures in an collections of arrays indexed by the above kinds
+ *
+ * @param pgConfig - The configuration parameters for connecting to the PostgresQL DB
+ * @param schemas - The requested schemas to pull from the database
+ * @param includeExtensionResources - True iff should include extension resources
+ * @param memoizationFn -  A function that needs to have the following structure:
+ * (cacheKey, () => pgStructuresByKind) => pgStructuresByKind
+ * Can be used for caching; TODO explain how - maybe move the cache to the outside of this function
+ */
+async function getPGStructuresByKind(
+  pgConfig,
+  schemas,
+  includeExtensionResources,
+  memoizationFn
+) {
+  //TODO find out what the cacheing mechanism is doing
+  const cacheKey = `PgIntrospectionPlugin-introspectionResultsByKind-v${version}`;
+
+  //introspect the database and return memoized list of structures by kind (see the
+  //above types for the fields on each type)
+  return await memoizationFn(cacheKey, () =>
+    //get a client to the postgres database
+    withPgClient(pgConfig, async pgClient => {
+      //load and run the query for the structure of the database
+      const introspectionQuery = await readFile(INTROSPECTION_PATH, "utf8");
+      const { rows } = await pgClient.query(introspectionQuery, [
+        schemas,
+        includeExtensionResources,
+      ]);
+
+      //sort the structures by kind
+      const pgStructuresByKind = rows.reduce(
+        (memo, { object }) => {
+          memo[object.kind].push(object);
+          return memo;
+        },
+        {
+          namespace: [],
+          class: [],
+          attribute: [],
+          type: [],
+          constraint: [],
+          procedure: [],
+          extension: [],
+        }
+      );
+
+      const extensionConfigurationClassIds = flatMap(
+        pgStructuresByKind.extension,
+        e => e.configurationClassIds
+      );
+      pgStructuresByKind.class.forEach(klass => {
+        klass.isExtensionConfigurationTable =
+          extensionConfigurationClassIds.indexOf(klass.id) >= 0;
+      });
+
+      return pgStructuresByKind;
+    })
+  );
+}
+
+/**
+ * Verifies if the returned PostgresQL structures contain the schemas requested
+ *
+ * @param namespaces
+ * @param requestedSchemas
+ * @param throwIfMissing
+ */
+function verifySchemas(namespaces, requestedSchemas, throwIfMissing) {
+  //extract the schemas found in the database
+  const knownSchemas = namespaces.map(n => n.name);
+
+  //check to see if any of the requested schemas are not actually present in the database
+  const missingSchemas = requestedSchemas.filter(
+    s => knownSchemas.indexOf(s) < 0
+  );
+  if (missingSchemas.length) {
+    const errorMessage = `
+      You requested to use schema '${requestedSchemas.join("', '")}';
+      however we couldn't find some of those! Missing schemas are: '${missingSchemas.join(
+        "', '"
+      )}'
+    `;
+    if (throwIfMissing) {
+      throw new Error(errorMessage);
+    } else {
+      console.warn("⚠️ WARNING⚠️  " + errorMessage); // eslint-disable-line no-console
+    }
+  }
+}
+
+/**
+ * Takes the result of getPGStructuresByKind and extracts the tags based on the
+ * smart commenting system exposed by the 'parseTags' function from utils
+ *
+ * @param pgStructuresByKind
+ * @param smartComments - True iff smart comments are enabled
+ */
+function parseTagsFromStructures(pgStructuresByKind, smartComments) {
+  Object.keys(pgStructuresByKind).forEach(kind => {
+    pgStructuresByKind[kind].forEach(struct => {
+      if (smartComments && struct.description) {
+        const parsed = parseTags(struct.description);
+        struct.tags = parsed.tags;
+        struct.description = parsed.text;
+      } else {
+        struct.tags = [];
+      }
+    });
+  });
+}
+
+/**
+ * Takes the result of getPGStructuresByKind and creates an index on all of the containing
+ * structures by their ID field; not all structures have an ID field (e.g., attributes), but those that do
+ * will have unique IDs (on a per database basis)
+ *
+ * @param pgStructuresByKind
+ */
+function createStructuresById(pgStructuresByKind) {
+  // put every struct that has an ID field into a single map
+  const pgStructureById = {};
+  Object.keys(pgStructuresByKind).forEach(kind => {
+    pgStructuresByKind[kind].forEach(struct => {
+      if (struct.id) {
+        pgStructureById[struct.id] = struct;
+      }
+    });
+  });
+
+  //TODO deprecate?
+  ["namespace", "class", "type", "extension"].forEach(kind => {
+    pgStructuresByKind[kind + "ById"] = pgStructuresByKind[kind].reduce(
+      (memo, struct) => {
+        memo[struct.id] = struct;
+        return memo;
+      },
+      {}
+    );
+  });
+  pgStructuresByKind.attributeByClassIdAndNum = pgStructuresByKind.attribute.reduce(
+    (memo, struct) => {
+      const { classId, num } = struct;
+      if (!memo.hasOwnProperty(classId)) memo[classId] = {};
+      memo[classId][num] = struct;
+      return memo;
+    },
+    {}
+  );
+
+  //TODO if yes, can warn about the deprecation via proxies (example below)
+  // ["namespaceById", "classById", "typeById", "extensionById"].forEach(prop => {
+  //     console.log(prop);
+  //    pgStructuresByKind[prop] = new Proxy(pgStructuresByKind[prop], {
+  //        get: function(target, property, rec){
+  //            console.warn(`@DeprecationWarning: Accessing postgres data by ID via pgIntrospectionResultsByKind will
+  //            soon be deprecated. Please use pgIntrospectionResultsByID instead.`);
+  //            return target[property];
+  //        }
+  //    })
+  // });
+
+  return pgStructureById;
+}
+
+/**
+ * Relates ("rehydrates") related structs by their ID fields.
+ *
+ * For example, Type structs reference their class by the classId field. Calling
+ * relate([types], 'classId', 'class', structsByID) will attach the corresponding class struct to each type.
+ *
+ * @param arrayOfStructs - An array of structs from the initial PG introspection
+ * @param IdAttr - The ID attribute on each struct in 'arrayOfStructs' to  use in looking up another struct with
+ * @param newAttr - The property name by which you want to attach the looked up struct to each struct in arrayOfStructs
+ * @param lookupTable - An ES6 Map that can be used to look up each struct by its ID (see createStructuresByID)
+ * @param missingOk - Should throw error if lookupTable does not contain an ID
+ */
+
+function relate(
+  arrayOfStructs,
+  IdAttr,
+  newAttr,
+  lookupTable,
+  missingOk = false
+) {
+  //lookup logic
+  const getRelatedStruct = (id, struct) => {
+    const relatedStruct = lookupTable[id];
+    if (!relatedStruct) {
+      if (missingOk) return;
+      else
+        throw new Error(
+          `Could not look up '${newAttr}' by '${IdAttr}' on '${JSON.stringify(
+            struct
+          )}'`
+        );
+    }
+    return relatedStruct;
+  };
+
+  //apply the lookup logic to each struct in the array (can handle both an array of ids and a single id)
+  arrayOfStructs.forEach(struct => {
+    const id = struct[IdAttr];
+    if (id)
+      struct[newAttr] = Array.isArray(id)
+        ? id.map(id => getRelatedStruct(id, struct))
+        : getRelatedStruct(id, struct);
+  });
+}
+
+/**
+ * Defines how to rehydrate the structural metadata retrieved from the postgres introspection query. See
+ * the 'relate' function below;
+ * //TODO is there a better place to put this?
+ */
+const toRelate = [
+  {
+    kind: "class",
+    IdAttr: "namespaceId",
+    newAttr: "namespace",
+    missingOk: true,
+  },
+  {
+    kind: "class",
+    IdAttr: "typeId",
+    newAttr: "type",
+  },
+  {
+    kind: "attribute",
+    IdAttr: "classId",
+    newAttr: "class",
+  },
+  {
+    kind: "attribute",
+    IdAttr: "typeId",
+    newAttr: "type",
+  },
+  {
+    kind: "procedure",
+    IdAttr: "namespaceId",
+    newAttr: "namespace",
+  },
+  {
+    kind: "type",
+    IdAttr: "classId",
+    newAttr: "class",
+    missingOk: true,
+  },
+  {
+    kind: "type",
+    IdAttr: "domainBaseTypeId",
+    newAttr: "domainBaseType",
+    missingOk: true,
+  },
+  {
+    kind: "type",
+    IdAttr: "arrayItemTypeId",
+    newAttr: "arrayItemType",
+    missingOk: true,
+  },
+  {
+    kind: "extension",
+    IdAttr: "namespaceId",
+    newAttr: "namespace",
+    missingOk: true,
+  },
+  {
+    kind: "extension",
+    IdAttr: "configurationClassesId",
+    newAttr: "configurationClasses",
+    missingOk: true,
+  },
+];
+
+/**
+ * Attaches each attribute struct to it's corresponding class using the ID look up
+ * table from 'createStructuresById'
+ *
+ * @param classStructs
+ * @param attributeStructs
+ * @param lookupTable
+ */
+
+function attachClassAttributes(classStructs, attributeStructs, lookupTable) {
+  //initialize all of the class structs to have no attributes
+  classStructs.forEach(struct => {
+    struct.attributes = [];
+  });
+
+  //attach all of the attributes to their corresponding class
+  attributeStructs.forEach(struct => {
+    lookupTable[struct.classId].attributes.push(struct);
+  });
+}
+
 export default (async function PgIntrospectionPlugin(
   builder,
   {
@@ -150,276 +455,60 @@ export default (async function PgIntrospectionPlugin(
     pgIncludeExtensionResources = false,
   }
 ) {
-
-  //TODO why have all these nested functions
-  async function introspect() {
-
-    if (!Array.isArray(schemas)) {
-      throw new Error("Argument 'schemas' (array) is required");
-    }
-
-    //TODO find out what the cacheing mechanism is doing
-    const cacheKey = `PgIntrospectionPlugin-introspectionResultsByKind-v${version}`;
-
-
-    //introspect the database and return memoized list of structures by kind (see the
-    //above types for the fields on each type)
-    const introspectionResultsByKind = await persistentMemoizeWithKey(cacheKey, () =>
-
-      //get a client to the postgres database
-      withPgClient(pgConfig, async pgClient => {
-
-        //load and run the query for the structure of the database
-        const introspectionQuery = await readFile(INTROSPECTION_PATH, "utf8");
-        const { rows } = await pgClient.query(introspectionQuery, [
-          schemas,
-          pgIncludeExtensionResources,
-        ]);
-
-        //sort the structures by kind
-        const pgStructuresByKind = rows.reduce(
-          (memo, { object }) => {
-            memo[object.kind].push(object);
-            return memo;
-          },
-          {
-            namespace: [],
-            class: [],
-            attribute: [],
-            type: [],
-            constraint: [],
-            procedure: [],
-            extension: [],
-          }
-        );
-
-        // Parse tags from comments (smart commenting system)
-        [
-          "namespace",
-          "class",
-          "attribute",
-          "type",
-          "constraint",
-          "procedure",
-          "extension",
-        ].forEach(kind => {
-          pgStructuresByKind[kind].forEach(object => {
-            if (pgEnableTags && object.description) {
-              const parsed = parseTags(object.description);
-              object.tags = parsed.tags;
-              object.description = parsed.text;
-            } else {
-              object.tags = {};
-            }
-          });
-        });
-
-        const extensionConfigurationClassIds = flatMap(
-          pgStructuresByKind.extension,
-          e => e.configurationClassIds
-        );
-        pgStructuresByKind.class.forEach(klass => {
-          klass.isExtensionConfigurationTable =
-            extensionConfigurationClassIds.indexOf(klass.id) >= 0;
-        });
-
-        return pgStructuresByKind;
-      })
-    );
-
-    //extract the schemas found in the database
-    const knownSchemas = introspectionResultsByKind.namespace.map(n => n.name);
-
-    //check to see if any of the requested schemas are not actually present in the database
-    const missingSchemas = schemas.filter(s => knownSchemas.indexOf(s) < 0);
-    if (missingSchemas.length) {
-      const errorMessage = `
-        You requested to use schema '${schemas.join("', '")}';
-        however we couldn't find some of those! Missing schemas are: '${missingSchemas.join("', '")}'
-      `;
-      if (pgThrowOnMissingSchema) {
-        throw new Error(errorMessage);
-      } else {
-        console.warn("⚠️ WARNING⚠️  " + errorMessage); // eslint-disable-line no-console
-      }
-    }
-
-
-    //organize everything by ID
-    const xByY = (arrayOfX, attrKey) =>
-      arrayOfX.reduce((memo, x) => {
-        memo[x[attrKey]] = x;
-        return memo;
-      }, {});
-    const xByYAndZ = (arrayOfX, attrKey, attrKey2) =>
-      arrayOfX.reduce((memo, x) => {
-        memo[x[attrKey]] = memo[x[attrKey]] || {};
-        memo[x[attrKey]][x[attrKey2]] = x;
-        return memo;
-      }, {});
-
-    //TODO seems like a confusing namespace convention to put id lookups under kind lookups
-    //TODO maybe these should be maps instead of POJO
-    introspectionResultsByKind.namespaceById = xByY(
-      introspectionResultsByKind.namespace,
-      "id"
-    );
-    introspectionResultsByKind.classById = xByY(
-      introspectionResultsByKind.class,
-      "id"
-    );
-    introspectionResultsByKind.typeById = xByY(
-      introspectionResultsByKind.type,
-      "id"
-    );
-    //TODO maybe just add these straight to the class objects
-    introspectionResultsByKind.attributeByClassIdAndNum = xByYAndZ(
-      introspectionResultsByKind.attribute,
-      "classId",
-      "num"
-    );
-    introspectionResultsByKind.extensionById = xByY(
-      introspectionResultsByKind.extension,
-      "id"
-    );
-
-
-    /**
-     *
-     *
-     * @param array
-     * @param newAttr
-     * @param lookupAttr
-     * @param lookup
-     * @param missingOk
-     */
-    const relate = (array, newAttr, lookupAttr, lookup, missingOk = false) => {
-      array.forEach(entry => {
-
-        //relationship
-        const key = entry[lookupAttr];
-
-        if (Array.isArray(key)) {
-          entry[newAttr] = key
-            .map(innerKey => {
-              const result = lookup[innerKey];
-              if (innerKey && !result) {
-                if (missingOk) {
-                  return;
-                }
-                throw new Error(
-                  `Could not look up '${newAttr}' by '${lookupAttr}' ('${innerKey}') on '${JSON.stringify(
-                    entry
-                  )}'`
-                );
-              }
-              return result;
-            })
-            .filter(_ => _);
-        } else {
-          const result = lookup[key];
-          if (key && !result) {
-            if (missingOk) {
-              return;
-            }
-            throw new Error(
-              `Could not look up '${newAttr}' by '${lookupAttr}' on '${JSON.stringify(
-                entry
-              )}'`
-            );
-          }
-          entry[newAttr] = result;
-        }
-      });
-    };
-
-    relate(
-      introspectionResultsByKind.class,
-      "namespace",
-      "namespaceId",
-      introspectionResultsByKind.namespaceById,
-      true // Because it could be a type defined in a different namespace - which is fine so long as we don't allow querying it directly
-    );
-
-    relate(
-      introspectionResultsByKind.class,
-      "type",
-      "typeId",
-      introspectionResultsByKind.typeById
-    );
-
-    relate(
-      introspectionResultsByKind.attribute,
-      "class",
-      "classId",
-      introspectionResultsByKind.classById
-    );
-
-    relate(
-      introspectionResultsByKind.attribute,
-      "type",
-      "typeId",
-      introspectionResultsByKind.typeById
-    );
-
-    relate(
-      introspectionResultsByKind.procedure,
-      "namespace",
-      "namespaceId",
-      introspectionResultsByKind.namespaceById
-    );
-
-    relate(
-      introspectionResultsByKind.type,
-      "class",
-      "classId",
-      introspectionResultsByKind.classById,
-      true
-    );
-
-    relate(
-      introspectionResultsByKind.type,
-      "domainBaseType",
-      "domainBaseTypeId",
-      introspectionResultsByKind.typeById,
-      true // Because not all types are domains
-    );
-
-    relate(
-      introspectionResultsByKind.type,
-      "arrayItemType",
-      "arrayItemTypeId",
-      introspectionResultsByKind.typeById,
-      true // Because not all types are arrays
-    );
-
-    relate(
-      introspectionResultsByKind.extension,
-      "namespace",
-      "namespaceId",
-      introspectionResultsByKind.namespaceById,
-      true // Because the extension could be a defined in a different namespace
-    );
-
-    relate(
-      introspectionResultsByKind.extension,
-      "configurationClasses",
-      "configurationClassIds",
-      introspectionResultsByKind.classById,
-      true // Because the configuration table could be a defined in a different namespace
-    );
-
-    introspectionResultsByKind.class.forEach(klass => {
-      klass.attributes = introspectionResultsByKind.attribute.filter(
-        attr => attr.classId === klass.id
-      );
-    });
-
-    return introspectionResultsByKind;
+  if (!Array.isArray(schemas)) {
+    throw new Error("Argument 'schemas' (array) is required");
   }
 
-  let introspectionResultsByKind = await introspect();
+  //query the PostgresQL database for the relevant meta data
+  const introspectionResultsByKind = await getPGStructuresByKind(
+    pgConfig,
+    schemas,
+    pgIncludeExtensionResources,
+    persistentMemoizeWithKey
+  );
 
+  //verify that all of the schemas are present
+  verifySchemas(
+    introspectionResultsByKind.namespace,
+    schemas,
+    pgThrowOnMissingSchema
+  );
+
+  // parse the smart comments
+  parseTagsFromStructures(introspectionResultsByKind, pgEnableTags);
+
+  //index the structures by ID
+  const introspectionResultsById = createStructuresById(
+    introspectionResultsByKind
+  );
+
+  //rehydrate the objects by linking them by their ID fields
+  toRelate.forEach(({ kind, IdAttr, newAttr, missingOk }) => {
+    relate(
+      introspectionResultsByKind[kind],
+      IdAttr,
+      newAttr,
+      introspectionResultsById,
+      missingOk
+    );
+  });
+  attachClassAttributes(
+    introspectionResultsByKind.class,
+    introspectionResultsByKind.attribute,
+    introspectionResultsById
+  );
+
+  //add the introspection results to the build object
+  builder.hook("build", build => {
+    return build.extend(build, {
+      pgIntrospectionResultsByKind: introspectionResultsByKind,
+
+      //TODO verify whether adding this top-level lookupByID is ok
+      //pgIntrospectionResultsByID: introspectionResultsById
+    });
+  });
+
+  //TODO refactor the watchers based on the below questions
   let pgClient, releasePgClient, listener;
 
   function stopListening() {
@@ -448,6 +537,8 @@ export default (async function PgIntrospectionPlugin(
       pgClient.on("error", e => {
         debug("pgClient error occurred: %s", e);
       });
+
+      //TODO why the if(pgClient) checks here and not above
       releasePgClient = () =>
         new Promise((resolve, reject) => {
           if (pgClient) pgClient.end(err => (err ? reject(err) : resolve()));
@@ -465,6 +556,7 @@ export default (async function PgIntrospectionPlugin(
         "Cannot watch schema with this configuration - need a string or pg.Pool"
       );
     }
+
     // Install the watch fixtures.
     const watchSqlInner = await readFile(WATCH_FIXTURES_PATH, "utf8");
     const sql = `begin; ${watchSqlInner}; commit;`;
@@ -478,17 +570,17 @@ export default (async function PgIntrospectionPlugin(
         )} ️️⚠️`
       );
       console.warn(
-        chalk.yellow(
+        chalk.bold.yellow(
           "This is likely because your Postgres user is not a superuser. If the"
         )
       );
       console.warn(
-        chalk.yellow(
+        chalk.bold.yellow(
           "fixtures already exist, the watch functionality may still work."
         )
       );
       console.warn(
-        chalk.yellow("Enable DEBUG='graphile-build-pg' to see the error")
+        chalk.bold.yellow("Enable DEBUG='graphile-build-pg' to see the error")
       );
       debug(error);
       /* eslint-enable no-console */
@@ -500,7 +592,8 @@ export default (async function PgIntrospectionPlugin(
     const handleChange = throttle(
       async () => {
         debug(`Schema change detected: re-inspecting schema...`);
-        introspectionResultsByKind = await introspect();
+        //TODO pretty sure that introspection here is unecessary if we are just calling rebuild immediately after
+        //introspectionResultsByKind = await introspect();
         debug(`Schema change detected: re-inspecting schema complete`);
         triggerRebuild();
       },
@@ -542,12 +635,7 @@ export default (async function PgIntrospectionPlugin(
       }
     };
     pgClient.on("notification", listener);
-    introspectionResultsByKind = await introspect();
+    //TODO not sure why we would be doing introspection here (this won't change what's already attached to build)
+    //introspectionResultsByKind = await introspect();
   }, stopListening);
-
-  builder.hook("build", build => {
-    return build.extend(build, {
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
-    });
-  });
 }: Plugin);
