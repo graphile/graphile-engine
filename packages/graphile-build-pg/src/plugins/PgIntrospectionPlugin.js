@@ -244,6 +244,8 @@ function verifySchemas(namespaces, requestedSchemas, throwIfMissing) {
  * Takes the result of getPGStructuresByKind and extracts the tags based on the
  * smart commenting system exposed by the 'parseTags' function from utils
  *
+ * See https://www.graphile.org/postgraphile/smart-comments/
+ *
  * @param pgStructuresByKind
  * @param smartComments - True iff smart comments are enabled
  */
@@ -300,7 +302,7 @@ function createStructuresById(pgStructuresByKind) {
   );
 
   //TODO if yes, can warn about the deprecation via proxies (example below)
-  // ["namespaceById", "classById", "typeById", "extensionById"].forEach(prop => {
+  // ["namespaceById", "classById", "typeById", "extensionById", "attributeByClassIdAndNum].forEach(prop => {
   //     console.log(prop);
   //    pgStructuresByKind[prop] = new Proxy(pgStructuresByKind[prop], {
   //        get: function(target, property, rec){
