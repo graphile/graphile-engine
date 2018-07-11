@@ -150,90 +150,93 @@ export default (async function PgIntrospectionPlugin(
     pgIncludeExtensionResources = false,
   }
 ) {
+
+  //TODO why have all these nested functions
   async function introspect() {
-    // Perform introspection
+
     if (!Array.isArray(schemas)) {
       throw new Error("Argument 'schemas' (array) is required");
     }
+
+    //TODO find out what the cacheing mechanism is doing
     const cacheKey = `PgIntrospectionPlugin-introspectionResultsByKind-v${version}`;
-    const cloneResults = obj => {
-      const result = Object.keys(obj).reduce((memo, k) => {
-        memo[k] = obj[k].map(v => Object.assign({}, v));
-        return memo;
-      }, {});
-      return result;
-    };
-    const introspectionResultsByKind = cloneResults(
-      await persistentMemoizeWithKey(cacheKey, () =>
-        withPgClient(pgConfig, async pgClient => {
-          const introspectionQuery = await readFile(INTROSPECTION_PATH, "utf8");
-          const { rows } = await pgClient.query(introspectionQuery, [
-            schemas,
-            pgIncludeExtensionResources,
-          ]);
 
-          const result = rows.reduce(
-            (memo, { object }) => {
-              memo[object.kind].push(object);
-              return memo;
-            },
-            {
-              namespace: [],
-              class: [],
-              attribute: [],
-              type: [],
-              constraint: [],
-              procedure: [],
-              extension: [],
-            }
-          );
 
-          // Parse tags from comments
-          [
-            "namespace",
-            "class",
-            "attribute",
-            "type",
-            "constraint",
-            "procedure",
-            "extension",
-          ].forEach(kind => {
-            result[kind].forEach(object => {
-              if (pgEnableTags && object.description) {
-                const parsed = parseTags(object.description);
-                object.tags = parsed.tags;
-                object.description = parsed.text;
-              } else {
-                object.tags = {};
-              }
-            });
-          });
+    //introspect the database and return memoized list of structures by kind (see the
+    //above types for the fields on each type)
+    const introspectionResultsByKind = await persistentMemoizeWithKey(cacheKey, () =>
 
-          const extensionConfigurationClassIds = flatMap(
-            result.extension,
-            e => e.configurationClassIds
-          );
-          result.class.forEach(klass => {
-            klass.isExtensionConfigurationTable =
-              extensionConfigurationClassIds.indexOf(klass.id) >= 0;
-          });
+      //get a client to the postgres database
+      withPgClient(pgConfig, async pgClient => {
 
-          for (const k in result) {
-            result[k].map(Object.freeze);
+        //load and run the query for the structure of the database
+        const introspectionQuery = await readFile(INTROSPECTION_PATH, "utf8");
+        const { rows } = await pgClient.query(introspectionQuery, [
+          schemas,
+          pgIncludeExtensionResources,
+        ]);
+
+        //sort the structures by kind
+        const pgStructuresByKind = rows.reduce(
+          (memo, { object }) => {
+            memo[object.kind].push(object);
+            return memo;
+          },
+          {
+            namespace: [],
+            class: [],
+            attribute: [],
+            type: [],
+            constraint: [],
+            procedure: [],
+            extension: [],
           }
-          return Object.freeze(result);
-        })
-      )
+        );
+
+        // Parse tags from comments (smart commenting system)
+        [
+          "namespace",
+          "class",
+          "attribute",
+          "type",
+          "constraint",
+          "procedure",
+          "extension",
+        ].forEach(kind => {
+          pgStructuresByKind[kind].forEach(object => {
+            if (pgEnableTags && object.description) {
+              const parsed = parseTags(object.description);
+              object.tags = parsed.tags;
+              object.description = parsed.text;
+            } else {
+              object.tags = {};
+            }
+          });
+        });
+
+        const extensionConfigurationClassIds = flatMap(
+          pgStructuresByKind.extension,
+          e => e.configurationClassIds
+        );
+        pgStructuresByKind.class.forEach(klass => {
+          klass.isExtensionConfigurationTable =
+            extensionConfigurationClassIds.indexOf(klass.id) >= 0;
+        });
+
+        return pgStructuresByKind;
+      })
     );
 
+    //extract the schemas found in the database
     const knownSchemas = introspectionResultsByKind.namespace.map(n => n.name);
+
+    //check to see if any of the requested schemas are not actually present in the database
     const missingSchemas = schemas.filter(s => knownSchemas.indexOf(s) < 0);
     if (missingSchemas.length) {
-      const errorMessage = `You requested to use schema '${schemas.join(
-        "', '"
-      )}'; however we couldn't find some of those! Missing schemas are: '${missingSchemas.join(
-        "', '"
-      )}'`;
+      const errorMessage = `
+        You requested to use schema '${schemas.join("', '")}';
+        however we couldn't find some of those! Missing schemas are: '${missingSchemas.join("', '")}'
+      `;
       if (pgThrowOnMissingSchema) {
         throw new Error(errorMessage);
       } else {
@@ -241,6 +244,8 @@ export default (async function PgIntrospectionPlugin(
       }
     }
 
+
+    //organize everything by ID
     const xByY = (arrayOfX, attrKey) =>
       arrayOfX.reduce((memo, x) => {
         memo[x[attrKey]] = x;
@@ -252,6 +257,9 @@ export default (async function PgIntrospectionPlugin(
         memo[x[attrKey]][x[attrKey2]] = x;
         return memo;
       }, {});
+
+    //TODO seems like a confusing namespace convention to put id lookups under kind lookups
+    //TODO maybe these should be maps instead of POJO
     introspectionResultsByKind.namespaceById = xByY(
       introspectionResultsByKind.namespace,
       "id"
@@ -264,6 +272,7 @@ export default (async function PgIntrospectionPlugin(
       introspectionResultsByKind.type,
       "id"
     );
+    //TODO maybe just add these straight to the class objects
     introspectionResultsByKind.attributeByClassIdAndNum = xByYAndZ(
       introspectionResultsByKind.attribute,
       "classId",
@@ -274,9 +283,22 @@ export default (async function PgIntrospectionPlugin(
       "id"
     );
 
+
+    /**
+     *
+     *
+     * @param array
+     * @param newAttr
+     * @param lookupAttr
+     * @param lookup
+     * @param missingOk
+     */
     const relate = (array, newAttr, lookupAttr, lookup, missingOk = false) => {
       array.forEach(entry => {
+
+        //relationship
         const key = entry[lookupAttr];
+
         if (Array.isArray(key)) {
           entry[newAttr] = key
             .map(innerKey => {
