@@ -69,7 +69,7 @@ export default (async function PgIntrospectionPlugin(
   );
 
   //rehydrate the objects by linking them by their ID fields
-  toRelate.forEach(({ kind, IdAttr, newAttr, missingOk }) => {
+  toRelate.forEach(({ kind, IdAttr, newAttr, missingOk }: relation) => {
     relate(
       introspectionResultsByKind[kind],
       IdAttr,
@@ -309,7 +309,7 @@ function relate(
   IdAttr,
   newAttr,
   lookupTable,
-  missingOk = false
+  missingOk?: boolean = false
 ) {
   //lookup logic
   const getRelatedStruct = (id, struct) => {
@@ -341,7 +341,14 @@ function relate(
  * the 'relate' function below;
  * //TODO is there a better place to put this?
  */
-const toRelate = [
+type relation = {
+  kind: string,
+  IdAttr: string,
+  newAttr: string,
+  missingOk?: boolean,
+};
+
+const toRelate: Array<relation> = [
   {
     kind: "class",
     IdAttr: "namespaceId",
