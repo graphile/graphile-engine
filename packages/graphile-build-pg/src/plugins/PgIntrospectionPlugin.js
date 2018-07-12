@@ -120,7 +120,8 @@ export default (async function PgIntrospectionPlugin(
  *
  * @param pgConfig - The configuration parameters for connecting to the PostgresQL DB
  * @param schemas - The requested schemas to pull from the database
- * @param includeExtensionResources - True iff should include extension resources
+ * @param includeExtensionResources - True iff should include extension resources; currently, this includes
+ * the functions and tables installed by extensions
  * @param memoizationFn -  A function that needs to have the following structure:
  * (cacheKey, () => pgStructuresByKind) => pgStructuresByKind
  * Can be used for caching; TODO explain how - maybe move the cache to the outside of this function
