@@ -69,10 +69,10 @@ export default (async function PgIntrospectionPlugin(
   );
 
   //rehydrate the objects by linking them by their ID fields
-  toRelate.forEach(({ kind, IdAttr, newAttr, missingOk }: relation) => {
+  toRelate.forEach(({ kind, idAttr, newAttr, missingOk }: relation) => {
     relate(
       introspectionResultsByKind[kind],
-      IdAttr,
+      idAttr,
       newAttr,
       introspectionResultsById,
       missingOk
@@ -298,7 +298,7 @@ function parseTagsFromStructures(pgStructuresByKind, smartComments) {
  * relate([types], 'classId', 'class', structsByID) will attach the corresponding class struct to each type.
  *
  * @param arrayOfStructs - An array of structs from the initial PG introspection
- * @param IdAttr - The ID attribute on each struct in 'arrayOfStructs' to  use in looking up another struct with
+ * @param idAttr - The ID attribute on each struct in 'arrayOfStructs' to  use in looking up another struct with
  * @param newAttr - The property name by which you want to attach the looked up struct to each struct in arrayOfStructs
  * @param lookupTable - An ES6 Map that can be used to look up each struct by its ID (see createStructuresByID)
  * @param missingOk - Should throw error if lookupTable does not contain an ID
@@ -306,7 +306,7 @@ function parseTagsFromStructures(pgStructuresByKind, smartComments) {
 
 function relate(
   arrayOfStructs,
-  IdAttr,
+  idAttr,
   newAttr,
   lookupTable,
   missingOk?: boolean = false
@@ -318,7 +318,7 @@ function relate(
       if (missingOk) return;
       else
         throw new Error(
-          `Could not look up '${newAttr}' by '${IdAttr}' on '${JSON.stringify(
+          `Could not look up '${newAttr}' by '${idAttr}' on '${JSON.stringify(
             struct
           )}'`
         );
@@ -328,7 +328,7 @@ function relate(
 
   //apply the lookup logic to each struct in the array (can handle both an array of ids and a single id)
   arrayOfStructs.forEach(struct => {
-    const id = struct[IdAttr];
+    const id = struct[idAttr];
     if (id)
       struct[newAttr] = Array.isArray(id)
         ? id.map(id => getRelatedStruct(id, struct))
@@ -343,7 +343,7 @@ function relate(
  */
 type relation = {
   kind: string,
-  IdAttr: string,
+  idAttr: string,
   newAttr: string,
   missingOk?: boolean,
 };
@@ -351,57 +351,57 @@ type relation = {
 const toRelate: Array<relation> = [
   {
     kind: "class",
-    IdAttr: "namespaceId",
+    idAttr: "namespaceId",
     newAttr: "namespace",
     missingOk: true,
   },
   {
     kind: "class",
-    IdAttr: "typeId",
+    idAttr: "typeId",
     newAttr: "type",
   },
   {
     kind: "attribute",
-    IdAttr: "classId",
+    idAttr: "classId",
     newAttr: "class",
   },
   {
     kind: "attribute",
-    IdAttr: "typeId",
+    idAttr: "typeId",
     newAttr: "type",
   },
   {
     kind: "procedure",
-    IdAttr: "namespaceId",
+    idAttr: "namespaceId",
     newAttr: "namespace",
   },
   {
     kind: "type",
-    IdAttr: "classId",
+    idAttr: "classId",
     newAttr: "class",
     missingOk: true,
   },
   {
     kind: "type",
-    IdAttr: "domainBaseTypeId",
+    idAttr: "domainBaseTypeId",
     newAttr: "domainBaseType",
     missingOk: true,
   },
   {
     kind: "type",
-    IdAttr: "arrayItemTypeId",
+    idAttr: "arrayItemTypeId",
     newAttr: "arrayItemType",
     missingOk: true,
   },
   {
     kind: "extension",
-    IdAttr: "namespaceId",
+    idAttr: "namespaceId",
     newAttr: "namespace",
     missingOk: true,
   },
   {
     kind: "extension",
-    IdAttr: "configurationClassesId",
+    idAttr: "configurationClassesId",
     newAttr: "configurationClasses",
     missingOk: true,
   },
@@ -446,7 +446,7 @@ function generateWatcher(pgConfig, schemasToWatch) {
   const watcher = async triggerRebuild => {
     withPgClient(pgConfig, async pgClient => {
       //activate the pg_notify channel with the schema watch query
-      await installPgWatch(pgClient);
+      const uninstall = await installPgWatch(pgClient);
       //because of the promise, client will remain active until resolve() is called
       return new Promise(resolve => {
         const listener = generateNotificationHandler(
@@ -460,9 +460,7 @@ function generateWatcher(pgConfig, schemasToWatch) {
           schemasToWatch
         );
         unwatcher = () => {
-          pgClient.query(`unlisten ${WATCH_CHANNEL}`).catch(e => {
-            debug(`Error occurred trying to unlisten watch: ${e}`);
-          });
+          uninstall();
           pgClient.removeListener("notification", listener);
           resolve();
         };
@@ -476,7 +474,8 @@ function generateWatcher(pgConfig, schemasToWatch) {
 }
 
 /**
- * Creates a pg_notify alert on the WATCH_CHANNEL to enable listening for schema changes
+ * Creates a pg_notify alert on the WATCH_CHANNEL to enable listening for schema changes; returns
+ * the thunk that will unlisten to the channel
  *
  * @param pgClient
  */
@@ -510,7 +509,10 @@ async function installPgWatch(pgClient) {
     await pgClient.query("rollback");
   }
   await pgClient.query(`listen ${WATCH_CHANNEL}`);
-  return pgClient;
+  return () =>
+    pgClient.query(`unlisten ${WATCH_CHANNEL}`).catch(e => {
+      debug(`Error occurred trying to unlisten watch: ${e}`);
+    });
 }
 
 /**
