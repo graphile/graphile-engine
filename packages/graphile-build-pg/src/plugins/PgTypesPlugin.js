@@ -98,6 +98,8 @@ export default (function PgTypesPlugin(
         "Sorry! This interface is no longer supported because it is not granular enough. It's not hard to port it to the new system - please contact Benjie and he'll walk you through it."
       );
     }
+
+    //TODO pretty sure these aren't doing anything
     const gqlTypeByTypeIdAndModifier = Object.assign(
       {},
       build.pgGqlTypeByTypeIdAndModifier
@@ -106,16 +108,27 @@ export default (function PgTypesPlugin(
       {},
       build.pgGqlInputTypeByTypeIdAndModifier
     );
+
+    //looks like the mapper uses typeIds?
     const pg2GqlMapper = {};
+
+    /**
+     * Transforms sql to gql?
+     */
     const pg2gql = (val, type) => {
       if (val == null) {
         return val;
       }
+
+      //todo add some explanation of what this is checking for
       if (val.__isNull) {
         return null;
       }
+
       if (pg2GqlMapper[type.id]) {
         return pg2GqlMapper[type.id].map(val);
+
+        //do structural recursion on arrays and domainBaseType?
       } else if (type.domainBaseType) {
         return pg2gql(val, type.domainBaseType);
       } else if (type.isPgArray) {
@@ -127,11 +140,15 @@ export default (function PgTypesPlugin(
           );
         }
         return val.map(v => pg2gql(v, type.arrayItemType));
+
+        //basically, so if it's not in the mapper just return val?
       } else {
         return val;
       }
     };
+
     const gql2pg = (val, type, modifier) => {
+      //print stack trace if modifier is undefined;
       if (modifier === undefined) {
         let stack;
         try {
@@ -144,14 +161,20 @@ export default (function PgTypesPlugin(
           "gql2pg should be called with three arguments, the third being the type modifier (or `null`); " +
             (stack || "")
         );
-        // Hack for backwards compatibility:
+        // Hack for backwards compatibility: TODO why?
         modifier = null;
       }
+
+      //TODO look up what sql.null is
       if (val == null) {
         return sql.null;
       }
+
+      //TODO find out why we use the pg2Gql mapper in the gql2pg function
       if (pg2GqlMapper[type.id]) {
-        return pg2GqlMapper[type.id].unmap(val, modifier);
+        return pg2GqlMapper[type.id].unmap(val, modifier); //Ok, so unmapping, like inverse operation
+
+        //another structural recursion, we can probably hoist this
       } else if (type.domainBaseType) {
         return gql2pg(val, type.domainBaseType, type.domainTypeModifier);
       } else if (type.isPgArray) {
@@ -162,6 +185,8 @@ export default (function PgTypesPlugin(
             }.${type.name}' (type: ${type === null ? "null" : typeof type})`
           );
         }
+
+        //ok interesting
         return sql.fragment`array[${sql.join(
           val.map(v => gql2pg(v, type.arrayItemType, modifier)),
           ", "
@@ -173,6 +198,7 @@ export default (function PgTypesPlugin(
       }
     };
 
+    //not sure why this has to be a thunk? maybe candidate for factory function
     const makeIntervalFields = () => {
       return {
         seconds: {
@@ -208,6 +234,8 @@ export default (function PgTypesPlugin(
         "An interval of time that has passed where the smallest distinct unit is a second.",
       fields: makeIntervalFields(),
     });
+
+    //TODO what does addType do?
     addType(GQLInterval);
 
     const GQLIntervalInput = new GraphQLInputObjectType({
@@ -218,6 +246,7 @@ export default (function PgTypesPlugin(
     });
     addType(GQLIntervalInput);
 
+    //looks like a factory function candidate
     const stringType = (name, description) =>
       new GraphQLScalarType({
         name,
@@ -243,6 +272,15 @@ export default (function PgTypesPlugin(
     addType(BigFloat);
     addType(BitString);
 
+    /****************************************************************************************
+     * Tweaking section
+     *
+     *
+     * TODO this all seems like a lot of stuff just to do really run tweakToText on a couple
+     * of specific types
+     *****************************************************************************************/
+
+    //well these aren't gql types, so  what are they?
     const rawTypes = [
       1186, // interval
       1082, // date
@@ -254,6 +292,8 @@ export default (function PgTypesPlugin(
 
     const tweakToJson = fragment => fragment; // Since everything is to_json'd now, just pass through
     const tweakToText = fragment => sql.fragment`(${fragment})::text`;
+
+    //TODO this does not appear to be used anywhere; not in here or in any other plugins
     const pgTweaksByTypeIdAndModifer = {};
     const pgTweaksByTypeId = Object.assign(
       // ::text rawTypes
@@ -315,6 +355,8 @@ export default (function PgTypesPlugin(
         const error = new Error(
           "Internal graphile-build-pg error: should not attempt to tweak an array, please process array before tweaking (type: `${type.namespaceName}.${type.name}`)"
         );
+
+        //TODO why only throw this in test? if correct, should move to the if conditional
         if (process.env.NODE_ENV === "test") {
           // This is to ensure that Graphile core does not introduce these problems
           throw error;
@@ -326,6 +368,8 @@ export default (function PgTypesPlugin(
         return fragment;
       }
     };
+
+    //TODO more string stuff, should probably move up above
     /*
         Determined by running:
 
@@ -357,12 +401,15 @@ export default (function PgTypesPlugin(
     const JSONType = pgExtendedTypes
       ? pgLegacyJsonUuid ? GraphQLJson : GraphQLJSON
       : SimpleJSON;
+
+    //TODO not sure why we just reassign everything we just created up above
     const UUIDType = SimpleUUID; // GraphQLUUID
     const DateType = SimpleDate; // GraphQLDate
     const DateTimeType = SimpleDatetime; // GraphQLDateTime
     const TimeType = SimpleTime; // GraphQLTime
 
     // 'point' in PostgreSQL is a 16-byte type that's comprised of two 8-byte floats.
+    //TODO we didn't add these types?
     const Point = new GraphQLObjectType({
       name: "Point",
       fields: {
@@ -393,6 +440,7 @@ export default (function PgTypesPlugin(
     addType(DateTimeType);
     addType(TimeType);
 
+    //TODO what is this for?
     const oidLookup = {
       "20": stringType(
         "BigInt",
@@ -429,8 +477,15 @@ export default (function PgTypesPlugin(
       "1186": GQLIntervalInput, // interval
       "600": PointInput, // point
     };
+
+    /****************************************************************************************
+     * Extending the mapper? Not sure why we do this here all of a sudden?
+     *****************************************************************************************/
+
     const identity = _ => _;
     const jsonStringify = o => JSON.stringify(o);
+
+    //not sure what this is but we should label it; looks like json stuff
     if (pgExtendedTypes) {
       pg2GqlMapper[114] = {
         map: identity,
@@ -489,6 +544,10 @@ export default (function PgTypesPlugin(
       unmap: o => sql.fragment`point(${sql.value(o.x)}, ${sql.value(o.y)})`,
     };
 
+    /****************************************************************************************
+     * Extending the mapper? Not sure why we do this here all of a sudden?
+     *****************************************************************************************/
+
     // TODO: add more support for geometric types
 
     let depth = 0;
@@ -519,241 +578,358 @@ export default (function PgTypesPlugin(
         depth--;
       }
     };
-    const reallyEnforceGqlTypeByPgTypeAndModifier = (type, typeModifier) => {
-      if (!type.id) {
+
+    /************************************************************************************
+     *
+     * GQL Type Registers and Generators
+     *
+     ************************************************************************************/
+
+    /* The main register
+     *
+     * There are four options:
+     *
+     * 1) We have an explicit type set. Those are found in the oidLookup table
+     * 2) If it is a wrapper type, parameterize it based on it's contents
+     * 3) We can also look up the types by generic category
+     * 4) If we cannot find a type in any of those, then we default to a string.
+     */
+    const reallyEnforceGqlTypeByPgTypeAndModifier = (pgType, modifier) => {
+      if (!pgType.id) {
         throw new Error(
-          `Invalid argument to enforceGqlTypeByPgTypeId - expected a full type, received '${type}'`
+          `Invalid argument to enforceGqlTypeByPgTypeId - expected a full type, received '${pgType}'`
         );
-      }
-      if (!gqlTypeByTypeIdAndModifier[type.id]) {
-        gqlTypeByTypeIdAndModifier[type.id] = {};
-      }
-      if (!gqlInputTypeByTypeIdAndModifier[type.id]) {
-        gqlInputTypeByTypeIdAndModifier[type.id] = {};
-      }
-      const typeModifierKey = typeModifier != null ? typeModifier : -1;
-      // Explicit overrides
-      if (!gqlTypeByTypeIdAndModifier[type.id][typeModifierKey]) {
-        const gqlType = oidLookup[type.id];
-        if (gqlType) {
-          gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = gqlType;
-        }
-      }
-      if (!gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey]) {
-        const gqlInputType = oidInputLookup[type.id];
-        if (gqlInputType) {
-          gqlInputTypeByTypeIdAndModifier[type.id][
-            typeModifierKey
-          ] = gqlInputType;
-        }
-      }
-      // Enums
-      if (
-        !gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] &&
-        type.type === "e"
-      ) {
-        gqlTypeByTypeIdAndModifier[type.id][
-          typeModifierKey
-        ] = new GraphQLEnumType({
-          name: inflection.enumType(type),
-          description: type.description,
-          values: type.enumVariants.reduce((memo, value) => {
-            memo[inflection.enumName(value)] = {
-              value: value,
-            };
-            return memo;
-          }, {}),
-        });
-      }
-      // Ranges
-      if (
-        !gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] &&
-        type.type === "r"
-      ) {
-        const subtype =
-          introspectionResultsByKind.typeById[type.rangeSubTypeId];
-        const gqlRangeSubType = getGqlTypeByTypeIdAndModifier(
-          subtype.id,
-          typeModifier
-        );
-        if (!gqlRangeSubType) {
-          throw new Error("Range of unsupported");
-        }
-        let Range = getTypeByName(inflection.rangeType(gqlRangeSubType.name));
-        let RangeInput;
-        if (!Range) {
-          const RangeBound = new GraphQLObjectType({
-            name: inflection.rangeBoundType(gqlRangeSubType.name),
-            description:
-              "The value at one end of a range. A range can either include this value, or not.",
-            fields: {
-              value: {
-                description: "The value at one end of our range.",
-                type: new GraphQLNonNull(gqlRangeSubType),
-              },
-              inclusive: {
-                description:
-                  "Whether or not the value of this bound is included in the range.",
-                type: new GraphQLNonNull(GraphQLBoolean),
-              },
-            },
-          });
-          const RangeBoundInput = new GraphQLInputObjectType({
-            name: inflection.inputType(RangeBound.name),
-            description:
-              "The value at one end of a range. A range can either include this value, or not.",
-            fields: {
-              value: {
-                description: "The value at one end of our range.",
-                type: new GraphQLNonNull(gqlRangeSubType),
-              },
-              inclusive: {
-                description:
-                  "Whether or not the value of this bound is included in the range.",
-                type: new GraphQLNonNull(GraphQLBoolean),
-              },
-            },
-          });
-          Range = new GraphQLObjectType({
-            name: inflection.rangeType(gqlRangeSubType.name),
-            description: `A range of \`${gqlRangeSubType.name}\`.`,
-            fields: {
-              start: {
-                description: "The starting bound of our range.",
-                type: RangeBound,
-              },
-              end: {
-                description: "The ending bound of our range.",
-                type: RangeBound,
-              },
-            },
-          });
-          RangeInput = new GraphQLInputObjectType({
-            name: inflection.inputType(Range.name),
-            description: `A range of \`${gqlRangeSubType.name}\`.`,
-            fields: {
-              start: {
-                description: "The starting bound of our range.",
-                type: RangeBoundInput,
-              },
-              end: {
-                description: "The ending bound of our range.",
-                type: RangeBoundInput,
-              },
-            },
-          });
-          addType(Range);
-          addType(RangeInput);
-        } else {
-          RangeInput = getTypeByName(inflection.inputType(Range.name));
-        }
-        gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = Range;
-        gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] = RangeInput;
-        pg2GqlMapper[type.id] = {
-          map: pgRange => {
-            const parsed = pgRangeParser.parse(pgRange);
-            // Since the value we will get from `parsed.(start|end).value` is a
-            // string but our code will expect it to be the value after `pg`
-            // parsed it, we pass through to `pg-types` for parsing.
-            const pgParse =
-              rawTypes.indexOf(parseInt(subtype.id, 10)) >= 0
-                ? identity
-                : pgTypes.getTypeParser(subtype.id);
-            const { start, end } = parsed;
-            return {
-              start: start
-                ? {
-                    value: pg2gql(pgParse(start.value), subtype),
-                    inclusive: start.inclusive,
-                  }
-                : null,
-              end: end
-                ? {
-                    value: pg2gql(pgParse(end.value), subtype),
-                    inclusive: end.inclusive,
-                  }
-                : null,
-            };
-          },
-          unmap: ({ start, end }) => {
-            // Ref: https://www.postgresql.org/docs/9.6/static/rangetypes.html#RANGETYPES-CONSTRUCT
-            const lower =
-              (start && gql2pg(start.value, subtype, null)) || sql.null;
-            const upper = (end && gql2pg(end.value, subtype, null)) || sql.null;
-            const lowerInclusive = start && !start.inclusive ? "(" : "[";
-            const upperInclusive = end && !end.inclusive ? ")" : "]";
-            return sql.fragment`${sql.identifier(
-              type.namespaceName,
-              type.name
-            )}(${lower}, ${upper}, ${sql.literal(
-              lowerInclusive + upperInclusive
-            )})`;
-          },
-        };
       }
 
-      // Domains
-      if (
-        !gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] &&
-        type.type === "d" &&
-        type.domainBaseTypeId
-      ) {
-        const baseType = getGqlTypeByTypeIdAndModifier(
-          type.domainBaseTypeId,
-          typeModifier
-        );
-        const baseInputType =
-          gqlInputTypeByTypeIdAndModifier[type.domainBaseTypeId][
-            typeModifierKey
-          ];
-        // Hack stolen from: https://github.com/graphile/postgraphile/blob/ade728ed8f8e3ecdc5fdad7d770c67aa573578eb/src/graphql/schema/type/aliasGqlType.ts#L16
-        gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = Object.assign(
-          Object.create(baseType),
-          {
-            name: inflection.domainType(type),
-            description: type.description,
-          }
-        );
-        if (baseInputType && baseInputType !== baseType) {
-          gqlInputTypeByTypeIdAndModifier[type.id][
-            typeModifierKey
-          ] = Object.assign(Object.create(baseInputType), {
-            name: inflection.inputType(
-              gqlTypeByTypeIdAndModifier[type.id][typeModifierKey]
-            ),
-            description: type.description,
-          });
-        }
+      //make sure each type id has an index on it
+      if (!gqlTypeByTypeIdAndModifier[pgType.id]) {
+        gqlTypeByTypeIdAndModifier[pgType.id] = {};
+      }
+      if (!gqlInputTypeByTypeIdAndModifier[pgType.id]) {
+        gqlInputTypeByTypeIdAndModifier[pgType.id] = {};
       }
 
-      // Fall back to categories
-      if (!gqlTypeByTypeIdAndModifier[type.id][typeModifierKey]) {
-        const gen = categoryLookup[type.category];
-        if (gen) {
-          gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = gen(
-            type,
-            typeModifier
-          );
-        }
+      //TODO see if I can get rid of this
+      const modifierKey = modifier != null ? modifier : -1;
+
+      //if type already exists, simply return
+      const currentType = gqlTypeByTypeIdAndModifier[pgType.id][modifierKey];
+      if (currentType) return currentType;
+
+      /*** Type Creation Paths Below ***/
+
+      //explicit types
+      let gqlType = oidLookup[pgType.id];
+      if (gqlType) {
+        //also try to override the input type
+        const gqlInputType = oidInputLookup[pgType.id];
+        registerType(pgType.id, modifierKey, gqlType, gqlInputType);
+        return gqlType;
+      }
+
+      //check if it is a wrapper
+      switch (pgType.type) {
+        case "e":
+          return generateAndRegisterGQLEnumType(pgType, modifier);
+        case "r":
+          return generateAndRegisterGQLRangeTypes(pgType, modifier);
+        case "d":
+          return linkGQLDomainType(pgType, modifier);
+      }
+
+      // Check if it is a category type
+      const gen = categoryLookup[pgType.category];
+      if (gen) {
+        gqlType = gen(pgType, modifier);
+        registerType(pgType.id, modifierKey, gqlType);
+        return gqlType;
       }
 
       // Nothing else worked; pass through as string!
-      if (!gqlTypeByTypeIdAndModifier[type.id][typeModifierKey]) {
-        // XXX: consider using stringType(upperFirst(camelCase(`fallback_${type.name}`)), type.description)?
-        gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = GraphQLString;
-      }
-      // Now for input types, fall back to output types if possible
-      if (!gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey]) {
-        if (isInputType(gqlTypeByTypeIdAndModifier[type.id][typeModifierKey])) {
-          gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] =
-            gqlTypeByTypeIdAndModifier[type.id][typeModifierKey];
-        }
-      }
-      addType(
-        getNamedType(gqlTypeByTypeIdAndModifier[type.id][typeModifierKey])
-      );
-      return gqlTypeByTypeIdAndModifier[type.id][typeModifierKey];
+      // XXX: consider using stringType(upperFirst(camelCase(`fallback_${type.name}`)), type.description)?
+      registerType(pgType.id, modifierKey, GraphQLString);
+      return GraphQLString;
     };
+
+    /******************************************************************
+     * Registration Utility
+     ******************************************************************/
+
+    function registerType(typeId, modifierKey, gqlType, gqlInputType) {
+      if (!gqlType) throw Error(gqlType);
+
+      //TODO check if we are really only supposed to call 'addType' on the gqlType
+      gqlTypeByTypeIdAndModifier[typeId][modifierKey] = gqlType;
+      addType(getNamedType(gqlType));
+
+      //if explicit, set the input type
+      if (gqlInputType) {
+        gqlInputTypeByTypeIdAndModifier[typeId][modifierKey] = gqlInputType;
+
+        //fall back on the output type, if possible
+      } else if (isInputType(gqlType)) {
+        gqlInputTypeByTypeIdAndModifier[typeId][modifierKey] = gqlType;
+      }
+    }
+
+    /******************************************************************
+     * Range Types
+     ******************************************************************/
+
+    function generateAndRegisterGQLRangeTypes(pgRangeType, modifier) {
+      //TODO see if I can get rid of this conversion nuisance
+      const modifierKey = modifier != null ? modifier : -1;
+
+      let Range, RangeInput;
+      const [pgElementType, ElementType] = getElementTypes(
+        pgRangeType,
+        modifier
+      );
+
+      //if the range type already exists by name, then we just need to register it by modifier
+      Range = getTypeByName(inflection.rangeType(ElementType.name));
+      if (Range) {
+        //TODO if we got it via getTypeByName, then it seems a little weird that we are registering?
+        RangeInput = getTypeByName(inflection.inputType(Range.name));
+        registerType(pgRangeType.id, modifierKey, Range, RangeInput);
+        return Range;
+      }
+
+      //otherwise, generate them
+      [Range, RangeInput] = generateRangeTypes(ElementType);
+
+      //then register them
+      //todo why is this the only one with a mapper
+      registerType(pgRangeType.id, modifierKey, Range, RangeInput);
+      pg2GqlMapper[pgRangeType.id] = generateRangeMapper(
+        pgRangeType,
+        pgElementType
+      );
+
+      return Range;
+    }
+
+    function getElementTypes(pgType, modifier) {
+      const pgElementType =
+        introspectionResultsByKind.typeById[pgType.rangeSubTypeId];
+      const ElementType = getGqlTypeByTypeIdAndModifier(
+        pgElementType.id,
+        modifier
+      );
+      if (!ElementType) {
+        throw new Error(`Range of unsupported: ${pgElementType}`);
+      }
+      return [pgElementType, ElementType];
+    }
+
+    function generateRangeTypes(ElementType) {
+      //generate the types
+      const RangeBoundType = generateRangeBoundType(ElementType);
+      const RangeBoundInputType = generateRangeBoundInputType(
+        ElementType,
+        RangeBoundType
+      );
+      const RangeType = generateRangeType(ElementType, RangeBoundType);
+      const RangeInputType = generateRangeInputType(
+        ElementType,
+        RangeType,
+        RangeBoundInputType
+      );
+
+      //return the pair
+      return [RangeType, RangeInputType];
+    }
+
+    function generateRangeBoundType(ElementType) {
+      return new GraphQLObjectType({
+        name: inflection.rangeBoundType(ElementType.name),
+        description:
+          "The value at one end of a range. A range can either include this value, or not.",
+        fields: {
+          value: {
+            description: "The value at one end of our range.",
+            type: new GraphQLNonNull(ElementType),
+          },
+          inclusive: {
+            description:
+              "Whether or not the value of this bound is included in the range.",
+            type: new GraphQLNonNull(GraphQLBoolean),
+          },
+        },
+      });
+    }
+
+    function generateRangeBoundInputType(ElementType, RangeBoundType) {
+      return new GraphQLInputObjectType({
+        name: inflection.inputType(RangeBoundType.name),
+        description:
+          "The value at one end of a range. A range can either include this value, or not.",
+        fields: {
+          value: {
+            description: "The value at one end of our range.",
+            type: new GraphQLNonNull(ElementType),
+          },
+          inclusive: {
+            description:
+              "Whether or not the value of this bound is included in the range.",
+            type: new GraphQLNonNull(GraphQLBoolean),
+          },
+        },
+      });
+    }
+
+    function generateRangeType(ElementType, RangeBoundType) {
+      return new GraphQLObjectType({
+        name: inflection.rangeType(ElementType.name),
+        description: `A range of \`${ElementType.name}\`.`,
+        fields: {
+          start: {
+            description: "The starting bound of our range.",
+            type: RangeBoundType,
+          },
+          end: {
+            description: "The ending bound of our range.",
+            type: RangeBoundType,
+          },
+        },
+      });
+    }
+
+    function generateRangeInputType(
+      ElementType,
+      RangeType,
+      RangeBoundInputType
+    ) {
+      return new GraphQLInputObjectType({
+        name: inflection.inputType(RangeType.name),
+        description: `A range of \`${ElementType.name}\`.`,
+        fields: {
+          start: {
+            description: "The starting bound of our range.",
+            type: RangeBoundInputType,
+          },
+          end: {
+            description: "The ending bound of our range.",
+            type: RangeBoundInputType,
+          },
+        },
+      });
+    }
+
+    //TODO take a look at this mapper
+    function generateRangeMapper(pgRangeType, pgElementType) {
+      return {
+        map: pgRange => {
+          const parsed = pgRangeParser.parse(pgRange);
+          // Since the value we will get from `parsed.(start|end).value` is a
+          // string but our code will expect it to be the value after `pg`
+          // parsed it, we pass through to `pg-types` for parsing.
+          const pgParse =
+            rawTypes.indexOf(parseInt(pgElementType.id, 10)) >= 0
+              ? identity
+              : pgTypes.getTypeParser(pgElementType.id);
+          const { start, end } = parsed;
+          return {
+            start: start
+              ? {
+                  value: pg2gql(pgParse(start.value), pgElementType),
+                  inclusive: start.inclusive,
+                }
+              : null,
+            end: end
+              ? {
+                  value: pg2gql(pgParse(end.value), pgElementType),
+                  inclusive: end.inclusive,
+                }
+              : null,
+          };
+        },
+        unmap: ({ start, end }) => {
+          // Ref: https://www.postgresql.org/docs/9.6/static/rangetypes.html#RANGETYPES-CONSTRUCT
+          const lower =
+            (start && gql2pg(start.value, pgElementType, null)) || sql.null;
+          const upper =
+            (end && gql2pg(end.value, pgElementType, null)) || sql.null;
+          const lowerInclusive = start && !start.inclusive ? "(" : "[";
+          const upperInclusive = end && !end.inclusive ? ")" : "]";
+          return sql.fragment`${sql.identifier(
+            pgRangeType.namespaceName,
+            pgRangeType.name
+          )}(${lower}, ${upper}, ${sql.literal(
+            lowerInclusive + upperInclusive
+          )})`;
+        },
+      };
+    }
+
+    /******************************************************************
+     * Domain Types
+     ******************************************************************/
+
+    //TODO not entirely sure what a domain is or what this is doing; I think this needs enhanced
+    //error checking
+    //looks like it is taking what was registerd uner domainBaseType and then registering it on DomainType
+    function linkGQLDomainType(pgDomainType, modifier) {
+      if (!pgDomainType.domainBaseTypeId) return;
+
+      //TODO see if I can get rid of this conversion nuisance
+      const modifierKey = modifier != null ? modifier : -1;
+
+      const BaseType = getGqlTypeByTypeIdAndModifier(
+        pgDomainType.domainBaseTypeId,
+        modifier
+      );
+      const BaseInputType =
+        gqlInputTypeByTypeIdAndModifier[pgDomainType.domainBaseTypeId][
+          modifierKey
+        ];
+
+      //create the regular type
+      // Hack stolen from: https://github.com/graphile/postgraphile/blob/ade728ed8f8e3ecdc5fdad7d770c67aa573578eb/src/graphql/schema/type/aliasGqlType.ts#L16
+      const DomainType = Object.assign(Object.create(BaseType), {
+        name: inflection.domainType(pgDomainType),
+        description: pgDomainType.description,
+      });
+
+      //create the input type
+      let DomainInputType;
+      if (BaseInputType && BaseInputType !== BaseType) {
+        DomainInputType = Object.assign(Object.create(BaseInputType), {
+          name: inflection.inputType(DomainType),
+          description: pgDomainType.description,
+        });
+      }
+
+      registerType(pgDomainType.id, modifierKey, DomainType, DomainInputType);
+
+      return DomainType;
+    }
+
+    /******************************************************************
+     * Enum Types
+     ******************************************************************/
+
+    function generateAndRegisterGQLEnumType(pgEnumType, modifier) {
+      //TODO see if I can get rid of this conversion nuisance
+      const modifierKey = modifier != null ? modifier : -1;
+
+      const EnumType = generateEnumType(pgEnumType);
+      registerType(pgEnumType.id, modifierKey, EnumType);
+      return EnumType;
+    }
+
+    function generateEnumType(pgEnumType) {
+      return new GraphQLEnumType({
+        name: inflection.enumType(pgEnumType),
+        description: pgEnumType.description,
+        values: pgEnumType.enumVariants.reduce((memo, value) => {
+          memo[inflection.enumName(value)] = {
+            value: value,
+          };
+          return memo;
+        }, {}),
+      });
+    }
 
     function getGqlTypeByTypeIdAndModifier(
       typeId,
