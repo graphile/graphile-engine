@@ -24,95 +24,185 @@ const WATCH_CHANNEL = "postgraphile_watch";
  * (1) Queries the designated PostgreSQL database for some relevant metadata
  * (2) Rehyradates the metadata by connecting related structures by their id fields (most of the metadata
  * links to each other (e.g., classes and attributes, classes and namespaces, etc.)
- * (3) Provides two access layers to the metadata on the build object:
- *  - pgIntrospectionResultsByKind: All the definitions organized by their kind
- *  - pgIntrospectionResultsById: All thee definitions indexed by their unique ids
+ * (3) Provides access to the introspection metadata on the build object via `pgIntrospectionResultsByKind`:
+ *
+ *  This object contains lists of the following PostgreSQL metadata structures
+ *
+ *    -namespace
+ *    -class
+ *    -procedure
+ *    -type
+ *    -attribute
+ *    -extension
+ *    -constraint
+ *
+ * Additionally, it has a fex indexed by PostgreSQL oid (a string):
+ *
+ *    -classById
+ *    -namespaceById
+ *    -typeById,
+ *    -extensionById
+ *
+ * Finally it has the attributes indexed by class and then identifying number on attributeByClassIdAndNum.
+ *
+ * See the flow types below for more information about what's contained on `pgIntrospectionResultsByKind`.
+ *
+ *
  * (4) Registers watchers with the builder in case you want to watch the PostgreSQL database for schema changes;
  * if a watcher see a DB change, it will trigger a build of the schema
  ****************************************************************************************/
 
-export default (async function PgIntrospectionPlugin(
-  builder,
-  options: PgIntrospectionPluginOptions
-) {
-  const { pgSchemas, pgConfig } = options;
+/****************************************************************************************
+ * Flow Types
+ ****************************************************************************************/
 
-  if (!Array.isArray(pgSchemas)) {
-    throw new Error("Argument 'schemas' (array) is required");
-  }
+export type PgNamespace = {
+  kind: "namespace",
+  id: string,
+  name: string,
+  description: ?string,
+  tags: { [string]: string },
+};
 
-  let introspectionResultsByKind: PgIntrospectionResultsByKind;
+export type PgProc = {
+  kind: "procedure",
+  name: string,
+  description: ?string,
+  namespaceId: string,
+  isStrict: boolean,
+  returnsSet: boolean,
+  isStable: boolean,
+  returnTypeId: string,
+  argTypeIds: Array<string>,
+  argNames: Array<string>,
+  argDefaultsNum: number,
+  namespace: PgNamespace,
+  tags: { [string]: string },
+  aclExecutable: boolean,
+};
 
-  //provide the logic for updating the introspection results asynchronously; needed
-  //for the watcher, but also called once during the initial setup
-  const updateIntrospectionResults = async () => {
-    introspectionResultsByKind = await getIntrospectionResultsByKind(options);
-  };
-  await updateIntrospectionResults();
+export type PgClass = {
+  kind: "class",
+  id: string,
+  name: string,
+  description: ?string,
+  classKind: string,
+  namespaceId: string,
+  namespaceName: string,
+  typeId: string,
+  isSelectable: boolean,
+  isInsertable: boolean,
+  isUpdatable: boolean,
+  isDeletable: boolean,
+  isExtensionConfigurationTable: boolean,
+  namespace: PgNamespace,
+  type: PgType,
+  tags: { [string]: string },
+  attributes: [PgAttribute],
+  aclSelectable: boolean,
+  aclInsertable: boolean,
+  aclUpdatable: boolean,
+  aclDeletable: boolean,
+};
 
-  //add the introspection results to the build object
-  builder.hook("build", build => {
-    return build.extend(build, {
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
+export type PgType = {
+  kind: "type",
+  id: string,
+  name: string,
+  description: ?string,
+  namespaceId: string,
+  namespaceName: string,
+  type: string,
+  category: string,
+  domainIsNotNull: boolean,
+  arrayItemTypeId: ?string,
+  typeLength: ?number,
+  isPgArray: boolean,
+  classId: ?string,
+  domainBaseTypeId: ?string,
+  domainTypeModifier: ?number,
+  tags: { [string]: string },
+};
+
+export type PgAttribute = {
+  kind: "attribute",
+  classId: string,
+  num: number,
+  name: string,
+  description: ?string,
+  typeId: string,
+  typeModifier: number,
+  isNotNull: boolean,
+  hasDefault: boolean,
+  class: PgClass,
+  type: PgType,
+  namespace: PgNamespace,
+  tags: { [string]: string },
+  aclSelectable: boolean,
+  aclInsertable: boolean,
+  aclUpdatable: boolean,
+};
+
+export type PgConstraint = {
+  kind: "constraint",
+  name: string,
+  type: string,
+  classId: string,
+  foreignClassId: ?string,
+  description: ?string,
+  keyAttributeNums: Array<number>,
+  foreignKeyAttributeNums: Array<number>,
+  namespace: PgNamespace,
+  tags: { [string]: string },
+};
+
+export type PgExtension = {
+  kind: "extension",
+  id: string,
+  name: string,
+  namespaceId: string,
+  relocatable: boolean,
+  version: string,
+  configurationClassIds?: Array<string>,
+  description: ?string,
+  tags: { [string]: string },
+};
+
+export type PgIntrospectionResultsByKind = {
+  namespace: Array<PgNamespace>,
+  class: Array<PgClass>,
+  attribute: Array<PgAttribute>,
+  type: Array<PgType>,
+  constraint: Array<PgConstraint>,
+  procedure: Array<PgProc>,
+  extension: Array<PgExtension>,
+  namespaceById: { [string]: PgNamespace },
+  classById: { [string]: PgClass },
+  typeById: { [string]: PgType },
+  extensionById: { [string]: PgExtension },
+  attributeByClassIdAndNum: { [string]: { [number]: PgAttribute } },
+};
+
+export type PgIntrospectionPluginOptions = {
+  pgConfig: pg.Client | pg.Pool | string,
+  pgSchemas: Array<string>,
+  pgEnableTags: boolean,
+  persistentMemoizeWithKey?: <T>(string, () => T) => T,
+  pgThrowOnMissingSchema?: boolean,
+  pgIncludeExtensionResources?: boolean,
+};
+
+/****************************************************************************************
+ * Utilities Functions
+ ****************************************************************************************/
+
+function readFile(filename, encoding) {
+  return new Promise((resolve, reject) => {
+    rawReadFile(filename, encoding, (err, res) => {
+      if (err) reject(err);
+      else resolve(res);
     });
   });
-
-  //add the watchers to trigger rebuild if necessary
-  builder.registerWatcher(
-    ...generateWatcher(pgConfig, pgSchemas, updateIntrospectionResults)
-  );
-}: Plugin);
-
-/* The main workhorse of the plugin; accepts all of the plugin options - see
- * above for details
- */
-async function getIntrospectionResultsByKind({
-  pgConfig,
-  pgSchemas,
-  pgEnableTags,
-  persistentMemoizeWithKey = (key, fn) => fn(),
-  pgThrowOnMissingSchema = false,
-  pgIncludeExtensionResources = false,
-}: PgIntrospectionPluginOptions): Promise<PgIntrospectionResultsByKind> {
-  //query the PostgresQL database for the relevant meta data
-  const introspectionResultsByKind = await getRawPGStructuresByKind(
-    pgConfig,
-    pgSchemas,
-    pgIncludeExtensionResources,
-    persistentMemoizeWithKey
-  );
-
-  //verify that all of the schemas are present
-  verifySchemas(
-    introspectionResultsByKind.namespace,
-    pgSchemas,
-    pgThrowOnMissingSchema
-  );
-
-  // parse the smart comments
-  addTagsToStructures(introspectionResultsByKind, pgEnableTags);
-
-  //index the structures by ID
-  addlookupTableById(introspectionResultsByKind);
-
-  //rehydrate the objects by linking them by their ID fields
-  toRelate.forEach(
-    ({ kind, key, lookupTable, newAttr, missingOk }: relation) => {
-      relate(
-        introspectionResultsByKind[kind],
-        key,
-        newAttr,
-        introspectionResultsByKind[lookupTable],
-        missingOk
-      );
-    }
-  );
-  attachClassAttributes(
-    introspectionResultsByKind.classById,
-    introspectionResultsByKind.attribute
-  );
-
-  return introspectionResultsByKind;
 }
 
 /****************************************************************************************
@@ -576,154 +666,89 @@ function generateNotificationHandler(onSchemaChange, schemasToWatch) {
 }
 
 /****************************************************************************************
- * Flow Types
+ * Plugin Definition
  ****************************************************************************************/
 
-export type PgNamespace = {
-  kind: "namespace",
-  id: string,
-  name: string,
-  description: ?string,
-  tags: { [string]: string },
-};
+export default (async function PgIntrospectionPlugin(
+  builder,
+  options: PgIntrospectionPluginOptions
+) {
+  const { pgSchemas, pgConfig } = options;
 
-export type PgProc = {
-  kind: "procedure",
-  name: string,
-  description: ?string,
-  namespaceId: string,
-  isStrict: boolean,
-  returnsSet: boolean,
-  isStable: boolean,
-  returnTypeId: string,
-  argTypeIds: Array<string>,
-  argNames: Array<string>,
-  argDefaultsNum: number,
-  namespace: PgNamespace,
-  tags: { [string]: string },
-  aclExecutable: boolean,
-};
+  if (!Array.isArray(pgSchemas)) {
+    throw new Error("Argument 'schemas' (array) is required");
+  }
 
-export type PgClass = {
-  kind: "class",
-  id: string,
-  name: string,
-  description: ?string,
-  classKind: string,
-  namespaceId: string,
-  namespaceName: string,
-  typeId: string,
-  isSelectable: boolean,
-  isInsertable: boolean,
-  isUpdatable: boolean,
-  isDeletable: boolean,
-  isExtensionConfigurationTable: boolean,
-  namespace: PgNamespace,
-  type: PgType,
-  tags: { [string]: string },
-  attributes: [PgAttribute],
-  aclSelectable: boolean,
-  aclInsertable: boolean,
-  aclUpdatable: boolean,
-  aclDeletable: boolean,
-};
+  let introspectionResultsByKind: PgIntrospectionResultsByKind;
 
-export type PgType = {
-  kind: "type",
-  id: string,
-  name: string,
-  description: ?string,
-  namespaceId: string,
-  namespaceName: string,
-  type: string,
-  category: string,
-  domainIsNotNull: boolean,
-  arrayItemTypeId: ?string,
-  typeLength: ?number,
-  isPgArray: boolean,
-  classId: ?string,
-  domainBaseTypeId: ?string,
-  domainTypeModifier: ?number,
-  tags: { [string]: string },
-};
+  //provide the logic for updating the introspection results asynchronously; needed
+  //for the watcher, but also called once during the initial setup
+  const updateIntrospectionResults = async () => {
+    introspectionResultsByKind = await getIntrospectionResultsByKind(options);
+  };
+  await updateIntrospectionResults();
 
-export type PgAttribute = {
-  kind: "attribute",
-  classId: string,
-  num: number,
-  name: string,
-  description: ?string,
-  typeId: string,
-  typeModifier: number,
-  isNotNull: boolean,
-  hasDefault: boolean,
-  class: PgClass,
-  type: PgType,
-  namespace: PgNamespace,
-  tags: { [string]: string },
-  aclSelectable: boolean,
-  aclInsertable: boolean,
-  aclUpdatable: boolean,
-};
-
-export type PgConstraint = {
-  kind: "constraint",
-  name: string,
-  type: string,
-  classId: string,
-  foreignClassId: ?string,
-  description: ?string,
-  keyAttributeNums: Array<number>,
-  foreignKeyAttributeNums: Array<number>,
-  namespace: PgNamespace,
-  tags: { [string]: string },
-};
-
-export type PgExtension = {
-  kind: "extension",
-  id: string,
-  name: string,
-  namespaceId: string,
-  relocatable: boolean,
-  version: string,
-  configurationClassIds?: Array<string>,
-  description: ?string,
-  tags: { [string]: string },
-};
-
-export type PgIntrospectionResultsByKind = {
-  namespace: Array<PgNamespace>,
-  class: Array<PgClass>,
-  attribute: Array<PgAttribute>,
-  type: Array<PgType>,
-  constraint: Array<PgConstraint>,
-  procedure: Array<PgProc>,
-  extension: Array<PgExtension>,
-  namespaceById: { [string]: PgNamespace },
-  classById: { [string]: PgClass },
-  typeById: { [string]: PgType },
-  extensionById: { [string]: PgExtension },
-  attributeByClassIdAndNum: { [string]: { [number]: PgAttribute } },
-};
-
-export type PgIntrospectionPluginOptions = {
-  pgConfig: pg.Client | pg.Pool | string,
-  pgSchemas: Array<string>,
-  pgEnableTags: boolean,
-  persistentMemoizeWithKey?: <T>(string, () => T) => T,
-  pgThrowOnMissingSchema?: boolean,
-  pgIncludeExtensionResources?: boolean,
-};
-
-/****************************************************************************************
- * Utilities Functions
- ****************************************************************************************/
-
-function readFile(filename, encoding) {
-  return new Promise((resolve, reject) => {
-    rawReadFile(filename, encoding, (err, res) => {
-      if (err) reject(err);
-      else resolve(res);
+  //add the introspection results to the build object
+  builder.hook("build", build => {
+    return build.extend(build, {
+      pgIntrospectionResultsByKind: introspectionResultsByKind,
     });
   });
+
+  //add the watchers to trigger rebuild if necessary
+  builder.registerWatcher(
+    ...generateWatcher(pgConfig, pgSchemas, updateIntrospectionResults)
+  );
+}: Plugin);
+
+/* The main workhorse of the plugin; accepts all of the plugin options - see
+ * above for details
+ */
+async function getIntrospectionResultsByKind({
+  pgConfig,
+  pgSchemas,
+  pgEnableTags,
+  persistentMemoizeWithKey = (key, fn) => fn(),
+  pgThrowOnMissingSchema = false,
+  pgIncludeExtensionResources = false,
+}: PgIntrospectionPluginOptions): Promise<PgIntrospectionResultsByKind> {
+  //query the PostgresQL database for the relevant meta data
+  const introspectionResultsByKind = await getRawPGStructuresByKind(
+    pgConfig,
+    pgSchemas,
+    pgIncludeExtensionResources,
+    persistentMemoizeWithKey
+  );
+
+  //verify that all of the schemas are present
+  verifySchemas(
+    introspectionResultsByKind.namespace,
+    pgSchemas,
+    pgThrowOnMissingSchema
+  );
+
+  // parse the smart comments
+  addTagsToStructures(introspectionResultsByKind, pgEnableTags);
+
+  //index the structures by ID
+  addlookupTableById(introspectionResultsByKind);
+
+  //rehydrate the objects by linking them by their ID fields
+  toRelate.forEach(
+    ({ kind, key, lookupTable, newAttr, missingOk }: relation) => {
+      relate(
+        introspectionResultsByKind[kind],
+        key,
+        newAttr,
+        introspectionResultsByKind[lookupTable],
+        missingOk
+      );
+    }
+  );
+  attachClassAttributes(
+    introspectionResultsByKind.classById,
+    introspectionResultsByKind.attribute
+  );
+
+  return introspectionResultsByKind;
 }
