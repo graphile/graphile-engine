@@ -61,7 +61,7 @@ export default (async function PgIntrospectionPlugin(
   );
 
   // parse the smart comments
-  parseTagsFromStructures(introspectionResultsByKind, pgEnableTags);
+  addTagsToStructures(introspectionResultsByKind, pgEnableTags);
 
   //index the structures by ID
   const introspectionResultsById = createStructuresById(
@@ -271,12 +271,12 @@ function verifySchemas(namespaces, requestedSchemas, throwIfMissing) {
  * See https://www.graphile.org/postgraphile/smart-comments/
  *
  * @param pgStructuresByKind
- * @param smartComments - True iff smart comments are enabled
+ * @param smartCommentsEnabled - True iff smart comments are enabled
  */
-function parseTagsFromStructures(pgStructuresByKind, smartComments) {
+function addTagsToStructures(pgStructuresByKind, smartCommentsEnabled) {
   Object.keys(pgStructuresByKind).forEach(kind => {
     pgStructuresByKind[kind].forEach(struct => {
-      if (smartComments && struct.description) {
+      if (smartCommentsEnabled && struct.description) {
         const parsed = parseTags(struct.description);
         struct.tags = parsed.tags;
         struct.description = parsed.text;
