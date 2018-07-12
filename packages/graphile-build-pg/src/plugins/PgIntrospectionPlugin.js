@@ -102,24 +102,23 @@ async function getIntrospectionResultsByKind({
   addTagsToStructures(introspectionResultsByKind, pgEnableTags);
 
   //index the structures by ID
-  const introspectionResultsById = createStructuresById(
-    introspectionResultsByKind
-  );
+  addlookupTableById(introspectionResultsByKind);
 
   //rehydrate the objects by linking them by their ID fields
-  toRelate.forEach(({ kind, idAttr, newAttr, missingOk }: relation) => {
-    relate(
-      introspectionResultsByKind[kind],
-      idAttr,
-      newAttr,
-      introspectionResultsById,
-      missingOk
-    );
-  });
+  toRelate.forEach(
+    ({ kind, key, lookupTable, newAttr, missingOk }: relation) => {
+      relate(
+        introspectionResultsByKind[kind],
+        key,
+        newAttr,
+        introspectionResultsByKind[lookupTable],
+        missingOk
+      );
+    }
+  );
   attachClassAttributes(
-    introspectionResultsByKind.class,
-    introspectionResultsByKind.attribute,
-    introspectionResultsById
+    introspectionResultsByKind.classById,
+    introspectionResultsByKind.attribute
   );
 
   return introspectionResultsByKind;
@@ -202,26 +201,20 @@ async function getRawPGStructuresByKind(
 }
 
 /**
- * Takes the result of getRawPGStructuresByKind and creates an index on all of the containing
- * structures by their ID field; not all structures have an ID field (e.g., attributes), but those that do
- * will have unique IDs (on a per database basis)
+ * Takes the result of getRawPGStructuresByKind and creates id lookupTable indices for the indicated
+ * types
  *
  * @param pgStructuresByKind
  */
-function createStructuresById(pgStructuresByKind) {
-  // put every struct that has an ID field into a single map
-  const pgStructureById = {};
-  Object.keys(pgStructuresByKind).forEach(kind => {
-    pgStructuresByKind[kind].forEach(struct => {
-      if (struct.id) {
-        pgStructureById[struct.id] = struct;
-      }
-    });
-  });
-
-  //TODO deprecate?
-  ["namespace", "class", "type", "extension"].forEach(kind => {
-    pgStructuresByKind[kind + "ById"] = pgStructuresByKind[kind].reduce(
+function addlookupTableById(pgStructuresByKind) {
+  //add "ById" fields for the following kinds
+  [
+    ["namespace", "namespaceById"],
+    ["class", "classById"],
+    ["type", "typeById"],
+    ["extension", "extensionById"],
+  ].forEach(([kind, lookupTableAttr]) => {
+    pgStructuresByKind[lookupTableAttr] = pgStructuresByKind[kind].reduce(
       (memo, struct) => {
         memo[struct.id] = struct;
         return memo;
@@ -229,6 +222,8 @@ function createStructuresById(pgStructuresByKind) {
       {}
     );
   });
+
+  //index attributes by both their class and their number;
   pgStructuresByKind.attributeByClassIdAndNum = pgStructuresByKind.attribute.reduce(
     (memo, struct) => {
       const { classId, num } = struct;
@@ -238,20 +233,6 @@ function createStructuresById(pgStructuresByKind) {
     },
     {}
   );
-
-  //TODO if yes, can warn about the deprecation via proxies (example below)
-  // ["namespaceById", "classById", "typeById", "extensionById", "attributeByClassIdAndNum].forEach(prop => {
-  //     console.log(prop);
-  //    pgStructuresByKind[prop] = new Proxy(pgStructuresByKind[prop], {
-  //        get: function(target, property, rec){
-  //            console.warn(`@DeprecationWarning: Accessing postgres data by ID via pgIntrospectionResultsByKind will
-  //            soon be deprecated. Please use pgIntrospectionResultsByID instead.`);
-  //            return target[property];
-  //        }
-  //    })
-  // });
-
-  return pgStructureById;
 }
 
 /**
@@ -324,20 +305,20 @@ function addTagsToStructures(pgStructuresByKind, smartCommentsEnabled) {
  * @param arrayOfStructs - An array of structs from the initial PG introspection
  * @param idAttr - The ID attribute on each struct in 'arrayOfStructs' to  use in looking up another struct with
  * @param newAttr - The property name by which you want to attach the looked up struct to each struct in arrayOfStructs
- * @param lookupTable - An ES6 Map that can be used to look up each struct by its ID (see createStructuresByID)
- * @param missingOk - Should throw error if lookupTable does not contain an ID
+ * @param lookupTableTable - An ES6 Map that can be used to look up each struct by its ID (see createStructuresByID)
+ * @param missingOk - Should throw error if lookupTableTable does not contain an ID
  */
 
 function relate(
   arrayOfStructs,
   idAttr,
   newAttr,
-  lookupTable,
+  lookupTableTable,
   missingOk?: boolean = false
 ) {
-  //lookup logic
+  //lookupTable logic
   const getRelatedStruct = (id, struct) => {
-    const relatedStruct = lookupTable[id];
+    const relatedStruct = lookupTableTable[id];
     if (!relatedStruct) {
       if (missingOk) return;
       else
@@ -350,7 +331,7 @@ function relate(
     return relatedStruct;
   };
 
-  //apply the lookup logic to each struct in the array (can handle both an array of ids and a single id)
+  //apply the lookupTable logic to each struct in the array (can handle both an array of ids and a single id)
   arrayOfStructs.forEach(struct => {
     const id = struct[idAttr];
     if (id)
@@ -366,7 +347,8 @@ function relate(
  */
 type relation = {
   kind: string,
-  idAttr: string,
+  key: string,
+  lookupTable: string,
   newAttr: string,
   missingOk?: boolean,
 };
@@ -374,57 +356,67 @@ type relation = {
 const toRelate: Array<relation> = [
   {
     kind: "class",
-    idAttr: "namespaceId",
+    key: "namespaceId",
+    lookupTable: "namespaceById",
     newAttr: "namespace",
     missingOk: true,
   },
   {
     kind: "class",
-    idAttr: "typeId",
+    key: "typeId",
+    lookupTable: "typeById",
     newAttr: "type",
   },
   {
     kind: "attribute",
-    idAttr: "classId",
+    key: "classId",
+    lookupTable: "classById",
     newAttr: "class",
   },
   {
     kind: "attribute",
-    idAttr: "typeId",
+    key: "typeId",
+    lookupTable: "typeById",
     newAttr: "type",
   },
   {
     kind: "procedure",
-    idAttr: "namespaceId",
+    key: "namespaceId",
+    lookupTable: "namespaceById",
     newAttr: "namespace",
   },
   {
     kind: "type",
-    idAttr: "classId",
+    key: "classId",
+    lookupTable: "classById",
     newAttr: "class",
     missingOk: true,
   },
   {
     kind: "type",
-    idAttr: "domainBaseTypeId",
+    key: "domainBaseTypeId",
+    lookupTable: "typeById",
     newAttr: "domainBaseType",
     missingOk: true,
   },
   {
     kind: "type",
-    idAttr: "arrayItemTypeId",
+    key: "arrayItemTypeId",
+    lookupTable: "typeById",
     newAttr: "arrayItemType",
     missingOk: true,
   },
   {
     kind: "extension",
-    idAttr: "namespaceId",
+    key: "namespaceId",
+    lookupTable: "namespaceById",
     newAttr: "namespace",
     missingOk: true,
   },
   {
     kind: "extension",
-    idAttr: "configurationClassesId",
+    key: "configurationClassesId",
+    lookupTable: "classById",
     newAttr: "configurationClasses",
     missingOk: true,
   },
@@ -434,20 +426,20 @@ const toRelate: Array<relation> = [
  * Attaches each attribute struct to it's corresponding class using the ID look up
  * table from 'createStructuresById'
  *
- * @param classStructs
+ * @param classStructsById
  * @param attributeStructs
- * @param lookupTable
  */
 
-function attachClassAttributes(classStructs, attributeStructs, lookupTable) {
+function attachClassAttributes(classStructsById, attributeStructs) {
   //initialize all of the class structs to have no attributes
-  classStructs.forEach(struct => {
+  Object.values(classStructsById).forEach(struct => {
+    // $FlowFixMe
     struct.attributes = [];
   });
 
   //attach all of the attributes to their corresponding class
   attributeStructs.forEach(struct => {
-    lookupTable[struct.classId].attributes.push(struct);
+    classStructsById[struct.classId].attributes.push(struct);
   });
 }
 
