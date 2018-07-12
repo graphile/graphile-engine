@@ -5,9 +5,10 @@ import { parseTags } from "../utils";
 import { readFile as rawReadFile } from "fs";
 import debugFactory from "debug";
 import chalk from "chalk";
-import once from "lodash/once";
+import throttle from "lodash/throttle";
 import flatMap from "lodash/flatMap";
 import { version } from "../../package.json";
+import pg from "pg/lib/index";
 
 const debug = debugFactory("graphile-build-pg");
 const INTROSPECTION_PATH = `${__dirname}/../../res/introspection-query.sql`;
@@ -30,25 +31,62 @@ const WATCH_CHANNEL = "postgraphile_watch";
  * if a watcher see a DB change, it will trigger a build of the schema
  ****************************************************************************************/
 
+type PgIntrospectionPluginOptions = {
+  pgConfig: pg.Client | pg.Pool | string,
+  pgSchemas: Array<string>,
+  pgEnableTags: boolean,
+  persistentMemoizeWithKey?: <T>(string, () => T) => T,
+  pgThrowOnMissingSchema?: boolean,
+  pgIncludeExtensionResources?: boolean,
+};
+
 export default (async function PgIntrospectionPlugin(
   builder,
-  {
-    pgConfig,
-    pgSchemas: schemas,
-    pgEnableTags,
-    persistentMemoizeWithKey = (key, fn) => fn(),
-    pgThrowOnMissingSchema = false,
-    pgIncludeExtensionResources = false,
-  }
+  options: PgIntrospectionPluginOptions
 ) {
-  if (!Array.isArray(schemas)) {
+  const { pgSchemas, pgConfig } = options;
+
+  if (!Array.isArray(pgSchemas)) {
     throw new Error("Argument 'schemas' (array) is required");
   }
 
+  let introspectionResultsByKind: PgIntrospectionResultsByKind;
+
+  //provide the logic for updating the introspection results asynchronously; needed
+  //for the watcher, but also called once during the initial setup
+  const updateIntrospectionResults = async () => {
+    introspectionResultsByKind = await getIntrospectionResultsByKind(options);
+  };
+  await updateIntrospectionResults();
+
+  //add the introspection results to the build object
+  builder.hook("build", build => {
+    return build.extend(build, {
+      pgIntrospectionResultsByKind: introspectionResultsByKind,
+    });
+  });
+
+  //add the watchers to trigger rebuild if necessary
+  builder.registerWatcher(
+    ...generateWatcher(pgConfig, pgSchemas, updateIntrospectionResults)
+  );
+}: Plugin);
+
+/* The main workhorse of the plugin; accepts all of the plugin options - see
+ * above for details
+ */
+async function getIntrospectionResultsByKind({
+  pgConfig,
+  pgSchemas,
+  pgEnableTags,
+  persistentMemoizeWithKey = (key, fn) => fn(),
+  pgThrowOnMissingSchema = false,
+  pgIncludeExtensionResources = false,
+}: PgIntrospectionPluginOptions): Promise<PgIntrospectionResultsByKind> {
   //query the PostgresQL database for the relevant meta data
-  const introspectionResultsByKind = await getPGStructuresByKind(
+  const introspectionResultsByKind = await getRawPGStructuresByKind(
     pgConfig,
-    schemas,
+    pgSchemas,
     pgIncludeExtensionResources,
     persistentMemoizeWithKey
   );
@@ -56,7 +94,7 @@ export default (async function PgIntrospectionPlugin(
   //verify that all of the schemas are present
   verifySchemas(
     introspectionResultsByKind.namespace,
-    schemas,
+    pgSchemas,
     pgThrowOnMissingSchema
   );
 
@@ -84,21 +122,8 @@ export default (async function PgIntrospectionPlugin(
     introspectionResultsById
   );
 
-  //add the introspection results to the build object
-  builder.hook("build", build => {
-    return build.extend(build, {
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
-
-      //TODO verify whether adding this top-level lookupByID is ok
-      //pgIntrospectionResultsByID: introspectionResultsById
-    });
-  });
-
-  //add the watchers to trigger rebuild if necessary
-  //TODO I don't think there are any tests for this so need to add some before merging
-  //PR
-  builder.registerWatcher(...generateWatcher(pgConfig, schemas));
-}: Plugin);
+  return introspectionResultsByKind;
+}
 
 /****************************************************************************************
  * Build Extensions - Add two ways to query the PostgreSQL introspection results to the
@@ -122,22 +147,20 @@ export default (async function PgIntrospectionPlugin(
  * @param schemas - The requested schemas to pull from the database
  * @param includeExtensionResources - True iff should include extension resources; currently, this includes
  * the functions and tables installed by extensions
- * @param memoizationFn -  A function that needs to have the following structure:
- * (cacheKey, () => pgStructuresByKind) => pgStructuresByKind
- * Can be used for caching; TODO explain how - maybe move the cache to the outside of this function
+ * @param memoizationFn - Can be used for caching
  */
-async function getPGStructuresByKind(
+async function getRawPGStructuresByKind(
   pgConfig,
   schemas,
   includeExtensionResources,
   memoizationFn
 ) {
-  //TODO find out what the cacheing mechanism is doing
   const cacheKey = `PgIntrospectionPlugin-introspectionResultsByKind-v${version}`;
 
   //introspect the database and return memoized list of structures by kind (see the
   //above types for the fields on each type)
-  return await memoizationFn(cacheKey, () =>
+
+  return memoizationFn(cacheKey, () =>
     //get a client to the postgres database
     withPgClient(pgConfig, async pgClient => {
       //load and run the query for the structure of the database
@@ -179,7 +202,7 @@ async function getPGStructuresByKind(
 }
 
 /**
- * Takes the result of getPGStructuresByKind and creates an index on all of the containing
+ * Takes the result of getRawPGStructuresByKind and creates an index on all of the containing
  * structures by their ID field; not all structures have an ID field (e.g., attributes), but those that do
  * will have unique IDs (on a per database basis)
  *
@@ -266,7 +289,7 @@ function verifySchemas(namespaces, requestedSchemas, throwIfMissing) {
  ****************************************************************************************/
 
 /**
- * Takes the result of getPGStructuresByKind and extracts the tags based on the
+ * Takes the result of getRawPGStructuresByKind and extracts the tags based on the
  * smart commenting system exposed by the 'parseTags' function from utils
  *
  * See https://www.graphile.org/postgraphile/smart-comments/
@@ -340,7 +363,6 @@ function relate(
 /**
  * Defines how to rehydrate the structural metadata retrieved from the postgres introspection query. See
  * the 'relate' function below;
- * //TODO is there a better place to put this?
  */
 type relation = {
   kind: string,
@@ -440,8 +462,9 @@ function attachClassAttributes(classStructs, attributeStructs, lookupTable) {
  *
  * @param pgConfig
  * @param schemasToWatch
+ * @param updater - thunk to call when the schema needs to be updated;
  */
-function generateWatcher(pgConfig, schemasToWatch) {
+function generateWatcher(pgConfig, schemasToWatch, updater) {
   let unwatcher = () => {};
 
   const watcher = async triggerRebuild => {
@@ -451,13 +474,20 @@ function generateWatcher(pgConfig, schemasToWatch) {
       //because of the promise, client will remain active until resolve() is called
       return new Promise(resolve => {
         const listener = generateNotificationHandler(
-          //the watcher can only trigger unwatching and a rebuild once
-          once(() => {
-            debug(`Schema change detected: re-inspecting schema...`);
-            //call unwatcher before the rebuild so that we always have a clean slate
-            unwatcher();
-            triggerRebuild();
-          }),
+          //throttle the amount of times we can update
+          throttle(
+            async () => {
+              debug(`Schema change detected: re-inspecting schema...`);
+              await updater();
+              debug(`Schema change detected: re-inspecting schema complete`);
+              triggerRebuild();
+            },
+            750,
+            {
+              leading: true,
+              trailing: true,
+            }
+          ),
           schemasToWatch
         );
         unwatcher = () => {
@@ -469,6 +499,9 @@ function generateWatcher(pgConfig, schemasToWatch) {
         pgClient.on("notification", listener);
       });
     });
+
+    //when the watcher is registered, update the schema
+    await updater();
   };
 
   return [watcher, unwatcher];
@@ -510,6 +543,7 @@ async function installPgWatch(pgClient) {
     await pgClient.query("rollback");
   }
   await pgClient.query(`listen ${WATCH_CHANNEL}`);
+  //TODO should probably do "drop schema if exists postgraphile_watch cascade;"
   return () =>
     pgClient.query(`unlisten ${WATCH_CHANNEL}`).catch(e => {
       debug(`Error occurred trying to unlisten watch: ${e}`);
@@ -682,3 +716,13 @@ function readFile(filename, encoding) {
     });
   });
 }
+
+export type PgIntrospectionResultsByKind = {
+  namespace: Array<PgNamespace>,
+  class: Array<PgClass>,
+  attribute: Array<PgAttribute>,
+  type: Array<PgType>,
+  constraint: Array<PgConstraint>,
+  procedure: Array<PgProc>,
+  extension: Array<PgExtension>,
+};
