@@ -3,140 +3,107 @@ import type { Plugin } from "graphile-build";
 import withPgClient from "../withPgClient";
 import { parseTags } from "../utils";
 import { readFile as rawReadFile } from "fs";
-import pg from "pg";
 import debugFactory from "debug";
 import chalk from "chalk";
-import throttle from "lodash/throttle";
+import once from "lodash/once";
 import flatMap from "lodash/flatMap";
-import { quacksLikePgPool } from "../withPgClient";
-
 import { version } from "../../package.json";
 
 const debug = debugFactory("graphile-build-pg");
 const INTROSPECTION_PATH = `${__dirname}/../../res/introspection-query.sql`;
 const WATCH_FIXTURES_PATH = `${__dirname}/../../res/watch-fixtures.sql`;
+const WATCH_CHANNEL = "postgraphile_watch";
 
-// Ref: https://github.com/graphile/postgraphile/tree/master/src/postgres/introspection/object
-export type PgNamespace = {
-  kind: "namespace",
-  id: string,
-  name: string,
-  description: ?string,
-  tags: { [string]: string },
-};
+/****************************************************************************************
+ * PgIntrospectionPlugin ---------------------------------------------------------------
+ * -------------------------------------------------------------------------------------
+ *
+ * Performs the following operations:
+ *
+ * (1) Queries the designated PostgreSQL database for some relevant metadata
+ * (2) Rehyradates the metadata by connecting related structures by their id fields (most of the metadata
+ * links to each other (e.g., classes and attributes, classes and namespaces, etc.)
+ * (3) Provides two access layers to the metadata on the build object:
+ *  - pgIntrospectionResultsByKind: All the definitions organized by their kind
+ *  - pgIntrospectionResultsById: All thee definitions indexed by their unique ids
+ * (4) Registers watchers with the builder in case you want to watch the PostgreSQL database for schema changes;
+ * if a watcher see a DB change, it will trigger a build of the schema
+ ****************************************************************************************/
 
-export type PgProc = {
-  kind: "procedure",
-  name: string,
-  description: ?string,
-  namespaceId: string,
-  isStrict: boolean,
-  returnsSet: boolean,
-  isStable: boolean,
-  returnTypeId: string,
-  argTypeIds: Array<string>,
-  argNames: Array<string>,
-  argDefaultsNum: number,
-  namespace: PgNamespace,
-  tags: { [string]: string },
-  aclExecutable: boolean,
-};
+export default (async function PgIntrospectionPlugin(
+  builder,
+  {
+    pgConfig,
+    pgSchemas: schemas,
+    pgEnableTags,
+    persistentMemoizeWithKey = (key, fn) => fn(),
+    pgThrowOnMissingSchema = false,
+    pgIncludeExtensionResources = false,
+  }
+) {
+  if (!Array.isArray(schemas)) {
+    throw new Error("Argument 'schemas' (array) is required");
+  }
 
-export type PgClass = {
-  kind: "class",
-  id: string,
-  name: string,
-  description: ?string,
-  classKind: string,
-  namespaceId: string,
-  namespaceName: string,
-  typeId: string,
-  isSelectable: boolean,
-  isInsertable: boolean,
-  isUpdatable: boolean,
-  isDeletable: boolean,
-  isExtensionConfigurationTable: boolean,
-  namespace: PgNamespace,
-  type: PgType,
-  tags: { [string]: string },
-  attributes: [PgAttribute],
-  aclSelectable: boolean,
-  aclInsertable: boolean,
-  aclUpdatable: boolean,
-  aclDeletable: boolean,
-};
+  //query the PostgresQL database for the relevant meta data
+  const introspectionResultsByKind = await getPGStructuresByKind(
+    pgConfig,
+    schemas,
+    pgIncludeExtensionResources,
+    persistentMemoizeWithKey
+  );
 
-export type PgType = {
-  kind: "type",
-  id: string,
-  name: string,
-  description: ?string,
-  namespaceId: string,
-  namespaceName: string,
-  type: string,
-  category: string,
-  domainIsNotNull: boolean,
-  arrayItemTypeId: ?string,
-  typeLength: ?number,
-  isPgArray: boolean,
-  classId: ?string,
-  domainBaseTypeId: ?string,
-  domainTypeModifier: ?number,
-  tags: { [string]: string },
-};
+  //verify that all of the schemas are present
+  verifySchemas(
+    introspectionResultsByKind.namespace,
+    schemas,
+    pgThrowOnMissingSchema
+  );
 
-export type PgAttribute = {
-  kind: "attribute",
-  classId: string,
-  num: number,
-  name: string,
-  description: ?string,
-  typeId: string,
-  typeModifier: number,
-  isNotNull: boolean,
-  hasDefault: boolean,
-  class: PgClass,
-  type: PgType,
-  namespace: PgNamespace,
-  tags: { [string]: string },
-  aclSelectable: boolean,
-  aclInsertable: boolean,
-  aclUpdatable: boolean,
-};
+  // parse the smart comments
+  parseTagsFromStructures(introspectionResultsByKind, pgEnableTags);
 
-export type PgConstraint = {
-  kind: "constraint",
-  name: string,
-  type: string,
-  classId: string,
-  foreignClassId: ?string,
-  description: ?string,
-  keyAttributeNums: Array<number>,
-  foreignKeyAttributeNums: Array<number>,
-  namespace: PgNamespace,
-  tags: { [string]: string },
-};
+  //index the structures by ID
+  const introspectionResultsById = createStructuresById(
+    introspectionResultsByKind
+  );
 
-export type PgExtension = {
-  kind: "extension",
-  id: string,
-  name: string,
-  namespaceId: string,
-  relocatable: boolean,
-  version: string,
-  configurationClassIds?: Array<string>,
-  description: ?string,
-  tags: { [string]: string },
-};
+  //rehydrate the objects by linking them by their ID fields
+  toRelate.forEach(({ kind, IdAttr, newAttr, missingOk }) => {
+    relate(
+      introspectionResultsByKind[kind],
+      IdAttr,
+      newAttr,
+      introspectionResultsById,
+      missingOk
+    );
+  });
+  attachClassAttributes(
+    introspectionResultsByKind.class,
+    introspectionResultsByKind.attribute,
+    introspectionResultsById
+  );
 
-function readFile(filename, encoding) {
-  return new Promise((resolve, reject) => {
-    rawReadFile(filename, encoding, (err, res) => {
-      if (err) reject(err);
-      else resolve(res);
+  //add the introspection results to the build object
+  builder.hook("build", build => {
+    return build.extend(build, {
+      pgIntrospectionResultsByKind: introspectionResultsByKind,
+
+      //TODO verify whether adding this top-level lookupByID is ok
+      //pgIntrospectionResultsByID: introspectionResultsById
     });
   });
-}
+
+  //add the watchers to trigger rebuild if necessary
+  //TODO I don't think there are any tests for this so need to add some before merging
+  //PR
+  builder.registerWatcher(...generateWatcher(pgConfig, schemas));
+}: Plugin);
+
+/****************************************************************************************
+ * Build Extensions - Add two ways to query the PostgreSQL introspection results to the
+ * build object; one by 'kind' and the other by 'id'. See below for details
+ ****************************************************************************************/
 
 /**
  * Query the postgres server for the following types of structures in the database:
@@ -211,59 +178,6 @@ async function getPGStructuresByKind(
 }
 
 /**
- * Verifies if the returned PostgresQL structures contain the schemas requested
- *
- * @param namespaces
- * @param requestedSchemas
- * @param throwIfMissing
- */
-function verifySchemas(namespaces, requestedSchemas, throwIfMissing) {
-  //extract the schemas found in the database
-  const knownSchemas = namespaces.map(n => n.name);
-
-  //check to see if any of the requested schemas are not actually present in the database
-  const missingSchemas = requestedSchemas.filter(
-    s => knownSchemas.indexOf(s) < 0
-  );
-  if (missingSchemas.length) {
-    const errorMessage = `
-      You requested to use schema '${requestedSchemas.join("', '")}';
-      however we couldn't find some of those! Missing schemas are: '${missingSchemas.join(
-        "', '"
-      )}'
-    `;
-    if (throwIfMissing) {
-      throw new Error(errorMessage);
-    } else {
-      console.warn("⚠️ WARNING⚠️  " + errorMessage); // eslint-disable-line no-console
-    }
-  }
-}
-
-/**
- * Takes the result of getPGStructuresByKind and extracts the tags based on the
- * smart commenting system exposed by the 'parseTags' function from utils
- *
- * See https://www.graphile.org/postgraphile/smart-comments/
- *
- * @param pgStructuresByKind
- * @param smartComments - True iff smart comments are enabled
- */
-function parseTagsFromStructures(pgStructuresByKind, smartComments) {
-  Object.keys(pgStructuresByKind).forEach(kind => {
-    pgStructuresByKind[kind].forEach(struct => {
-      if (smartComments && struct.description) {
-        const parsed = parseTags(struct.description);
-        struct.tags = parsed.tags;
-        struct.description = parsed.text;
-      } else {
-        struct.tags = [];
-      }
-    });
-  });
-}
-
-/**
  * Takes the result of getPGStructuresByKind and creates an index on all of the containing
  * structures by their ID field; not all structures have an ID field (e.g., attributes), but those that do
  * will have unique IDs (on a per database basis)
@@ -315,6 +229,67 @@ function createStructuresById(pgStructuresByKind) {
 
   return pgStructureById;
 }
+
+/**
+ * Verifies if the returned PostgresQL structures contain the schemas requested
+ *
+ * @param namespaces
+ * @param requestedSchemas
+ * @param throwIfMissing
+ */
+function verifySchemas(namespaces, requestedSchemas, throwIfMissing) {
+  //extract the schemas found in the database
+  const knownSchemas = namespaces.map(n => n.name);
+
+  //check to see if any of the requested schemas are not actually present in the database
+  const missingSchemas = requestedSchemas.filter(
+    s => knownSchemas.indexOf(s) < 0
+  );
+  if (missingSchemas.length) {
+    const errorMessage = `
+      You requested to use schema '${requestedSchemas.join("', '")}';
+      however we couldn't find some of those! Missing schemas are: '${missingSchemas.join(
+        "', '"
+      )}'
+    `;
+    if (throwIfMissing) {
+      throw new Error(errorMessage);
+    } else {
+      console.warn("⚠️ WARNING⚠️  " + errorMessage); // eslint-disable-line no-console
+    }
+  }
+}
+
+/****************************************************************************************
+ * Smart Comments - Extract the tags for smart comments
+ ****************************************************************************************/
+
+/**
+ * Takes the result of getPGStructuresByKind and extracts the tags based on the
+ * smart commenting system exposed by the 'parseTags' function from utils
+ *
+ * See https://www.graphile.org/postgraphile/smart-comments/
+ *
+ * @param pgStructuresByKind
+ * @param smartComments - True iff smart comments are enabled
+ */
+function parseTagsFromStructures(pgStructuresByKind, smartComments) {
+  Object.keys(pgStructuresByKind).forEach(kind => {
+    pgStructuresByKind[kind].forEach(struct => {
+      if (smartComments && struct.description) {
+        const parsed = parseTags(struct.description);
+        struct.tags = parsed.tags;
+        struct.description = parsed.text;
+      } else {
+        struct.tags = [];
+      }
+    });
+  });
+}
+
+/****************************************************************************************
+ * Rehydration Utilties - Links the various PostgreSQL metadata structs by their ID fields
+ ****************************************************************************************/
 
 /**
  * Relates ("rehydrates") related structs by their ID fields.
@@ -446,198 +421,254 @@ function attachClassAttributes(classStructs, attributeStructs, lookupTable) {
   });
 }
 
-export default (async function PgIntrospectionPlugin(
-  builder,
-  {
-    pgConfig,
-    pgSchemas: schemas,
-    pgEnableTags,
-    persistentMemoizeWithKey = (key, fn) => fn(),
-    pgThrowOnMissingSchema = false,
-    pgIncludeExtensionResources = false,
-  }
-) {
-  if (!Array.isArray(schemas)) {
-    throw new Error("Argument 'schemas' (array) is required");
-  }
+/****************************************************************************************
+ * Watching Utilties - Triggers rebuild if detect a change in schema in PostgresQL DB
+ ****************************************************************************************/
 
-  //query the PostgresQL database for the relevant meta data
-  const introspectionResultsByKind = await getPGStructuresByKind(
-    pgConfig,
-    schemas,
-    pgIncludeExtensionResources,
-    persistentMemoizeWithKey
-  );
+/**
+ * Generates a [watcher, unwatcher] tuple to register to the builder. The rebuild callback
+ * will be triggered whenever a schema change is detected using the watch-fixtures query and
+ * pg_notify channels
+ *
+ * @param pgConfig
+ * @param schemasToWatch
+ */
+function generateWatcher(pgConfig, schemasToWatch) {
+  let unwatcher = () => {};
 
-  //verify that all of the schemas are present
-  verifySchemas(
-    introspectionResultsByKind.namespace,
-    schemas,
-    pgThrowOnMissingSchema
-  );
+  const watcher = async triggerRebuild => {
+    withPgClient(pgConfig, async pgClient => {
+      //activate the pg_notify channel with the schema watch query
+      await installPgWatch(pgClient);
+      //because of the promise, client will remain active until resolve() is called
+      return new Promise(resolve => {
+        const listener = generateNotificationHandler(
+          //the watcher can only trigger unwatching and a rebuild once
+          once(() => {
+            debug(`Schema change detected: re-inspecting schema...`);
+            //call unwatcher before the rebuild so that we always have a clean slate
+            unwatcher();
+            triggerRebuild();
+          }),
+          schemasToWatch
+        );
+        unwatcher = () => {
+          pgClient.query(`unlisten ${WATCH_CHANNEL}`).catch(e => {
+            debug(`Error occurred trying to unlisten watch: ${e}`);
+          });
+          pgClient.removeListener("notification", listener);
+          resolve();
+        };
 
-  // parse the smart comments
-  parseTagsFromStructures(introspectionResultsByKind, pgEnableTags);
+        pgClient.on("notification", listener);
+      });
+    });
+  };
 
-  //index the structures by ID
-  const introspectionResultsById = createStructuresById(
-    introspectionResultsByKind
-  );
+  return [watcher, unwatcher];
+}
 
-  //rehydrate the objects by linking them by their ID fields
-  toRelate.forEach(({ kind, IdAttr, newAttr, missingOk }) => {
-    relate(
-      introspectionResultsByKind[kind],
-      IdAttr,
-      newAttr,
-      introspectionResultsById,
-      missingOk
+/**
+ * Creates a pg_notify alert on the WATCH_CHANNEL to enable listening for schema changes
+ *
+ * @param pgClient
+ */
+async function installPgWatch(pgClient) {
+  const watchSqlInner = await readFile(WATCH_FIXTURES_PATH, "utf8");
+  const sql = `begin; ${watchSqlInner}; commit;`;
+  try {
+    await pgClient.query(sql);
+  } catch (error) {
+    /* eslint-disable no-console */
+    console.warn(
+      `${chalk.bold.yellow(
+        "Failed to setup watch fixtures in Postgres database"
+      )} ️️⚠️`
     );
-  });
-  attachClassAttributes(
-    introspectionResultsByKind.class,
-    introspectionResultsByKind.attribute,
-    introspectionResultsById
-  );
+    console.warn(
+      chalk.bold.yellow(
+        "This is likely because your Postgres user is not a superuser. If the"
+      )
+    );
+    console.warn(
+      chalk.bold.yellow(
+        "fixtures already exist, the watch functionality may still work."
+      )
+    );
+    console.warn(
+      chalk.bold.yellow("Enable DEBUG='graphile-build-pg' to see the error")
+    );
+    debug(error);
+    /* eslint-enable no-console */
+    await pgClient.query("rollback");
+  }
+  await pgClient.query(`listen ${WATCH_CHANNEL}`);
+  return pgClient;
+}
 
-  //add the introspection results to the build object
-  builder.hook("build", build => {
-    return build.extend(build, {
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
+/**
+ * Generates the handler will be registered to the schema change channel; calls onSchemaChange()
+ * when one of the schemasToWatch changes
+ *
+ * @param onSchemaChange
+ * @param schemasToWatch
+ */
 
-      //TODO verify whether adding this top-level lookupByID is ok
-      //pgIntrospectionResultsByID: introspectionResultsById
+function generateNotificationHandler(onSchemaChange, schemasToWatch) {
+  return async notification => {
+    //only look watch postgraphile notifications
+    if (notification.channel !== WATCH_CHANNEL) return;
+
+    try {
+      const payload = JSON.parse(notification.payload);
+      payload.payload = payload.payload || [];
+      if (payload.type === "ddl") {
+        const commands = payload.payload
+          .filter(
+            ({ schema }) =>
+              schema == null || schemasToWatch.indexOf(schema) >= 0
+          )
+          .map(({ command }) => command);
+        if (commands.length) {
+          onSchemaChange();
+        }
+      } else if (payload.type === "drop") {
+        const affectsOurSchemas = payload.payload.some(
+          schemaName => schemasToWatch.indexOf(schemaName) >= 0
+        );
+        if (affectsOurSchemas) {
+          onSchemaChange();
+        }
+      } else {
+        throw new Error(`Payload type '${payload.type}' not recognised`);
+      }
+    } catch (e) {
+      debug(`Error occurred parsing notification payload: ${e}`);
+    }
+  };
+}
+
+/****************************************************************************************
+ * Flow Types
+ ****************************************************************************************/
+
+export type PgNamespace = {
+  kind: "namespace",
+  id: string,
+  name: string,
+  description: ?string,
+  tags: { [string]: string },
+};
+
+export type PgProc = {
+  kind: "procedure",
+  name: string,
+  description: ?string,
+  namespaceId: string,
+  isStrict: boolean,
+  returnsSet: boolean,
+  isStable: boolean,
+  returnTypeId: string,
+  argTypeIds: Array<string>,
+  argNames: Array<string>,
+  argDefaultsNum: number,
+  namespace: PgNamespace,
+  tags: { [string]: string },
+  aclExecutable: boolean,
+};
+
+export type PgClass = {
+  kind: "class",
+  id: string,
+  name: string,
+  description: ?string,
+  classKind: string,
+  namespaceId: string,
+  namespaceName: string,
+  typeId: string,
+  isSelectable: boolean,
+  isInsertable: boolean,
+  isUpdatable: boolean,
+  isDeletable: boolean,
+  isExtensionConfigurationTable: boolean,
+  namespace: PgNamespace,
+  type: PgType,
+  tags: { [string]: string },
+  attributes: [PgAttribute],
+  aclSelectable: boolean,
+  aclInsertable: boolean,
+  aclUpdatable: boolean,
+  aclDeletable: boolean,
+};
+
+export type PgType = {
+  kind: "type",
+  id: string,
+  name: string,
+  description: ?string,
+  namespaceId: string,
+  namespaceName: string,
+  type: string,
+  category: string,
+  domainIsNotNull: boolean,
+  arrayItemTypeId: ?string,
+  typeLength: ?number,
+  isPgArray: boolean,
+  classId: ?string,
+  domainBaseTypeId: ?string,
+  domainTypeModifier: ?number,
+  tags: { [string]: string },
+};
+
+export type PgAttribute = {
+  kind: "attribute",
+  classId: string,
+  num: number,
+  name: string,
+  description: ?string,
+  typeId: string,
+  typeModifier: number,
+  isNotNull: boolean,
+  hasDefault: boolean,
+  class: PgClass,
+  type: PgType,
+  namespace: PgNamespace,
+  tags: { [string]: string },
+  aclSelectable: boolean,
+  aclInsertable: boolean,
+  aclUpdatable: boolean,
+};
+
+export type PgConstraint = {
+  kind: "constraint",
+  name: string,
+  type: string,
+  classId: string,
+  foreignClassId: ?string,
+  description: ?string,
+  keyAttributeNums: Array<number>,
+  foreignKeyAttributeNums: Array<number>,
+  namespace: PgNamespace,
+  tags: { [string]: string },
+};
+
+export type PgExtension = {
+  kind: "extension",
+  id: string,
+  name: string,
+  namespaceId: string,
+  relocatable: boolean,
+  version: string,
+  configurationClassIds?: Array<string>,
+  description: ?string,
+  tags: { [string]: string },
+};
+
+function readFile(filename, encoding) {
+  return new Promise((resolve, reject) => {
+    rawReadFile(filename, encoding, (err, res) => {
+      if (err) reject(err);
+      else resolve(res);
     });
   });
-
-  //TODO refactor the watchers based on the below questions
-  let pgClient, releasePgClient, listener;
-
-  function stopListening() {
-    if (pgClient) {
-      pgClient.query("unlisten postgraphile_watch").catch(e => {
-        debug(`Error occurred trying to unlisten watch: ${e}`);
-      });
-      pgClient.removeListener("notification", listener);
-    }
-    if (releasePgClient) {
-      releasePgClient();
-      pgClient = null;
-    }
-  }
-
-  builder.registerWatcher(async triggerRebuild => {
-    // In case we started listening before, clean up
-    await stopListening();
-
-    // Check we can get a pgClient
-    if (pgConfig instanceof pg.Pool || quacksLikePgPool(pgConfig)) {
-      pgClient = await pgConfig.connect();
-      releasePgClient = () => pgClient && pgClient.release();
-    } else if (typeof pgConfig === "string") {
-      pgClient = new pg.Client(pgConfig);
-      pgClient.on("error", e => {
-        debug("pgClient error occurred: %s", e);
-      });
-
-      //TODO why the if(pgClient) checks here and not above
-      releasePgClient = () =>
-        new Promise((resolve, reject) => {
-          if (pgClient) pgClient.end(err => (err ? reject(err) : resolve()));
-          else resolve();
-        });
-      await new Promise((resolve, reject) => {
-        if (pgClient) {
-          pgClient.connect(err => (err ? reject(err) : resolve()));
-        } else {
-          resolve();
-        }
-      });
-    } else {
-      throw new Error(
-        "Cannot watch schema with this configuration - need a string or pg.Pool"
-      );
-    }
-
-    // Install the watch fixtures.
-    const watchSqlInner = await readFile(WATCH_FIXTURES_PATH, "utf8");
-    const sql = `begin; ${watchSqlInner}; commit;`;
-    try {
-      await pgClient.query(sql);
-    } catch (error) {
-      /* eslint-disable no-console */
-      console.warn(
-        `${chalk.bold.yellow(
-          "Failed to setup watch fixtures in Postgres database"
-        )} ️️⚠️`
-      );
-      console.warn(
-        chalk.bold.yellow(
-          "This is likely because your Postgres user is not a superuser. If the"
-        )
-      );
-      console.warn(
-        chalk.bold.yellow(
-          "fixtures already exist, the watch functionality may still work."
-        )
-      );
-      console.warn(
-        chalk.bold.yellow("Enable DEBUG='graphile-build-pg' to see the error")
-      );
-      debug(error);
-      /* eslint-enable no-console */
-      await pgClient.query("rollback");
-    }
-
-    await pgClient.query("listen postgraphile_watch");
-
-    const handleChange = throttle(
-      async () => {
-        debug(`Schema change detected: re-inspecting schema...`);
-        //TODO pretty sure that introspection here is unecessary if we are just calling rebuild immediately after
-        //introspectionResultsByKind = await introspect();
-        debug(`Schema change detected: re-inspecting schema complete`);
-        triggerRebuild();
-      },
-      750,
-      {
-        leading: true,
-        trailing: true,
-      }
-    );
-
-    listener = async notification => {
-      if (notification.channel !== "postgraphile_watch") {
-        return;
-      }
-      try {
-        const payload = JSON.parse(notification.payload);
-        payload.payload = payload.payload || [];
-        if (payload.type === "ddl") {
-          const commands = payload.payload
-            .filter(
-              ({ schema }) => schema == null || schemas.indexOf(schema) >= 0
-            )
-            .map(({ command }) => command);
-          if (commands.length) {
-            handleChange();
-          }
-        } else if (payload.type === "drop") {
-          const affectsOurSchemas = payload.payload.some(
-            schemaName => schemas.indexOf(schemaName) >= 0
-          );
-          if (affectsOurSchemas) {
-            handleChange();
-          }
-        } else {
-          throw new Error(`Payload type '${payload.type}' not recognised`);
-        }
-      } catch (e) {
-        debug(`Error occurred parsing notification payload: ${e}`);
-      }
-    };
-    pgClient.on("notification", listener);
-    //TODO not sure why we would be doing introspection here (this won't change what's already attached to build)
-    //introspectionResultsByKind = await introspect();
-  }, stopListening);
-}: Plugin);
+}
