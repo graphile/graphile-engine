@@ -31,15 +31,6 @@ const WATCH_CHANNEL = "postgraphile_watch";
  * if a watcher see a DB change, it will trigger a build of the schema
  ****************************************************************************************/
 
-type PgIntrospectionPluginOptions = {
-  pgConfig: pg.Client | pg.Pool | string,
-  pgSchemas: Array<string>,
-  pgEnableTags: boolean,
-  persistentMemoizeWithKey?: <T>(string, () => T) => T,
-  pgThrowOnMissingSchema?: boolean,
-  pgIncludeExtensionResources?: boolean,
-};
-
 export default (async function PgIntrospectionPlugin(
   builder,
   options: PgIntrospectionPluginOptions
@@ -700,15 +691,6 @@ export type PgExtension = {
   tags: { [string]: string },
 };
 
-function readFile(filename, encoding) {
-  return new Promise((resolve, reject) => {
-    rawReadFile(filename, encoding, (err, res) => {
-      if (err) reject(err);
-      else resolve(res);
-    });
-  });
-}
-
 export type PgIntrospectionResultsByKind = {
   namespace: Array<PgNamespace>,
   class: Array<PgClass>,
@@ -717,4 +699,31 @@ export type PgIntrospectionResultsByKind = {
   constraint: Array<PgConstraint>,
   procedure: Array<PgProc>,
   extension: Array<PgExtension>,
+  namespaceById: { [string]: PgNamespace },
+  classById: { [string]: PgClass },
+  typeById: { [string]: PgType },
+  extensionById: { [string]: PgExtension },
+  attributeByClassIdAndNum: { [string]: { [number]: PgAttribute } },
 };
+
+export type PgIntrospectionPluginOptions = {
+  pgConfig: pg.Client | pg.Pool | string,
+  pgSchemas: Array<string>,
+  pgEnableTags: boolean,
+  persistentMemoizeWithKey?: <T>(string, () => T) => T,
+  pgThrowOnMissingSchema?: boolean,
+  pgIncludeExtensionResources?: boolean,
+};
+
+/****************************************************************************************
+ * Utilities Functions
+ ****************************************************************************************/
+
+function readFile(filename, encoding) {
+  return new Promise((resolve, reject) => {
+    rawReadFile(filename, encoding, (err, res) => {
+      if (err) reject(err);
+      else resolve(res);
+    });
+  });
+}
