@@ -561,6 +561,154 @@ export default (function PgTypesPlugin(
      *
      ************************************************************************************/
 
+    function getGqlTypeByTypeIdAndModifier2(
+      typeId,
+      typeModifier = null,
+      useFallback = true
+    ) {
+      //make sure this type was actually found in the database
+      if (!introspectionResultsByKind.typeById[typeId]) {
+        throw new Error(
+          `Type '${typeId}' not present in introspection results`
+        );
+      }
+
+      //convert null to -1 for the lookup queries
+      const typeModifierKey = typeModifier != null ? typeModifier : -1;
+
+      //make sure that we are always querying instantiated objects
+      if (!gqlTypeByTypeIdAndModifier[typeId]) {
+        gqlTypeByTypeIdAndModifier[typeId] = {};
+      }
+      if (!gqlInputTypeByTypeIdAndModifier[typeId]) {
+        gqlInputTypeByTypeIdAndModifier[typeId] = {};
+      }
+
+      //if the type was cached, simply return it
+      const gqlType = gqlTypeByTypeIdAndModifier[typeId][typeModifierKey];
+      if (gqlType) return gqlType;
+
+      //try to find a plugin-defined generator
+      //TODO there appears to be a lot of redundancy in here, but I need to look
+      //a bit closer at what the gnerator spec is
+      const gen = gqlTypeByTypeIdGenerator[typeId];
+      if (gen) {
+        const set = Type => {
+          registerType(typeId, typeModifierKey, Type);
+        };
+        const result = gen(set, typeModifier);
+        if (result) {
+          if (
+            gqlTypeByTypeIdAndModifier[typeId][typeModifierKey] &&
+            gqlTypeByTypeIdAndModifier[typeId][typeModifierKey] !== result
+          ) {
+            throw new Error(
+              `Callback and return types differ when defining type for '${typeId}'`
+            );
+          }
+          registerType(typeId, typeModifierKey, result);
+          return result;
+        }
+      }
+
+      // Fall back to `null` modifier
+      if (typeModifierKey > -1) {
+        const nullModifierResult = getGqlTypeByTypeIdAndModifier(
+          typeId,
+          null,
+          false
+        );
+        if (nullModifierResult) {
+          return nullModifierResult;
+        }
+      }
+
+      // If the null modifier doesn't work, fall back to the default type generator
+      if (useFallback) {
+        return getDefaultGQLTypeByTypeIdAndModifier(
+          typeId,
+          typeModifier,
+          typeModifierKey
+        );
+      }
+    }
+
+    function getGqlTypeByTypeIdAndModifier(
+      typeId,
+      typeModifier = null,
+      useFallback = true
+    ) {
+      //make sure this type was actually found in the database
+      if (!introspectionResultsByKind.typeById[typeId]) {
+        throw new Error(
+          `Type '${typeId}' not present in introspection results`
+        );
+      }
+
+      //convert null to -1 for the lookup queries
+      const typeModifierKey = typeModifier != null ? typeModifier : -1;
+
+      //make sure that we are always querying instantiated objects
+      if (!gqlTypeByTypeIdAndModifier[typeId]) {
+        gqlTypeByTypeIdAndModifier[typeId] = {};
+      }
+      if (!gqlInputTypeByTypeIdAndModifier[typeId]) {
+        gqlInputTypeByTypeIdAndModifier[typeId] = {};
+      }
+
+      //if the type was cached, simply return it
+      const gqlType = gqlTypeByTypeIdAndModifier[typeId][typeModifierKey];
+      if (gqlType) return gqlType;
+
+      //try to find a plugin-defined generator
+      //TODO there appears to be a lot of redundancy in here, but I need to look
+      //a bit closer at what the gnerator spec is
+      const gen = gqlTypeByTypeIdGenerator[typeId];
+      if (gen) {
+        const set = Type => {
+          registerType(typeId, typeModifierKey, Type);
+        };
+        const result = gen(set, typeModifier);
+        if (result) {
+          if (
+            gqlTypeByTypeIdAndModifier[typeId][typeModifierKey] &&
+            gqlTypeByTypeIdAndModifier[typeId][typeModifierKey] !== result
+          ) {
+            throw new Error(
+              `Callback and return types differ when defining type for '${typeId}'`
+            );
+          }
+          registerType(typeId, typeModifierKey, result);
+          return result;
+        }
+
+
+      }
+
+      // Fall back to `null` modifier
+      if (typeModifierKey > -1) {
+        const nullModifierResult = getGqlTypeByTypeIdAndModifier(
+          typeId,
+          null,
+          false
+        );
+        if (nullModifierResult) {
+          return nullModifierResult;
+        }
+      }
+
+      if (useFallback && !gqlTypeByTypeIdAndModifier[typeId][typeModifierKey]) {
+        return getDefaultGQLTypeByTypeIdAndModifier(
+          typeId,
+          typeModifier,
+          typeModifierKey
+        );
+      }
+
+      console.log(typeModifierKey, useFallback, gqlType, "no fucking result");
+      //return gqlTypeByTypeIdAndModifier[typeId][typeModifierKey];
+    }
+
     /* The default GQL type generator to use if none of the subsequent plugins provide the required generators
      *
      * There are four generation options:
@@ -587,16 +735,19 @@ export default (function PgTypesPlugin(
      *
      */
     let recusiveDepth = 0;
-    const getDefaultGQLTypeByPGTypeIdAndModifier = (pgTypeId, typeModifier) => {
+    const getDefaultGQLTypeByTypeIdAndModifier = (
+      pgTypeId,
+      modifier,
+      modifierKey
+    ) => {
       if (recusiveDepth > 50)
         throw new Error("Exceeded maximum recursion for resolving type!");
 
       try {
         recusiveDepth++;
-        const modifierKey = typeModifier != null ? typeModifier : -1;
-        return _getDefaultGQLTypeByPGTypeIdAndModifier(
+        return _getDefaultGQLTypeByTypeIdAndModifier(
           pgTypeId,
-          typeModifier,
+          modifier,
           modifierKey
         );
       } catch (e) {
@@ -614,7 +765,7 @@ export default (function PgTypesPlugin(
       }
     };
 
-    const _getDefaultGQLTypeByPGTypeIdAndModifier = (
+    const _getDefaultGQLTypeByTypeIdAndModifier = (
       pgTypeId,
       modifier,
       modifierKey
@@ -931,63 +1082,6 @@ export default (function PgTypesPlugin(
           return memo;
         }, {}),
       });
-    }
-
-    function getGqlTypeByTypeIdAndModifier(
-      typeId,
-      typeModifier = null,
-      useFallback = true
-    ) {
-      const typeModifierKey = typeModifier != null ? typeModifier : -1;
-      if (!gqlTypeByTypeIdAndModifier[typeId]) {
-        gqlTypeByTypeIdAndModifier[typeId] = {};
-      }
-      if (!gqlInputTypeByTypeIdAndModifier[typeId]) {
-        gqlInputTypeByTypeIdAndModifier[typeId] = {};
-      }
-      if (!gqlTypeByTypeIdAndModifier[typeId][typeModifierKey]) {
-        const type = introspectionResultsByKind.type.find(t => t.id === typeId);
-        if (!type) {
-          throw new Error(
-            `Type '${typeId}' not present in introspection results`
-          );
-        }
-        const gen = gqlTypeByTypeIdGenerator[type.id];
-        if (gen) {
-          const set = Type => {
-            gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = Type;
-          };
-          const result = gen(set, typeModifier);
-          if (result) {
-            if (
-              gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] &&
-              gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] !== result
-            ) {
-              throw new Error(
-                `Callback and return types differ when defining type for '${
-                  type.id
-                }'`
-              );
-            }
-            gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = result;
-          }
-        }
-      }
-      if (
-        !gqlTypeByTypeIdAndModifier[typeId][typeModifierKey] &&
-        typeModifierKey > -1
-      ) {
-        // Fall back to `null` modifier, but if that still doesn't work, we
-        // still want to pass the modifier to enforceGqlTypeByPgTypeId.
-        const fallback = getGqlTypeByTypeIdAndModifier(typeId, null, false);
-        if (fallback) {
-          return fallback;
-        }
-      }
-      if (useFallback && !gqlTypeByTypeIdAndModifier[typeId][typeModifierKey]) {
-        return getDefaultGQLTypeByPGTypeIdAndModifier(typeId, typeModifier);
-      }
-      return gqlTypeByTypeIdAndModifier[typeId][typeModifierKey];
     }
 
     function getGqlInputTypeByTypeIdAndModifier(typeId, typeModifier = null) {
