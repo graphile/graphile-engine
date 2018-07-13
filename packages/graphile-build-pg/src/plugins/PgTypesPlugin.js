@@ -1,64 +1,140 @@
 // @flow
 import type { Plugin } from "graphile-build";
 import { types as pgTypes } from "pg";
-
 import makeGraphQLJSONTypes from "../GraphQLJSON";
-
 import rawParseInterval from "postgres-interval";
 import LRU from "lru-cache";
 
-function indent(str) {
-  return "  " + str.replace(/\n/g, "\n  ");
-}
-
-const parseCache = LRU(500);
-function parseInterval(str) {
-  let result = parseCache.get(str);
-  if (!result) {
-    result = rawParseInterval(str);
-    Object.freeze(result);
-    parseCache.set(str, result);
-  }
-  return result;
-}
-
-const pgRangeParser = {
-  parse(str) {
-    const parts = str.split(",");
-    if (parts.length !== 2) {
-      throw new Error("Invalid daterange");
-    }
-
-    return {
-      start:
-        parts[0].length > 1
-          ? {
-              inclusive: parts[0][0] === "[",
-              value: parts[0].slice(1),
-            }
-          : null,
-      end:
-        parts[1].length > 1
-          ? {
-              inclusive: parts[1][parts[1].length - 1] === "]",
-              value: parts[1].slice(0, -1),
-            }
-          : null,
-    };
-  },
-
-  serialize({ start, end }) {
-    const inclusivity = {
-      true: "[]",
-      false: "()",
-    };
-
-    return [
-      start ? inclusivity[start.inclusive][0] + start.value : "[",
-      end ? end.value + inclusivity[end.inclusive][1] : "]",
-    ].join(",");
-  },
-};
+/****************************************************************************************
+ * PgTypesPlugin -------------------------------------------------------------------------
+ * ---------------------------------------------------------------------------------------
+ *
+ * ----------------------------------------------------------------------------------------
+ * Overview
+ * ----------------------------------------------------------------------------------------
+ *
+ * NOTE: This plugin depends on having the 'introspectionResultsByKind' metadata available
+ * which is added by the PgIntrospectionPlugin.
+ *
+ * Attaches the following functionality to the build object:
+ *
+ * Todo need descriptions - still unsure of exactly what this is doing
+ * 1) Mappers
+ *
+ *    - pg2gql
+ *    - gql2pg
+ *    - pg2GqlMapper: mapper from [pgTypeId] -> {map: pg2GqlConverterFn, unmap: gql2pgConverterFn}
+ *
+ * Todo need better description
+ * 2) Tweaks (SQL -> SQL) conversions
+ *
+ *    - pgTweaksByTypeId: mapper from [pgTypeId] -> tweakFn
+ *    - pgTweaksByTypeIdAndModifier: mapper from from [pgTypeId][typeModifier] -> tweakFn
+ *    - pgTweakFragmentForTypeAndModifier: (sqlToConvert, pgTypeId, typeModifier) -> newSQL
+ *
+ * 3) Converters from PostgreSQL types to GQL types
+ *
+ *    - pgGetGqlTypeByTypeIdAndModifier: (pgTypeId, typeModifier) -> gqlType
+ *    - pgGetGqlInputTypeByTypeIdAndModifier: (pgTypeId, typeModifier) -> gqlInputType
+ *
+ *    The above functions will first try to use any of the generators registerd by the below functions
+ *    by subsequent plugins. This enables users to create custom GQL types.
+ *    If a generator does not exist for the given typeModifier, they will try to fallback on the 'null'
+ *    modifier. If still no generator is found, it falls back to one of the default GQL types. Currently,
+ *    the following are supported:
+ *
+ *      - int2
+ *      - int4,
+ *      - float4
+ *      - float8
+ *      - numeric
+ *      - money
+ *      - interval
+ *      - date
+ *      - timestamp
+ *      - timestamptz
+ *      - time
+ *      - timetz
+ *      - json
+ *      - jsonb
+ *      - uuid
+ *      - bit
+ *      - varbit
+ *      - char
+ *      - text
+ *      - varchar
+ *      - point
+ *      - domain
+ *      - range
+ *      - enum
+ *      - array
+ *      - boolean
+ *      - number (fallback if pgType is not one of the above numbers)
+ *
+ * 4) Registering custom PostgreSQL type to GQL type generators
+ *
+ *    -pgRegisterGqlTypeByTypeId: (pgTypeId, generatorFn, yieldToExisting = false) => void
+ *    -pgRegisterGqlInputTypeByTypeId: (pgTypeId, generatorFn, yieldToExisting = false) => void
+ *
+ *    //TODO not strictly correct?
+ *    The generator functions must be of the following form:
+ *
+ *    (cacheType:(generatedGQLType) => void, typeModifier) => generatedType?
+ *
+ *    Once the GQL type is generated (potentially using the type modifier), the GQL type MUST
+ *    be passed to the cacheType function. It can optionally return the GQL type.
+ *
+ *    These functions will be used in the coverter functions covered above as the first option
+ *    (the will override any default generators provided by this plugin).
+ *
+ *    By default, if a generator was already registered to the pgTypeId, an error will be thrown.
+ *    This can be prevented by setting 'yieldToExisting' to true.
+ *
+ * ----------------------------------------------------------------------------------------
+ * Plugin Conventions
+ * ----------------------------------------------------------------------------------------
+ * There are several naming conventions used throughout this plugin to avoid confusing the many type:
+ *
+ *  1) Any information pertaining to PostgreSQL type metadata objects is preceded by 'pgType';
+ *  the object itself is called 'pgType' unless it is a known type and then it may be have a specificier
+ *  (e.g., 'pgDomainType')
+ *
+ *  2) GQL types are labled as 'gqlType' if the type is ambiguous. Otherwise, they are fully labeled
+ *  and the 'gql' is dropped. (e.g., DomainType)
+ *
+ *  3) Type modifiers are heavily used throughout many of the component functions. They are always
+ *  labeled 'typeModifier' and if being used for lookups are labeled 'typeModifierKey'. The default
+ *  type modifier is 'null'.
+ *
+ * ----------------------------------------------------------------------------------------
+ * TODO Outstanding questions/issues
+ * ----------------------------------------------------------------------------------------
+ * 1) For specific code related questions, I've marked todo tags throughout. These are more general
+ *
+ * 2) Is the above type generator spec correct?
+ *
+ * 3) 'pgRegisterGqlTypeByTypeId' is a little misleading because it's not really registering types,
+ * it's registering generator functions. Consider changing the name in a subsequent release? Can the
+ * internal plugin name be changed to something like 'pgRegisterGqlTypeGeneratorById'?
+ *
+ * 4) The exposure patterns of the component parts of this plugin vary dramatically making it hard to
+ * intuit and understanding of how to interoperate with everything. The following things stick out to me:
+ *
+ * - I really like the way the registration and getting mechanism works for the GQL type getters (3 + 4 above)
+ * - The mappers (1 above) directly expose a mapper index, rather than working through a registration function
+ * - the 'get' semantics are not used on the mapper functions (pg2gql and gql2pg)
+ * - unlike everything every plugin in the suite exposes, gql2pg is not preceed by 'pg'
+ * - there is both a 'pgTweaksByTypeId' and 'pgTweaksByTypeIdAndModifier' index. It looks like not
+ * using a modifier has been deprecated everywhere else but here?
+ * - again, no registration method for tweaks, meaning that to add a tweak, users have to access the indices
+ * directly
+ *
+ * 5) In addition to caching types here in this plugin, it appears we also use the addType function...
+ * however, based on the original plugin it seems pretty haphazard what gets added and what doesn't. Is
+ * there a particular pattern that I am missing?
+ *
+ *
+ ****************************************************************************************/
 
 export default (function PgTypesPlugin(
   builder,
@@ -90,32 +166,16 @@ export default (function PgTypesPlugin(
       Kind,
     } = graphql;
 
-    const gqlTypeByTypeIdGenerator = {};
-    const gqlInputTypeByTypeIdGenerator = {};
-    if (build.pgGqlTypeByTypeId || build.pgGqlInputTypeByTypeId) {
-      // I don't expect anyone to receive this error, because I don't think anyone uses this interface.
-      throw new Error(
-        "Sorry! This interface is no longer supported because it is not granular enough. It's not hard to port it to the new system - please contact Benjie and he'll walk you through it."
-      );
-    }
+    /****************************************************************************************
+     * Utilities for converting between gql and sq?
+     *
+     * TODO Need some documentation for these functions - not quite sure what role they
+     * are playing yet, or what val is supposed to represent in each case
+     *****************************************************************************************/
 
-    //TODO pretty sure these aren't doing anything
-    const gqlTypeByTypeIdAndModifier = Object.assign(
-      {},
-      build.pgGqlTypeByTypeIdAndModifier
-    );
-    const gqlInputTypeByTypeIdAndModifier = Object.assign(
-      {},
-      build.pgGqlInputTypeByTypeIdAndModifier
-    );
-
-    //looks like the mapper uses typeIds?
     const pg2GqlMapper = {};
 
-    /**
-     * Transforms sql to gql?
-     */
-    const pg2gql = (val, type) => {
+    const pg2gql = (val, pgType) => {
       if (val == null) {
         return val;
       }
@@ -125,367 +185,81 @@ export default (function PgTypesPlugin(
         return null;
       }
 
-      if (pg2GqlMapper[type.id]) {
-        return pg2GqlMapper[type.id].map(val);
+      if (pg2GqlMapper[pgType.id]) {
+        return pg2GqlMapper[pgType.id].map(val);
 
-        //do structural recursion on arrays and domainBaseType?
-      } else if (type.domainBaseType) {
-        return pg2gql(val, type.domainBaseType);
-      } else if (type.isPgArray) {
+        //unwrap domain types
+      } else if (pgType.domainBaseType) {
+        return pg2gql(val, pgType.domainBaseType);
+
+        //array types
+      } else if (pgType.isPgArray) {
         if (!Array.isArray(val)) {
           throw new Error(
             `Expected array when converting PostgreSQL data into GraphQL; failing type: '${
-              type.namespaceName
-            }.${type.name}'`
+              pgType.namespaceName
+            }.${pgType.name}'`
           );
         }
-        return val.map(v => pg2gql(v, type.arrayItemType));
+        return val.map(v => pg2gql(v, pgType.arrayItemType));
 
-        //basically, so if it's not in the mapper just return val?
+        //if no mapper, simply return the value
       } else {
         return val;
       }
     };
 
-    const gql2pg = (val, type, modifier) => {
-      //print stack trace if modifier is undefined;
-      if (modifier === undefined) {
-        let stack;
-        try {
-          throw new Error();
-        } catch (e) {
-          stack = e.stack;
-        }
+    const gql2pg = (val, pgType, typeModifier) => {
+      //deprecation warning
+      if (typeModifier === undefined) {
         // eslint-disable-next-line no-console
         console.warn(
-          "gql2pg should be called with three arguments, the third being the type modifier (or `null`); " +
-            (stack || "")
+          `gql2pg should be called with three arguments, the third being the type modifier (or null);
+            ${new Error().stack || ""}`
         );
-        // Hack for backwards compatibility: TODO why?
-        modifier = null;
+        typeModifier = null;
       }
 
-      //TODO look up what sql.null is
+      //TODO why are we doing this
       if (val == null) {
         return sql.null;
       }
 
-      //TODO find out why we use the pg2Gql mapper in the gql2pg function
-      if (pg2GqlMapper[type.id]) {
-        return pg2GqlMapper[type.id].unmap(val, modifier); //Ok, so unmapping, like inverse operation
+      //lookup and perform the gql to sql mapping
+      if (pg2GqlMapper[pgType.id]) {
+        return pg2GqlMapper[pgType.id].unmap(val, typeModifier);
 
-        //another structural recursion, we can probably hoist this
-      } else if (type.domainBaseType) {
-        return gql2pg(val, type.domainBaseType, type.domainTypeModifier);
-      } else if (type.isPgArray) {
+        //unwrap domain types
+      } else if (pgType.domainBaseType) {
+        return gql2pg(val, pgType.domainBaseType, pgType.domainTypeModifier);
+
+        //array type
+      } else if (pgType.isPgArray) {
         if (!Array.isArray(val)) {
           throw new Error(
             `Expected array when converting GraphQL data into PostgreSQL data; failing type: '${
-              type.namespaceName
-            }.${type.name}' (type: ${type === null ? "null" : typeof type})`
+              pgType.namespaceName
+            }.${pgType.name}' (type: ${
+              pgType === null ? "null" : typeof pgType
+            })`
           );
         }
-
-        //ok interesting
         return sql.fragment`array[${sql.join(
-          val.map(v => gql2pg(v, type.arrayItemType, modifier)),
+          val.map(v => gql2pg(v, pgType.arrayItemType, typeModifier)),
           ", "
-        )}]::${sql.identifier(type.namespaceName)}.${sql.identifier(
-          type.name
+        )}]::${sql.identifier(pgType.namespaceName)}.${sql.identifier(
+          pgType.name
         )}`;
+
+        //if no registered type, wrap it like a value
       } else {
         return sql.value(val);
       }
     };
 
-    //not sure why this has to be a thunk? maybe candidate for factory function
-    const makeIntervalFields = () => {
-      return {
-        seconds: {
-          description:
-            "A quantity of seconds. This is the only non-integer field, as all the other fields will dump their overflow into a smaller unit of time. Intervals don’t have a smaller unit than seconds.",
-          type: GraphQLFloat,
-        },
-        minutes: {
-          description: "A quantity of minutes.",
-          type: GraphQLInt,
-        },
-        hours: {
-          description: "A quantity of hours.",
-          type: GraphQLInt,
-        },
-        days: {
-          description: "A quantity of days.",
-          type: GraphQLInt,
-        },
-        months: {
-          description: "A quantity of months.",
-          type: GraphQLInt,
-        },
-        years: {
-          description: "A quantity of years.",
-          type: GraphQLInt,
-        },
-      };
-    };
-    const GQLInterval = new GraphQLObjectType({
-      name: "Interval",
-      description:
-        "An interval of time that has passed where the smallest distinct unit is a second.",
-      fields: makeIntervalFields(),
-    });
+    /*** Provide Some Default Mappings ***/
 
-    //TODO what does addType do?
-    addType(GQLInterval);
-
-    const GQLIntervalInput = new GraphQLInputObjectType({
-      name: "IntervalInput",
-      description:
-        "An interval of time that has passed where the smallest distinct unit is a second.",
-      fields: makeIntervalFields(),
-    });
-    addType(GQLIntervalInput);
-
-    //looks like a factory function candidate
-    const stringType = (name, description) =>
-      new GraphQLScalarType({
-        name,
-        description,
-        serialize: value => String(value),
-        parseValue: value => String(value),
-        parseLiteral: ast => {
-          if (ast.kind !== Kind.STRING) {
-            throw new Error("Can only parse string values");
-          }
-          return ast.value;
-        },
-      });
-
-    const BigFloat = stringType(
-      "BigFloat",
-      "A floating point number that requires more precision than IEEE 754 binary 64"
-    );
-    const BitString = stringType(
-      "BitString",
-      "A string representing a series of binary bits"
-    );
-    addType(BigFloat);
-    addType(BitString);
-
-    /****************************************************************************************
-     * Tweaking section
-     *
-     *
-     * TODO this all seems like a lot of stuff just to do really run tweakToText on a couple
-     * of specific types
-     *****************************************************************************************/
-
-    //well these aren't gql types, so  what are they?
-    const rawTypes = [
-      1186, // interval
-      1082, // date
-      1114, // timestamp
-      1184, // timestamptz
-      1083, // time
-      1266, // timetz
-    ];
-
-    const tweakToJson = fragment => fragment; // Since everything is to_json'd now, just pass through
-    const tweakToText = fragment => sql.fragment`(${fragment})::text`;
-
-    //TODO this does not appear to be used anywhere; not in here or in any other plugins
-    const pgTweaksByTypeIdAndModifer = {};
-    const pgTweaksByTypeId = Object.assign(
-      // ::text rawTypes
-      rawTypes.reduce((memo, typeId) => {
-        memo[typeId] = tweakToText;
-        return memo;
-      }, {}),
-      {
-        // cast numbers above our ken to strings to avoid loss of precision
-        "20": tweakToText,
-        "1700": tweakToText,
-        // to_json all dates to make them ISO (overrides rawTypes above)
-        "1082": tweakToJson,
-        "1114": tweakToJson,
-        "1184": tweakToJson,
-        "1083": tweakToJson,
-        "1266": tweakToJson,
-      }
-    );
-
-    const categoryLookup = {
-      B: () => GraphQLBoolean,
-
-      // Numbers may be too large for GraphQL/JS to handle, so stringify by
-      // default.
-      N: type => {
-        pgTweaksByTypeId[type.id] = tweakToText;
-        return BigFloat;
-      },
-
-      A: (type, typeModifier) =>
-        new GraphQLList(
-          getGqlTypeByTypeIdAndModifier(type.arrayItemTypeId, typeModifier)
-        ),
-    };
-
-    const pgTweakFragmentForTypeAndModifier = (
-      fragment,
-      type,
-      typeModifier = null,
-      resolveData
-    ) => {
-      const typeModifierKey = typeModifier != null ? typeModifier : -1;
-      const tweaker =
-        (pgTweaksByTypeIdAndModifer[type.id] &&
-          pgTweaksByTypeIdAndModifer[type.id][typeModifierKey]) ||
-        pgTweaksByTypeId[type.id];
-      if (tweaker) {
-        return tweaker(fragment, resolveData);
-      } else if (type.domainBaseType) {
-        // TODO: check that domains don't support atttypemod
-        return pgTweakFragmentForTypeAndModifier(
-          fragment,
-          type.domainBaseType,
-          type.domainBaseTypeModifier,
-          resolveData
-        );
-      } else if (type.isPgArray) {
-        const error = new Error(
-          "Internal graphile-build-pg error: should not attempt to tweak an array, please process array before tweaking (type: `${type.namespaceName}.${type.name}`)"
-        );
-
-        //TODO why only throw this in test? if correct, should move to the if conditional
-        if (process.env.NODE_ENV === "test") {
-          // This is to ensure that Graphile core does not introduce these problems
-          throw error;
-        }
-        // eslint-disable-next-line no-console
-        console.error(error);
-        return fragment;
-      } else {
-        return fragment;
-      }
-    };
-
-    //TODO more string stuff, should probably move up above
-    /*
-        Determined by running:
-
-          select oid, typname, typarray, typcategory, typtype from pg_catalog.pg_type where typtype = 'b' order by oid;
-
-        We only need to add oidLookups for types that don't have the correct fallback
-      */
-    const SimpleDate = stringType("Date", "The day, does not include a time.");
-    const SimpleDatetime = stringType(
-      "Datetime",
-      "A point in time as described by the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone."
-    );
-    const SimpleTime = stringType(
-      "Time",
-      "The exact time of day, does not include the date. May or may not have a timezone offset."
-    );
-    const SimpleJSON = stringType(
-      pgLegacyJsonUuid ? "Json" : "JSON",
-      "A JavaScript object encoded in the JSON format as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf)."
-    );
-    const SimpleUUID = stringType(
-      pgLegacyJsonUuid ? "Uuid" : "UUID",
-      "A universally unique identifier as defined by [RFC 4122](https://tools.ietf.org/html/rfc4122)."
-    );
-
-    const { GraphQLJSON, GraphQLJson } = makeGraphQLJSONTypes(graphql);
-
-    // pgExtendedTypes might change what types we use for things
-    const JSONType = pgExtendedTypes
-      ? pgLegacyJsonUuid ? GraphQLJson : GraphQLJSON
-      : SimpleJSON;
-
-    //TODO not sure why we just reassign everything we just created up above
-    const UUIDType = SimpleUUID; // GraphQLUUID
-    const DateType = SimpleDate; // GraphQLDate
-    const DateTimeType = SimpleDatetime; // GraphQLDateTime
-    const TimeType = SimpleTime; // GraphQLTime
-
-    // 'point' in PostgreSQL is a 16-byte type that's comprised of two 8-byte floats.
-    //TODO we didn't add these types?
-    const Point = new GraphQLObjectType({
-      name: "Point",
-      fields: {
-        x: {
-          type: new GraphQLNonNull(GraphQLFloat),
-        },
-        y: {
-          type: new GraphQLNonNull(GraphQLFloat),
-        },
-      },
-    });
-    const PointInput = new GraphQLInputObjectType({
-      name: "PointInput",
-      fields: {
-        x: {
-          type: new GraphQLNonNull(GraphQLFloat),
-        },
-        y: {
-          type: new GraphQLNonNull(GraphQLFloat),
-        },
-      },
-    });
-
-    // Other plugins might want to use JSON
-    addType(JSONType);
-    addType(UUIDType);
-    addType(DateType);
-    addType(DateTimeType);
-    addType(TimeType);
-
-    //TODO what is this for?
-    const oidLookup = {
-      "20": stringType(
-        "BigInt",
-        "A signed eight-byte integer. The upper big integer values are greater then the max value for a JavaScript number. Therefore all big integers will be output as strings and not numbers."
-      ), // bitint - even though this is int8, it's too big for JS int, so cast to string.
-      "21": GraphQLInt, // int2
-      "23": GraphQLInt, // int4
-      "700": GraphQLFloat, // float4
-      "701": GraphQLFloat, // float8
-      "1700": BigFloat, // numeric
-      "790": GraphQLFloat, // money
-
-      "1186": GQLInterval, // interval
-      "1082": DateType, // date
-      "1114": DateTimeType, // timestamp
-      "1184": DateTimeType, // timestamptz
-      "1083": TimeType, // time
-      "1266": TimeType, // timetz
-
-      "114": JSONType, // json
-      "3802": JSONType, // jsonb
-      "2950": UUIDType, // uuid
-
-      "1560": BitString, // bit
-      "1562": BitString, // varbit
-
-      "18": GraphQLString, // char
-      "25": GraphQLString, // text
-      "1043": GraphQLString, // varchar
-
-      "600": Point, // point
-    };
-    const oidInputLookup = {
-      "1186": GQLIntervalInput, // interval
-      "600": PointInput, // point
-    };
-
-    /****************************************************************************************
-     * Extending the mapper? Not sure why we do this here all of a sudden?
-     *****************************************************************************************/
-
-    const identity = _ => _;
-    const jsonStringify = o => JSON.stringify(o);
-
-    //not sure what this is but we should label it; looks like json stuff
+    //TODO provide labels for what types this handles
     if (pgExtendedTypes) {
       pg2GqlMapper[114] = {
         map: identity,
@@ -499,7 +273,7 @@ export default (function PgTypesPlugin(
     }
     pg2GqlMapper[3802] = pg2GqlMapper[114]; // jsonb
 
-    // interval
+    // Interval Types
     pg2GqlMapper[1186] = {
       map: str => parseInterval(str),
       unmap: o => {
@@ -525,12 +299,14 @@ export default (function PgTypesPlugin(
         return parseFloat(numerical.replace(/,/g, ""));
       }
     };
+
+    // Money Types
     pg2GqlMapper[790] = {
       map: parseMoney,
       unmap: val => sql.fragment`(${sql.value(val)})::money`,
     };
 
-    // point
+    // Point Types
     pg2GqlMapper[600] = {
       map: f => {
         if (f[0] === "(" && f[f.length - 1] === ")") {
@@ -545,15 +321,78 @@ export default (function PgTypesPlugin(
     };
 
     /****************************************************************************************
-     * Extending the mapper? Not sure why we do this here all of a sudden?
+     * SQL -> SQL Tweaks Based on PostgresSQL types
+     *
+     * Helps to better build queries
      *****************************************************************************************/
 
-    // TODO: add more support for geometric types
-    /*
-     * Enforce: this is the fallback when we can't find a specific GraphQL type
-     * for a specific PG type.  Use the generators from
-     * `pgRegisterGqlTypeByTypeId` first, this is a last resort.
+    /*** Tweak definitions ***/
+    const tweakToText = fragment => sql.fragment`(${fragment})::text`;
+
+    /*** Tweak oid Mappings ***/
+    //TODO this does not appear to be used anywhere; not in here or in any other plugins
+    const pgTweaksByTypeIdAndModifer = {};
+    const pgTweaksByTypeId = {
+      "1186": tweakToText, // interval
+      "20": tweakToText,
+      "1700": tweakToText,
+    };
+
+    /**
+     * If the oid is registered on the above mappings, a tweak will be applied to the fragment.
+     * Otherwise, it will just return the input fragment.
+     *
+     * TODO add explanation for type modifier and resolveData (doesn't appear to be used anywhere) once I have them
+     *
+     * @param sqlFragment
+     * @param pgType
+     * @param typeModifier
+     * @param resolveData
      */
+    const pgTweakFragmentForTypeAndModifier = (
+      sqlFragment,
+      pgType,
+      typeModifier = null,
+      resolveData
+    ) => {
+      //TODO not sure why this is supporting modifiers as no modifier are registered anywhere for tweaking
+      const typeModifierKey = typeModifier != null ? typeModifier : -1;
+      const tweaker =
+        (pgTweaksByTypeIdAndModifer[pgType.id] &&
+          pgTweaksByTypeIdAndModifer[pgType.id][typeModifierKey]) ||
+        pgTweaksByTypeId[pgType.id];
+
+      //if a tweaker is registerd, apply it
+      if (tweaker) {
+        return tweaker(sqlFragment, resolveData);
+
+        //if domain base type, recur
+      } else if (pgType.domainBaseType) {
+        // TODO: check that domains don't support atttypemod
+        return pgTweakFragmentForTypeAndModifier(
+          sqlFragment,
+          pgType.domainBaseType,
+          pgType.domainBaseTypeModifier,
+          resolveData
+        );
+
+        //issue warning if it is an array
+      } else if (pgType.isPgArray) {
+        const error = new Error(
+          "Internal graphile-build-pg error: should not attempt to tweak an array, please process array before tweaking (type: `${type.namespaceName}.${type.name}`)"
+        );
+
+        // This is to ensure that Graphile core does not introduce these problems //TODO why not always throw?
+        if (process.env.NODE_ENV === "test") {
+          throw error;
+        }
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
+
+      //by default return the original fragment if no tweaker is registerd
+      return sqlFragment;
+    };
 
     /************************************************************************************
      *
@@ -561,7 +400,48 @@ export default (function PgTypesPlugin(
      *
      ************************************************************************************/
 
-    function getGqlTypeByTypeIdAndModifier2(
+    /******************************************************************
+     * Registering Generators
+     ******************************************************************/
+
+    const gqlTypeByTypeIdGenerator = {};
+    const gqlInputTypeByTypeIdGenerator = {};
+
+    //TODO these names seem a little misleading because they really register generators
+    //TODO while everything else supports modifiers these don't
+    function registerGqlTypeByTypeId(typeId, gen, yieldToExisting = false) {
+      if (gqlTypeByTypeIdGenerator[typeId]) {
+        if (yieldToExisting) {
+          return;
+        }
+        throw new Error(
+          `There's already a type generator registered for '${typeId}'`
+        );
+      }
+      gqlTypeByTypeIdGenerator[typeId] = gen;
+    }
+    function registerGqlInputTypeByTypeId(
+      typeId,
+      gen,
+      yieldToExisting = false
+    ) {
+      if (gqlInputTypeByTypeIdGenerator[typeId]) {
+        if (yieldToExisting) {
+          return;
+        }
+        throw new Error(
+          `There's already an input type generator registered for '${typeId}'`
+        );
+      }
+      gqlInputTypeByTypeIdGenerator[typeId] = gen;
+    }
+
+    /******************************************************************
+     * Utilities for getting and generating GQL types based on PG types
+     ******************************************************************/
+
+    //TODO need a explanation of what this is doing
+    function getGqlTypeByTypeIdAndModifier(
       typeId,
       typeModifier = null,
       useFallback = true
@@ -573,41 +453,47 @@ export default (function PgTypesPlugin(
         );
       }
 
+      //TODO seeing this in a lot of places, might want to isolate this in a single
+      //function in case it needs to change
       //convert null to -1 for the lookup queries
       const typeModifierKey = typeModifier != null ? typeModifier : -1;
 
       //make sure that we are always querying instantiated objects
-      if (!gqlTypeByTypeIdAndModifier[typeId]) {
-        gqlTypeByTypeIdAndModifier[typeId] = {};
+      if (!gqlTypeCache[typeId]) {
+        gqlTypeCache[typeId] = {};
       }
-      if (!gqlInputTypeByTypeIdAndModifier[typeId]) {
-        gqlInputTypeByTypeIdAndModifier[typeId] = {};
+      if (!gqlInputTypeCache[typeId]) {
+        gqlInputTypeCache[typeId] = {};
       }
 
       //if the type was cached, simply return it
-      const gqlType = gqlTypeByTypeIdAndModifier[typeId][typeModifierKey];
+      let gqlType = gqlTypeCache[typeId][typeModifierKey];
       if (gqlType) return gqlType;
 
       //try to find a plugin-defined generator
-      //TODO there appears to be a lot of redundancy in here, but I need to look
-      //a bit closer at what the gnerator spec is
+      //todo what is the generator spec?
       const gen = gqlTypeByTypeIdGenerator[typeId];
       if (gen) {
         const set = Type => {
-          registerType(typeId, typeModifierKey, Type);
+          cacheType(typeId, typeModifierKey, Type);
+          gqlType = Type; //had to add this to deal with generators using the set callback without returning a result
         };
         const result = gen(set, typeModifier);
         if (result) {
+          //todo why do this check
           if (
-            gqlTypeByTypeIdAndModifier[typeId][typeModifierKey] &&
-            gqlTypeByTypeIdAndModifier[typeId][typeModifierKey] !== result
+            gqlTypeCache[typeId][typeModifierKey] &&
+            gqlTypeCache[typeId][typeModifierKey] !== result
           ) {
             throw new Error(
               `Callback and return types differ when defining type for '${typeId}'`
             );
           }
-          registerType(typeId, typeModifierKey, result);
+          //TODO there appears to be a lot of redundancy in here, but I need to look
+          cacheType(typeId, typeModifierKey, result);
           return result;
+        } else if (gqlType) {
+          return gqlType;
         }
       }
 
@@ -633,80 +519,54 @@ export default (function PgTypesPlugin(
       }
     }
 
-    function getGqlTypeByTypeIdAndModifier(
-      typeId,
-      typeModifier = null,
-      useFallback = true
-    ) {
-      //make sure this type was actually found in the database
+    //TODO add function description
+    function getGqlInputTypeByTypeIdAndModifier(typeId, typeModifier = null) {
+      // Make sure that the type was actually found during introspection of the database
       if (!introspectionResultsByKind.typeById[typeId]) {
         throw new Error(
           `Type '${typeId}' not present in introspection results`
         );
       }
 
-      //convert null to -1 for the lookup queries
+      // First, load the OUTPUT type (it might register an input type)
+      getGqlTypeByTypeIdAndModifier(typeId, typeModifier);
+
       const typeModifierKey = typeModifier != null ? typeModifier : -1;
-
-      //make sure that we are always querying instantiated objects
-      if (!gqlTypeByTypeIdAndModifier[typeId]) {
-        gqlTypeByTypeIdAndModifier[typeId] = {};
+      if (!gqlInputTypeCache[typeId]) {
+        gqlInputTypeCache[typeId] = {};
       }
-      if (!gqlInputTypeByTypeIdAndModifier[typeId]) {
-        gqlInputTypeByTypeIdAndModifier[typeId] = {};
-      }
-
       //if the type was cached, simply return it
-      const gqlType = gqlTypeByTypeIdAndModifier[typeId][typeModifierKey];
+      let gqlType = gqlInputTypeCache[typeId][typeModifierKey];
       if (gqlType) return gqlType;
 
-      //try to find a plugin-defined generator
-      //TODO there appears to be a lot of redundancy in here, but I need to look
-      //a bit closer at what the gnerator spec is
-      const gen = gqlTypeByTypeIdGenerator[typeId];
+      //utilize a generator specified by a plugin
+      const gen = gqlInputTypeByTypeIdGenerator[typeId];
       if (gen) {
         const set = Type => {
-          registerType(typeId, typeModifierKey, Type);
+          cacheType(typeId, typeModifierKey, null, Type);
+          gqlType = Type;
         };
         const result = gen(set, typeModifier);
         if (result) {
           if (
-            gqlTypeByTypeIdAndModifier[typeId][typeModifierKey] &&
-            gqlTypeByTypeIdAndModifier[typeId][typeModifierKey] !== result
+            gqlInputTypeCache[typeId][typeModifierKey] &&
+            gqlInputTypeCache[typeId][typeModifierKey] !== result
           ) {
             throw new Error(
               `Callback and return types differ when defining type for '${typeId}'`
             );
           }
-          registerType(typeId, typeModifierKey, result);
+          //TODO cache type here seems redundant
+          cacheType(typeId, typeModifierKey, null, result);
           return result;
+        } else if (gqlType) {
+          return gqlType;
         }
-
-
       }
-
-      // Fall back to `null` modifier
+      // Fall back to default type modifier
       if (typeModifierKey > -1) {
-        const nullModifierResult = getGqlTypeByTypeIdAndModifier(
-          typeId,
-          null,
-          false
-        );
-        if (nullModifierResult) {
-          return nullModifierResult;
-        }
+        return getGqlInputTypeByTypeIdAndModifier(typeId, null);
       }
-
-      if (useFallback && !gqlTypeByTypeIdAndModifier[typeId][typeModifierKey]) {
-        return getDefaultGQLTypeByTypeIdAndModifier(
-          typeId,
-          typeModifier,
-          typeModifierKey
-        );
-      }
-
-      console.log(typeModifierKey, useFallback, gqlType, "no fucking result");
-      //return gqlTypeByTypeIdAndModifier[typeId][typeModifierKey];
     }
 
     /* The default GQL type generator to use if none of the subsequent plugins provide the required generators
@@ -716,21 +576,23 @@ export default (function PgTypesPlugin(
      * 1) We have an explicit type matched based on the typeId. Those are found in the oidLookup table
      * 2) If it is a wrapper type, parameterize it based on it's contents
      *     -- Note: this only unwraps a finite amount of times (50) before throwing an error
-     * 3) We can also look up the types by generic category
-     * 4) If we cannot find a type in any of those, then we default to a string.
+     * 3) We can also look up a few generic type generators by their category (if applicable)
+     * 4) If we cannot find a match in any of those, then we default to a GQLString type.
      *
-     * The generator will cache the results on gqlTypeByTypeIdAndModifier[pgTypeId][typeModifier] (and
-     * gqlInputTypeByTypeIdAndModifier[pgTypeId][typeModifier], where applicable)
+     *
+     *
+     * This will cache the results on gqlTypeCache[pgTypeId][typeModifier]. If possible, this function will also generate
+     * and cache the corresponding InputType on gqlInputTypeCache[pgTypeId][typeModifier].
      *
      * Since this is meant to only be accessed from the module's exposed typeGetter, we make the following assumptions:
      *
      * 1) pgTypeId refers to a valid PG type and can be found on pgInstrospectionResultsByKind.typeById
-     * 2) No type currently exists on gqlTypeByTypeIdAndModifier[pgTypeId][modifierKey]
-     * 3) Both gqlTypeByTypeIdAndModifier[pgTypeId] and gqlInputTypeByTypeIdAndModifier[pgTypeId] are instantiated objects
+     * 2) No type currently exists on gqlTypeCache[pgTypeId][modifierKey]
+     * 3) Both gqlTypeCache[pgTypeId] and gqlInputTypeCache[pgTypeId] are instantiated objects
      *
      * We do not check for these things, so the onus is on the caller.
      *
-     * We provide a public function `getDefaultGQLTypeByPGTypeIdAndModifier` that wraps the logic in
+     * Below we  provide the function `getDefaultGQLTypeByPGTypeIdAndModifier` that wraps the logic in
      * `_getDefaultGQLTypeByPGTypeIdAndModifier` to provide a stack trace should something go wrong.
      *
      */
@@ -777,7 +639,7 @@ export default (function PgTypesPlugin(
       if (gqlType) {
         //also try to override the input type
         const gqlInputType = oidInputLookup[pgTypeId];
-        registerType(pgTypeId, modifierKey, gqlType, gqlInputType);
+        cacheType(pgTypeId, modifierKey, gqlType, gqlInputType);
         return gqlType;
       }
 
@@ -801,32 +663,40 @@ export default (function PgTypesPlugin(
       const gen = categoryLookup[pgType.category];
       if (gen) {
         gqlType = gen(pgType, modifier);
-        registerType(pgTypeId, modifierKey, gqlType);
+        cacheType(pgTypeId, modifierKey, gqlType);
         return gqlType;
       }
 
       // Nothing else worked; pass through as string!
       // XXX: consider using stringType(upperFirst(camelCase(`fallback_${type.name}`)), type.description)?
-      registerType(pgTypeId, modifierKey, GraphQLString);
+      cacheType(pgTypeId, modifierKey, GraphQLString);
       return GraphQLString;
     };
 
     /******************************************************************
-     * Registration Utility
+     * Caching Utility
      ******************************************************************/
 
-    function registerType(typeId, modifierKey, gqlType, gqlInputType) {
-      //TODO check if we are really only supposed to call 'addType' on the gqlType
-      gqlTypeByTypeIdAndModifier[typeId][modifierKey] = gqlType;
-      addType(getNamedType(gqlType));
+    //TODO Not sure if we need the Object.assign here
+    const gqlTypeCache = Object.assign({}, build.pgGqlTypeByTypeIdAndModifier);
+    const gqlInputTypeCache = Object.assign(
+      {},
+      build.pgGqlInputTypeByTypeIdAndModifier
+    );
 
+    function cacheType(typeId, modifierKey, gqlType, gqlInputType) {
+      //TODO check if we are really only supposed to call 'addType' on the gqlType; seemed to be the default behavior in the original
+      if (gqlType) {
+        gqlTypeCache[typeId][modifierKey] = gqlType;
+        addType(getNamedType(gqlType));
+      }
       //if explicit, set the input type
       if (gqlInputType) {
-        gqlInputTypeByTypeIdAndModifier[typeId][modifierKey] = gqlInputType;
+        gqlInputTypeCache[typeId][modifierKey] = gqlInputType;
 
         //fall back on the output type, if possible
-      } else if (isInputType(gqlType)) {
-        gqlInputTypeByTypeIdAndModifier[typeId][modifierKey] = gqlType;
+      } else if (gqlType && isInputType(gqlType)) {
+        gqlInputTypeCache[typeId][modifierKey] = gqlType;
       }
     }
 
@@ -848,9 +718,9 @@ export default (function PgTypesPlugin(
       //if the range type already exists by name, then we just need to register it by modifier
       Range = getTypeByName(inflection.rangeType(ElementType.name));
       if (Range) {
-        //TODO if we got it via getTypeByName, then it seems a little weird that we are registering?
+        //TODO if we got it via getTypeByName, then it seems a little weird that we are registering? Shouldn't it already be registered?
         RangeInput = getTypeByName(inflection.inputType(Range.name));
-        registerType(pgRangeType.id, modifierKey, Range, RangeInput);
+        cacheType(pgRangeType.id, modifierKey, Range, RangeInput);
         return Range;
       }
 
@@ -858,8 +728,8 @@ export default (function PgTypesPlugin(
       [Range, RangeInput] = generateRangeTypes(ElementType);
 
       //then register them
-      //todo why is this the only one with a mapper
-      registerType(pgRangeType.id, modifierKey, Range, RangeInput);
+      //todo question4self: why is this the only one with a mapper
+      cacheType(pgRangeType.id, modifierKey, Range, RangeInput);
       pg2GqlMapper[pgRangeType.id] = generateRangeMapper(
         pgRangeType,
         pgElementType
@@ -882,7 +752,6 @@ export default (function PgTypesPlugin(
     }
 
     function generateRangeTypes(ElementType) {
-      //generate the types
       const RangeBoundType = generateRangeBoundType(ElementType);
       const RangeBoundInputType = generateRangeBoundInputType(
         ElementType,
@@ -894,8 +763,6 @@ export default (function PgTypesPlugin(
         RangeType,
         RangeBoundInputType
       );
-
-      //return the pair
       return [RangeType, RangeInputType];
     }
 
@@ -974,9 +841,16 @@ export default (function PgTypesPlugin(
         },
       });
     }
-
-    //TODO take a look at this mapper
     function generateRangeMapper(pgRangeType, pgElementType) {
+      const typesToNotParse = [
+        1186, // interval
+        1082, // date
+        1114, // timestamp
+        1184, // timestamptz
+        1083, // time
+        1266, // timetz
+      ];
+
       return {
         map: pgRange => {
           const parsed = pgRangeParser.parse(pgRange);
@@ -984,7 +858,7 @@ export default (function PgTypesPlugin(
           // string but our code will expect it to be the value after `pg`
           // parsed it, we pass through to `pg-types` for parsing.
           const pgParse =
-            rawTypes.indexOf(parseInt(pgElementType.id, 10)) >= 0
+            typesToNotParse.indexOf(parseInt(pgElementType.id, 10)) >= 0
               ? identity
               : pgTypes.getTypeParser(pgElementType.id);
           const { start, end } = parsed;
@@ -1035,13 +909,13 @@ export default (function PgTypesPlugin(
         pgDomainType.domainBaseTypeId,
         modifier
       );
+
       const BaseInputType =
-        gqlInputTypeByTypeIdAndModifier[pgDomainType.domainBaseTypeId][
-          modifierKey
-        ];
+        gqlInputTypeCache[pgDomainType.domainBaseTypeId][modifierKey];
 
       //create the regular type
       // Hack stolen from: https://github.com/graphile/postgraphile/blob/ade728ed8f8e3ecdc5fdad7d770c67aa573578eb/src/graphql/schema/type/aliasGqlType.ts#L16
+      // $FlowFixMe
       const DomainType = Object.assign(Object.create(BaseType), {
         name: inflection.domainType(pgDomainType),
         description: pgDomainType.description,
@@ -1056,7 +930,7 @@ export default (function PgTypesPlugin(
         });
       }
 
-      registerType(pgDomainType.id, modifierKey, DomainType, DomainInputType);
+      cacheType(pgDomainType.id, modifierKey, DomainType, DomainInputType);
 
       return DomainType;
     }
@@ -1067,7 +941,7 @@ export default (function PgTypesPlugin(
 
     function generateAndRegisterGQLEnumType(pgEnumType, modifierKey) {
       const EnumType = generateEnumType(pgEnumType);
-      registerType(pgEnumType.id, modifierKey, EnumType);
+      cacheType(pgEnumType.id, modifierKey, EnumType);
       return EnumType;
     }
 
@@ -1084,81 +958,199 @@ export default (function PgTypesPlugin(
       });
     }
 
-    function getGqlInputTypeByTypeIdAndModifier(typeId, typeModifier = null) {
-      // First, load the OUTPUT type (it might register an input type)
-      getGqlTypeByTypeIdAndModifier(typeId, typeModifier);
+    /******************************************************************
+     * Categorical Types
+     ******************************************************************/
 
-      const typeModifierKey = typeModifier != null ? typeModifier : -1;
-      if (!gqlInputTypeByTypeIdAndModifier[typeId]) {
-        gqlInputTypeByTypeIdAndModifier[typeId] = {};
-      }
-      if (!gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey]) {
-        const type = introspectionResultsByKind.type.find(t => t.id === typeId);
+    //Maps PostgresQL type.category to generator functions that return the appropriate
+    //GQL type
+    const categoryLookup = {
+      B: () => GraphQLBoolean,
 
-        if (!type) {
-          throw new Error(
-            `Type '${typeId}' not present in introspection results`
-          );
-        }
-        const gen = gqlInputTypeByTypeIdGenerator[type.id];
-        if (gen) {
-          const set = Type => {
-            gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] = Type;
-          };
-          const result = gen(set, typeModifier);
-          if (result) {
-            if (
-              gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] &&
-              gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] !==
-                result
-            ) {
-              throw new Error(
-                `Callback and return types differ when defining type for '${
-                  type.id
-                }'`
-              );
-            }
-            gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] = result;
+      // Numbers may be too large for GraphQL/JS to handle, so stringify by
+      // default.
+      N: type => {
+        pgTweaksByTypeId[type.id] = tweakToText;
+        return BigFloat;
+      },
+
+      A: (type, typeModifier) =>
+        new GraphQLList(
+          getGqlTypeByTypeIdAndModifier(type.arrayItemTypeId, typeModifier)
+        ),
+    };
+
+    /******************************************************************
+     * Specific Default Types Indexed by PostgreSQL oid
+     ******************************************************************/
+
+    /***       Custom Type Generators      ***/
+
+    const makeIntervalFields = () => {
+      return {
+        seconds: {
+          description:
+            "A quantity of seconds. This is the only non-integer field, as all the other fields will dump their overflow into a smaller unit of time. Intervals don’t have a smaller unit than seconds.",
+          type: GraphQLFloat,
+        },
+        minutes: {
+          description: "A quantity of minutes.",
+          type: GraphQLInt,
+        },
+        hours: {
+          description: "A quantity of hours.",
+          type: GraphQLInt,
+        },
+        days: {
+          description: "A quantity of days.",
+          type: GraphQLInt,
+        },
+        months: {
+          description: "A quantity of months.",
+          type: GraphQLInt,
+        },
+        years: {
+          description: "A quantity of years.",
+          type: GraphQLInt,
+        },
+      };
+    };
+    const stringType = (name, description) =>
+      new GraphQLScalarType({
+        name,
+        description,
+        serialize: value => String(value),
+        parseValue: value => String(value),
+        parseLiteral: ast => {
+          if (ast.kind !== Kind.STRING) {
+            throw new Error("Can only parse string values");
           }
-        }
-      }
-      if (
-        !gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey] &&
-        typeModifierKey > -1
-      ) {
-        // Fall back to default
-        return getGqlInputTypeByTypeIdAndModifier(typeId, null);
-      }
-      return gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey];
-    }
-    function registerGqlTypeByTypeId(typeId, gen, yieldToExisting = false) {
-      if (gqlTypeByTypeIdGenerator[typeId]) {
-        if (yieldToExisting) {
-          return;
-        }
-        throw new Error(
-          `There's already a type generator registered for '${typeId}'`
-        );
-      }
-      gqlTypeByTypeIdGenerator[typeId] = gen;
-    }
-    function registerGqlInputTypeByTypeId(
-      typeId,
-      gen,
-      yieldToExisting = false
-    ) {
-      if (gqlInputTypeByTypeIdGenerator[typeId]) {
-        if (yieldToExisting) {
-          return;
-        }
-        throw new Error(
-          `There's already an input type generator registered for '${typeId}'`
-        );
-      }
-      gqlInputTypeByTypeIdGenerator[typeId] = gen;
-    }
+          return ast.value;
+        },
+      });
 
-    // DEPRECATIONS!
+    /***       Custom Types      ***/
+    const Point = new GraphQLObjectType({
+      name: "Point",
+      fields: {
+        x: {
+          type: new GraphQLNonNull(GraphQLFloat),
+        },
+        y: {
+          type: new GraphQLNonNull(GraphQLFloat),
+        },
+      },
+    });
+    const PointInput = new GraphQLInputObjectType({
+      name: "PointInput",
+      fields: {
+        x: {
+          type: new GraphQLNonNull(GraphQLFloat),
+        },
+        y: {
+          type: new GraphQLNonNull(GraphQLFloat),
+        },
+      },
+    });
+    const DateType = stringType("Date", "The day, does not include a time.");
+    const DateTimeType = stringType(
+      "Datetime",
+      "A point in time as described by the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone."
+    );
+    const TimeType = stringType(
+      "Time",
+      "The exact time of day, does not include the date. May or may not have a timezone offset."
+    );
+    const SimpleJSON = stringType(
+      pgLegacyJsonUuid ? "Json" : "JSON",
+      "A JavaScript object encoded in the JSON format as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf)."
+    );
+    const UUIDType = stringType(
+      pgLegacyJsonUuid ? "Uuid" : "UUID",
+      "A universally unique identifier as defined by [RFC 4122](https://tools.ietf.org/html/rfc4122)."
+    );
+    const BigInt = stringType(
+      "BigInt",
+      "A signed eight-byte integer. The upper big integer values are greater then the max value for a JavaScript number. Therefore all big integers will be output as strings and not numbers."
+    );
+    const { GraphQLJSON, GraphQLJson } = makeGraphQLJSONTypes(graphql);
+    const JSONType = pgExtendedTypes
+      ? pgLegacyJsonUuid ? GraphQLJson : GraphQLJSON
+      : SimpleJSON;
+
+    const BigFloat = stringType(
+      "BigFloat",
+      "A floating point number that requires more precision than IEEE 754 binary 64"
+    );
+    const BitString = stringType(
+      "BitString",
+      "A string representing a series of binary bits"
+    );
+    const GQLInterval = new GraphQLObjectType({
+      name: "Interval",
+      description:
+        "An interval of time that has passed where the smallest distinct unit is a second.",
+      fields: makeIntervalFields(),
+    });
+    const GQLIntervalInput = new GraphQLInputObjectType({
+      name: "IntervalInput",
+      description:
+        "An interval of time that has passed where the smallest distinct unit is a second.",
+      fields: makeIntervalFields(),
+    });
+
+    /***       oid Lookup Table      ***/
+    const oidLookup = {
+      "20": BigInt, // bitint - even though this is int8, it's too big for JS int, so cast to string.
+      "21": GraphQLInt, // int2
+      "23": GraphQLInt, // int4
+      "700": GraphQLFloat, // float4
+      "701": GraphQLFloat, // float8
+      "1700": BigFloat, // numeric
+      "790": GraphQLFloat, // money
+
+      "1186": GQLInterval, // interval
+      "1082": DateType, // date
+      "1114": DateTimeType, // timestamp
+      "1184": DateTimeType, // timestamptz
+      "1083": TimeType, // time
+      "1266": TimeType, // timetz
+
+      "114": JSONType, // json
+      "3802": JSONType, // jsonb
+      "2950": UUIDType, // uuid
+
+      "1560": BitString, // bit
+      "1562": BitString, // varbit
+
+      "18": GraphQLString, // char
+      "25": GraphQLString, // text
+      "1043": GraphQLString, // varchar
+
+      "600": Point, // point
+    };
+    const oidInputLookup = {
+      "1186": GQLIntervalInput, // interval
+      "600": PointInput, // point
+    };
+
+    /*** Register the types with builder ***/
+    addType(JSONType);
+    addType(UUIDType);
+    addType(DateType);
+    addType(DateTimeType);
+    addType(TimeType);
+    addType(BigFloat);
+    addType(BitString);
+    addType(GQLInterval);
+    addType(GQLIntervalInput);
+
+    /******************************************************************
+     * Deprecated Functions
+     *
+     * //TODO might consider selecting a release target for complete removal
+     ******************************************************************/
+
     function getGqlTypeByTypeId(typeId, typeModifier) {
       if (typeModifier === undefined) {
         // eslint-disable-next-line no-console
@@ -1191,7 +1183,17 @@ export default (function PgTypesPlugin(
         resolveData
       );
     }
-    // END OF DEPRECATIONS!
+
+    if (build.pgGqlTypeByTypeId || build.pgGqlInputTypeByTypeId) {
+      // I don't expect anyone to receive this error, because I don't think anyone uses this interface.
+      throw new Error(
+        "Sorry! This interface is no longer supported because it is not granular enough. It's not hard to port it to the new system - please contact Benjie and he'll walk you through it."
+      );
+    }
+
+    /******************************************************************
+     * Register with Build
+     ******************************************************************/
 
     return build.extend(build, {
       pgRegisterGqlTypeByTypeId: registerGqlTypeByTypeId,
@@ -1212,3 +1214,62 @@ export default (function PgTypesPlugin(
     });
   });
 }: Plugin);
+
+/******************************************************************
+ * Utility Functions
+ ******************************************************************/
+
+function indent(str) {
+  return "  " + str.replace(/\n/g, "\n  ");
+}
+
+const parseCache = LRU(500);
+function parseInterval(str) {
+  let result = parseCache.get(str);
+  if (!result) {
+    result = rawParseInterval(str);
+    Object.freeze(result);
+    parseCache.set(str, result);
+  }
+  return result;
+}
+
+const pgRangeParser = {
+  parse(str) {
+    const parts = str.split(",");
+    if (parts.length !== 2) {
+      throw new Error("Invalid daterange");
+    }
+
+    return {
+      start:
+        parts[0].length > 1
+          ? {
+              inclusive: parts[0][0] === "[",
+              value: parts[0].slice(1),
+            }
+          : null,
+      end:
+        parts[1].length > 1
+          ? {
+              inclusive: parts[1][parts[1].length - 1] === "]",
+              value: parts[1].slice(0, -1),
+            }
+          : null,
+    };
+  },
+
+  serialize({ start, end }) {
+    const inclusivity = {
+      true: "[]",
+      false: "()",
+    };
+
+    return [
+      start ? inclusivity[start.inclusive][0] + start.value : "[",
+      end ? end.value + inclusivity[end.inclusive][1] : "]",
+    ].join(",");
+  },
+};
+const identity = _ => _;
+const jsonStringify = o => JSON.stringify(o);
