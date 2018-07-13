@@ -549,23 +549,58 @@ export default (function PgTypesPlugin(
      *****************************************************************************************/
 
     // TODO: add more support for geometric types
-
-    let depth = 0;
-
     /*
      * Enforce: this is the fallback when we can't find a specific GraphQL type
      * for a specific PG type.  Use the generators from
      * `pgRegisterGqlTypeByTypeId` first, this is a last resort.
      */
-    const enforceGqlTypeByPgTypeId = (typeId, typeModifier) => {
-      const type = introspectionResultsByKind.type.find(t => t.id === typeId);
-      depth++;
-      if (depth > 50) {
-        throw new Error("Type enforcement went too deep - infinite loop?");
-      }
+
+    /************************************************************************************
+     *
+     * GQL Type Registers and Generators
+     *
+     ************************************************************************************/
+
+    /* The default GQL type generator to use if none of the subsequent plugins provide the required generators
+     *
+     * There are four generation options:
+     *
+     * 1) We have an explicit type matched based on the typeId. Those are found in the oidLookup table
+     * 2) If it is a wrapper type, parameterize it based on it's contents
+     *     -- Note: this only unwraps a finite amount of times (50) before throwing an error
+     * 3) We can also look up the types by generic category
+     * 4) If we cannot find a type in any of those, then we default to a string.
+     *
+     * The generator will cache the results on gqlTypeByTypeIdAndModifier[pgTypeId][typeModifier] (and
+     * gqlInputTypeByTypeIdAndModifier[pgTypeId][typeModifier], where applicable)
+     *
+     * Since this is meant to only be accessed from the module's exposed typeGetter, we make the following assumptions:
+     *
+     * 1) pgTypeId refers to a valid PG type and can be found on pgInstrospectionResultsByKind.typeById
+     * 2) No type currently exists on gqlTypeByTypeIdAndModifier[pgTypeId][modifierKey]
+     * 3) Both gqlTypeByTypeIdAndModifier[pgTypeId] and gqlInputTypeByTypeIdAndModifier[pgTypeId] are instantiated objects
+     *
+     * We do not check for these things, so the onus is on the caller.
+     *
+     * We provide a public function `getDefaultGQLTypeByPGTypeIdAndModifier` that wraps the logic in
+     * `_getDefaultGQLTypeByPGTypeIdAndModifier` to provide a stack trace should something go wrong.
+     *
+     */
+    let recusiveDepth = 0;
+    const getDefaultGQLTypeByPGTypeIdAndModifier = (pgTypeId, typeModifier) => {
+      if (recusiveDepth > 50)
+        throw new Error("Exceeded maximum recursion for resolving type!");
+
       try {
-        return reallyEnforceGqlTypeByPgTypeAndModifier(type, typeModifier);
+        recusiveDepth++;
+        const modifierKey = typeModifier != null ? typeModifier : -1;
+        return _getDefaultGQLTypeByPGTypeIdAndModifier(
+          pgTypeId,
+          typeModifier,
+          modifierKey
+        );
       } catch (e) {
+        const type = introspectionResultsByKind.typeById[pgTypeId];
         const error = new Error(
           `Error occurred when processing database type '${
             type.namespaceName
@@ -575,79 +610,53 @@ export default (function PgTypesPlugin(
         error.originalError = e;
         throw error;
       } finally {
-        depth--;
+        recusiveDepth--;
       }
     };
 
-    /************************************************************************************
-     *
-     * GQL Type Registers and Generators
-     *
-     ************************************************************************************/
-
-    /* The main register
-     *
-     * There are four options:
-     *
-     * 1) We have an explicit type set. Those are found in the oidLookup table
-     * 2) If it is a wrapper type, parameterize it based on it's contents
-     * 3) We can also look up the types by generic category
-     * 4) If we cannot find a type in any of those, then we default to a string.
-     */
-    const reallyEnforceGqlTypeByPgTypeAndModifier = (pgType, modifier) => {
-      if (!pgType.id) {
-        throw new Error(
-          `Invalid argument to enforceGqlTypeByPgTypeId - expected a full type, received '${pgType}'`
-        );
-      }
-
-      //make sure each type id has an index on it
-      if (!gqlTypeByTypeIdAndModifier[pgType.id]) {
-        gqlTypeByTypeIdAndModifier[pgType.id] = {};
-      }
-      if (!gqlInputTypeByTypeIdAndModifier[pgType.id]) {
-        gqlInputTypeByTypeIdAndModifier[pgType.id] = {};
-      }
-
-      //TODO see if I can get rid of this
-      const modifierKey = modifier != null ? modifier : -1;
-
-      //if type already exists, simply return
-      const currentType = gqlTypeByTypeIdAndModifier[pgType.id][modifierKey];
-      if (currentType) return currentType;
-
+    const _getDefaultGQLTypeByPGTypeIdAndModifier = (
+      pgTypeId,
+      modifier,
+      modifierKey
+    ) => {
       /*** Type Creation Paths Below ***/
 
       //explicit types
-      let gqlType = oidLookup[pgType.id];
+      let gqlType = oidLookup[pgTypeId];
       if (gqlType) {
         //also try to override the input type
-        const gqlInputType = oidInputLookup[pgType.id];
-        registerType(pgType.id, modifierKey, gqlType, gqlInputType);
+        const gqlInputType = oidInputLookup[pgTypeId];
+        registerType(pgTypeId, modifierKey, gqlType, gqlInputType);
         return gqlType;
       }
 
-      //check if it is a wrapper
+      const pgType = introspectionResultsByKind.typeById[pgTypeId];
+
+      //wrapper types
       switch (pgType.type) {
         case "e":
-          return generateAndRegisterGQLEnumType(pgType, modifier);
+          return generateAndRegisterGQLEnumType(pgType, modifierKey);
         case "r":
-          return generateAndRegisterGQLRangeTypes(pgType, modifier);
+          return generateAndRegisterGQLRangeTypes(
+            pgType,
+            modifier,
+            modifierKey
+          );
         case "d":
-          return linkGQLDomainType(pgType, modifier);
+          return linkGQLDomainType(pgType, modifier, modifierKey);
       }
 
-      // Check if it is a category type
+      // Category Types
       const gen = categoryLookup[pgType.category];
       if (gen) {
         gqlType = gen(pgType, modifier);
-        registerType(pgType.id, modifierKey, gqlType);
+        registerType(pgTypeId, modifierKey, gqlType);
         return gqlType;
       }
 
       // Nothing else worked; pass through as string!
       // XXX: consider using stringType(upperFirst(camelCase(`fallback_${type.name}`)), type.description)?
-      registerType(pgType.id, modifierKey, GraphQLString);
+      registerType(pgTypeId, modifierKey, GraphQLString);
       return GraphQLString;
     };
 
@@ -656,8 +665,6 @@ export default (function PgTypesPlugin(
      ******************************************************************/
 
     function registerType(typeId, modifierKey, gqlType, gqlInputType) {
-      if (!gqlType) throw Error(gqlType);
-
       //TODO check if we are really only supposed to call 'addType' on the gqlType
       gqlTypeByTypeIdAndModifier[typeId][modifierKey] = gqlType;
       addType(getNamedType(gqlType));
@@ -676,10 +683,11 @@ export default (function PgTypesPlugin(
      * Range Types
      ******************************************************************/
 
-    function generateAndRegisterGQLRangeTypes(pgRangeType, modifier) {
-      //TODO see if I can get rid of this conversion nuisance
-      const modifierKey = modifier != null ? modifier : -1;
-
+    function generateAndRegisterGQLRangeTypes(
+      pgRangeType,
+      modifier,
+      modifierKey
+    ) {
       let Range, RangeInput;
       const [pgElementType, ElementType] = getElementTypes(
         pgRangeType,
@@ -869,11 +877,8 @@ export default (function PgTypesPlugin(
     //TODO not entirely sure what a domain is or what this is doing; I think this needs enhanced
     //error checking
     //looks like it is taking what was registerd uner domainBaseType and then registering it on DomainType
-    function linkGQLDomainType(pgDomainType, modifier) {
+    function linkGQLDomainType(pgDomainType, modifier, modifierKey) {
       if (!pgDomainType.domainBaseTypeId) return;
-
-      //TODO see if I can get rid of this conversion nuisance
-      const modifierKey = modifier != null ? modifier : -1;
 
       const BaseType = getGqlTypeByTypeIdAndModifier(
         pgDomainType.domainBaseTypeId,
@@ -909,10 +914,7 @@ export default (function PgTypesPlugin(
      * Enum Types
      ******************************************************************/
 
-    function generateAndRegisterGQLEnumType(pgEnumType, modifier) {
-      //TODO see if I can get rid of this conversion nuisance
-      const modifierKey = modifier != null ? modifier : -1;
-
+    function generateAndRegisterGQLEnumType(pgEnumType, modifierKey) {
       const EnumType = generateEnumType(pgEnumType);
       registerType(pgEnumType.id, modifierKey, EnumType);
       return EnumType;
@@ -983,7 +985,7 @@ export default (function PgTypesPlugin(
         }
       }
       if (useFallback && !gqlTypeByTypeIdAndModifier[typeId][typeModifierKey]) {
-        return enforceGqlTypeByPgTypeId(typeId, typeModifier);
+        return getDefaultGQLTypeByPGTypeIdAndModifier(typeId, typeModifier);
       }
       return gqlTypeByTypeIdAndModifier[typeId][typeModifierKey];
     }
