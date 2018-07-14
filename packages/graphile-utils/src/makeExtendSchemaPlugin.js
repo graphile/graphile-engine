@@ -364,8 +364,10 @@ function getFields(
         };
         const deprecationReason =
           directives.deprecated && directives.deprecated.reason;
-        const functionToResolveObject = something =>
-          typeof something === "function" ? { resolve: something } : something;
+        const functionToResolveObject = functionOrResolveObject =>
+          typeof functionOrResolveObject === "function"
+            ? { resolve: functionOrResolveObject }
+            : functionOrResolveObject;
         /*
          * We accept a resolver function directly, or an object which can
          * define 'resolve', 'subscribe' and other relevant methods.
