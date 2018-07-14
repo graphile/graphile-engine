@@ -73,11 +73,20 @@ const resolvers = {
   },
   Subscription: {
     clockTicks: {
-      resolve() {
-        return Date.now();
+      resolve(_subscription, args) {
+        const { frequency } = args;
+        if (frequency == null) {
+          throw new Error("No frequency specified");
+        }
+        return new Promise(resolve =>
+          setTimeout(() => resolve(Date.now()), frequency)
+        );
       },
       subscribe(_subscription, args) {
         const { frequency } = args;
+        if (frequency == null) {
+          throw new Error("No frequency specified");
+        }
         const callbackQueue = [];
         const valueQueue = [];
         // In a normal application you'd define timerRunning here:
@@ -587,7 +596,7 @@ it("supports defining a simple subscription", async () => {
             """
             How frequently to fire a clock tick (milliseconds)
             """
-            frequency: Int = 1000
+            frequency: Int = 100
           ): Float
         }
       `,
@@ -609,6 +618,7 @@ it("supports defining a simple subscription", async () => {
     `
   );
   let after = Date.now();
+  expect(after).toBeGreaterThanOrEqual(before + 100);
   expect(errors).toBeFalsy();
   expect(data.clockTicks).toBeGreaterThanOrEqual(before);
   expect(data.clockTicks).toBeLessThanOrEqual(after);
