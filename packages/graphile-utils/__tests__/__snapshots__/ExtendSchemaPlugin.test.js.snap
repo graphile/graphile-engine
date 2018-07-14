@@ -261,6 +261,28 @@ Object {
 }
 `;
 
+exports[`supports defining a simple subscription 1`] = `
+"\\"\\"\\"The root query type which gives access points into the data universe.\\"\\"\\"
+type Query {
+  \\"\\"\\"
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  \\"\\"\\"
+  query: Query!
+}
+
+\\"\\"\\"
+The root subscription type which contains root level fields which mutate data.
+\\"\\"\\"
+type Subscription {
+  clockTicks(
+    \\"\\"\\"How frequently to fire a clock tick (milliseconds)\\"\\"\\"
+    frequency: Int!
+  ): Float
+}
+"
+`;
+
 exports[`supports defining new types 1`] = `
 "input EchoInput {
   text: String!
