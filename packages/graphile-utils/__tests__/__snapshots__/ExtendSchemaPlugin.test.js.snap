@@ -277,7 +277,7 @@ The root subscription type which contains root level fields which mutate data.
 type Subscription {
   clockTicks(
     \\"\\"\\"How frequently to fire a clock tick (milliseconds)\\"\\"\\"
-    frequency: Int!
+    frequency: Int = 1000
   ): Float
 }
 "

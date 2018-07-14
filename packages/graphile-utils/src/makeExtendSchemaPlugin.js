@@ -288,18 +288,14 @@ function getArguments(args, build) {
         const name = getName(arg.name);
         const type = getType(arg.type, build);
         const description = getDescription(arg.description);
+        let defaultValue;
         if (arg.defaultValue) {
-          throw new Error(
-            `We don't support default values on args yet, PRs welcome!`
-          );
+          defaultValue = getValue(arg.defaultValue);
         }
         memo[name] = {
           type,
-          ...(description
-            ? {
-                description,
-              }
-            : null),
+          ...(defaultValue ? { defaultValue } : null),
+          ...(description ? { description } : null),
         };
       } else {
         throw new Error(

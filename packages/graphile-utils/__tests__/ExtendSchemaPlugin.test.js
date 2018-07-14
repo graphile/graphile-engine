@@ -587,7 +587,7 @@ it("supports defining a simple subscription", async () => {
             """
             How frequently to fire a clock tick (milliseconds)
             """
-            frequency: Int!
+            frequency: Int = 1000
           ): Float
         }
       `,
@@ -604,7 +604,7 @@ it("supports defining a simple subscription", async () => {
     schema,
     `
       subscription {
-        clockTicks(frequency: 50)
+        clockTicks
       }
     `
   );
