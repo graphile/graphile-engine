@@ -55,6 +55,13 @@ const resolvers = {
       return args.input;
     },
   },
+  Mutation: {
+    add(_mutation, args) {
+      const { a, b } = args;
+      // So this isn't a mutation. Whatever.
+      return a + b;
+    }
+  },
 };
 
 it("allows adding a simple type", async () => {
@@ -378,6 +385,102 @@ it("supports defining new types", async () => {
     schema,
     `
       {
+        t1: echo(input: { text: "Hi1", float: 0.23 }) {
+          text
+          int
+          float
+          intList
+        }
+        t2: echo(input: { text: "Hi2", int: 42, float: 1.23 }) {
+          text
+          int
+          float
+          intList
+        }
+        t3: echo(
+          input: { text: "Hi3", int: 88, float: 2.23, intList: [99, 22, 33] }
+        ) {
+          text
+          int
+          float
+          intList
+        }
+      }
+    `
+  );
+  expect(errors).toBeFalsy();
+  expect(data).toMatchSnapshot();
+});
+
+it("supports defining a simple mutation", async () => {
+  const schema = await buildSchema([
+    ...simplePlugins,
+    makeExtendSchemaPlugin(_build => ({
+      typeDefs: gql`
+        extend type Mutation {
+          add(a: Int, b: Int): Int
+        }
+      `,
+      resolvers,
+    })),
+  ]);
+  const printedSchema = printSchema(schema);
+  expect(printedSchema).toMatchSnapshot();
+  const { data, errors } = await graphql(
+    schema,
+    `
+      mutation {
+        add(a: 101, b: 42)
+      }
+    `
+  );
+  expect(errors).toBeFalsy();
+  expect(data).toMatchSnapshot();
+});
+
+it("supports defining a more complex mutation", async () => {
+  const schema = await buildSchema([
+    ...simplePlugins,
+    makeExtendSchemaPlugin(_build => ({
+      typeDefs: gql`
+        input EchoInput {
+          text: String!
+          int: Int
+          float: Float!
+          intList: [Int!]
+        }
+
+        type EchoOutput {
+          text: String!
+          int: Int
+          float: Float!
+          intList: [Int!]
+        }
+
+        extend type Mutation {
+          """
+          Gives you back what you put in
+          """
+          echo(input: EchoInput): EchoOutput
+        }
+      `,
+      resolvers: {
+        Mutation: {
+          echo: {
+            resolve(_query, args) {
+              return args.input;
+            },
+          }
+        },
+      },
+    })),
+  ]);
+  const printedSchema = printSchema(schema);
+  expect(printedSchema).toMatchSnapshot();
+  const { data, errors } = await graphql(
+    schema,
+    `
+      mutation {
         t1: echo(input: { text: "Hi1", float: 0.23 }) {
           text
           int
