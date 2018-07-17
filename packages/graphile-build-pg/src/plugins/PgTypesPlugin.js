@@ -350,6 +350,10 @@ export default (function PgTypesPlugin(
       pgLegacyJsonUuid ? "Uuid" : "UUID",
       "A universally unique identifier as defined by [RFC 4122](https://tools.ietf.org/html/rfc4122)."
     );
+    const InetType = stringType(
+      "Inet",
+      "An IPv4 or IPv6 host address, and optionally its subnet."
+    );
 
     const { GraphQLJSON, GraphQLJson } = makeGraphQLJSONTypes(graphql);
 
@@ -426,6 +430,8 @@ export default (function PgTypesPlugin(
       "1043": GraphQLString, // varchar
 
       "600": Point, // point
+
+      "869": InetType,
     };
     const oidInputLookup = {
       "1186": GQLIntervalInput, // interval
