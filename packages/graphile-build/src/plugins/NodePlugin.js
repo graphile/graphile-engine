@@ -8,7 +8,7 @@ import type {
 } from "../SchemaBuilder";
 import resolveNode from "../resolveNode";
 import type { ResolveTree } from "graphql-parse-resolve-info";
-import type { GraphQLType, GraphQLID, GraphQLInterfaceType } from "graphql";
+import type { GraphQLType, GraphQLInterfaceType } from "graphql";
 import type { BuildExtensionQuery } from "./QueryPlugin";
 
 const base64 = str => new Buffer(String(str)).toString("base64");
