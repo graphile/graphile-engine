@@ -11,14 +11,14 @@ export default async function resolveNode(
     $$nodeType,
     parseResolveInfo,
     nodeFetcherByTypeName,
-    getTypeAndIdentifiersFromNodeId,
+    getNodeIdFromTypeAndIdentifiers,
     graphql: { getNamedType },
   } = build;
   if (nodeId === "query") {
     return $$isQuery;
   }
   try {
-    const { Type, identifiers } = getTypeAndIdentifiersFromNodeId(nodeId);
+    const { Type, identifiers } = getNodeIdFromTypeAndIdentifiers(nodeId);
     if (!Type) {
       throw new Error("Type not found");
     }

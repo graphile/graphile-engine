@@ -31,7 +31,7 @@ export type BuildExtensionNode = {|
     Type: GraphQLType,
     ...identifiers: Array<mixed>
   ): string,
-  getTypeAndIdentifiersFromNodeId(
+  getNodeIdFromTypeAndIdentifiers(
     nodeId: GraphQLID
   ): {
     Type: GraphQLType,
@@ -67,7 +67,7 @@ export default (function NodePlugin(
               JSON.stringify([this.getNodeAlias(Type), ...identifiers])
             );
           },
-          getTypeAndIdentifiersFromNodeId(nodeId) {
+          getNodeIdFromTypeAndIdentifiers(nodeId) {
             const [alias, ...identifiers] = JSON.parse(base64Decode(nodeId));
             return {
               Type: this.getTypeByName(nodeTypeNameByAlias[alias] || alias),
