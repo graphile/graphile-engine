@@ -13,7 +13,7 @@ export default async function resolveNode(
     $$nodeType,
     parseResolveInfo,
     nodeFetcherByTypeName,
-    getTypeAndIdentifiersFromNodeId
+    getTypeAndIdentifiersFromNodeId,
     getNodeType,
     graphql: { getNamedType },
   } = build;
@@ -21,7 +21,7 @@ export default async function resolveNode(
     return $$isQuery;
   }
   try {
-    const { Type, identifiers} = getTypeAndIdentifiersFromNodeId(nodeId);
+    const { Type, identifiers } = getTypeAndIdentifiersFromNodeId(nodeId);
     if (!Type) {
       throw new Error("Type not found");
     }
