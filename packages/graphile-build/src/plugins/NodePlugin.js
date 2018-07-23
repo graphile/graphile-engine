@@ -31,11 +31,11 @@ export type BuildExtensionNode = {|
     Type: GraphQLType,
     ...identifiers: Array<mixed>
   ): string,
-  getTypeAndIdentifiersForNodeId(
-    nodeId: GraphQLID,
-  ) : {
+  getTypeAndIdentifiersFromNodeId(
+    nodeId: GraphQLID
+  ): {
     Type: GraphQLType,
-    identifiers: Array<mixed>
+    identifiers: Array<mixed>,
   },
   addNodeFetcherForTypeName(typeName: string, fetcher: NodeFetcher): void,
   getNodeAlias(typeName: string): string,
@@ -67,9 +67,12 @@ export default (function NodePlugin(
               JSON.stringify([this.getNodeAlias(Type), ...identifiers])
             );
           },
-          getTypeAndIdentifiersForNodeId(nodeId) {
+          getTypeAndIdentifiersFromNodeId(nodeId) {
             const [alias, ...identifiers] = JSON.parse(base64Decode(nodeId));
-            return { Type: this.getTypeByName(nodeTypeNameByAlias[alias] || alias), identifiers };
+            return {
+              Type: this.getTypeByName(nodeTypeNameByAlias[alias] || alias),
+              identifiers,
+            };
           },
           addNodeFetcherForTypeName(typeName, fetcher) {
             if (nodeFetcherByTypeName[typeName]) {
