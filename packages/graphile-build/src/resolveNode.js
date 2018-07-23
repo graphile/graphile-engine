@@ -1,5 +1,3 @@
-const base64Decode = str => new Buffer(String(str), "base64").toString("utf8");
-
 export default async function resolveNode(
   nodeId,
   build,
@@ -14,7 +12,6 @@ export default async function resolveNode(
     parseResolveInfo,
     nodeFetcherByTypeName,
     getTypeAndIdentifiersFromNodeId,
-    getNodeType,
     graphql: { getNamedType },
   } = build;
   if (nodeId === "query") {
