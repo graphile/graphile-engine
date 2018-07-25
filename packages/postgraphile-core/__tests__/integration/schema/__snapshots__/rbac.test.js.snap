@@ -1115,6 +1115,7 @@ type Query implements Node {
   which can only query top level fields if they are in a particular form.
   \\"\\"\\"
   query: Query!
+  returnTableWithoutGrants: CompoundKey
 }
 
 \\"\\"\\"All input for the \`updateLeftArmById\` mutation.\\"\\"\\"
@@ -7353,6 +7354,7 @@ type Query implements Node {
     nodeId: ID!
   ): ReservedPatchRecord
   reservedPatchRecordById(id: Int!): ReservedPatchRecord
+  returnTableWithoutGrants: CompoundKey
 
   \\"\\"\\"Reads a single \`SimilarTable1\` using its globally unique \`ID\`.\\"\\"\\"
   similarTable1(
