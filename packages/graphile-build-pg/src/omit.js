@@ -113,7 +113,7 @@ export default function omit(
       const bad = PERMISSIONS_THAT_REQUIRE_READ.filter(
         p => omitSpec.indexOf(p) === -1
       );
-      if (bad) {
+      if (bad.length > 0) {
         throw new Error(
           `Processing @omit for ${entity.kind} '${entity.name}' - '${bad.join(
             ","
