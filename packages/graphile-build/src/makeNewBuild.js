@@ -268,7 +268,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
       Type: Class<T>,
       spec: ConfigType,
       inScope: Scope,
-      returnNullOnInvalid = false
+      performNonEmptyFieldsCheck = false
     ): ?T {
       const scope = inScope || {};
       if (!inScope) {
@@ -701,7 +701,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
       const finalSpec: ConfigType = newSpec;
 
       const Self: T = new Type(finalSpec);
-      if (!(Self instanceof GraphQLSchema) && returnNullOnInvalid) {
+      if (!(Self instanceof GraphQLSchema) && performNonEmptyFieldsCheck) {
         try {
           if (
             Self instanceof GraphQLInterfaceType ||
