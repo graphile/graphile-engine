@@ -6,7 +6,7 @@ export default function makeExtendSchemaPlugin(
     // Add stuff to the schema
     builder.hook("build", build => {
       const {
-        graphql: { GraphQLInputObjectType, GraphQLObjectType },
+        graphql: { GraphQLEnumType, GraphQLInputObjectType, GraphQLObjectType },
       } = build;
       const { typeDefs, resolvers = {} } = generator(build);
       if (!typeDefs || !typeDefs.kind === "Document") {
@@ -20,7 +20,12 @@ export default function makeExtendSchemaPlugin(
       };
       const newTypes = [];
       typeDefs.definitions.forEach(definition => {
-        if (definition.kind === "ObjectTypeExtension") {
+        if (definition.kind === "EnumTypeDefinition") {
+          newTypes.push({
+            type: GraphQLEnumType,
+            definition
+          });
+        } else if (definition.kind === "ObjectTypeExtension") {
           const name = getName(definition.name);
           if (!typeExtensions.GraphQLObjectType[name]) {
             typeExtensions.GraphQLObjectType[name] = [];
@@ -46,7 +51,7 @@ export default function makeExtendSchemaPlugin(
           throw new Error(
             `Unexpected '${
               definition.kind
-            }' definition; we were expecting 'ObjectTypeExtension', 'InputObjectTypeExtension', 'ObjectTypeDefinition' or 'InputObjectTypeDefinition', i.e. something like 'extend type Foo { ... }'`
+            }' definition; we were expecting 'GraphQLEnumType', ObjectTypeExtension', 'InputObjectTypeExtension', 'ObjectTypeDefinition' or 'InputObjectTypeDefinition', i.e. something like 'extend type Foo { ... }'`
           );
         }
       });
@@ -62,10 +67,29 @@ export default function makeExtendSchemaPlugin(
         newWithHooks,
         [`ExtendSchemaPlugin_${uniqueId}_newTypes`]: newTypes,
         [`ExtendSchemaPlugin_${uniqueId}_resolvers`]: resolvers,
-        graphql: { GraphQLObjectType, GraphQLInputObjectType },
+        graphql: { GraphQLEnumType, GraphQLObjectType, GraphQLInputObjectType },
       } = build;
       newTypes.forEach(({ type, definition }) => {
-        if (type === GraphQLObjectType) {
+        if (type === GraphQLEnumType) {
+          const name = getName(definition.name);
+          const description = getDescription(definition.description);
+          const directives = getDirectives(definition.directives);
+          const values = definition.values.reduce(
+            (memo, value) => ({
+              ...memo,
+              [getName(value.name)]: {
+                description: getDescription(value.description),
+                directives: getDirectives(value.directives)
+              }
+            }),
+            {}
+          );
+          const scope = {
+            directives,
+            ...(directives.scope || {})
+          };
+          newWithHooks(type, { name, description, values }, scope);
+        } else if (type === GraphQLObjectType) {
           const name = getName(definition.name);
           const description = getDescription(definition.description);
           const interfaces = getInterfaces(definition.interfaces, build);
