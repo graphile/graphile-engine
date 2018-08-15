@@ -89,7 +89,10 @@ export default function makeExtendSchemaPlugin(
             //   }
             // }
             // Ref: https://github.com/graphql/graphql-js/issues/525#issuecomment-255834625
-            const valueValue = relevantResolver[valueName]; // Defaults to undefined
+            const valueValue =
+              relevantResolver[valueName] !== undefined
+                ? relevantResolver[valueName]
+                : valueName;
 
             const valueDeprecationReason =
               valueDirectives.deprecated && valueDirectives.deprecated.reason;
