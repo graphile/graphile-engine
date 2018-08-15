@@ -23,7 +23,7 @@ export default function makeExtendSchemaPlugin(
         if (definition.kind === "EnumTypeDefinition") {
           newTypes.push({
             type: GraphQLEnumType,
-            definition
+            definition,
           });
         } else if (definition.kind === "ObjectTypeExtension") {
           const name = getName(definition.name);
@@ -75,21 +75,39 @@ export default function makeExtendSchemaPlugin(
           const name = getName(definition.name);
           const description = getDescription(definition.description);
           const directives = getDirectives(definition.directives);
-          const values = definition.values.reduce(
-            (memo, value) => ({
+          const relevantResolver = resolvers[name] || {};
+          const values = definition.values.reduce((memo, value) => {
+            const valueName = getName(value.name);
+            const valueDescription = getDescription(value.description);
+            const valueDirectives = getDirectives(value.directives);
+
+            // Value cannot be expressed via SDL, so we grab the value from the resolvers instead.
+            // resolvers = {
+            //   MyEnum: {
+            //     MY_ENUM_VALUE1: 'value1',
+            //     MY_ENUM_VALUE2: 'value2',
+            //   }
+            // }
+            // Ref: https://github.com/graphql/graphql-js/issues/525#issuecomment-255834625
+            const valueValue = relevantResolver[valueName]; // Defaults to undefined
+
+            const valueDeprecationReason =
+              valueDirectives.deprecated && valueDirectives.deprecated.reason;
+            return {
               ...memo,
-              [getName(value.name)]: {
-                description: getDescription(value.description),
-                directives: getDirectives(value.directives)
-              }
-            }),
-            {}
-          );
+              [valueName]: {
+                value: valueValue,
+                deprecationReason: valueDeprecationReason,
+                description: valueDescription,
+                directives: valueDirectives,
+              },
+            };
+          }, {});
           const scope = {
             directives,
-            ...(directives.scope || {})
+            ...(directives.scope || {}),
           };
-          newWithHooks(type, { name, description, values }, scope);
+          newWithHooks(type, { name, values, description }, scope);
         } else if (type === GraphQLObjectType) {
           // https://graphql.org/graphql-js/type/#graphqlobjecttype
           const name = getName(definition.name);
