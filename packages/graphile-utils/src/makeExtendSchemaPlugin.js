@@ -149,7 +149,9 @@ export default function makeExtendSchemaPlugin(
             scope
           );
         } else {
-          throw new Error("Coding error.");
+          throw new Error(
+            `We have no code to build an object of type '${type}'; it should not have reached this area of the code.`
+          );
         }
       });
       return _;
