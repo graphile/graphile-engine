@@ -71,6 +71,7 @@ export default function makeExtendSchemaPlugin(
       } = build;
       newTypes.forEach(({ type, definition }) => {
         if (type === GraphQLEnumType) {
+          // https://graphql.org/graphql-js/type/#graphqlenumtype
           const name = getName(definition.name);
           const description = getDescription(definition.description);
           const directives = getDirectives(definition.directives);
@@ -90,6 +91,7 @@ export default function makeExtendSchemaPlugin(
           };
           newWithHooks(type, { name, description, values }, scope);
         } else if (type === GraphQLObjectType) {
+          // https://graphql.org/graphql-js/type/#graphqlobjecttype
           const name = getName(definition.name);
           const description = getDescription(definition.description);
           const interfaces = getInterfaces(definition.interfaces, build);
@@ -124,6 +126,7 @@ export default function makeExtendSchemaPlugin(
             scope
           );
         } else if (type === GraphQLInputObjectType) {
+          // https://graphql.org/graphql-js/type/#graphqlinputobjecttype
           const name = getName(definition.name);
           const description = getDescription(definition.description);
           const directives = getDirectives(definition.directives);
