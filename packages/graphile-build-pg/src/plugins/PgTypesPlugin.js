@@ -62,7 +62,12 @@ const pgRangeParser = {
 
 export default (function PgTypesPlugin(
   builder,
-  { pgExtendedTypes = true, pgLegacyJsonUuid = false }
+  {
+    pgExtendedTypes = true,
+    pgLegacyJsonUuid = false,
+    // Adding hstore support is technically a breaking change; this allows people to opt out easily:
+    pgSkipHstore = false,
+  }
 ) {
   // XXX: most of this should be in an "init" hook, not a "build" hook
   builder.hook("build", build => {
@@ -943,4 +948,167 @@ export default (function PgTypesPlugin(
       pgTweakFragmentForType, // DEPRECATED, replaced by pgTweakFragmentForTypeAndModifier
     });
   });
+
+  /* Start of hstore type */
+  builder.hook("inflection", (inflection, build) => {
+    // This hook allows you to append a plugin which renames the KeyValueHash
+    // (hstore) type name.
+    if (pgSkipHstore) return build;
+    return build.extend(inflection, {
+      hstoreType() {
+        return "KeyValueHash";
+      },
+    });
+  });
+  builder.hook("build", build => {
+    // This hook tells graphile-build-pg about the hstore database type so it
+    // knows how to express it in input/output.
+    if (pgSkipHstore) return build;
+    const {
+      getTypeByName,
+      pgIntrospectionResultsByKind: introspectionResultsByKind,
+      pgRegisterGqlTypeByTypeId,
+      pgRegisterGqlInputTypeByTypeId,
+      graphql,
+    } = build;
+
+    // Check we have the hstore extension
+    const hstoreExtension = introspectionResultsByKind.extension.find(
+      e => e.name === "hstore"
+    );
+    if (!hstoreExtension) {
+      return build;
+    }
+
+    // Get the 'hstore' type itself:
+    const hstoreType = introspectionResultsByKind.type.find(
+      t => t.name === "hstore" && t.namespaceId === hstoreExtension.namespaceId
+    );
+    if (!hstoreType) {
+      return build;
+    }
+
+    const hstoreTypeName = build.inflection.hstoreType();
+
+    // We're going to use our own special HStore type for this so that we get
+    // better validation; but you could just as easily use JSON directly if you
+    // wanted to.
+    const GraphQLHStoreType = makeGraphQLHstoreType(graphql, hstoreTypeName);
+    // const GraphQLHStoreType = getTypeByName(pgLegacyJsonUuid ? "Json" : "JSON");
+
+    // Now register the hstore type with the type system for both output and input.
+    pgRegisterGqlTypeByTypeId(hstoreType.id, () => GraphQLHStoreType);
+    pgRegisterGqlInputTypeByTypeId(hstoreType.id, () => GraphQLHStoreType);
+
+    return build;
+  });
+  /* End of hstore type */
 }: Plugin);
+
+function makeGraphQLHstoreType(graphql, hstoreTypeName) {
+  const { GraphQLScalarType, Kind } = graphql;
+
+  function isValidHstoreObject(obj) {
+    if (obj === null) {
+      // Null is okay
+      return true;
+    } else if (typeof obj === "object") {
+      // A hash with string/null values is also okay
+      const keys = Object.keys(obj);
+      for (const key of keys) {
+        const val = obj[key];
+        if (val === null) {
+          // Null is okay
+        } else if (typeof val === "string") {
+          // String is okay
+        } else {
+          // Everything else is invalid.
+          return false;
+        }
+      }
+      return true;
+    } else {
+      // Everything else is invalid.
+      return false;
+    }
+  }
+
+  function identity(value) {
+    return value;
+  }
+
+  function identityWithCheck(obj) {
+    if (isValidHstoreObject(obj)) {
+      return obj;
+    }
+    throw new TypeError(
+      `This is not a valid ${hstoreTypeName} object, it must be a key/value hash where keys and values are both strings (or null).`
+    );
+  }
+
+  function parseValueLiteral(ast, variables) {
+    switch (ast.kind) {
+      case Kind.STRING:
+        // String is okay.
+        return String(ast.value);
+      case Kind.NULL:
+        // Null is okay.
+        return null;
+      case Kind.VARIABLE: {
+        // Variable is okay if that variable is either a string or null.
+        const name = ast.name.value;
+        const value = variables ? variables[name] : undefined;
+        if (value === null || typeof value === "string") {
+          return value;
+        }
+        return undefined;
+      }
+      default:
+        // Everything else is invalid.
+        return undefined;
+    }
+  }
+
+  function parseLiteral(ast, variables) {
+    switch (ast.kind) {
+      case Kind.OBJECT: {
+        const value = ast.fields.reduce((memo, field) => {
+          memo[field.name.value] = parseValueLiteral(field.value, variables);
+          return memo;
+        }, Object.create(null));
+
+        if (!isValidHstoreObject(value)) {
+          return undefined;
+        }
+        return value;
+      }
+
+      case Kind.NULL:
+        return null;
+
+      case Kind.VARIABLE: {
+        const name = ast.name.value;
+        const value = variables ? variables[name] : undefined;
+
+        if (!isValidHstoreObject(value)) {
+          return undefined;
+        }
+        return value;
+      }
+
+      default:
+        return undefined;
+    }
+  }
+
+  // TODO: use newWithHooks instead
+  const GraphQLHStore = new GraphQLScalarType({
+    name: hstoreTypeName,
+    description:
+      "A set of key/value pairs, keys are strings, values may be a string or null. Exposed as a JSON object.",
+    serialize: identity,
+    parseValue: identityWithCheck,
+    parseLiteral,
+  });
+  return GraphQLHStore;
+}
