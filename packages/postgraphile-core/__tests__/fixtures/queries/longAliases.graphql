@@ -1,0 +1,9 @@
+query {
+  person: personByEmail(email: "sara.smith@email.com") {
+    nodeId
+    email
+    aVeryLongAliasInOrderToTestThatThingsGoThroughPostgresJustFineAndWeDontGetAnyIssuesDueToAliasLength: friends {
+      totalCount
+    }
+  }
+}
