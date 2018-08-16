@@ -844,6 +844,16 @@ export default (function PgTypesPlugin(
           }
         }
       }
+      // Use the same type as the output type if it's valid input
+      if (
+        !gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey] &&
+        gqlTypeByTypeIdAndModifier[typeId] &&
+        gqlTypeByTypeIdAndModifier[typeId][typeModifierKey] &&
+        isInputType(gqlTypeByTypeIdAndModifier[typeId][typeModifierKey])
+      ) {
+        gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey] =
+          gqlTypeByTypeIdAndModifier[typeId][typeModifierKey];
+      }
       if (
         !gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey] &&
         typeModifierKey > -1
