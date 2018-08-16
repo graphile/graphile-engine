@@ -19,7 +19,7 @@ import {
 } from "graphile-build-pg";
 import { Pool, Client } from "pg";
 
-export type mixed = {} | string | number | boolean | undefined | null;
+type mixed = {} | string | number | boolean | undefined | null;
 
 const ensureValidPlugins = (name: string, arr: Array<Plugin>) => {
   if (!Array.isArray(arr)) {
@@ -51,7 +51,11 @@ type PostGraphileOptions = {
   jwtPgTypeIdentifier?: string;
   jwtSecret?: string;
   inflector?: Inflector; // NO LONGER SUPPORTED!
-  pgColumnFilter?: (attr: mixed, build: Build, context: Context) => boolean;
+  pgColumnFilter?: <TSource>(
+    attr: mixed,
+    build: Build,
+    context: Context<TSource>
+  ) => boolean;
   viewUniqueKey?: string;
   enableTags?: boolean;
   readCache?: string;
@@ -366,9 +370,9 @@ export const watchPostGraphileSchema = async (
     })
   );
   let released = false;
-  function handleNewSchema(schema: GraphQLSchema, ...args: Array<any>) {
+  function handleNewSchema(schema: GraphQLSchema) {
     if (writeCache) writeCache().catch(abort);
-    onNewSchema(schema, ...args);
+    onNewSchema(schema);
   }
   await builder.watchSchema(handleNewSchema);
 

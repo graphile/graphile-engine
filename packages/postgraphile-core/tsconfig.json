@@ -4,7 +4,7 @@
     "declarationDir": "./node8plus",
     "allowJs": false,
     "rootDir": "src",
-    "outDir": "build",
+    "outDir": "./node8plus",
     "target": "es2017",
     "module": "commonjs",
     "moduleResolution": "node",
@@ -17,7 +17,11 @@
     "strictNullChecks": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedParameters": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "lib": [
+      "es2018",
+      "esnext.asynciterable"
+    ]
   },
   "include": [
     "src/**/*"
