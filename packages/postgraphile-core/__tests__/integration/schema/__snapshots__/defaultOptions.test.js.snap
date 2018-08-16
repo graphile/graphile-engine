@@ -1853,6 +1853,40 @@ type DeleteMyTablePayload {
   query: Query
 }
 
+\\"\\"\\"All input for the \`deleteNoPrimaryKeyById\` mutation.\\"\\"\\"
+input DeleteNoPrimaryKeyByIdInput {
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+  id: Int!
+}
+
+\\"\\"\\"The output of our delete \`NoPrimaryKey\` mutation.\\"\\"\\"
+type DeleteNoPrimaryKeyPayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+  deletedNoPrimaryKeyId: ID
+
+  \\"\\"\\"The \`NoPrimaryKey\` that was deleted by this mutation.\\"\\"\\"
+  noPrimaryKey: NoPrimaryKey
+
+  \\"\\"\\"An edge for our \`NoPrimaryKey\`. May be used by Relay 1.\\"\\"\\"
+  noPrimaryKeyEdge(
+    \\"\\"\\"The method to use when ordering \`NoPrimaryKey\`.\\"\\"\\"
+    orderBy: [NoPrimaryKeysOrderBy!] = [NATURAL]
+  ): NoPrimaryKeysEdge
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
+}
+
 \\"\\"\\"All input for the \`deletePatchById\` mutation.\\"\\"\\"
 input DeletePatchByIdInput {
   \\"\\"\\"
@@ -3625,6 +3659,14 @@ type Mutation {
     input: DeleteMyTableByIdInput!
   ): DeleteMyTablePayload
 
+  \\"\\"\\"Deletes a single \`NoPrimaryKey\` using a unique key.\\"\\"\\"
+  deleteNoPrimaryKeyById(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: DeleteNoPrimaryKeyByIdInput!
+  ): DeleteNoPrimaryKeyPayload
+
   \\"\\"\\"Deletes a single \`Patch\` using its globally unique id.\\"\\"\\"
   deletePatch(
     \\"\\"\\"
@@ -4066,6 +4108,14 @@ type Mutation {
     \\"\\"\\"
     input: UpdateMyTableByIdInput!
   ): UpdateMyTablePayload
+
+  \\"\\"\\"Updates a single \`NoPrimaryKey\` using a unique key and a patch.\\"\\"\\"
+  updateNoPrimaryKeyById(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: UpdateNoPrimaryKeyByIdInput!
+  ): UpdateNoPrimaryKeyPayload
 
   \\"\\"\\"Updates a single \`Patch\` using its globally unique id and a patch.\\"\\"\\"
   updatePatch(
@@ -4551,6 +4601,14 @@ input NoPrimaryKeyCondition {
 input NoPrimaryKeyInput {
   id: Int!
   str: String!
+}
+
+\\"\\"\\"
+Represents an update to a \`NoPrimaryKey\`. Fields that are set will be updated.
+\\"\\"\\"
+input NoPrimaryKeyPatch {
+  id: Int
+  str: String
 }
 
 \\"\\"\\"A connection to a list of \`NoPrimaryKey\` values.\\"\\"\\"
@@ -7654,6 +7712,44 @@ type UpdateMyTablePayload {
     \\"\\"\\"The method to use when ordering \`MyTable\`.\\"\\"\\"
     orderBy: [MyTablesOrderBy!] = [PRIMARY_KEY_ASC]
   ): MyTablesEdge
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
+}
+
+\\"\\"\\"All input for the \`updateNoPrimaryKeyById\` mutation.\\"\\"\\"
+input UpdateNoPrimaryKeyByIdInput {
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+  id: Int!
+
+  \\"\\"\\"
+  An object where the defined keys will be set on the \`NoPrimaryKey\` being updated.
+  \\"\\"\\"
+  noPrimaryKeyPatch: NoPrimaryKeyPatch!
+}
+
+\\"\\"\\"The output of our update \`NoPrimaryKey\` mutation.\\"\\"\\"
+type UpdateNoPrimaryKeyPayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"The \`NoPrimaryKey\` that was updated by this mutation.\\"\\"\\"
+  noPrimaryKey: NoPrimaryKey
+
+  \\"\\"\\"An edge for our \`NoPrimaryKey\`. May be used by Relay 1.\\"\\"\\"
+  noPrimaryKeyEdge(
+    \\"\\"\\"The method to use when ordering \`NoPrimaryKey\`.\\"\\"\\"
+    orderBy: [NoPrimaryKeysOrderBy!] = [NATURAL]
+  ): NoPrimaryKeysEdge
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
