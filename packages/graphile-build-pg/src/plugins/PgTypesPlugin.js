@@ -1048,6 +1048,10 @@ function makeGraphQLHstoreType(graphql, hstoreTypeName) {
 
   function parseValueLiteral(ast, variables) {
     switch (ast.kind) {
+      case Kind.INT:
+      case Kind.FLOAT:
+        // Number isn't really okay, but we'll coerce it to a string anyway.
+        return String(parseFloat(ast.value));
       case Kind.STRING:
         // String is okay.
         return String(ast.value);
