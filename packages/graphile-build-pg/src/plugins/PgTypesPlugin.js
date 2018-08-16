@@ -968,7 +968,6 @@ export default (function PgTypesPlugin(
     // knows how to express it in input/output.
     if (pgSkipHstore) return build;
     const {
-      getTypeByName,
       pgIntrospectionResultsByKind: introspectionResultsByKind,
       pgRegisterGqlTypeByTypeId,
       pgRegisterGqlInputTypeByTypeId,
@@ -999,7 +998,7 @@ export default (function PgTypesPlugin(
     // better validation; but you could just as easily use JSON directly if you
     // wanted to.
     const GraphQLHStoreType = makeGraphQLHstoreType(graphql, hstoreTypeName);
-    // const GraphQLHStoreType = getTypeByName(pgLegacyJsonUuid ? "Json" : "JSON");
+    // const GraphQLHStoreType = build.getTypeByName(pgLegacyJsonUuid ? "Json" : "JSON");
 
     // Now register the hstore type with the type system for both output and input.
     pgRegisterGqlTypeByTypeId(hstoreType.id, () => GraphQLHStoreType);
