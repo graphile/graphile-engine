@@ -922,6 +922,41 @@ type CreateMyTablePayload {
   query: Query
 }
 
+\\"\\"\\"All input for the create \`NoPrimaryKey\` mutation.\\"\\"\\"
+input CreateNoPrimaryKeyInput {
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"The \`NoPrimaryKey\` to be created by this mutation.\\"\\"\\"
+  noPrimaryKey: NoPrimaryKeyInput!
+}
+
+\\"\\"\\"The output of our create \`NoPrimaryKey\` mutation.\\"\\"\\"
+type CreateNoPrimaryKeyPayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"The \`NoPrimaryKey\` that was created by this mutation.\\"\\"\\"
+  noPrimaryKey: NoPrimaryKey
+
+  \\"\\"\\"An edge for our \`NoPrimaryKey\`. May be used by Relay 1.\\"\\"\\"
+  noPrimaryKeyEdge(
+    \\"\\"\\"The method to use when ordering \`NoPrimaryKey\`.\\"\\"\\"
+    orderBy: [NoPrimaryKeysOrderBy!] = [NATURAL]
+  ): NoPrimaryKeysEdge
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
+}
+
 \\"\\"\\"All input for the create \`Patch\` mutation.\\"\\"\\"
 input CreatePatchInput {
   \\"\\"\\"
@@ -3374,6 +3409,14 @@ type Mutation {
     input: CreateMyTableInput!
   ): CreateMyTablePayload
 
+  \\"\\"\\"Creates a single \`NoPrimaryKey\`.\\"\\"\\"
+  createNoPrimaryKey(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: CreateNoPrimaryKeyInput!
+  ): CreateNoPrimaryKeyPayload
+
   \\"\\"\\"Creates a single \`Patch\`.\\"\\"\\"
   createPatch(
     \\"\\"\\"
@@ -4487,6 +4530,64 @@ enum NonUpdatableViewsOrderBy {
   NATURAL
 }
 
+type NoPrimaryKey {
+  id: Int!
+  str: String!
+}
+
+\\"\\"\\"
+A condition to be used against \`NoPrimaryKey\` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+\\"\\"\\"
+input NoPrimaryKeyCondition {
+  \\"\\"\\"Checks for equality with the object’s \`id\` field.\\"\\"\\"
+  id: Int
+
+  \\"\\"\\"Checks for equality with the object’s \`str\` field.\\"\\"\\"
+  str: String
+}
+
+\\"\\"\\"An input for mutations affecting \`NoPrimaryKey\`\\"\\"\\"
+input NoPrimaryKeyInput {
+  id: Int!
+  str: String!
+}
+
+\\"\\"\\"A connection to a list of \`NoPrimaryKey\` values.\\"\\"\\"
+type NoPrimaryKeysConnection {
+  \\"\\"\\"
+  A list of edges which contains the \`NoPrimaryKey\` and cursor to aid in pagination.
+  \\"\\"\\"
+  edges: [NoPrimaryKeysEdge!]!
+
+  \\"\\"\\"A list of \`NoPrimaryKey\` objects.\\"\\"\\"
+  nodes: [NoPrimaryKey]!
+
+  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
+  pageInfo: PageInfo!
+
+  \\"\\"\\"The count of *all* \`NoPrimaryKey\` you could get from the connection.\\"\\"\\"
+  totalCount: Int
+}
+
+\\"\\"\\"A \`NoPrimaryKey\` edge in the connection.\\"\\"\\"
+type NoPrimaryKeysEdge {
+  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
+  cursor: Cursor
+
+  \\"\\"\\"The \`NoPrimaryKey\` at the end of the edge.\\"\\"\\"
+  node: NoPrimaryKey
+}
+
+\\"\\"\\"Methods to use when ordering \`NoPrimaryKey\`.\\"\\"\\"
+enum NoPrimaryKeysOrderBy {
+  ID_ASC
+  ID_DESC
+  NATURAL
+  STR_ASC
+  STR_DESC
+}
+
 scalar NotNullTimestamp
 
 scalar NotNullUrl
@@ -5467,6 +5568,35 @@ type Query implements Node {
     orderBy: [MyTablesOrderBy!] = [PRIMARY_KEY_ASC]
   ): MyTablesConnection
 
+  \\"\\"\\"Reads and enables pagination through a set of \`NoPrimaryKey\`.\\"\\"\\"
+  allNoPrimaryKeys(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"
+    A condition to be used in determining which values should be returned by the collection.
+    \\"\\"\\"
+    condition: NoPrimaryKeyCondition
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+
+    \\"\\"\\"The method to use when ordering \`NoPrimaryKey\`.\\"\\"\\"
+    orderBy: [NoPrimaryKeysOrderBy!] = [NATURAL]
+  ): NoPrimaryKeysConnection
+
   \\"\\"\\"Reads and enables pagination through a set of \`NonUpdatableView\`.\\"\\"\\"
   allNonUpdatableViews(
     \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
@@ -5989,6 +6119,7 @@ type Query implements Node {
   ): MyTable
   myTableById(id: Int!): MyTable
   noArgsQuery: Int
+  noPrimaryKeyById(id: Int!): NoPrimaryKey
 
   \\"\\"\\"Fetches an object given its globally unique \`ID\`.\\"\\"\\"
   node(
