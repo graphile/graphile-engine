@@ -1,49 +1,45 @@
-// @flow
-
-import assert from "assert";
-import { getArgumentValues } from "graphql/execution/values";
+import * as assert from "assert";
 import {
   getNamedType,
   isCompositeType,
   GraphQLObjectType,
   GraphQLUnionType,
-} from "graphql";
-import debugFactory from "debug";
-
-import type {
   GraphQLResolveInfo,
   GraphQLField,
   GraphQLCompositeType,
   GraphQLInterfaceType,
   GraphQLType,
-} from "graphql/type/definition";
-
-import type {
+  GraphQLNamedType,
   ASTNode,
   FieldNode,
   SelectionNode,
   FragmentSpreadNode,
   InlineFragmentNode,
-} from "graphql/language/ast";
+  NamedTypeNode
+} from "graphql";
+import { getArgumentValues } from "graphql/execution/values";
+import * as debugFactory from "debug";
+
+export type mixed = {} | string | number | boolean | undefined | null;
 
 export type FieldsByTypeName = {
-  [string]: {
-    [string]: ResolveTree,
-  },
+  [str: string]: {
+    [str: string]: ResolveTree;
+  };
 };
 
 export type ResolveTree = {
-  name: string,
-  alias: string,
+  name: string;
+  alias: string;
   args: {
-    [string]: mixed,
-  },
-  fieldsByTypeName: FieldsByTypeName,
+    [str: string]: mixed;
+  };
+  fieldsByTypeName: FieldsByTypeName;
 };
 
 const debug = debugFactory("graphql-parse-resolve-info");
 
-function getArgVal(resolveInfo, argument) {
+function getArgVal(resolveInfo: GraphQLResolveInfo, argument: any) {
   if (argument.kind === "Variable") {
     return resolveInfo.variableValues[argument.name.value];
   } else if (argument.kind === "BooleanValue") {
@@ -51,7 +47,10 @@ function getArgVal(resolveInfo, argument) {
   }
 }
 
-function skipField(resolveInfo, { directives = [] }) {
+function skipField(
+  resolveInfo: GraphQLResolveInfo,
+  { directives = [] }: SelectionNode
+) {
   let skip = false;
   directives.forEach(directive => {
     const directiveName = directive.name.value;
@@ -77,7 +76,8 @@ function skipField(resolveInfo, { directives = [] }) {
 export function getAliasFromResolveInfo(
   resolveInfo: GraphQLResolveInfo
 ): string {
-  const asts = resolveInfo.fieldNodes || resolveInfo.fieldASTs;
+  const asts: ReadonlyArray<FieldNode> =
+    resolveInfo.fieldNodes || (resolveInfo["fieldASTs"] as any);
   for (let i = 0, l = asts.length; i < l; i++) {
     const val = asts[i];
     if (val.kind === "Field") {
@@ -90,12 +90,14 @@ export function getAliasFromResolveInfo(
   throw new Error("Could not determine alias?!");
 }
 
+export type ParseOptions = { keepRoot?: boolean; deep?: boolean };
+
 export function parseResolveInfo(
   resolveInfo: GraphQLResolveInfo,
-  options: { keepRoot?: boolean, deep?: boolean } = {}
+  options: ParseOptions = {}
 ): ResolveTree | FieldsByTypeName | null | void {
-  const fieldNodes: $ReadOnlyArray<FieldNode> =
-    resolveInfo.fieldNodes || resolveInfo.fieldASTs;
+  const fieldNodes: ReadonlyArray<FieldNode> =
+    resolveInfo.fieldNodes || (resolveInfo["fieldASTs"] as any);
 
   const { parentType } = resolveInfo;
   if (!fieldNodes) {
@@ -119,20 +121,20 @@ export function parseResolveInfo(
     if (!typeKey) {
       return null;
     }
-    tree = tree[typeKey];
-    const fieldKey = firstKey(tree);
+    const tmp = tree[typeKey];
+    const fieldKey = firstKey(tmp);
     if (!fieldKey) {
       return null;
     }
-    tree = tree[fieldKey];
+    return tmp[fieldKey];
   }
   return tree;
 }
 
-function getFieldFromAST(
+function getFieldFromAST<TContext>(
   ast: ASTNode,
   parentType: GraphQLCompositeType
-): ?GraphQLField<*, *> {
+): GraphQLField<GraphQLCompositeType, TContext> | undefined {
   if (ast.kind === "Field") {
     const fieldNode: FieldNode = ast;
     const fieldName = fieldNode.name.value;
@@ -143,15 +145,15 @@ function getFieldFromAST(
       // XXX: TODO: Handle GraphQLUnionType
     }
   }
-  return;
+  return undefined;
 }
 
 let iNum = 1;
-function fieldTreeFromAST<T: SelectionNode>(
-  inASTs: $ReadOnlyArray<T> | T,
+function fieldTreeFromAST<T extends SelectionNode>(
+  inASTs: ReadonlyArray<T> | T,
   resolveInfo: GraphQLResolveInfo,
   initTree: FieldsByTypeName = {},
-  options = {},
+  options: ParseOptions = {},
   parentType: GraphQLCompositeType,
   depth = ""
 ): FieldsByTypeName {
@@ -164,7 +166,7 @@ function fieldTreeFromAST<T: SelectionNode>(
   );
   let { variableValues } = resolveInfo;
   const fragments = resolveInfo.fragments || {};
-  const asts: $ReadOnlyArray<T> = Array.isArray(inASTs) ? inASTs : [inASTs];
+  const asts: ReadonlyArray<T> = Array.isArray(inASTs) ? inASTs : [inASTs];
   initTree[parentType.name] = initTree[parentType.name] || {};
   const outerDepth = depth;
   return asts.reduce(function(tree, selectionVal: SelectionNode, idx) {
@@ -198,10 +200,11 @@ function fieldTreeFromAST<T: SelectionNode>(
         if (!field) {
           return tree;
         }
-        const fieldGqlType = getNamedType(field.type);
-        if (!fieldGqlType) {
+        const fieldGqlTypeOrUndefined = getNamedType(field.type);
+        if (!fieldGqlTypeOrUndefined) {
           return tree;
         }
+        const fieldGqlType: GraphQLNamedType = fieldGqlTypeOrUndefined;
         const args = getArgumentValues(field, val, variableValues) || {};
         if (parentType.name && !tree[parentType.name][alias]) {
           const newTreeRoot: ResolveTree = {
@@ -210,9 +213,9 @@ function fieldTreeFromAST<T: SelectionNode>(
             args,
             fieldsByTypeName: isCompositeType(fieldGqlType)
               ? {
-                  [fieldGqlType.name]: {},
+                  [fieldGqlType.name]: {}
                 }
-              : {},
+              : {}
           };
           tree[parentType.name][alias] = newTreeRoot;
         }
@@ -243,7 +246,7 @@ function fieldTreeFromAST<T: SelectionNode>(
       debug("%s[%d] Fragment spread '%s'", depth, instance, name);
       const fragment = fragments[name];
       assert(fragment, 'unknown fragment "' + name + '"');
-      let fragmentType = parentType;
+      let fragmentType: GraphQLNamedType | null | undefined = parentType;
       if (fragment.typeCondition) {
         fragmentType = getType(resolveInfo, fragment.typeCondition);
       }
@@ -261,7 +264,7 @@ function fieldTreeFromAST<T: SelectionNode>(
     } else if (selectionVal.kind === "InlineFragment" && options.deep) {
       const val: InlineFragmentNode = selectionVal;
       const fragment = val;
-      let fragmentType = parentType;
+      let fragmentType: GraphQLNamedType | null | undefined = parentType;
       if (fragment.typeCondition) {
         fragmentType = getType(resolveInfo, fragment.typeCondition);
       }
@@ -296,13 +299,16 @@ function fieldTreeFromAST<T: SelectionNode>(
   }, initTree);
 }
 
-function firstKey(obj) {
+function firstKey(obj: object) {
   for (const key in obj) {
     return key;
   }
 }
 
-function getType(resolveInfo, typeCondition) {
+function getType(
+  resolveInfo: GraphQLResolveInfo,
+  typeCondition: NamedTypeNode
+) {
   const { schema } = resolveInfo;
   const { kind, name } = typeCondition;
   if (kind === "NamedType") {
@@ -329,7 +335,7 @@ export function simplifyParsedResolveInfoFragmentWithType(
     }
   }
   return Object.assign({}, parsedResolveInfoFragment, {
-    fields,
+    fields
   });
 }
 
