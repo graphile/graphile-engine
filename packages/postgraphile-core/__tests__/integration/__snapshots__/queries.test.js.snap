@@ -1042,6 +1042,9 @@ Object {
       "aVeryLongAliasInOrderToTestThatThingsGoThroughPostgresJustFineAndWeDontGetAnyIssuesDueToAliasLength": Object {
         "totalCount": 2,
       },
+      "anotherLongAliasInOrderToTestThatThingsGoThroughPostgresJustFineAndWeDontGetAnyIssuesDueToAliasLength": Object {
+        "totalCount": 2,
+      },
       "email": "sara.smith@email.com",
       "nodeId": "WyJwZW9wbGUiLDJd",
     },
