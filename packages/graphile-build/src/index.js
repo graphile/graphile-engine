@@ -37,6 +37,7 @@ export type {
   Hook,
   WatchUnwatch,
   SchemaListener,
+  SchemaBuilder,
 } from "./SchemaBuilder";
 
 export const getBuilder = async (
