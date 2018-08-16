@@ -11,6 +11,10 @@ function indent(str) {
   return "  " + str.replace(/\n/g, "\n  ");
 }
 
+function identity(value) {
+  return value;
+}
+
 const parseCache = LRU(500);
 function parseInterval(str) {
   let result = parseCache.get(str);
@@ -439,7 +443,6 @@ export default (function PgTypesPlugin(
       "1186": GQLIntervalInput, // interval
       "600": PointInput, // point
     };
-    const identity = _ => _;
     const jsonStringify = o => JSON.stringify(o);
     if (pgExtendedTypes) {
       pg2GqlMapper[114] = {
@@ -969,6 +972,8 @@ export default (function PgTypesPlugin(
       pgIntrospectionResultsByKind: introspectionResultsByKind,
       pgRegisterGqlTypeByTypeId,
       pgRegisterGqlInputTypeByTypeId,
+      pg2GqlMapper,
+      pgSql: sql,
       graphql,
     } = build;
 
@@ -999,6 +1004,14 @@ export default (function PgTypesPlugin(
     // Now register the hstore type with the type system for both output and input.
     pgRegisterGqlTypeByTypeId(hstoreType.id, () => GraphQLHStoreType);
     pgRegisterGqlInputTypeByTypeId(hstoreType.id, () => GraphQLHStoreType);
+
+    // Finally we must tell the system how to translate the data between PG-land and JS-land:
+    pg2GqlMapper[hstoreType.id] = {
+      // node-postgres parses hstore for us, no action required on map
+      map: identity,
+      // When unmapping we need to convert back to hstore
+      unmap: o => sql.fragment`(${sql.value(hstoreStringify(o))}::hstore)`,
+    };
 
     return build;
   });
@@ -1031,10 +1044,6 @@ function makeGraphQLHstoreType(graphql, hstoreTypeName) {
       // Everything else is invalid.
       return false;
     }
-  }
-
-  function identity(value) {
-    return value;
   }
 
   function identityWithCheck(obj) {
@@ -1115,4 +1124,30 @@ function makeGraphQLHstoreType(graphql, hstoreTypeName) {
     parseLiteral,
   });
   return GraphQLHStore;
+}
+
+// To include a double quote or a backslash in a key or value, escape it
+// with a backslash.
+// -- https://www.postgresql.org/docs/10/static/hstore.html
+function toHstoreString(str) {
+  return '"' + str.replace(/(["\\])/g, "\\$1") + '"';
+}
+
+function hstoreStringify(o) {
+  if (o === null) {
+    return null;
+  }
+  if (typeof o !== "object") {
+    throw new TypeError("Expected an hstore object");
+  }
+  const keys = Object.keys(o);
+  const encodeKeyValue = key => {
+    const value = o[key];
+    if (value === null) {
+      return `${toHstoreString(key)} => NULL`;
+    } else {
+      return `${toHstoreString(key)} => ${toHstoreString(String(value))}`;
+    }
+  };
+  return keys.map(encodeKeyValue).join(", ");
 }

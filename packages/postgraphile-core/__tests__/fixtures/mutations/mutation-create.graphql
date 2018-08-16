@@ -4,7 +4,7 @@
 #    "b": "6",
 #    "actually_null": null,
 #    "null_string": "null",
-#    "_\"_$@£$)(@*£$": "_\"_$@£$)(@*£$"
+#    "_\"\\_$@£$)(@*£$": "_\"\\_$@£$)(@*£$"
 #  }
 #}!
 mutation CreateMutation($config: KeyValueHash!) {
