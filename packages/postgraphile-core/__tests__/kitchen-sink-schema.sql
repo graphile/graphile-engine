@@ -31,7 +31,7 @@ create table c.person (
   about text,
   email b.email not null unique,
   site b.wrapped_url default null,
-  config hstore not null default ''::hstore,
+  config hstore,
   created_at timestamp default current_timestamp
 );
 

@@ -976,7 +976,7 @@ type Person implements Node {
     \\"\\"\\"The method to use when ordering \`CompoundKey\`.\\"\\"\\"
     orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysConnection!
-  config: KeyValueHash!
+  config: KeyValueHash
   createdAt: Datetime
   email: Email!
   exists(email: Email): Boolean
