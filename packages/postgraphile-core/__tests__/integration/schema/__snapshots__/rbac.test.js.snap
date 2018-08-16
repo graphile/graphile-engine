@@ -670,7 +670,7 @@ enum PeopleOrderBy {
 type Person implements Node {
   about: String
   aliases: [String]!
-  config: KeyValueHash!
+  config: KeyValueHash
   createdAt: Datetime
   email: Email!
 
@@ -5988,7 +5988,7 @@ type Person implements Node {
     \\"\\"\\"The method to use when ordering \`CompoundKey\`.\\"\\"\\"
     orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysConnection!
-  config: KeyValueHash!
+  config: KeyValueHash
   createdAt: Datetime
   email: Email!
   exists(email: Email): Boolean
