@@ -94,7 +94,7 @@
   dependencies:
     moment ">=2.14.0"
 
-"@types/pg@7.4.10":
+"@types/pg@7.4.10", "@types/pg@^7.4.10":
   version "7.4.10"
   resolved "https://registry.yarnpkg.com/@types/pg/-/pg-7.4.10.tgz#1cf4d6c5d32e621566eca82981161b371fb90ace"
   dependencies:
@@ -4417,10 +4417,11 @@ pg-pool@~2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/pg-pool/-/pg-pool-2.0.3.tgz#c022032c8949f312a4f91fb6409ce04076be3257"
 
-pg-sql2@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/pg-sql2/-/pg-sql2-2.1.0.tgz#f86978278451482099e4f8e8db8b7486ecb67e3f"
+pg-sql2@2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/pg-sql2/-/pg-sql2-2.2.1.tgz#a37612e5243887c5135a6849dec1f20b2cf00553"
   dependencies:
+    "@types/pg" "^7.4.10"
     debug ">=2 <3"
 
 pg-types@~1.12.1:
