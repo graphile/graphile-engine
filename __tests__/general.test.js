@@ -1,31 +1,43 @@
 const sql = require("../src");
 
+function sansSymbols(obj) {
+  if (obj && typeof obj === 'object') {
+    return Object.keys(obj).reduce((memo, key) => {
+      memo[key] = obj[key];
+      return memo;
+    }, {});
+  } else {
+    return obj;
+  }
+}
+
+
 it("sql.value", () => {
   const node = sql.value({ foo: { bar: 1 } });
-  expect(node).toEqual({ type: "VALUE", value: { foo: { bar: 1 } } });
+  expect(sansSymbols(node)).toEqual({ type: "VALUE", value: { foo: { bar: 1 } } });
 });
 
 describe("sql.identifier", () => {
   it("one", () => {
     const node = sql.identifier("foo");
-    expect(node).toEqual({ type: "IDENTIFIER", names: ["foo"] });
+    expect(sansSymbols(node)).toEqual({ type: "IDENTIFIER", names: ["foo"] });
   });
 
   it("many", () => {
     const node = sql.identifier("foo", "bar", 'b"z');
-    expect(node).toEqual({ type: "IDENTIFIER", names: ["foo", "bar", 'b"z'] });
+    expect(sansSymbols(node)).toEqual({ type: "IDENTIFIER", names: ["foo", "bar", 'b"z'] });
   });
 });
 
 describe("sql.query", () => {
   it("simple", () => {
     const node = sql.query`select 1`;
-    expect(node).toEqual([{ type: "RAW", text: "select 1" }]);
+    expect(node.map(sansSymbols)).toEqual([{ type: "RAW", text: "select 1" }]);
   });
 
   it("with values", () => {
     const node = sql.query`select ${sql.value(1)}::integer`;
-    expect(node).toEqual([
+    expect(node.map(sansSymbols)).toEqual([
       { type: "RAW", text: "select " },
       { type: "VALUE", value: 1 },
       { type: "RAW", text: "::integer" },
@@ -34,7 +46,7 @@ describe("sql.query", () => {
 
   it("with sub-sub-sub query", () => {
     const node = sql.query`select ${sql.query`1 ${sql.query`from ${sql.query`foo`}`}`}`;
-    expect(node).toEqual([
+    expect(node.map(sansSymbols)).toEqual([
       { type: "RAW", text: "select " },
       { type: "RAW", text: "1 " },
       { type: "RAW", text: "from " },
@@ -54,7 +66,7 @@ describe("sql.join", () => {
       ],
       ", "
     )}`;
-    expect(node).toEqual([
+    expect(node.map(sansSymbols)).toEqual([
       { type: "RAW", text: "select " },
       { type: "VALUE", value: 1 },
       { type: "RAW", text: ", " },
