@@ -27,6 +27,8 @@ export {
   singularize,
 } from "./utils";
 
+export type { SchemaBuilder };
+
 export type {
   Plugin,
   Options,
@@ -37,7 +39,6 @@ export type {
   Hook,
   WatchUnwatch,
   SchemaListener,
-  SchemaBuilder,
 } from "./SchemaBuilder";
 
 export const getBuilder = async (

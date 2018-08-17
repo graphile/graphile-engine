@@ -12,7 +12,7 @@ export const upperCamelCase: CaseChangeFunction;
 export const pluralize: CaseChangeFunction;
 export const singularize: CaseChangeFunction;
 
-import {
+import SchemaBuilder, {
   Plugin,
   Options,
   Build,
@@ -21,7 +21,6 @@ import {
   Hook,
   WatchUnwatch,
   SchemaListener,
-  SchemaBuilder,
   DataForType
 } from "./SchemaBuilder";
 

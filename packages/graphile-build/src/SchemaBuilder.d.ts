@@ -57,7 +57,7 @@ export type Hook<Type> = (
   context: Context<Type>
 ) => Type;
 
-export class SchemaBuilder extends EventEmitter {
+export default class SchemaBuilder extends EventEmitter {
   hook(hookName: "build", fn: Hook<Build>): void;
   hook(hookName: "inflection", fn: Hook<Inflection>): void;
   hook(hookName: "init", fn: Hook<InitObject>): void;
