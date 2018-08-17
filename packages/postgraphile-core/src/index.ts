@@ -37,10 +37,10 @@ const ensureValidPlugins = (name: string, arr: Array<Plugin>) => {
   }
 };
 
-type PostGraphileOptions = {
+interface PostGraphileOptions {
   dynamicJson?: boolean;
   classicIds?: boolean;
-  disableDefaultMutations?: string;
+  disableDefaultMutations?: boolean;
   nodeIdFieldName?: string;
   graphileBuildOptions?: Options;
   graphqlBuildOptions?: Options; // DEPRECATED!
@@ -67,7 +67,7 @@ type PostGraphileOptions = {
   simpleCollections?: "only" | "both" | "omit";
   includeExtensionResources?: boolean;
   ignoreRBAC?: boolean;
-};
+}
 
 type PgConfig = Client | Pool | string;
 
