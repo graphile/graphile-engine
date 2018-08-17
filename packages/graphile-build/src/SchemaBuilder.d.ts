@@ -215,7 +215,7 @@ export default class SchemaBuilder extends EventEmitter {
 
   buildSchema(): GraphQLSchema;
 
-  watchSchema(listener: SchemaListener): Promise<void>;
+  watchSchema(listener?: SchemaListener): Promise<void>;
 
   unwatchSchema(): Promise<void>;
 }
