@@ -27,7 +27,7 @@ export type Plugin = (
   options: Options
 ) => Promise<void> | void;
 
-type TriggerChangeType = () => void;
+export type TriggerChangeType = () => void;
 export type WatchUnwatch = (triggerChange: TriggerChangeType) => void;
 
 export type SchemaListener = (newSchema: GraphQLSchema) => void;
