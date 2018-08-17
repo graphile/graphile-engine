@@ -20,22 +20,22 @@ import {
 import { getArgumentValues } from "graphql/execution/values";
 import * as debugFactory from "debug";
 
-export type mixed = {} | string | number | boolean | undefined | null;
+type mixed = {} | string | number | boolean | undefined | null;
 
-export type FieldsByTypeName = {
+export interface FieldsByTypeName {
   [str: string]: {
     [str: string]: ResolveTree;
   };
-};
+}
 
-export type ResolveTree = {
+export interface ResolveTree {
   name: string;
   alias: string;
   args: {
     [str: string]: mixed;
   };
   fieldsByTypeName: FieldsByTypeName;
-};
+}
 
 const debug = debugFactory("graphql-parse-resolve-info");
 
@@ -90,7 +90,10 @@ export function getAliasFromResolveInfo(
   throw new Error("Could not determine alias?!");
 }
 
-export type ParseOptions = { keepRoot?: boolean; deep?: boolean };
+export interface ParseOptions {
+  keepRoot?: boolean;
+  deep?: boolean;
+}
 
 export function parseResolveInfo(
   resolveInfo: GraphQLResolveInfo,

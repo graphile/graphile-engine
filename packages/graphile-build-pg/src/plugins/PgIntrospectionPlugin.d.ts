@@ -1,12 +1,12 @@
-export type PgNamespace = {
+export interface PgNamespace {
   kind: "namespace";
   id: string;
   name: string;
   description: string | void;
   tags: { [tag: string]: string };
-};
+}
 
-export type PgProc = {
+export interface PgProc {
   kind: "procedure";
   name: string;
   description: string | void;
@@ -21,9 +21,9 @@ export type PgProc = {
   namespace: PgNamespace;
   tags: { [tag: string]: string | Array<string> };
   aclExecutable: boolean;
-};
+}
 
-export type PgClass = {
+export interface PgClass {
   kind: "class";
   id: string;
   name: string;
@@ -45,9 +45,9 @@ export type PgClass = {
   aclInsertable: boolean;
   aclUpdatable: boolean;
   aclDeletable: boolean;
-};
+}
 
-export type PgType = {
+export interface PgType {
   kind: "type";
   id: string;
   name: string;
@@ -64,9 +64,9 @@ export type PgType = {
   domainBaseTypeId: string | void;
   domainTypeModifier: number | void;
   tags: { [tag: string]: string | Array<string> };
-};
+}
 
-export type PgAttribute = {
+export interface PgAttribute {
   kind: "attribute";
   classId: string;
   num: number;
@@ -83,9 +83,9 @@ export type PgAttribute = {
   aclSelectable: boolean;
   aclInsertable: boolean;
   aclUpdatable: boolean;
-};
+}
 
-export type PgConstraint = {
+export interface PgConstraint {
   kind: "constraint";
   name: string;
   type: string;
@@ -96,9 +96,9 @@ export type PgConstraint = {
   foreignKeyAttributeNums: Array<number>;
   namespace: PgNamespace;
   tags: { [tag: string]: string | Array<string> };
-};
+}
 
-export type PgExtension = {
+export interface PgExtension {
   kind: "extension";
   id: string;
   name: string;
@@ -108,4 +108,4 @@ export type PgExtension = {
   configurationClassIds?: Array<string>;
   description: string | void;
   tags: { [tag: string]: string | Array<string> };
-};
+}

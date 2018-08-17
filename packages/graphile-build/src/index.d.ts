@@ -1,5 +1,6 @@
 import { GraphQLSchema, GraphQLResolveInfo, GraphQLType } from "graphql";
 import { ResolveTree } from "graphql-parse-resolve-info";
+
 type CaseChangeFunction = (str: string) => string;
 export const constantCaseAll: CaseChangeFunction;
 export const formatInsideUnderscores: ((
