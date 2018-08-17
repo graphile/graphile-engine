@@ -18,6 +18,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUnusedParameters": true,
     "noUnusedLocals": true,
+    "preserveWatchOutput": true,
     "lib": [
       "es2018",
       "esnext.asynciterable"
