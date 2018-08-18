@@ -20,6 +20,13 @@ import {
 import { getArgumentValues } from "graphql/execution/values";
 import * as debugFactory from "debug";
 
+// Extend GraphQLResolveInfo for old GraphQL versions
+declare module 'graphql/type/definition.js' {
+  interface GraphQLResolveInfo {
+    readonly fieldASTs: ReadonlyArray<FieldNode>;
+  }
+};
+
 type mixed = {} | string | number | boolean | undefined | null;
 
 export interface FieldsByTypeName {
@@ -77,7 +84,7 @@ export function getAliasFromResolveInfo(
   resolveInfo: GraphQLResolveInfo
 ): string {
   const asts: ReadonlyArray<FieldNode> =
-    resolveInfo.fieldNodes || (resolveInfo["fieldASTs"] as any);
+    resolveInfo.fieldNodes || resolveInfo.fieldASTs;
   for (let i = 0, l = asts.length; i < l; i++) {
     const val = asts[i];
     if (val.kind === "Field") {
@@ -100,7 +107,7 @@ export function parseResolveInfo(
   options: ParseOptions = {}
 ): ResolveTree | FieldsByTypeName | null | void {
   const fieldNodes: ReadonlyArray<FieldNode> =
-    resolveInfo.fieldNodes || (resolveInfo["fieldASTs"] as any);
+    resolveInfo.fieldNodes || resolveInfo.fieldASTs;
 
   const { parentType } = resolveInfo;
   if (!fieldNodes) {
