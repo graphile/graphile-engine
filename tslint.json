@@ -1,0 +1,28 @@
+{
+  "extends": [
+    "tslint:latest",
+    "tslint-config-prettier"
+  ],
+  "rules": {
+    "object-literal-sort-keys": false,
+    "array-type": [
+      true,
+      "generic"
+    ],
+    "interface-name": [
+      true,
+      "never-prefix"
+    ],
+    "ordered-imports": false,
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-leading-underscore"
+    ],
+    "no-implicit-dependencies": [
+      true,
+      "dev"
+    ]
+  }
+}

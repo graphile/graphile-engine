@@ -17,15 +17,16 @@ import {
   InlineFragmentNode,
   NamedTypeNode
 } from "graphql";
+// tslint:disable-next-line
 import { getArgumentValues } from "graphql/execution/values";
 import * as debugFactory from "debug";
 
 // Extend GraphQLResolveInfo for old GraphQL versions
-declare module 'graphql/type/definition.js' {
+declare module "graphql/type/definition.js" {
   interface GraphQLResolveInfo {
     readonly fieldASTs: ReadonlyArray<FieldNode>;
   }
-};
+}
 
 type mixed = {} | string | number | boolean | undefined | null;
 
@@ -119,7 +120,7 @@ export function parseResolveInfo(
   if (options.deep == null) {
     options.deep = true;
   }
-  let tree = fieldTreeFromAST(
+  const tree = fieldTreeFromAST(
     fieldNodes,
     resolveInfo,
     undefined,
@@ -131,12 +132,12 @@ export function parseResolveInfo(
     if (!typeKey) {
       return null;
     }
-    const tmp = tree[typeKey];
-    const fieldKey = firstKey(tmp);
+    const fields = tree[typeKey];
+    const fieldKey = firstKey(fields);
     if (!fieldKey) {
       return null;
     }
-    return tmp[fieldKey];
+    return fields[fieldKey];
   }
   return tree;
 }
@@ -174,12 +175,13 @@ function fieldTreeFromAST<T extends SelectionNode>(
     instance,
     parentType
   );
-  let { variableValues } = resolveInfo;
+  const { variableValues } = resolveInfo;
   const fragments = resolveInfo.fragments || {};
   const asts: ReadonlyArray<T> = Array.isArray(inASTs) ? inASTs : [inASTs];
   initTree[parentType.name] = initTree[parentType.name] || {};
   const outerDepth = depth;
-  return asts.reduce(function(tree, selectionVal: SelectionNode, idx) {
+  return asts.reduce((tree, selectionVal: SelectionNode, idx) => {
+    // tslint:disable-next-line no-shadowed-variable
     const depth = `${outerDepth}  `;
     debug(
       "%s[%d] Processing AST %d of %d; kind = %s",
@@ -311,7 +313,9 @@ function fieldTreeFromAST<T extends SelectionNode>(
 
 function firstKey(obj: object) {
   for (const key in obj) {
-    return key;
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      return key;
+    }
   }
 }
 
@@ -329,24 +333,25 @@ function getType(
 
 export function simplifyParsedResolveInfoFragmentWithType(
   parsedResolveInfoFragment: ResolveTree,
-  Type: GraphQLType
+  type: GraphQLType
 ) {
   const { fieldsByTypeName } = parsedResolveInfoFragment;
   const fields = {};
-  const StrippedType = getNamedType(Type);
-  if (isCompositeType(StrippedType)) {
-    Object.assign(fields, fieldsByTypeName[StrippedType.name]);
-    if (StrippedType instanceof GraphQLObjectType) {
-      const ObjectType: GraphQLObjectType = StrippedType;
+  const strippedType = getNamedType(type);
+  if (isCompositeType(strippedType)) {
+    Object.assign(fields, fieldsByTypeName[strippedType.name]);
+    if (strippedType instanceof GraphQLObjectType) {
+      const objectType: GraphQLObjectType = strippedType;
       // GraphQL ensures that the subfields cannot clash, so it's safe to simply overwrite them
-      for (const Interface of ObjectType.getInterfaces()) {
-        Object.assign(fields, fieldsByTypeName[Interface.name]);
+      for (const anInterface of objectType.getInterfaces()) {
+        Object.assign(fields, fieldsByTypeName[anInterface.name]);
       }
     }
   }
-  return Object.assign({}, parsedResolveInfoFragment, {
-    fields
-  });
+  return {
+    ...parsedResolveInfoFragment,
+    ...fields
+  };
 }
 
 export const parse = parseResolveInfo;

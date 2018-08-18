@@ -7,6 +7,7 @@
   "scripts": {
     "test": "jest",
     "prepack": "mkdir -p node8plus && tsc",
+    "tslint": "tslint --config ../../tslint.json --project tsconfig.json",
     "watch": "mkdir -p node8plus && tsc --watch"
   },
   "repository": {
