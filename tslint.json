@@ -5,6 +5,8 @@
   ],
   "rules": {
     "object-literal-sort-keys": false,
+    "only-arrow-functions": false,
+    "ordered-imports": false,
     "array-type": [
       true,
       "generic"
@@ -13,12 +15,12 @@
       true,
       "never-prefix"
     ],
-    "ordered-imports": false,
     "variable-name": [
       true,
       "ban-keywords",
       "check-format",
-      "allow-leading-underscore"
+      "allow-leading-underscore",
+      "allow-pascal-case"
     ],
     "no-implicit-dependencies": [
       true,

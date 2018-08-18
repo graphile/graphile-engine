@@ -22,7 +22,8 @@ import SchemaBuilder, {
   Hook,
   WatchUnwatch,
   SchemaListener,
-  DataForType
+  DataForType,
+  Inflection
 } from "./SchemaBuilder";
 
 export {
@@ -35,7 +36,8 @@ export {
   WatchUnwatch,
   SchemaListener,
   SchemaBuilder,
-  DataForType
+  DataForType,
+  Inflection
 };
 
 export const getBuilder: (

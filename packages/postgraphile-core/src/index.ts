@@ -8,7 +8,8 @@ import {
   SchemaListener,
   Build,
   Context,
-  SchemaBuilder
+  SchemaBuilder,
+  Inflection
 } from "graphile-build";
 import { GraphQLSchema } from "graphql";
 import {
@@ -94,16 +95,17 @@ export const postGraphileInflection = inflections.newInflector(
   postGraphileBaseOverrides
 );
 
-export const postGraphileClassicIdsInflection = inflections.newInflector(
-  Object.assign({}, postGraphileBaseOverrides, postGraphileClassicIdsOverrides)
-);
+export const postGraphileClassicIdsInflection = inflections.newInflector({
+  ...postGraphileBaseOverrides,
+  ...postGraphileClassicIdsOverrides
+});
 /*
  * ABOVE HERE IS DEPRECATED.
  */
 
 export const PostGraphileInflectionPlugin = function(builder: SchemaBuilder) {
-  builder.hook("inflection", (inflection: object) => {
-    const previous = inflection["enumName"];
+  builder.hook("inflection", (inflection: Inflection) => {
+    const previous = inflection.enumName;
     return {
       ...inflection,
       enumName(value: string) {
@@ -116,8 +118,8 @@ export const PostGraphileInflectionPlugin = function(builder: SchemaBuilder) {
 export const PostGraphileClassicIdsInflectionPlugin = function(
   builder: SchemaBuilder
 ) {
-  builder.hook("inflection", (inflection: object) => {
-    const previous = inflection["_columnName"];
+  builder.hook("inflection", (inflection: Inflection) => {
+    const previous = inflection._columnName;
     return {
       ...inflection,
       _columnName(attr: PgAttribute, options: { skipRowId?: boolean }) {
@@ -133,7 +135,9 @@ export const PostGraphileClassicIdsInflectionPlugin = function(
 const awaitKeys = async (obj: { [key: string]: Promise<any> }) => {
   const result = {};
   for (const k in obj) {
-    result[k] = await obj[k];
+    if (Object.prototype.hasOwnProperty.call(obj, k)) {
+      result[k] = await obj[k];
+    }
   }
   return result;
 };
@@ -204,7 +208,7 @@ const getPostGraphileBuilder = async (
     throw new Error("Use `readCache` or `writeCache` - not both.");
   }
 
-  let persistentMemoizeWithKey = undefined; // NOT null, otherwise it won't default correctly.
+  let persistentMemoizeWithKey; // NOT null, otherwise it won't default correctly.
   let memoizeCache = {};
 
   if (readCache) {
@@ -283,43 +287,41 @@ const getPostGraphileBuilder = async (
           ...appendPlugins
         ]
     ).filter(p => skipPlugins.indexOf(p) === -1),
-    Object.assign(
-      {
-        pgConfig: pgConfig,
-        pgSchemas: Array.isArray(schemas) ? schemas : [schemas],
-        pgExtendedTypes: !!dynamicJson,
-        pgColumnFilter: pgColumnFilter || (() => true),
-        pgInflection:
-          inflector ||
-          (classicIds
-            ? postGraphileClassicIdsInflection
-            : postGraphileInflection),
-        nodeIdFieldName: nodeIdFieldName || (classicIds ? "id" : "nodeId"),
-        pgJwtTypeIdentifier: jwtPgTypeIdentifier,
-        pgJwtSecret: jwtSecret,
-        pgDisableDefaultMutations: disableDefaultMutations,
-        pgViewUniqueKey: viewUniqueKey,
-        pgEnableTags: enableTags,
-        pgLegacyRelations: legacyRelations,
-        pgLegacyJsonUuid: legacyJsonUuid,
-        persistentMemoizeWithKey,
-        pgForbidSetofFunctionsToReturnNull: !setofFunctionsContainNulls,
-        pgSimpleCollections: simpleCollections,
-        pgIncludeExtensionResources: includeExtensionResources,
-        pgIgnoreRBAC: ignoreRBAC
-      },
-      graphileBuildOptions,
-      graphqlBuildOptions // DEPRECATED!
-    )
+    {
+      pgConfig,
+      pgSchemas: Array.isArray(schemas) ? schemas : [schemas],
+      pgExtendedTypes: !!dynamicJson,
+      pgColumnFilter: pgColumnFilter || (() => true),
+      pgInflection:
+        inflector ||
+        (classicIds
+          ? postGraphileClassicIdsInflection
+          : postGraphileInflection),
+      nodeIdFieldName: nodeIdFieldName || (classicIds ? "id" : "nodeId"),
+      pgJwtTypeIdentifier: jwtPgTypeIdentifier,
+      pgJwtSecret: jwtSecret,
+      pgDisableDefaultMutations: disableDefaultMutations,
+      pgViewUniqueKey: viewUniqueKey,
+      pgEnableTags: enableTags,
+      pgLegacyRelations: legacyRelations,
+      pgLegacyJsonUuid: legacyJsonUuid,
+      persistentMemoizeWithKey,
+      pgForbidSetofFunctionsToReturnNull: !setofFunctionsContainNulls,
+      pgSimpleCollections: simpleCollections,
+      pgIncludeExtensionResources: includeExtensionResources,
+      pgIgnoreRBAC: ignoreRBAC,
+      ...graphileBuildOptions,
+      ...graphqlBuildOptions // DEPRECATED!
+    }
   );
 };
 
 function abort(e: Error) {
-  /* eslint-disable no-console */
+  /* tslint:disable no-console */
   console.error("Error occured whilst writing cache");
   console.error(e);
+  /* tslint:enable no-console */
   process.exit(1);
-  /* eslint-enable */
 }
 
 export const createPostGraphileSchema = async (
@@ -328,17 +330,16 @@ export const createPostGraphileSchema = async (
   options: PostGraphileOptions = {}
 ) => {
   let writeCache: undefined | (() => Promise<void>);
-  const builder = await getPostGraphileBuilder(
-    pgConfig,
-    schemas,
-    Object.assign({}, options, {
-      setWriteCacheCallback(fn: () => Promise<void>) {
-        writeCache = fn;
-      }
-    })
-  );
+  const builder = await getPostGraphileBuilder(pgConfig, schemas, {
+    ...options,
+    setWriteCacheCallback(fn: () => Promise<void>) {
+      writeCache = fn;
+    }
+  });
   const schema = builder.buildSchema();
-  if (writeCache) writeCache().catch(abort);
+  if (writeCache) {
+    writeCache().catch(abort);
+  }
   return schema;
 };
 
@@ -360,24 +361,25 @@ export const watchPostGraphileSchema = async (
     throw new Error("Using readCache in watch mode does not make sense.");
   }
   let writeCache: undefined | (() => Promise<void>);
-  const builder = await getPostGraphileBuilder(
-    pgConfig,
-    schemas,
-    Object.assign({}, options, {
-      setWriteCacheCallback(fn: () => Promise<void>) {
-        writeCache = fn;
-      }
-    })
-  );
+  const builder = await getPostGraphileBuilder(pgConfig, schemas, {
+    ...options,
+    setWriteCacheCallback(fn: () => Promise<void>) {
+      writeCache = fn;
+    }
+  });
   let released = false;
   function handleNewSchema(schema: GraphQLSchema) {
-    if (writeCache) writeCache().catch(abort);
+    if (writeCache) {
+      writeCache().catch(abort);
+    }
     onNewSchema(schema);
   }
   await builder.watchSchema(handleNewSchema);
 
   return async function release() {
-    if (released) return;
+    if (released) {
+      return;
+    }
     released = true;
     await builder.unwatchSchema();
   };
