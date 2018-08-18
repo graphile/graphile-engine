@@ -350,7 +350,7 @@ export function simplifyParsedResolveInfoFragmentWithType(
   }
   return {
     ...parsedResolveInfoFragment,
-    ...fields
+    fields
   };
 }
 
