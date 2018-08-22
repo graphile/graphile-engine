@@ -3,6 +3,7 @@
   "version": "4.0.0-rc.5",
   "description": "Utilities to help with building graphile-build plugins",
   "main": "node8plus/index.js",
+  "types": "node8plus/index.d.ts",
   "scripts": {
     "test": "scripts/test",
     "prepack": "mkdir -p node8plus && tsc",
