@@ -265,7 +265,7 @@ export default function makeExtendSchemaPlugin(
       return _;
     });
 
-    builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
+    builder.hook("GraphQLObjectType:fields", (fields, build, context: any) => {
       const {
         extend,
         [`ExtendSchemaPlugin_${uniqueId}_typeExtensions`]: typeExtensions,
