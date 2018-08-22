@@ -17,28 +17,11 @@ import SchemaBuilder, {
   Plugin,
   Options,
   Build,
-  Scope,
-  Context,
-  Hook,
-  WatchUnwatch,
-  SchemaListener,
-  DataForType,
-  Inflection
+  DataForType
 } from "./SchemaBuilder";
 
-export {
-  Plugin,
-  Options,
-  Build,
-  Scope,
-  Context,
-  Hook,
-  WatchUnwatch,
-  SchemaListener,
-  SchemaBuilder,
-  DataForType,
-  Inflection
-};
+export * from "./SchemaBuilder";
+export { SchemaBuilder };
 
 export const getBuilder: (
   plugins: Array<Plugin>,

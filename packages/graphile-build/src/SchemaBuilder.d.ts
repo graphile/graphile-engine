@@ -35,7 +35,7 @@ export type DataForType = {
   [str: string]: Array<mixed>;
 };
 
-export type InitObject = {};
+export type InitObject = never;
 
 export interface Build {
   [str: string]: any;

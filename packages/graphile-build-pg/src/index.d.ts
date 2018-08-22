@@ -6,7 +6,7 @@ import {
   PgType,
   PgAttribute,
   PgConstraint,
-  PgExtension
+  PgExtension,
 } from "./plugins/PgIntrospectionPlugin";
 
 export {
@@ -16,7 +16,7 @@ export {
   PgType,
   PgAttribute,
   PgConstraint,
-  PgExtension
+  PgExtension,
 };
 
 export function parseIdentifier(
@@ -77,3 +77,7 @@ export { upperFirst, camelCase, constantCase } from "graphile-build";
 // DEPRECATED, DO NOT USE!
 export const inflections: any;
 export type Inflector = any;
+
+import QueryBuilder from "./QueryBuilder";
+export { QueryBuilder };
+export * from "./QueryBuilder";
