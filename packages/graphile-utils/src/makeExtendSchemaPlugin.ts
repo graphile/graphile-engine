@@ -213,20 +213,16 @@ export default function makeExtendSchemaPlugin(
             {
               name,
               interfaces,
-              fields: ({
-                Self,
-                fieldWithHooks,
-                recurseDataGeneratorsForField,
-              }: {
+              fields: (fieldsContext: {
                 Self: typeof type;
                 fieldWithHooks: any;
                 recurseDataGeneratorsForField: any;
               }) =>
                 getFields(
-                  Self,
+                  fieldsContext.Self,
                   definition.fields,
                   resolvers,
-                  { fieldWithHooks, recurseDataGeneratorsForField },
+                  fieldsContext,
                   build
                 ),
               ...(description
@@ -275,7 +271,7 @@ export default function makeExtendSchemaPlugin(
         [`ExtendSchemaPlugin_${uniqueId}_typeExtensions`]: typeExtensions,
         [`ExtendSchemaPlugin_${uniqueId}_resolvers`]: resolvers,
       } = build;
-      const { Self, fieldWithHooks, recurseDataGeneratorsForField } = context;
+      const { Self } = context;
       if (typeExtensions.GraphQLObjectType[Self.name]) {
         const newFields = typeExtensions.GraphQLObjectType[Self.name].reduce(
           (
@@ -286,7 +282,7 @@ export default function makeExtendSchemaPlugin(
               Self,
               extension.fields,
               resolvers,
-              { fieldWithHooks, recurseDataGeneratorsForField },
+              context,
               build
             );
             return extend(memo, moreFields);
@@ -379,7 +375,15 @@ function getInterfaces(
   return [];
 }
 
-function getValue(value: ValueNode | GraphileEmbed) {
+function getValue(
+  value: ValueNode | GraphileEmbed
+):
+  | boolean
+  | string
+  | number
+  | null
+  | Array<boolean | string | number | null>
+  | any {
   if (value.kind === "BooleanValue") {
     return !!value.value;
   } else if (value.kind === "StringValue") {
@@ -388,10 +392,10 @@ function getValue(value: ValueNode | GraphileEmbed) {
     return parseInt(value.value, 10);
   } else if (value.kind === "FloatValue") {
     return parseFloat(value.value);
-  } else if (value.kind === "ListValue") {
-    return value.values.map(getValue);
   } else if (value.kind === "NullValue") {
     return null;
+  } else if (value.kind === "ListValue") {
+    return value.values.map(getValue);
   } else if (value.kind === "GraphileEmbed") {
     // RAW!
     return value.value;
@@ -481,12 +485,12 @@ function getArguments(
   return {};
 }
 
-type SelectGraphQLResultFromTable = (
+export type SelectGraphQLResultFromTable = (
   tableFragment: SQL,
   builderCallback: (alias: SQL, sqlBuilder: QueryBuilder) => void
 ) => Promise<any>;
 
-type GraphileHelpers<TSource> = Scope<TSource> & {
+export type GraphileHelpers<TSource> = Scope<TSource> & {
   selectGraphQLResultFromTable: SelectGraphQLResultFromTable;
 };
 
@@ -593,6 +597,31 @@ function getFields<TSource>(
         memo[fieldName] = fieldWithHooks(
           fieldName,
           (fieldScope: Scope<TSource>) => {
+            // @requires directive: pulls down necessary columns from table.
+            //
+            //   e.g. `@requires(columns: ["id", "name"])`
+            //
+            if (directives.requires) {
+              if (Array.isArray(directives.requires.columns)) {
+                fieldScope.addDataGenerator(() => ({
+                  pgQuery: (queryBuilder: QueryBuilder) => {
+                    directives.requires.columns.forEach((col: string) => {
+                      queryBuilder.select(
+                        sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
+                          col
+                        )}`,
+                        col
+                      );
+                    });
+                  },
+                }));
+              } else {
+                throw new Error(
+                  `@requires(columns: ["...", ...]) directive called with invalid arguments`
+                );
+              }
+            }
+
             const resolversSpec = rawResolversSpec
               ? Object.keys(rawResolversSpec).reduce(
                   (newResolversSpec, key) => {
