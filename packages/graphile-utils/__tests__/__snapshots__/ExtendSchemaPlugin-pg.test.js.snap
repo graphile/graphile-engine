@@ -1,7 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`allows adding a custom field returning a list to PG schema 1`] = `
-"\\"\\"\\"A location in a connection that can be used for resuming pagination.\\"\\"\\"
+"type Complex {
+  numberInt: Int
+  stringText: String
+}
+
+\\"\\"\\"An input for mutations affecting \`Complex\`\\"\\"\\"
+input ComplexInput {
+  numberInt: Int
+  stringText: String
+}
+
+\\"\\"\\"A location in a connection that can be used for resuming pagination.\\"\\"\\"
 scalar Cursor
 
 \\"\\"\\"
@@ -99,6 +110,7 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
+  renamedComplexColumn: [Complex]
   createdAt: Datetime!
 }
 
@@ -117,6 +129,9 @@ input UserCondition {
 
   \\"\\"\\"Checks for equality with the object’s \`bio\` field.\\"\\"\\"
   bio: String
+
+  \\"\\"\\"Checks for equality with the object’s \`renamedComplexColumn\` field.\\"\\"\\"
+  renamedComplexColumn: [ComplexInput]
 
   \\"\\"\\"Checks for equality with the object’s \`createdAt\` field.\\"\\"\\"
   createdAt: Datetime
@@ -159,6 +174,8 @@ enum UsersOrderBy {
   EMAIL_DESC
   BIO_ASC
   BIO_DESC
+  RENAMED_COMPLEX_COLUMN_ASC
+  RENAMED_COMPLEX_COLUMN_DESC
   CREATED_AT_ASC
   CREATED_AT_DESC
   PRIMARY_KEY_ASC
@@ -168,7 +185,18 @@ enum UsersOrderBy {
 `;
 
 exports[`allows adding a custom single field to PG schema 1`] = `
-"\\"\\"\\"A location in a connection that can be used for resuming pagination.\\"\\"\\"
+"type Complex {
+  numberInt: Int
+  stringText: String
+}
+
+\\"\\"\\"An input for mutations affecting \`Complex\`\\"\\"\\"
+input ComplexInput {
+  numberInt: Int
+  stringText: String
+}
+
+\\"\\"\\"A location in a connection that can be used for resuming pagination.\\"\\"\\"
 scalar Cursor
 
 \\"\\"\\"
@@ -266,6 +294,7 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
+  renamedComplexColumn: [Complex]
   createdAt: Datetime!
 }
 
@@ -284,6 +313,9 @@ input UserCondition {
 
   \\"\\"\\"Checks for equality with the object’s \`bio\` field.\\"\\"\\"
   bio: String
+
+  \\"\\"\\"Checks for equality with the object’s \`renamedComplexColumn\` field.\\"\\"\\"
+  renamedComplexColumn: [ComplexInput]
 
   \\"\\"\\"Checks for equality with the object’s \`createdAt\` field.\\"\\"\\"
   createdAt: Datetime
@@ -326,6 +358,8 @@ enum UsersOrderBy {
   EMAIL_DESC
   BIO_ASC
   BIO_DESC
+  RENAMED_COMPLEX_COLUMN_ASC
+  RENAMED_COMPLEX_COLUMN_DESC
   CREATED_AT_ASC
   CREATED_AT_DESC
   PRIMARY_KEY_ASC
@@ -335,7 +369,18 @@ enum UsersOrderBy {
 `;
 
 exports[`allows adding a field to an existing table, and requesting necessary data along with it 1`] = `
-"\\"\\"\\"A location in a connection that can be used for resuming pagination.\\"\\"\\"
+"type Complex {
+  numberInt: Int
+  stringText: String
+}
+
+\\"\\"\\"An input for mutations affecting \`Complex\`\\"\\"\\"
+input ComplexInput {
+  numberInt: Int
+  stringText: String
+}
+
+\\"\\"\\"A location in a connection that can be used for resuming pagination.\\"\\"\\"
 scalar Cursor
 
 \\"\\"\\"
@@ -432,6 +477,7 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
+  renamedComplexColumn: [Complex]
   createdAt: Datetime!
   customField: String
 }
@@ -451,6 +497,9 @@ input UserCondition {
 
   \\"\\"\\"Checks for equality with the object’s \`bio\` field.\\"\\"\\"
   bio: String
+
+  \\"\\"\\"Checks for equality with the object’s \`renamedComplexColumn\` field.\\"\\"\\"
+  renamedComplexColumn: [ComplexInput]
 
   \\"\\"\\"Checks for equality with the object’s \`createdAt\` field.\\"\\"\\"
   createdAt: Datetime
@@ -493,6 +542,8 @@ enum UsersOrderBy {
   EMAIL_DESC
   BIO_ASC
   BIO_DESC
+  RENAMED_COMPLEX_COLUMN_ASC
+  RENAMED_COMPLEX_COLUMN_DESC
   CREATED_AT_ASC
   CREATED_AT_DESC
   PRIMARY_KEY_ASC
@@ -502,7 +553,18 @@ enum UsersOrderBy {
 `;
 
 exports[`allows adding a simple mutation field to PG schema 1`] = `
-"\\"\\"\\"A location in a connection that can be used for resuming pagination.\\"\\"\\"
+"type Complex {
+  numberInt: Int
+  stringText: String
+}
+
+\\"\\"\\"An input for mutations affecting \`Complex\`\\"\\"\\"
+input ComplexInput {
+  numberInt: Int
+  stringText: String
+}
+
+\\"\\"\\"A location in a connection that can be used for resuming pagination.\\"\\"\\"
 scalar Cursor
 
 \\"\\"\\"
@@ -621,6 +683,7 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
+  renamedComplexColumn: [Complex]
   createdAt: Datetime!
 }
 
@@ -639,6 +702,9 @@ input UserCondition {
 
   \\"\\"\\"Checks for equality with the object’s \`bio\` field.\\"\\"\\"
   bio: String
+
+  \\"\\"\\"Checks for equality with the object’s \`renamedComplexColumn\` field.\\"\\"\\"
+  renamedComplexColumn: [ComplexInput]
 
   \\"\\"\\"Checks for equality with the object’s \`createdAt\` field.\\"\\"\\"
   createdAt: Datetime
@@ -681,6 +747,8 @@ enum UsersOrderBy {
   EMAIL_DESC
   BIO_ASC
   BIO_DESC
+  RENAMED_COMPLEX_COLUMN_ASC
+  RENAMED_COMPLEX_COLUMN_DESC
   CREATED_AT_ASC
   CREATED_AT_DESC
   PRIMARY_KEY_ASC

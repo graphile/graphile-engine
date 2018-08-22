@@ -309,12 +309,16 @@ it("allows adding a field to an existing table, and requesting necessary data al
       makeExtendSchemaPlugin(() => ({
         typeDefs: gql`
           extend type User {
-            customField: String @requires(columns: ["id", "name"])
+            customField: String
+              @requires(columns: ["id", "name", "slightly_more_complex_column"])
           }
         `,
         resolvers: {
           User: {
-            customField: user => `User ${user.id} fetched (name: ${user.name})`,
+            customField: user =>
+              `User ${user.id} fetched (name: ${user.name}) ${JSON.stringify(
+                user.renamedComplexColumn
+              )}`,
           },
         },
       })),
@@ -340,7 +344,9 @@ it("allows adding a field to an existing table, and requesting necessary data al
     expect(errors).toBeFalsy();
     expect(data).toBeTruthy();
     expect(data.userById).toBeTruthy();
-    expect(data.userById.customField).toEqual(`User 1 fetched (name: Alice)`);
+    expect(data.userById.customField).toEqual(
+      `User 1 fetched (name: Alice) [{"number_int":1,"string_text":"hi"},{"number_int":2,"string_text":"bye"}]`
+    );
   } finally {
     pgClient.release();
   }
