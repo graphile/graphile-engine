@@ -306,22 +306,18 @@ it("allows adding a field to an existing table, and requesting necessary data al
   const schema = await createPostGraphileSchema(pgPool, ["a"], {
     disableDefaultMutations: true,
     appendPlugins: [
-      makeExtendSchemaPlugin(build => {
-        const { pgSql: sql } = build;
-        return {
-          typeDefs: gql`
-            extend type User {
-              customField: String @requires(columns: ["id", "name"])
-            }
-          `,
-          resolvers: {
-            User: {
-              customField: user =>
-                `User ${user.id} fetched (name: ${user.name})`,
-            },
+      makeExtendSchemaPlugin(() => ({
+        typeDefs: gql`
+          extend type User {
+            customField: String @requires(columns: ["id", "name"])
+          }
+        `,
+        resolvers: {
+          User: {
+            customField: user => `User ${user.id} fetched (name: ${user.name})`,
           },
-        };
-      }),
+        },
+      })),
     ],
   });
   const printedSchema = printSchema(schema);
