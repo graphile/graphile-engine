@@ -388,6 +388,8 @@ function getValue(value: ValueNode | GraphileEmbed) {
     return parseInt(value.value, 10);
   } else if (value.kind === "FloatValue") {
     return parseFloat(value.value);
+  } else if (value.kind === "ListValue") {
+    return value.values.map(getValue);
   } else if (value.kind === "NullValue") {
     return null;
   } else if (value.kind === "GraphileEmbed") {
