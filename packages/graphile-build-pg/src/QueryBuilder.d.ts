@@ -1,5 +1,6 @@
 import * as sql from "pg-sql2";
-import { SQL } from "pg-sql2";
+
+type SQL = sql.SQL;
 export { sql, SQL };
 
 export interface GenContext {
@@ -7,54 +8,54 @@ export interface GenContext {
 }
 export type Gen<T> = (context: GenContext) => T;
 
-export type RawAlias = Symbol | string;
+export type RawAlias = symbol | string;
 export type SQLAlias = SQL;
 export type SQLGen = Gen<SQL> | SQL;
 export type NumberGen = Gen<number> | number;
-export type CursorValue = {};
+export type CursorValue = object;
 export type CursorComparator = (val: CursorValue, isAfter: boolean) => void;
 
 export default class QueryBuilder {
-  beforeLock(field: string, fn: () => void): void;
-  setCursorComparator(fn: CursorComparator): void;
-  addCursorCondition(cursorValue: CursorValue, isAfter: boolean): void;
-  select(exprGen: SQLGen, alias: RawAlias): void;
-  selectCursor(exprGen: SQLGen): void;
-  from(expr: SQLGen, alias?: SQLAlias): void;
-  where(exprGen: SQLGen): void;
-  whereBound(exprGen: SQLGen, isLower: boolean): void;
-  setOrderIsUnique(): void;
-  orderBy(exprGen: SQLGen, ascending: boolean): void;
-  limit(limitGen: NumberGen): void;
-  offset(offsetGen: NumberGen): void;
-  first(first: number): void;
-  last(last: number): void;
+  public beforeLock(field: string, fn: () => void): void;
+  public setCursorComparator(fn: CursorComparator): void;
+  public addCursorCondition(cursorValue: CursorValue, isAfter: boolean): void;
+  public select(exprGen: SQLGen, alias: RawAlias): void;
+  public selectCursor(exprGen: SQLGen): void;
+  public from(expr: SQLGen, alias?: SQLAlias): void;
+  public where(exprGen: SQLGen): void;
+  public whereBound(exprGen: SQLGen, isLower: boolean): void;
+  public setOrderIsUnique(): void;
+  public orderBy(exprGen: SQLGen, ascending: boolean): void;
+  public limit(limitGen: NumberGen): void;
+  public offset(offsetGen: NumberGen): void;
+  public first(first: number): void;
+  public last(last: number): void;
 
   // ----------------------------------------
 
-  isOrderUnique(lock?: boolean): boolean;
-  getTableExpression(): SQL;
-  getTableAlias(): SQL;
-  getSelectCursor(): SQL;
-  getOffset(): number;
-  getFinalLimitAndOffset(): {
+  public isOrderUnique(lock?: boolean): boolean;
+  public getTableExpression(): SQL;
+  public getTableAlias(): SQL;
+  public getSelectCursor(): SQL;
+  public getOffset(): number;
+  public getFinalLimitAndOffset(): {
     limit: number;
     offset: number;
     flip: boolean;
   };
-  getFinalOffset(): number;
-  getFinalLimit(): number;
-  getOrderByExpressionsAndDirections(): Array<[SQL, boolean]>;
-  getSelectFieldsCount(): number;
-  buildSelectFields(): SQL;
-  buildSelectJson({ addNullCase }: { addNullCase?: boolean }): SQL;
-  buildWhereBoundClause(isLower: boolean): SQL;
-  buildWhereClause(
+  public getFinalOffset(): number;
+  public getFinalLimit(): number;
+  public getOrderByExpressionsAndDirections(): Array<[SQL, boolean]>;
+  public getSelectFieldsCount(): number;
+  public buildSelectFields(): SQL;
+  public buildSelectJson({ addNullCase }: { addNullCase?: boolean }): SQL;
+  public buildWhereBoundClause(isLower: boolean): SQL;
+  public buildWhereClause(
     includeLowerBound: boolean,
     includeUpperBound: boolean,
     { addNullCase }: { addNullCase?: boolean }
   ): SQL;
-  build(options?: {
+  public build(options?: {
     asJson?: boolean;
     asJsonAggregate?: boolean;
     onlyJsonField?: boolean;
@@ -63,7 +64,7 @@ export default class QueryBuilder {
 
   // ----------------------------------------
 
-  lock(type: string): void;
-  checkLock(type: string): void;
-  lockEverything(): void;
+  public lock(type: string): void;
+  public checkLock(type: string): void;
+  public lockEverything(): void;
 }

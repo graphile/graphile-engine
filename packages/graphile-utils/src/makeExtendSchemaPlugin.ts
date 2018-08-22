@@ -1,38 +1,39 @@
+import { SchemaBuilder, Build, Scope, Plugin, Options } from "graphile-build";
+import { QueryBuilder, SQL } from "graphile-build-pg";
 import {
-  Build,
-  Context,
-  Scope,
-  InitObject,
-  Plugin,
-  Options,
-} from "graphile-build";
-import { QueryBuilder } from "graphile-build-pg";
-import {
-  GraphQLFieldResolver,
+  // ONLY import types here, not values
+  // Misc:
   GraphQLIsTypeOfFn,
+
+  // Resolvers:
+  GraphQLFieldResolver,
   GraphQLTypeResolver,
+  GraphQLResolveInfo,
+
+  // Union types:
   GraphQLType,
+  GraphQLNamedType,
+
+  // Config:
   GraphQLEnumValueConfigMap,
   GraphQLFieldConfigMap,
   GraphQLInputFieldConfigMap,
-  GraphQLObjectType,
-  GraphQLInputObjectType,
+
+  // Nodes:
+  DirectiveNode,
   DocumentNode,
   EnumValueDefinitionNode,
-  ObjectTypeExtensionNode,
-  NameNode,
-  StringValueNode,
-  TypeNode,
-  NamedTypeNode,
-  ValueNode,
-  DirectiveNode,
   FieldDefinitionNode,
   InputValueDefinitionNode,
-  GraphQLResolveInfo,
-  isNamedType,
+  NameNode,
+  NamedTypeNode,
+  ObjectTypeExtensionNode,
+  StringValueNode,
+  TypeNode,
+  ValueNode,
 } from "graphql";
-import { SQLQuery } from "pg-sql2";
 import { GraphileEmbed } from "./gql";
+// tslint:disable-next-line
 import { InputObjectTypeExtensionNode } from "graphql/language/ast";
 
 export type AugmentedGraphQLFieldResolver<
@@ -82,9 +83,9 @@ export default function makeExtendSchemaPlugin(
   generator: ((build: Build, schemaOptions: Options) => ExtensionDefinition),
   uniqueId = String(Math.random()).substr(2)
 ): Plugin {
-  return (builder: Build, schemaOptions: Options): void => {
+  return (builder: SchemaBuilder, schemaOptions: Options): void => {
     // Add stuff to the schema
-    builder.hook("build", (build: Build) => {
+    builder.hook("build", build => {
       const {
         graphql: { GraphQLEnumType, GraphQLInputObjectType, GraphQLObjectType },
       } = build;
@@ -142,208 +143,186 @@ export default function makeExtendSchemaPlugin(
       });
     });
 
-    builder.hook(
-      "init",
-      (_: InitObject, build: Build, _context: Context<InitObject>) => {
-        const {
-          newWithHooks,
-          [`ExtendSchemaPlugin_${uniqueId}_newTypes`]: newTypes,
-          [`ExtendSchemaPlugin_${uniqueId}_resolvers`]: resolvers,
-          graphql: {
-            GraphQLEnumType,
-            GraphQLObjectType,
-            GraphQLInputObjectType,
-          },
-        } = build;
-        newTypes.forEach(({ type, definition }: NewTypeDef) => {
-          if (type === GraphQLEnumType) {
-            // https://graphql.org/graphql-js/type/#graphqlenumtype
-            const name = getName(definition.name);
-            const description = getDescription(definition.description);
-            const directives = getDirectives(definition.directives);
-            const relevantResolver = resolvers[name] || {};
-            const values: GraphQLEnumValueConfigMap = definition.values.reduce(
-              (
-                memo: GraphQLEnumValueConfigMap,
-                value: EnumValueDefinitionNode
-              ) => {
-                const valueName = getName(value.name);
-                const valueDescription = getDescription(value.description);
-                const valueDirectives = getDirectives(value.directives);
-
-                // Value cannot be expressed via SDL, so we grab the value from the resolvers instead.
-                // resolvers = {
-                //   MyEnum: {
-                //     MY_ENUM_VALUE1: 'value1',
-                //     MY_ENUM_VALUE2: 'value2',
-                //   }
-                // }
-                // Ref: https://github.com/graphql/graphql-js/issues/525#issuecomment-255834625
-                const valueValue =
-                  relevantResolver[valueName] !== undefined
-                    ? relevantResolver[valueName]
-                    : valueName;
-
-                const valueDeprecationReason =
-                  valueDirectives.deprecated &&
-                  valueDirectives.deprecated.reason;
-                return {
-                  ...memo,
-                  [valueName]: {
-                    value: valueValue,
-                    deprecationReason: valueDeprecationReason,
-                    description: valueDescription,
-                    directives: valueDirectives,
-                  },
-                };
-              },
-              {} as GraphQLEnumValueConfigMap
-            );
-            const scope = {
-              directives,
-              ...(directives.scope || {}),
-            };
-            newWithHooks(type, { name, values, description }, scope);
-          } else if (type === GraphQLObjectType) {
-            // https://graphql.org/graphql-js/type/#graphqlobjecttype
-            const name = getName(definition.name);
-            const description = getDescription(definition.description);
-            const interfaces = getInterfaces(definition.interfaces, build);
-            const directives = getDirectives(definition.directives);
-            const scope = {
-              directives,
-              ...(directives.scope || {}),
-            };
-            newWithHooks(
-              type,
-              {
-                name,
-                interfaces,
-                fields: ({
-                  Self,
-                  fieldWithHooks,
-                  recurseDataGeneratorsForField,
-                }: {
-                  Self: GraphQLObjectType;
-                  fieldWithHooks: any;
-                  recurseDataGeneratorsForField: any;
-                }) =>
-                  getFields(
-                    Self,
-                    definition.fields,
-                    resolvers,
-                    { fieldWithHooks, recurseDataGeneratorsForField },
-                    build
-                  ),
-                ...(description
-                  ? {
-                      description,
-                    }
-                  : null),
-              },
-              scope
-            );
-          } else if (type === GraphQLInputObjectType) {
-            // https://graphql.org/graphql-js/type/#graphqlinputobjecttype
-            const name = getName(definition.name);
-            const description = getDescription(definition.description);
-            const directives = getDirectives(definition.directives);
-            const scope = {
-              directives,
-              ...(directives.scope || {}),
-            };
-            newWithHooks(
-              type,
-              {
-                name,
-                fields: ({ Self }: { Self: GraphQLInputObjectType }) =>
-                  getInputFields(Self, definition.fields, build),
-                ...(description
-                  ? {
-                      description,
-                    }
-                  : null),
-              },
-              scope
-            );
-          } else {
-            throw new Error(
-              `We have no code to build an object of type '${type}'; it should not have reached this area of the code.`
-            );
-          }
-        });
-        return _;
-      }
-    );
-
-    builder.hook(
-      "GraphQLObjectType:fields",
-      (
-        fields: GraphQLFieldConfigMap<any, any>,
-        build: Build,
-        context: Context<GraphQLObjectType>
-      ) => {
-        const {
-          extend,
-          [`ExtendSchemaPlugin_${uniqueId}_typeExtensions`]: typeExtensions,
-          [`ExtendSchemaPlugin_${uniqueId}_resolvers`]: resolvers,
-        } = build;
-        const { Self, fieldWithHooks, recurseDataGeneratorsForField } = context;
-        if (typeExtensions.GraphQLObjectType[Self.name]) {
-          const newFields = typeExtensions.GraphQLObjectType[Self.name].reduce(
+    builder.hook("init", (_, build, _context) => {
+      const {
+        newWithHooks,
+        [`ExtendSchemaPlugin_${uniqueId}_newTypes`]: newTypes,
+        [`ExtendSchemaPlugin_${uniqueId}_resolvers`]: resolvers,
+        graphql: { GraphQLEnumType, GraphQLObjectType, GraphQLInputObjectType },
+      } = build;
+      newTypes.forEach(({ type, definition }: NewTypeDef) => {
+        if (type === GraphQLEnumType) {
+          // https://graphql.org/graphql-js/type/#graphqlenumtype
+          const name = getName(definition.name);
+          const description = getDescription(definition.description);
+          const directives = getDirectives(definition.directives);
+          const relevantResolver = resolvers[name] || {};
+          const values: GraphQLEnumValueConfigMap = definition.values.reduce(
             (
-              memo: GraphQLFieldConfigMap<any, any>,
-              extension: ObjectTypeExtensionNode
+              memo: GraphQLEnumValueConfigMap,
+              value: EnumValueDefinitionNode
             ) => {
-              const moreFields = getFields(
-                Self,
-                extension.fields,
-                resolvers,
-                { fieldWithHooks, recurseDataGeneratorsForField },
-                build
-              );
-              return extend(memo, moreFields);
-            },
-            {} as GraphQLFieldConfigMap<any, any>
-          );
-          return extend(fields, newFields);
-        } else {
-          return fields;
-        }
-      }
-    );
+              const valueName = getName(value.name);
+              const valueDescription = getDescription(value.description);
+              const valueDirectives = getDirectives(value.directives);
 
-    builder.hook(
-      "GraphQLInputObjectType:fields",
-      (
-        fields: GraphQLInputFieldConfigMap,
-        build: Build,
-        context: Context<GraphQLInputFieldConfigMap>
-      ) => {
-        const {
-          extend,
-          [`ExtendSchemaPlugin_${uniqueId}_typeExtensions`]: typeExtensions,
-        } = build;
-        const { Self } = context;
-        if (typeExtensions.GraphQLInputObjectType[Self.name]) {
-          const newFields = typeExtensions.GraphQLInputObjectType[
-            Self.name
-          ].reduce(
-            (
-              memo: GraphQLInputFieldConfigMap,
-              extension: InputObjectTypeExtensionNode
-            ) => {
-              const moreFields = getInputFields(Self, extension.fields, build);
-              return extend(memo, moreFields);
+              // Value cannot be expressed via SDL, so we grab the value from the resolvers instead.
+              // resolvers = {
+              //   MyEnum: {
+              //     MY_ENUM_VALUE1: 'value1',
+              //     MY_ENUM_VALUE2: 'value2',
+              //   }
+              // }
+              // Ref: https://github.com/graphql/graphql-js/issues/525#issuecomment-255834625
+              const valueValue =
+                relevantResolver[valueName] !== undefined
+                  ? relevantResolver[valueName]
+                  : valueName;
+
+              const valueDeprecationReason =
+                valueDirectives.deprecated && valueDirectives.deprecated.reason;
+              return {
+                ...memo,
+                [valueName]: {
+                  value: valueValue,
+                  deprecationReason: valueDeprecationReason,
+                  description: valueDescription,
+                  directives: valueDirectives,
+                },
+              };
             },
             {}
           );
-          return extend(fields, newFields);
+          const scope = {
+            directives,
+            ...(directives.scope || {}),
+          };
+          newWithHooks(type, { name, values, description }, scope);
+        } else if (type === GraphQLObjectType) {
+          // https://graphql.org/graphql-js/type/#graphqlobjecttype
+          const name = getName(definition.name);
+          const description = getDescription(definition.description);
+          const interfaces = getInterfaces(definition.interfaces, build);
+          const directives = getDirectives(definition.directives);
+          const scope = {
+            directives,
+            ...(directives.scope || {}),
+          };
+          newWithHooks(
+            type,
+            {
+              name,
+              interfaces,
+              fields: ({
+                Self,
+                fieldWithHooks,
+                recurseDataGeneratorsForField,
+              }: {
+                Self: typeof type;
+                fieldWithHooks: any;
+                recurseDataGeneratorsForField: any;
+              }) =>
+                getFields(
+                  Self,
+                  definition.fields,
+                  resolvers,
+                  { fieldWithHooks, recurseDataGeneratorsForField },
+                  build
+                ),
+              ...(description
+                ? {
+                    description,
+                  }
+                : null),
+            },
+            scope
+          );
+        } else if (type === GraphQLInputObjectType) {
+          // https://graphql.org/graphql-js/type/#graphqlinputobjecttype
+          const name = getName(definition.name);
+          const description = getDescription(definition.description);
+          const directives = getDirectives(definition.directives);
+          const scope = {
+            directives,
+            ...(directives.scope || {}),
+          };
+          newWithHooks(
+            type,
+            {
+              name,
+              fields: ({ Self }: { Self: typeof type }) =>
+                getInputFields(Self, definition.fields, build),
+              ...(description
+                ? {
+                    description,
+                  }
+                : null),
+            },
+            scope
+          );
         } else {
-          return fields;
+          throw new Error(
+            `We have no code to build an object of type '${type}'; it should not have reached this area of the code.`
+          );
         }
+      });
+      return _;
+    });
+
+    builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
+      const {
+        extend,
+        [`ExtendSchemaPlugin_${uniqueId}_typeExtensions`]: typeExtensions,
+        [`ExtendSchemaPlugin_${uniqueId}_resolvers`]: resolvers,
+      } = build;
+      const { Self, fieldWithHooks, recurseDataGeneratorsForField } = context;
+      if (typeExtensions.GraphQLObjectType[Self.name]) {
+        const newFields = typeExtensions.GraphQLObjectType[Self.name].reduce(
+          (
+            memo: GraphQLFieldConfigMap<any, any>,
+            extension: ObjectTypeExtensionNode
+          ) => {
+            const moreFields = getFields(
+              Self,
+              extension.fields,
+              resolvers,
+              { fieldWithHooks, recurseDataGeneratorsForField },
+              build
+            );
+            return extend(memo, moreFields);
+          },
+          {}
+        );
+        return extend(fields, newFields);
+      } else {
+        return fields;
       }
-    );
+    });
+
+    builder.hook("GraphQLInputObjectType:fields", (fields, build, context) => {
+      const {
+        extend,
+        [`ExtendSchemaPlugin_${uniqueId}_typeExtensions`]: typeExtensions,
+      } = build;
+      const { Self } = context;
+      if (typeExtensions.GraphQLInputObjectType[Self.name]) {
+        const newFields = typeExtensions.GraphQLInputObjectType[
+          Self.name
+        ].reduce(
+          (
+            memo: GraphQLInputFieldConfigMap,
+            extension: InputObjectTypeExtensionNode
+          ) => {
+            const moreFields = getInputFields(Self, extension.fields, build);
+            return extend(memo, moreFields);
+          },
+          {}
+        );
+        return extend(fields, newFields);
+      } else {
+        return fields;
+      }
+    });
   };
 }
 
@@ -421,47 +400,50 @@ function getValue(value: ValueNode | GraphileEmbed) {
   }
 }
 
-type DirectiveMap = {
+interface DirectiveMap {
   [directiveName: string]: {
     [directiveArgument: string]: any;
   };
-};
+}
 
 function getDirectives(
   directives: ReadonlyArray<DirectiveNode> | void
 ): DirectiveMap {
-  return (directives || []).reduce((memo, directive) => {
+  return (directives || []).reduce((directivesList, directive) => {
     if (directive.kind === "Directive") {
       const name = getName(directive.name);
-      const value = (directive.arguments || []).reduce((memo, arg) => {
-        if (arg.kind === "Argument") {
-          const argName = getName(arg.name);
-          const argValue = getValue(arg.value);
-          if (memo[name]) {
+      const value = (directive.arguments || []).reduce(
+        (argumentValues, arg) => {
+          if (arg.kind === "Argument") {
+            const argName = getName(arg.name);
+            const argValue = getValue(arg.value);
+            if (argumentValues[name]) {
+              throw new Error(
+                `Argument '${argName}' of directive '${name}' must only be used once.`
+              );
+            }
+            argumentValues[argName] = argValue;
+          } else {
             throw new Error(
-              `Argument '${argName}' of directive '${name}' must only be used once.`
+              `Unexpected '${arg.kind}', we were expecting 'Argument'`
             );
           }
-          memo[argName] = argValue;
-        } else {
-          throw new Error(
-            `Unexpected '${arg.kind}', we were expecting 'Argument'`
-          );
-        }
-        return memo;
-      }, {});
-      if (memo[name]) {
+          return argumentValues;
+        },
+        {}
+      );
+      if (directivesList[name]) {
         throw new Error(
           `Directive '${name}' must only be used once per field.`
         );
       }
-      memo[name] = value;
+      directivesList[name] = value;
     } else {
       throw new Error(
         `Unexpected '${directive.kind}', we were expecting 'Directive'`
       );
     }
-    return memo;
+    return directivesList;
   }, {});
 }
 
@@ -498,8 +480,8 @@ function getArguments(
 }
 
 type SelectGraphQLResultFromTable = (
-  tableFragment: SQLQuery,
-  builderCallback: (alias: SQLQuery, sqlBuilder: QueryBuilder) => void
+  tableFragment: SQL,
+  builderCallback: (alias: SQL, sqlBuilder: QueryBuilder) => void
 ) => Promise<any>;
 
 type GraphileHelpers<TSource> = Scope<TSource> & {
@@ -507,7 +489,7 @@ type GraphileHelpers<TSource> = Scope<TSource> & {
 };
 
 function getFields<TSource>(
-  Self: TSource,
+  SelfGeneric: TSource,
   fields: ReadonlyArray<FieldDefinitionNode> | void,
   resolvers: Resolvers,
   {
@@ -519,9 +501,10 @@ function getFields<TSource>(
   },
   build: Build
 ) {
-  if (!isNamedType(Self)) {
+  if (!build.graphql.isNamedType(SelfGeneric)) {
     throw new Error("getFields only supports named types");
   }
+  const Self: GraphQLNamedType = SelfGeneric as any;
   const { parseResolveInfo, pgQueryFromResolveData, pgSql: sql } = build;
   function augmentResolver(
     resolver: AugmentedGraphQLFieldResolver<TSource, any>,
@@ -535,8 +518,8 @@ function getFields<TSource>(
       resolveInfo
     ) => {
       const selectGraphQLResultFromTable: SelectGraphQLResultFromTable = async (
-        tableFragment: SQLQuery,
-        builderCallback: (alias: SQLQuery, sqlBuilder: QueryBuilder) => void
+        tableFragment: SQL,
+        builderCallback: (alias: SQL, sqlBuilder: QueryBuilder) => void
       ) => {
         const { pgClient } = context;
         const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
@@ -609,15 +592,18 @@ function getFields<TSource>(
           fieldName,
           (fieldScope: Scope<TSource>) => {
             const resolversSpec = rawResolversSpec
-              ? Object.keys(rawResolversSpec).reduce((memo, key) => {
-                  if (typeof rawResolversSpec[key] === "function") {
-                    memo[key] = augmentResolver(
-                      rawResolversSpec[key],
-                      fieldScope
-                    );
-                  }
-                  return memo;
-                }, {})
+              ? Object.keys(rawResolversSpec).reduce(
+                  (newResolversSpec, key) => {
+                    if (typeof rawResolversSpec[key] === "function") {
+                      newResolversSpec[key] = augmentResolver(
+                        rawResolversSpec[key],
+                        fieldScope
+                      );
+                    }
+                    return newResolversSpec;
+                  },
+                  {}
+                )
               : {};
             return {
               type,

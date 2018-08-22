@@ -1,11 +1,11 @@
 import { parse, visit, ASTNode } from "graphql";
 const $$embed = Symbol("graphile-embed");
 
-export type GraphileEmbed<T = any> = {
+export interface GraphileEmbed<T = any> {
   [$$embed]: true;
   kind: "GraphileEmbed";
   value: T;
-};
+}
 
 export function isEmbed(obj: any): obj is GraphileEmbed {
   return obj && obj[$$embed] === true;
