@@ -15,7 +15,7 @@ import {
   SelectionNode,
   FragmentSpreadNode,
   InlineFragmentNode,
-  NamedTypeNode
+  NamedTypeNode,
 } from "graphql";
 // tslint:disable-next-line
 import { getArgumentValues } from "graphql/execution/values";
@@ -225,9 +225,9 @@ function fieldTreeFromAST<T extends SelectionNode>(
             args,
             fieldsByTypeName: isCompositeType(fieldGqlType)
               ? {
-                  [fieldGqlType.name]: {}
+                  [fieldGqlType.name]: {},
                 }
-              : {}
+              : {},
           };
           tree[parentType.name][alias] = newTreeRoot;
         }
@@ -350,7 +350,7 @@ export function simplifyParsedResolveInfoFragmentWithType(
   }
   return {
     ...parsedResolveInfoFragment,
-    fields
+    fields,
   };
 }
 

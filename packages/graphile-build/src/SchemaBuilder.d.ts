@@ -12,7 +12,7 @@ import {
   GraphQLEnumValueConfigMap,
   GraphQLEnumValueConfig,
   GraphQLInputFieldConfigMap,
-  GraphQLInputFieldConfig
+  GraphQLInputFieldConfig,
 } from "graphql";
 import * as EventEmitter from "events";
 

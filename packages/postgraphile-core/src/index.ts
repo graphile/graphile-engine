@@ -9,14 +9,14 @@ import {
   Build,
   Context,
   SchemaBuilder,
-  Inflection
+  Inflection,
 } from "graphile-build";
 import { GraphQLSchema } from "graphql";
 import {
   defaultPlugins as pgDefaultPlugins,
   inflections,
   Inflector,
-  PgAttribute
+  PgAttribute,
 } from "graphile-build-pg";
 import { Pool, Client } from "pg";
 
@@ -82,13 +82,13 @@ export const postGraphileBaseOverrides = {
     return inflections.defaultUtils.constantCase(
       inflections.defaultInflection.enumName(value)
     );
-  }
+  },
 };
 
 export const postGraphileClassicIdsOverrides = {
   column(name: string, _table: string, _schema?: string) {
     return name === "id" ? "rowId" : inflections.defaultUtils.camelCase(name);
-  }
+  },
 };
 
 export const postGraphileInflection = inflections.newInflector(
@@ -97,7 +97,7 @@ export const postGraphileInflection = inflections.newInflector(
 
 export const postGraphileClassicIdsInflection = inflections.newInflector({
   ...postGraphileBaseOverrides,
-  ...postGraphileClassicIdsOverrides
+  ...postGraphileClassicIdsOverrides,
 });
 /*
  * ABOVE HERE IS DEPRECATED.
@@ -110,7 +110,7 @@ export const PostGraphileInflectionPlugin = function(builder: SchemaBuilder) {
       ...inflection,
       enumName(value: string) {
         return this.constantCase(previous.call(this, value));
-      }
+      },
     };
   });
 } as Plugin;
@@ -127,7 +127,7 @@ export const PostGraphileClassicIdsInflectionPlugin = function(
         return (options && options.skipRowId) || previousValue !== "id"
           ? previousValue
           : this.camelCase("rowId");
-      }
+      },
     };
   });
 } as Plugin;
@@ -172,7 +172,7 @@ const getPostGraphileBuilder = async (
     legacyJsonUuid = false,
     simpleCollections = "omit",
     includeExtensionResources = false,
-    ignoreRBAC = true // TODO: Change to 'false' in v5
+    ignoreRBAC = true, // TODO: Change to 'false' in v5
   } = options;
 
   if (
@@ -277,14 +277,14 @@ const getPostGraphileBuilder = async (
           ...prependPlugins,
           ...replaceAllPlugins,
           ...inflectionOverridePlugins,
-          ...appendPlugins
+          ...appendPlugins,
         ]
       : [
           ...prependPlugins,
           ...defaultPlugins,
           ...pgDefaultPlugins,
           ...inflectionOverridePlugins,
-          ...appendPlugins
+          ...appendPlugins,
         ]
     ).filter(p => skipPlugins.indexOf(p) === -1),
     {
@@ -311,7 +311,7 @@ const getPostGraphileBuilder = async (
       pgIncludeExtensionResources: includeExtensionResources,
       pgIgnoreRBAC: ignoreRBAC,
       ...graphileBuildOptions,
-      ...graphqlBuildOptions // DEPRECATED!
+      ...graphqlBuildOptions, // DEPRECATED!
     }
   );
 };
@@ -334,7 +334,7 @@ export const createPostGraphileSchema = async (
     ...options,
     setWriteCacheCallback(fn: () => Promise<void>) {
       writeCache = fn;
-    }
+    },
   });
   const schema = builder.buildSchema();
   if (writeCache) {
@@ -365,7 +365,7 @@ export const watchPostGraphileSchema = async (
     ...options,
     setWriteCacheCallback(fn: () => Promise<void>) {
       writeCache = fn;
-    }
+    },
   });
   let released = false;
   function handleNewSchema(schema: GraphQLSchema) {

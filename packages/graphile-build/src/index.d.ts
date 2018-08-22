@@ -17,7 +17,7 @@ import SchemaBuilder, {
   Plugin,
   Options,
   Build,
-  DataForType
+  DataForType,
 } from "./SchemaBuilder";
 
 export * from "./SchemaBuilder";
