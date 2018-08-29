@@ -274,10 +274,14 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
           const oldTypeSource = allTypesSources[type.name];
           const firstEntityDetails = !oldTypeSource
             ? "The first type was registered from an unknown origin."
-            : `The first entity was:\n\n${indent(oldTypeSource)}`;
+            : `The first entity was:\n\n${indent(
+                chalk.magenta(oldTypeSource)
+              )}`;
           const secondEntityDetails = !newTypeSource
             ? "The second type was registered from an unknown origin."
-            : `The second entity was:\n\n${indent(newTypeSource)}`;
+            : `The second entity was:\n\n${indent(
+                chalk.yellow(newTypeSource)
+              )}`;
           throw new Error(
             `A type naming conflict has occurred - two entities have tried to define the same type '${chalk.bold(
               type.name
