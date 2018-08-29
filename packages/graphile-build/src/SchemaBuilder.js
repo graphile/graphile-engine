@@ -245,6 +245,7 @@ class SchemaBuilder extends EventEmitter {
         this.depth++;
         try {
           const hookDisplayName = hook.displayName || hook.name || "anonymous";
+          build.status.currentHookName = hookDisplayName;
           debug(
             `${INDENT.repeat(
               this.depth

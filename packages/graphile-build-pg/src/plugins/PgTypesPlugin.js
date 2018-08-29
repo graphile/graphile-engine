@@ -78,11 +78,11 @@ export default (function PgTypesPlugin(
     const {
       pgIntrospectionResultsByKind: introspectionResultsByKind,
       getTypeByName,
-      addType,
       pgSql: sql,
       inflection,
       graphql,
     } = build;
+    const addType = build.addType.bind(build);
     const {
       GraphQLNonNull,
       GraphQLString,

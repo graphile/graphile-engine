@@ -4,7 +4,7 @@ import chalk from "chalk";
 const aExtendedB = new WeakMap();
 const INDENT = "  ";
 
-function indent(text) {
+export function indent(text) {
   return INDENT + text.replace(/\n/g, "\n" + INDENT);
 }
 

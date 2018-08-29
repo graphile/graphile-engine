@@ -27,7 +27,8 @@ import type SchemaBuilder, {
   DataForType,
 } from "./SchemaBuilder";
 
-import extend from "./extend";
+import extend, { indent } from "./extend";
+import chalk from "chalk";
 import { createHash } from "crypto";
 
 import { version } from "../package.json";
@@ -221,6 +222,13 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
     Boolean: graphql.GraphQLBoolean,
     ID: graphql.GraphQLID,
   };
+  const allTypesSources = {
+    Int: "GraphQL Built-in",
+    Float: "GraphQL Built-in",
+    String: "GraphQL Built-in",
+    Boolean: "GraphQL Built-in",
+    ID: "GraphQL Built-in",
+  };
 
   // Every object type gets fieldData associated with each of its
   // fields.
@@ -249,16 +257,36 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
       const alias = getSafeAliasFromResolveInfo(resolveInfo);
       return data[alias];
     },
-    addType(type: GraphQLNamedType): void {
+    addType(type: GraphQLNamedType, origin?: ?string): void {
       if (!type.name) {
         throw new Error(
           `addType must only be called with named types, try using require('graphql').getNamedType`
         );
       }
+      const newTypeSource =
+        origin ||
+        // 'this' is typically only available after the build is finalized
+        (this
+          ? `'addType' call during hook '${this.status.currentHookName}'`
+          : null);
       if (allTypes[type.name] && allTypes[type.name] !== type) {
-        throw new Error(`There's already a type with the name: ${type.name}`);
+        const oldTypeSource = allTypesSources[type.name];
+        const firstEntityDetails = !oldTypeSource
+          ? "The first type was registered from an unknown origin."
+          : `The first entity was:\n\n${indent(oldTypeSource)}`;
+        const secondEntityDetails = !newTypeSource
+          ? "The second type was registered from an unknown origin."
+          : `The second entity was:\n\n${indent(newTypeSource)}`;
+        throw new Error(
+          `A type naming conflict has occurred - two entities have tried to define the same type '${chalk.bold(
+            type.name
+          )}'.\n\n${indent(firstEntityDetails)}\n\n${indent(
+            secondEntityDetails
+          )}`
+        );
       }
       allTypes[type.name] = type;
+      allTypesSources[type.name] = newTypeSource;
     },
     getTypeByName(typeName) {
       return allTypes[typeName];
@@ -737,12 +765,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
       }
 
       if (finalSpec.name) {
-        if (allTypes[finalSpec.name]) {
-          throw new Error(
-            `Type '${finalSpec.name}' has already been registered!`
-          );
-        }
-        allTypes[finalSpec.name] = Self;
+        this.addType(Self, scope.origin);
       }
       fieldDataGeneratorsByFieldNameByType.set(
         Self,
@@ -767,5 +790,8 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
     swallowError,
     // resolveNode: EXPERIMENTAL, API might change!
     resolveNode,
+    status: {
+      currentHookName: null,
+    },
   };
 }

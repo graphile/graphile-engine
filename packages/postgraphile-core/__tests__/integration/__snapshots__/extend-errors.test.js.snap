@@ -16,4 +16,14 @@ exports[`simple collections naming clash 1`] = `
     [33m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'[1m@foreignSimpleFieldName newNameHere[22m\\n@foreignFieldName clash\\nRest of existing \\'comment\\' \\nhere.';[39m]
 `;
 
-exports[`table naming clash 1`] = `[Error: Type 'PeopleOrderBy' has already been registered!]`;
+exports[`table naming clash 1`] = `
+[Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mPeopleOrderBy[22m'.
+
+  The first entity was:
+  
+    'addType' call during hook 'PgOrderByPrimaryKeyPlugin/GraphQLEnumType:values/anonymous'
+
+  The second entity was:
+  
+    'addType' call during hook 'PgOrderByPrimaryKeyPlugin/GraphQLEnumType:values/anonymous']
+`;
