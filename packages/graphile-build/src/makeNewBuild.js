@@ -269,24 +269,27 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
         (this
           ? `'addType' call during hook '${this.status.currentHookName}'`
           : null);
-      if (allTypes[type.name] && allTypes[type.name] !== type) {
-        const oldTypeSource = allTypesSources[type.name];
-        const firstEntityDetails = !oldTypeSource
-          ? "The first type was registered from an unknown origin."
-          : `The first entity was:\n\n${indent(oldTypeSource)}`;
-        const secondEntityDetails = !newTypeSource
-          ? "The second type was registered from an unknown origin."
-          : `The second entity was:\n\n${indent(newTypeSource)}`;
-        throw new Error(
-          `A type naming conflict has occurred - two entities have tried to define the same type '${chalk.bold(
-            type.name
-          )}'.\n\n${indent(firstEntityDetails)}\n\n${indent(
-            secondEntityDetails
-          )}`
-        );
+      if (allTypes[type.name]) {
+        if (allTypes[type.name] !== type) {
+          const oldTypeSource = allTypesSources[type.name];
+          const firstEntityDetails = !oldTypeSource
+            ? "The first type was registered from an unknown origin."
+            : `The first entity was:\n\n${indent(oldTypeSource)}`;
+          const secondEntityDetails = !newTypeSource
+            ? "The second type was registered from an unknown origin."
+            : `The second entity was:\n\n${indent(newTypeSource)}`;
+          throw new Error(
+            `A type naming conflict has occurred - two entities have tried to define the same type '${chalk.bold(
+              type.name
+            )}'.\n\n${indent(firstEntityDetails)}\n\n${indent(
+              secondEntityDetails
+            )}`
+          );
+        }
+      } else {
+        allTypes[type.name] = type;
+        allTypesSources[type.name] = newTypeSource;
       }
-      allTypes[type.name] = type;
-      allTypesSources[type.name] = newTypeSource;
     },
     getTypeByName(typeName) {
       return allTypes[typeName];
