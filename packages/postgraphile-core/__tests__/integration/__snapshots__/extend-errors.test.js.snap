@@ -16,7 +16,23 @@ exports[`simple collections naming clash 1`] = `
     [33m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'[1m@foreignSimpleFieldName newNameHere[22m\\n@foreignFieldName clash\\nRest of existing \\'comment\\' \\nhere.';[39m]
 `;
 
-exports[`table naming clash 1`] = `
+exports[`table naming clash - condition 1`] = `
+[Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mPersonCondition[22m'.
+
+  The first entity was:
+  
+    Adding condition type for table [1m"c"."person"[22m. You can rename the table's GraphQL type via:
+    
+      COMMENT ON TABLE "c"."person" IS E'[1m@name newNameHere[22m\\nPerson test comment';
+
+  The second entity was:
+  
+    Adding table type for table [1m"a"."post"[22m. You can rename the table's GraphQL type via:
+    
+      COMMENT ON TABLE "a"."post" IS E'[1m@name newNameHere[22m\\nRest of existing \\'comment\\' \\nhere.';]
+`;
+
+exports[`table naming clash - direct 1`] = `
 [Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mPeopleOrderBy[22m'.
 
   The first entity was:
@@ -32,12 +48,12 @@ exports[`table naming clash 1`] = `
       COMMENT ON TABLE "c"."person" IS E'[1m@name newNameHere[22m\\nPerson test comment';]
 `;
 
-exports[`table naming clash 2`] = `
-[Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mPersonCondition[22m'.
+exports[`table naming clash - order 1`] = `
+[Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mPeopleOrderBy[22m'.
 
   The first entity was:
   
-    Adding condition type for table [1m"c"."person"[22m. You can rename the table's GraphQL type via:
+    Adding connection "orderBy" argument for table [1m"c"."person"[22m. You can rename the table's GraphQL type via:
     
       COMMENT ON TABLE "c"."person" IS E'[1m@name newNameHere[22m\\nPerson test comment';
 

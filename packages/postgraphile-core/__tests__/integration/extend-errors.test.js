@@ -27,15 +27,22 @@ check(
 );
 
 check(
-  "table naming clash",
+  "table naming clash - direct",
   `
     comment on table a.post is E'@name person\nRest of existing ''comment'' \nhere.';
   `
 );
 
 check(
-  "table naming clash",
+  "table naming clash - condition",
   `
     comment on table a.post is E'@name person_condition\nRest of existing ''comment'' \nhere.';
+  `
+);
+
+check(
+  "table naming clash - order",
+  `
+    comment on table a.post is E'@name people_order_by\nRest of existing ''comment'' \nhere.';
   `
 );
