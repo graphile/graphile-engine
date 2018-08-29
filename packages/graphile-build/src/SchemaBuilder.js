@@ -251,10 +251,13 @@ class SchemaBuilder extends EventEmitter {
             )}[${hookName}${debugStr}]:   Executing '${hookDisplayName}'`
           );
 
-          const previousHook = build.status.currentHookName;
+          const previousHookName = build.status.currentHookName;
+          const previousHookEvent = build.status.currentHookEvent;
           build.status.currentHookName = hookDisplayName;
+          build.status.currentHookEvent = hookName;
           newObj = hook(newObj, build, context);
-          build.status.currentHookName = previousHook;
+          build.status.currentHookName = previousHookName;
+          build.status.currentHookEvent = previousHookEvent;
 
           if (!newObj) {
             throw new Error(

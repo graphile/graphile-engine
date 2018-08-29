@@ -795,6 +795,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
     resolveNode,
     status: {
       currentHookName: null,
+      currentHookEvent: null,
     },
   };
 }
