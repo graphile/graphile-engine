@@ -384,6 +384,25 @@ export default (function PgBasicsPlugin(
               .join("-and-")}`
           );
         },
+        singleRelationByKeysBackwards(
+          detailedKeys: Keys,
+          table: PgClass,
+          _foreignTable: PgClass,
+          constraint: PgConstraint
+        ) {
+          if (constraint.tags.foreignSingleFieldName) {
+            return constraint.tags.foreignSingleFieldName;
+          }
+          if (constraint.tags.foreignFieldName) {
+            return constraint.tags.foreignFieldName;
+          }
+          return this.singleRelationByKeys(
+            detailedKeys,
+            table,
+            _foreignTable,
+            constraint
+          );
+        },
         manyRelationByKeys(
           detailedKeys: Keys,
           table: PgClass,
@@ -405,6 +424,9 @@ export default (function PgBasicsPlugin(
           _foreignTable: PgClass,
           constraint: PgConstraint
         ) {
+          if (constraint.tags.foreignSimplFieldName) {
+            return constraint.tags.foreignSimpleFieldName;
+          }
           if (constraint.tags.foreignFieldName) {
             return constraint.tags.foreignFieldName;
           }

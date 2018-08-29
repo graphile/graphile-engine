@@ -2,6 +2,7 @@ export interface PgNamespace {
   kind: "namespace";
   id: string;
   name: string;
+  comment: string | void;
   description: string | void;
   tags: { [tag: string]: string };
 }
@@ -9,6 +10,7 @@ export interface PgNamespace {
 export interface PgProc {
   kind: "procedure";
   name: string;
+  comment: string | void;
   description: string | void;
   namespaceId: string;
   isStrict: boolean;
@@ -27,6 +29,7 @@ export interface PgClass {
   kind: "class";
   id: string;
   name: string;
+  comment: string | void;
   description: string | void;
   classKind: string;
   namespaceId: string;
@@ -51,6 +54,7 @@ export interface PgType {
   kind: "type";
   id: string;
   name: string;
+  comment: string | void;
   description: string | void;
   namespaceId: string;
   namespaceName: string;
@@ -71,6 +75,7 @@ export interface PgAttribute {
   classId: string;
   num: number;
   name: string;
+  comment: string | void;
   description: string | void;
   typeId: string;
   typeModifier: number;
@@ -91,6 +96,7 @@ export interface PgConstraint {
   type: string;
   classId: string;
   foreignClassId: string | void;
+  comment: string | void;
   description: string | void;
   keyAttributeNums: Array<number>;
   foreignKeyAttributeNums: Array<number>;
@@ -106,6 +112,7 @@ export interface PgExtension {
   relocatable: boolean;
   version: string;
   configurationClassIds?: Array<string>;
+  comment: string | void;
   description: string | void;
   tags: { [tag: string]: string | Array<string> };
 }
