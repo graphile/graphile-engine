@@ -375,7 +375,10 @@ export default (function PgBackwardRelationPlugin(
                 constraint.name
               }" ON "${table.namespaceName}"."${table.name}" IS E'@${
                 isConnection ? "foreignFieldName" : "foreignSimpleFieldName"
-              } newNameHere\\n${constraint.description}';`
+              } newNameHere\\n${constraint.description.replace(
+                /['\\]/g,
+                "\\$1"
+              )}';`
             );
           }
         }

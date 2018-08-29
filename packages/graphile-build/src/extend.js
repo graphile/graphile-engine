@@ -1,6 +1,12 @@
 // @flow
+import chalk from "chalk";
 
 const aExtendedB = new WeakMap();
+const INDENT = "  ";
+
+function indent(text) {
+  return INDENT + text.replace(/\n/g, "\n" + INDENT);
+}
 
 export default function extend<Obj1: *, Obj2: *>(
   base: Obj1,
@@ -13,11 +19,23 @@ export default function extend<Obj1: *, Obj2: *>(
   for (const key of keysB) {
     const newValue = extra[key];
     const oldValue = base[key];
-    if (aExtendedB.get(newValue) !== oldValue && keysA.indexOf(key) >= 0) {
-      throw new Error(`Overwriting key '${key}' is not allowed! ${hint || ""}`);
-    }
     const hintKey = `_source__${key}`;
-    hints[hintKey] = extra[hintKey] || base[hintKey] || hint;
+    const hintB = extra[hintKey] || hint;
+    if (aExtendedB.get(newValue) !== oldValue && keysA.indexOf(key) >= 0) {
+      const hintA = base[hintKey];
+      const firstEntityDetails = !hintA
+        ? "We don't have any information about the first entity."
+        : `The first entity was:\n\n${indent(chalk.magenta(hintA))}`;
+      const secondEntityDetails = !hintB
+        ? "We don't have any information about the second entity."
+        : `The second entity was:\n\n${indent(chalk.yellow(hintB))}`;
+      throw new Error(
+        `A naming conflict has occurred - two entities have tried to define the same key '${chalk.bold(
+          key
+        )}'.\n\n${indent(firstEntityDetails)}\n\n${indent(secondEntityDetails)}`
+      );
+    }
+    hints[hintKey] = hintB || base[hintKey];
   }
   const obj = Object.assign({}, base, extra);
   aExtendedB.set(obj, base);

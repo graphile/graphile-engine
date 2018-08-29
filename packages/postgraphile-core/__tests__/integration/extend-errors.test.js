@@ -22,6 +22,6 @@ function check(description, sql) {
 check(
   "simple collections naming clash",
   `
-    comment on constraint post_author_id_fkey on a.post is E'@foreignFieldName clash';
+    comment on constraint post_author_id_fkey on a.post is E'@foreignFieldName clash\nRest of existing ''comment'' \nhere.';
   `
 );
