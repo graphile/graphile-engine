@@ -162,6 +162,10 @@ export default (function PgBasicsPlugin(
             )}' on table ${chalk.bold(
               `"${entity.class.namespaceName}"."${entity.class.name}"`
             )}`;
+          } else if (entity.kind === "class") {
+            return `table ${chalk.bold(
+              `"${entity.namespaceName}"."${entity.name}"`
+            )}`;
           }
         } catch (e) {
           // eslint-disable-next-line no-console

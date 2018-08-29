@@ -10,6 +10,8 @@ export default (function PgConnectionArgOrderBy(builder) {
       graphql: { GraphQLEnumType },
       inflection,
       pgOmit: omit,
+      sqlCommentByAddingTags,
+      describePgEntity,
     } = build;
     introspectionResultsByKind.class
       .filter(table => table.isSelectable && !omit(table, "order"))
@@ -32,6 +34,13 @@ export default (function PgConnectionArgOrderBy(builder) {
             },
           },
           {
+            __origin: `Adding connection "orderBy" argument for ${describePgEntity(
+              table
+            )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
+              table.namespaceName
+            }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
+              name: "newNameHere",
+            })};`,
             pgIntrospection: table,
             isPgRowSortEnum: true,
           }

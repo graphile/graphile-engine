@@ -768,7 +768,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
       }
 
       if (finalSpec.name) {
-        this.addType(Self, scope.origin);
+        this.addType(Self, scope.__origin);
       }
       fieldDataGeneratorsByFieldNameByType.set(
         Self,
