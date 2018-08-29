@@ -22,7 +22,7 @@ export function embed<T>(value: T): GraphileEmbed<T> {
 export function gql(
   strings: TemplateStringsArray,
   ...interpolatedValues: Array<string | GraphileEmbed>
-) {
+): DocumentNode {
   const gqlStrings = [];
   const placeholders = {};
   const createPlaceholderFor = (value: any) => {
