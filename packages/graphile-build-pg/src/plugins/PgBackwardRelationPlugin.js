@@ -35,6 +35,7 @@ export default (function PgBackwardRelationPlugin(
       pgQueryFromResolveData: queryFromResolveData,
       pgAddStartEndCursor: addStartEndCursor,
       pgOmit: omit,
+      sqlCommentByAddingTags,
     } = build;
     const {
       scope: { isPgRowType, pgIntrospection: foreignTable },
@@ -227,9 +228,9 @@ export default (function PgBackwardRelationPlugin(
               constraint.name
             }" ON "${table.namespaceName}"."${
               table.name
-            }" IS E'@foreignSingleFieldName newNameHere\\n${
-              constraint.description
-            }';`
+            }" IS ${sqlCommentByAddingTags(constraint, {
+              foreignSingleFieldName: "newNameHere",
+            })};`
           );
         }
         function makeFields(isConnection) {
@@ -373,12 +374,13 @@ export default (function PgBackwardRelationPlugin(
                 table.name
               }'. To rename this relation with smart comments:\n\n  COMMENT ON CONSTRAINT "${
                 constraint.name
-              }" ON "${table.namespaceName}"."${table.name}" IS E'@${
-                isConnection ? "foreignFieldName" : "foreignSimpleFieldName"
-              } newNameHere\\n${constraint.description.replace(
-                /['\\]/g,
-                "\\$1"
-              )}';`
+              }" ON "${table.namespaceName}"."${
+                table.name
+              }" IS ${sqlCommentByAddingTags(constraint, {
+                [isConnection
+                  ? "foreignFieldName"
+                  : "foreignSimpleFieldName"]: "newNameHere",
+              })};`
             );
           }
         }

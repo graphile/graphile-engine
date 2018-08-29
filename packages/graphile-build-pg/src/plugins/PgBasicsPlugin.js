@@ -151,6 +151,39 @@ export default (function PgBasicsPlugin(
       pgMakeProcField: makeProcField,
       pgParseIdentifier: parseIdentifier,
       pgViaTemporaryTable: viaTemporaryTable,
+      sqlCommentByAddingTags: (thing, tagsToAdd) => {
+        // Ref: https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-BACKSLASH-TABLE
+        const escape = str =>
+          str.replace(
+            /['\\\b\f\n\r\t]/g,
+            chr =>
+              ({
+                "\b": "\\b",
+                "\f": "\\f",
+                "\n": "\\n",
+                "\r": "\\r",
+                "\t": "\\t",
+              }[chr] || "\\" + chr)
+          );
+        // tagsToAdd is here twice to ensure that the keys in tagsToAdd come first, but that they also "win" any conflicts.
+        const tags = Object.assign({}, tagsToAdd, thing.tags, tagsToAdd);
+        const description = thing.description;
+        const tagsSql = Object.keys(tags)
+          .reduce((memo, tag) => {
+            const tagValue = tags[tag];
+            const valueArray = Array.isArray(tagValue) ? tagValue : [tagValue];
+            valueArray.forEach(value => {
+              memo.push(
+                `@${escape(escape(tag))}${
+                  value === true ? "" : " " + escape(escape(value))
+                }`
+              );
+            });
+            return memo;
+          }, [])
+          .join("\\n");
+        return `E'${tagsSql}${description ? "\\n" + escape(description) : ""}'`;
+      },
     });
   });
 

@@ -7,11 +7,11 @@ exports[`simple collections naming clash 1`] = `
   
     [35mBackward relation (connection) for constraint 'post_author_id_fkey' on table 'a.post'. To rename this relation with smart comments:[39m
     [35m[39m
-    [35m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'@foreignFieldName newNameHere\\n';[39m
+    [35m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'@foreignFieldName newNameHere\\nRest of existing \\'comment\\' \\nhere.';[39m
 
   The second entity was:
   
     [33mBackward relation (simple collection) for constraint 'post_author_id_fkey' on table 'a.post'. To rename this relation with smart comments:[39m
     [33m[39m
-    [33m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'@foreignSimpleFieldName newNameHere\\n';[39m]
+    [33m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'@foreignSimpleFieldName newNameHere\\n@foreignFieldName clash\\nRest of existing \\'comment\\' \\nhere.';[39m]
 `;
