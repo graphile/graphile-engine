@@ -39,6 +39,8 @@ export default (async function PgMutationUpdateDeletePlugin(
       pgQueryFromResolveData: queryFromResolveData,
       pgOmit: omit,
       pgViaTemporaryTable: viaTemporaryTable,
+      describePgEntity,
+      sqlCommentByAddingTags,
     } = build;
     const {
       scope: { isRootMutation },
@@ -266,6 +268,13 @@ export default (async function PgMutationUpdateDeletePlugin(
                     },
                   },
                   {
+                    __origin: `Adding table ${mode} mutation payload type for ${describePgEntity(
+                      table
+                    )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
+                      table.namespaceName
+                    }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
+                      name: "newNameHere",
+                    })};`,
                     isMutationPayload: true,
                     isPgUpdatePayloadType: mode === "update",
                     isPgDeletePayloadType: mode === "delete",
@@ -320,6 +329,13 @@ export default (async function PgMutationUpdateDeletePlugin(
                       ),
                     },
                     {
+                      __origin: `Adding table ${mode} (by node ID) mutation input type for ${describePgEntity(
+                        table
+                      )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
+                        table.namespaceName
+                      }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
+                        name: "newNameHere",
+                      })};`,
                       isPgUpdateInputType: mode === "update",
                       isPgUpdateNodeInputType: mode === "update",
                       isPgDeleteInputType: mode === "delete",
@@ -460,6 +476,13 @@ export default (async function PgMutationUpdateDeletePlugin(
                       ),
                     },
                     {
+                      __origin: `Adding table ${mode} mutation input type for ${describePgEntity(
+                        constraint
+                      )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
+                        table.namespaceName
+                      }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
+                        name: "newNameHere",
+                      })};`,
                       isPgUpdateInputType: mode === "update",
                       isPgUpdateByKeysInputType: mode === "update",
                       isPgDeleteInputType: mode === "delete",

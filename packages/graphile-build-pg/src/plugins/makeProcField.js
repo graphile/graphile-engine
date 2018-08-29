@@ -49,6 +49,8 @@ export default function makeProcField(
     pgQueryFromResolveData: queryFromResolveData,
     pgAddStartEndCursor: addStartEndCursor,
     pgViaTemporaryTable: viaTemporaryTable,
+    describePgEntity,
+    sqlCommentByAddingTags,
   }: {| ...Build |},
   {
     fieldWithHooks,
@@ -417,8 +419,16 @@ export default function makeProcField(
             },
           },
           Object.assign(
-            {},
             {
+              __origin: `Adding mutation function payload type for ${describePgEntity(
+                proc
+              )}. You can rename the function's GraphQL field (and its dependent types) via:\n\n  COMMENT ON FUNCTION "${
+                proc.namespaceName
+              }"."${
+                proc.name
+              }"(...arg types go here...) IS ${sqlCommentByAddingTags(proc, {
+                name: "newNameHere",
+              })};`,
               isMutationPayload: true,
             },
             payloadTypeScope
@@ -442,6 +452,15 @@ export default function makeProcField(
             ),
           },
           {
+            __origin: `Adding mutation function input type for ${describePgEntity(
+              proc
+            )}. You can rename the function's GraphQL field (and its dependent types) via:\n\n  COMMENT ON FUNCTION "${
+              proc.namespaceName
+            }"."${
+              proc.name
+            }"(...arg types go here...) IS ${sqlCommentByAddingTags(proc, {
+              name: "newNameHere",
+            })};`,
             isMutationInput: true,
           }
         );

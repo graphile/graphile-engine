@@ -134,6 +134,15 @@ export default (function PgScalarFunctionConnectionPlugin(
             },
           },
           {
+            __origin: `Adding function connection type for ${describePgEntity(
+              proc
+            )}. You can rename the function's GraphQL field (and its dependent types) via:\n\n  COMMENT ON FUNCTION "${
+              proc.namespaceName
+            }"."${
+              proc.name
+            }"(...arg types go here...) IS ${sqlCommentByAddingTags(proc, {
+              name: "newNameHere",
+            })};`,
             isConnectionType: true,
             edgeType: EdgeType,
             nodeType: NodeType,
