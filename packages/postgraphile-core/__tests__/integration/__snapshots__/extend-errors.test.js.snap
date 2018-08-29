@@ -21,9 +21,9 @@ exports[`table naming clash 1`] = `
 
   The first entity was:
   
-    'addType' call during hook 'PgOrderByPrimaryKeyPlugin/GraphQLEnumType:values/anonymous'
+    'addType' call during hook 'PgConnectionArgOrderBy/init/anonymous'
 
   The second entity was:
   
-    'addType' call during hook 'PgOrderByPrimaryKeyPlugin/GraphQLEnumType:values/anonymous']
+    'addType' call during hook 'PgConnectionArgOrderBy/init/anonymous']
 `;

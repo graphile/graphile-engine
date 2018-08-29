@@ -245,13 +245,17 @@ class SchemaBuilder extends EventEmitter {
         this.depth++;
         try {
           const hookDisplayName = hook.displayName || hook.name || "anonymous";
-          build.status.currentHookName = hookDisplayName;
           debug(
             `${INDENT.repeat(
               this.depth
             )}[${hookName}${debugStr}]:   Executing '${hookDisplayName}'`
           );
+
+          const previousHook = build.status.currentHookName;
+          build.status.currentHookName = hookDisplayName;
           newObj = hook(newObj, build, context);
+          build.status.currentHookName = previousHook;
+
           if (!newObj) {
             throw new Error(
               `Hook '${hook.displayName ||
