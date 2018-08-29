@@ -585,7 +585,13 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
             const fieldsSpec = builder.applyHooks(
               this,
               "GraphQLObjectType:fields",
-              rawFields,
+              this.extend(
+                {},
+                rawFields,
+                `Default field included in newWithHooks call for '${
+                  rawSpec.name
+                }'. ${inScope.__origin || ""}`
+              ),
               fieldsContext,
               `|${rawSpec.name}`
             );
@@ -674,7 +680,13 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
             const fieldsSpec = builder.applyHooks(
               this,
               "GraphQLInputObjectType:fields",
-              rawFields,
+              this.extend(
+                {},
+                rawFields,
+                `Default field included in newWithHooks call for '${
+                  rawSpec.name
+                }'. ${inScope.__origin || ""}`
+              ),
               fieldsContext,
               `|${getNameFromType(Self)}`
             );

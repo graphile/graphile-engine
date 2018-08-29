@@ -75,6 +75,7 @@ export default (function StandardTypesPlugin(builder) {
         }),
       },
       {
+        __origin: `graphile-build built-in`,
         isPageInfo: true,
       }
     );

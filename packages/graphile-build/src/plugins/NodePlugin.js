@@ -135,7 +135,9 @@ export default (function NodePlugin(
           },
         },
       },
-      {}
+      {
+        __origin: `graphile-build built-in (NodePlugin); you can omit this plugin if you like, but you'll lose compatibility with Relay`,
+      }
     );
     return _;
   });

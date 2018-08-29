@@ -166,6 +166,10 @@ export default (function PgBasicsPlugin(
             return `table ${chalk.bold(
               `"${entity.namespaceName}"."${entity.name}"`
             )}`;
+          } else if (entity.kind === "procedure") {
+            return `function ${chalk.bold(
+              `"${entity.namespaceName}"."${entity.name}"(...args...)`
+            )}`;
           }
         } catch (e) {
           // eslint-disable-next-line no-console

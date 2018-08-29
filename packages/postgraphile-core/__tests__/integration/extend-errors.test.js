@@ -9,6 +9,23 @@ function check(description, sql) {
       try {
         await createPostGraphileSchema(pgClient, ["a", "b", "c"], {
           simpleCollections: "both",
+          appendPlugins: [
+            function DummySubPlugin(builder) {
+              builder.hook(
+                "GraphQLObjectType:fields",
+                (fields, build, context) => {
+                  if (!context.scope.isRootSubscription) {
+                    return fields;
+                  }
+                  return build.extend(fields, {
+                    mySub: {
+                      type: build.graphql.GraphQLInt,
+                    },
+                  });
+                }
+              );
+            },
+          ],
         });
       } catch (e) {
         error = e;
@@ -44,5 +61,34 @@ check(
   "table naming clash - order",
   `
     comment on table a.post is E'@name people_order_by\nRest of existing ''comment'' \nhere.';
+  `
+);
+
+check(
+  "table naming clash - query",
+  `
+    comment on table a.post is E'@name query\nRest of existing ''comment'' \nhere.';
+  `
+);
+
+check(
+  "table naming clash - mutation",
+  `
+    comment on table a.post is E'@name mutation\nRest of existing ''comment'' \nhere.';
+  `
+);
+
+check(
+  "table naming clash - subscription",
+  `
+    comment on table a.post is E'@name subscription\nRest of existing ''comment'' \nhere.';
+  `
+);
+
+check(
+  "function naming clash - payload",
+  `
+    comment on table a.post is E'@name q_edge\nRest of existing ''comment'' \nhere.';
+    comment on function c.int_set_query(int, int, int) is E'@name q\nRest of existing ''comment'' \nhere.';
   `
 );

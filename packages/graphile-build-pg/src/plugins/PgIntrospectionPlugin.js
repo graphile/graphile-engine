@@ -33,6 +33,7 @@ export type PgProc = {
   comment: ?string,
   description: ?string,
   namespaceId: string,
+  namespaceName: string,
   isStrict: boolean,
   returnsSet: boolean,
   isStable: boolean,

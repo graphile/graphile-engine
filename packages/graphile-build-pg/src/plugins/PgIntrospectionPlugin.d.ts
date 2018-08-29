@@ -13,6 +13,7 @@ export interface PgProc {
   comment: string | void;
   description: string | void;
   namespaceId: string;
+  namespaceName: string;
   isStrict: boolean;
   returnsSet: boolean;
   isStable: boolean;

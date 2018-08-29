@@ -29,7 +29,10 @@ export default (async function MutationPlugin(builder) {
         description:
           "The root mutation type which contains root level fields which mutate data.",
       },
-      { isRootMutation: true },
+      {
+        __origin: `graphile-build built-in (root mutation type)`,
+        isRootMutation: true,
+      },
       true
     );
     if (isValidMutation(Mutation)) {

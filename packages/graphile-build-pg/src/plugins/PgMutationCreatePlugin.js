@@ -32,6 +32,8 @@ export default (function PgMutationCreatePlugin(
       pgQueryFromResolveData: queryFromResolveData,
       pgOmit: omit,
       pgViaTemporaryTable: viaTemporaryTable,
+      describePgEntity,
+      sqlCommentByAddingTags,
     } = build;
     const {
       scope: { isRootMutation },
@@ -91,6 +93,13 @@ export default (function PgMutationCreatePlugin(
               },
             },
             {
+              __origin: `Adding table create input type for ${describePgEntity(
+                table
+              )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
+                table.namespaceName
+              }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
+                name: "newNameHere",
+              })};`,
               isPgCreateInputType: true,
               pgInflection: table,
             }
@@ -120,6 +129,13 @@ export default (function PgMutationCreatePlugin(
               },
             },
             {
+              __origin: `Adding table create payload type for ${describePgEntity(
+                table
+              )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
+                table.namespaceName
+              }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
+                name: "newNameHere",
+              })};`,
               isMutationPayload: true,
               isPgCreatePayloadType: true,
               pgIntrospection: table,

@@ -16,6 +16,13 @@ export default function extend<Obj1: *, Obj2: *>(
   const keysA = Object.keys(base);
   const keysB = Object.keys(extra);
   const hints = Object.create(null);
+  for (const key of keysA) {
+    const hintKey = `_source__${key}`;
+    if (base[hintKey]) {
+      hints[hintKey] = base[hintKey];
+    }
+  }
+
   for (const key of keysB) {
     const newValue = extra[key];
     const oldValue = base[key];
@@ -35,17 +42,19 @@ export default function extend<Obj1: *, Obj2: *>(
         )}'.\n\n${indent(firstEntityDetails)}\n\n${indent(secondEntityDetails)}`
       );
     }
-    hints[hintKey] = hintB || base[hintKey];
+    hints[hintKey] = hints[hintKey] || hintB || base[hintKey];
   }
   const obj = Object.assign({}, base, extra);
   aExtendedB.set(obj, base);
   for (const hintKey in hints) {
-    Object.defineProperty(obj, hintKey, {
-      configurable: false,
-      enumerable: false,
-      value: hints[hintKey],
-      writable: false,
-    });
+    if (hints[hintKey]) {
+      Object.defineProperty(obj, hintKey, {
+        configurable: false,
+        enumerable: false,
+        value: hints[hintKey],
+        writable: false,
+      });
+    }
   }
   return obj;
 }

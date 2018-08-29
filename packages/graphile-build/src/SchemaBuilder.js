@@ -322,7 +322,10 @@ class SchemaBuilder extends EventEmitter {
       this._generatedSchema = build.newWithHooks(
         GraphQLSchema,
         {},
-        { isSchema: true }
+        {
+          __origin: `GraphQL built-in`,
+          isSchema: true,
+        }
       );
     }
     if (!this._generatedSchema) {

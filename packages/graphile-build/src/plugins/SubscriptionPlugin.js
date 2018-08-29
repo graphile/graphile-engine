@@ -29,7 +29,10 @@ export default (async function SubscriptionPlugin(builder) {
         description:
           "The root subscription type which contains root level fields which mutate data.",
       },
-      { isRootSubscription: true },
+      {
+        __origin: `graphile-build built-in (root subscription type)`,
+        isRootSubscription: true,
+      },
       true
     );
     if (isValidSubscription(Subscription)) {

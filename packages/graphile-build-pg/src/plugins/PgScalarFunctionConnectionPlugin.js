@@ -20,6 +20,8 @@ export default (function PgScalarFunctionConnectionPlugin(
       },
       inflection,
       pgOmit: omit,
+      describePgEntity,
+      sqlCommentByAddingTags,
     } = build;
     const nullableIf = (condition, Type) =>
       condition ? Type : new GraphQLNonNull(Type);
@@ -80,6 +82,15 @@ export default (function PgScalarFunctionConnectionPlugin(
             },
           },
           {
+            __origin: `Adding function result edge type for ${describePgEntity(
+              proc
+            )}. You can rename the function's GraphQL field (and its dependent types) via:\n\n  COMMENT ON FUNCTION "${
+              proc.namespaceName
+            }"."${
+              proc.name
+            }"(...arg types go here...) IS ${sqlCommentByAddingTags(proc, {
+              name: "newNameHere",
+            })};`,
             isEdgeType: true,
             nodeType: NodeType,
             pgIntrospection: proc,
