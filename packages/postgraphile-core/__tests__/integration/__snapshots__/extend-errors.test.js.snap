@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`simple collections naming clash 1`] = `
+[Error: Overwriting key 'clash' is not allowed! Backward relation (simple collection) for constraint 'post_author_id_fkey' on table 'a.post'. To rename this relation with smart comments:
+
+  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'@foreignSimpleFieldName newNameHere\\n';]
+`;
