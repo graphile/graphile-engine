@@ -95,6 +95,7 @@ export interface PgConstraint {
   name: string;
   type: string;
   classId: string;
+  class: PgClass | void;
   foreignClassId: string | void;
   comment: string | void;
   description: string | void;

@@ -115,6 +115,7 @@ export type PgConstraint = {
   name: string,
   type: string,
   classId: string,
+  class: ?PgClass,
   foreignClassId: ?string,
   comment: ?string,
   description: ?string,
@@ -378,6 +379,14 @@ export default (async function PgIntrospectionPlugin(
       "arrayItemTypeId",
       introspectionResultsByKind.typeById,
       true // Because not all types are arrays
+    );
+
+    relate(
+      introspectionResultsByKind.constraint,
+      "class",
+      "classId",
+      introspectionResultsByKind.classById,
+      true
     );
 
     relate(

@@ -36,6 +36,7 @@ export default (function PgBackwardRelationPlugin(
       pgAddStartEndCursor: addStartEndCursor,
       pgOmit: omit,
       sqlCommentByAddingTags,
+      describePgEntity,
     } = build;
     const {
       scope: { isPgRowType, pgIntrospection: foreignTable },
@@ -220,11 +221,9 @@ export default (function PgBackwardRelationPlugin(
                 }
               ),
             },
-            `Backward relation (single) for constraint '${
-              constraint.name
-            }' on table '${table.namespaceName}.${
-              table.name
-            }'. To rename this relation with smart comments:\n\n  COMMENT ON CONSTRAINT "${
+            `Backward relation (single) for ${describePgEntity(
+              constraint
+            )}. To rename this relation with smart comments:\n\n  COMMENT ON CONSTRAINT "${
               constraint.name
             }" ON "${table.namespaceName}"."${
               table.name
@@ -368,11 +367,9 @@ export default (function PgBackwardRelationPlugin(
 
               `Backward relation (${
                 isConnection ? "connection" : "simple collection"
-              }) for constraint '${constraint.name}' on table '${
-                table.namespaceName
-              }.${
-                table.name
-              }'. To rename this relation with smart comments:\n\n  COMMENT ON CONSTRAINT "${
+              }) for ${describePgEntity(
+                constraint
+              )}. To rename this relation with smart comments:\n\n  COMMENT ON CONSTRAINT "${
                 constraint.name
               }" ON "${table.namespaceName}"."${
                 table.name

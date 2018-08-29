@@ -5,15 +5,15 @@ exports[`simple collections naming clash 1`] = `
 
   The first entity was:
   
-    [35mBackward relation (connection) for constraint 'post_author_id_fkey' on table 'a.post'. To rename this relation with smart comments:[39m
+    [35mBackward relation (connection) for constraint '[1mpost_author_id_fkey[22m' on table [1m"a"."post"[22m. To rename this relation with smart comments:[39m
     [35m[39m
-    [35m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'@foreignFieldName newNameHere\\nRest of existing \\'comment\\' \\nhere.';[39m
+    [35m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'[1m@foreignFieldName newNameHere[22m\\nRest of existing \\'comment\\' \\nhere.';[39m
 
   The second entity was:
   
-    [33mBackward relation (simple collection) for constraint 'post_author_id_fkey' on table 'a.post'. To rename this relation with smart comments:[39m
+    [33mBackward relation (simple collection) for constraint '[1mpost_author_id_fkey[22m' on table [1m"a"."post"[22m. To rename this relation with smart comments:[39m
     [33m[39m
-    [33m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'@foreignSimpleFieldName newNameHere\\n@foreignFieldName clash\\nRest of existing \\'comment\\' \\nhere.';[39m]
+    [33m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'[1m@foreignSimpleFieldName newNameHere[22m\\n@foreignFieldName clash\\nRest of existing \\'comment\\' \\nhere.';[39m]
 `;
 
 exports[`table naming clash 1`] = `[Error: Type 'PeopleOrderBy' has already been registered!]`;

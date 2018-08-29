@@ -26,6 +26,7 @@ import omit, {
 import makeProcField from "./makeProcField";
 import parseIdentifier from "../parseIdentifier";
 import viaTemporaryTable from "./viaTemporaryTable";
+import chalk from "chalk";
 
 const defaultPgColumnFilter = (_attr, _build, _context) => true;
 type Keys = Array<{
@@ -33,6 +34,8 @@ type Keys = Array<{
   table: string,
   schema: ?string,
 }>;
+
+const identity = _ => _;
 
 export function preventEmptyResult<
   // eslint-disable-next-line flowtype/no-weak-types
@@ -151,7 +154,31 @@ export default (function PgBasicsPlugin(
       pgMakeProcField: makeProcField,
       pgParseIdentifier: parseIdentifier,
       pgViaTemporaryTable: viaTemporaryTable,
+      describePgEntity: entity => {
+        try {
+          if (entity.kind === "constraint") {
+            return `constraint '${chalk.bold(
+              entity.name
+            )}' on table ${chalk.bold(
+              `"${entity.class.namespaceName}"."${entity.class.name}"`
+            )}`;
+          }
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error(
+            "Error occurred while attempting to debug entity:",
+            entity
+          );
+          // eslint-disable-next-line no-console
+          console.error(e);
+        }
+        return `entity of kind '${entity.kind}' with oid '${entity.oid}'`;
+      },
       sqlCommentByAddingTags: (thing, tagsToAdd) => {
+        // NOTE: this function is NOT intended to be SQL safe; it's for
+        // displaying in error messages. Nonetheless if you find issues with
+        // SQL compatibility, please send a PR or issue.
+
         // Ref: https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-BACKSLASH-TABLE
         const escape = str =>
           str.replace(
@@ -165,18 +192,23 @@ export default (function PgBasicsPlugin(
                 "\t": "\\t",
               }[chr] || "\\" + chr)
           );
+
         // tagsToAdd is here twice to ensure that the keys in tagsToAdd come first, but that they also "win" any conflicts.
         const tags = Object.assign({}, tagsToAdd, thing.tags, tagsToAdd);
+
         const description = thing.description;
         const tagsSql = Object.keys(tags)
           .reduce((memo, tag) => {
             const tagValue = tags[tag];
             const valueArray = Array.isArray(tagValue) ? tagValue : [tagValue];
+            const highlightOrNot = tag in tagsToAdd ? chalk.bold : identity;
             valueArray.forEach(value => {
               memo.push(
-                `@${escape(escape(tag))}${
-                  value === true ? "" : " " + escape(escape(value))
-                }`
+                highlightOrNot(
+                  `@${escape(escape(tag))}${
+                    value === true ? "" : " " + escape(escape(value))
+                  }`
+                )
               );
             });
             return memo;
@@ -457,7 +489,7 @@ export default (function PgBasicsPlugin(
           _foreignTable: PgClass,
           constraint: PgConstraint
         ) {
-          if (constraint.tags.foreignSimplFieldName) {
+          if (constraint.tags.foreignSimpleFieldName) {
             return constraint.tags.foreignSimpleFieldName;
           }
           if (constraint.tags.foreignFieldName) {
