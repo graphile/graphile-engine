@@ -4,15 +4,15 @@ exports[`function naming clash - payload 1`] = `
 [Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mQEdge[22m'.
 
   The first entity was:
-  
+
     Adding function result edge type for function [1m"c"."int_set_query"(...args...)[22m. You can rename the function's GraphQL field (and its dependent types) via:
-    
+
       COMMENT ON FUNCTION "c"."int_set_query"(...arg types go here...) IS E'[1m@name newNameHere[22m\\nRest of existing \\'comment\\' \\nhere.';
 
   The second entity was:
-  
+
     Adding table type for table [1m"a"."post"[22m. You can rename the table's GraphQL type via:
-    
+
       COMMENT ON TABLE "a"."post" IS E'[1m@name newNameHere[22m\\nRest of existing \\'comment\\' \\nhere.';]
 `;
 
@@ -20,13 +20,13 @@ exports[`simple collections naming clash 1`] = `
 [Error: A naming conflict has occurred - two entities have tried to define the same key '[1mclash[22m'.
 
   The first entity was:
-  
+
     [35mBackward relation (connection) for constraint '[1mpost_author_id_fkey[22m' on table [1m"a"."post"[22m. To rename this relation with smart comments:[39m
     [35m[39m
     [35m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'[1m@foreignFieldName newNameHere[22m\\nRest of existing \\'comment\\' \\nhere.';[39m
 
   The second entity was:
-  
+
     [33mBackward relation (simple collection) for constraint '[1mpost_author_id_fkey[22m' on table [1m"a"."post"[22m. To rename this relation with smart comments:[39m
     [33m[39m
     [33m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'[1m@foreignSimpleFieldName newNameHere[22m\\n@foreignFieldName clash\\nRest of existing \\'comment\\' \\nhere.';[39m]
@@ -36,15 +36,15 @@ exports[`table naming clash - condition 1`] = `
 [Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mPersonCondition[22m'.
 
   The first entity was:
-  
+
     Adding condition type for table [1m"c"."person"[22m. You can rename the table's GraphQL type via:
-    
+
       COMMENT ON TABLE "c"."person" IS E'[1m@name newNameHere[22m\\nPerson test comment';
 
   The second entity was:
-  
+
     Adding table type for table [1m"a"."post"[22m. You can rename the table's GraphQL type via:
-    
+
       COMMENT ON TABLE "a"."post" IS E'[1m@name newNameHere[22m\\nRest of existing \\'comment\\' \\nhere.';]
 `;
 
@@ -52,15 +52,15 @@ exports[`table naming clash - direct 1`] = `
 [Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mPeopleOrderBy[22m'.
 
   The first entity was:
-  
+
     Adding connection "orderBy" argument for table [1m"a"."post"[22m. You can rename the table's GraphQL type via:
-    
+
       COMMENT ON TABLE "a"."post" IS E'[1m@name newNameHere[22m\\nRest of existing \\'comment\\' \\nhere.';
 
   The second entity was:
-  
+
     Adding connection "orderBy" argument for table [1m"c"."person"[22m. You can rename the table's GraphQL type via:
-    
+
       COMMENT ON TABLE "c"."person" IS E'[1m@name newNameHere[22m\\nPerson test comment';]
 `;
 
@@ -68,13 +68,13 @@ exports[`table naming clash - mutation 1`] = `
 [Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mMutation[22m'.
 
   The first entity was:
-  
+
     Adding table type for table [1m"a"."post"[22m. You can rename the table's GraphQL type via:
-    
+
       COMMENT ON TABLE "a"."post" IS E'[1m@name newNameHere[22m\\nRest of existing \\'comment\\' \\nhere.';
 
   The second entity was:
-  
+
     graphile-build built-in (root mutation type)]
 `;
 
@@ -82,15 +82,15 @@ exports[`table naming clash - order 1`] = `
 [Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mPeopleOrderBy[22m'.
 
   The first entity was:
-  
+
     Adding connection "orderBy" argument for table [1m"c"."person"[22m. You can rename the table's GraphQL type via:
-    
+
       COMMENT ON TABLE "c"."person" IS E'[1m@name newNameHere[22m\\nPerson test comment';
 
   The second entity was:
-  
+
     Adding table type for table [1m"a"."post"[22m. You can rename the table's GraphQL type via:
-    
+
       COMMENT ON TABLE "a"."post" IS E'[1m@name newNameHere[22m\\nRest of existing \\'comment\\' \\nhere.';]
 `;
 
@@ -98,11 +98,11 @@ exports[`table naming clash - query 1`] = `
 [Error: A naming conflict has occurred - two entities have tried to define the same key '[1mquery[22m'.
 
   The first entity was:
-  
+
     [35mDefault field included in newWithHooks call for 'Query'. graphile-build built-in (root query type)[39m
 
   The second entity was:
-  
+
     [33mAdding "row by node ID" fields to root Query type[39m]
 `;
 
@@ -110,12 +110,12 @@ exports[`table naming clash - subscription 1`] = `
 [Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mSubscription[22m'.
 
   The first entity was:
-  
+
     Adding table type for table [1m"a"."post"[22m. You can rename the table's GraphQL type via:
-    
+
       COMMENT ON TABLE "a"."post" IS E'[1m@name newNameHere[22m\\nRest of existing \\'comment\\' \\nhere.';
 
   The second entity was:
-  
+
     graphile-build built-in (root subscription type)]
 `;

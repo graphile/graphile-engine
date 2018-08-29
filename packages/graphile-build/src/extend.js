@@ -5,7 +5,9 @@ const aExtendedB = new WeakMap();
 const INDENT = "  ";
 
 export function indent(text) {
-  return INDENT + text.replace(/\n/g, "\n" + INDENT);
+  return (
+    INDENT + text.replace(/\n/g, "\n" + INDENT).replace(/\n +(?=\n|$)/g, "\n")
+  );
 }
 
 export default function extend<Obj1: *, Obj2: *>(
