@@ -11,6 +11,8 @@ export default (function PgConnectionArgCondition(builder) {
       pgColumnFilter,
       inflection,
       pgOmit: omit,
+      describePgEntity,
+      sqlCommentByAddingTags,
     } = build;
     introspectionResultsByKind.class
       .filter(table => table.isSelectable && !omit(table, "filter"))
@@ -50,6 +52,13 @@ export default (function PgConnectionArgCondition(builder) {
             },
           },
           {
+            __origin: `Adding condition type for ${describePgEntity(
+              table
+            )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
+              table.namespaceName
+            }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
+              name: "newNameHere",
+            })};`,
             pgIntrospection: table,
             isPgCondition: true,
           }

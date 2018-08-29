@@ -768,7 +768,15 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
       }
 
       if (finalSpec.name) {
-        this.addType(Self, scope.__origin);
+        this.addType(
+          Self,
+          scope.__origin ||
+            (this
+              ? `'newWithHooks' call during hook '${
+                  this.status.currentHookName
+                }'`
+              : null)
+        );
       }
       fieldDataGeneratorsByFieldNameByType.set(
         Self,

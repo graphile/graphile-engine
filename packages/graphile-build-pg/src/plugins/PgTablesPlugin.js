@@ -55,6 +55,8 @@ export default (function PgTablesPlugin(
         GraphQLInputObjectType,
       },
       inflection,
+      describePgEntity,
+      sqlCommentByAddingTags,
     } = build;
     const nullableIf = (condition, Type) =>
       condition ? Type : new GraphQLNonNull(Type);
@@ -177,6 +179,13 @@ export default (function PgTablesPlugin(
               },
             },
             {
+              __origin: `Adding table type for ${describePgEntity(
+                table
+              )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
+                table.namespaceName
+              }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
+                name: "newNameHere",
+              })};`,
               pgIntrospection: table,
               isPgRowType: table.isSelectable,
               isPgCompoundType: !table.isSelectable,
@@ -193,6 +202,13 @@ export default (function PgTablesPlugin(
               name: inflection.inputType(TableType),
             },
             {
+              __origin: `Adding table input type for ${describePgEntity(
+                table
+              )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
+                table.namespaceName
+              }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
+                name: "newNameHere",
+              })};`,
               pgIntrospection: table,
               isInputType: true,
               isPgRowType: table.isSelectable,
@@ -222,6 +238,13 @@ export default (function PgTablesPlugin(
                 name: inflection.patchType(TableType),
               },
               {
+                __origin: `Adding table patch type for ${describePgEntity(
+                  table
+                )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
+                  table.namespaceName
+                }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
+                  name: "newNameHere",
+                })};`,
                 pgIntrospection: table,
                 isPgRowType: table.isSelectable,
                 isPgCompoundType: !table.isSelectable,
@@ -244,6 +267,13 @@ export default (function PgTablesPlugin(
                 name: inflection.baseInputType(TableType),
               },
               {
+                __origin: `Adding table base input type for ${describePgEntity(
+                  table
+                )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
+                  table.namespaceName
+                }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
+                  name: "newNameHere",
+                })};`,
                 pgIntrospection: table,
                 isPgRowType: table.isSelectable,
                 isPgCompoundType: !table.isSelectable,
@@ -342,6 +372,13 @@ export default (function PgTablesPlugin(
               },
             },
             {
+              __origin: `Adding table edge type for ${describePgEntity(
+                table
+              )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
+                table.namespaceName
+              }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
+                name: "newNameHere",
+              })};`,
               isEdgeType: true,
               isPgRowEdgeType: true,
               nodeType: TableType,
@@ -394,6 +431,13 @@ export default (function PgTablesPlugin(
               },
             },
             {
+              __origin: `Adding table connection type for ${describePgEntity(
+                table
+              )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
+                table.namespaceName
+              }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
+                name: "newNameHere",
+              })};`,
               isConnectionType: true,
               isPgRowConnectionType: true,
               edgeType: EdgeType,
