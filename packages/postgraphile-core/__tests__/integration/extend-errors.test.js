@@ -25,3 +25,9 @@ check(
     comment on constraint post_author_id_fkey on a.post is E'@foreignFieldName clash\nRest of existing ''comment'' \nhere.';
   `
 );
+check(
+  "table naming clash",
+  `
+    comment on table a.post is E'@name person\nRest of existing ''comment'' \nhere.';
+  `
+);
