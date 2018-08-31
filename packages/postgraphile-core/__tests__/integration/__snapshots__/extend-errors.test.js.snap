@@ -21,7 +21,9 @@ exports[`function naming clash - computed 1`] = `
 
   The first entity was:
 
-    [35mAdding columns to 'table [1m"c"."edge_case"[22m'[39m
+    [35mAdding field for column [1m"row_id"[22m on table [1m"c"."edge_case"[22m. You can rename this field with:[39m
+    [35m[39m
+    [35m  COMMENT ON COLUMN "c"."edge_case"."row_id" IS E'[1m@name newNameHere[22m';[39m
 
   The second entity was:
 
