@@ -36,9 +36,13 @@ export default (async function SubscriptionPlugin(builder) {
       true
     );
     if (isValidSubscription(Subscription)) {
-      return extend(schema, {
-        subscription: Subscription,
-      });
+      return extend(
+        schema,
+        {
+          subscription: Subscription,
+        },
+        "Adding subscription type to schema"
+      );
     } else {
       return schema;
     }

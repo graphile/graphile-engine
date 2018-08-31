@@ -81,11 +81,11 @@ export default (function PgColumnsPlugin(builder) {
       inflection,
       pgOmit: omit,
       pgGetSelectValueForFieldAndTypeAndModifier: getSelectValueForFieldAndTypeAndModifier,
+      describePgEntity,
     } = build;
     const {
       scope: { isPgRowType, isPgCompoundType, pgIntrospection: table },
       fieldWithHooks,
-      Self,
     } = context;
     if (
       !(isPgRowType || isPgCompoundType) ||
@@ -164,7 +164,7 @@ export default (function PgColumnsPlugin(builder) {
           );
           return memo;
         }, {}),
-      `Adding columns to '${Self.name}'`
+      `Adding columns to '${describePgEntity(table)}'`
     );
   });
   builder.hook("GraphQLInputObjectType:fields", (fields, build, context) => {
@@ -176,6 +176,7 @@ export default (function PgColumnsPlugin(builder) {
       pgColumnFilter,
       inflection,
       pgOmit: omit,
+      describePgEntity,
     } = build;
     const {
       scope: {
@@ -187,7 +188,6 @@ export default (function PgColumnsPlugin(builder) {
         pgAddSubfield,
       },
       fieldWithHooks,
-      Self,
     } = context;
     if (
       !(isPgRowType || isPgCompoundType) ||
@@ -243,7 +243,7 @@ export default (function PgColumnsPlugin(builder) {
           );
           return memo;
         }, {}),
-      `Adding columns to input object '${Self.name}'`
+      `Adding columns to input object for ${describePgEntity(table)}`
     );
   });
 }: Plugin);

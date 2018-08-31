@@ -36,9 +36,13 @@ export default (async function MutationPlugin(builder) {
       true
     );
     if (isValidMutation(Mutation)) {
-      return extend(schema, {
-        mutation: Mutation,
-      });
+      return extend(
+        schema,
+        {
+          mutation: Mutation,
+        },
+        "Adding mutation type to schema"
+      );
     } else {
       return schema;
     }
