@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`function naming clash - nodeId 1`] = `
+[Error: A naming conflict has occurred - two entities have tried to define the same key '[1mnodeId[22m'.
+
+  The first entity was:
+
+    [35mAdding node helpers to the root Query[39m
+
+  The second entity was:
+
+    [33mAdding query field for function [1m"c"."int_set_query"(...args...)[22m. You can rename this field with:[39m
+    [33m[39m
+    [33m  COMMENT ON FUNCTION "c"."int_set_query"(...arg types go here...) IS E'[1m@name newNameHere[22m\\nRest of existing \\'comment\\' \\nhere.';[39m]
+`;
+
 exports[`function naming clash - payload 1`] = `
 [Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mQEdge[22m'.
 
@@ -21,13 +35,13 @@ exports[`simple collections naming clash 1`] = `
 
   The first entity was:
 
-    [35mBackward relation (connection) for constraint '[1mpost_author_id_fkey[22m' on table [1m"a"."post"[22m. To rename this relation with smart comments:[39m
+    [35mBackward relation (connection) for constraint [1m"post_author_id_fkey"[22m on table [1m"a"."post"[22m. To rename this relation with smart comments:[39m
     [35m[39m
     [35m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'[1m@foreignFieldName newNameHere[22m\\nRest of existing \\'comment\\' \\nhere.';[39m
 
   The second entity was:
 
-    [33mBackward relation (simple collection) for constraint '[1mpost_author_id_fkey[22m' on table [1m"a"."post"[22m. To rename this relation with smart comments:[39m
+    [33mBackward relation (simple collection) for constraint [1m"post_author_id_fkey"[22m on table [1m"a"."post"[22m. To rename this relation with smart comments:[39m
     [33m[39m
     [33m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'[1m@foreignSimpleFieldName newNameHere[22m\\n@foreignFieldName clash\\nRest of existing \\'comment\\' \\nhere.';[39m]
 `;

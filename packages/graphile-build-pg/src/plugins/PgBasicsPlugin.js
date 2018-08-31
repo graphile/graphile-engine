@@ -136,7 +136,7 @@ function omitWithRBACChecks(
 function describePgEntity(entity) {
   try {
     if (entity.kind === "constraint") {
-      return `constraint '${chalk.bold(
+      return `constraint ${chalk.bold(
         `"${entity.name}"`
       )} on ${describePgEntity(entity.class)}`;
     } else if (entity.kind === "class") {

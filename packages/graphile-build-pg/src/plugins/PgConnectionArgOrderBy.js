@@ -142,7 +142,7 @@ export default (function PgConnectionArgOrderBy(builder) {
             type: new GraphQLList(new GraphQLNonNull(TableOrderByType)),
           },
         },
-        `Adding 'orderBy' to field '${field.name}' of '${Self.name}'`
+        `Adding 'orderBy' argument to field '${field.name}' of '${Self.name}'`
       );
     }
   );

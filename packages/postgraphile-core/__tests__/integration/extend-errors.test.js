@@ -92,3 +92,9 @@ check(
     comment on function c.int_set_query(int, int, int) is E'@name q\nRest of existing ''comment'' \nhere.';
   `
 );
+check(
+  "function naming clash - nodeId",
+  `
+    comment on function c.int_set_query(int, int, int) is E'@name nodeId\nRest of existing ''comment'' \nhere.';
+  `
+);
