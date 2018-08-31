@@ -197,7 +197,9 @@ exports[`table naming clash - query 1`] = `
 
   The second entity was:
 
-    [33mAdding "row by node ID" fields to root Query type[39m]
+    [33mAdding row by globally unique identifier field for table [1m"a"."post"[22m (with smart comments: [1m@name query[22m). You can rename this table via:[39m
+    [33m[39m
+    [33m  COMMENT ON TABLE "a"."post" IS E'[1m@name newNameHere[22m\\nRest of existing \\'comment\\' \\nhere.';[39m]
 `;
 
 exports[`table naming clash - subscription 1`] = `
