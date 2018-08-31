@@ -115,3 +115,15 @@ check(
     comment on function a.mutation_text_array() is E'@name createPost\nRest of existing ''comment'' \nhere.';
   `
 );
+check(
+  "function naming clash - updatePost",
+  `
+    comment on function a.mutation_text_array() is E'@name updatePost\nRest of existing ''comment'' \nhere.';
+  `
+);
+check(
+  "function naming clash - deletePost",
+  `
+    comment on function a.mutation_text_array() is E'@name deletePost\nRest of existing ''comment'' \nhere.';
+  `
+);
