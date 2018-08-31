@@ -133,6 +133,44 @@ function omitWithRBACChecks(
   return omit(entity, permission);
 }
 
+function describePgEntity(entity) {
+  try {
+    if (entity.kind === "constraint") {
+      return `constraint '${chalk.bold(
+        `"${entity.name}"`
+      )} on ${describePgEntity(entity.class)}`;
+    } else if (entity.kind === "class") {
+      // see pg_class.relkind https://www.postgresql.org/docs/10/static/catalog-pg-class.html
+      const kind =
+        {
+          c: "composite type",
+          f: "foreign table",
+          p: "partitioned table",
+          r: "table",
+          v: "view",
+          m: "materialized view",
+        }[entity.classKind] || "table-like";
+      return `${kind} ${chalk.bold(
+        `"${entity.namespaceName}"."${entity.name}"`
+      )}`;
+    } else if (entity.kind === "procedure") {
+      return `function ${chalk.bold(
+        `"${entity.namespaceName}"."${entity.name}"(...args...)`
+      )}`;
+    } else if (entity.kind === "attribute") {
+      return `column ${chalk.bold(`"${entity.name}"`)} on ${describePgEntity(
+        entity.class
+      )}`;
+    }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("Error occurred while attempting to debug entity:", entity);
+    // eslint-disable-next-line no-console
+    console.error(e);
+  }
+  return `entity of kind '${entity.kind}' with oid '${entity.oid}'`;
+}
+
 export default (function PgBasicsPlugin(
   builder,
   {
@@ -154,34 +192,7 @@ export default (function PgBasicsPlugin(
       pgMakeProcField: makeProcField,
       pgParseIdentifier: parseIdentifier,
       pgViaTemporaryTable: viaTemporaryTable,
-      describePgEntity: entity => {
-        try {
-          if (entity.kind === "constraint") {
-            return `constraint '${chalk.bold(
-              entity.name
-            )}' on table ${chalk.bold(
-              `"${entity.class.namespaceName}"."${entity.class.name}"`
-            )}`;
-          } else if (entity.kind === "class") {
-            return `table ${chalk.bold(
-              `"${entity.namespaceName}"."${entity.name}"`
-            )}`;
-          } else if (entity.kind === "procedure") {
-            return `function ${chalk.bold(
-              `"${entity.namespaceName}"."${entity.name}"(...args...)`
-            )}`;
-          }
-        } catch (e) {
-          // eslint-disable-next-line no-console
-          console.error(
-            "Error occurred while attempting to debug entity:",
-            entity
-          );
-          // eslint-disable-next-line no-console
-          console.error(e);
-        }
-        return `entity of kind '${entity.kind}' with oid '${entity.oid}'`;
-      },
+      describePgEntity,
       sqlCommentByAddingTags: (thing, tagsToAdd) => {
         // NOTE: this function is NOT intended to be SQL safe; it's for
         // displaying in error messages. Nonetheless if you find issues with

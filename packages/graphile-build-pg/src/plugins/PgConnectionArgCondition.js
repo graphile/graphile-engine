@@ -33,19 +33,25 @@ export default (function PgConnectionArgCondition(builder) {
                 .filter(attr => !omit(attr, "filter"))
                 .reduce((memo, attr) => {
                   const fieldName = inflection.column(attr);
-                  memo[fieldName] = fieldWithHooks(
-                    fieldName,
+                  memo = build.extend(
+                    memo,
                     {
-                      description: `Checks for equality with the object’s \`${fieldName}\` field.`,
-                      type:
-                        pgGetGqlInputTypeByTypeIdAndModifier(
-                          attr.typeId,
-                          attr.typeModifier
-                        ) || GraphQLString,
+                      [fieldName]: fieldWithHooks(
+                        fieldName,
+                        {
+                          description: `Checks for equality with the object’s \`${fieldName}\` field.`,
+                          type:
+                            pgGetGqlInputTypeByTypeIdAndModifier(
+                              attr.typeId,
+                              attr.typeModifier
+                            ) || GraphQLString,
+                        },
+                        {
+                          isPgConnectionConditionInputField: true,
+                        }
+                      ),
                     },
-                    {
-                      isPgConnectionConditionInputField: true,
-                    }
+                    `Adding condition argument for ${describePgEntity(attr)}`
                   );
                   return memo;
                 }, {});
