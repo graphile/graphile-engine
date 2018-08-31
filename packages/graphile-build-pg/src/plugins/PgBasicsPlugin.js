@@ -27,6 +27,7 @@ import makeProcField from "./makeProcField";
 import parseIdentifier from "../parseIdentifier";
 import viaTemporaryTable from "./viaTemporaryTable";
 import chalk from "chalk";
+import pickBy from "lodash/pickBy";
 
 const defaultPgColumnFilter = (_attr, _build, _context) => true;
 type Keys = Array<{
@@ -133,12 +134,29 @@ function omitWithRBACChecks(
   return omit(entity, permission);
 }
 
-function describePgEntity(entity) {
+function describePgEntity(entity, includeAlias = true) {
+  const getAlias = !includeAlias
+    ? () => ""
+    : () => {
+        const tags = pickBy(
+          entity.tags,
+          (value, key) => key === "name" || key.endsWith("Name")
+        );
+        if (Object.keys(tags).length) {
+          return ` (with smart comments: ${chalk.bold(
+            Object.keys(tags)
+              .map(t => `@${t} ${tags[t]}`)
+              .join(" | ")
+          )})`;
+        }
+        return "";
+      };
+
   try {
     if (entity.kind === "constraint") {
       return `constraint ${chalk.bold(
         `"${entity.name}"`
-      )} on ${describePgEntity(entity.class)}`;
+      )} on ${describePgEntity(entity.class, false)}${getAlias()}`;
     } else if (entity.kind === "class") {
       // see pg_class.relkind https://www.postgresql.org/docs/10/static/catalog-pg-class.html
       const kind =
@@ -152,15 +170,16 @@ function describePgEntity(entity) {
         }[entity.classKind] || "table-like";
       return `${kind} ${chalk.bold(
         `"${entity.namespaceName}"."${entity.name}"`
-      )}`;
+      )}${getAlias()}`;
     } else if (entity.kind === "procedure") {
       return `function ${chalk.bold(
         `"${entity.namespaceName}"."${entity.name}"(...args...)`
-      )}`;
+      )}${getAlias()}`;
     } else if (entity.kind === "attribute") {
       return `column ${chalk.bold(`"${entity.name}"`)} on ${describePgEntity(
-        entity.class
-      )}`;
+        entity.class,
+        false
+      )}${getAlias()}`;
     }
   } catch (e) {
     // eslint-disable-next-line no-console
