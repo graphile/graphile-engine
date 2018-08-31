@@ -1,5 +1,6 @@
 const { withPgClient } = require("../helpers");
 const { createPostGraphileSchema } = require("../..");
+// eslint-disable-next-line no-unused-vars
 const { printSchema } = require("graphql");
 
 function check(description, sql) {
