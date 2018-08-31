@@ -169,14 +169,12 @@ export default (function PgColumnsPlugin(builder) {
             },
             `Adding field for ${describePgEntity(
               attr
-            )}. You can rename this field with:\n\n  COMMENT ON COLUMN "${
-              attr.class.namespaceName
-            }"."${attr.class.name}"."${attr.name}" IS ${sqlCommentByAddingTags(
+            )}. You can rename this field with:\n\n  ${sqlCommentByAddingTags(
               attr,
               {
                 name: "newNameHere",
               }
-            )};`
+            )}`
           );
           return memo;
         }, {}),
@@ -264,14 +262,12 @@ export default (function PgColumnsPlugin(builder) {
             },
             `Adding input object field for ${describePgEntity(
               attr
-            )}. You can rename this field with:\n\n  COMMENT ON COLUMN "${
-              attr.class.namespaceName
-            }"."${attr.class.name}"."${attr.name}" IS ${sqlCommentByAddingTags(
+            )}. You can rename this field with:\n\n  ${sqlCommentByAddingTags(
               attr,
               {
                 name: "newNameHere",
               }
-            )};`
+            )}`
           );
           return memo;
         }, {}),

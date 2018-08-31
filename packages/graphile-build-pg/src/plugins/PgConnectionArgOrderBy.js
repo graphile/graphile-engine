@@ -36,11 +36,12 @@ export default (function PgConnectionArgOrderBy(builder) {
           {
             __origin: `Adding connection "orderBy" argument for ${describePgEntity(
               table
-            )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
-              table.namespaceName
-            }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
-              name: "newNameHere",
-            })};`,
+            )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+              table,
+              {
+                name: "newNameHere",
+              }
+            )}`,
             pgIntrospection: table,
             isPgRowSortEnum: true,
           }

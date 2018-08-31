@@ -88,13 +88,12 @@ export default (function PgQueryProceduresPlugin(
                 },
                 `Adding query field for ${describePgEntity(
                   proc
-                )}. You can rename this field with:\n\n  COMMENT ON FUNCTION "${
-                  proc.namespaceName
-                }"."${
-                  proc.name
-                }"(...arg types go here...) IS ${sqlCommentByAddingTags(proc, {
-                  name: "newNameHere",
-                })};`
+                )}. You can rename this field with:\n\n  ${sqlCommentByAddingTags(
+                  proc,
+                  {
+                    name: "newNameHere",
+                  }
+                )}`
               );
             } catch (e) {
               // eslint-disable-next-line no-console

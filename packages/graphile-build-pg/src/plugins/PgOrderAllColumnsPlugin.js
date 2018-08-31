@@ -41,14 +41,12 @@ export default (function PgOrderAllColumnsPlugin(builder) {
             },
             `Adding ascending orderBy enum value for ${describePgEntity(
               attr
-            )}. You can rename this field with:\n\n  COMMENT ON COLUMN "${
-              attr.class.namespaceName
-            }"."${attr.class.name}"."${attr.name}" IS ${sqlCommentByAddingTags(
+            )}. You can rename this field with:\n\n  ${sqlCommentByAddingTags(
               attr,
               {
                 name: "newNameHere",
               }
-            )};`
+            )}`
           );
           memo = extend(
             memo,
@@ -62,14 +60,12 @@ export default (function PgOrderAllColumnsPlugin(builder) {
             },
             `Adding descending orderBy enum value for ${describePgEntity(
               attr
-            )}. You can rename this field with:\n\n  COMMENT ON COLUMN "${
-              attr.class.namespaceName
-            }"."${attr.class.name}"."${attr.name}" IS ${sqlCommentByAddingTags(
+            )}. You can rename this field with:\n\n  ${sqlCommentByAddingTags(
               attr,
               {
                 name: "newNameHere",
               }
-            )};`
+            )}`
           );
           return memo;
         }, {}),

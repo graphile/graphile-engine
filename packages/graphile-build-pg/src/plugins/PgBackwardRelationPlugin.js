@@ -223,13 +223,12 @@ export default (function PgBackwardRelationPlugin(
             },
             `Backward relation (single) for ${describePgEntity(
               constraint
-            )}. To rename this relation with smart comments:\n\n  COMMENT ON CONSTRAINT "${
-              constraint.name
-            }" ON "${table.namespaceName}"."${
-              table.name
-            }" IS ${sqlCommentByAddingTags(constraint, {
-              foreignSingleFieldName: "newNameHere",
-            })};`
+            )}. To rename this relation with smart comments:\n\n  ${sqlCommentByAddingTags(
+              constraint,
+              {
+                foreignSingleFieldName: "newNameHere",
+              }
+            )}`
           );
         }
         function makeFields(isConnection) {
@@ -369,15 +368,14 @@ export default (function PgBackwardRelationPlugin(
                 isConnection ? "connection" : "simple collection"
               }) for ${describePgEntity(
                 constraint
-              )}. To rename this relation with smart comments:\n\n  COMMENT ON CONSTRAINT "${
-                constraint.name
-              }" ON "${table.namespaceName}"."${
-                table.name
-              }" IS ${sqlCommentByAddingTags(constraint, {
-                [isConnection
-                  ? "foreignFieldName"
-                  : "foreignSimpleFieldName"]: "newNameHere",
-              })};`
+              )}. To rename this relation with smart comments:\n\n  ${sqlCommentByAddingTags(
+                constraint,
+                {
+                  [isConnection
+                    ? "foreignFieldName"
+                    : "foreignSimpleFieldName"]: "newNameHere",
+                }
+              )}`
             );
           }
         }

@@ -84,13 +84,12 @@ export default (function PgScalarFunctionConnectionPlugin(
           {
             __origin: `Adding function result edge type for ${describePgEntity(
               proc
-            )}. You can rename the function's GraphQL field (and its dependent types) via:\n\n  COMMENT ON FUNCTION "${
-              proc.namespaceName
-            }"."${
-              proc.name
-            }"(...arg types go here...) IS ${sqlCommentByAddingTags(proc, {
-              name: "newNameHere",
-            })};`,
+            )}. You can rename the function's GraphQL field (and its dependent types) via:\n\n  ${sqlCommentByAddingTags(
+              proc,
+              {
+                name: "newNameHere",
+              }
+            )}`,
             isEdgeType: true,
             nodeType: NodeType,
             pgIntrospection: proc,
@@ -136,13 +135,12 @@ export default (function PgScalarFunctionConnectionPlugin(
           {
             __origin: `Adding function connection type for ${describePgEntity(
               proc
-            )}. You can rename the function's GraphQL field (and its dependent types) via:\n\n  COMMENT ON FUNCTION "${
-              proc.namespaceName
-            }"."${
-              proc.name
-            }"(...arg types go here...) IS ${sqlCommentByAddingTags(proc, {
-              name: "newNameHere",
-            })};`,
+            )}. You can rename the function's GraphQL field (and its dependent types) via:\n\n  ${sqlCommentByAddingTags(
+              proc,
+              {
+                name: "newNameHere",
+              }
+            )}`,
             isConnectionType: true,
             edgeType: EdgeType,
             nodeType: NodeType,

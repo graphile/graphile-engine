@@ -212,7 +212,7 @@ export default (function PgBasicsPlugin(
       pgParseIdentifier: parseIdentifier,
       pgViaTemporaryTable: viaTemporaryTable,
       describePgEntity,
-      sqlCommentByAddingTags: (thing, tagsToAdd) => {
+      sqlCommentByAddingTags: (entity, tagsToAdd) => {
         // NOTE: this function is NOT intended to be SQL safe; it's for
         // displaying in error messages. Nonetheless if you find issues with
         // SQL compatibility, please send a PR or issue.
@@ -232,9 +232,9 @@ export default (function PgBasicsPlugin(
           );
 
         // tagsToAdd is here twice to ensure that the keys in tagsToAdd come first, but that they also "win" any conflicts.
-        const tags = Object.assign({}, tagsToAdd, thing.tags, tagsToAdd);
+        const tags = Object.assign({}, tagsToAdd, entity.tags, tagsToAdd);
 
-        const description = thing.description;
+        const description = entity.description;
         const tagsSql = Object.keys(tags)
           .reduce((memo, tag) => {
             const tagValue = tags[tag];
@@ -252,7 +252,39 @@ export default (function PgBasicsPlugin(
             return memo;
           }, [])
           .join("\\n");
-        return `E'${tagsSql}${description ? "\\n" + escape(description) : ""}'`;
+        const commentValue = `E'${tagsSql}${
+          description ? "\\n" + escape(description) : ""
+        }'`;
+        let sqlThing;
+        if (entity.kind === "class") {
+          const identifier = `"${entity.namespaceName}"."${entity.name}"`;
+          if (entity.classKind === "r") {
+            sqlThing = `TABLE ${identifier}`;
+          } else if (entity.classKind === "v") {
+            sqlThing = `VIEW ${identifier}`;
+          } else if (entity.classKind === "m") {
+            sqlThing = `MATERIALIZED VIEW ${identifier}`;
+          } else {
+            sqlThing = `PLEASE_SEND_A_PULL_REQUEST_TO_FIX_THIS ${identifier}`;
+          }
+        } else if (entity.kind === "attribute") {
+          sqlThing = `COLUMN "${entity.class.namespaceName}"."${
+            entity.class.name
+          }"."${entity.name}"`;
+        } else if (entity.kind === "procedure") {
+          sqlThing = `FUNCTION "${entity.namespaceName}"."${
+            entity.name
+          }"(...arg types go here...)`;
+        } else if (entity.kind === "constraint") {
+          // TODO: TEST!
+          sqlThing = `CONSTRAINT "${entity.name}" ON "${
+            entity.class.namespaceName
+          }"."${entity.class.name}"`;
+        } else {
+          sqlThing = `UNKNOWN_ENTITY_PLEASE_SEND_A_PULL_REQUEST`;
+        }
+
+        return `COMMENT ON ${sqlThing} IS ${commentValue};`;
       },
     });
   });

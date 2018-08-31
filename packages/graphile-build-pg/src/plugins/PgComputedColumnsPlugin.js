@@ -103,13 +103,12 @@ export default (function PgComputedColumnsPlugin(
                 },
                 `Adding computed column for ${describePgEntity(
                   proc
-                )}. You can rename this field with:\n\n  COMMENT ON FUNCTION "${
-                  proc.namespaceName
-                }"."${
-                  proc.name
-                }"(...arg types go here...) IS ${sqlCommentByAddingTags(proc, {
-                  fieldName: "newNameHere",
-                })};`
+                )}. You can rename this field with:\n\n  ${sqlCommentByAddingTags(
+                  proc,
+                  {
+                    fieldName: "newNameHere",
+                  }
+                )}`
               );
             } catch (e) {
               swallowError(e);

@@ -95,11 +95,12 @@ export default (function PgMutationCreatePlugin(
             {
               __origin: `Adding table create input type for ${describePgEntity(
                 table
-              )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
-                table.namespaceName
-              }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
-                name: "newNameHere",
-              })};`,
+              )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+                table,
+                {
+                  name: "newNameHere",
+                }
+              )}`,
               isPgCreateInputType: true,
               pgInflection: table,
             }
@@ -131,11 +132,12 @@ export default (function PgMutationCreatePlugin(
             {
               __origin: `Adding table create payload type for ${describePgEntity(
                 table
-              )}. You can rename the table's GraphQL type via:\n\n  COMMENT ON TABLE "${
-                table.namespaceName
-              }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
-                name: "newNameHere",
-              })};`,
+              )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+                table,
+                {
+                  name: "newNameHere",
+                }
+              )}`,
               isMutationPayload: true,
               isPgCreatePayloadType: true,
               pgIntrospection: table,
@@ -242,11 +244,12 @@ export default (function PgMutationCreatePlugin(
             },
             `Adding create mutation for ${describePgEntity(
               table
-            )}. You can omit this default mutation with:\n\n  COMMENT ON TABLE "${
-              table.namespaceName
-            }"."${table.name}" IS ${sqlCommentByAddingTags(table, {
-              omit: "create",
-            })};`
+            )}. You can omit this default mutation with:\n\n  ${sqlCommentByAddingTags(
+              table,
+              {
+                omit: "create",
+              }
+            )}`
           );
           return memo;
         }, {}),
