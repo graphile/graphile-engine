@@ -1,5 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`column naming clash - rename 1`] = `
+[Error: A naming conflict has occurred - two entities have tried to define the same key '[1mWONT_CAST_EASY_ASC[22m'.
+
+  The first entity was:
+
+    [35mAdding ascending orderBy enum value for column [1m"wont_cast_easy"[22m on table [1m"c"."edge_case"[22m. You can rename this field with:[39m
+    [35m[39m
+    [35m  COMMENT ON COLUMN "c"."edge_case"."wont_cast_easy" IS E'[1m@name newNameHere[22m';[39m
+
+  The second entity was:
+
+    [33mAdding ascending orderBy enum value for column [1m"row_id"[22m on table [1m"c"."edge_case"[22m (with smart comments: [1m@name wontCastEasy[22m). You can rename this field with:[39m
+    [33m[39m
+    [33m  COMMENT ON COLUMN "c"."edge_case"."row_id" IS E'[1m@name newNameHere[22m\\nRest of existing \\'comment\\' \\nhere.';[39m]
+`;
+
 exports[`function naming clash - computed 1`] = `
 [Error: A naming conflict has occurred - two entities have tried to define the same key '[1mrowId[22m'.
 

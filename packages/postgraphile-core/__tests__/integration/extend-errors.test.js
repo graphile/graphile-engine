@@ -133,3 +133,9 @@ check(
     comment on function c.edge_case_computed(c.edge_case) is E'@fieldName rowId\nRest of existing ''comment'' \nhere.';
   `
 );
+check(
+  "column naming clash - rename",
+  `
+    comment on column c.edge_case.row_id is E'@name wontCastEasy\nRest of existing ''comment'' \nhere.';
+  `
+);
