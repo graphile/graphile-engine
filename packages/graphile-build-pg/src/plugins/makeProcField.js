@@ -419,6 +419,7 @@ export default function makeProcField(
             },
           },
           Object.assign(
+            {},
             {
               __origin: `Adding mutation function payload type for ${describePgEntity(
                 proc

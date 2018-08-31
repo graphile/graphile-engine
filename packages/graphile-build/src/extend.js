@@ -4,7 +4,7 @@ import chalk from "chalk";
 const aExtendedB = new WeakMap();
 const INDENT = "  ";
 
-export function indent(text) {
+export function indent(text: string) {
   return (
     INDENT + text.replace(/\n/g, "\n" + INDENT).replace(/\n +(?=\n|$)/g, "\n")
   );
@@ -31,7 +31,8 @@ export default function extend<Obj1: *, Obj2: *>(
     const hintKey = `_source__${key}`;
     const hintB = extra[hintKey] || hint;
     if (aExtendedB.get(newValue) !== oldValue && keysA.indexOf(key) >= 0) {
-      const hintA = base[hintKey];
+      // $FlowFixMe
+      const hintA: ?string = base[hintKey];
       const firstEntityDetails = !hintA
         ? "We don't have any information about the first entity."
         : `The first entity was:\n\n${indent(chalk.magenta(hintA))}`;

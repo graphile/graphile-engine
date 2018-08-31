@@ -54,14 +54,14 @@ export type Build = {|
     _context: mixed,
     resolveInfo: GraphQLResolveInfo
   ): string,
-  addType(type: GraphQLNamedType): void,
+  addType(type: GraphQLNamedType, origin?: ?string): void,
   getTypeByName(typeName: string): ?GraphQLType,
   extend<Obj1: *, Obj2: *>(base: Obj1, extra: Obj2, hint?: string): Obj1 & Obj2,
-  newWithHooks<T: GraphQLNamedType | GraphQLSchema>(
+  newWithHooks<T: GraphQLNamedType | GraphQLSchema, ConfigType: *>(
     Class<T>,
-    spec: {},
-    scope: {},
-    returnNullOnInvalid?: boolean
+    spec: ConfigType,
+    scope: Scope,
+    performNonEmptyFieldsCheck?: boolean
   ): ?T,
   fieldDataGeneratorsByType: Map<*, *>, // @deprecated - use fieldDataGeneratorsByFieldNameByType instead
   fieldDataGeneratorsByFieldNameByType: Map<*, *>,
@@ -71,6 +71,10 @@ export type Build = {|
     [string]: (...args: Array<any>) => string,
   },
   swallowError: (e: Error) => void,
+  status: {
+    currentHookName: ?string,
+    currentHookEvent: ?string,
+  },
 |};
 
 export type BuildExtensionQuery = {|
@@ -78,6 +82,7 @@ export type BuildExtensionQuery = {|
 |};
 
 export type Scope = {
+  __origin: ?string,
   [string]: mixed,
 };
 

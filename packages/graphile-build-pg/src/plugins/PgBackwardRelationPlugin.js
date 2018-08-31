@@ -154,7 +154,11 @@ export default (function PgBackwardRelationPlugin(
           legacyRelationMode === DEPRECATED ||
           legacyRelationMode === ONLY;
 
-        if (shouldAddSingleRelation && !omit(table, "read")) {
+        if (
+          shouldAddSingleRelation &&
+          !omit(table, "read") &&
+          singleRelationFieldName
+        ) {
           memo = extend(
             memo,
             {
