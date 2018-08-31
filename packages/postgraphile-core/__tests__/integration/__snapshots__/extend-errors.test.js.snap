@@ -69,7 +69,7 @@ exports[`function naming clash - nodeId 1`] = `
 
   The first entity was:
 
-    [35mAdding node helpers to the root Query[39m
+    [35mAdding Relay Global Object Identification support to the root Query via 'node' and 'nodeId' fields[39m
 
   The second entity was:
 

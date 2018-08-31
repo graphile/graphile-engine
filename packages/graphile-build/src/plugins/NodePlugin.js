@@ -220,7 +220,7 @@ export default (function NodePlugin(
             }
           ),
         },
-        `Adding node helpers to the root Query`
+        `Adding Relay Global Object Identification support to the root Query via 'node' and '${nodeIdFieldName}' fields`
       );
     }
   );
