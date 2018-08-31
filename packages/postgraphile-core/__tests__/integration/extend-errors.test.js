@@ -5,6 +5,7 @@ const { printSchema } = require("graphql");
 function check(description, sql) {
   test(description, async () => {
     let error;
+    // eslint-disable-next-line no-unused-vars
     let schema;
     await withPgClient(async pgClient => {
       await pgClient.query(sql);
@@ -39,7 +40,7 @@ function check(description, sql) {
     // Debugging
     if (!error) {
       // eslint-disable-next-line no-console
-      //console.error(printSchema(schema));
+      // console.error(printSchema(schema));
     }
     expect(error).toBeTruthy();
     expect(error).toMatchSnapshot();
