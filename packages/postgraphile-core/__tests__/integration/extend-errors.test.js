@@ -36,6 +36,11 @@ function check(description, sql) {
         error = e;
       }
     });
+    // Debugging
+    if (!error) {
+      // eslint-disable-next-line no-console
+      //console.error(printSchema(schema));
+    }
     expect(error).toBeTruthy();
     expect(error).toMatchSnapshot();
   });
