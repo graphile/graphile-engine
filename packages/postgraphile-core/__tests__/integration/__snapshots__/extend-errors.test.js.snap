@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`function naming clash - computed 1`] = `
+[Error: A naming conflict has occurred - two entities have tried to define the same key '[1mrowId[22m'.
+
+  The first entity was:
+
+    [35mAdding columns to 'table [1m"c"."edge_case"[22m'[39m
+
+  The second entity was:
+
+    [33mAdding computed column for function [1m"c"."edge_case_computed"(...args...)[22m (with smart comments: [1m@fieldName rowId[22m). You can rename this field with:[39m
+    [33m[39m
+    [33m  COMMENT ON FUNCTION "c"."edge_case_computed"(...arg types go here...) IS E'[1m@fieldName newNameHere[22m\\nRest of existing \\'comment\\' \\nhere.';[39m]
+`;
+
 exports[`function naming clash - createPost 1`] = `
 [Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mCreatePostPayload[22m'.
 

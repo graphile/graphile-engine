@@ -127,3 +127,9 @@ check(
     comment on function a.mutation_text_array() is E'@name deletePost\nRest of existing ''comment'' \nhere.';
   `
 );
+check(
+  "function naming clash - computed",
+  `
+    comment on function c.edge_case_computed(c.edge_case) is E'@fieldName rowId\nRest of existing ''comment'' \nhere.';
+  `
+);

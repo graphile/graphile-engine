@@ -36,6 +36,7 @@ export default (function PgComputedColumnsPlugin(
       pgMakeProcField: makeProcField,
       swallowError,
       describePgEntity,
+      sqlCommentByAddingTags,
     } = build;
     const tableType = introspectionResultsByKind.type.filter(
       type =>
@@ -100,7 +101,15 @@ export default (function PgComputedColumnsPlugin(
                     forceList,
                   }),
                 },
-                `Adding computed column for ${describePgEntity(proc)}`
+                `Adding computed column for ${describePgEntity(
+                  proc
+                )}. You can rename this field with:\n\n  COMMENT ON FUNCTION "${
+                  proc.namespaceName
+                }"."${
+                  proc.name
+                }"(...arg types go here...) IS ${sqlCommentByAddingTags(proc, {
+                  fieldName: "newNameHere",
+                })};`
               );
             } catch (e) {
               swallowError(e);
