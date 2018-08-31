@@ -1,13 +1,18 @@
 const { withPgClient } = require("../helpers");
 const { createPostGraphileSchema } = require("../..");
+const { printSchema } = require("graphql");
 
 function check(description, sql) {
   test(description, async () => {
     let error;
+    let schema;
     await withPgClient(async pgClient => {
       await pgClient.query(sql);
       try {
-        await createPostGraphileSchema(pgClient, ["a", "b", "c"], {
+        schema = await createPostGraphileSchema(pgClient, ["a", "b", "c"], {
+          graphileBuildOptions: {
+            dontSwallowErrors: true,
+          },
           simpleCollections: "both",
           appendPlugins: [
             function DummySubPlugin(builder) {
@@ -96,5 +101,11 @@ check(
   "function naming clash - nodeId",
   `
     comment on function c.int_set_query(int, int, int) is E'@name nodeId\nRest of existing ''comment'' \nhere.';
+  `
+);
+check(
+  "function naming clash - createPost",
+  `
+    comment on function a.mutation_text_array() is E'@name createPost\nRest of existing ''comment'' \nhere.';
   `
 );
