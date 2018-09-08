@@ -159,7 +159,7 @@ with
       nullif(att.atttypmod, -1) as "typeModifier",
       att.attnotnull as "isNotNull",
       att.atthasdef as "hasDefault",
-      ${serverVersionNum >= 100000 ? `att.attidentity as "identity",` : ``}
+      ${serverVersionNum >= 100000 ? "att.attidentity" : "''"} as "identity",
       exists(select 1 from accessible_roles where has_column_privilege(accessible_roles.oid, att.attrelid, att.attname, 'SELECT')) as "aclSelectable",
       exists(select 1 from accessible_roles where has_column_privilege(accessible_roles.oid, att.attrelid, att.attname, 'INSERT')) as "aclInsertable",
       exists(select 1 from accessible_roles where has_column_privilege(accessible_roles.oid, att.attrelid, att.attname, 'UPDATE')) as "aclUpdatable"
