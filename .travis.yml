@@ -25,8 +25,7 @@ script:
 
 matrix:
   include:
-    - name: PG10
-      addons:
+    - addons:
         apt:
           packages:
             - postgresql-10
@@ -35,20 +34,6 @@ matrix:
       env:
         - PGPORT=5433
         - TEST_DATABASE_URL=postgres://travis:travis@localhost:5433/travis
-      sudo: false
-      dist: trusty
-      before_script:
-        - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
-    - name: PG11
-      addons:
-        apt:
-          packages:
-            - postgresql-11
-            - postgresql-client-11
-        postgresql: 11
-      env:
-        - PGPORT=5434
-        - TEST_DATABASE_URL=postgres://travis:travis@localhost:5434/travis
       sudo: false
       dist: trusty
       before_script:
