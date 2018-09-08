@@ -31,10 +31,17 @@ beforeAll(() => {
   const gqlSchemaPromise = withPgClient(async pgClient => {
     // A selection of omit/rename comments on the d schema
     await pgClient.query(await dSchemaComments());
-
-    const [gqlSchema, dSchema] = await Promise.all([
+    const versionResult = await pgClient.query("show server_version_num;");
+    const serverVersionNum = parseInt(
+      versionResult.rows[0].server_version_num,
+      10
+    );
+    const [gqlSchema, dSchema, pg10Schema] = await Promise.all([
       createPostGraphileSchema(pgClient, ["a", "b", "c"]),
       createPostGraphileSchema(pgClient, ["d"]),
+      serverVersionNum >= 100000
+        ? await createPostGraphileSchema(pgClient, ["pg10"])
+        : null,
     ]);
     // Now for RBAC-enabled tests
     await pgClient.query("set role postgraphile_test_authenticator");
@@ -44,6 +51,7 @@ beforeAll(() => {
     return {
       gqlSchema,
       dSchema,
+      pg10Schema,
       rbacSchema,
     };
   });
@@ -56,7 +64,7 @@ beforeAll(() => {
   mutationResults = mutationFileNames.map(async fileName => {
     // Wait for the schema to resolve. We need the schema to be introspected
     // before we can do anything else!
-    let { gqlSchema, dSchema, rbacSchema } = await gqlSchemaPromise;
+    let { gqlSchema, dSchema, pg10Schema, rbacSchema } = await gqlSchemaPromise;
     // Get a new Postgres client and run the mutation.
     return await withPgClient(async pgClient => {
       // Read the mutation from the file system.
@@ -71,6 +79,8 @@ beforeAll(() => {
       let schemaToUse;
       if (fileName.startsWith("d.")) {
         schemaToUse = dSchema;
+      } else if (fileName.startsWith("pg10.")) {
+        schemaToUse = pg10Schema;
       } else if (fileName.startsWith("rbac.")) {
         await pgClient.query(
           "select set_config('role', 'postgraphile_test_visitor', true), set_config('jwt.claims.user_id', '3', true)"
