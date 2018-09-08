@@ -1,4 +1,5 @@
-function makeIntrospectionQuery(serverVersionNum) {
+// @flow
+function makeIntrospectionQuery(serverVersionNum: number): string {
   return `\
 -- @see https://www.postgresql.org/docs/9.5/static/catalogs.html
 -- @see https://github.com/graphile/postgraphile/blob/master/resources/introspection-query.sql
