@@ -69,7 +69,11 @@ with
       -- TODO: Variadic arguments.
       pro.provariadic = 0 and
       -- Filter our aggregate functions and window functions.
-      ${serverVersionNum >= 110000 ? "pro.prokind = 'f'" : 'pro.proisagg = false and pro.proiswindow = false'} and
+      ${
+        serverVersionNum >= 110000
+          ? "pro.prokind = 'f'"
+          : "pro.proisagg = false and pro.proiswindow = false"
+      } and
       -- We want to make sure the argument mode for all of our arguments is
       -- \`IN\` which means \`proargmodes\` will be null.
       pro.proargmodes is null and
