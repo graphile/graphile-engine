@@ -13,6 +13,11 @@ function readFile(filename, encoding) {
   });
 }
 
+async function getServerVersionNum(pgClient) {
+  const versionResult = await pgClient.query("show server_version_num;");
+  return parseInt(versionResult.rows[0].server_version_num, 10);
+}
+
 // This test suite can be flaky. Increase it’s timeout.
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 20;
 
@@ -31,16 +36,12 @@ beforeAll(() => {
   const gqlSchemaPromise = withPgClient(async pgClient => {
     // A selection of omit/rename comments on the d schema
     await pgClient.query(await dSchemaComments());
-    const versionResult = await pgClient.query("show server_version_num;");
-    const serverVersionNum = parseInt(
-      versionResult.rows[0].server_version_num,
-      10
-    );
+    const serverVersionNum = await getServerVersionNum(pgClient);
     const [gqlSchema, dSchema, pg10Schema] = await Promise.all([
       createPostGraphileSchema(pgClient, ["a", "b", "c"]),
       createPostGraphileSchema(pgClient, ["d"]),
       serverVersionNum >= 100000
-        ? await createPostGraphileSchema(pgClient, ["pg10"])
+        ? createPostGraphileSchema(pgClient, ["pg10"])
         : null,
     ]);
     // Now for RBAC-enabled tests
@@ -80,6 +81,12 @@ beforeAll(() => {
       if (fileName.startsWith("d.")) {
         schemaToUse = dSchema;
       } else if (fileName.startsWith("pg10.")) {
+        const serverVersionNum = await getServerVersionNum(pgClient);
+        if (serverVersionNum < 100000) {
+          // eslint-disable-next-line
+          console.log("Skipping test as PG version is less than 10");
+          return;
+        }
         schemaToUse = pg10Schema;
       } else if (fileName.startsWith("rbac.")) {
         await pgClient.query(
