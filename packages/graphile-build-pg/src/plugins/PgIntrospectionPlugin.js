@@ -102,7 +102,7 @@ export type PgAttribute = {
   typeModifier: number,
   isNotNull: boolean,
   hasDefault: boolean,
-  identity: ?string,
+  identity: "" | "a" | "d",
   class: PgClass,
   type: PgType,
   namespace: PgNamespace,
