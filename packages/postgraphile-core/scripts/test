@@ -35,7 +35,7 @@ HERE
 psql -Xqv ON_ERROR_STOP=1 -f __tests__/kitchen-sink-schema.sql "$TEST_DATABASE_URL"
 psql -Xqv ON_ERROR_STOP=1 -f __tests__/kitchen-sink-permissions.sql "$TEST_DATABASE_URL"
 
-SERVER_VERSION_NUM=$(psql -Xqtv ON_ERROR_STOP=1 -c "show server_version_num;")
+SERVER_VERSION_NUM=$(psql -Xqtv ON_ERROR_STOP=1 -c "show server_version_num;" "$TEST_DATABASE_URL")
 
 if [ $SERVER_VERSION_NUM -ge 100000 ]; then
   psql -Xqv ON_ERROR_STOP=1 -f __tests__/pg10.sql "$TEST_DATABASE_URL"
