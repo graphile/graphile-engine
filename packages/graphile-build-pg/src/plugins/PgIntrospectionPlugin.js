@@ -176,9 +176,13 @@ export default (async function PgIntrospectionPlugin(
     const introspectionResultsByKind = cloneResults(
       await persistentMemoizeWithKey(cacheKey, () =>
         withPgClient(pgConfig, async pgClient => {
-          const {
-            rows: [{ server_version_num: serverVersionNum }],
-          } = await pgClient.query("show server_version_num;");
+          const versionResult = await pgClient.query(
+            "show server_version_num;"
+          );
+          const serverVersionNum = parseInt(
+            versionResult.rows[0].server_version_num,
+            10
+          );
           const introspectionQuery = makeIntrospectionQuery(serverVersionNum);
           const { rows } = await pgClient.query(introspectionQuery, [
             schemas,
