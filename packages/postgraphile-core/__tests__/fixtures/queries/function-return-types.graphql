@@ -1,0 +1,32 @@
+{
+  funcInInout(i: 10, ino: 5)
+  funcInOut(i: 10)
+  funcOut
+  funcOutOut {
+    firstOut
+    secondOut
+  }
+  funcOutOutSetof {
+    nodes {
+      o1
+      o2
+    }
+  }
+  funcOutOutUnnamed {
+    arg1
+    arg2
+  }
+  funcOutSetof {
+    nodes
+  }
+  funcOutUnnamed
+  funcReturnsTableMultiCol(i: 20) {
+    nodes {
+      col1
+      col2
+    }
+  }
+  funcReturnsTableOneCol(i: 20) {
+    nodes
+  }
+}

@@ -858,6 +858,110 @@ input FloatRangeInput {
   start: FloatRangeBoundInput
 }
 
+\\"\\"\\"The return type of our \`funcOutOut\` query.\\"\\"\\"
+type FuncOutOutRecord {
+  firstOut: Int
+  secondOut: String
+}
+
+\\"\\"\\"A connection to a list of \`FuncOutOutSetofRecord\` values.\\"\\"\\"
+type FuncOutOutSetofConnection {
+  \\"\\"\\"
+  A list of edges which contains the \`FuncOutOutSetofRecord\` and cursor to aid in pagination.
+  \\"\\"\\"
+  edges: [FuncOutOutSetofEdge!]!
+
+  \\"\\"\\"A list of \`FuncOutOutSetofRecord\` objects.\\"\\"\\"
+  nodes: [FuncOutOutSetofRecord!]!
+}
+
+\\"\\"\\"A \`FuncOutOutSetofRecord\` edge in the connection.\\"\\"\\"
+type FuncOutOutSetofEdge {
+  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
+  cursor: Cursor
+
+  \\"\\"\\"The \`FuncOutOutSetofRecord\` at the end of the edge.\\"\\"\\"
+  node: FuncOutOutSetofRecord
+}
+
+\\"\\"\\"The return type of our \`funcOutOutSetof\` query.\\"\\"\\"
+type FuncOutOutSetofRecord {
+  o1: Int
+  o2: String
+}
+
+\\"\\"\\"The return type of our \`funcOutOutUnnamed\` query.\\"\\"\\"
+type FuncOutOutUnnamedRecord {
+  arg1: Int
+  arg2: String
+}
+
+\\"\\"\\"A connection to a list of \`Int\` values.\\"\\"\\"
+type FuncOutSetofConnection {
+  \\"\\"\\"
+  A list of edges which contains the \`Int\` and cursor to aid in pagination.
+  \\"\\"\\"
+  edges: [FuncOutSetofEdge!]!
+
+  \\"\\"\\"A list of \`Int\` objects.\\"\\"\\"
+  nodes: [Int!]!
+}
+
+\\"\\"\\"A \`Int\` edge in the connection.\\"\\"\\"
+type FuncOutSetofEdge {
+  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
+  cursor: Cursor
+
+  \\"\\"\\"The \`Int\` at the end of the edge.\\"\\"\\"
+  node: Int
+}
+
+\\"\\"\\"A connection to a list of \`FuncReturnsTableMultiColRecord\` values.\\"\\"\\"
+type FuncReturnsTableMultiColConnection {
+  \\"\\"\\"
+  A list of edges which contains the \`FuncReturnsTableMultiColRecord\` and cursor to aid in pagination.
+  \\"\\"\\"
+  edges: [FuncReturnsTableMultiColEdge!]!
+
+  \\"\\"\\"A list of \`FuncReturnsTableMultiColRecord\` objects.\\"\\"\\"
+  nodes: [FuncReturnsTableMultiColRecord!]!
+}
+
+\\"\\"\\"A \`FuncReturnsTableMultiColRecord\` edge in the connection.\\"\\"\\"
+type FuncReturnsTableMultiColEdge {
+  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
+  cursor: Cursor
+
+  \\"\\"\\"The \`FuncReturnsTableMultiColRecord\` at the end of the edge.\\"\\"\\"
+  node: FuncReturnsTableMultiColRecord
+}
+
+\\"\\"\\"The return type of our \`funcReturnsTableMultiCol\` query.\\"\\"\\"
+type FuncReturnsTableMultiColRecord {
+  col1: Int
+  col2: String
+}
+
+\\"\\"\\"A connection to a list of \`Int\` values.\\"\\"\\"
+type FuncReturnsTableOneColConnection {
+  \\"\\"\\"
+  A list of edges which contains the \`Int\` and cursor to aid in pagination.
+  \\"\\"\\"
+  edges: [FuncReturnsTableOneColEdge!]!
+
+  \\"\\"\\"A list of \`Int\` objects.\\"\\"\\"
+  nodes: [Int!]!
+}
+
+\\"\\"\\"A \`Int\` edge in the connection.\\"\\"\\"
+type FuncReturnsTableOneColEdge {
+  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
+  cursor: Cursor
+
+  \\"\\"\\"The \`Int\` at the end of the edge.\\"\\"\\"
+  node: Int
+}
+
 \\"\\"\\"An IPv4 or IPv6 host address, and optionally its subnet.\\"\\"\\"
 scalar InternetAddress
 
@@ -2616,6 +2720,120 @@ type Query implements Node {
     offset: Int
   ): [CompoundType]
   currentUserId: Int
+  funcInInout(i: Int, ino: Int): Int
+  funcInOut(i: Int): Int
+  funcOut: Int
+  funcOutOut: FuncOutOutRecord
+  funcOutOutSetof(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+  ): FuncOutOutSetofConnection!
+  funcOutOutSetofList(
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Skip the first \`n\` values.\\"\\"\\"
+    offset: Int
+  ): [FuncOutOutSetofRecord]
+  funcOutOutUnnamed: FuncOutOutUnnamedRecord
+  funcOutSetof(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+  ): FuncOutSetofConnection!
+  funcOutSetofList(
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Skip the first \`n\` values.\\"\\"\\"
+    offset: Int
+  ): [Int]
+  funcOutUnnamed: Int
+  funcReturnsTableMultiCol(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+    i: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+  ): FuncReturnsTableMultiColConnection!
+  funcReturnsTableMultiColList(
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+    i: Int
+
+    \\"\\"\\"Skip the first \`n\` values.\\"\\"\\"
+    offset: Int
+  ): [FuncReturnsTableMultiColRecord]
+  funcReturnsTableOneCol(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+    i: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+  ): FuncReturnsTableOneColConnection!
+  funcReturnsTableOneColList(
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+    i: Int
+
+    \\"\\"\\"Skip the first \`n\` values.\\"\\"\\"
+    offset: Int
+  ): [Int]
   intSetQuery(
     \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
     after: Cursor

@@ -1242,6 +1242,61 @@ Object {
 }
 `;
 
+exports[`function-return-types.graphql 1`] = `
+Object {
+  "data": Object {
+    "funcInInout": 15,
+    "funcInOut": 52,
+    "funcOut": 42,
+    "funcOutOut": Object {
+      "firstOut": 42,
+      "secondOut": "out",
+    },
+    "funcOutOutSetof": Object {
+      "nodes": Array [
+        Object {
+          "o1": 42,
+          "o2": "out",
+        },
+        Object {
+          "o1": 43,
+          "o2": "out2",
+        },
+      ],
+    },
+    "funcOutOutUnnamed": Object {
+      "arg1": 42,
+      "arg2": "out",
+    },
+    "funcOutSetof": Object {
+      "nodes": Array [
+        42,
+        43,
+      ],
+    },
+    "funcOutUnnamed": 42,
+    "funcReturnsTableMultiCol": Object {
+      "nodes": Array [
+        Object {
+          "col1": 62,
+          "col2": "out",
+        },
+        Object {
+          "col1": 63,
+          "col2": "out2",
+        },
+      ],
+    },
+    "funcReturnsTableOneCol": Object {
+      "nodes": Array [
+        62,
+        63,
+      ],
+    },
+  },
+}
+`;
+
 exports[`longAliases.graphql 1`] = `
 Object {
   "data": Object {

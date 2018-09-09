@@ -448,6 +448,54 @@ create function c.return_table_without_grants() returns c.compound_key as $$
   select * from c.compound_key order by person_id_1, person_id_2 limit 1
 $$ language sql stable security definer;
 
+create function c.func_out(out o int) as $$
+  select 42 as o;
+$$ language sql stable;
+
+create function c.func_out_unnamed(out int) as $$
+  select 42;
+$$ language sql stable;
+
+create function c.func_out_setof(out o int) returns setof int as $$
+  select 42 as o
+  union
+  select 43 as o;
+$$ language sql stable;
+
+create function c.func_out_out(out first_out int, out second_out text) as $$
+  select 42 as first_out, 'out' as second_out;
+$$ language sql stable;
+
+create function c.func_out_out_unnamed(out int, out text) as $$
+  select 42, 'out';
+$$ language sql stable;
+
+create function c.func_out_out_setof(out o1 int, out o2 text) returns setof record as $$
+  select 42 as o1, 'out' as o2
+  union
+  select 43 as o1, 'out2' as o2
+$$ language sql stable;
+
+create function c.func_in_out(i int, out o int) as $$
+  select i + 42 as o;
+$$ language sql stable;
+
+create function c.func_in_inout(i int, inout ino int) as $$
+  select i + ino as ino;
+$$ language sql stable;
+
+create function c.func_returns_table_one_col(i int) returns table (col1 int) as $$
+  select i + 42 as col1
+  union
+  select i + 43 as col1;
+$$ language sql stable;
+
+create function c.func_returns_table_multi_col(i int) returns table (col1 int, col2 text) as $$
+  select i + 42 as col1, 'out' as col2
+  union
+  select i + 43 as col1, 'out2' as col2;
+$$ language sql stable;
+
 -- Begin tests for smart comments
 
 -- Rename table and columns
