@@ -40,6 +40,7 @@ export type PgProc = {
   returnTypeId: string,
   argTypeIds: Array<string>,
   argNames: Array<string>,
+  argModes: Array<string>,
   argDefaultsNum: number,
   namespace: PgNamespace,
   tags: { [string]: string },
