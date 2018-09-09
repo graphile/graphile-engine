@@ -87,13 +87,47 @@ export default function makeProcField(
   if (computed && isMutation) {
     throw new Error("Mutation procedure cannot be computed");
   }
+  /*
+  let argNames = [];
+  let argTypes = [];
+  let outputArgNames = [];
+  let outputArgTypes = [];
+  for (const idx of proc.argTypeIds.keys()) {
+    if (computed && idx === 0) {
+      continue;
+    }
+    const argName = proc.argNames[idx] || "";
+    const argType = introspectionResultsByKind.typeById[proc.argTypeIds[idx]];
+    if (proc.argModes.length === 0 || proc.argModes[idx] === "i") {
+      argNames.push(argName);
+      argTypes.push(argType);
+    } else if (proc.argModes[idx] === "o") {
+      outputArgNames.push(argName);
+      outputArgTypes.push(argType);
+    } else {
+      throw new Error(`Unexpected argMode '${proc.argModes[idx]}'`);
+    }
+  }
+  */
   const sliceAmount = computed ? 1 : 0;
-  const argNames = proc.argTypeIds
-    .slice(sliceAmount)
-    .map((_, idx) => proc.argNames[idx + sliceAmount] || "");
-  const argTypes = proc.argTypeIds
-    .slice(sliceAmount)
-    .map(typeId => introspectionResultsByKind.typeById[typeId]);
+  const argNames = proc.argTypeIds.slice(sliceAmount).reduce(
+    (prev, _, idx) =>
+      proc.argModes.length === 0 || // all args are `in`
+      proc.argModes[idx] === "i" || // this arg is `in`
+      proc.argModes[idx] === "b" // this arg is `inout`
+        ? [...prev, proc.argNames[idx + sliceAmount] || ""]
+        : prev,
+    []
+  );
+  const argTypes = proc.argTypeIds.slice(sliceAmount).reduce(
+    (prev, typeId, idx) =>
+      proc.argModes.length === 0 || // all args are `in`
+      proc.argModes[idx] === "i" || // this arg is `in`
+      proc.argModes[idx] === "b" // this arg is `inout`
+        ? [...prev, introspectionResultsByKind.typeById[typeId]]
+        : prev,
+    []
+  );
   const requiredArgCount = Math.max(0, argNames.length - proc.argDefaultsNum);
   const variantFromName = (name, _type) => {
     if (name.match(/(_p|P)atch$/)) {
@@ -193,7 +227,10 @@ export default function makeProcField(
   } else {
     // TODO: PG10 doesn't support the equivalent of pg_attribute.atttypemod on function return values, but maybe a later version might
     const Type =
-      pgGetGqlTypeByTypeIdAndModifier(returnType.id, null) || GraphQLString;
+      returnType.id === "2249" // record type
+        ? getTypeByName(inflection.functionReturnsRecordType(proc))
+        : pgGetGqlTypeByTypeIdAndModifier(returnType.id, null) || GraphQLString;
+
     if (proc.returnsSet) {
       const connectionTypeName = inflection.scalarFunctionConnection(proc);
       const ConnectionType = getTypeByName(connectionTypeName);
@@ -327,7 +364,7 @@ export default function makeProcField(
               } else {
                 innerQueryBuilder.select(
                   pgTweakFragmentForTypeAndModifier(
-                    sql.fragment`${functionAlias}.${functionAlias}`,
+                    sql.fragment`${functionAlias}`,
                     returnType,
                     null, // We can't determine a type modifier for functions
                     resolveData

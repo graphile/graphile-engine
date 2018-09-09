@@ -54,6 +54,7 @@ with
       end as "isStable",
       pro.prorettype as "returnTypeId",
       coalesce(pro.proallargtypes, pro.proargtypes) as "argTypeIds",
+      coalesce(pro.proargmodes, array[]::text[]) as "argModes",
       coalesce(pro.proargnames, array[]::text[]) as "argNames",
       pro.pronargdefaults as "argDefaultsNum",
       exists(select 1 from accessible_roles where has_function_privilege(accessible_roles.oid, pro.oid, 'EXECUTE')) as "aclExecutable"
@@ -74,9 +75,9 @@ with
           ? "pro.prokind = 'f'"
           : "pro.proisagg = false and pro.proiswindow = false"
       } and
-      -- We want to make sure the argument mode for all of our arguments is
-      -- \`IN\` which means \`proargmodes\` will be null.
-      pro.proargmodes is null and
+      -- We want to make sure the argument modes for all of our arguments are
+      -- \`IN\`, \`OUT\`, \`INOUT\`, or \`TABLE\` (not \`VARIADIC\`).
+      (pro.proargmodes is null or pro.proargmodes <@ array['i','o','b','t']::"char"[]) and
       -- Do not select procedures that create range types. These are utility
       -- functions that really don’t need to be exposed in an API.
       pro.proname not in (select typ.typname from pg_catalog.pg_type as typ where typ.typtype = 'r' and typ.typnamespace = pro.pronamespace) and

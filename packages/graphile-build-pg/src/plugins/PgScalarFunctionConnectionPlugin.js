@@ -43,7 +43,10 @@ export default (function PgScalarFunctionConnectionPlugin(
         // on function arguments and return types, however maybe a later
         // version of PG will?
         const NodeType =
-          pgGetGqlTypeByTypeIdAndModifier(returnType.id, null) || GraphQLString;
+          returnType.id === "2249" // record type
+            ? getTypeByName(inflection.functionReturnsRecordType(proc))
+            : pgGetGqlTypeByTypeIdAndModifier(returnType.id, null) ||
+              GraphQLString;
         const EdgeType = newWithHooks(
           GraphQLObjectType,
           {
