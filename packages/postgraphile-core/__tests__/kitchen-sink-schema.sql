@@ -463,17 +463,17 @@ create function c.func_out_setof(out o int) returns setof int as $$
 $$ language sql stable;
 
 create function c.func_out_out(out first_out int, out second_out text) as $$
-  select 42 as first_out, 'out' as second_out;
+  select 42 as first_out, 'out'::text as second_out;
 $$ language sql stable;
 
 create function c.func_out_out_unnamed(out int, out text) as $$
-  select 42, 'out';
+  select 42, 'out'::text;
 $$ language sql stable;
 
 create function c.func_out_out_setof(out o1 int, out o2 text) returns setof record as $$
-  select 42 as o1, 'out' as o2
+  select 42 as o1, 'out'::text as o2
   union
-  select 43 as o1, 'out2' as o2
+  select 43 as o1, 'out2'::text as o2
 $$ language sql stable;
 
 create function c.func_in_out(i int, out o int) as $$
@@ -491,9 +491,9 @@ create function c.func_returns_table_one_col(i int) returns table (col1 int) as 
 $$ language sql stable;
 
 create function c.func_returns_table_multi_col(i int) returns table (col1 int, col2 text) as $$
-  select i + 42 as col1, 'out' as col2
+  select i + 42 as col1, 'out'::text as col2
   union
-  select i + 43 as col1, 'out2' as col2;
+  select i + 43 as col1, 'out2'::text as col2;
 $$ language sql stable;
 
 -- Begin tests for smart comments
