@@ -87,28 +87,6 @@ export default function makeProcField(
   if (computed && isMutation) {
     throw new Error("Mutation procedure cannot be computed");
   }
-  /*
-  let argNames = [];
-  let argTypes = [];
-  let outputArgNames = [];
-  let outputArgTypes = [];
-  for (const idx of proc.argTypeIds.keys()) {
-    if (computed && idx === 0) {
-      continue;
-    }
-    const argName = proc.argNames[idx] || "";
-    const argType = introspectionResultsByKind.typeById[proc.argTypeIds[idx]];
-    if (proc.argModes.length === 0 || proc.argModes[idx] === "i") {
-      argNames.push(argName);
-      argTypes.push(argType);
-    } else if (proc.argModes[idx] === "o") {
-      outputArgNames.push(argName);
-      outputArgTypes.push(argType);
-    } else {
-      throw new Error(`Unexpected argMode '${proc.argModes[idx]}'`);
-    }
-  }
-  */
   const sliceAmount = computed ? 1 : 0;
   const argNames = proc.argTypeIds.slice(sliceAmount).reduce(
     (prev, _, idx) =>
