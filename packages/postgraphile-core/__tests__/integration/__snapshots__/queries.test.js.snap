@@ -4155,7 +4155,7 @@ Object {
       ],
       "pageInfo": Object {
         "endCursor": "WyJuYXR1cmFsIiw0XQ==",
-        "hasNextPage": false,
+        "hasNextPage": true,
         "hasPreviousPage": true,
         "startCursor": "WyJuYXR1cmFsIiwzXQ==",
       },
