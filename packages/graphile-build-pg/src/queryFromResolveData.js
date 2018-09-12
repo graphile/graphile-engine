@@ -219,6 +219,12 @@ export default (
       // cursors, so the `queryBuilder` factors the before/after, first/last into the limit
       // / offset.
       const { limit } = queryBuilder.getFinalLimitAndOffset();
+
+      if (limit == null) {
+        // If paginating backwards, then offset > 0 has already been dealt
+        // with. Unbounded, so there's no next page.
+        return sql.fragment`false`;
+      }
       /*
        * If we're paginating forwards, then either there's a before, there's a
        * first, or both.
@@ -231,7 +237,7 @@ export default (
        */
       return sql.fragment`exists(
         ${sqlCommon}
-        offset ${sql.value(limit + offset)}
+        offset ${sql.literal(limit + offset)}
       )`;
     }
   }
