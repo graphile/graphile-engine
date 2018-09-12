@@ -216,29 +216,31 @@ export default (
       assert(!invert || offset === 0); // isForwardOrSymmetric
       assert(!canHaveCursorInWhere);
       // We're dealing with LIMIT/OFFSET pagination here, which means `natural`
-      // cursors, so the `queryBuilder` factors the before/after, first/last into the limit
-      // / offset.
+      // cursors, so the `queryBuilder` factors the before/after, first/last
+      // into the limit / offset.
       const { limit } = queryBuilder.getFinalLimitAndOffset();
 
       if (limit == null) {
         // If paginating backwards, then offset > 0 has already been dealt
         // with. Unbounded, so there's no next page.
         return sql.fragment`false`;
+      } else if (invert) {
+        assert(offset === 0);
+        // Paginating backwards and there's no offset (which factors in before/after), so there's no previous page.
+        return sql.fragment`false`;
+      } else {
+        assert(!invert);
+        /*
+         * We're paginating forwards; either there's a before, there's a first,
+         * or both.
+         *
+         * We want to see if there's more than limit+offset records in sqlCommon.
+         */
+        return sql.fragment`exists(
+          ${sqlCommon}
+          offset ${sql.literal(limit + offset)}
+        )`;
       }
-      /*
-       * If we're paginating forwards, then either there's a before, there's a
-       * first, or both.
-       *
-       * If we're paginating backwards then either there's an
-       * after, there's a last, or both - but either way offset is zero.
-       *
-       * Backwards of forwards, we want to see if there's more than
-       * limit+offset records in sqlCommon.
-       */
-      return sql.fragment`exists(
-        ${sqlCommon}
-        offset ${sql.literal(limit + offset)}
-      )`;
     }
   }
   const getPgCursorPrefix = () =>
