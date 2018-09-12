@@ -160,14 +160,13 @@ export default (
       // We're looking for a previous page, and there's an offset, so lets just
       // assume there's a previous page where offset is smaller.
       return sql.literal(true);
-    } else if (!queryHasBefore && !queryHasFirst) {
-      assert(isForwardOrSymmetric);
-      // There can be no next page since there's no upper bound
-      return sql.literal(false);
     } else if (canHaveCursorInWhere) {
       assert(isForwardOrSymmetric);
-      assert(queryHasBefore || queryHasFirst);
-      if (queryHasBefore && !queryHasFirst) {
+      if (!queryHasBefore && !queryHasFirst) {
+        assert(isForwardOrSymmetric);
+        // There can be no next page since there's no upper bound
+        return sql.literal(false);
+      } else if (queryHasBefore && !queryHasFirst) {
         /*
          * We invert the upper buildWhereBoundClause to only represent the data
          * after `before`, then check if there's at least one record in that set.
@@ -185,6 +184,7 @@ export default (
         )`;
       } else {
         assert(queryHasFirst);
+        // queryHasBefore could be true or false.
         /*
          * There's a few ways that we could determine if there's a next page.
          *
@@ -214,10 +214,9 @@ export default (
       }
     } else {
       assert(!invert || offset === 0); // isForwardOrSymmetric
-      assert(queryHasBefore || queryHasFirst);
       assert(!canHaveCursorInWhere);
       // We're dealing with LIMIT/OFFSET pagination here, which means `natural`
-      // cursors, so the `queryBuilder` factors the before/after into the limit
+      // cursors, so the `queryBuilder` factors the before/after, first/last into the limit
       // / offset.
       const { limit } = queryBuilder.getFinalLimitAndOffset();
       /*
