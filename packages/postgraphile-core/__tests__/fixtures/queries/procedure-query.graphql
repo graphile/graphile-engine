@@ -32,6 +32,10 @@ query {
   tableSetQueryWithOffset8: tableSetQuery(first: 2, offset: 0) { edges { cursor node { name } } pageInfo { startCursor endCursor hasNextPage hasPreviousPage } }
   # There should be no previous or next page
   tableSetQueryWithOffset9: tableSetQuery(first: 6, offset: 0) { edges { cursor node { name } } pageInfo { startCursor endCursor hasNextPage hasPreviousPage } }
+  # Requesting before the first record returns no results, and thus has hasNextPage = false and hasPreviousPage = false as there's no cursors to use for pagination
+  tableSetQueryWithOffset10: tableSetQuery(before: "WyJuYXR1cmFsIiwxXQ==", last: 2) { edges { cursor node { name } } pageInfo { startCursor endCursor hasNextPage hasPreviousPage } }
+  # Using after and offset together should not throw
+  tableSetQueryWithOffset11: tableSetQuery(after: "WyJuYXR1cmFsIiwxXQ==", offset: 1, first: 2) { edges { cursor node { name } } pageInfo { startCursor endCursor hasNextPage hasPreviousPage } }
   intSetQuery(x: 5, z: 6) { edges { cursor node } }
   noArgsQuery
   staticBigInteger { edges { node } }
