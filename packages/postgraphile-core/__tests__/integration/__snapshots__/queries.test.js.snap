@@ -4172,9 +4172,40 @@ Object {
       ],
       "pageInfo": Object {
         "endCursor": "WyJuYXR1cmFsIiw0XQ==",
-        "hasNextPage": false,
+        "hasNextPage": true,
         "hasPreviousPage": true,
         "startCursor": "WyJuYXR1cmFsIiw0XQ==",
+      },
+    },
+    "tableSetQueryWithOffset10": Object {
+      "edges": Array [],
+      "pageInfo": Object {
+        "endCursor": null,
+        "hasNextPage": false,
+        "hasPreviousPage": false,
+        "startCursor": null,
+      },
+    },
+    "tableSetQueryWithOffset11": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwzXQ==",
+          "node": Object {
+            "name": "Budd Deey",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw0XQ==",
+          "node": Object {
+            "name": "Kathryn Ramirez",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw0XQ==",
+        "hasNextPage": true,
+        "hasPreviousPage": true,
+        "startCursor": "WyJuYXR1cmFsIiwzXQ==",
       },
     },
     "tableSetQueryWithOffset2": Object {
@@ -4188,7 +4219,7 @@ Object {
       ],
       "pageInfo": Object {
         "endCursor": "WyJuYXR1cmFsIiw0XQ==",
-        "hasNextPage": false,
+        "hasNextPage": true,
         "hasPreviousPage": true,
         "startCursor": "WyJuYXR1cmFsIiw0XQ==",
       },
@@ -4210,7 +4241,7 @@ Object {
       ],
       "pageInfo": Object {
         "endCursor": "WyJuYXR1cmFsIiw0XQ==",
-        "hasNextPage": false,
+        "hasNextPage": true,
         "hasPreviousPage": true,
         "startCursor": "WyJuYXR1cmFsIiwzXQ==",
       },
@@ -4279,6 +4310,96 @@ Object {
         "hasNextPage": true,
         "hasPreviousPage": true,
         "startCursor": "WyJuYXR1cmFsIiwzXQ==",
+      },
+    },
+    "tableSetQueryWithOffset7": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw1XQ==",
+          "node": Object {
+            "name": "Joe Tucker",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw2XQ==",
+          "node": Object {
+            "name": "Twenty Seventwo",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw2XQ==",
+        "hasNextPage": false,
+        "hasPreviousPage": true,
+        "startCursor": "WyJuYXR1cmFsIiw1XQ==",
+      },
+    },
+    "tableSetQueryWithOffset8": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwxXQ==",
+          "node": Object {
+            "name": "John Smith",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwyXQ==",
+          "node": Object {
+            "name": "Sara Smith",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiwyXQ==",
+        "hasNextPage": true,
+        "hasPreviousPage": false,
+        "startCursor": "WyJuYXR1cmFsIiwxXQ==",
+      },
+    },
+    "tableSetQueryWithOffset9": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwxXQ==",
+          "node": Object {
+            "name": "John Smith",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwyXQ==",
+          "node": Object {
+            "name": "Sara Smith",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwzXQ==",
+          "node": Object {
+            "name": "Budd Deey",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw0XQ==",
+          "node": Object {
+            "name": "Kathryn Ramirez",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw1XQ==",
+          "node": Object {
+            "name": "Joe Tucker",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw2XQ==",
+          "node": Object {
+            "name": "Twenty Seventwo",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw2XQ==",
+        "hasNextPage": false,
+        "hasPreviousPage": false,
+        "startCursor": "WyJuYXR1cmFsIiwxXQ==",
       },
     },
     "typesQuery": false,
@@ -6934,6 +7055,80 @@ Object {
       "personId2": 4,
     },
     "e": null,
+  },
+}
+`;
+
+exports[`unique-foreign-keys.graphql 1`] = `
+Object {
+  "data": Object {
+    "allCompoundKeys": Object {
+      "nodes": Array [
+        Object {
+          "personId1": 1,
+          "personId2": 2,
+          "uniqueForeignKeyByCompoundKey1AndCompoundKey2": null,
+        },
+        Object {
+          "personId1": 2,
+          "personId2": 1,
+          "uniqueForeignKeyByCompoundKey1AndCompoundKey2": Object {
+            "compoundKey1": 2,
+            "compoundKey2": 1,
+            "compoundKeyByCompoundKey1AndCompoundKey2": Object {
+              "personId1": 2,
+              "personId2": 1,
+              "uniqueForeignKeyByCompoundKey1AndCompoundKey2": Object {
+                "compoundKey1": 2,
+                "compoundKey2": 1,
+              },
+            },
+          },
+        },
+        Object {
+          "personId1": 2,
+          "personId2": 3,
+          "uniqueForeignKeyByCompoundKey1AndCompoundKey2": null,
+        },
+        Object {
+          "personId1": 2,
+          "personId2": 5,
+          "uniqueForeignKeyByCompoundKey1AndCompoundKey2": Object {
+            "compoundKey1": 2,
+            "compoundKey2": 5,
+            "compoundKeyByCompoundKey1AndCompoundKey2": Object {
+              "personId1": 2,
+              "personId2": 5,
+              "uniqueForeignKeyByCompoundKey1AndCompoundKey2": Object {
+                "compoundKey1": 2,
+                "compoundKey2": 5,
+              },
+            },
+          },
+        },
+        Object {
+          "personId1": 4,
+          "personId2": 3,
+          "uniqueForeignKeyByCompoundKey1AndCompoundKey2": null,
+        },
+        Object {
+          "personId1": 4,
+          "personId2": 4,
+          "uniqueForeignKeyByCompoundKey1AndCompoundKey2": Object {
+            "compoundKey1": 4,
+            "compoundKey2": 4,
+            "compoundKeyByCompoundKey1AndCompoundKey2": Object {
+              "personId1": 4,
+              "personId2": 4,
+              "uniqueForeignKeyByCompoundKey1AndCompoundKey2": Object {
+                "compoundKey1": 4,
+                "compoundKey2": 4,
+              },
+            },
+          },
+        },
+      ],
+    },
   },
 }
 `;
