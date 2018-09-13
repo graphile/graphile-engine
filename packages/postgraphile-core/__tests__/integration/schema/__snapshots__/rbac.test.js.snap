@@ -1734,6 +1734,11 @@ type CompoundKey implements Node {
   personId1: Int!
   personId2: Int!
 
+  \\"\\"\\"
+  Reads a single \`UniqueForeignKey\` that is related to this \`CompoundKey\`.
+  \\"\\"\\"
+  uniqueForeignKeyByCompoundKey1AndCompoundKey2: UniqueForeignKey
+
   \\"\\"\\"Reads and enables pagination through a set of \`UniqueForeignKey\`.\\"\\"\\"
   uniqueForeignKeysByCompoundKey1AndCompoundKey2(
     \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
@@ -1753,7 +1758,7 @@ type CompoundKey implements Node {
     based pagination. May not be used with \`last\`.
     \\"\\"\\"
     offset: Int
-  ): UniqueForeignKeysConnection!
+  ): UniqueForeignKeysConnection! @deprecated(reason: \\"Please use uniqueForeignKeyByCompoundKey1AndCompoundKey2 instead\\")
 }
 
 \\"\\"\\"
