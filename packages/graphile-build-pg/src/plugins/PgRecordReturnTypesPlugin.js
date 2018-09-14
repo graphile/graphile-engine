@@ -86,6 +86,7 @@ export default (function PgRecordReturnTypesPlugin(builder) {
               }
             )}`,
             isRecordReturnType: true,
+            pgIntrospection: proc,
           }
         );
       });
