@@ -79,6 +79,11 @@ export default (function PgRecordReturnTypesPlugin(builder) {
               {
                 name: "newNameHere",
               }
+            )}\n\nYou can rename just the function's GraphQL result type via:\n\n  ${sqlCommentByAddingTags(
+              proc,
+              {
+                resultTypeName: "newNameHere",
+              }
             )}`,
             isRecordReturnType: true,
           }
