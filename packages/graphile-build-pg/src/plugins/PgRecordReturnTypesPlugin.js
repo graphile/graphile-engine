@@ -50,7 +50,11 @@ export default (function PgRecordReturnTypesPlugin(builder) {
             )}\` query.`,
             fields: () =>
               outputArgNames.reduce((memo, outputArgName, idx) => {
-                const fieldName = inflection.argument(outputArgName, idx + 1);
+                const fieldName = inflection.functionOutputFieldName(
+                  proc,
+                  outputArgName,
+                  idx + 1
+                );
                 const fieldType = pgGetGqlTypeByTypeIdAndModifier(
                   outputArgTypes[idx].id,
                   null

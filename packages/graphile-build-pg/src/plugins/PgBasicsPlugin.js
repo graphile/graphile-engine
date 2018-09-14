@@ -482,6 +482,13 @@ export default (function PgBasicsPlugin(
         functionInputType(proc: PgProc) {
           return this.upperCamelCase(`${this._functionName(proc)}-input`);
         },
+        functionOutputFieldName(
+          proc: PgProc,
+          outputArgName: string,
+          index: number
+        ) {
+          return this.argument(outputArgName, index);
+        },
         functionReturnsRecordType(proc: PgProc) {
           return (
             proc.tags.resultTypeName ||
