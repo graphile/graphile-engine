@@ -19,14 +19,7 @@ export default (function PgRecordReturnTypesPlugin(builder) {
       .forEach(proc => {
         const returnType =
           introspectionResultsByKind.typeById[proc.returnTypeId];
-        const returnTypeTable =
-          introspectionResultsByKind.classById[returnType.classId];
-        if (returnTypeTable) {
-          // Just use the standard table connection from PgTablesPlugin
-          return;
-        }
-        const isReturnTypeRecord = returnType => returnType.id === "2249";
-        if (!isReturnTypeRecord) {
+        if (returnType.id !== "2249") {
           return;
         }
         const outputArgNames = proc.argTypeIds.reduce(
