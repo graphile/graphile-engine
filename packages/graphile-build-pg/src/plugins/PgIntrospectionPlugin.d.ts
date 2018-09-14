@@ -20,7 +20,7 @@ export interface PgProc {
   returnTypeId: string;
   argTypeIds: Array<string>;
   argNames: Array<string>;
-  argModes: Array<string>;
+  argModes: Array<"i" | "o" | "b" | "v" | "t"> | null;
   argDefaultsNum: number;
   namespace: PgNamespace;
   tags: { [tag: string]: string | Array<string> };
