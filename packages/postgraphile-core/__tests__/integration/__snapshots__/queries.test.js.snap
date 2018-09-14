@@ -1275,6 +1275,11 @@ Object {
       ],
     },
     "funcOutUnnamed": 42,
+    "funcOutUnnamedOutOutUnnamed": Object {
+      "arg1": 42,
+      "arg3": 3,
+      "o2": "out2",
+    },
     "funcReturnsTableMultiCol": Object {
       "nodes": Array [
         Object {

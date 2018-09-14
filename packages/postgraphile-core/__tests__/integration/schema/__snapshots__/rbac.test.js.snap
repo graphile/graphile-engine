@@ -4004,6 +4004,13 @@ type FuncOutSetofEdge {
   node: Int
 }
 
+\\"\\"\\"The return type of our \`funcOutUnnamedOutOutUnnamed\` query.\\"\\"\\"
+type FuncOutUnnamedOutOutUnnamedRecord {
+  arg1: Int
+  arg3: Int
+  o2: String
+}
+
 \\"\\"\\"A connection to a list of \`FuncReturnsTableMultiColRecord\` values.\\"\\"\\"
 type FuncReturnsTableMultiColConnection {
   \\"\\"\\"
@@ -7623,6 +7630,7 @@ type Query implements Node {
     offset: Int
   ): FuncOutSetofConnection!
   funcOutUnnamed: Int
+  funcOutUnnamedOutOutUnnamed: FuncOutUnnamedOutOutUnnamedRecord
   funcReturnsTableMultiCol(
     \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
     after: Cursor

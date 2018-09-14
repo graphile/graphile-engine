@@ -20,6 +20,11 @@
     nodes
   }
   funcOutUnnamed
+  funcOutUnnamedOutOutUnnamed {
+    arg1
+    arg3
+    o2
+  }
   funcReturnsTableMultiCol(i: 20) {
     nodes {
       col1
