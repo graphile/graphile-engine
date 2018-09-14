@@ -461,6 +461,16 @@ create function c.return_table_without_grants() returns c.compound_key as $$
   select * from c.compound_key order by person_id_1, person_id_2 limit 1
 $$ language sql stable security definer;
 
+-- This should not add a query to the schema; return type is undefined
+create function c.func_returns_untyped_record() returns record as $$
+  select 42;
+$$ language sql stable;
+
+-- This should not add a query to the schema; return type is undefined
+create function c.func_with_input_returns_untyped_record(i int) returns record as $$
+  select 42;
+$$ language sql stable;
+
 create function c.func_out(out o int) as $$
   select 42 as o;
 $$ language sql stable;
