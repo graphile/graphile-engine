@@ -22,16 +22,21 @@ export default (function PgRecordReturnTypesPlugin(builder) {
         if (returnType.id !== "2249") {
           return;
         }
+        const argModesWithOutput = [
+          "o", // OUT,
+          "b", // INOUT
+          "t", // TABLE
+        ];
         const outputArgNames = proc.argTypeIds.reduce(
           (prev, _, idx) =>
-            ["o", "b", "t"].includes(proc.argModes[idx])
+            argModesWithOutput.includes(proc.argModes[idx])
               ? [...prev, proc.argNames[idx] || ""]
               : prev,
           []
         );
         const outputArgTypes = proc.argTypeIds.reduce(
           (prev, typeId, idx) =>
-            ["o", "b", "t"].includes(proc.argModes[idx])
+            argModesWithOutput.includes(proc.argModes[idx])
               ? [...prev, introspectionResultsByKind.typeById[typeId]]
               : prev,
           []
