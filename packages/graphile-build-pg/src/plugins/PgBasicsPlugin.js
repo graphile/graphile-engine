@@ -483,7 +483,10 @@ export default (function PgBasicsPlugin(
           return this.upperCamelCase(`${this._functionName(proc)}-input`);
         },
         functionReturnsRecordType(proc: PgProc) {
-          return this.upperCamelCase(`${this._functionName(proc)}-record`);
+          return (
+            proc.tags.resultTypeName ||
+            this.upperCamelCase(`${this._functionName(proc)}-record`)
+          );
         },
         tableType(table: PgClass) {
           return this.upperCamelCase(this._singularizedTableName(table));
