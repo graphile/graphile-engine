@@ -47,6 +47,9 @@ export default (function PgScalarFunctionConnectionPlugin(
             ? getTypeByName(inflection.functionReturnsRecordType(proc))
             : pgGetGqlTypeByTypeIdAndModifier(returnType.id, null) ||
               GraphQLString;
+        if (!NodeType) {
+          return;
+        }
         const EdgeType = newWithHooks(
           GraphQLObjectType,
           {
