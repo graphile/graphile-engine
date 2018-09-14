@@ -4989,6 +4989,8 @@ type Person implements Node {
     \\"\\"\\"The method to use when ordering \`CompoundKey\`.\\"\\"\\"
     orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysConnection!
+  computedOut: String
+  computedOutOut: PersonComputedOutOutRecord
   config: KeyValueHash
   createdAt: Datetime
   email: Email!
@@ -5151,6 +5153,12 @@ type Person implements Node {
     orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsConnection!
   site: WrappedUrl @deprecated(reason: \\"Don’t use me\\")
+}
+
+\\"\\"\\"The return type of our \`personComputedOutOut\` query.\\"\\"\\"
+type PersonComputedOutOutRecord {
+  o1: String
+  o2: String
 }
 
 \\"\\"\\"

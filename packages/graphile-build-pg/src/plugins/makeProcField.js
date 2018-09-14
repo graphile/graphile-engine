@@ -91,8 +91,8 @@ export default function makeProcField(
   const argNames = proc.argTypeIds.slice(sliceAmount).reduce(
     (prev, _, idx) =>
       proc.argModes.length === 0 || // all args are `in`
-      proc.argModes[idx] === "i" || // this arg is `in`
-      proc.argModes[idx] === "b" // this arg is `inout`
+      proc.argModes[idx + sliceAmount] === "i" || // this arg is `in`
+      proc.argModes[idx + sliceAmount] === "b" // this arg is `inout`
         ? [...prev, proc.argNames[idx + sliceAmount] || ""]
         : prev,
     []
@@ -100,8 +100,8 @@ export default function makeProcField(
   const argTypes = proc.argTypeIds.slice(sliceAmount).reduce(
     (prev, typeId, idx) =>
       proc.argModes.length === 0 || // all args are `in`
-      proc.argModes[idx] === "i" || // this arg is `in`
-      proc.argModes[idx] === "b" // this arg is `inout`
+      proc.argModes[idx + sliceAmount] === "i" || // this arg is `in`
+      proc.argModes[idx + sliceAmount] === "b" // this arg is `inout`
         ? [...prev, introspectionResultsByKind.typeById[typeId]]
         : prev,
     []

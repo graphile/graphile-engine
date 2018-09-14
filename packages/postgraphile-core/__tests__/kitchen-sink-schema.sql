@@ -511,6 +511,14 @@ create function c.func_out_out_compound_type(i1 int, out o1 int, out o2 c.compou
   select i1 + 10 as o1, compound_type as o2 from b.types limit 1;
 $$ language sql stable;
 
+create function c.person_computed_out (person c.person, out o1 text) as $$
+  select 'o1 ' || person.person_full_name;
+$$ language sql stable;
+
+create function c.person_computed_out_out (person c.person, out o1 text, out o2 text) as $$
+  select 'o1 ' || person.person_full_name, 'o2 ' || person.person_full_name;
+$$ language sql stable;
+
 create function c.func_out_unnamed_out_out_unnamed(out int, out o2 text, out int) as $$
   select 42, 'out2'::text, 3;
 $$ language sql stable;

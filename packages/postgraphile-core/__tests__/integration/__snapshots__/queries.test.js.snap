@@ -1338,6 +1338,16 @@ Object {
         63,
       ],
     },
+    "personById": Object {
+      "computedOut": "o1 John Smith",
+      "computedOutOut": Object {
+        "o1": "o1 John Smith",
+        "o2": "o2 John Smith",
+      },
+      "id": 1,
+      "name": "John Smith",
+      "nodeId": "WyJwZW9wbGUiLDFd",
+    },
   },
 }
 `;

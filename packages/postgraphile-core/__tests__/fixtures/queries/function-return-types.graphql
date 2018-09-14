@@ -6,7 +6,7 @@
     firstOut
     secondOut
   }
-  funcOutOutCompoundType(i1:10) {
+  funcOutOutCompoundType(i1: 10) {
     o1
     o2 {
       a
@@ -51,5 +51,15 @@
   }
   funcReturnsTableOneCol(i: 20) {
     nodes
+  }
+  personById(id: 1) {
+    nodeId
+    id
+    name
+    computedOut
+    computedOutOut {
+      o1
+      o2
+    }
   }
 }
