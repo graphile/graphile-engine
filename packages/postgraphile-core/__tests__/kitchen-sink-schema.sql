@@ -507,6 +507,10 @@ create function c.func_out_table_setof(out c.person) returns setof c.person as $
   select * from c.person;
 $$ language sql stable;
 
+create function c.func_out_out_compound_type(i1 int, out o1 int, out o2 c.compound_type) as $$
+  select i1 + 10 as o1, compound_type as o2 from b.types limit 1;
+$$ language sql stable;
+
 create function c.func_out_unnamed_out_out_unnamed(out int, out o2 text, out int) as $$
   select 42, 'out2'::text, 3;
 $$ language sql stable;

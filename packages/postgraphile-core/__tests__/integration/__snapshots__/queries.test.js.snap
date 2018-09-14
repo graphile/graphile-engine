@@ -1252,6 +1252,14 @@ Object {
       "firstOut": 42,
       "secondOut": "out",
     },
+    "funcOutOutCompoundType": Object {
+      "o1": 20,
+      "o2": Object {
+        "a": 1,
+        "b": "2",
+        "c": "BLUE",
+      },
+    },
     "funcOutOutSetof": Object {
       "nodes": Array [
         Object {

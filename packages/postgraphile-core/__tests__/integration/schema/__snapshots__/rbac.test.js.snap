@@ -3946,6 +3946,12 @@ enum ForeignKeysOrderBy {
   PERSON_ID_DESC
 }
 
+\\"\\"\\"The return type of our \`funcOutOutCompoundType\` query.\\"\\"\\"
+type FuncOutOutCompoundTypeRecord {
+  o1: Int
+  o2: CompoundType
+}
+
 \\"\\"\\"The return type of our \`funcOutOut\` query.\\"\\"\\"
 type FuncOutOutRecord {
   firstOut: Int
@@ -7590,6 +7596,7 @@ type Query implements Node {
   funcInOut(i: Int): Int
   funcOut: Int
   funcOutOut: FuncOutOutRecord
+  funcOutOutCompoundType(i1: Int): FuncOutOutCompoundTypeRecord
   funcOutOutSetof(
     \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
     after: Cursor

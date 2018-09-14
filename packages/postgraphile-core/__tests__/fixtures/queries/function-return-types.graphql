@@ -6,6 +6,14 @@
     firstOut
     secondOut
   }
+  funcOutOutCompoundType(i1:10) {
+    o1
+    o2 {
+      a
+      b
+      c
+    }
+  }
   funcOutOutSetof {
     nodes {
       o1
