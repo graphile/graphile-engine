@@ -1274,6 +1274,38 @@ Object {
         43,
       ],
     },
+    "funcOutTable": Object {
+      "id": 1,
+      "nodeId": "WyJwZW9wbGUiLDFd",
+    },
+    "funcOutTableSetof": Object {
+      "nodes": Array [
+        Object {
+          "id": 1,
+          "nodeId": "WyJwZW9wbGUiLDFd",
+        },
+        Object {
+          "id": 2,
+          "nodeId": "WyJwZW9wbGUiLDJd",
+        },
+        Object {
+          "id": 3,
+          "nodeId": "WyJwZW9wbGUiLDNd",
+        },
+        Object {
+          "id": 4,
+          "nodeId": "WyJwZW9wbGUiLDRd",
+        },
+        Object {
+          "id": 5,
+          "nodeId": "WyJwZW9wbGUiLDVd",
+        },
+        Object {
+          "id": 6,
+          "nodeId": "WyJwZW9wbGUiLDZd",
+        },
+      ],
+    },
     "funcOutUnnamed": 42,
     "funcOutUnnamedOutOutUnnamed": Object {
       "arg1": 42,

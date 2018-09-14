@@ -19,6 +19,16 @@
   funcOutSetof {
     nodes
   }
+  funcOutTable {
+    nodeId
+    id
+  }
+  funcOutTableSetof {
+    nodes {
+      nodeId
+      id
+    }
+  }
   funcOutUnnamed
   funcOutUnnamedOutOutUnnamed {
     arg1

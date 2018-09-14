@@ -499,6 +499,14 @@ create function c.func_out_out_setof(out o1 int, out o2 text) returns setof reco
   select 43 as o1, 'out2'::text as o2
 $$ language sql stable;
 
+create function c.func_out_table(out c.person) as $$
+  select * from c.person where id = 1;
+$$ language sql stable;
+
+create function c.func_out_table_setof(out c.person) returns setof c.person as $$
+  select * from c.person;
+$$ language sql stable;
+
 create function c.func_out_unnamed_out_out_unnamed(out int, out o2 text, out int) as $$
   select 42, 'out2'::text, 3;
 $$ language sql stable;
