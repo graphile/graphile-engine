@@ -2,6 +2,25 @@
   funcInInout(i: 10, ino: 5)
   funcInOut(i: 10)
   funcOut
+  funcOutComplex(a: 1, b: "test") {
+    x
+    y {
+      a
+      b
+      c
+    }
+    z {
+      nodeId
+      id
+      name
+      postsByAuthorId {
+        nodes {
+          nodeId
+          id
+        }
+      }
+    }
+  }
   funcOutOut {
     firstOut
     secondOut

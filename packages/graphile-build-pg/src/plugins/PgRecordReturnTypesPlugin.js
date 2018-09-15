@@ -12,6 +12,8 @@ export default (function PgRecordReturnTypesPlugin(builder) {
       pgOmit: omit,
       describePgEntity,
       sqlCommentByAddingTags,
+      pgSql: sql,
+      pgGetSelectValueForFieldAndTypeAndModifier: getSelectValueForFieldAndTypeAndModifier,
     } = build;
     introspectionResultsByKind.procedure
       .filter(proc => !!proc.namespace)
@@ -48,8 +50,8 @@ export default (function PgRecordReturnTypesPlugin(builder) {
             description: `The return type of our \`${inflection.functionQueryName(
               proc
             )}\` query.`,
-            fields: () =>
-              outputArgNames.reduce((memo, outputArgName, idx) => {
+            fields: ({ fieldWithHooks }) => {
+              return outputArgNames.reduce((memo, outputArgName, idx) => {
                 const fieldName = inflection.functionOutputFieldName(
                   proc,
                   outputArgName,
@@ -61,19 +63,48 @@ export default (function PgRecordReturnTypesPlugin(builder) {
                 );
                 return {
                   ...memo,
-                  [fieldName]: {
+                  [fieldName]: fieldWithHooks(
+                    fieldName,
+                    fieldContext => {
+                      const { addDataGenerator } = fieldContext;
+                      addDataGenerator(parsedResolveInfoFragment => {
+                        return {
+                          pgQuery: queryBuilder => {
+                            queryBuilder.select(
+                              getSelectValueForFieldAndTypeAndModifier(
+                                fieldType,
+                                fieldContext,
+                                parsedResolveInfoFragment,
+                                sql.fragment`(${queryBuilder.getTableAlias()}.${sql.identifier(
+                                  outputArgName !== ""
+                                    ? outputArgName
+                                    : `column${idx + 1}`
+                                )})`,
+                                outputArgTypes[idx],
+                                null
+                              ),
+                              fieldName
+                            );
+                          },
+                        };
+                      });
+                      return {
                     type: fieldType,
                     resolve(data) {
                       return outputArgName !== ""
-                        ? data[outputArgName]
+                            ? data[fieldName]
                         : // According to https://www.postgresql.org/docs/10/static/sql-createfunction.html,
                           // "If you omit the name for an output argument, the system will choose a default column name."
                           // In PG 9.x and 10, the column names appear to be assigned with a `column` prefix.
-                          data[`column${idx + 1}`];
+                              data.value[`column${idx + 1}`];
                     },
+                      };
                   },
+                    {}
+                  ),
                 };
-              }, {}),
+              }, {});
+            },
           },
           {
             __origin: `Adding record return type for ${describePgEntity(

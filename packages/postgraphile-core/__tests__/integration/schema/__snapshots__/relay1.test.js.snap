@@ -858,6 +858,13 @@ input FloatRangeInput {
   start: FloatRangeBoundInput
 }
 
+\\"\\"\\"The return type of our \`funcOutComplex\` query.\\"\\"\\"
+type FuncOutComplexRecord {
+  x: Int
+  y: CompoundType
+  z: Person
+}
+
 \\"\\"\\"The return type of our \`funcOutOutCompoundType\` query.\\"\\"\\"
 type FuncOutOutCompoundTypeRecord {
   o1: Int
@@ -2561,6 +2568,7 @@ type Query implements Node {
   funcInInout(i: Int, ino: Int): Int
   funcInOut(i: Int): Int
   funcOut: Int
+  funcOutComplex(a: Int, b: String): FuncOutComplexRecord
   funcOutOut: FuncOutOutRecord
   funcOutOutCompoundType(i1: Int): FuncOutOutCompoundTypeRecord
   funcOutOutSetof(

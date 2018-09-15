@@ -229,7 +229,7 @@ export default function makeProcField(
         // `__cursor` field so we can't just use a scalar.
       }
     } else {
-      returnFirstValueAsValue = true;
+      returnFirstValueAsValue = returnType.id !== "2249";
       type = Type;
       if (rawReturnType.isPgArray) {
         type = new GraphQLList(type);

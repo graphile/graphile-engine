@@ -531,6 +531,34 @@ create function c.func_in_inout(i int, inout ino int) as $$
   select i + ino as ino;
 $$ language sql stable;
 
+create function c.func_out_complex(in a int, in b text, out x int, out y c.compound_type, out z c.person) as $$
+  select
+    a + 1 as x,
+    b.types.compound_type as y,
+    person as z
+  from c.person
+    inner join b.types on c.person.id = (b.types.id - 11)
+  limit 1;
+$$ language sql stable;
+
+/*
+create type c.func_complex_type as (
+  x int,
+  y c.compound_type,
+  z c.person
+);
+
+create function c.func_out_complex_the_old_way(a int, b text) returns c.func_complex_type as $$
+  select
+    a + 1 as x,
+    b.types.compound_type as y,
+    person as z
+  from c.person
+    inner join b.types on c.person.id = (b.types.id - 11)
+  limit 1;
+$$ language sql stable;
+*/
+
 create function c.func_returns_table_one_col(i int) returns table (col1 int) as $$
   select i + 42 as col1
   union
