@@ -102,7 +102,7 @@ export default (function PgRecordReturnTypesPlugin(builder) {
                             : data.value[`column${idx + 1}`];
                         },
                       };
-                  },
+                    },
                     {}
                   ),
                 };
