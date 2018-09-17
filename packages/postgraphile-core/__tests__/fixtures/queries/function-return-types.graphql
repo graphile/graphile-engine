@@ -21,6 +21,27 @@
       }
     }
   }
+  funcOutComplexSetof(a: 1, b: "test") {
+    nodes {
+      x
+      y {
+        a
+        b
+        c
+      }
+      z {
+        nodeId
+        id
+        name
+        postsByAuthorId {
+          nodes {
+            nodeId
+            id
+          }
+        }
+      }
+    }
+  }
   funcOutOut {
     firstOut
     secondOut
