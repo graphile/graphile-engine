@@ -43,13 +43,24 @@ export default (function PgRecordReturnTypesPlugin(builder) {
               : prev,
           []
         );
+        const firstArgType = argTypes[0];
+        const computed =
+          firstArgType &&
+          firstArgType.type === "c" &&
+          firstArgType.class &&
+          firstArgType.namespaceId === proc.namespaceId &&
+          proc.name.startsWith(`${firstArgType.name}_`);
+        const procFieldName = computed
+          ? inflection.computedColumn(
+              proc.name.substr(firstArgType.name.length + 1),
+              proc
+            )
+          : inflection.functionQueryName(proc);
         newWithHooks(
           GraphQLObjectType,
           {
             name: inflection.functionReturnsRecordType(proc),
-            description: `The return type of our \`${inflection.functionQueryName(
-              proc
-            )}\` query.`,
+            description: `The return type of our \`${procFieldName}\` query.`,
             fields: ({ fieldWithHooks }) => {
               return outputArgNames.reduce((memo, outputArgName, idx) => {
                 const fieldName = inflection.functionOutputFieldName(

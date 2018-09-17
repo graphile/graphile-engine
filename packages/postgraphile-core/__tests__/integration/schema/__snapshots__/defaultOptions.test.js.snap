@@ -5192,20 +5192,20 @@ type Person implements Node {
   site: WrappedUrl @deprecated(reason: \\"Don’t use me\\")
 }
 
-\\"\\"\\"The return type of our \`personComputedComplex\` query.\\"\\"\\"
+\\"\\"\\"The return type of our \`computedComplex\` query.\\"\\"\\"
 type PersonComputedComplexRecord {
   x: Int
   y: CompoundType
   z: Person
 }
 
-\\"\\"\\"The return type of our \`personComputedInoutOut\` query.\\"\\"\\"
+\\"\\"\\"The return type of our \`computedInoutOut\` query.\\"\\"\\"
 type PersonComputedInoutOutRecord {
   ino: String
   o: String
 }
 
-\\"\\"\\"The return type of our \`personComputedOutOut\` query.\\"\\"\\"
+\\"\\"\\"The return type of our \`computedOutOut\` query.\\"\\"\\"
 type PersonComputedOutOutRecord {
   o1: String
   o2: String
