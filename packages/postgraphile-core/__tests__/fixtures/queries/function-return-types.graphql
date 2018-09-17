@@ -96,8 +96,27 @@
     nodeId
     id
     name
-    computedInout(ino:"test")
-    computedInoutOut(ino:"test") {
+    computedComplex(a: 1, b: "test") {
+      x
+      y {
+        a
+        b
+        c
+      }
+      z {
+        nodeId
+        id
+        name
+        postsByAuthorId {
+          nodes {
+            nodeId
+            id
+          }
+        }
+      }
+    }
+    computedInout(ino: "test")
+    computedInoutOut(ino: "test") {
       ino
       o
     }

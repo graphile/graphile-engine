@@ -527,6 +527,16 @@ create function c.person_computed_inout_out (person c.person, inout ino text, ou
   select ino || ' ' || person.person_full_name as ino, 'o ' || person.person_full_name as o;
 $$ language sql stable;
 
+create function c.person_computed_complex (person c.person, in a int, in b text, out x int, out y c.compound_type, out z c.person) as $$
+  select
+    a + 1 as x,
+    b.types.compound_type as y,
+    person as z
+  from c.person
+    inner join b.types on c.person.id = (b.types.id - 11)
+  limit 1;
+$$ language sql stable;
+
 create function c.func_out_unnamed_out_out_unnamed(out int, out o2 text, out int) as $$
   select 42, 'out2'::text, 3;
 $$ language sql stable;

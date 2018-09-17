@@ -2100,6 +2100,7 @@ type Person implements Node {
     \\"\\"\\"The method to use when ordering \`CompoundKey\`.\\"\\"\\"
     orderBy: [CompoundKeysOrderBy!]
   ): [CompoundKey!]!
+  computedComplex(a: Int, b: String): PersonComputedComplexRecord
   computedInout(ino: String): String
   computedInoutOut(ino: String): PersonComputedInoutOutRecord
   computedOut: String
@@ -2217,6 +2218,13 @@ type Person implements Node {
     orderBy: [PersonSecretsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PersonSecretsConnection! @deprecated(reason: \\"Please use personSecretByPersonId instead\\")
   site: WrappedUrl @deprecated(reason: \\"Don’t use me\\")
+}
+
+\\"\\"\\"The return type of our \`personComputedComplex\` query.\\"\\"\\"
+type PersonComputedComplexRecord {
+  x: Int
+  y: CompoundType
+  z: Person
 }
 
 \\"\\"\\"The return type of our \`personComputedInoutOut\` query.\\"\\"\\"

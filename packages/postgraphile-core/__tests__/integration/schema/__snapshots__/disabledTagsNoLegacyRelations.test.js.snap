@@ -2063,6 +2063,7 @@ type Person implements Node {
     \\"\\"\\"The method to use when ordering \`CompoundKey\`.\\"\\"\\"
     orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysConnection!
+  computedComplex(a: Int, b: String): PersonComputedComplexRecord
   computedInout(ino: String): String
   computedInoutOut(ino: String): PersonComputedInoutOutRecord
   computedOut: String
@@ -2118,6 +2119,13 @@ type Person implements Node {
 
   \\"\\"\\"@deprecated Don’t use me\\"\\"\\"
   site: WrappedUrl
+}
+
+\\"\\"\\"The return type of our \`personComputedComplex\` query.\\"\\"\\"
+type PersonComputedComplexRecord {
+  x: Int
+  y: CompoundType
+  z: Person
 }
 
 \\"\\"\\"The return type of our \`personComputedInoutOut\` query.\\"\\"\\"

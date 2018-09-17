@@ -1409,6 +1409,39 @@ Object {
       ],
     },
     "personById": Object {
+      "computedComplex": Object {
+        "x": 2,
+        "y": Object {
+          "a": 1,
+          "b": "2",
+          "c": "BLUE",
+        },
+        "z": Object {
+          "id": 1,
+          "name": "John Smith",
+          "nodeId": "WyJwZW9wbGUiLDFd",
+          "postsByAuthorId": Object {
+            "nodes": Array [
+              Object {
+                "id": 2,
+                "nodeId": "WyJwb3N0cyIsMl0=",
+              },
+              Object {
+                "id": 3,
+                "nodeId": "WyJwb3N0cyIsM10=",
+              },
+              Object {
+                "id": 4,
+                "nodeId": "WyJwb3N0cyIsNF0=",
+              },
+              Object {
+                "id": 7,
+                "nodeId": "WyJwb3N0cyIsN10=",
+              },
+            ],
+          },
+        },
+      },
       "computedInout": "test John Smith",
       "computedInoutOut": Object {
         "ino": "test John Smith",
