@@ -24,6 +24,15 @@ export default (function PgRecordReturnTypesPlugin(builder) {
         if (returnType.id !== "2249") {
           return;
         }
+        const argTypes = proc.argTypeIds.reduce(
+          (prev, typeId, idx) =>
+            proc.argModes.length === 0 || // all args are `in`
+            proc.argModes[idx] === "i" || // this arg is `in`
+            proc.argModes[idx] === "b" // this arg is `inout`
+              ? [...prev, introspectionResultsByKind.typeById[typeId]]
+              : prev,
+          []
+        );
         const argModesWithOutput = [
           "o", // OUT,
           "b", // INOUT
