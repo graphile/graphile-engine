@@ -81,7 +81,7 @@ export default (function PgScalarFunctionConnectionPlugin(
                   }\` at the end of the edge.`,
                   type: NodeType,
                   resolve(data) {
-                    return data.value;
+                    return returnType.id === "2249" ? data : data.value;
                   },
                 },
               };
@@ -121,7 +121,9 @@ export default (function PgScalarFunctionConnectionPlugin(
                     )
                   ),
                   resolve(data) {
-                    return data.data.map(entry => entry.value);
+                    return returnType.id === "2249"
+                      ? data.data
+                      : data.data.map(entry => entry.value);
                   },
                 },
                 edges: {
