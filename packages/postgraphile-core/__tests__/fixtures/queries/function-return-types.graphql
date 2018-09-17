@@ -96,6 +96,11 @@
     nodeId
     id
     name
+    computedInout(ino:"test")
+    computedInoutOut(ino:"test") {
+      ino
+      o
+    }
     computedOut
     computedOutOut {
       o1

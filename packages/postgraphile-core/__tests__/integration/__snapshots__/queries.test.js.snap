@@ -1409,6 +1409,11 @@ Object {
       ],
     },
     "personById": Object {
+      "computedInout": "test John Smith",
+      "computedInoutOut": Object {
+        "ino": "test John Smith",
+        "o": "o John Smith",
+      },
       "computedOut": "o1 John Smith",
       "computedOutOut": Object {
         "o1": "o1 John Smith",

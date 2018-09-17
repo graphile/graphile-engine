@@ -519,6 +519,14 @@ create function c.person_computed_out_out (person c.person, out o1 text, out o2 
   select 'o1 ' || person.person_full_name, 'o2 ' || person.person_full_name;
 $$ language sql stable;
 
+create function c.person_computed_inout (person c.person, inout ino text) as $$
+  select ino || ' ' || person.person_full_name as ino;
+$$ language sql stable;
+
+create function c.person_computed_inout_out (person c.person, inout ino text, out o text) as $$
+  select ino || ' ' || person.person_full_name as ino, 'o ' || person.person_full_name as o;
+$$ language sql stable;
+
 create function c.func_out_unnamed_out_out_unnamed(out int, out o2 text, out int) as $$
   select 42, 'out2'::text, 3;
 $$ language sql stable;

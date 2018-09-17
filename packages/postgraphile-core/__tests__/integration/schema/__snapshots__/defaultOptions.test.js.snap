@@ -5023,6 +5023,8 @@ type Person implements Node {
     \\"\\"\\"The method to use when ordering \`CompoundKey\`.\\"\\"\\"
     orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysConnection!
+  computedInout(ino: String): String
+  computedInoutOut(ino: String): PersonComputedInoutOutRecord
   computedOut: String
   computedOutOut: PersonComputedOutOutRecord
   config: KeyValueHash
@@ -5187,6 +5189,12 @@ type Person implements Node {
     orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsConnection!
   site: WrappedUrl @deprecated(reason: \\"Don’t use me\\")
+}
+
+\\"\\"\\"The return type of our \`personComputedInoutOut\` query.\\"\\"\\"
+type PersonComputedInoutOutRecord {
+  ino: String
+  o: String
 }
 
 \\"\\"\\"The return type of our \`personComputedOutOut\` query.\\"\\"\\"
