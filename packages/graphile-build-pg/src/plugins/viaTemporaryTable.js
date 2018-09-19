@@ -45,8 +45,8 @@ export default async function viaTemporaryTable(
   sqlResultQuery: SQL,
   isPgClassLike: boolean = true,
   isPgRecord: boolean = false,
-  outputArgTypes = [],
-  outputArgNames = []
+  outputArgTypes: Array<any> = [],
+  outputArgNames: Array<string> = []
 ) {
   async function performQuery(pgClient: Client, sqlQuery: SQLQuery) {
     // TODO: look into rowMode = 'array'
