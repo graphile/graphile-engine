@@ -43,7 +43,10 @@ export default async function viaTemporaryTable(
   sqlMutationQuery: SQL,
   sqlResultSourceAlias: SQL,
   sqlResultQuery: SQL,
-  isPgClassLike: boolean = true
+  isPgClassLike: boolean = true,
+  isPgRecord: boolean = false,
+  outputArgTypes = [],
+  outputArgNames = []
 ) {
   async function performQuery(pgClient: Client, sqlQuery: SQLQuery) {
     // TODO: look into rowMode = 'array'
@@ -83,7 +86,17 @@ export default async function viaTemporaryTable(
          * representation to make it easier to deal with below.
          */
         sql.query`(case when ${sqlResultSourceAlias} is null then null else ${sqlResultSourceAlias} end)`
-      : sql.query`(${sqlResultSourceAlias}.${sqlResultSourceAlias})::${sqlTypeIdentifier}`;
+      : isPgRecord
+        ? sql.query`array[${sql.join(
+            outputArgNames.map(
+              (outputArgName, idx) =>
+                sql.query`${sqlResultSourceAlias}.${sql.identifier(
+                  outputArgName !== "" ? outputArgName : `column${idx + 1}`
+                )}::text`
+            ),
+            " ,"
+          )}]`
+        : sql.query`(${sqlResultSourceAlias}.${sqlResultSourceAlias})::${sqlTypeIdentifier}`;
     const result = await performQuery(
       pgClient,
       sql.query`
@@ -101,16 +114,38 @@ export default async function viaTemporaryTable(
     const rawValues = rows.map(row => row && row[firstKey]);
     const values = rawValues.filter(rawValue => rawValue !== null);
     const convertFieldBack = isPgClassLike
-      ? sql.query`(str::${sqlTypeIdentifier}).*`
-      : sql.query`str::${sqlTypeIdentifier} as ${sqlResultSourceAlias}`;
+      ? sql.query`\
+              select (str::${sqlTypeIdentifier}).*
+              from unnest((${sql.value(values)})::text[]) str`
+      : isPgRecord
+        ? sql.query`\
+          select ${sql.join(
+            outputArgNames.map(
+              (outputArgName, idx) =>
+                sql.query`\
+                    (arr)[${sql.literal(idx + 1)}]::${sql.identifier(
+                  outputArgTypes[idx].namespaceName,
+                  outputArgTypes[idx].name
+                )} as ${sql.identifier(
+                  outputArgName !== "" ? outputArgName : `column${idx + 1}`
+                )}`
+            ),
+            ", "
+          )}
+          from (values ${sql.join(
+            values.map(value => sql.query`(${sql.value(value)}::text[])`),
+            ", "
+          )}) as x(arr)`
+        : sql.query`\
+        select str::${sqlTypeIdentifier} as ${sqlResultSourceAlias}
+        from unnest((${sql.value(values)})::text[]) str`;
     const { rows: filteredValuesResults } =
       values.length > 0
         ? await performQuery(
             pgClient,
             sql.query`\
               with ${sqlResultSourceAlias} as (
-                select ${convertFieldBack}
-                from unnest((${sql.value(values)})::text[]) str
+                ${convertFieldBack}
               )
               ${sqlResultQuery}
               `

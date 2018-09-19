@@ -106,6 +106,25 @@ export default function makeProcField(
         : prev,
     []
   );
+  const argModesWithOutput = [
+    "o", // OUT,
+    "b", // INOUT
+    "t", // TABLE
+  ];
+  const outputArgNames = proc.argTypeIds.reduce(
+    (prev, _, idx) =>
+      argModesWithOutput.includes(proc.argModes[idx])
+        ? [...prev, proc.argNames[idx] || ""]
+        : prev,
+    []
+  );
+  const outputArgTypes = proc.argTypeIds.reduce(
+    (prev, typeId, idx) =>
+      argModesWithOutput.includes(proc.argModes[idx])
+        ? [...prev, introspectionResultsByKind.typeById[typeId]]
+        : prev,
+    []
+  );
   const requiredArgCount = Math.max(0, argNames.length - proc.argDefaultsNum);
   const variantFromName = (name, _type) => {
     if (name.match(/(_p|P)atch$/)) {
@@ -584,8 +603,10 @@ export default function makeProcField(
                 );
                 const intermediateIdentifier = sql.identifier(Symbol());
                 const isVoid = returnType.id === "2278";
+                const isPgRecord = returnType.id === "2249";
                 const isPgClass =
-                  !returnFirstValueAsValue || returnTypeTable || false;
+                  !isPgRecord &&
+                  (!returnFirstValueAsValue || returnTypeTable || false);
                 try {
                   await pgClient.query("SAVEPOINT graphql_mutation");
                   queryResultRows = await viaTemporaryTable(
@@ -599,11 +620,16 @@ export default function makeProcField(
                     sql.query`select ${
                       isPgClass
                         ? sql.query`${intermediateIdentifier}.*`
-                        : sql.query`${intermediateIdentifier}.${intermediateIdentifier} as ${functionAlias}`
+                        : isPgRecord
+                          ? sql.query`${intermediateIdentifier}.*`
+                          : sql.query`${intermediateIdentifier} as ${functionAlias}`
                     } from ${sqlMutationQuery} ${intermediateIdentifier}`,
                     functionAlias,
                     query,
-                    isPgClass
+                    isPgClass,
+                    isPgRecord,
+                    outputArgTypes,
+                    outputArgNames
                   );
                   await pgClient.query("RELEASE SAVEPOINT graphql_mutation");
                 } catch (e) {

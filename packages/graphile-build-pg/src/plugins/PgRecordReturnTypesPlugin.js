@@ -52,6 +52,7 @@ export default (function PgRecordReturnTypesPlugin(builder) {
               : prev,
           []
         );
+        const isMutation = !proc.isStable;
         const firstArgType = argTypes[0];
         const computed =
           firstArgType &&
@@ -59,17 +60,21 @@ export default (function PgRecordReturnTypesPlugin(builder) {
           firstArgType.class &&
           firstArgType.namespaceId === proc.namespaceId &&
           proc.name.startsWith(`${firstArgType.name}_`);
-        const procFieldName = computed
-          ? inflection.computedColumn(
-              proc.name.substr(firstArgType.name.length + 1),
-              proc
-            )
-          : inflection.functionQueryName(proc);
+        const procFieldName = isMutation
+          ? inflection.functionMutationName(proc)
+          : computed
+            ? inflection.computedColumn(
+                proc.name.substr(firstArgType.name.length + 1),
+                proc
+              )
+            : inflection.functionQueryName(proc);
         newWithHooks(
           GraphQLObjectType,
           {
             name: inflection.functionReturnsRecordType(proc),
-            description: `The return type of our \`${procFieldName}\` query.`,
+            description: `The return type of our \`${procFieldName}\` ${
+              isMutation ? "mutation" : "query"
+            }.`,
             fields: ({ fieldWithHooks }) => {
               return outputArgNames.reduce((memo, outputArgName, idx) => {
                 const fieldName = inflection.functionOutputFieldName(
