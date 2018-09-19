@@ -213,7 +213,7 @@ export default function makeProcField(
       } else if (forceList) {
         type = new GraphQLList(RecordType);
         fieldScope.isPgFieldSimpleCollection = true;
-  } else {
+      } else {
         const ConnectionType = getTypeByName(
           inflection.scalarFunctionConnection(proc)
         );
