@@ -581,6 +581,90 @@ create function c.func_returns_table_multi_col(i int) returns table (col1 int, c
   select i + 43 as col1, 'out2'::text as col2;
 $$ language sql stable;
 
+create function c.mutation_in_inout(i int, inout ino int) as $$
+  select i + ino as ino;
+$$ language sql volatile;
+
+create function c.mutation_in_out(i int, out o int) as $$
+  select i + 42 as o;
+$$ language sql volatile;
+
+create function c.mutation_out(out o int) as $$
+  select 42 as o;
+$$ language sql volatile;
+
+create function c.mutation_out_complex(in a int, in b text, out x int, out y c.compound_type, out z c.person) as $$
+  select
+    a + 1 as x,
+    b.types.compound_type as y,
+    person as z
+  from c.person
+    inner join b.types on c.person.id = (b.types.id - 11)
+  limit 1;
+$$ language sql volatile;
+
+create function c.mutation_out_complex_setof(in a int, in b text, out x int, out y c.compound_type, out z c.person) returns setof record as $$
+  select
+    a + 1 as x,
+    b.types.compound_type as y,
+    person as z
+  from c.person
+    inner join b.types on c.person.id = (b.types.id - 11)
+  limit 1;
+$$ language sql volatile;
+
+create function c.mutation_out_out(out first_out int, out second_out text) as $$
+  select 42 as first_out, 'out'::text as second_out;
+$$ language sql volatile;
+
+create function c.mutation_out_out_compound_type(i1 int, out o1 int, out o2 c.compound_type) as $$
+  select i1 + 10 as o1, compound_type as o2 from b.types limit 1;
+$$ language sql volatile;
+
+create function c.mutation_out_out_setof(out o1 int, out o2 text) returns setof record as $$
+  select 42 as o1, 'out'::text as o2
+  union
+  select 43 as o1, 'out2'::text as o2
+$$ language sql volatile;
+
+create function c.mutation_out_out_unnamed(out int, out text) as $$
+  select 42, 'out'::text;
+$$ language sql volatile;
+
+create function c.mutation_out_setof(out o int) returns setof int as $$
+  select 42 as o
+  union
+  select 43 as o;
+$$ language sql volatile;
+
+create function c.mutation_out_table(out c.person) as $$
+  select * from c.person where id = 1;
+$$ language sql volatile;
+
+create function c.mutation_out_table_setof(out c.person) returns setof c.person as $$
+  select * from c.person;
+$$ language sql volatile;
+
+create function c.mutation_out_unnamed(out int) as $$
+  select 42;
+$$ language sql volatile;
+
+create function c.mutation_out_unnamed_out_out_unnamed(out int, out o2 text, out int) as $$
+  select 42, 'out2'::text, 3;
+$$ language sql volatile;
+
+create function c.mutation_returns_table_multi_col(i int) returns table (col1 int, col2 text) as $$
+  select i + 42 as col1, 'out'::text as col2
+  union
+  select i + 43 as col1, 'out2'::text as col2;
+$$ language sql volatile;
+
+create function c.mutation_returns_table_one_col(i int) returns table (col1 int) as $$
+  select i + 42 as col1
+  union
+  select i + 43 as col1;
+$$ language sql volatile;
+
 -- Begin tests for smart comments
 
 -- Rename table and columns

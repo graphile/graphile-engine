@@ -1,0 +1,115 @@
+mutation {
+  mutationInInout(input: { i: 10, ino: 5 }) {
+    integer
+  }
+  mutationInOut(input: { i: 10 }) {
+    integer
+  }
+  mutationOut(input: {}) {
+    integer
+  }
+  mutationOutComplex(input: { a: 1, b: "test" }) {
+    mutationOutComplexRecord {
+      x
+      y {
+        a
+        b
+        c
+      }
+      z {
+        nodeId
+        id
+        name
+        postsByAuthorId {
+          nodes {
+            nodeId
+            id
+          }
+        }
+      }
+    }
+  }
+  mutationOutComplexSetof(input: { a: 1, b: "test" }) {
+    mutationOutComplexSetofRecords {
+      x
+      y {
+        a
+        b
+        c
+      }
+      z {
+        nodeId
+        id
+        name
+        postsByAuthorId {
+          nodes {
+            nodeId
+            id
+          }
+        }
+      }
+    }
+  }
+  mutationOutOut(input: {}) {
+    mutationOutOutRecord {
+      firstOut
+      secondOut
+    }
+  }
+  mutationOutOutCompoundType(input: { i1: 10 }) {
+    mutationOutOutCompoundTypeRecord {
+      o1
+      o2 {
+        a
+        b
+        c
+      }
+    }
+  }
+  mutationOutOutSetof(input: {}) {
+    mutationOutOutSetofRecords {
+      o1
+      o2
+    }
+  }
+  mutationOutOutUnnamed(input: {}) {
+    mutationOutOutUnnamedRecord {
+      arg1
+      arg2
+    }
+  }
+  mutationOutSetof(input: {}) {
+    integers
+  }
+  mutationOutTable(input: {}) {
+    person {
+      nodeId
+      id
+    }
+  }
+  mutationOutTableSetof(input: {}) {
+    people {
+      nodeId
+      id
+    }
+  }
+  mutationOutUnnamed(input: {}) {
+    integer
+  }
+  mutationOutUnnamedOutOutUnnamed(input: {}) {
+    mutationOutUnnamedOutOutUnnamedRecord {
+      arg1
+      arg3
+      o2
+    }
+  }
+  mutationReturnsTableMultiCol(input: { i: 20 }) {
+    mutationReturnsTableMultiColRecords {
+      col1
+      col2
+    }
+  }
+  mutationReturnsTableOneCol(input: { i: 20 }) {
+    integers
+  }
+}
