@@ -171,6 +171,7 @@ export default function makeProcField(
 
   const isTableLike: boolean =
     (TableType && isCompositeType(TableType)) || false;
+  const isRecordLike = returnType.id === "2249";
   if (isTableLike) {
     if (proc.returnsSet) {
       if (isMutation) {
@@ -202,12 +203,40 @@ export default function makeProcField(
       fieldScope.pgFieldIntrospectionTable = returnTypeTable;
       payloadTypeScope.pgIntrospectionTable = returnTypeTable;
     }
+  } else if (isRecordLike) {
+    const RecordType = getTypeByName(
+      inflection.functionReturnsRecordType(proc)
+    );
+    if (proc.returnsSet) {
+      if (isMutation) {
+        type = new GraphQLList(RecordType);
+      } else if (forceList) {
+        type = new GraphQLList(RecordType);
+        fieldScope.isPgFieldSimpleCollection = true;
+  } else {
+        const ConnectionType = getTypeByName(
+          inflection.scalarFunctionConnection(proc)
+        );
+        if (!ConnectionType) {
+          throw new Error(
+            `Do not have a connection type '${inflection.scalarFunctionConnection(
+              proc
+            )}' for '${RecordType.name}' so cannot create procedure field`
+          );
+        }
+        type = new GraphQLNonNull(ConnectionType);
+        fieldScope.isPgFieldConnection = true;
+      }
+    } else {
+      type = RecordType;
+      if (rawReturnType.isPgArray) {
+        type = new GraphQLList(type);
+      }
+    }
   } else {
     // TODO: PG10 doesn't support the equivalent of pg_attribute.atttypemod on function return values, but maybe a later version might
     const Type =
-      returnType.id === "2249" // record type
-        ? getTypeByName(inflection.functionReturnsRecordType(proc))
-        : pgGetGqlTypeByTypeIdAndModifier(returnType.id, null) || GraphQLString;
+      pgGetGqlTypeByTypeIdAndModifier(returnType.id, null) || GraphQLString;
 
     if (proc.returnsSet) {
       const connectionTypeName = inflection.scalarFunctionConnection(proc);
@@ -229,7 +258,7 @@ export default function makeProcField(
         // `__cursor` field so we can't just use a scalar.
       }
     } else {
-      returnFirstValueAsValue = returnType.id !== "2249";
+      returnFirstValueAsValue = true;
       type = Type;
       if (rawReturnType.isPgArray) {
         type = new GraphQLList(type);
