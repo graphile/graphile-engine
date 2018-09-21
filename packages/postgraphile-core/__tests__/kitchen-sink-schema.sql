@@ -471,6 +471,11 @@ create function c.func_with_input_returns_untyped_record(i int) returns record a
   select 42;
 $$ language sql stable;
 
+-- This should not add a query to the schema; uses a record argument
+create function c.func_with_record_arg(out r record) as $$
+  select 42;
+$$ language sql stable;
+
 create function c.func_out(out o int) as $$
   select 42 as o;
 $$ language sql stable;
@@ -664,6 +669,103 @@ create function c.mutation_returns_table_one_col(i int) returns table (col1 int)
   union
   select i + 43 as col1;
 $$ language sql volatile;
+
+/*------------------
+
+create type c.mut_in_inout_type as (ino int);
+create function c.mut_in_inout(i int, ino int) returns c.mut_in_inout_type as $$
+  select i + ino as ino;
+$$ language sql volatile;
+
+create type c.mut_in_out_type as (o int);
+create function c.mut_in_out(i int) returns c.mut_in_out_type as $$
+  select i + 42 as o;
+$$ language sql volatile;
+
+create type c.mut_out_type as (o int);
+create function c.mut_out() returns c.mut_out_type as $$
+  select 42 as o;
+$$ language sql volatile;
+
+create type c.mut_out_complex_type as (x int, y c.compound_type, z c.person);
+create function c.mut_out_complex(a int, b text) returns c.mut_out_complex_type as $$
+  select
+    a + 1 as x,
+    b.types.compound_type as y,
+    person as z
+  from c.person
+    inner join b.types on c.person.id = (b.types.id - 11)
+  limit 1;
+$$ language sql volatile;
+
+create type c.mut_out_complex_setof_type as (x int, y c.compound_type, z c.person);
+create function c.mut_out_complex_setof(a int, b text) returns setof c.mut_out_complex_setof_type as $$
+  select
+    a + 1 as x,
+    b.types.compound_type as y,
+    person as z
+  from c.person
+    inner join b.types on c.person.id = (b.types.id - 11)
+  limit 1;
+$$ language sql volatile;
+
+create type c.mut_out_out_type as (first_out int, second_out text);
+create function c.mut_out_out() returns c.mut_out_out_type as $$
+  select 42 as first_out, 'out'::text as second_out;
+$$ language sql volatile;
+
+create type c.mut_out_out_compound_type_type as (o1 int, o2 c.compound_type);
+create function c.mut_out_out_compound_type(i1 int) returns c.mut_out_out_compound_type_type as $$
+  select i1 + 10 as o1, compound_type as o2 from b.types limit 1;
+$$ language sql volatile;
+
+create type c.mut_out_out_setof_type as (o1 int, o2 text);
+create function c.mut_out_out_setof() returns setof c.mut_out_out_setof_type as $$
+  select 42 as o1, 'out'::text as o2
+  union
+  select 43 as o1, 'out2'::text as o2
+$$ language sql volatile;
+
+create type c.mut_out_setof_type as (o int);
+create function c.mut_out_setof() returns setof c.mut_out_setof_type as $$
+  select 42 as o
+  union
+  select 43 as o;
+$$ language sql volatile;
+
+create type c.mut_returns_table_multi_col_type as (col1 int, col2 text);
+create function c.mut_returns_table_multi_col(i int) returns c.mut_returns_table_multi_col_type as $$
+  select i + 42 as col1, 'out'::text as col2
+  union
+  select i + 43 as col1, 'out2'::text as col2;
+$$ language sql volatile;
+
+create type c.mut_returns_table_one_col_type as (col1 int);
+create function c.mut_returns_table_one_col(i int) returns c.mut_returns_table_one_col_type as $$
+  select i + 42 as col1
+  union
+  select i + 43 as col1;
+$$ language sql volatile;
+
+--------------
+
+create function c.mu_out() returns int as $$
+  select 42;
+$$ language sql volatile;
+
+create function c.mu_out_setof() returns setof int as $$
+  select 42;
+$$ language sql volatile;
+
+create function c.mu_out_table() returns c.person as $$
+  select * from c.person where id = 1;
+$$ language sql volatile;
+
+create function c.mu_out_table_setof() returns setof c.person as $$
+  select * from c.person;
+$$ language sql volatile;
+
+------------------- */
 
 -- Begin tests for smart comments
 
