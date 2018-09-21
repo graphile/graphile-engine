@@ -65,6 +65,7 @@ export const PgOrderByPrimaryKeyPlugin: Plugin;
 export const PgRowNode: Plugin;
 export const PgNodeAliasPostGraphile: Plugin;
 export const PgRecordReturnTypesPlugin: Plugin;
+export const PgRecordFunctionConnectionPlugin: Plugin;
 export const PgScalarFunctionConnectionPlugin: Plugin;
 export const PageInfoStartEndCursor: Plugin;
 export const PgConnectionTotalCount: Plugin;

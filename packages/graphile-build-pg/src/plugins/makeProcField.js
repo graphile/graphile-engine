@@ -241,11 +241,11 @@ export default function makeProcField(
         fieldScope.isPgFieldSimpleCollection = true;
       } else {
         const ConnectionType = getTypeByName(
-          inflection.scalarFunctionConnection(proc)
+          inflection.recordFunctionConnection(proc)
         );
         if (!ConnectionType) {
           throw new Error(
-            `Do not have a connection type '${inflection.scalarFunctionConnection(
+            `Do not have a connection type '${inflection.recordFunctionConnection(
               proc
             )}' for '${RecordType.name}' so cannot create procedure field`
           );

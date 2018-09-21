@@ -679,6 +679,14 @@ export default (function PgBasicsPlugin(
         edgeField(table: PgClass) {
           return this.camelCase(`${this._singularizedTableName(table)}-edge`);
         },
+        recordFunctionConnection(proc: PgProc) {
+          return this.upperCamelCase(`${this._functionName(proc)}-connection`);
+        },
+        recordFunctionEdge(proc: PgProc) {
+          return this.upperCamelCase(
+            `${this.singularize(this._functionName(proc))}-edge`
+          );
+        },
         scalarFunctionConnection(proc: PgProc) {
           return this.upperCamelCase(`${this._functionName(proc)}-connection`);
         },
