@@ -226,6 +226,13 @@ export default function makeProcField(
     const RecordType = getTypeByName(
       inflection.functionReturnsRecordType(proc)
     );
+    if (!RecordType) {
+      throw new Error(
+        `Do not have a record type '${inflection.functionReturnsRecordType(
+          proc
+        )}' for '${proc.name}' so cannot create procedure field`
+      );
+    }
     if (proc.returnsSet) {
       if (isMutation) {
         type = new GraphQLList(RecordType);
