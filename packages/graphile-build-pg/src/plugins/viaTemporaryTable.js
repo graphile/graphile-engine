@@ -92,6 +92,9 @@ export default async function viaTemporaryTable(
             outputArgNames.map(
               (outputArgName, idx) =>
                 sql.query`${sqlResultSourceAlias}.${sql.identifier(
+                  // According to https://www.postgresql.org/docs/10/static/sql-createfunction.html,
+                  // "If you omit the name for an output argument, the system will choose a default column name."
+                  // In PG 9.x and 10, the column names appear to be assigned with a `column` prefix.
                   outputArgName !== "" ? outputArgName : `column${idx + 1}`
                 )}::text`
             ),
@@ -128,6 +131,9 @@ export default async function viaTemporaryTable(
                   outputArgTypes[idx].namespaceName,
                   outputArgTypes[idx].name
                 )} as ${sql.identifier(
+                  // According to https://www.postgresql.org/docs/10/static/sql-createfunction.html,
+                  // "If you omit the name for an output argument, the system will choose a default column name."
+                  // In PG 9.x and 10, the column names appear to be assigned with a `column` prefix.
                   outputArgName !== "" ? outputArgName : `column${idx + 1}`
                 )}`
             ),
