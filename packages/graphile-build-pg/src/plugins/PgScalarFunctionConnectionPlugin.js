@@ -48,9 +48,6 @@ export default (function PgScalarFunctionConnectionPlugin(
         // version of PG will?
         const NodeType =
           pgGetGqlTypeByTypeIdAndModifier(returnType.id, null) || GraphQLString;
-        if (!NodeType) {
-          return;
-        }
         const EdgeType = newWithHooks(
           GraphQLObjectType,
           {
