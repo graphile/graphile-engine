@@ -634,9 +634,12 @@ export default function makeProcField(
                     functionAlias,
                     query,
                     isPgClass,
-                    isPgRecord,
-                    outputArgTypes,
-                    outputArgNames
+                    isPgRecord
+                      ? {
+                          outputArgTypes,
+                          outputArgNames,
+                        }
+                      : null
                   );
                   await pgClient.query("RELEASE SAVEPOINT graphql_mutation");
                 } catch (e) {

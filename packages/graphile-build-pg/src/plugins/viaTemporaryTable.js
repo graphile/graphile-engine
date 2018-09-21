@@ -44,11 +44,14 @@ export default async function viaTemporaryTable(
   sqlResultSourceAlias: SQL,
   sqlResultQuery: SQL,
   isPgClassLike: boolean = true,
-  isPgRecord: boolean = false,
-  // eslint-disable-next-line flowtype/no-weak-types
-  outputArgTypes: Array<any> = [],
-  outputArgNames: Array<string> = []
+  pgRecordInfo: ?{
+    outputArgTypes: Array<any>,
+    outputArgNames: Array<string>,
+  } = undefined
 ) {
+  const isPgRecord = pgRecordInfo != null;
+  const { outputArgTypes, outputArgNames } = pgRecordInfo || {};
+
   async function performQuery(pgClient: Client, sqlQuery: SQLQuery) {
     // TODO: look into rowMode = 'array'
     const { text, values } = sql.compile(sqlQuery);
