@@ -1,19 +1,19 @@
 import {
-  makeExtendSchemaPlugin,
-  makeAddInflectorsPlugin,
-  gql,
-  embed,
-} from "../";
-import {
-  buildSchema,
-  // defaultPlugins,
-  StandardTypesPlugin,
-  QueryPlugin,
-  MutationPlugin,
-  SubscriptionPlugin,
   MutationPayloadQueryPlugin,
+  MutationPlugin,
+  QueryPlugin,
+  StandardTypesPlugin,
+  SubscriptionPlugin,
+  buildSchema,
 } from "graphile-build";
-import { graphql, subscribe, parse, printSchema } from "graphql";
+import {
+  embed,
+  gql,
+  makeAddInflectorsPlugin,
+  makeExtendSchemaPlugin,
+} from "../";
+import { graphql, parse, printSchema, subscribe } from "graphql";
+
 import { $$asyncIterator } from "iterall";
 
 function TestUtils_ExtractScopePlugin(

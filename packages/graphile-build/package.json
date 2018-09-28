@@ -30,8 +30,8 @@
   },
   "homepage": "https://graphile.org/graphile-build/",
   "dependencies": {
-    "@types/graphql": "^0.13.4",
-    "debug": ">=2 <3",
+    "@types/graphql": "^14.0.1",
+    "debug": "^4.0.1",
     "graphql-parse-resolve-info": "4.0.0-rc.12",
     "lodash": ">=4 <5",
     "lru-cache": ">=4 <5",
@@ -42,8 +42,8 @@
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
-    "eslint_d": "^5.3.1",
-    "flow-copy-source": "^1.2.0",
+    "eslint_d": "^7.1.1",
+    "flow-copy-source": "^2.0.2",
     "jest": "^23.5.0"
   },
   "peerDependencies": {
