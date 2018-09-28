@@ -38,9 +38,9 @@
   "homepage": "https://github.com/graphile/graphile-build/tree/master/packages/graphile-build-pg",
   "dependencies": {
     "chalk": "^2.1.0",
-    "debug": ">=2 <3",
+    "debug": "^4.0.1",
     "graphile-build": "4.0.0-rc.12",
-    "graphql-iso-date": "^3.2.0",
+    "graphql-iso-date": "^3.6.1",
     "jsonwebtoken": "^8.1.1",
     "lodash": ">=4 <5",
     "lru-cache": ">=4 <5",
@@ -52,8 +52,8 @@
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
-    "eslint_d": "^5.3.1",
-    "flow-copy-source": "^1.2.0",
+    "eslint_d": "^7.1.1",
+    "flow-copy-source": "^2.0.2",
     "jest": "^23.5.0"
   },
   "jest": {

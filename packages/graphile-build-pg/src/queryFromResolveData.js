@@ -1,10 +1,11 @@
+import * as sql from "pg-sql2";
+
+import type { DataForType } from "graphile-build";
 // @flow
 import QueryBuilder from "./QueryBuilder";
-import * as sql from "pg-sql2";
 import type { SQL } from "pg-sql2";
-import type { DataForType } from "graphile-build";
-import isSafeInteger from "lodash/isSafeInteger";
 import assert from "assert";
+import isSafeInteger from "lodash/isSafeInteger";
 
 const identity = _ => _ !== null && _ !== undefined;
 
@@ -15,6 +16,7 @@ export default (
   options: {
     withPagination?: boolean,
     withPaginationAsFields?: boolean,
+    withCursor?: boolean,
     asJson?: boolean,
     asJsonAggregate?: boolean,
     addNullCase?: boolean,

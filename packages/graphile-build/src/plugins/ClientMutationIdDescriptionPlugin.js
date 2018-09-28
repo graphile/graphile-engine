@@ -6,7 +6,7 @@ export default (function ClientMutationIdDescriptionPlugin(
 ) {
   builder.hook(
     "GraphQLInputObjectType:fields:field",
-    (field: { name?: string }, build, context) => {
+    (field: { name?: string, description?: string }, build, context) => {
       const { extend } = build;
       const {
         scope: { isMutationInput, fieldName },
@@ -32,7 +32,7 @@ export default (function ClientMutationIdDescriptionPlugin(
 
   builder.hook(
     "GraphQLObjectType:fields:field",
-    (field: { name?: string }, build, context) => {
+    (field: { name?: string, description?: string }, build, context) => {
       const { extend } = build;
       const {
         scope: { isMutationPayload, fieldName },
@@ -58,7 +58,7 @@ export default (function ClientMutationIdDescriptionPlugin(
 
   builder.hook(
     "GraphQLObjectType:fields:field:args",
-    (args: {}, build, context) => {
+    (args: { input?: any }, build, context) => {
       const { extend } = build;
       const {
         scope: { isRootMutation },
