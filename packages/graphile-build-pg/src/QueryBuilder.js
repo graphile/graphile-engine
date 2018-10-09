@@ -3,7 +3,7 @@ import * as sql from "pg-sql2";
 import type { SQL } from "pg-sql2";
 import isSafeInteger from "lodash/isSafeInteger";
 
-const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
+const isDev = process.env.POSTGRAPHILE_ENV === "development";
 
 type GenContext = {
   queryBuilder: QueryBuilder,
