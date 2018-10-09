@@ -533,11 +533,11 @@ class QueryBuilder {
       );
     } else if (type === "select") {
       // Assume that duplicate fields must be identical, don't output the same key multiple times
-      const seenFields = [];
+      const seenFields = {};
       const context = getContext();
       this.compiledData[type] = this.data[type].reduce((memo, [a, b]) => {
-        if (seenFields.indexOf(b) < 0) {
-          seenFields.push(b);
+        if (!seenFields[b]) {
+          seenFields[b] = true;
           memo.push([callIfNecessary(a, context), b]);
         }
         return memo;
