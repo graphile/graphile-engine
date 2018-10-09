@@ -536,7 +536,9 @@ class QueryBuilder {
       const seenFields = {};
       const context = getContext();
       this.compiledData[type] = this.data[type].reduce((memo, [a, b]) => {
+        // $FlowFixMe
         if (!seenFields[b]) {
+          // $FlowFixMe
           seenFields[b] = true;
           memo.push([callIfNecessary(a, context), b]);
         }
