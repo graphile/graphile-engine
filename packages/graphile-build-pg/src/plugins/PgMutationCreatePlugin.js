@@ -130,8 +130,7 @@ export default (function PgMutationCreatePlugin(
                     {
                       isPgCreatePayloadResultField: true,
                       pgFieldIntrospection: table,
-                    },
-                    queryBuilder => queryBuilder.getTableAlias()
+                    }
                   ),
                 };
               },

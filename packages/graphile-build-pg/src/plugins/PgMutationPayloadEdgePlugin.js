@@ -117,7 +117,7 @@ export default (function PgMutationPayloadEdgePlugin(builder) {
             isPgMutationPayloadEdgeField: true,
             pgFieldIntrospection: table,
           },
-          queryBuilder => queryBuilder.getTableAlias(),
+          false,
           {
             withQueryBuilder(queryBuilder, { parsedResolveInfoFragment }) {
               const {

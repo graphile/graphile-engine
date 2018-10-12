@@ -107,43 +107,28 @@ export default (function PgScalarFunctionConnectionPlugin(
             }\` values.`,
             fields: ({ fieldWithHooks }) => {
               return {
-                nodes: sqlField(
-                  build,
-                  fieldWithHooks,
-                  "nodes",
-                  {
-                    description: `A list of \`${NodeType.name}\` objects.`,
-                    type: new GraphQLNonNull(
-                      new GraphQLList(
-                        nullableIf(
-                          !pgForbidSetofFunctionsToReturnNull,
-                          NodeType
-                        )
-                      )
-                    ),
-                    resolve(data) {
-                      return data.data.map(entry => entry.value);
-                    },
+                nodes: sqlField(build, fieldWithHooks, "nodes", {
+                  description: `A list of \`${NodeType.name}\` objects.`,
+                  type: new GraphQLNonNull(
+                    new GraphQLList(
+                      nullableIf(!pgForbidSetofFunctionsToReturnNull, NodeType)
+                    )
+                  ),
+                  resolve(data) {
+                    return data.data.map(entry => entry.value);
                   },
-                  {}
-                ),
-                edges: sqlField(
-                  build,
-                  fieldWithHooks,
-                  "edges",
-                  {
-                    description: `A list of edges which contains the \`${
-                      NodeType.name
-                    }\` and cursor to aid in pagination.`,
-                    type: new GraphQLNonNull(
-                      new GraphQLList(new GraphQLNonNull(EdgeType))
-                    ),
-                    resolve(data) {
-                      return data.data;
-                    },
+                }),
+                edges: sqlField(build, fieldWithHooks, "edges", {
+                  description: `A list of edges which contains the \`${
+                    NodeType.name
+                  }\` and cursor to aid in pagination.`,
+                  type: new GraphQLNonNull(
+                    new GraphQLList(new GraphQLNonNull(EdgeType))
+                  ),
+                  resolve(data) {
+                    return data.data;
                   },
-                  {}
-                ),
+                }),
               };
             },
           },

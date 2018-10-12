@@ -4,7 +4,7 @@ export default function sqlField(
   fieldName,
   fieldSpec,
   fieldScope = {},
-  whereFrom = sqlBuilder => sqlBuilder.getTableAlias(),
+  whereFrom = false,
   options = {}
 ) {
   const { type: FieldType } = fieldSpec;
