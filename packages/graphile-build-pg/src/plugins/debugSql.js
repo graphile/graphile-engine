@@ -16,7 +16,6 @@ function debugSql(sql) {
     chalk.magenta,
     chalk.cyan,
     chalk.white,
-    chalk.gray,
     chalk.black,
   ];
   function nextColor() {
@@ -34,7 +33,8 @@ function debugSql(sql) {
   }
 
   let indentLevel = 0;
-  function handleIndent(match) {
+  function handleIndent(all, rawMatch) {
+    const match = rawMatch.replace(/ $/, "");
     if (match === "(") {
       indentLevel++;
       return match + "\n" + "  ".repeat(indentLevel);
@@ -61,9 +61,11 @@ function debugSql(sql) {
     .replace(/\s+(?=$|\n|\))/g, "")
     .replace(/(\n|^|\()\s+/g, "$1")
     .replace(
-      /(\(|\),?|,| (select|insert|update|delete|from|where|and|or|order|limit) )/g,
+      /(\(|\)|\), ?|, ?| (select|insert|update|delete|from|where|and|or|order|limit)(?= ))/g,
       handleIndent
-    );
+    )
+    .replace(/\(\s*([A-Za-z0-9_."' =]{1,50})\s*\)/g, "($1)")
+    .replace(/\n\s*and \(TRUE\)/g, chalk.gray(" and (TRUE)"));
   const colouredSql = tidySql.replace(/__local_[0-9]+__/g, colourize);
   rawDebugSql("%s", "\n" + colouredSql);
 }
