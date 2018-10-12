@@ -33,6 +33,8 @@ import { createHash } from "crypto";
 
 import { version } from "../package.json";
 
+let recurseDataGeneratorsForFieldWarned = false;
+
 const isString = str => typeof str === "string";
 const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
 const debug = debugFactory("graphile-build");
@@ -353,6 +355,12 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
           fieldDataGeneratorsByFieldName[fieldName].push(fn);
         };
         const recurseDataGeneratorsForField = fieldName => {
+          if (!recurseDataGeneratorsForFieldWarned) {
+            recurseDataGeneratorsForFieldWarned = true;
+            console.error(
+              "Use of `recurseDataGeneratorsForField` is NOT SAFE. e.g. `{n1: node { a: field1 }, n2: node { a: field2 } }` cannot resolve correctly."
+            );
+          }
           const fn = (parsedResolveInfoFragment, ReturnType, ...rest) => {
             const { args } = parsedResolveInfoFragment;
             const { fields } = this.simplifyParsedResolveInfoFragmentWithType(

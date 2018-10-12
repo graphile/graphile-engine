@@ -28,12 +28,17 @@ export default function sqlField(
                 parsedResolveInfoFragment,
                 FieldType
               );
-              const tableAlias = sql.identifier(Symbol());
+              const tableAlias =
+                whereFrom === false
+                  ? queryBuilder.getTableAlias()
+                  : sql.identifier(Symbol());
               const query = queryFromResolveData(
-                whereFrom(queryBuilder),
+                whereFrom ? whereFrom(queryBuilder) : sql.identifier(Symbol()),
                 tableAlias,
                 resolveData,
-                { asJson: true },
+                whereFrom === false
+                  ? { onlyJsonField: true }
+                  : { asJson: true },
                 innerQueryBuilder => {
                   innerQueryBuilder.parentQueryBuilder = queryBuilder;
                   if (typeof options.withQueryBuilder === "function") {

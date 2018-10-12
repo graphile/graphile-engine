@@ -1,5 +1,6 @@
 // @flow
 import type { Plugin } from "graphile-build";
+import sqlField from "./sqlField";
 const base64 = str => Buffer.from(String(str)).toString("base64");
 
 const hasNonNullKey = row => {
@@ -38,6 +39,7 @@ export default (function PgTablesPlugin(
       getNodeIdForTypeAndIdentifiers,
       nodeIdFieldName,
       newWithHooks,
+      getSafeAliasFromResolveInfo,
       pgSql: sql,
       pgIntrospectionResultsByKind: introspectionResultsByKind,
       getTypeByName,
@@ -339,7 +341,7 @@ export default (function PgTablesPlugin(
               description: `A \`${tableTypeName}\` edge in the connection.`,
               name: inflection.edge(TableType.name),
               fields: ({ fieldWithHooks, recurseDataGeneratorsForField }) => {
-                recurseDataGeneratorsForField("node");
+                //recurseDataGeneratorsForField("node");
                 return {
                   cursor: fieldWithHooks(
                     "cursor",
@@ -362,16 +364,26 @@ export default (function PgTablesPlugin(
                       isCursorField: true,
                     }
                   ),
-                  node: {
-                    description: `The \`${tableTypeName}\` at the end of the edge.`,
-                    type: nullableIf(
-                      !pgForbidSetofFunctionsToReturnNull,
-                      TableType
-                    ),
-                    resolve(data) {
-                      return handleNullRow(data);
+                  node: sqlField(
+                    build,
+                    fieldWithHooks,
+                    "node",
+                    {
+                      description: `The \`${tableTypeName}\` at the end of the edge.`,
+                      type: nullableIf(
+                        !pgForbidSetofFunctionsToReturnNull,
+                        TableType
+                      ),
+                      resolve(data, _args, _context, resolveInfo) {
+                        const safeAlias = getSafeAliasFromResolveInfo(
+                          resolveInfo
+                        );
+                        return handleNullRow(data[safeAlias]);
+                      },
                     },
-                  },
+                    {},
+                    false
+                  ),
                 };
               },
             },
@@ -397,34 +409,56 @@ export default (function PgTablesPlugin(
             {
               description: `A connection to a list of \`${tableTypeName}\` values.`,
               name: inflection.connection(TableType.name),
-              fields: ({ recurseDataGeneratorsForField }) => {
-                recurseDataGeneratorsForField("edges");
-                recurseDataGeneratorsForField("nodes");
+              fields: ({ recurseDataGeneratorsForField, fieldWithHooks }) => {
+                //recurseDataGeneratorsForField("edges");
+                //recurseDataGeneratorsForField("nodes");
                 recurseDataGeneratorsForField("pageInfo");
                 return {
-                  nodes: {
-                    description: `A list of \`${tableTypeName}\` objects.`,
-                    type: new GraphQLNonNull(
-                      new GraphQLList(
-                        nullableIf(
-                          !pgForbidSetofFunctionsToReturnNull,
-                          TableType
+                  nodes: sqlField(
+                    build,
+                    fieldWithHooks,
+                    "nodes",
+                    {
+                      description: `A list of \`${tableTypeName}\` objects.`,
+                      type: new GraphQLNonNull(
+                        new GraphQLList(
+                          nullableIf(
+                            !pgForbidSetofFunctionsToReturnNull,
+                            TableType
+                          )
                         )
-                      )
-                    ),
-                    resolve(data) {
-                      return data.data.map(handleNullRow);
+                      ),
+                      resolve(data, _args, _context, resolveInfo) {
+                        const safeAlias = getSafeAliasFromResolveInfo(
+                          resolveInfo
+                        );
+                        return data.data
+                          .map(entry => entry[safeAlias])
+                          .map(handleNullRow);
+                      },
                     },
-                  },
-                  edges: {
-                    description: `A list of edges which contains the \`${tableTypeName}\` and cursor to aid in pagination.`,
-                    type: new GraphQLNonNull(
-                      new GraphQLList(new GraphQLNonNull(EdgeType))
-                    ),
-                    resolve(data) {
-                      return data.data;
+                    {},
+                    false
+                  ),
+                  edges: sqlField(
+                    build,
+                    fieldWithHooks,
+                    "edges",
+                    {
+                      description: `A list of edges which contains the \`${tableTypeName}\` and cursor to aid in pagination.`,
+                      type: new GraphQLNonNull(
+                        new GraphQLList(new GraphQLNonNull(EdgeType))
+                      ),
+                      resolve(data, _args, _context, resolveInfo) {
+                        const safeAlias = getSafeAliasFromResolveInfo(
+                          resolveInfo
+                        );
+                        return data.data.map(entry => entry[safeAlias]);
+                      },
                     },
-                  },
+                    {},
+                    false
+                  ),
                   pageInfo: PageInfo && {
                     description: "Information to aid in pagination.",
                     type: new GraphQLNonNull(PageInfo),

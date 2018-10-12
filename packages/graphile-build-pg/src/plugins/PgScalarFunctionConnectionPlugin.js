@@ -1,5 +1,7 @@
 // @flow
 import type { Plugin } from "graphile-build";
+import sqlField from "./sqlField";
+
 const base64 = str => Buffer.from(String(str)).toString("base64");
 
 export default (function PgScalarFunctionConnectionPlugin(
@@ -103,32 +105,45 @@ export default (function PgScalarFunctionConnectionPlugin(
             description: `A connection to a list of \`${
               NodeType.name
             }\` values.`,
-            fields: ({ recurseDataGeneratorsForField }) => {
-              recurseDataGeneratorsForField("edges");
-              recurseDataGeneratorsForField("nodes");
+            fields: ({ fieldWithHooks }) => {
               return {
-                nodes: {
-                  description: `A list of \`${NodeType.name}\` objects.`,
-                  type: new GraphQLNonNull(
-                    new GraphQLList(
-                      nullableIf(!pgForbidSetofFunctionsToReturnNull, NodeType)
-                    )
-                  ),
-                  resolve(data) {
-                    return data.data.map(entry => entry.value);
+                nodes: sqlField(
+                  build,
+                  fieldWithHooks,
+                  "nodes",
+                  {
+                    description: `A list of \`${NodeType.name}\` objects.`,
+                    type: new GraphQLNonNull(
+                      new GraphQLList(
+                        nullableIf(
+                          !pgForbidSetofFunctionsToReturnNull,
+                          NodeType
+                        )
+                      )
+                    ),
+                    resolve(data) {
+                      return data.data.map(entry => entry.value);
+                    },
                   },
-                },
-                edges: {
-                  description: `A list of edges which contains the \`${
-                    NodeType.name
-                  }\` and cursor to aid in pagination.`,
-                  type: new GraphQLNonNull(
-                    new GraphQLList(new GraphQLNonNull(EdgeType))
-                  ),
-                  resolve(data) {
-                    return data.data;
+                  {}
+                ),
+                edges: sqlField(
+                  build,
+                  fieldWithHooks,
+                  "edges",
+                  {
+                    description: `A list of edges which contains the \`${
+                      NodeType.name
+                    }\` and cursor to aid in pagination.`,
+                    type: new GraphQLNonNull(
+                      new GraphQLList(new GraphQLNonNull(EdgeType))
+                    ),
+                    resolve(data) {
+                      return data.data;
+                    },
                   },
-                },
+                  {}
+                ),
               };
             },
           },
