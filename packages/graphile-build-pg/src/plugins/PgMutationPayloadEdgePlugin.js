@@ -6,12 +6,15 @@ export default (function PgMutationPayloadEdgePlugin(builder) {
   builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
     const {
       extend,
+      getSafeAliasFromResolveInfo,
+      getSafeAliasFromAlias,
       getTypeByName,
       pgGetGqlTypeByTypeIdAndModifier,
       pgSql: sql,
       graphql: { GraphQLList, GraphQLNonNull },
       pgIntrospectionResultsByKind: introspectionResultsByKind,
       inflection,
+      pgQueryFromResolveData: queryFromResolveData,
       pgOmit: omit,
       describePgEntity,
     } = build;
@@ -56,68 +59,91 @@ export default (function PgMutationPayloadEdgePlugin(builder) {
     const canOrderBy = !omit(table, "order");
 
     const fieldName = inflection.edgeField(table);
-    recurseDataGeneratorsForField(fieldName);
+    //recurseDataGeneratorsForField(fieldName);
     return extend(
       fields,
       {
         [fieldName]: fieldWithHooks(
           fieldName,
-          ({ addArgDataGenerator }) => {
-            addArgDataGenerator(function connectionOrderBy({
-              orderBy: rawOrderBy,
-            }) {
-              const orderBy =
-                canOrderBy && rawOrderBy
-                  ? Array.isArray(rawOrderBy)
-                    ? rawOrderBy
-                    : [rawOrderBy]
-                  : null;
+          ({ getDataFromParsedResolveInfoFragment, addDataGenerator }) => {
+            addDataGenerator(parsedResolveInfoFragment => {
               return {
                 pgQuery: queryBuilder => {
-                  if (orderBy != null) {
-                    const aliases = [];
-                    const expressions = [];
-                    let unique = false;
-                    orderBy.forEach(item => {
-                      const { alias, specs, unique: itemIsUnique } = item;
-                      unique = unique || itemIsUnique;
-                      const orders = Array.isArray(specs[0]) ? specs : [specs];
-                      orders.forEach(([col, _ascending]) => {
-                        if (!col) {
-                          return;
+                  queryBuilder.select(() => {
+                    const resolveData = getDataFromParsedResolveInfoFragment(
+                      parsedResolveInfoFragment,
+                      TableEdgeType
+                    );
+                    const tableAlias = sql.identifier(Symbol());
+                    const {
+                      args: { orderBy: rawOrderBy },
+                    } = parsedResolveInfoFragment;
+                    const orderBy =
+                      canOrderBy && rawOrderBy
+                        ? Array.isArray(rawOrderBy)
+                          ? rawOrderBy
+                          : [rawOrderBy]
+                        : null;
+                    const query = queryFromResolveData(
+                      queryBuilder.getTableAlias(),
+                      tableAlias,
+                      resolveData,
+                      { asJson: true },
+                      innerQueryBuilder => {
+                        innerQueryBuilder.parentQueryBuilder = queryBuilder;
+                        if (orderBy != null) {
+                          const aliases = [];
+                          const expressions = [];
+                          let unique = false;
+                          orderBy.forEach(item => {
+                            const { alias, specs, unique: itemIsUnique } = item;
+                            unique = unique || itemIsUnique;
+                            const orders = Array.isArray(specs[0])
+                              ? specs
+                              : [specs];
+                            orders.forEach(([col, _ascending]) => {
+                              if (!col) {
+                                return;
+                              }
+                              const expr = isString(col)
+                                ? sql.fragment`${innerQueryBuilder.getTableAlias()}.${sql.identifier(
+                                    col
+                                  )}`
+                                : col;
+                              expressions.push(expr);
+                            });
+                            if (alias == null) return;
+                            aliases.push(alias);
+                          });
+                          if (!unique && primaryKeys) {
+                            // Add PKs
+                            primaryKeys.forEach(key => {
+                              expressions.push(
+                                sql.fragment`${innerQueryBuilder.getTableAlias()}.${sql.identifier(
+                                  key.name
+                                )}`
+                              );
+                            });
+                          }
+                          if (aliases.length) {
+                            innerQueryBuilder.select(
+                              sql.fragment`json_build_array(${sql.join(
+                                aliases.map(
+                                  a => sql.fragment`${sql.literal(a)}::text`
+                                ),
+                                ", "
+                              )}, json_build_array(${sql.join(
+                                expressions,
+                                ", "
+                              )}))`,
+                              "__order_" + aliases.join("__")
+                            );
+                          }
                         }
-                        const expr = isString(col)
-                          ? sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
-                              col
-                            )}`
-                          : col;
-                        expressions.push(expr);
-                      });
-                      if (alias == null) return;
-                      aliases.push(alias);
-                    });
-                    if (!unique && primaryKeys) {
-                      // Add PKs
-                      primaryKeys.forEach(key => {
-                        expressions.push(
-                          sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
-                            key.name
-                          )}`
-                        );
-                      });
-                    }
-                    if (aliases.length) {
-                      queryBuilder.select(
-                        sql.fragment`json_build_array(${sql.join(
-                          aliases.map(
-                            a => sql.fragment`${sql.literal(a)}::text`
-                          ),
-                          ", "
-                        )}, json_build_array(${sql.join(expressions, ", ")}))`,
-                        "__order_" + aliases.join("__")
-                      );
-                    }
-                  }
+                      }
+                    );
+                    return sql.fragment`(${query})`;
+                  }, getSafeAliasFromAlias(parsedResolveInfoFragment.alias));
                 },
               };
             });
@@ -142,7 +168,12 @@ export default (function PgMutationPayloadEdgePlugin(builder) {
                     },
                   }
                 : {},
-              resolve(data, { orderBy: rawOrderBy }) {
+              resolve(data, { orderBy: rawOrderBy }, _context, resolveInfo) {
+                const safeAlias = getSafeAliasFromResolveInfo(resolveInfo);
+                const edge = data.data[safeAlias];
+                if (!edge) {
+                  return null;
+                }
                 const orderBy =
                   canOrderBy && rawOrderBy
                     ? Array.isArray(rawOrderBy)
@@ -155,19 +186,18 @@ export default (function PgMutationPayloadEdgePlugin(builder) {
                     : null;
 
                 if (!order) {
-                  if (data.data.__identifiers) {
-                    return Object.assign({}, data.data, {
-                      __cursor: ["primary_key_asc", data.data.__identifiers],
+                  if (edge.__identifiers) {
+                    return Object.assign({}, edge, {
+                      __cursor: ["primary_key_asc", edge.__identifiers],
                     });
                   } else {
-                    return data.data;
+                    return edge;
                   }
                 }
-                return Object.assign({}, data.data, {
+
+                return Object.assign({}, edge, {
                   __cursor:
-                    data.data[
-                      `__order_${order.map(item => item.alias).join("__")}`
-                    ],
+                    edge[`__order_${order.map(item => item.alias).join("__")}`],
                 });
               },
             };
