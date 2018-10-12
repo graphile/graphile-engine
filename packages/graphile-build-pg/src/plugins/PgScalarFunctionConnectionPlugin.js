@@ -118,17 +118,27 @@ export default (function PgScalarFunctionConnectionPlugin(
                     return data.data.map(entry => entry.value);
                   },
                 }),
-                edges: sqlField(build, fieldWithHooks, "edges", {
-                  description: `A list of edges which contains the \`${
-                    NodeType.name
-                  }\` and cursor to aid in pagination.`,
-                  type: new GraphQLNonNull(
-                    new GraphQLList(new GraphQLNonNull(EdgeType))
-                  ),
-                  resolve(data) {
-                    return data.data;
+                edges: sqlField(
+                  build,
+                  fieldWithHooks,
+                  "edges",
+                  {
+                    description: `A list of edges which contains the \`${
+                      NodeType.name
+                    }\` and cursor to aid in pagination.`,
+                    type: new GraphQLNonNull(
+                      new GraphQLList(new GraphQLNonNull(EdgeType))
+                    ),
+                    resolve(data) {
+                      return data.data;
+                    },
                   },
-                }),
+                  {},
+                  false,
+                  {
+                    hoistCursor: true,
+                  }
+                ),
               };
             },
           },
