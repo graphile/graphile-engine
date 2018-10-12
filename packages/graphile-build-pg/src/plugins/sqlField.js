@@ -3,8 +3,8 @@ export default function sqlField(
   fieldWithHooks,
   fieldName,
   fieldSpec,
-  fieldScope,
-  whereFrom,
+  fieldScope = {},
+  whereFrom = sqlBuilder => sqlBuilder.getTableAlias(),
   options = {}
 ) {
   const { type: FieldType } = fieldSpec;
@@ -36,7 +36,7 @@ export default function sqlField(
                 { asJson: true },
                 innerQueryBuilder => {
                   innerQueryBuilder.parentQueryBuilder = queryBuilder;
-                  if (typeof options.withInnerQueryBuilder === "function") {
+                  if (typeof options.withQueryBuilder === "function") {
                     options.withQueryBuilder(innerQueryBuilder, {
                       parsedResolveInfoFragment,
                     });
