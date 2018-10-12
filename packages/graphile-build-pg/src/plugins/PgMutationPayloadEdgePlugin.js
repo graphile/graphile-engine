@@ -1,27 +1,25 @@
 // @flow
 import type { Plugin } from "graphile-build";
 import isString from "lodash/isString";
+import sqlField from "./sqlField";
 
 export default (function PgMutationPayloadEdgePlugin(builder) {
   builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
     const {
       extend,
       getSafeAliasFromResolveInfo,
-      getSafeAliasFromAlias,
       getTypeByName,
       pgGetGqlTypeByTypeIdAndModifier,
       pgSql: sql,
       graphql: { GraphQLList, GraphQLNonNull },
       pgIntrospectionResultsByKind: introspectionResultsByKind,
       inflection,
-      pgQueryFromResolveData: queryFromResolveData,
       pgOmit: omit,
       describePgEntity,
     } = build;
     const {
       scope: { isMutationPayload, pgIntrospection, pgIntrospectionTable },
       fieldWithHooks,
-      recurseDataGeneratorsForField,
       Self,
     } = context;
     const table = pgIntrospectionTable || pgIntrospection;
@@ -59,152 +57,121 @@ export default (function PgMutationPayloadEdgePlugin(builder) {
     const canOrderBy = !omit(table, "order");
 
     const fieldName = inflection.edgeField(table);
-    //recurseDataGeneratorsForField(fieldName);
+    const defaultValueEnum =
+      canOrderBy &&
+      (TableOrderByType.getValues().find(v => v.name === "PRIMARY_KEY_ASC") ||
+        TableOrderByType.getValues()[0]);
     return extend(
       fields,
       {
-        [fieldName]: fieldWithHooks(
+        [fieldName]: sqlField(
+          build,
+          fieldWithHooks,
           fieldName,
-          ({ getDataFromParsedResolveInfoFragment, addDataGenerator }) => {
-            addDataGenerator(parsedResolveInfoFragment => {
-              return {
-                pgQuery: queryBuilder => {
-                  queryBuilder.select(() => {
-                    const resolveData = getDataFromParsedResolveInfoFragment(
-                      parsedResolveInfoFragment,
-                      TableEdgeType
-                    );
-                    const tableAlias = sql.identifier(Symbol());
-                    const {
-                      args: { orderBy: rawOrderBy },
-                    } = parsedResolveInfoFragment;
-                    const orderBy =
-                      canOrderBy && rawOrderBy
-                        ? Array.isArray(rawOrderBy)
-                          ? rawOrderBy
-                          : [rawOrderBy]
-                        : null;
-                    const query = queryFromResolveData(
-                      queryBuilder.getTableAlias(),
-                      tableAlias,
-                      resolveData,
-                      { asJson: true },
-                      innerQueryBuilder => {
-                        innerQueryBuilder.parentQueryBuilder = queryBuilder;
-                        if (orderBy != null) {
-                          const aliases = [];
-                          const expressions = [];
-                          let unique = false;
-                          orderBy.forEach(item => {
-                            const { alias, specs, unique: itemIsUnique } = item;
-                            unique = unique || itemIsUnique;
-                            const orders = Array.isArray(specs[0])
-                              ? specs
-                              : [specs];
-                            orders.forEach(([col, _ascending]) => {
-                              if (!col) {
-                                return;
-                              }
-                              const expr = isString(col)
-                                ? sql.fragment`${innerQueryBuilder.getTableAlias()}.${sql.identifier(
-                                    col
-                                  )}`
-                                : col;
-                              expressions.push(expr);
-                            });
-                            if (alias == null) return;
-                            aliases.push(alias);
-                          });
-                          if (!unique && primaryKeys) {
-                            // Add PKs
-                            primaryKeys.forEach(key => {
-                              expressions.push(
-                                sql.fragment`${innerQueryBuilder.getTableAlias()}.${sql.identifier(
-                                  key.name
-                                )}`
-                              );
-                            });
-                          }
-                          if (aliases.length) {
-                            innerQueryBuilder.select(
-                              sql.fragment`json_build_array(${sql.join(
-                                aliases.map(
-                                  a => sql.fragment`${sql.literal(a)}::text`
-                                ),
-                                ", "
-                              )}, json_build_array(${sql.join(
-                                expressions,
-                                ", "
-                              )}))`,
-                              "__order_" + aliases.join("__")
-                            );
-                          }
-                        }
-                      }
-                    );
-                    return sql.fragment`(${query})`;
-                  }, getSafeAliasFromAlias(parsedResolveInfoFragment.alias));
-                },
-              };
-            });
-
-            const defaultValueEnum =
-              canOrderBy &&
-              (TableOrderByType.getValues().find(
-                v => v.name === "PRIMARY_KEY_ASC"
-              ) ||
-                TableOrderByType.getValues()[0]);
-            return {
-              description: `An edge for our \`${tableTypeName}\`. May be used by Relay 1.`,
-              type: TableEdgeType,
-              args: canOrderBy
-                ? {
-                    orderBy: {
-                      description: `The method to use when ordering \`${tableTypeName}\`.`,
-                      type: new GraphQLList(
-                        new GraphQLNonNull(TableOrderByType)
-                      ),
-                      defaultValue: defaultValueEnum && defaultValueEnum.value,
-                    },
-                  }
-                : {},
-              resolve(data, { orderBy: rawOrderBy }, _context, resolveInfo) {
-                const safeAlias = getSafeAliasFromResolveInfo(resolveInfo);
-                const edge = data.data[safeAlias];
-                if (!edge) {
-                  return null;
+          {
+            description: `An edge for our \`${tableTypeName}\`. May be used by Relay 1.`,
+            type: TableEdgeType,
+            args: canOrderBy
+              ? {
+                  orderBy: {
+                    description: `The method to use when ordering \`${tableTypeName}\`.`,
+                    type: new GraphQLList(new GraphQLNonNull(TableOrderByType)),
+                    defaultValue: defaultValueEnum && defaultValueEnum.value,
+                  },
                 }
-                const orderBy =
-                  canOrderBy && rawOrderBy
-                    ? Array.isArray(rawOrderBy)
-                      ? rawOrderBy
-                      : [rawOrderBy]
-                    : null;
-                const order =
-                  orderBy && orderBy.some(item => item.alias)
-                    ? orderBy.filter(item => item.alias)
-                    : null;
+              : {},
+            resolve(data, { orderBy: rawOrderBy }, _context, resolveInfo) {
+              const safeAlias = getSafeAliasFromResolveInfo(resolveInfo);
+              const edge = data.data[safeAlias];
+              if (!edge) {
+                return null;
+              }
+              const orderBy =
+                canOrderBy && rawOrderBy
+                  ? Array.isArray(rawOrderBy)
+                    ? rawOrderBy
+                    : [rawOrderBy]
+                  : null;
+              const order =
+                orderBy && orderBy.some(item => item.alias)
+                  ? orderBy.filter(item => item.alias)
+                  : null;
 
-                if (!order) {
-                  if (edge.__identifiers) {
-                    return Object.assign({}, edge, {
-                      __cursor: ["primary_key_asc", edge.__identifiers],
-                    });
-                  } else {
-                    return edge;
-                  }
+              if (!order) {
+                if (edge.__identifiers) {
+                  return Object.assign({}, edge, {
+                    __cursor: ["primary_key_asc", edge.__identifiers],
+                  });
+                } else {
+                  return edge;
                 }
+              }
 
-                return Object.assign({}, edge, {
-                  __cursor:
-                    edge[`__order_${order.map(item => item.alias).join("__")}`],
-                });
-              },
-            };
+              return Object.assign({}, edge, {
+                __cursor:
+                  edge[`__order_${order.map(item => item.alias).join("__")}`],
+              });
+            },
           },
           {
             isPgMutationPayloadEdgeField: true,
             pgFieldIntrospection: table,
+          },
+          queryBuilder => queryBuilder.getTableAlias(),
+          {
+            withQueryBuilder(queryBuilder, { parsedResolveInfoFragment }) {
+              const {
+                args: { orderBy: rawOrderBy },
+              } = parsedResolveInfoFragment;
+              const orderBy =
+                canOrderBy && rawOrderBy
+                  ? Array.isArray(rawOrderBy)
+                    ? rawOrderBy
+                    : [rawOrderBy]
+                  : null;
+              if (orderBy != null) {
+                const aliases = [];
+                const expressions = [];
+                let unique = false;
+                orderBy.forEach(item => {
+                  const { alias, specs, unique: itemIsUnique } = item;
+                  unique = unique || itemIsUnique;
+                  const orders = Array.isArray(specs[0]) ? specs : [specs];
+                  orders.forEach(([col, _ascending]) => {
+                    if (!col) {
+                      return;
+                    }
+                    const expr = isString(col)
+                      ? sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
+                          col
+                        )}`
+                      : col;
+                    expressions.push(expr);
+                  });
+                  if (alias == null) return;
+                  aliases.push(alias);
+                });
+                if (!unique && primaryKeys) {
+                  // Add PKs
+                  primaryKeys.forEach(key => {
+                    expressions.push(
+                      sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
+                        key.name
+                      )}`
+                    );
+                  });
+                }
+                if (aliases.length) {
+                  queryBuilder.select(
+                    sql.fragment`json_build_array(${sql.join(
+                      aliases.map(a => sql.fragment`${sql.literal(a)}::text`),
+                      ", "
+                    )}, json_build_array(${sql.join(expressions, ", ")}))`,
+                    "__order_" + aliases.join("__")
+                  );
+                }
+              }
+            },
           }
         ),
       },

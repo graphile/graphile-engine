@@ -1,6 +1,7 @@
 // @flow
 import type { Plugin } from "graphile-build";
 import debugFactory from "debug";
+import sqlField from "./sqlField";
 
 const debug = debugFactory("graphile-build-pg");
 
@@ -110,22 +111,28 @@ export default (function PgMutationCreatePlugin(
             {
               name: inflection.createPayloadType(table),
               description: `The output of our create \`${tableTypeName}\` mutation.`,
-              fields: ({ recurseDataGeneratorsForField }) => {
+              fields: ({ fieldWithHooks }) => {
                 const tableName = inflection.tableFieldName(table);
-                recurseDataGeneratorsForField(tableName);
                 return {
                   clientMutationId: {
                     description:
                       "The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.",
                     type: GraphQLString,
                   },
-                  [tableName]: {
-                    description: `The \`${tableTypeName}\` that was created by this mutation.`,
-                    type: Table,
-                    resolve(data) {
-                      return data.data;
+                  [tableName]: sqlField(
+                    build,
+                    fieldWithHooks,
+                    tableName,
+                    {
+                      description: `The \`${tableTypeName}\` that was created by this mutation.`,
+                      type: Table,
                     },
-                  },
+                    {
+                      isPgCreatePayloadResultField: true,
+                      pgFieldIntrospection: table,
+                    },
+                    queryBuilder => queryBuilder.getTableAlias()
+                  ),
                 };
               },
             },
