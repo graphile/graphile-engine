@@ -340,14 +340,29 @@ export default (function PgTablesPlugin(
             {
               description: `A \`${tableTypeName}\` edge in the connection.`,
               name: inflection.edge(TableType.name),
-              fields: ({ fieldWithHooks, recurseDataGeneratorsForField }) => {
-                //recurseDataGeneratorsForField("node");
+              fields: ({ fieldWithHooks }) => {
                 return {
                   cursor: fieldWithHooks(
                     "cursor",
                     ({ addDataGenerator }) => {
                       addDataGenerator(() => ({
                         usesCursor: [true],
+                        pgQuery: queryBuilder => {
+                          if (primaryKeys) {
+                            queryBuilder.select(
+                              sql.fragment`json_build_array(${sql.join(
+                                primaryKeys.map(
+                                  key =>
+                                    sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
+                                      key.name
+                                    )}`
+                                ),
+                                ", "
+                              )})`,
+                              "__identifiers"
+                            );
+                          }
+                        },
                       }));
                       return {
                         description: "A cursor for use in pagination.",
@@ -453,11 +468,17 @@ export default (function PgTablesPlugin(
                         const safeAlias = getSafeAliasFromResolveInfo(
                           resolveInfo
                         );
-                        return data.data.map(entry => entry[safeAlias]);
+                        return data.data.map(entry => ({
+                          __cursor: entry.__cursor,
+                          ...entry[safeAlias],
+                        }));
                       },
                     },
                     {},
-                    false
+                    false,
+                    {
+                      hoistCursor: true,
+                    }
                   ),
                   pageInfo: PageInfo && {
                     description: "Information to aid in pagination.",

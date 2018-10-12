@@ -21,13 +21,18 @@ export default function sqlField(
         const safeAlias = getSafeAliasFromAlias(
           parsedResolveInfoFragment.alias
         );
+        const resolveData = getDataFromParsedResolveInfoFragment(
+          parsedResolveInfoFragment,
+          FieldType
+        );
         return {
+          ...(options.hoistCursor &&
+          resolveData.usesCursor &&
+          resolveData.usesCursor.length
+            ? { usesCursor: [true] }
+            : null),
           pgQuery: queryBuilder => {
             queryBuilder.select(() => {
-              const resolveData = getDataFromParsedResolveInfoFragment(
-                parsedResolveInfoFragment,
-                FieldType
-              );
               const tableAlias =
                 whereFrom === false
                   ? queryBuilder.getTableAlias()
