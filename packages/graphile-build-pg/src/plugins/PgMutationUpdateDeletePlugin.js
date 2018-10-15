@@ -1,7 +1,6 @@
 // @flow
 import type { Plugin } from "graphile-build";
 import debugFactory from "debug";
-import sqlField from "./sqlField";
 
 const debug = debugFactory("graphile-build-pg");
 const base64Decode = str => Buffer.from(String(str), "base64").toString("utf8");
@@ -42,6 +41,7 @@ export default (async function PgMutationUpdateDeletePlugin(
       pgViaTemporaryTable: viaTemporaryTable,
       describePgEntity,
       sqlCommentByAddingTags,
+      pgField,
     } = build;
     const {
       scope: { isRootMutation },
@@ -217,7 +217,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                               "The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.",
                             type: GraphQLString,
                           },
-                          [tableName]: sqlField(
+                          [tableName]: pgField(
                             build,
                             fieldWithHooks,
                             tableName,

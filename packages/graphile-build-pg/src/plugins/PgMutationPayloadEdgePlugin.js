@@ -1,7 +1,6 @@
 // @flow
 import type { Plugin } from "graphile-build";
 import isString from "lodash/isString";
-import sqlField from "./sqlField";
 
 export default (function PgMutationPayloadEdgePlugin(builder) {
   builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
@@ -16,6 +15,7 @@ export default (function PgMutationPayloadEdgePlugin(builder) {
       inflection,
       pgOmit: omit,
       describePgEntity,
+      pgField,
     } = build;
     const {
       scope: { isMutationPayload, pgIntrospection, pgIntrospectionTable },
@@ -64,7 +64,7 @@ export default (function PgMutationPayloadEdgePlugin(builder) {
     return extend(
       fields,
       {
-        [fieldName]: sqlField(
+        [fieldName]: pgField(
           build,
           fieldWithHooks,
           fieldName,

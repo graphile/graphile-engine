@@ -1,4 +1,4 @@
-export default function sqlField(
+export default function pgField(
   build,
   fieldWithHooks,
   fieldName,
@@ -21,7 +21,14 @@ export default function sqlField(
     nullableType.constructor === build.graphql.GraphQLList;
   return fieldWithHooks(
     fieldName,
-    ({ getDataFromParsedResolveInfoFragment, addDataGenerator }) => {
+    fieldContext => {
+      const {
+        getDataFromParsedResolveInfoFragment,
+        addDataGenerator,
+      } = fieldContext;
+      if (typeof options.withFieldContext === "function") {
+        options.withFieldContext(fieldContext);
+      }
       addDataGenerator(parsedResolveInfoFragment => {
         const safeAlias = getSafeAliasFromAlias(
           parsedResolveInfoFragment.alias

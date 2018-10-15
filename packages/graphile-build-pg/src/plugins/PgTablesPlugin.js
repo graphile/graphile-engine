@@ -1,6 +1,5 @@
 // @flow
 import type { Plugin } from "graphile-build";
-import sqlField from "./sqlField";
 const base64 = str => Buffer.from(String(str)).toString("base64");
 
 const hasNonNullKey = row => {
@@ -59,6 +58,7 @@ export default (function PgTablesPlugin(
       inflection,
       describePgEntity,
       sqlCommentByAddingTags,
+      pgField,
     } = build;
     const nullableIf = (condition, Type) =>
       condition ? Type : new GraphQLNonNull(Type);
@@ -379,7 +379,7 @@ export default (function PgTablesPlugin(
                       isCursorField: true,
                     }
                   ),
-                  node: sqlField(
+                  node: pgField(
                     build,
                     fieldWithHooks,
                     "node",
@@ -427,7 +427,7 @@ export default (function PgTablesPlugin(
               fields: ({ recurseDataGeneratorsForField, fieldWithHooks }) => {
                 recurseDataGeneratorsForField("pageInfo", true);
                 return {
-                  nodes: sqlField(
+                  nodes: pgField(
                     build,
                     fieldWithHooks,
                     "nodes",
@@ -453,7 +453,7 @@ export default (function PgTablesPlugin(
                     {},
                     false
                   ),
-                  edges: sqlField(
+                  edges: pgField(
                     build,
                     fieldWithHooks,
                     "edges",

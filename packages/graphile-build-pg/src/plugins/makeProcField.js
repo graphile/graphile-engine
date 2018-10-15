@@ -3,7 +3,6 @@
 import type { Build, FieldWithHooksFunction } from "graphile-build";
 import type { PgProc } from "./PgIntrospectionPlugin";
 import type { SQL } from "pg-sql2";
-import sqlField from "./sqlField";
 import debugSql from "./debugSql";
 
 const firstValue = obj => {
@@ -64,6 +63,7 @@ export default function makeProcField(
     pgViaTemporaryTable: viaTemporaryTable,
     describePgEntity,
     sqlCommentByAddingTags,
+    pgField,
   } = build;
   const { pluralize, camelCase } = inflection;
   function getResultFieldName(proc, gqlType, type, returnsSet) {
@@ -404,7 +404,7 @@ export default function makeProcField(
                 },
                 isNotVoid
                   ? {
-                      [resultFieldName]: sqlField(
+                      [resultFieldName]: pgField(
                         build,
                         fieldWithHooks,
                         resultFieldName,

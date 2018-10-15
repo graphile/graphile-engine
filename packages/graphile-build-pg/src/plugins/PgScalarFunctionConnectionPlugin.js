@@ -1,6 +1,5 @@
 // @flow
 import type { Plugin } from "graphile-build";
-import sqlField from "./sqlField";
 
 const base64 = str => Buffer.from(String(str)).toString("base64");
 
@@ -24,6 +23,7 @@ export default (function PgScalarFunctionConnectionPlugin(
       pgOmit: omit,
       describePgEntity,
       sqlCommentByAddingTags,
+      pgField,
     } = build;
     const nullableIf = (condition, Type) =>
       condition ? Type : new GraphQLNonNull(Type);
@@ -107,7 +107,7 @@ export default (function PgScalarFunctionConnectionPlugin(
             }\` values.`,
             fields: ({ fieldWithHooks }) => {
               return {
-                nodes: sqlField(build, fieldWithHooks, "nodes", {
+                nodes: pgField(build, fieldWithHooks, "nodes", {
                   description: `A list of \`${NodeType.name}\` objects.`,
                   type: new GraphQLNonNull(
                     new GraphQLList(
@@ -118,7 +118,7 @@ export default (function PgScalarFunctionConnectionPlugin(
                     return data.data.map(entry => entry.value);
                   },
                 }),
-                edges: sqlField(
+                edges: pgField(
                   build,
                   fieldWithHooks,
                   "edges",

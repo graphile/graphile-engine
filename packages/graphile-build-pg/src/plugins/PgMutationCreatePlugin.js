@@ -1,7 +1,6 @@
 // @flow
 import type { Plugin } from "graphile-build";
 import debugFactory from "debug";
-import sqlField from "./sqlField";
 
 const debug = debugFactory("graphile-build-pg");
 
@@ -35,6 +34,7 @@ export default (function PgMutationCreatePlugin(
       pgViaTemporaryTable: viaTemporaryTable,
       describePgEntity,
       sqlCommentByAddingTags,
+      pgField,
     } = build;
     const {
       scope: { isRootMutation },
@@ -119,7 +119,7 @@ export default (function PgMutationCreatePlugin(
                       "The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.",
                     type: GraphQLString,
                   },
-                  [tableName]: sqlField(
+                  [tableName]: pgField(
                     build,
                     fieldWithHooks,
                     tableName,

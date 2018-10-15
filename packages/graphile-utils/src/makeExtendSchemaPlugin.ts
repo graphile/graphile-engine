@@ -222,7 +222,6 @@ export default function makeExtendSchemaPlugin(
               fields: (fieldsContext: {
                 Self: typeof type;
                 fieldWithHooks: any;
-                recurseDataGeneratorsForField: any;
               }) =>
                 getFields(
                   fieldsContext.Self,
@@ -507,10 +506,8 @@ function getFields<TSource>(
   resolvers: Resolvers,
   {
     fieldWithHooks,
-    recurseDataGeneratorsForField,
   }: {
     fieldWithHooks: any;
-    recurseDataGeneratorsForField: any;
   },
   build: Build
 ) {
@@ -599,94 +596,109 @@ function getFields<TSource>(
           ? functionToResolveObject(resolver)
           : null;
         if (directives.recurseDataGenerators) {
-          recurseDataGeneratorsForField(fieldName);
+          // tslint:disable-next-line no-console
+          console.warn(
+            "DEPRECATION: `recurseDataGenerators` is mislead, please use `pgField` instead"
+          );
+          if (!directives.pgField) {
+            directives.pgField = directives.recurseDataGenerators;
+          }
         }
-        memo[fieldName] = fieldWithHooks(
-          fieldName,
-          (fieldContext: Context<TSource>) => {
-            const { pgIntrospection } = fieldContext.scope;
-            // @requires directive: pulls down necessary columns from table.
-            //
-            //   e.g. `@requires(columns: ["id", "name"])`
-            //
-            if (directives.requires && pgIntrospection.kind === "class") {
-              if (Array.isArray(directives.requires.columns)) {
-                const table: PgClass = pgIntrospection;
-                const attrs = table.attributes.filter(
-                  attr => directives.requires.columns.indexOf(attr.name) >= 0
-                );
-                const fieldNames = attrs.map(attr =>
-                  build.inflection.column(attr)
-                );
-                const ReturnTypes = attrs.map(
-                  attr =>
-                    build.pgGetGqlTypeByTypeIdAndModifier(
-                      attr.typeId,
-                      attr.typeModifier
-                    ) || build.graphql.GraphQLString
-                );
-                fieldContext.addDataGenerator(
-                  (parsedResolveInfoFragment: any) => ({
-                    pgQuery: (queryBuilder: QueryBuilder) => {
-                      attrs.forEach((attr, i) => {
-                        const columnFieldName = fieldNames[i];
-                        const ReturnType = ReturnTypes[i];
-                        queryBuilder.select(
-                          build.pgGetSelectValueForFieldAndTypeAndModifier(
-                            ReturnType,
-                            fieldContext,
-                            parsedResolveInfoFragment,
-                            sql.fragment`(${queryBuilder.getTableAlias()}.${sql.identifier(
-                              attr.name
-                            )})`, // The brackets are necessary to stop the parser getting confused, ref: https://www.postgresql.org/docs/9.6/static/rowtypes.html#ROWTYPES-ACCESSING
-                            attr.type,
-                            attr.typeModifier
-                          ),
-                          columnFieldName
-                        );
-                      });
-                    },
-                  })
-                );
-              } else {
-                throw new Error(
-                  `@requires(columns: ["...", ...]) directive called with invalid arguments`
-                );
-              }
-            }
-
-            const resolversSpec = rawResolversSpec
-              ? Object.keys(rawResolversSpec).reduce(
-                  (newResolversSpec, key) => {
-                    if (typeof rawResolversSpec[key] === "function") {
-                      newResolversSpec[key] = augmentResolver(
-                        rawResolversSpec[key],
-                        fieldContext
+        const withFieldContext = (fieldContext: Context<TSource>) => {
+          const { pgIntrospection } = fieldContext.scope;
+          // @requires directive: pulls down necessary columns from table.
+          //
+          //   e.g. `@requires(columns: ["id", "name"])`
+          //
+          if (directives.requires && pgIntrospection.kind === "class") {
+            if (Array.isArray(directives.requires.columns)) {
+              const table: PgClass = pgIntrospection;
+              const attrs = table.attributes.filter(
+                attr => directives.requires.columns.indexOf(attr.name) >= 0
+              );
+              const fieldNames = attrs.map(attr =>
+                build.inflection.column(attr)
+              );
+              const ReturnTypes = attrs.map(
+                attr =>
+                  build.pgGetGqlTypeByTypeIdAndModifier(
+                    attr.typeId,
+                    attr.typeModifier
+                  ) || build.graphql.GraphQLString
+              );
+              fieldContext.addDataGenerator(
+                (parsedResolveInfoFragment: any) => ({
+                  pgQuery: (queryBuilder: QueryBuilder) => {
+                    attrs.forEach((attr, i) => {
+                      const columnFieldName = fieldNames[i];
+                      const ReturnType = ReturnTypes[i];
+                      queryBuilder.select(
+                        build.pgGetSelectValueForFieldAndTypeAndModifier(
+                          ReturnType,
+                          fieldContext,
+                          parsedResolveInfoFragment,
+                          sql.fragment`(${queryBuilder.getTableAlias()}.${sql.identifier(
+                            attr.name
+                          )})`, // The brackets are necessary to stop the parser getting confused, ref: https://www.postgresql.org/docs/9.6/static/rowtypes.html#ROWTYPES-ACCESSING
+                          attr.type,
+                          attr.typeModifier
+                        ),
+                        columnFieldName
                       );
-                    }
-                    return newResolversSpec;
+                    });
                   },
-                  {}
-                )
-              : {};
-            return {
-              type,
-              args,
-              ...(deprecationReason
-                ? {
-                    deprecationReason,
-                  }
-                : null),
-              ...(description
-                ? {
-                    description,
-                  }
-                : null),
-              ...resolversSpec,
-            };
-          },
-          scope
-        );
+                })
+              );
+            } else {
+              throw new Error(
+                `@requires(columns: ["...", ...]) directive called with invalid arguments`
+              );
+            }
+          }
+
+          const resolversSpec = rawResolversSpec
+            ? Object.keys(rawResolversSpec).reduce((newResolversSpec, key) => {
+                if (typeof rawResolversSpec[key] === "function") {
+                  newResolversSpec[key] = augmentResolver(
+                    rawResolversSpec[key],
+                    fieldContext
+                  );
+                }
+                return newResolversSpec;
+              }, {})
+            : {};
+          return {
+            type,
+            args,
+            ...(deprecationReason
+              ? {
+                  deprecationReason,
+                }
+              : null),
+            ...(description
+              ? {
+                  description,
+                }
+              : null),
+            ...resolversSpec,
+          };
+        };
+        if (directives.pgField) {
+          return build.extend(memo, {
+            [fieldName]: build.pgField(
+              build,
+              fieldWithHooks,
+              fieldName,
+              withFieldContext,
+              scope,
+              false
+            ),
+          });
+        } else {
+          return build.extend(memo, {
+            [fieldName]: fieldWithHooks(fieldName, withFieldContext, scope),
+          });
+        }
       } else {
         throw new Error(
           `AST issue: expected 'FieldDefinition', instead received '${
@@ -694,7 +706,6 @@ function getFields<TSource>(
           }'`
         );
       }
-      return memo;
     }, {});
   }
   return {};
