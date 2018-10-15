@@ -425,7 +425,7 @@ export default (function PgTablesPlugin(
               description: `A connection to a list of \`${tableTypeName}\` values.`,
               name: inflection.connection(TableType.name),
               fields: ({ recurseDataGeneratorsForField, fieldWithHooks }) => {
-                recurseDataGeneratorsForField("pageInfo");
+                recurseDataGeneratorsForField("pageInfo", true);
                 return {
                   nodes: sqlField(
                     build,

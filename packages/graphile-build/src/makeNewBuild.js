@@ -354,8 +354,19 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
             fieldDataGeneratorsByFieldName[fieldName] || [];
           fieldDataGeneratorsByFieldName[fieldName].push(fn);
         };
-        const recurseDataGeneratorsForField = fieldName => {
-          if (!recurseDataGeneratorsForFieldWarned) {
+        const recurseDataGeneratorsForField = (
+          fieldName,
+          iKnowWhatIAmDoing
+        ) => {
+          /*
+           * Recursing data generators is not safe in general; however there
+           * are certain exceptions - for example when you know there are no
+           * "dynamic" data generator fields - e.g. where the GraphQL alias is
+           * not used at all. In PostGraphile the only case of this is the
+           * PageInfo object as none of the fields accept arguments, and they
+           * do not rely on the GraphQL query alias to store the result.
+           */
+          if (!iKnowWhatIAmDoing && !recurseDataGeneratorsForFieldWarned) {
             recurseDataGeneratorsForFieldWarned = true;
             console.error(
               "Use of `recurseDataGeneratorsForField` is NOT SAFE. e.g. `{n1: node { a: field1 }, n2: node { a: field2 } }` cannot resolve correctly."
