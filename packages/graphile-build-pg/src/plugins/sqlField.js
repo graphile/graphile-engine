@@ -14,6 +14,11 @@ export default function sqlField(
     getSafeAliasFromAlias,
     getSafeAliasFromResolveInfo,
   } = build;
+  const nullableType = build.graphql.getNullableType(FieldType);
+  const namedType = build.graphql.getNamedType(FieldType);
+  const isListType =
+    nullableType !== namedType &&
+    nullableType.constructor === build.graphql.GraphQLList;
   return fieldWithHooks(
     fieldName,
     ({ getDataFromParsedResolveInfoFragment, addDataGenerator }) => {
@@ -62,7 +67,12 @@ export default function sqlField(
       return {
         resolve(data, _args, _context, resolveInfo) {
           const safeAlias = getSafeAliasFromResolveInfo(resolveInfo);
-          return data.data[safeAlias];
+          if (data.data == null) return null;
+          if (isListType) {
+            return data.data.map(d => (d != null ? d[safeAlias] : null));
+          } else {
+            return data.data[safeAlias];
+          }
         },
         ...fieldSpec,
       };

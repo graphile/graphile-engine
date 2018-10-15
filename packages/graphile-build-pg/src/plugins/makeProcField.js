@@ -3,6 +3,7 @@
 import type { Build, FieldWithHooksFunction } from "graphile-build";
 import type { PgProc } from "./PgIntrospectionPlugin";
 import type { SQL } from "pg-sql2";
+import sqlField from "./sqlField";
 import debugSql from "./debugSql";
 
 const firstValue = obj => {
@@ -18,7 +19,20 @@ const firstValue = obj => {
 export default function makeProcField(
   fieldName: string,
   proc: PgProc,
+  build: {| ...Build |},
   {
+    fieldWithHooks,
+    computed = false,
+    isMutation = false,
+    forceList = false,
+  }: {
+    fieldWithHooks: FieldWithHooksFunction,
+    computed?: boolean,
+    isMutation?: boolean,
+    forceList?: boolean,
+  }
+) {
+  const {
     pgIntrospectionResultsByKind: introspectionResultsByKind,
     pgGetGqlTypeByTypeIdAndModifier,
     pgGetGqlInputTypeByTypeIdAndModifier,
@@ -50,19 +64,7 @@ export default function makeProcField(
     pgViaTemporaryTable: viaTemporaryTable,
     describePgEntity,
     sqlCommentByAddingTags,
-  }: {| ...Build |},
-  {
-    fieldWithHooks,
-    computed = false,
-    isMutation = false,
-    forceList = false,
-  }: {
-    fieldWithHooks: FieldWithHooksFunction,
-    computed?: boolean,
-    isMutation?: boolean,
-    forceList?: boolean,
-  }
-) {
+  } = build;
   const { pluralize, camelCase } = inflection;
   function getResultFieldName(proc, gqlType, type, returnsSet) {
     if (proc.tags.resultFieldName) {
@@ -392,10 +394,7 @@ export default function makeProcField(
             description: `The output of our \`${inflection.functionMutationName(
               proc
             )}\` mutation.`,
-            fields: ({ recurseDataGeneratorsForField }) => {
-              if (isNotVoid) {
-                recurseDataGeneratorsForField(resultFieldName);
-              }
+            fields: ({ fieldWithHooks }) => {
               return Object.assign(
                 {},
                 {
@@ -405,12 +404,23 @@ export default function makeProcField(
                 },
                 isNotVoid
                   ? {
-                      [resultFieldName]: {
-                        type: type,
-                        resolve(data) {
-                          return data.data;
+                      [resultFieldName]: sqlField(
+                        build,
+                        fieldWithHooks,
+                        resultFieldName,
+                        {
+                          type: type,
+                          ...(returnFirstValueAsValue
+                            ? {
+                                resolve(data) {
+                                  return data.data;
+                                },
+                              }
+                            : null),
                         },
-                      },
+                        {},
+                        false
+                      ),
                       // Result
                     }
                   : null
