@@ -368,6 +368,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
            */
           if (!iKnowWhatIAmDoing && !recurseDataGeneratorsForFieldWarned) {
             recurseDataGeneratorsForFieldWarned = true;
+            // eslint-disable-next-line no-console
             console.error(
               "Use of `recurseDataGeneratorsForField` is NOT SAFE. e.g. `{n1: node { a: field1 }, n2: node { a: field2 } }` cannot resolve correctly."
             );
