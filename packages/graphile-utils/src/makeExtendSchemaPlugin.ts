@@ -13,6 +13,7 @@ import {
   // Union types:
   GraphQLType,
   GraphQLNamedType,
+  GraphQLOutputType,
 
   // Config:
   GraphQLEnumValueConfigMap,
@@ -35,6 +36,8 @@ import {
 import { GraphileEmbed } from "./gql";
 // tslint:disable-next-line
 import { InputObjectTypeExtensionNode } from "graphql/language/ast";
+
+const recurseDataGeneratorsWorkaroundFieldByType = new Map();
 
 export type AugmentedGraphQLFieldResolver<
   TSource,
@@ -518,10 +521,18 @@ function getFields<TSource>(
   const { parseResolveInfo, pgQueryFromResolveData, pgSql: sql } = build;
   function augmentResolver(
     resolver: AugmentedGraphQLFieldResolver<TSource, any>,
-    fieldContext: Context<TSource>
+    fieldContext: Context<TSource>,
+    type: GraphQLOutputType
   ) {
+    const namedType = build.graphql.getNamedType(type);
+    if (typeof namedType.getFields === "function") {
+      namedType.getFields(); // Ensure fields have been loaded, so workarounds are flagged
+    }
+    const recurseDataGeneratorsWorkaroundField = recurseDataGeneratorsWorkaroundFieldByType.get(
+      namedType
+    );
     const { getDataFromParsedResolveInfoFragment } = fieldContext;
-    const newResolver: GraphQLFieldResolver<TSource, any> = (
+    const newResolver: GraphQLFieldResolver<TSource, any> = async (
       parent,
       args,
       context,
@@ -550,10 +561,21 @@ function getFields<TSource>(
         const { rows } = await pgClient.query(text, values);
         return rows;
       };
-      return resolver(parent, args, context, resolveInfo, {
+      const result = await resolver(parent, args, context, resolveInfo, {
         ...fieldContext,
         selectGraphQLResultFromTable,
       });
+      if (
+        result != null &&
+        !result.data &&
+        recurseDataGeneratorsWorkaroundField
+      ) {
+        return {
+          ...result,
+          data: result[recurseDataGeneratorsWorkaroundField],
+        };
+      }
+      return result;
     };
     return newResolver;
   }
@@ -596,15 +618,18 @@ function getFields<TSource>(
           ? functionToResolveObject(resolver)
           : null;
         if (directives.recurseDataGenerators) {
+          if (!recurseDataGeneratorsWorkaroundFieldByType.get(Self)) {
+            recurseDataGeneratorsWorkaroundFieldByType.set(Self, fieldName);
+          }
           // tslint:disable-next-line no-console
           console.warn(
-            "DEPRECATION: `recurseDataGenerators` is mislead, please use `pgField` instead"
+            "DEPRECATION: `recurseDataGenerators` is misleading, please use `pgField` instead"
           );
           if (!directives.pgField) {
             directives.pgField = directives.recurseDataGenerators;
           }
         }
-        const withFieldContext = (fieldContext: Context<TSource>) => {
+        const fieldSpecGenerator = (fieldContext: Context<TSource>) => {
           const { pgIntrospection } = fieldContext.scope;
           // @requires directive: pulls down necessary columns from table.
           //
@@ -661,7 +686,8 @@ function getFields<TSource>(
                 if (typeof rawResolversSpec[key] === "function") {
                   newResolversSpec[key] = augmentResolver(
                     rawResolversSpec[key],
-                    fieldContext
+                    fieldContext,
+                    type as GraphQLOutputType
                   );
                 }
                 return newResolversSpec;
@@ -689,14 +715,14 @@ function getFields<TSource>(
               build,
               fieldWithHooks,
               fieldName,
-              withFieldContext,
+              fieldSpecGenerator,
               scope,
               false
             ),
           });
         } else {
           return build.extend(memo, {
-            [fieldName]: fieldWithHooks(fieldName, withFieldContext, scope),
+            [fieldName]: fieldWithHooks(fieldName, fieldSpecGenerator, scope),
           });
         }
       } else {
