@@ -882,7 +882,7 @@ type FuncOutComplexSetofEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`FuncOutComplexSetofRecord\` at the end of the edge.\\"\\"\\"
-  node: FuncOutComplexSetofRecord
+  node: FuncOutComplexSetofRecord!
 }
 
 \\"\\"\\"The return type of our \`funcOutComplexSetof\` query.\\"\\"\\"
@@ -921,7 +921,7 @@ type FuncOutOutSetofEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`FuncOutOutSetofRecord\` at the end of the edge.\\"\\"\\"
-  node: FuncOutOutSetofRecord
+  node: FuncOutOutSetofRecord!
 }
 
 \\"\\"\\"The return type of our \`funcOutOutSetof\` query.\\"\\"\\"
@@ -980,7 +980,7 @@ type FuncReturnsTableMultiColEdge {
   cursor: Cursor
 
   \\"\\"\\"The \`FuncReturnsTableMultiColRecord\` at the end of the edge.\\"\\"\\"
-  node: FuncReturnsTableMultiColRecord
+  node: FuncReturnsTableMultiColRecord!
 }
 
 \\"\\"\\"The return type of our \`funcReturnsTableMultiCol\` query.\\"\\"\\"
