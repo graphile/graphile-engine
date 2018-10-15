@@ -9,6 +9,7 @@ import type {
   PgAttribute,
   PgConstraint,
 } from "./PgIntrospectionPlugin";
+import pgField from "./pgField";
 
 import queryFromResolveData from "../queryFromResolveData";
 import addStartEndCursor from "./addStartEndCursor";
@@ -212,6 +213,7 @@ export default (function PgBasicsPlugin(
       pgParseIdentifier: parseIdentifier,
       pgViaTemporaryTable: viaTemporaryTable,
       describePgEntity,
+      pgField,
       sqlCommentByAddingTags: (entity, tagsToAdd) => {
         // NOTE: this function is NOT intended to be SQL safe; it's for
         // displaying in error messages. Nonetheless if you find issues with
@@ -718,7 +720,8 @@ export default (function PgBasicsPlugin(
             `delete-${this._singularizedTableName(table)}-payload`
           );
         },
-      })
+      }),
+      "Default inflectors from PgBasicsPlugin. You can override these with `makeAddInflectorsPlugin(..., true)`."
     );
   });
 }: Plugin);

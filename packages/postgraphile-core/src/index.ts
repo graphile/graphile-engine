@@ -116,12 +116,13 @@ export const postGraphileClassicIdsInflection = inflections.newInflector({
 export const PostGraphileInflectionPlugin = function(builder: SchemaBuilder) {
   builder.hook("inflection", (inflection: Inflection) => {
     const previous = inflection.enumName;
-    return {
-      ...inflection,
+    // Overwrite directly so that we don't lose the 'extend' hints
+    Object.assign(inflection, {
       enumName(value: string) {
         return this.constantCase(previous.call(this, value));
       },
-    };
+    });
+    return inflection;
   });
 } as Plugin;
 
@@ -130,15 +131,16 @@ export const PostGraphileClassicIdsInflectionPlugin = function(
 ) {
   builder.hook("inflection", (inflection: Inflection) => {
     const previous = inflection._columnName;
-    return {
-      ...inflection,
+    // Overwrite directly so that we don't lose the 'extend' hints
+    Object.assign(inflection, {
       _columnName(attr: PgAttribute, options: { skipRowId?: boolean }) {
         const previousValue = previous.call(this, attr, options);
         return (options && options.skipRowId) || previousValue !== "id"
           ? previousValue
           : this.camelCase("rowId");
       },
-    };
+    });
+    return inflection;
   });
 } as Plugin;
 
@@ -231,7 +233,13 @@ const getPostGraphileBuilder = async (
         }
       });
     });
-    memoizeCache = JSON.parse(cacheString);
+    try {
+      memoizeCache = JSON.parse(cacheString);
+    } catch (e) {
+      throw new Error(
+        `Failed to parse cache file '${readCache}', perhaps it is corrupted? ${e}`
+      );
+    }
   }
   if (readCache || writeCache) {
     persistentMemoizeWithKey = (key: string, fn: () => any) => {
@@ -281,49 +289,60 @@ const getPostGraphileBuilder = async (
   const inflectionOverridePlugins = classicIds
     ? [PostGraphileInflectionPlugin, PostGraphileClassicIdsInflectionPlugin]
     : [PostGraphileInflectionPlugin];
-  return getBuilder(
-    (replaceAllPlugins
-      ? [
-          ...prependPlugins,
-          ...replaceAllPlugins,
-          ...inflectionOverridePlugins,
-          ...appendPlugins,
-        ]
-      : [
-          ...prependPlugins,
-          ...defaultPlugins,
-          ...pgDefaultPlugins,
-          ...inflectionOverridePlugins,
-          ...appendPlugins,
-        ]
-    ).filter(p => skipPlugins.indexOf(p) === -1),
-    {
-      pgConfig,
-      pgSchemas: Array.isArray(schemas) ? schemas : [schemas],
-      pgExtendedTypes: !!dynamicJson,
-      pgColumnFilter: pgColumnFilter || (() => true),
-      pgInflection:
-        inflector ||
-        (classicIds
-          ? postGraphileClassicIdsInflection
-          : postGraphileInflection),
-      nodeIdFieldName: nodeIdFieldName || (classicIds ? "id" : "nodeId"),
-      pgJwtTypeIdentifier: jwtPgTypeIdentifier,
-      pgJwtSecret: jwtSecret,
-      pgDisableDefaultMutations: disableDefaultMutations,
-      pgViewUniqueKey: viewUniqueKey,
-      pgEnableTags: enableTags,
-      pgLegacyRelations: legacyRelations,
-      pgLegacyJsonUuid: legacyJsonUuid,
-      persistentMemoizeWithKey,
-      pgForbidSetofFunctionsToReturnNull: !setofFunctionsContainNulls,
-      pgSimpleCollections: simpleCollections,
-      pgIncludeExtensionResources: includeExtensionResources,
-      pgIgnoreRBAC: ignoreRBAC,
-      ...graphileBuildOptions,
-      ...graphqlBuildOptions, // DEPRECATED!
-    }
+  const basePluginList = replaceAllPlugins
+    ? [
+        ...prependPlugins,
+        ...replaceAllPlugins,
+        ...inflectionOverridePlugins,
+        ...appendPlugins,
+      ]
+    : [
+        ...prependPlugins,
+        ...defaultPlugins,
+        ...pgDefaultPlugins,
+        ...inflectionOverridePlugins,
+        ...appendPlugins,
+      ];
+  const invalidSkipPlugins = skipPlugins.filter(
+    pluginToSkip => basePluginList.indexOf(pluginToSkip) < 0
   );
+  if (invalidSkipPlugins.length) {
+    function getFunctionName(fn: Plugin) {
+      return fn.displayName || fn.name || String(fn);
+    }
+    throw new Error(
+      `You tried to skip plugins that would never have been loaded anyway. Perhaps you've made a mistake in your skipPlugins list, or have sourced the plugin from a duplicate plugin module - check for duplicate modules in your 'node_modules' folder. The plugins that you requested to skip were: ${invalidSkipPlugins
+        .map(getFunctionName)
+        .join(", ")}`
+    );
+  }
+  const finalPluginList = basePluginList.filter(
+    p => skipPlugins.indexOf(p) === -1
+  );
+  return getBuilder(finalPluginList, {
+    pgConfig,
+    pgSchemas: Array.isArray(schemas) ? schemas : [schemas],
+    pgExtendedTypes: !!dynamicJson,
+    pgColumnFilter: pgColumnFilter || (() => true),
+    pgInflection:
+      inflector ||
+      (classicIds ? postGraphileClassicIdsInflection : postGraphileInflection),
+    nodeIdFieldName: nodeIdFieldName || (classicIds ? "id" : "nodeId"),
+    pgJwtTypeIdentifier: jwtPgTypeIdentifier,
+    pgJwtSecret: jwtSecret,
+    pgDisableDefaultMutations: disableDefaultMutations,
+    pgViewUniqueKey: viewUniqueKey,
+    pgEnableTags: enableTags,
+    pgLegacyRelations: legacyRelations,
+    pgLegacyJsonUuid: legacyJsonUuid,
+    persistentMemoizeWithKey,
+    pgForbidSetofFunctionsToReturnNull: !setofFunctionsContainNulls,
+    pgSimpleCollections: simpleCollections,
+    pgIncludeExtensionResources: includeExtensionResources,
+    pgIgnoreRBAC: ignoreRBAC,
+    ...graphileBuildOptions,
+    ...graphqlBuildOptions, // DEPRECATED!
+  });
 };
 
 function abort(e: Error) {
@@ -348,7 +367,7 @@ export const createPostGraphileSchema = async (
   });
   const schema = builder.buildSchema();
   if (writeCache) {
-    writeCache().catch(abort);
+    await writeCache().catch(abort);
   }
   return schema;
 };

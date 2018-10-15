@@ -5,10 +5,9 @@
   "packages": [
     "packages/*"
   ],
-  "version": "4.0.0-rc.11",
+  "version": "4.1.0-alpha.0",
   "command": {
     "publish": {
-      "ignore": "graphile",
       "allowBranch": "master"
     }
   }

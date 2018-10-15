@@ -44,6 +44,7 @@ export type PgProc = {
   argDefaultsNum: number,
   namespace: PgNamespace,
   tags: { [string]: string },
+  cost: number,
   aclExecutable: boolean,
 };
 
