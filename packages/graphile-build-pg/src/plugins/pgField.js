@@ -2,33 +2,34 @@ export default function pgField(
   build,
   fieldWithHooks,
   fieldName,
-  fieldSpec,
+  fieldSpecGenerator,
   fieldScope = {},
   whereFrom = false,
   options = {}
 ) {
-  const { type: FieldType } = fieldSpec;
   const {
     pgSql: sql,
     pgQueryFromResolveData: queryFromResolveData,
     getSafeAliasFromAlias,
     getSafeAliasFromResolveInfo,
   } = build;
-  const nullableType = build.graphql.getNullableType(FieldType);
-  const namedType = build.graphql.getNamedType(FieldType);
-  const isListType =
-    nullableType !== namedType &&
-    nullableType.constructor === build.graphql.GraphQLList;
   return fieldWithHooks(
     fieldName,
     fieldContext => {
+      const fieldSpec =
+        typeof fieldSpecGenerator === "function"
+          ? fieldSpecGenerator(fieldContext)
+          : fieldSpecGenerator;
+      const { type: FieldType } = fieldSpec;
+      const nullableType = build.graphql.getNullableType(FieldType);
+      const namedType = build.graphql.getNamedType(FieldType);
+      const isListType =
+        nullableType !== namedType &&
+        nullableType.constructor === build.graphql.GraphQLList;
       const {
         getDataFromParsedResolveInfoFragment,
         addDataGenerator,
       } = fieldContext;
-      if (typeof options.withFieldContext === "function") {
-        options.withFieldContext(fieldContext);
-      }
       addDataGenerator(parsedResolveInfoFragment => {
         const safeAlias = getSafeAliasFromAlias(
           parsedResolveInfoFragment.alias
