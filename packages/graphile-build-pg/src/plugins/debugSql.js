@@ -65,6 +65,7 @@ function debugSql(sql) {
       handleIndent
     )
     .replace(/\(\s*([A-Za-z0-9_."' =]{1,50})\s*\)/g, "($1)")
+    .replace(/\(\s*(\([A-Za-z0-9_."' =]{1,50}\))\s*\)/g, "($1)")
     .replace(/\n\s*and \(TRUE\)/g, chalk.gray(" and (TRUE)"));
   const colouredSql = tidySql.replace(/__local_[0-9]+__/g, colourize);
   rawDebugSql("%s", "\n" + colouredSql);
