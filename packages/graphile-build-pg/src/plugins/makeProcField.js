@@ -380,7 +380,9 @@ export default function makeProcField(
               computed &&
               (forceList || (!proc.returnsSet && rawReturnType.isPgArray)),
             addNullCase:
-              !proc.returnsSet && !rawReturnType.isPgArray && isTableLike,
+              !proc.returnsSet &&
+              !rawReturnType.isPgArray &&
+              (isTableLike || isRecordLike),
           },
           innerQueryBuilder => {
             innerQueryBuilder.parentQueryBuilder = parentQueryBuilder;
