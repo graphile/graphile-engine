@@ -1512,6 +1512,9 @@ Object {
       "nodeId": "WyJwZW9wbGUiLDFd",
     },
     "queryOutputTwoRowsBothExist": Object {
+      "l2": Object {
+        "personId": 4,
+      },
       "leftArm": Object {
         "id": 42,
         "lengthInMetres": 0.6,
@@ -1520,7 +1523,6 @@ Object {
           "name": "Kathryn Ramirez",
           "personSecretByPersonId": null,
         },
-        "personId": 4,
       },
       "post": Object {
         "authorId": 2,
@@ -1536,6 +1538,7 @@ Object {
       "txt": "Hi421",
     },
     "queryOutputTwoRowsNeitherExist": Object {
+      "l2": null,
       "leftArm": null,
       "post": null,
       "txt": "Don't fail me now...999999999999999999",

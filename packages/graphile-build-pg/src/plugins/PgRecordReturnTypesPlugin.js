@@ -14,6 +14,8 @@ export default (function PgRecordReturnTypesPlugin(builder) {
       sqlCommentByAddingTags,
       pgSql: sql,
       pgGetSelectValueForFieldAndTypeAndModifier: getSelectValueForFieldAndTypeAndModifier,
+      getSafeAliasFromResolveInfo,
+      getSafeAliasFromAlias,
     } = build;
     introspectionResultsByKind.procedure
       .filter(proc => !!proc.namespace)
@@ -93,6 +95,9 @@ export default (function PgRecordReturnTypesPlugin(builder) {
                     fieldContext => {
                       const { addDataGenerator } = fieldContext;
                       addDataGenerator(parsedResolveInfoFragment => {
+                        const safeAlias = getSafeAliasFromAlias(
+                          parsedResolveInfoFragment.alias
+                        );
                         return {
                           pgQuery: queryBuilder => {
                             queryBuilder.select(
@@ -111,15 +116,18 @@ export default (function PgRecordReturnTypesPlugin(builder) {
                                 outputArgTypes[idx],
                                 null
                               ),
-                              fieldName
+                              safeAlias
                             );
                           },
                         };
                       });
                       return {
                         type: fieldType,
-                        resolve(data) {
-                          return data[fieldName];
+                        resolve(data, _args, _context, resolveInfo) {
+                          const safeAlias = getSafeAliasFromResolveInfo(
+                            resolveInfo
+                          );
+                          return data[safeAlias];
                         },
                       };
                     },
