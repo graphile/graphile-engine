@@ -474,26 +474,26 @@ export default (function PgBasicsPlugin(
         },
         functionMutationResultFieldName(
           proc: PgProc,
-          typeName: string,
+          gqlType,
           plural: boolean = false
         ) {
           if (proc.tags.resultFieldName) {
             return proc.tags.resultFieldName;
           }
           let name;
-          if (typeName === "Int") {
+          if (gqlType.name === "Int") {
             name = "integer";
-          } else if (typeName === "Float") {
+          } else if (gqlType.name === "Float") {
             name = "float";
-          } else if (typeName === "Boolean") {
+          } else if (gqlType.name === "Boolean") {
             name = "boolean";
-          } else if (typeName === "String") {
+          } else if (gqlType.name === "String") {
             name = "string";
           } else if (proc.returnTypeId === "2249") {
             // returns a record type
             name = "result";
           } else {
-            name = this.camelCase(typeName);
+            name = this.camelCase(gqlType.name);
           }
           return plural ? this.pluralize(name) : name;
         },

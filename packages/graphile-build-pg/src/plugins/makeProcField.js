@@ -428,7 +428,7 @@ export default function makeProcField(
       if (isMutation) {
         const resultFieldName = inflection.functionMutationResultFieldName(
           proc,
-          getNamedType(type).name,
+          getNamedType(type),
           proc.returnsSet || rawReturnType.isPgArray
         );
         const isNotVoid = String(returnType.id) !== "2278";
