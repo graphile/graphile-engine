@@ -2400,6 +2400,7 @@ type Query implements Node {
   which can only query top level fields if they are in a particular form.
   \\"\\"\\"
   query: Query!
+  queryOutputTwoRows(leftArmId: Int, postId: Int, txt: String): QueryOutputTwoRowsRecord
   returnTableWithoutGrants: CompoundKey
   tableQuery(id: Int): Post
 
@@ -2424,6 +2425,13 @@ type Query implements Node {
     offset: Int
   ): PeopleConnection!
   typesQuery(a: BigInt!, b: Boolean!, c: String!, d: [Int]!, e: JSON!, f: FloatRangeInput!): Boolean
+}
+
+\\"\\"\\"The return type of our \`queryOutputTwoRows\` query.\\"\\"\\"
+type QueryOutputTwoRowsRecord {
+  leftArm: LeftArm
+  post: Post
+  txt: String
 }
 
 \\"\\"\\"All input for the \`tableMutation\` mutation.\\"\\"\\"

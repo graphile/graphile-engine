@@ -678,6 +678,14 @@ create function c.mutation_returns_table_one_col(i int) returns table (col1 int)
   select i + 43 as col1;
 $$ language sql volatile;
 
+create function c.query_output_two_rows(in left_arm_id int, in post_id int, inout txt text, out left_arm c.left_arm, out post a.post) as $$
+begin
+  txt = txt || left_arm_id::text || post_id::text;
+  select * into $4 from c.left_arm where id = left_arm_id;
+  select * into $5 from a.post where id = post_id;
+end;
+$$ language plpgsql stable;
+
 -- Begin tests for smart comments
 
 -- Rename table and columns

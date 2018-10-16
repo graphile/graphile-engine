@@ -137,4 +137,18 @@
       o2
     }
   }
+  queryOutputTwoRows(leftArmId: 42, postId: 1, txt: "Hi") {
+    leftArm {
+      id
+      personId
+      lengthInMetres
+      mood
+    }
+    post {
+      id
+      headline
+      authorId
+    }
+    txt
+  }
 }

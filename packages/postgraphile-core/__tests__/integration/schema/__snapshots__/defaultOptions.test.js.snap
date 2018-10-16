@@ -7160,6 +7160,7 @@ type Query implements Node {
     \\"\\"\\"
     offset: Int
   ): QueryIntervalSetConnection!
+  queryOutputTwoRows(leftArmId: Int, postId: Int, txt: String): QueryOutputTwoRowsRecord
   queryTextArray: [String]
 
   \\"\\"\\"Reads a single \`Reserved\` using its globally unique \`ID\`.\\"\\"\\"
@@ -7284,6 +7285,13 @@ type QueryIntervalSetEdge {
 
   \\"\\"\\"The \`Interval\` at the end of the edge.\\"\\"\\"
   node: Interval
+}
+
+\\"\\"\\"The return type of our \`queryOutputTwoRows\` query.\\"\\"\\"
+type QueryOutputTwoRowsRecord {
+  leftArm: LeftArm
+  post: Post
+  txt: String
 }
 
 type Reserved implements Node {

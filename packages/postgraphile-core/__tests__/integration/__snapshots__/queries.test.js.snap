@@ -1511,6 +1511,20 @@ Object {
       "name": "John Smith",
       "nodeId": "WyJwZW9wbGUiLDFd",
     },
+    "queryOutputTwoRows": Object {
+      "leftArm": Object {
+        "id": 42,
+        "lengthInMetres": 0.6,
+        "mood": "neutral",
+        "personId": 4,
+      },
+      "post": Object {
+        "authorId": 2,
+        "headline": "No… It’s a thing; it’s like a plan, but with more greatness.",
+        "id": 1,
+      },
+      "txt": "Hi421",
+    },
   },
 }
 `;
