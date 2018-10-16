@@ -472,6 +472,28 @@ export default (function PgBasicsPlugin(
         functionMutationName(proc: PgProc) {
           return this.camelCase(this._functionName(proc));
         },
+        functionMutationResultFieldName(
+          proc: PgProc,
+          typeName: string,
+          plural: boolean = false
+        ) {
+          if (proc.tags.resultFieldName) {
+            return proc.tags.resultFieldName;
+          }
+          let name;
+          if (typeName === "Int") {
+            name = "integer";
+          } else if (typeName === "Float") {
+            name = "float";
+          } else if (typeName === "Boolean") {
+            name = "boolean";
+          } else if (typeName === "String") {
+            name = "string";
+          } else {
+            name = this.camelCase(typeName);
+          }
+          return plural ? this.pluralize(name) : name;
+        },
         functionQueryName(proc: PgProc) {
           return this.camelCase(this._functionName(proc));
         },

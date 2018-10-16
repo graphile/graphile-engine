@@ -49,9 +49,6 @@ export default function makeProcField(
       GraphQLNonNull,
       GraphQLList,
       GraphQLString,
-      GraphQLInt,
-      GraphQLFloat,
-      GraphQLBoolean,
       GraphQLObjectType,
       GraphQLInputObjectType,
       getNamedType,
@@ -65,26 +62,6 @@ export default function makeProcField(
     sqlCommentByAddingTags,
     pgField,
   } = build;
-  const { pluralize, camelCase } = inflection;
-  function getResultFieldName(proc, gqlType, type, returnsSet) {
-    if (proc.tags.resultFieldName) {
-      return proc.tags.resultFieldName;
-    }
-    const gqlNamedType = getNamedType(gqlType);
-    let name;
-    if (gqlNamedType === GraphQLInt) {
-      name = "integer";
-    } else if (gqlNamedType === GraphQLFloat) {
-      name = "float";
-    } else if (gqlNamedType === GraphQLBoolean) {
-      name = "boolean";
-    } else if (gqlNamedType === GraphQLString) {
-      name = "string";
-    } else {
-      name = camelCase(gqlNamedType.name);
-    }
-    return returnsSet || type.isPgArray ? pluralize(name) : name;
-  }
   if (computed && isMutation) {
     throw new Error("Mutation procedure cannot be computed");
   }
@@ -449,11 +426,10 @@ export default function makeProcField(
         return memo;
       }, {});
       if (isMutation) {
-        const resultFieldName = getResultFieldName(
+        const resultFieldName = inflection.functionMutationResultFieldName(
           proc,
-          type,
-          rawReturnType,
-          proc.returnsSet
+          getNamedType(type).name,
+          proc.returnsSet || rawReturnType.isPgArray
         );
         const isNotVoid = String(returnType.id) !== "2278";
         // If set then plural name
