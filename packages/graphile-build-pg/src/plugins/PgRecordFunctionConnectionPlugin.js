@@ -144,7 +144,7 @@ export default (function PgRecordFunctionConnectionPlugin(
                         resolveInfo
                       );
                       return data.data.map(entry => ({
-                        __cursor: entry.cursor,
+                        __cursor: entry.__cursor,
                         ...entry[safeAlias],
                       }));
                     },
