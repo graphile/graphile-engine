@@ -137,18 +137,38 @@
       o2
     }
   }
-  queryOutputTwoRows(leftArmId: 42, postId: 1, txt: "Hi") {
-    leftArm {
-      id
-      personId
-      lengthInMetres
-      mood
-    }
-    post {
-      id
-      headline
-      authorId
-    }
-    txt
+  queryOutputTwoRowsBothExist: queryOutputTwoRows(
+    leftArmId: 42
+    postId: 1
+    txt: "Hi"
+  ) {
+    ...OutputTwoRowsFragment
   }
+}
+
+fragment OutputTwoRowsFragment on QueryOutputTwoRowsRecord {
+  leftArm {
+    id
+    personId
+    lengthInMetres
+    mood
+    personByPersonId {
+      name
+      personSecretByPersonId {
+        secret
+      }
+    }
+  }
+  post {
+    id
+    headline
+    authorId
+    personByAuthorId {
+      name
+      personSecretByPersonId {
+        secret
+      }
+    }
+  }
+  txt
 }
