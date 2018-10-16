@@ -1995,12 +1995,12 @@ type MutationOutComplexPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-  mutationOutComplexRecord: MutationOutComplexRecord
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
   query: Query
+  result: MutationOutComplexRecord
 }
 
 \\"\\"\\"The return type of our \`mutationOutComplex\` mutation.\\"\\"\\"
@@ -2029,12 +2029,12 @@ type MutationOutComplexSetofPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-  mutationOutComplexSetofRecords: [MutationOutComplexSetofRecord]
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
   query: Query
+  results: [MutationOutComplexSetofRecord]
 }
 
 \\"\\"\\"The return type of our \`mutationOutComplexSetof\` mutation.\\"\\"\\"
@@ -2070,12 +2070,12 @@ type MutationOutOutCompoundTypePayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-  mutationOutOutCompoundTypeRecord: MutationOutOutCompoundTypeRecord
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
   query: Query
+  result: MutationOutOutCompoundTypeRecord
 }
 
 \\"\\"\\"The return type of our \`mutationOutOutCompoundType\` mutation.\\"\\"\\"
@@ -2100,12 +2100,12 @@ type MutationOutOutPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-  mutationOutOutRecord: MutationOutOutRecord
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
   query: Query
+  result: MutationOutOutRecord
 }
 
 \\"\\"\\"The return type of our \`mutationOutOut\` mutation.\\"\\"\\"
@@ -2130,12 +2130,12 @@ type MutationOutOutSetofPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-  mutationOutOutSetofRecords: [MutationOutOutSetofRecord]
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
   query: Query
+  results: [MutationOutOutSetofRecord]
 }
 
 \\"\\"\\"The return type of our \`mutationOutOutSetof\` mutation.\\"\\"\\"
@@ -2160,12 +2160,12 @@ type MutationOutOutUnnamedPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-  mutationOutOutUnnamedRecord: MutationOutOutUnnamedRecord
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
   query: Query
+  result: MutationOutOutUnnamedRecord
 }
 
 \\"\\"\\"The return type of our \`mutationOutOutUnnamed\` mutation.\\"\\"\\"
@@ -2298,12 +2298,12 @@ type MutationOutUnnamedOutOutUnnamedPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-  mutationOutUnnamedOutOutUnnamedRecord: MutationOutUnnamedOutOutUnnamedRecord
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
   query: Query
+  result: MutationOutUnnamedOutOutUnnamedRecord
 }
 
 \\"\\"\\"The return type of our \`mutationOutUnnamedOutOutUnnamed\` mutation.\\"\\"\\"
@@ -2345,12 +2345,12 @@ type MutationReturnsTableMultiColPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-  mutationReturnsTableMultiColRecords: [MutationReturnsTableMultiColRecord]
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
   query: Query
+  results: [MutationReturnsTableMultiColRecord]
 }
 
 \\"\\"\\"The return type of our \`mutationReturnsTableMultiCol\` mutation.\\"\\"\\"

@@ -9,7 +9,7 @@ mutation {
     integer
   }
   mutationOutComplex(input: { a: 1, b: "test" }) {
-    mutationOutComplexRecord {
+    result {
       x
       y {
         a
@@ -30,7 +30,7 @@ mutation {
     }
   }
   mutationOutComplexSetof(input: { a: 1, b: "test" }) {
-    mutationOutComplexSetofRecords {
+    results {
       x
       y {
         a
@@ -51,13 +51,13 @@ mutation {
     }
   }
   mutationOutOut(input: {}) {
-    mutationOutOutRecord {
+    result {
       firstOut
       secondOut
     }
   }
   mutationOutOutCompoundType(input: { i1: 10 }) {
-    mutationOutOutCompoundTypeRecord {
+    result {
       o1
       o2 {
         a
@@ -67,13 +67,13 @@ mutation {
     }
   }
   mutationOutOutSetof(input: {}) {
-    mutationOutOutSetofRecords {
+    results {
       o1
       o2
     }
   }
   mutationOutOutUnnamed(input: {}) {
-    mutationOutOutUnnamedRecord {
+    result {
       arg1
       arg2
     }
@@ -97,14 +97,14 @@ mutation {
     integer
   }
   mutationOutUnnamedOutOutUnnamed(input: {}) {
-    mutationOutUnnamedOutOutUnnamedRecord {
+    result {
       arg1
       arg3
       o2
     }
   }
   mutationReturnsTableMultiCol(input: { i: 20 }) {
-    mutationReturnsTableMultiColRecords {
+    results {
       col1
       col2
     }

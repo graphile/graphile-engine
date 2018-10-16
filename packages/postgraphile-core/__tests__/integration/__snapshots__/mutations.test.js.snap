@@ -710,7 +710,7 @@ Object {
       "integer": 42,
     },
     "mutationOutComplex": Object {
-      "mutationOutComplexRecord": Object {
+      "result": Object {
         "x": 2,
         "y": Object {
           "a": 1,
@@ -745,7 +745,7 @@ Object {
       },
     },
     "mutationOutComplexSetof": Object {
-      "mutationOutComplexSetofRecords": Array [
+      "results": Array [
         Object {
           "x": 2,
           "y": Object {
@@ -782,13 +782,13 @@ Object {
       ],
     },
     "mutationOutOut": Object {
-      "mutationOutOutRecord": Object {
+      "result": Object {
         "firstOut": 42,
         "secondOut": "out",
       },
     },
     "mutationOutOutCompoundType": Object {
-      "mutationOutOutCompoundTypeRecord": Object {
+      "result": Object {
         "o1": 20,
         "o2": Object {
           "a": 1,
@@ -798,7 +798,7 @@ Object {
       },
     },
     "mutationOutOutSetof": Object {
-      "mutationOutOutSetofRecords": Array [
+      "results": Array [
         Object {
           "o1": 42,
           "o2": "out",
@@ -810,7 +810,7 @@ Object {
       ],
     },
     "mutationOutOutUnnamed": Object {
-      "mutationOutOutUnnamedRecord": Object {
+      "result": Object {
         "arg1": 42,
         "arg2": "out",
       },
@@ -859,14 +859,14 @@ Object {
       "integer": 42,
     },
     "mutationOutUnnamedOutOutUnnamed": Object {
-      "mutationOutUnnamedOutOutUnnamedRecord": Object {
+      "result": Object {
         "arg1": 42,
         "arg3": 3,
         "o2": "out2",
       },
     },
     "mutationReturnsTableMultiCol": Object {
-      "mutationReturnsTableMultiColRecords": Array [
+      "results": Array [
         Object {
           "col1": 62,
           "col2": "out",

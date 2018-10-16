@@ -489,6 +489,9 @@ export default (function PgBasicsPlugin(
             name = "boolean";
           } else if (typeName === "String") {
             name = "string";
+          } else if (proc.returnTypeId === "2249") {
+            // returns a record type
+            name = "result";
           } else {
             name = this.camelCase(typeName);
           }
