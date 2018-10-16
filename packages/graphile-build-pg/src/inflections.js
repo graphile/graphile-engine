@@ -197,9 +197,6 @@ export const newInflector = (
         functionInputType(name: string, _schema: ?string) {
           return upperCamelCase(`${name}-input`);
         },
-        functionReturnsRecordType(name: string, _schema: ?string) {
-          return upperCamelCase(`${name}-record`);
-        },
         tableType(name: string, schema: ?string) {
           return upperCamelCase(this.tableName(name, schema));
         },
