@@ -40,7 +40,11 @@ export default (function PgRecordFunctionConnectionPlugin(
           inflection.functionReturnsRecordType(proc)
         );
         if (!NodeType) {
-          return;
+          throw new Error(
+            `Do not have a node type '${inflection.functionReturnsRecordType(
+              proc
+            )}' for '${proc.name}' so cannot create connection type`
+          );
         }
         const EdgeType = newWithHooks(
           GraphQLObjectType,
