@@ -156,7 +156,6 @@
 fragment OutputTwoRowsFragment on QueryOutputTwoRowsRecord {
   leftArm {
     id
-    personId
     lengthInMetres
     mood
     personByPersonId {
@@ -165,6 +164,9 @@ fragment OutputTwoRowsFragment on QueryOutputTwoRowsRecord {
         secret
       }
     }
+  }
+  l2: leftArm {
+    personId
   }
   post {
     id
