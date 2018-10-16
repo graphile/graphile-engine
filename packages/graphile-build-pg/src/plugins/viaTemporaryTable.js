@@ -119,6 +119,7 @@ export default async function viaTemporaryTable(
     const firstKey = firstNonNullRow && Object.keys(firstNonNullRow)[0];
     const rawValues = rows.map(row => row && row[firstKey]);
     const values = rawValues.filter(rawValue => rawValue !== null);
+    const sqlValuesAlias = sql.identifier(Symbol());
     const convertFieldBack = isPgClassLike
       ? sql.query`\
               select (str::${sqlTypeIdentifier}).*
@@ -129,7 +130,9 @@ export default async function viaTemporaryTable(
             outputArgNames.map(
               (outputArgName, idx) =>
                 sql.query`\
-                    (arr)[${sql.literal(idx + 1)}]::${sql.identifier(
+                    (${sqlValuesAlias}.output_value_list)[${sql.literal(
+                  idx + 1
+                )}]::${sql.identifier(
                   outputArgTypes[idx].namespaceName,
                   outputArgTypes[idx].name
                 )} as ${sql.identifier(
@@ -144,7 +147,7 @@ export default async function viaTemporaryTable(
           from (values ${sql.join(
             values.map(value => sql.query`(${sql.value(value)}::text[])`),
             ", "
-          )}) as x(arr)`
+          )}) as ${sqlValuesAlias}(output_value_list)`
         : sql.query`\
         select str::${sqlTypeIdentifier} as ${sqlResultSourceAlias}
         from unnest((${sql.value(values)})::text[]) str`;
