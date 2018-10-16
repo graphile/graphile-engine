@@ -5581,6 +5581,8 @@ type Person implements Node {
     orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysConnection!
   computedComplex(a: Int, b: String): PersonComputedComplexRecord
+  computedFirstArgInout: Person
+  computedFirstArgInoutOut: PersonComputedFirstArgInoutOutRecord
   computedInout(ino: String): String
   computedInoutOut(ino: String): PersonComputedInoutOutRecord
   computedOut: String
@@ -5754,6 +5756,12 @@ type PersonComputedComplexRecord {
   x: Int
   y: CompoundType
   z: Person
+}
+
+\\"\\"\\"The return type of our \`computedFirstArgInoutOut\` query.\\"\\"\\"
+type PersonComputedFirstArgInoutOutRecord {
+  o: Int
+  person: Person
 }
 
 \\"\\"\\"The return type of our \`computedInoutOut\` query.\\"\\"\\"

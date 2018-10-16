@@ -1486,6 +1486,17 @@ Object {
           },
         },
       },
+      "computedFirstArgInout": Object {
+        "id": 1,
+        "name": "John Smith",
+      },
+      "computedFirstArgInoutOut": Object {
+        "o": 42,
+        "person": Object {
+          "id": 1,
+          "name": "John Smith",
+        },
+      },
       "computedInout": "test John Smith",
       "computedInoutOut": Object {
         "ino": "test John Smith",

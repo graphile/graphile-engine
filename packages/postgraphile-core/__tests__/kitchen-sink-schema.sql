@@ -542,6 +542,14 @@ create function c.person_computed_complex (person c.person, in a int, in b text,
   limit 1;
 $$ language sql stable;
 
+create function c.person_computed_first_arg_inout (inout person c.person) as $$
+  select person;
+$$ language sql stable;
+
+create function c.person_computed_first_arg_inout_out (inout person c.person, out o int) as $$
+  select person, 42 as o;
+$$ language sql stable;
+
 create function c.func_out_unnamed_out_out_unnamed(out int, out o2 text, out int) as $$
   select 42, 'out2'::text, 3;
 $$ language sql stable;

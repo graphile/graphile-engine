@@ -115,6 +115,17 @@
         }
       }
     }
+    computedFirstArgInout {
+      id
+      name
+    }
+    computedFirstArgInoutOut {
+      person {
+        id
+        name
+      }
+      o
+    }
     computedInout(ino: "test")
     computedInoutOut(ino: "test") {
       ino
