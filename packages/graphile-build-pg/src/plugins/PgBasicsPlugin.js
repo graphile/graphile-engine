@@ -491,12 +491,6 @@ export default (function PgBasicsPlugin(
         ) {
           return this.argument(outputArgName, index);
         },
-        functionReturnsRecordType(proc: PgProc) {
-          return (
-            proc.tags.resultTypeName ||
-            this.upperCamelCase(`${this._functionName(proc)}-record`)
-          );
-        },
         tableType(table: PgClass) {
           return this.upperCamelCase(this._singularizedTableName(table));
         },
@@ -680,6 +674,12 @@ export default (function PgBasicsPlugin(
         },
         edgeField(table: PgClass) {
           return this.camelCase(`${this._singularizedTableName(table)}-edge`);
+        },
+        recordFunctionReturnType(proc: PgProc) {
+          return (
+            proc.tags.resultTypeName ||
+            this.upperCamelCase(`${this._functionName(proc)}-record`)
+          );
         },
         recordFunctionConnection(proc: PgProc) {
           return this.upperCamelCase(`${this._functionName(proc)}-connection`);

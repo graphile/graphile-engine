@@ -224,12 +224,10 @@ export default function makeProcField(
       payloadTypeScope.pgIntrospectionTable = returnTypeTable;
     }
   } else if (isRecordLike) {
-    const RecordType = getTypeByName(
-      inflection.functionReturnsRecordType(proc)
-    );
+    const RecordType = getTypeByName(inflection.recordFunctionReturnType(proc));
     if (!RecordType) {
       throw new Error(
-        `Do not have a record type '${inflection.functionReturnsRecordType(
+        `Do not have a record type '${inflection.recordFunctionReturnType(
           proc
         )}' for '${proc.name}' so cannot create procedure field`
       );

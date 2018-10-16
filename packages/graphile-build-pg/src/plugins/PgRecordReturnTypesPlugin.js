@@ -73,7 +73,7 @@ export default (function PgRecordReturnTypesPlugin(builder) {
         newWithHooks(
           GraphQLObjectType,
           {
-            name: inflection.functionReturnsRecordType(proc),
+            name: inflection.recordFunctionReturnType(proc),
             description: `The return type of our \`${procFieldName}\` ${
               isMutation ? "mutation" : "query"
             }.`,

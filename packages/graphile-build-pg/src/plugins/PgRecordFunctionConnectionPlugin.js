@@ -37,11 +37,11 @@ export default (function PgRecordFunctionConnectionPlugin(
         // on function arguments and return types, however maybe a later
         // version of PG will?
         const NodeType = getTypeByName(
-          inflection.functionReturnsRecordType(proc)
+          inflection.recordFunctionReturnType(proc)
         );
         if (!NodeType) {
           throw new Error(
-            `Do not have a node type '${inflection.functionReturnsRecordType(
+            `Do not have a node type '${inflection.recordFunctionReturnType(
               proc
             )}' for '${proc.name}' so cannot create connection type`
           );
