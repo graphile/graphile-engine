@@ -144,6 +144,13 @@
   ) {
     ...OutputTwoRowsFragment
   }
+  queryOutputTwoRowsNeitherExist: queryOutputTwoRows(
+    leftArmId: 999999999
+    postId: 999999999
+    txt: "Don't fail me now..."
+  ) {
+    ...OutputTwoRowsFragment
+  }
 }
 
 fragment OutputTwoRowsFragment on QueryOutputTwoRowsRecord {
