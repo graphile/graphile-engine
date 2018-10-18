@@ -310,6 +310,32 @@ with
       left join pg_catalog.pg_description as dsc on dsc.objoid = ext.oid and dsc.classoid = 'pg_catalog.pg_extension'::regclass
     order by
       ext.extname, ext.oid
+  ),
+  -- @see https://www.postgresql.org/docs/9.5/static/catalog-pg-index.html
+  "indexes" as (
+    select
+      'index' as "kind",
+      idx.indrelid as "classId",
+      idx.indnatts as "numberOfAttributes",
+      idx.indisunique as "isUnique",
+      idx.indisprimary as "isPrimary",
+      idx.indimmediate as "isImmediate", -- enforce uniqueness immediately on insert
+      idx.indisreplident as "isReplicaIdentity",
+      idx.indisvalid as "isValid", -- if false, don't use for queries
+      idx.indkey as "attributeNums",
+      dsc.description as "description"
+    from
+      pg_catalog.pg_index as idx
+      inner join class on (idx.indrelid = class.id)
+      left join pg_catalog.pg_description as dsc on dsc.objoid = idx.indexrelid and dsc.objsubid = 0 and dsc.classoid = 'pg_catalog.pg_class'::regclass
+    where
+      idx.indislive is not false and
+      idx.indisexclusion is not true and -- exclusion index
+      idx.indcheckxmin is not true and -- always valid?
+      not (string_to_array(idx.indkey::text, ' ')::int2[] @> ARRAY[0::int2]) and -- no expressions
+      idx.indpred is null -- no partial index predicate
+    order by
+      idx.indrelid, idx.indexrelid
   )
 select row_to_json(x) as object from namespace as x
 union all
@@ -324,6 +350,8 @@ union all
 select row_to_json(x) as object from procedure as x
 union all
 select row_to_json(x) as object from extension as x
+union all
+select row_to_json(x) as object from indexes as x
 ;
 `;
 }

@@ -204,6 +204,7 @@ export default (async function PgIntrospectionPlugin(
               constraint: [],
               procedure: [],
               extension: [],
+              index: [],
             }
           );
 
@@ -216,6 +217,7 @@ export default (async function PgIntrospectionPlugin(
             "constraint",
             "procedure",
             "extension",
+            "index",
           ].forEach(kind => {
             result[kind].forEach(object => {
               // Keep a copy of the raw comment
