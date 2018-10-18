@@ -27,7 +27,7 @@ with
       dsc.description as "description"
     from
       pg_catalog.pg_namespace as nsp
-      left join pg_catalog.pg_description as dsc on dsc.objoid = nsp.oid and dsc.classoid = (select oid from pg_catalog.pg_class where relname = 'pg_namespace')
+      left join pg_catalog.pg_description as dsc on dsc.objoid = nsp.oid and dsc.classoid = 'pg_catalog.pg_namespace'::regclass
     where
       nsp.nspname = any ($1)
     order by
@@ -61,7 +61,7 @@ with
       exists(select 1 from accessible_roles where has_function_privilege(accessible_roles.oid, pro.oid, 'EXECUTE')) as "aclExecutable"
     from
       pg_catalog.pg_proc as pro
-      left join pg_catalog.pg_description as dsc on dsc.objoid = pro.oid and dsc.classoid = (select oid from pg_catalog.pg_class where relname = 'pg_proc')
+      left join pg_catalog.pg_description as dsc on dsc.objoid = pro.oid and dsc.classoid = 'pg_catalog.pg_proc'::regclass
       left join pg_catalog.pg_namespace as nsp on nsp.oid = pro.pronamespace
     where
       pro.pronamespace in (select "id" from namespace) and
@@ -140,7 +140,7 @@ with
       exists(select 1 from accessible_roles where has_table_privilege(accessible_roles.oid, rel.oid, 'DELETE')) as "aclDeletable"
     from
       pg_catalog.pg_class as rel
-      left join pg_catalog.pg_description as dsc on dsc.objoid = rel.oid and dsc.objsubid = 0 and dsc.classoid = (select oid from pg_catalog.pg_class where relname = 'pg_class')
+      left join pg_catalog.pg_description as dsc on dsc.objoid = rel.oid and dsc.objsubid = 0 and dsc.classoid = 'pg_catalog.pg_class'::regclass
       left join pg_catalog.pg_namespace as nsp on nsp.oid = rel.relnamespace
     where
       rel.relpersistence in ('p') and
@@ -176,7 +176,7 @@ with
       exists(select 1 from accessible_roles where has_column_privilege(accessible_roles.oid, att.attrelid, att.attname, 'UPDATE')) as "aclUpdatable"
     from
       pg_catalog.pg_attribute as att
-      left join pg_catalog.pg_description as dsc on dsc.objoid = att.attrelid and dsc.objsubid = att.attnum and dsc.classoid = (select oid from pg_catalog.pg_class where relname = 'pg_class')
+      left join pg_catalog.pg_description as dsc on dsc.objoid = att.attrelid and dsc.objsubid = att.attnum and dsc.classoid = 'pg_catalog.pg_class'::regclass
     where
       att.attrelid in (select "id" from class) and
       att.attnum > 0 and
@@ -238,7 +238,7 @@ with
         end as "rangeSubTypeId"
       from
         pg_catalog.pg_type as typ
-        left join pg_catalog.pg_description as dsc on dsc.objoid = typ.oid and dsc.classoid = (select oid from pg_catalog.pg_class where relname = 'pg_type')
+        left join pg_catalog.pg_description as dsc on dsc.objoid = typ.oid and dsc.classoid = 'pg_catalog.pg_type'::regclass
         left join pg_catalog.pg_namespace as nsp on nsp.oid = typ.typnamespace
     )
     select
@@ -276,7 +276,7 @@ with
       con.confkey as "foreignKeyAttributeNums"
     from
       pg_catalog.pg_constraint as con
-      left join pg_catalog.pg_description as dsc on dsc.objoid = con.oid and dsc.classoid = (select oid from pg_catalog.pg_class where relname = 'pg_constraint')
+      left join pg_catalog.pg_description as dsc on dsc.objoid = con.oid and dsc.classoid = 'pg_catalog.pg_constraint'::regclass
     where
       -- Only get constraints for classes we have selected.
       con.conrelid in (select "id" from class where "namespaceId" in (select "id" from namespace)) and
@@ -307,7 +307,7 @@ with
       dsc.description as "description"
     from
       pg_catalog.pg_extension as ext
-      left join pg_catalog.pg_description as dsc on dsc.objoid = ext.oid and dsc.classoid = (select oid from pg_catalog.pg_class where relname = 'pg_extension')
+      left join pg_catalog.pg_description as dsc on dsc.objoid = ext.oid and dsc.classoid = 'pg_catalog.pg_extension'::regclass
     order by
       ext.extname, ext.oid
   )
