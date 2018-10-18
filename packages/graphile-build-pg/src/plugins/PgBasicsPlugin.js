@@ -63,10 +63,10 @@ export function preventEmptyResult<
   }, {});
 }
 
-function omitWithRBACChecks(
+const omitWithRBACChecks = omit => (
   entity: PgProc | PgClass | PgAttribute | PgConstraint,
   permission: string
-) {
+) => {
   const ORDINARY_TABLE = "r";
   const VIEW = "v";
   const MATERIALIZED_VIEW = "m";
@@ -133,7 +133,21 @@ function omitWithRBACChecks(
     }
   }
   return omit(entity, permission);
-}
+};
+
+const omitUnindexed = omit => (
+  entity: PgProc | PgClass | PgAttribute | PgConstraint,
+  permission: string
+) => {
+  if (
+    entity.kind === "attribute" &&
+    permission === "filter" &&
+    !entity.isIndexed
+  ) {
+    return false;
+  }
+  return omit(entity, permission);
+};
 
 function describePgEntity(entity, includeAlias = true) {
   const getAlias = !includeAlias
@@ -197,9 +211,16 @@ export default (function PgBasicsPlugin(
     pgStrictFunctions = false,
     pgColumnFilter = defaultPgColumnFilter,
     pgIgnoreRBAC = false,
+    pgIgnoreIndexes = true, // TODO:v5: change this to false
   }
 ) {
-  const pgOmit = pgIgnoreRBAC ? omit : omitWithRBACChecks;
+  let pgOmit = omit;
+  if (!pgIgnoreRBAC) {
+    pgOmit = omitWithRBACChecks(pgOmit);
+  }
+  if (!pgIgnoreIndexes) {
+    pgOmit = omitUnindexed(pgOmit);
+  }
   builder.hook("build", build => {
     return build.extend(build, {
       graphileBuildPgVersion: version,

@@ -418,10 +418,28 @@ export default (async function PgIntrospectionPlugin(
       true // Because the configuration table could be a defined in a different namespace
     );
 
+    relate(
+      introspectionResultsByKind.index,
+      "class",
+      "classId",
+      introspectionResultsByKind.classById
+    );
+
+    // Table/type columns
     introspectionResultsByKind.class.forEach(klass => {
       klass.attributes = introspectionResultsByKind.attribute.filter(
         attr => attr.classId === klass.id
       );
+    });
+
+    // Indexed attributes
+    introspectionResultsByKind.index.forEach(index => {
+      const column = index.class.attributes.filter(
+        attr => attr.num === index.attributeNums[0]
+      );
+      if (column) {
+        column.isIndexed = true;
+      }
     });
 
     return introspectionResultsByKind;

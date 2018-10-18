@@ -27,8 +27,7 @@ export default (function PgConnectionArgCondition(builder) {
             name: inflection.conditionType(inflection.tableType(table)),
             fields: context => {
               const { fieldWithHooks } = context;
-              return introspectionResultsByKind.attribute
-                .filter(attr => attr.classId === table.id)
+              return table.attributes
                 .filter(attr => pgColumnFilter(attr, build, context))
                 .filter(attr => !omit(attr, "filter"))
                 .reduce((memo, attr) => {
