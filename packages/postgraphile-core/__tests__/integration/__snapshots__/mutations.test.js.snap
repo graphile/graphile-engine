@@ -701,13 +701,13 @@ exports[`mutation-return-types.graphql 1`] = `
 Object {
   "data": Object {
     "mutationInInout": Object {
-      "integer": 15,
+      "ino": 15,
     },
     "mutationInOut": Object {
-      "integer": 52,
+      "o": 52,
     },
     "mutationOut": Object {
-      "integer": 42,
+      "o": 42,
     },
     "mutationOutComplex": Object {
       "result": Object {
@@ -816,7 +816,7 @@ Object {
       },
     },
     "mutationOutSetof": Object {
-      "integers": Array [
+      "os": Array [
         42,
         43,
       ],
@@ -878,7 +878,7 @@ Object {
       ],
     },
     "mutationReturnsTableOneCol": Object {
-      "integers": Array [
+      "col1S": Array [
         62,
         63,
       ],

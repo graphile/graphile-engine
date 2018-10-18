@@ -429,7 +429,8 @@ export default function makeProcField(
         const resultFieldName = inflection.functionMutationResultFieldName(
           proc,
           getNamedType(type),
-          proc.returnsSet || rawReturnType.isPgArray
+          proc.returnsSet || rawReturnType.isPgArray,
+          outputArgNames
         );
         const isNotVoid = String(returnType.id) !== "2278";
         // If set then plural name

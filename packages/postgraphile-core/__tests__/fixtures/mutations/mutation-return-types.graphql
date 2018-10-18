@@ -1,12 +1,12 @@
 mutation {
   mutationInInout(input: { i: 10, ino: 5 }) {
-    integer
+    ino
   }
   mutationInOut(input: { i: 10 }) {
-    integer
+    o
   }
   mutationOut(input: {}) {
-    integer
+    o
   }
   mutationOutComplex(input: { a: 1, b: "test" }) {
     result {
@@ -79,7 +79,7 @@ mutation {
     }
   }
   mutationOutSetof(input: {}) {
-    integers
+    os
   }
   mutationOutTable(input: {}) {
     person {
@@ -110,6 +110,6 @@ mutation {
     }
   }
   mutationReturnsTableOneCol(input: { i: 20 }) {
-    integers
+    col1S
   }
 }

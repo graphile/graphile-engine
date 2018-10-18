@@ -1943,7 +1943,7 @@ type MutationInInoutPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-  integer: Int
+  ino: Int
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -1968,7 +1968,7 @@ type MutationInOutPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-  integer: Int
+  o: Int
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -2181,7 +2181,7 @@ type MutationOutPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-  integer: Int
+  o: Int
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -2205,7 +2205,7 @@ type MutationOutSetofPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-  integers: [Int]
+  os: [Int]
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -2376,7 +2376,7 @@ type MutationReturnsTableOneColPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-  integers: [Int]
+  col1S: [Int]
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.

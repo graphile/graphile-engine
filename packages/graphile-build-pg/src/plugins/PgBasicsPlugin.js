@@ -475,13 +475,16 @@ export default (function PgBasicsPlugin(
         functionMutationResultFieldName(
           proc: PgProc,
           gqlType,
-          plural: boolean = false
+          plural: boolean = false,
+          outputArgNames: Array<string> = []
         ) {
           if (proc.tags.resultFieldName) {
             return proc.tags.resultFieldName;
           }
           let name;
-          if (gqlType.name === "Int") {
+          if (outputArgNames.length === 1 && outputArgNames[0] !== "") {
+            name = this.camelCase(outputArgNames[0]);
+          } else if (gqlType.name === "Int") {
             name = "integer";
           } else if (gqlType.name === "Float") {
             name = "float";
