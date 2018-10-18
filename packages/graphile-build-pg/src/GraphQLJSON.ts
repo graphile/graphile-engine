@@ -1,3 +1,6 @@
+// These imports for types only
+import * as GraphQL from "graphql";
+
 // This file is based on
 // https://github.com/taion/graphql-type-json/blob/6e45ae4ee0a60f8f3565c8c980a82c7d9b98d3f5/src/index.js
 //
@@ -27,14 +30,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-export default function makeGraphQLJSONTypes(graphql) {
+
+export default function makeGraphQLJSONTypes(graphql: {
+  Kind: typeof GraphQL.Kind;
+  GraphQLScalarType: typeof GraphQL.GraphQLScalarType;
+}) {
   const { GraphQLScalarType, Kind } = graphql;
 
-  function identity(value) {
+  function identity<T>(value: T): T {
     return value;
   }
 
-  function parseLiteral(ast, variables) {
+  function parseLiteral(ast: GraphQL.ValueNode, variables: object): any {
     switch (ast.kind) {
       case Kind.STRING:
       case Kind.BOOLEAN:
