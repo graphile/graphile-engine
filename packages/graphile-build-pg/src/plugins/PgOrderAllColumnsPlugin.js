@@ -11,7 +11,9 @@ export default (function PgOrderAllColumnsPlugin(builder) {
       describePgEntity,
       sqlCommentByAddingTags,
     } = build;
-    const { scope: { isPgRowSortEnum, pgIntrospection: table } } = context;
+    const {
+      scope: { isPgRowSortEnum, pgIntrospection: table },
+    } = context;
     if (!isPgRowSortEnum || !table || table.kind !== "class") {
       return values;
     }

@@ -82,7 +82,6 @@ export default (function PgConnectionArgCondition(builder) {
         extend,
         getTypeByName,
         pgGetGqlTypeByTypeIdAndModifier,
-        pgIntrospectionResultsByKind: introspectionResultsByKind,
         pgColumnFilter,
         inflection,
         pgOmit: omit,
