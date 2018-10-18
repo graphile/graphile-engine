@@ -434,7 +434,7 @@ export default (async function PgIntrospectionPlugin(
 
     // Indexed attributes
     introspectionResultsByKind.index.forEach(index => {
-      const column = index.class.attributes.filter(
+      const column = index.class.attributes.find(
         attr => attr.num === index.attributeNums[0]
       );
       if (column) {
