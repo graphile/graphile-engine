@@ -5,28 +5,22 @@ export default (function PgOrderAllColumnsPlugin(builder) {
   builder.hook("GraphQLEnumType:values", (values, build, context) => {
     const {
       extend,
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
       pgColumnFilter,
       inflection,
       pgOmit: omit,
       describePgEntity,
       sqlCommentByAddingTags,
     } = build;
-    const {
-      scope: { isPgRowSortEnum, pgIntrospection: table },
-    } = context;
+    const { scope: { isPgRowSortEnum, pgIntrospection: table } } = context;
     if (!isPgRowSortEnum || !table || table.kind !== "class") {
       return values;
     }
     return extend(
       values,
-      introspectionResultsByKind.attribute
-        .filter(attr => attr.classId === table.id)
+      table.attributes
         .filter(attr => pgColumnFilter(attr, build, context))
+        .filter(attr => !omit(attr, "order"))
         .reduce((memo, attr) => {
-          if (omit(attr, "order")) {
-            return memo;
-          }
           const ascFieldName = inflection.orderByColumnEnum(attr, true);
           const descFieldName = inflection.orderByColumnEnum(attr, false);
           memo = extend(
