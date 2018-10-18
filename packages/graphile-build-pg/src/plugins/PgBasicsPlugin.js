@@ -13,7 +13,7 @@ import pgField from "./pgField";
 
 import queryFromResolveData from "../queryFromResolveData";
 import addStartEndCursor from "./addStartEndCursor";
-import omit, {
+import baseOmit, {
   CREATE,
   READ,
   UPDATE,
@@ -141,10 +141,10 @@ const omitUnindexed = omit => (
 ) => {
   if (
     entity.kind === "attribute" &&
-    permission === "filter" &&
-    !entity.isIndexed
+    !entity.isIndexed &&
+    (permission === "filter" || permission === "order")
   ) {
-    return false;
+    return true;
   }
   return omit(entity, permission);
 };
@@ -214,7 +214,7 @@ export default (function PgBasicsPlugin(
     pgIgnoreIndexes = true, // TODO:v5: change this to false
   }
 ) {
-  let pgOmit = omit;
+  let pgOmit = baseOmit;
   if (!pgIgnoreRBAC) {
     pgOmit = omitWithRBACChecks(pgOmit);
   }
