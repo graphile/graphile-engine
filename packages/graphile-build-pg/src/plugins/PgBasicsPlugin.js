@@ -29,6 +29,9 @@ import parseIdentifier from "../parseIdentifier";
 import viaTemporaryTable from "./viaTemporaryTable";
 import chalk from "chalk";
 import pickBy from "lodash/pickBy";
+import debugFactory from "debug";
+
+const warn = debugFactory("graphile-build-pg:warn");
 
 const defaultPgColumnFilter = (_attr, _build, _context) => true;
 type Keys = Array<{
@@ -153,9 +156,9 @@ const omitUnindexed = omit => (
     !entity.isIndexed &&
     permission === "read"
   ) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      `We did not add the reverse relation for ${describePgEntity(
+    warn(
+      "%s",
+      `We've disabled the 'read' permission for ${describePgEntity(
         entity
       )} because it isn't indexed. For more information see https://graphile.org/postgraphile/best-practices/ To fix this, perform\n\n  CREATE INDEX ON ${`"${
         entity.class.namespaceName
