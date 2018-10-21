@@ -120,6 +120,7 @@ create table a.post (
   enums a.an_enum[],
   comptypes a.comptype[]
 );
+CREATE INDEX ON "a"."post"("author_id");
 
 -- This should not add a query to the schema
 create unique index uniq_post__headline_author_3 on a.post (headline) where (author_id = 3);

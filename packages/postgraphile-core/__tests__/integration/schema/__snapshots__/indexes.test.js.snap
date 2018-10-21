@@ -1060,6 +1060,9 @@ type CreatePostPayload {
   \\"\\"\\"
   clientMutationId: String
 
+  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
+  personByAuthorId: Person
+
   \\"\\"\\"The \`Post\` that was created by this mutation.\\"\\"\\"
   post: Post
 
@@ -2042,6 +2045,9 @@ type DeletePostPayload {
   \\"\\"\\"
   clientMutationId: String
   deletedPostId: ID
+
+  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
+  personByAuthorId: Person
 
   \\"\\"\\"The \`Post\` that was deleted by this mutation.\\"\\"\\"
   post: Post
@@ -5498,6 +5504,35 @@ type Person implements Node {
     \\"\\"\\"The method to use when ordering \`PersonSecret\`.\\"\\"\\"
     orderBy: [PersonSecretsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PersonSecretsConnection! @deprecated(reason: \\"Please use personSecretByPersonId instead\\")
+
+  \\"\\"\\"Reads and enables pagination through a set of \`Post\`.\\"\\"\\"
+  postsByAuthorId(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"
+    A condition to be used in determining which values should be returned by the collection.
+    \\"\\"\\"
+    condition: PostCondition
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+
+    \\"\\"\\"The method to use when ordering \`Post\`.\\"\\"\\"
+    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PostsConnection!
   site: WrappedUrl @deprecated(reason: \\"Don’t use me\\")
 }
 
@@ -5697,6 +5732,9 @@ type Post implements Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   \\"\\"\\"
   nodeId: ID!
+
+  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
+  personByAuthorId: Person
 }
 
 \\"\\"\\"A connection to a list of \`Interval\` values.\\"\\"\\"
@@ -5723,6 +5761,9 @@ type PostComputedIntervalSetEdge {
 A condition to be used against \`Post\` object types. All fields are tested for equality and combined with a logical ‘and.’
 \\"\\"\\"
 input PostCondition {
+  \\"\\"\\"Checks for equality with the object’s \`authorId\` field.\\"\\"\\"
+  authorId: Int
+
   \\"\\"\\"Checks for equality with the object’s \`id\` field.\\"\\"\\"
   id: Int
 }
@@ -5754,6 +5795,9 @@ type PostManyPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
+
+  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
+  personByAuthorId: Person
 
   \\"\\"\\"An edge for our \`Post\`. May be used by Relay 1.\\"\\"\\"
   postEdge(
@@ -5808,6 +5852,8 @@ type PostsEdge {
 
 \\"\\"\\"Methods to use when ordering \`Post\`.\\"\\"\\"
 enum PostsOrderBy {
+  AUTHOR_ID_ASC
+  AUTHOR_ID_DESC
   ID_ASC
   ID_DESC
   NATURAL
@@ -5833,6 +5879,9 @@ type PostWithSuffixPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
+
+  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
+  personByAuthorId: Person
   post: Post
 
   \\"\\"\\"An edge for our \`Post\`. May be used by Relay 1.\\"\\"\\"
@@ -7372,6 +7421,9 @@ type TableMutationPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
+
+  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
+  personByAuthorId: Person
   post: Post
 
   \\"\\"\\"An edge for our \`Post\`. May be used by Relay 1.\\"\\"\\"
@@ -8374,6 +8426,9 @@ type UpdatePostPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
+
+  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
+  personByAuthorId: Person
 
   \\"\\"\\"The \`Post\` that was updated by this mutation.\\"\\"\\"
   post: Post
