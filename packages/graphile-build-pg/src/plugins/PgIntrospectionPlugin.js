@@ -67,6 +67,8 @@ export type PgClass = {
   type: PgType,
   tags: { [string]: string },
   attributes: [PgAttribute],
+  constraints: [PgConstraint],
+  foreignConstraints: [PgConstraint],
   aclSelectable: boolean,
   aclInsertable: boolean,
   aclUpdatable: boolean,
@@ -112,6 +114,7 @@ export type PgAttribute = {
   aclSelectable: boolean,
   aclInsertable: boolean,
   aclUpdatable: boolean,
+  isIndexed: ?boolean,
 };
 
 export type PgConstraint = {
@@ -121,11 +124,13 @@ export type PgConstraint = {
   classId: string,
   class: ?PgClass,
   foreignClassId: ?string,
+  foreignClass: ?PgClass,
   comment: ?string,
   description: ?string,
   keyAttributeNums: Array<number>,
   foreignKeyAttributeNums: Array<number>,
   namespace: PgNamespace,
+  isIndexed: ?boolean,
   tags: { [string]: string },
 };
 
@@ -138,6 +143,25 @@ export type PgExtension = {
   version: string,
   configurationClassIds?: Array<string>,
   comment: ?string,
+  description: ?string,
+  tags: { [string]: string },
+};
+
+export type PgIndex = {
+  kind: "index",
+  classId: string,
+  numberOfAttributes: number,
+  isUnique: boolean,
+  isPrimary: boolean,
+  /*
+  Though these exist, we don't want to officially
+  support them yet.
+
+  isImmediate: boolean,
+  isReplicaIdentity: boolean,
+  isValid: boolean,
+  */
+  attributeNums: Array<number>,
   description: ?string,
   tags: { [string]: string },
 };
@@ -403,6 +427,14 @@ export default (async function PgIntrospectionPlugin(
     );
 
     relate(
+      introspectionResultsByKind.constraint,
+      "foreignClass",
+      "foreignClassId",
+      introspectionResultsByKind.classById,
+      true
+    );
+
+    relate(
       introspectionResultsByKind.extension,
       "namespace",
       "namespaceId",
@@ -425,21 +457,56 @@ export default (async function PgIntrospectionPlugin(
       introspectionResultsByKind.classById
     );
 
-    // Table/type columns
+    // Table/type columns / constraints
     introspectionResultsByKind.class.forEach(klass => {
       klass.attributes = introspectionResultsByKind.attribute.filter(
         attr => attr.classId === klass.id
       );
+      klass.constraints = introspectionResultsByKind.constraint.filter(
+        constraint => constraint.classId === klass.id
+      );
+      klass.foreignConstraints = introspectionResultsByKind.constraint.filter(
+        constraint => constraint.foreignClassId === klass.id
+      );
     });
 
-    // Indexed attributes
-    introspectionResultsByKind.index.forEach(index => {
-      const column = index.class.attributes.find(
-        attr => attr.num === index.attributeNums[0]
-      );
-      if (column) {
-        column.isIndexed = true;
+    // Constraint attributes
+    introspectionResultsByKind.constraint.forEach(constraint => {
+      if (constraint.keyAttributeNums && constraint.class) {
+        constraint.keyAttributes = constraint.keyAttributeNums.map(nr =>
+          constraint.class.attributes.find(attr => attr.num === nr)
+        );
       }
+      if (constraint.foreignKeyAttributeNums && constraint.foreignClass) {
+        constraint.foreignKeyAttributes = constraint.foreignKeyAttributeNums.map(
+          nr => constraint.foreignClass.attributes.find(attr => attr.num === nr)
+        );
+      }
+    });
+
+    // Detect which columns and constraints are indexed
+    introspectionResultsByKind.index.forEach(index => {
+      const columns = index.attributeNums.map(nr =>
+        index.class.attributes.find(attr => attr.num === nr)
+      );
+
+      // Indexed column (for orderBy / filter):
+      if (columns[0]) {
+        columns[0].isIndexed = true;
+      }
+
+      // Indexed constraints (for reverse relations):
+      index.class.constraints
+        .filter(constraint => constraint.type === "f")
+        .forEach(constraint => {
+          if (
+            constraint.keyAttributeNums.every(
+              (nr, idx) => index.attributeNums[idx] === nr
+            )
+          ) {
+            constraint.isIndexed = true;
+          }
+        });
     });
 
     return introspectionResultsByKind;

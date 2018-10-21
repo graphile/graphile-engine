@@ -377,30 +377,6 @@ enum Color {
 type CompoundKey implements Node {
   extra: Boolean
 
-  \\"\\"\\"Reads and enables pagination through a set of \`ForeignKey\`.\\"\\"\\"
-  foreignKeysByCompoundKey1AndCompoundKey2(
-    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
-    after: Cursor
-
-    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
-    before: Cursor
-
-    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
-    first: Int
-
-    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
-    last: Int
-
-    \\"\\"\\"
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    \\"\\"\\"
-    offset: Int
-
-    \\"\\"\\"The method to use when ordering \`ForeignKey\`.\\"\\"\\"
-    orderBy: [ForeignKeysOrderBy!] = [NATURAL]
-  ): ForeignKeysConnection!
-
   \\"\\"\\"
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   \\"\\"\\"
@@ -408,9 +384,6 @@ type CompoundKey implements Node {
 
   \\"\\"\\"Reads a single \`Person\` that is related to this \`CompoundKey\`.\\"\\"\\"
   personByPersonId1: Person
-
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`CompoundKey\`.\\"\\"\\"
-  personByPersonId2: Person
   personId1: Int!
   personId2: Int!
 
@@ -670,9 +643,6 @@ type CreateCompoundKeyPayload {
   \\"\\"\\"Reads a single \`Person\` that is related to this \`CompoundKey\`.\\"\\"\\"
   personByPersonId1: Person
 
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`CompoundKey\`.\\"\\"\\"
-  personByPersonId2: Person
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -769,9 +739,6 @@ type CreateForeignKeyPayload {
   \\"\\"\\"
   clientMutationId: String
 
-  \\"\\"\\"Reads a single \`CompoundKey\` that is related to this \`ForeignKey\`.\\"\\"\\"
-  compoundKeyByCompoundKey1AndCompoundKey2: CompoundKey
-
   \\"\\"\\"The \`ForeignKey\` that was created by this mutation.\\"\\"\\"
   foreignKey: ForeignKey
 
@@ -780,9 +747,6 @@ type CreateForeignKeyPayload {
     \\"\\"\\"The method to use when ordering \`ForeignKey\`.\\"\\"\\"
     orderBy: [ForeignKeysOrderBy!] = [NATURAL]
   ): ForeignKeysEdge
-
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`ForeignKey\`.\\"\\"\\"
-  personByPersonId: Person
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -1095,9 +1059,6 @@ type CreatePostPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
-  personByAuthorId: Person
 
   \\"\\"\\"The \`Post\` that was created by this mutation.\\"\\"\\"
   post: Post
@@ -1597,9 +1558,6 @@ type DeleteCompoundKeyPayload {
   \\"\\"\\"Reads a single \`Person\` that is related to this \`CompoundKey\`.\\"\\"\\"
   personByPersonId1: Person
 
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`CompoundKey\`.\\"\\"\\"
-  personByPersonId2: Person
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -2085,9 +2043,6 @@ type DeletePostPayload {
   clientMutationId: String
   deletedPostId: ID
 
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
-  personByAuthorId: Person
-
   \\"\\"\\"The \`Post\` that was deleted by this mutation.\\"\\"\\"
   post: Post
 
@@ -2522,12 +2477,6 @@ input FloatRangeInput {
 type ForeignKey {
   compoundKey1: Int
   compoundKey2: Int
-
-  \\"\\"\\"Reads a single \`CompoundKey\` that is related to this \`ForeignKey\`.\\"\\"\\"
-  compoundKeyByCompoundKey1AndCompoundKey2: CompoundKey
-
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`ForeignKey\`.\\"\\"\\"
-  personByPersonId: Person
   personId: Int
 }
 
@@ -5439,35 +5388,6 @@ type Person implements Node {
     \\"\\"\\"The method to use when ordering \`CompoundKey\`.\\"\\"\\"
     orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
   ): CompoundKeysConnection!
-
-  \\"\\"\\"Reads and enables pagination through a set of \`CompoundKey\`.\\"\\"\\"
-  compoundKeysByPersonId2(
-    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
-    after: Cursor
-
-    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
-    before: Cursor
-
-    \\"\\"\\"
-    A condition to be used in determining which values should be returned by the collection.
-    \\"\\"\\"
-    condition: CompoundKeyCondition
-
-    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
-    first: Int
-
-    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
-    last: Int
-
-    \\"\\"\\"
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    \\"\\"\\"
-    offset: Int
-
-    \\"\\"\\"The method to use when ordering \`CompoundKey\`.\\"\\"\\"
-    orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
-  ): CompoundKeysConnection!
   computedComplex(a: Int, b: String): PersonComputedComplexRecord
   computedFirstArgInout: Person
   computedFirstArgInoutOut: PersonComputedFirstArgInoutOutRecord
@@ -5481,30 +5401,6 @@ type Person implements Node {
   exists(email: Email): Boolean
   firstName: String
   firstPost: Post
-
-  \\"\\"\\"Reads and enables pagination through a set of \`ForeignKey\`.\\"\\"\\"
-  foreignKeysByPersonId(
-    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
-    after: Cursor
-
-    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
-    before: Cursor
-
-    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
-    first: Int
-
-    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
-    last: Int
-
-    \\"\\"\\"
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    \\"\\"\\"
-    offset: Int
-
-    \\"\\"\\"The method to use when ordering \`ForeignKey\`.\\"\\"\\"
-    orderBy: [ForeignKeysOrderBy!] = [NATURAL]
-  ): ForeignKeysConnection!
 
   \\"\\"\\"Reads and enables pagination through a set of \`Person\`.\\"\\"\\"
   friends(
@@ -5602,35 +5498,6 @@ type Person implements Node {
     \\"\\"\\"The method to use when ordering \`PersonSecret\`.\\"\\"\\"
     orderBy: [PersonSecretsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PersonSecretsConnection! @deprecated(reason: \\"Please use personSecretByPersonId instead\\")
-
-  \\"\\"\\"Reads and enables pagination through a set of \`Post\`.\\"\\"\\"
-  postsByAuthorId(
-    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
-    after: Cursor
-
-    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
-    before: Cursor
-
-    \\"\\"\\"
-    A condition to be used in determining which values should be returned by the collection.
-    \\"\\"\\"
-    condition: PostCondition
-
-    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
-    first: Int
-
-    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
-    last: Int
-
-    \\"\\"\\"
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    \\"\\"\\"
-    offset: Int
-
-    \\"\\"\\"The method to use when ordering \`Post\`.\\"\\"\\"
-    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PostsConnection!
   site: WrappedUrl @deprecated(reason: \\"Don’t use me\\")
 }
 
@@ -5830,9 +5697,6 @@ type Post implements Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   \\"\\"\\"
   nodeId: ID!
-
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
-  personByAuthorId: Person
 }
 
 \\"\\"\\"A connection to a list of \`Interval\` values.\\"\\"\\"
@@ -5890,9 +5754,6 @@ type PostManyPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
-  personByAuthorId: Person
 
   \\"\\"\\"An edge for our \`Post\`. May be used by Relay 1.\\"\\"\\"
   postEdge(
@@ -5972,9 +5833,6 @@ type PostWithSuffixPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
-  personByAuthorId: Person
   post: Post
 
   \\"\\"\\"An edge for our \`Post\`. May be used by Relay 1.\\"\\"\\"
@@ -7514,9 +7372,6 @@ type TableMutationPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
-  personByAuthorId: Person
   post: Post
 
   \\"\\"\\"An edge for our \`Post\`. May be used by Relay 1.\\"\\"\\"
@@ -7939,9 +7794,6 @@ type UpdateCompoundKeyPayload {
 
   \\"\\"\\"Reads a single \`Person\` that is related to this \`CompoundKey\`.\\"\\"\\"
   personByPersonId1: Person
-
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`CompoundKey\`.\\"\\"\\"
-  personByPersonId2: Person
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -8522,9 +8374,6 @@ type UpdatePostPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
-  personByAuthorId: Person
 
   \\"\\"\\"The \`Post\` that was updated by this mutation.\\"\\"\\"
   post: Post
