@@ -146,6 +146,25 @@ const omitUnindexed = omit => (
   ) {
     return true;
   }
+  if (
+    entity.kind === "constraint" &&
+    entity.type === "f" &&
+    entity.foreignClass &&
+    !entity.isIndexed &&
+    permission === "read"
+  ) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `We did not add the reverse relation for ${describePgEntity(
+        entity
+      )} because it isn't indexed. For more information see https://graphile.org/postgraphile/best-practices/ To fix this, perform\n\n  CREATE INDEX ON ${`"${
+        entity.class.namespaceName
+      }"."${entity.class.name}"`}("${entity.keyAttributes
+        .map(a => a.name)
+        .join('", "')}");`
+    );
+    return true;
+  }
   return omit(entity, permission);
 };
 
@@ -205,6 +224,81 @@ function describePgEntity(entity, includeAlias = true) {
   return `entity of kind '${entity.kind}' with oid '${entity.oid}'`;
 }
 
+function sqlCommentByAddingTags(entity, tagsToAdd) {
+  // NOTE: this function is NOT intended to be SQL safe; it's for
+  // displaying in error messages. Nonetheless if you find issues with
+  // SQL compatibility, please send a PR or issue.
+
+  // Ref: https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-BACKSLASH-TABLE
+  const escape = str =>
+    str.replace(
+      /['\\\b\f\n\r\t]/g,
+      chr =>
+        ({
+          "\b": "\\b",
+          "\f": "\\f",
+          "\n": "\\n",
+          "\r": "\\r",
+          "\t": "\\t",
+        }[chr] || "\\" + chr)
+    );
+
+  // tagsToAdd is here twice to ensure that the keys in tagsToAdd come first, but that they also "win" any conflicts.
+  const tags = Object.assign({}, tagsToAdd, entity.tags, tagsToAdd);
+
+  const description = entity.description;
+  const tagsSql = Object.keys(tags)
+    .reduce((memo, tag) => {
+      const tagValue = tags[tag];
+      const valueArray = Array.isArray(tagValue) ? tagValue : [tagValue];
+      const highlightOrNot = tag in tagsToAdd ? chalk.bold : identity;
+      valueArray.forEach(value => {
+        memo.push(
+          highlightOrNot(
+            `@${escape(escape(tag))}${
+              value === true ? "" : " " + escape(escape(value))
+            }`
+          )
+        );
+      });
+      return memo;
+    }, [])
+    .join("\\n");
+  const commentValue = `E'${tagsSql}${
+    description ? "\\n" + escape(description) : ""
+  }'`;
+  let sqlThing;
+  if (entity.kind === "class") {
+    const identifier = `"${entity.namespaceName}"."${entity.name}"`;
+    if (entity.classKind === "r") {
+      sqlThing = `TABLE ${identifier}`;
+    } else if (entity.classKind === "v") {
+      sqlThing = `VIEW ${identifier}`;
+    } else if (entity.classKind === "m") {
+      sqlThing = `MATERIALIZED VIEW ${identifier}`;
+    } else {
+      sqlThing = `PLEASE_SEND_A_PULL_REQUEST_TO_FIX_THIS ${identifier}`;
+    }
+  } else if (entity.kind === "attribute") {
+    sqlThing = `COLUMN "${entity.class.namespaceName}"."${
+      entity.class.name
+    }"."${entity.name}"`;
+  } else if (entity.kind === "procedure") {
+    sqlThing = `FUNCTION "${entity.namespaceName}"."${
+      entity.name
+    }"(...arg types go here...)`;
+  } else if (entity.kind === "constraint") {
+    // TODO: TEST!
+    sqlThing = `CONSTRAINT "${entity.name}" ON "${
+      entity.class.namespaceName
+    }"."${entity.class.name}"`;
+  } else {
+    sqlThing = `UNKNOWN_ENTITY_PLEASE_SEND_A_PULL_REQUEST`;
+  }
+
+  return `COMMENT ON ${sqlThing} IS ${commentValue};`;
+}
+
 export default (function PgBasicsPlugin(
   builder,
   {
@@ -235,80 +329,7 @@ export default (function PgBasicsPlugin(
       pgViaTemporaryTable: viaTemporaryTable,
       describePgEntity,
       pgField,
-      sqlCommentByAddingTags: (entity, tagsToAdd) => {
-        // NOTE: this function is NOT intended to be SQL safe; it's for
-        // displaying in error messages. Nonetheless if you find issues with
-        // SQL compatibility, please send a PR or issue.
-
-        // Ref: https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-BACKSLASH-TABLE
-        const escape = str =>
-          str.replace(
-            /['\\\b\f\n\r\t]/g,
-            chr =>
-              ({
-                "\b": "\\b",
-                "\f": "\\f",
-                "\n": "\\n",
-                "\r": "\\r",
-                "\t": "\\t",
-              }[chr] || "\\" + chr)
-          );
-
-        // tagsToAdd is here twice to ensure that the keys in tagsToAdd come first, but that they also "win" any conflicts.
-        const tags = Object.assign({}, tagsToAdd, entity.tags, tagsToAdd);
-
-        const description = entity.description;
-        const tagsSql = Object.keys(tags)
-          .reduce((memo, tag) => {
-            const tagValue = tags[tag];
-            const valueArray = Array.isArray(tagValue) ? tagValue : [tagValue];
-            const highlightOrNot = tag in tagsToAdd ? chalk.bold : identity;
-            valueArray.forEach(value => {
-              memo.push(
-                highlightOrNot(
-                  `@${escape(escape(tag))}${
-                    value === true ? "" : " " + escape(escape(value))
-                  }`
-                )
-              );
-            });
-            return memo;
-          }, [])
-          .join("\\n");
-        const commentValue = `E'${tagsSql}${
-          description ? "\\n" + escape(description) : ""
-        }'`;
-        let sqlThing;
-        if (entity.kind === "class") {
-          const identifier = `"${entity.namespaceName}"."${entity.name}"`;
-          if (entity.classKind === "r") {
-            sqlThing = `TABLE ${identifier}`;
-          } else if (entity.classKind === "v") {
-            sqlThing = `VIEW ${identifier}`;
-          } else if (entity.classKind === "m") {
-            sqlThing = `MATERIALIZED VIEW ${identifier}`;
-          } else {
-            sqlThing = `PLEASE_SEND_A_PULL_REQUEST_TO_FIX_THIS ${identifier}`;
-          }
-        } else if (entity.kind === "attribute") {
-          sqlThing = `COLUMN "${entity.class.namespaceName}"."${
-            entity.class.name
-          }"."${entity.name}"`;
-        } else if (entity.kind === "procedure") {
-          sqlThing = `FUNCTION "${entity.namespaceName}"."${
-            entity.name
-          }"(...arg types go here...)`;
-        } else if (entity.kind === "constraint") {
-          // TODO: TEST!
-          sqlThing = `CONSTRAINT "${entity.name}" ON "${
-            entity.class.namespaceName
-          }"."${entity.class.name}"`;
-        } else {
-          sqlThing = `UNKNOWN_ENTITY_PLEASE_SEND_A_PULL_REQUEST`;
-        }
-
-        return `COMMENT ON ${sqlThing} IS ${commentValue};`;
-      },
+      sqlCommentByAddingTags,
     });
   });
 
