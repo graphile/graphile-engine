@@ -808,3 +808,17 @@ create table d.tv_episodes (
     title       varchar(40),
     show_id     integer references d.tv_shows on delete cascade
 );
+
+/*
+
+Here's the missing indexes:
+
+CREATE INDEX ON "a"."foreign_key"("compound_key_1", "compound_key_2");
+CREATE INDEX ON "a"."foreign_key"("person_id");
+CREATE INDEX ON "a"."unique_foreign_key"("compound_key_1", "compound_key_2");
+CREATE INDEX ON "c"."compound_key"("person_id_1");
+CREATE INDEX ON "c"."compound_key"("person_id_2");
+CREATE INDEX ON "c"."left_arm"("person_id");
+CREATE INDEX ON "c"."person_secret"("person_id");
+
+*/
