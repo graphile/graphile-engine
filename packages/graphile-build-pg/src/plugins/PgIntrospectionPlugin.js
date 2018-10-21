@@ -29,6 +29,7 @@ export type PgNamespace = {
 
 export type PgProc = {
   kind: "procedure",
+  id: string,
   name: string,
   comment: ?string,
   description: ?string,
@@ -119,16 +120,19 @@ export type PgAttribute = {
 
 export type PgConstraint = {
   kind: "constraint",
+  id: string,
   name: string,
   type: string,
   classId: string,
-  class: ?PgClass,
+  class: PgClass,
   foreignClassId: ?string,
   foreignClass: ?PgClass,
   comment: ?string,
   description: ?string,
   keyAttributeNums: Array<number>,
+  keyAttributes: [PgAttribute],
   foreignKeyAttributeNums: Array<number>,
+  foreignKeyAttributes: [PgAttribute],
   namespace: PgNamespace,
   isIndexed: ?boolean,
   tags: { [string]: string },
@@ -149,6 +153,9 @@ export type PgExtension = {
 
 export type PgIndex = {
   kind: "index",
+  id: string,
+  name: string,
+  namespaceName: string,
   classId: string,
   numberOfAttributes: number,
   isUnique: boolean,
@@ -165,6 +172,16 @@ export type PgIndex = {
   description: ?string,
   tags: { [string]: string },
 };
+
+export type PgEntity =
+  | PgNamespace
+  | PgProc
+  | PgClass
+  | PgType
+  | PgAttribute
+  | PgConstraint
+  | PgExtension
+  | PgIndex;
 
 function readFile(filename, encoding) {
   return new Promise((resolve, reject) => {
@@ -422,8 +439,7 @@ export default (async function PgIntrospectionPlugin(
       introspectionResultsByKind.constraint,
       "class",
       "classId",
-      introspectionResultsByKind.classById,
-      true
+      introspectionResultsByKind.classById
     );
 
     relate(
@@ -476,11 +492,15 @@ export default (async function PgIntrospectionPlugin(
         constraint.keyAttributes = constraint.keyAttributeNums.map(nr =>
           constraint.class.attributes.find(attr => attr.num === nr)
         );
+      } else {
+        constraint.keyAttributes = [];
       }
       if (constraint.foreignKeyAttributeNums && constraint.foreignClass) {
         constraint.foreignKeyAttributes = constraint.foreignKeyAttributeNums.map(
           nr => constraint.foreignClass.attributes.find(attr => attr.num === nr)
         );
+      } else {
+        constraint.foreignKeyAttributes = [];
       }
     });
 

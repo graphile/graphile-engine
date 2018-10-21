@@ -41,6 +41,7 @@ with
   procedure as (
     select
       'procedure' as "kind",
+      pro.oid as "id",
       pro.proname as "name",
       dsc.description as "description",
       pro.pronamespace as "namespaceId",
@@ -267,6 +268,7 @@ with
   "constraint" as (
     select distinct on (con.conrelid, con.conkey, con.confrelid, con.confkey)
       'constraint' as "kind",
+      con.oid as "id",
       con.conname as "name",
       con.contype as "type",
       con.conrelid as "classId",
@@ -276,6 +278,7 @@ with
       con.confkey as "foreignKeyAttributeNums"
     from
       pg_catalog.pg_constraint as con
+      inner join class on (con.conrelid = class.id)
       left join pg_catalog.pg_description as dsc on dsc.objoid = con.oid and dsc.classoid = 'pg_catalog.pg_constraint'::regclass
     where
       -- Only get constraints for classes we have selected.
@@ -315,6 +318,9 @@ with
   "indexes" as (
     select
       'index' as "kind",
+      idx.indexrelid as "id",
+      idx_more.relname as "name",
+      nsp.nspname as "namespaceName",
       idx.indrelid as "classId",
       idx.indnatts as "numberOfAttributes",
       idx.indisunique as "isUnique",
@@ -326,7 +332,9 @@ with
       dsc.description as "description"
     from
       pg_catalog.pg_index as idx
+      inner join pg_catalog.pg_class idx_more on (idx.indexrelid = idx_more.oid)
       inner join class on (idx.indrelid = class.id)
+      inner join pg_catalog.pg_namespace as nsp on (nsp.oid = idx_more.relnamespace)
       left join pg_catalog.pg_description as dsc on dsc.objoid = idx.indexrelid and dsc.objsubid = 0 and dsc.classoid = 'pg_catalog.pg_class'::regclass
     where
       idx.indislive is not false and

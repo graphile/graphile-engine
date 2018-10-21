@@ -8,6 +8,7 @@ import type {
   PgClass,
   PgAttribute,
   PgConstraint,
+  PgEntity,
 } from "./PgIntrospectionPlugin";
 import pgField from "./pgField";
 
@@ -152,26 +153,28 @@ const omitUnindexed = omit => (
   if (
     entity.kind === "constraint" &&
     entity.type === "f" &&
-    entity.foreignClass &&
     !entity.isIndexed &&
     permission === "read"
   ) {
-    warn(
-      "%s",
-      `We've disabled the 'read' permission for ${describePgEntity(
-        entity
-      )} because it isn't indexed. For more information see https://graphile.org/postgraphile/best-practices/ To fix this, perform\n\n  CREATE INDEX ON ${`"${
-        entity.class.namespaceName
-      }"."${entity.class.name}"`}("${entity.keyAttributes
-        .map(a => a.name)
-        .join('", "')}");`
-    );
+    let klass = entity.class;
+    if (klass) {
+      warn(
+        "%s",
+        `We've disabled the 'read' permission for ${describePgEntity(
+          entity
+        )} because it isn't indexed. For more information see https://graphile.org/postgraphile/best-practices/ To fix this, perform\n\n  CREATE INDEX ON ${`"${
+          klass.namespaceName
+        }"."${klass.name}"`}("${entity.keyAttributes
+          .map(a => a.name)
+          .join('", "')}");`
+      );
+    }
     return true;
   }
   return omit(entity, permission);
 };
 
-function describePgEntity(entity, includeAlias = true) {
+function describePgEntity(entity: PgEntity, includeAlias = true) {
   const getAlias = !includeAlias
     ? () => ""
     : () => {
@@ -224,7 +227,9 @@ function describePgEntity(entity, includeAlias = true) {
     // eslint-disable-next-line no-console
     console.error(e);
   }
-  return `entity of kind '${entity.kind}' with oid '${entity.oid}'`;
+  return `entity of kind '${entity.kind}' with ${
+    typeof entity.id === "string" ? `oid '${entity.id}'` : ""
+  }`;
 }
 
 function sqlCommentByAddingTags(entity, tagsToAdd) {

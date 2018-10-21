@@ -9,6 +9,7 @@ export interface PgNamespace {
 
 export interface PgProc {
   kind: "procedure";
+  id: string;
   name: string;
   comment: string | void;
   description: string | void;
@@ -99,15 +100,18 @@ export interface PgAttribute {
 
 export interface PgConstraint {
   kind: "constraint";
+  id: string;
   name: string;
   type: string;
   classId: string;
-  class: PgClass | void;
+  class: PgClass;
   foreignClassId: string | void;
   comment: string | void;
   description: string | void;
   keyAttributeNums: Array<number>;
+  keyAttributes: Array<PgAttribute>;
   foreignKeyAttributeNums: Array<number>;
+  foreignKeyAttributes: Array<PgAttribute>;
   namespace: PgNamespace;
   isIndexed: boolean | void;
   tags: { [tag: string]: true | string | Array<string> };
@@ -128,6 +132,9 @@ export interface PgExtension {
 
 export interface PgIndex {
   kind: "index";
+  id: string;
+  name: string;
+  namespaceName: string;
   classId: string;
   numberOfAttributes: number;
   isUnique: boolean;
@@ -136,3 +143,13 @@ export interface PgIndex {
   description: string | void;
   tags: { [tag: string]: true | string | Array<string> };
 }
+
+export type PgEntity =
+  | PgNamespace
+  | PgProc
+  | PgClass
+  | PgType
+  | PgAttribute
+  | PgConstraint
+  | PgExtension
+  | PgIndex;
