@@ -1,8 +1,9 @@
 // @flow
 function makeIntrospectionQuery(
   serverVersionNum: number,
-  pgLegacyFunctionsOnly: boolean
+  options: { pgLegacyFunctionsOnly?: boolean } = {}
 ): string {
+  const { pgLegacyFunctionsOnly } = options;
   return `\
 -- @see https://www.postgresql.org/docs/9.5/static/catalogs.html
 -- @see https://github.com/graphile/postgraphile/blob/master/resources/introspection-query.sql
