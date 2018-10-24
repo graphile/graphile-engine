@@ -70,6 +70,7 @@ export interface PgType {
   domainIsNotNull: boolean;
   arrayItemTypeId: string | void;
   arrayItemType: PgType | void;
+  arrayType: PgType | void;
   typeLength: number | void;
   isPgArray: boolean;
   classId: string | void;

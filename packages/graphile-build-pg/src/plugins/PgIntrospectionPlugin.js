@@ -90,6 +90,7 @@ export type PgType = {
   domainIsNotNull: boolean,
   arrayItemTypeId: ?string,
   arrayItemType: ?PgType,
+  arrayType: ?PgType,
   typeLength: ?number,
   isPgArray: boolean,
   classId: ?string,
@@ -477,6 +478,13 @@ export default (async function PgIntrospectionPlugin(
       "classId",
       introspectionResultsByKind.classById
     );
+
+    // Reverse arrayItemType -> arrayType
+    introspectionResultsByKind.type.forEach(type => {
+      if (type.arrayItemType) {
+        type.arrayItemType.arrayType = type;
+      }
+    });
 
     // Table/type columns / constraints
     introspectionResultsByKind.class.forEach(klass => {
