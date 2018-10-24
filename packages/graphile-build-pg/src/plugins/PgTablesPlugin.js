@@ -391,6 +391,7 @@ export default (function PgTablesPlugin(
             }
           );
           const PageInfo = getTypeByName("PageInfo");
+
           /*const ConnectionType = */
           newWithHooks(
             GraphQLObjectType,
