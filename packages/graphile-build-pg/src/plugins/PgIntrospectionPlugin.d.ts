@@ -69,6 +69,7 @@ export interface PgType {
   category: string;
   domainIsNotNull: boolean;
   arrayItemTypeId: string | void;
+  arrayItemType: PgType | void;
   typeLength: number | void;
   isPgArray: boolean;
   classId: string | void;
