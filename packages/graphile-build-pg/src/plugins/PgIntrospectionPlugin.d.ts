@@ -50,6 +50,7 @@ export interface PgClass {
   attributes: [PgAttribute];
   constraints: [PgConstraint];
   foreignConstraints: [PgConstraint];
+  primaryKeyConstraint: PgConstraint | void;
   aclSelectable: boolean;
   aclInsertable: boolean;
   aclUpdatable: boolean;

@@ -70,6 +70,7 @@ export type PgClass = {
   attributes: [PgAttribute],
   constraints: [PgConstraint],
   foreignConstraints: [PgConstraint],
+  primaryKeyConstraint: PgConstraint | void,
   aclSelectable: boolean,
   aclInsertable: boolean,
   aclUpdatable: boolean,
@@ -486,6 +487,9 @@ export default (async function PgIntrospectionPlugin(
       );
       klass.foreignConstraints = introspectionResultsByKind.constraint.filter(
         constraint => constraint.foreignClassId === klass.id
+      );
+      klass.primaryKeyConstraint = klass.constraints.find(
+        constraint => constraint.type === "p"
       );
     });
 

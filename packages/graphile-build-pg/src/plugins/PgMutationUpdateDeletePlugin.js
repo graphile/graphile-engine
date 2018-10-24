@@ -422,12 +422,12 @@ export default (async function PgMutationUpdateDeletePlugin(
                 if (omit(constraint, mode)) {
                   return;
                 }
-                const keys = constraint.keyAttributeNums.map(num =>
-                  attributes.find(attr => attr.num === num)
-                );
+                const keys = constraint.keyAttributes;
                 if (!keys.every(_ => _)) {
                   throw new Error(
-                    "Consistency error: could not find an attribute!"
+                    `Consistency error: could not find an attribute in the constraint when building the ${mode} mutation for ${describePgEntity(
+                      table
+                    )}!`
                   );
                 }
                 if (keys.some(key => omit(key, "read"))) {
