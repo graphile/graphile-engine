@@ -78,6 +78,7 @@ export interface PostGraphileCoreOptions {
   simpleCollections?: "only" | "both" | "omit";
   includeExtensionResources?: boolean;
   ignoreRBAC?: boolean;
+  legacyFunctionsOnly?: boolean;
   ignoreIndexes?: boolean;
 }
 
@@ -180,12 +181,13 @@ const getPostGraphileBuilder = async (
     readCache,
     writeCache,
     setWriteCacheCallback,
-    legacyRelations = "deprecated", // TODO: Change to 'omit' in v5
+    legacyRelations = "deprecated", // TODO:v5: Change to 'omit' in v5
     setofFunctionsContainNulls = true,
     legacyJsonUuid = false,
     simpleCollections = "omit",
     includeExtensionResources = false,
     ignoreRBAC = true, // TODO:v5: Change to 'false' in v5
+    legacyFunctionsOnly = false, // TODO:v5: Remove in v5
     ignoreIndexes = true, // TODO:v5: Change to 'false' in v5
   } = options;
 
@@ -342,6 +344,7 @@ const getPostGraphileBuilder = async (
     pgSimpleCollections: simpleCollections,
     pgIncludeExtensionResources: includeExtensionResources,
     pgIgnoreRBAC: ignoreRBAC,
+    pgLegacyFunctionsOnly: legacyFunctionsOnly,
     pgIgnoreIndexes: ignoreIndexes,
     ...graphileBuildOptions,
     ...graphqlBuildOptions, // DEPRECATED!
