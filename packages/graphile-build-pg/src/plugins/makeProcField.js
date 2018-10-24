@@ -555,11 +555,9 @@ export default function makeProcField(
                 if (proc.returnsSet && !forceList) {
                   // EITHER `isMutation` is true, or `ConnectionType` does not
                   // exist - either way, we're not returning a connection.
-                  return value.data
-                    .map(firstValue)
-                    .map(v => pg2gql(v, returnType));
+                  return value.data.map(v => pg2gql(firstValue(v), returnType));
                 } else if (proc.returnsSet || rawReturnType.isPgArray) {
-                  return value.map(firstValue).map(v => pg2gql(v, returnType));
+                  return value.map(v => pg2gql(firstValue(v), returnType));
                 } else {
                   return pg2gql(value, returnType);
                 }
@@ -655,11 +653,9 @@ export default function makeProcField(
                     // EITHER `isMutation` is true, or `ConnectionType` does
                     // not exist - either way, we're not returning a
                     // connection.
-                    return row.data
-                      .map(firstValue)
-                      .map(v => pg2gql(v, returnType));
+                    return row.data.map(v => pg2gql(firstValue(v), returnType));
                   } else if (proc.returnsSet || rawReturnType.isPgArray) {
-                    return rows.map(firstValue).map(v => pg2gql(v, returnType));
+                    return rows.map(v => pg2gql(firstValue(v), returnType));
                   } else {
                     return pg2gql(firstValue(row), returnType);
                   }
