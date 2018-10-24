@@ -50,7 +50,6 @@ export default (function PgBackwardRelationPlugin(
     const foreignKeyConstraints = foreignTable.foreignConstraints.filter(
       con => con.type === "f"
     );
-    const foreignAttributes = foreignTable.attributes;
     const foreignTableTypeName = inflection.tableType(foreignTable);
     const gqlForeignTableType = pgGetGqlTypeByTypeIdAndModifier(
       foreignTable.type.id,
@@ -91,8 +90,6 @@ export default (function PgBackwardRelationPlugin(
           );
         }
         const schema = table.namespace;
-
-        const attributes = table.attributes;
 
         const keys = constraint.keyAttributes;
         const foreignKeys = constraint.foreignKeyAttributes;

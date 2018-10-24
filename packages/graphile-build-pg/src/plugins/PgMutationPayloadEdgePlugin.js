@@ -11,7 +11,6 @@ export default (function PgMutationPayloadEdgePlugin(builder) {
       pgGetGqlTypeByTypeIdAndModifier,
       pgSql: sql,
       graphql: { GraphQLList, GraphQLNonNull },
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
       inflection,
       pgOmit: omit,
       describePgEntity,

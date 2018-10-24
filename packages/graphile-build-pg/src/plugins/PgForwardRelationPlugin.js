@@ -44,7 +44,6 @@ export default (function PgForwardRelationPlugin(builder) {
     const foreignKeyConstraints = table.constraints.filter(
       con => con.type === "f"
     );
-    const attributes = table.attributes;
 
     return extend(
       fields,

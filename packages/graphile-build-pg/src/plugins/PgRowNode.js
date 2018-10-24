@@ -8,7 +8,6 @@ export default (async function PgRowNode(builder) {
   builder.hook("GraphQLObjectType", (object, build, context) => {
     const {
       addNodeFetcherForTypeName,
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
       pgSql: sql,
       gql2pg,
       pgQueryFromResolveData: queryFromResolveData,

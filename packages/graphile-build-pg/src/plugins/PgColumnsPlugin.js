@@ -176,7 +176,6 @@ export default (function PgColumnsPlugin(builder) {
     const {
       extend,
       pgGetGqlInputTypeByTypeIdAndModifier,
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
       graphql: { GraphQLString, GraphQLNonNull },
       pgColumnFilter,
       inflection,

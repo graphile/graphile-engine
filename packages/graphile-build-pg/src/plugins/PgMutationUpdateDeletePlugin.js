@@ -178,7 +178,6 @@ export default (async function PgMutationUpdateDeletePlugin(
               const uniqueConstraints = table.constraints.filter(
                 con => con.type === "u" || con.type === "p"
               );
-              const attributes = table.attributes;
               const Table = pgGetGqlTypeByTypeIdAndModifier(
                 table.type.id,
                 null
