@@ -100,6 +100,7 @@ export default (function PgScalarFunctionConnectionPlugin(
           pgIntrospection: proc,
         }
       );
+
       /*const ConnectionType = */
       newWithHooks(
         GraphQLObjectType,
