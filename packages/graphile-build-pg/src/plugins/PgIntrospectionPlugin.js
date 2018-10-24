@@ -315,7 +315,7 @@ export default (async function PgIntrospectionPlugin(
       }, {});
     const xByYAndZ = (arrayOfX, attrKey, attrKey2) =>
       arrayOfX.reduce((memo, x) => {
-        memo[x[attrKey]] = memo[x[attrKey]] || {};
+        if (!memo[x[attrKey]]) memo[x[attrKey]] = {};
         memo[x[attrKey]][x[attrKey2]] = x;
         return memo;
       }, {});
@@ -450,7 +450,7 @@ export default (async function PgIntrospectionPlugin(
       "foreignClass",
       "foreignClassId",
       introspectionResultsByKind.classById,
-      true
+      true // Because many constraints don't apply to foreign classes
     );
 
     relate(
