@@ -15,6 +15,7 @@ export default function extend<Obj1: *, Obj2: *>(
   extra: Obj2,
   hint?: string
 ): Obj1 & Obj2 {
+  // $FlowFixMe
   const hints = base[$$hints] || {};
 
   const keysB = Object.keys(extra);
@@ -42,6 +43,7 @@ export default function extend<Obj1: *, Obj2: *>(
     }
   }
   return Object.assign(base, extra, {
+    // $FlowFixMe
     [$$hints]: hints,
   });
 }
