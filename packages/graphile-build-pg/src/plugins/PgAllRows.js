@@ -53,9 +53,7 @@ export default (async function PgAllRows(
           );
         }
         const attributes = table.attributes;
-        const primaryKeyConstraint = table.constraints.find(
-          con => con.type === "p"
-        );
+        const primaryKeyConstraint = table.primaryKeyConstraint;
         const primaryKeys =
           primaryKeyConstraint &&
           primaryKeyConstraint.keyAttributeNums.map(num =>

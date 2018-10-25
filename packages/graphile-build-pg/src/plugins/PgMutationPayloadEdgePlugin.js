@@ -44,9 +44,7 @@ export default (function PgMutationPayloadEdgePlugin(builder) {
       return fields;
     }
 
-    const primaryKeyConstraint = table.constraints.find(
-      con => con.type === "p"
-    );
+    const primaryKeyConstraint = table.primaryKeyConstraint;
     const primaryKeys =
       primaryKeyConstraint && primaryKeyConstraint.keyAttributes;
     const canOrderBy = !omit(table, "order");

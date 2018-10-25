@@ -120,9 +120,7 @@ export default (function PgBackwardRelationPlugin(
             )
           : null;
 
-        const primaryKeyConstraint = table.constraints.find(
-          con => con.type === "p"
-        );
+        const primaryKeyConstraint = table.primaryKeyConstraint;
         const primaryKeys =
           primaryKeyConstraint && primaryKeyConstraint.keyAttributes;
 

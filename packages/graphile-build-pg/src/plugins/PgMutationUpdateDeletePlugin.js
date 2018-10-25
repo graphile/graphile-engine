@@ -276,9 +276,7 @@ export default (async function PgMutationUpdateDeletePlugin(
               );
 
               // NodeId
-              const primaryKeyConstraint = table.constraints.find(
-                con => con.type === "p"
-              );
+              const primaryKeyConstraint = table.primaryKeyConstraint;
               if (nodeIdFieldName && primaryKeyConstraint) {
                 const primaryKeys =
                   primaryKeyConstraint && primaryKeyConstraint.keyAttributes;
