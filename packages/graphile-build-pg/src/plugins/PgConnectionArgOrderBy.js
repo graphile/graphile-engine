@@ -121,13 +121,13 @@ export default (function PgConnectionArgOrderBy(builder) {
                   Array.isArray(specs[0]) || specs.length === 0
                     ? specs
                     : [specs];
-                orders.forEach(([col, ascending]) => {
+                orders.forEach(([col, ascending, nullsFirst]) => {
                   const expr = isString(col)
                     ? sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
                         col
                       )}`
                     : col;
-                  queryBuilder.orderBy(expr, ascending);
+                  queryBuilder.orderBy(expr, ascending, nullsFirst);
                 });
                 if (unique) {
                   queryBuilder.setOrderIsUnique();
