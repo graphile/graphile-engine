@@ -2,7 +2,7 @@
 import isString from "lodash/isString";
 import type { Plugin } from "graphile-build";
 
-export default (function PgConnectionArgOrderBy(builder) {
+export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
   builder.hook("init", (_, build) => {
     const {
       newWithHooks,
@@ -121,12 +121,20 @@ export default (function PgConnectionArgOrderBy(builder) {
                   Array.isArray(specs[0]) || specs.length === 0
                     ? specs
                     : [specs];
-                orders.forEach(([col, ascending, nullsFirst]) => {
+                orders.forEach(([col, ascending, specNullsFirst]) => {
                   const expr = isString(col)
                     ? sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
                         col
                       )}`
                     : col;
+                  // If the enum specifies null ordering, use that
+                  // Otherwise, use the orderByNullsLast option if present
+                  const nullsFirst =
+                    specNullsFirst != null
+                      ? specNullsFirst
+                      : orderByNullsLast != null
+                        ? !orderByNullsLast
+                        : undefined;
                   queryBuilder.orderBy(expr, ascending, nullsFirst);
                 });
                 if (unique) {
