@@ -1547,6 +1547,14 @@ Object {
 }
 `;
 
+exports[`json-overflow.graphql 1`] = `
+Object {
+  "data": Object {
+    "allPosts": [/*FIXME*/],
+  },
+}
+`;
+
 exports[`longAliases.graphql 1`] = `
 Object {
   "data": Object {
