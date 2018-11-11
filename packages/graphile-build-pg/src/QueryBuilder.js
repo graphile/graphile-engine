@@ -30,7 +30,7 @@ function callIfNecessaryArray<T>(
   }
 }
 
-type RawAlias = Symbol | string;
+export type RawAlias = Symbol | string;
 type SQLAlias = SQL;
 type SQLGen = Gen<SQL> | SQL;
 type NumberGen = Gen<number> | number;
@@ -39,7 +39,7 @@ type CursorComparator = (val: CursorValue, isAfter: boolean) => void;
 
 class QueryBuilder {
   // Helper function
-  static jsonbBuildObject(fields) {
+  static jsonbBuildObject(fields: Array<[SQL, RawAlias]>) {
     const fieldsChunks = chunk(fields, 50);
     const chunkToJson = fieldsChunk =>
       sql.fragment`jsonb_build_object(${sql.join(

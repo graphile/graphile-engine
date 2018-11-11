@@ -1,5 +1,6 @@
 // @flow
 import QueryBuilder from "./QueryBuilder";
+import type { RawAlias } from "./QueryBuilder";
 import * as sql from "pg-sql2";
 import type { SQL } from "pg-sql2";
 import type { DataForType } from "graphile-build";
@@ -385,7 +386,7 @@ export default (
       ? sql.fragment`with ${sqlQueryAlias} as (${query}), ${sqlSummaryAlias} as (select json_agg(to_json(${sqlQueryAlias})) as data from ${sqlQueryAlias})`
       : sql.fragment``;
     const sqlFrom = sql.fragment``;
-    const fields: Array<[SQL, string]> = [];
+    const fields: Array<[SQL, RawAlias]> = [];
     if (haveFields) {
       fields.push([
         sql.fragment`coalesce((select ${sqlSummaryAlias}.data from ${sqlSummaryAlias}), '[]'::json)`,
