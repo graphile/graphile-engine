@@ -343,6 +343,19 @@ with
       idx.indisreplident as "isReplicaIdentity",
       idx.indisvalid as "isValid", -- if false, don't use for queries
       idx.indkey as "attributeNums",
+      ${
+        serverVersionNum >= 90600
+          ? `\
+      (
+        select array_agg(pg_index_column_has_property(idx.indexrelid,n,'asc'))
+        from generate_series(1,idx.indnkeyatts) s(n)
+      ) as "attributePropertiesAsc",
+      (
+        select array_agg(pg_index_column_has_property(idx.indexrelid,n,'nulls_first'))
+        from generate_series(1,idx.indnkeyatts) s(n)
+      ) as "attributePropertiesNullsFirst",`
+          : ""
+      }
       dsc.description as "description"
     from
       pg_catalog.pg_index as idx
