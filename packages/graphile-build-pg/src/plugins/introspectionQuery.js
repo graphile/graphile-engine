@@ -347,11 +347,11 @@ with
         serverVersionNum >= 90600
           ? `\
       (
-        select array_agg(pg_index_column_has_property(idx.indexrelid,n,'asc'))
+        select array_agg(pg_index_column_has_property(idx.indexrelid,n::int2,'asc'))
         from unnest(idx.indkey) with ordinality as ord(key,n)
       ) as "attributePropertiesAsc",
       (
-        select array_agg(pg_index_column_has_property(idx.indexrelid,n,'nulls_first'))
+        select array_agg(pg_index_column_has_property(idx.indexrelid,n::int2,'nulls_first'))
         from unnest(idx.indkey) with ordinality as ord(key,n)
       ) as "attributePropertiesNullsFirst",`
           : ""
