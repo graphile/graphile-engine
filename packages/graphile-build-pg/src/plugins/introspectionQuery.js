@@ -348,11 +348,11 @@ with
           ? `\
       (
         select array_agg(pg_index_column_has_property(idx.indexrelid,n,'asc'))
-        from generate_series(1,idx.indnkeyatts) s(n)
+        from unnest(idx.indkey) with ordinality as ord(key,n)
       ) as "attributePropertiesAsc",
       (
         select array_agg(pg_index_column_has_property(idx.indexrelid,n,'nulls_first'))
-        from generate_series(1,idx.indnkeyatts) s(n)
+        from unnest(idx.indkey) with ordinality as ord(key,n)
       ) as "attributePropertiesNullsFirst",`
           : ""
       }
