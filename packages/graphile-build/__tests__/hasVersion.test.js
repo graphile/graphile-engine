@@ -16,7 +16,6 @@ function IncompatiblePlugin(builder) {
 
 function FooPlugin(builder) {
   builder.hook("build", build => {
-    // todo.. move the hasVersion plugin to here and try running in a build hook to see if the late-plugin check works
     if (!build.hasVersion("early-plugin", "^2.0.0")) {
       throw new Error("early-plugin should be loaded at this point");
     }
