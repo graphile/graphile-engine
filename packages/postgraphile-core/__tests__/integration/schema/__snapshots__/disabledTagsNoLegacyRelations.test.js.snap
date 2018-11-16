@@ -3088,7 +3088,7 @@ type Query implements Node {
     orderBy: [PersonSecretsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PersonSecretsConnection
 
-  \\"\\"\\"Reads and enables pagination through a set of \`Person\`.\\"\\"\\"
+  \\"\\"\\"@deprecated This is deprecated.\\"\\"\\"
   badlyBehavedFunction(
     \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
     after: Cursor

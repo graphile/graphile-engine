@@ -3306,7 +3306,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     \\"\\"\\"
     offset: Int
-  ): PeopleConnection!
+  ): PeopleConnection! @deprecated(reason: \\"This is deprecated.\\")
 
   \\"\\"\\"Reads and enables pagination through a set of \`Person\`.\\"\\"\\"
   badlyBehavedFunctionList(
@@ -3315,7 +3315,7 @@ type Query implements Node {
 
     \\"\\"\\"Skip the first \`n\` values.\\"\\"\\"
     offset: Int
-  ): [Person]
+  ): [Person] @deprecated(reason: \\"This is deprecated.\\")
 
   \\"\\"\\"Reads a single \`CompoundKey\` using its globally unique \`ID\`.\\"\\"\\"
   compoundKey(

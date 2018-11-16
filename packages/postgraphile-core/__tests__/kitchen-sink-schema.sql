@@ -433,6 +433,8 @@ begin
 end;
 $$ language plpgsql stable;
 
+comment on function c.badly_behaved_function is '@deprecated This is deprecated.';
+
 create table c.my_table (
   id serial primary key,
   json_data jsonb
