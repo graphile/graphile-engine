@@ -25,6 +25,9 @@ function FooPlugin(builder) {
     if (build.hasVersion("late-plugin", "^2.0.0")) {
       throw new Error("late-plugin should not be loaded at this point");
     }
+    if (build.hasVersion("missing-plugin", "^1.0.0")) {
+      throw new Error("missing-plugin should have failed");
+    }
     build.versions["foo-plugin"] = "1.0.0";
     return build;
   });
