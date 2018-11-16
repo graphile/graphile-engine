@@ -54,7 +54,7 @@ create table c.person_secret (
 comment on column c.person_secret.sekrit is E'@name secret\nA secret held by the associated Person';
 comment on constraint person_secret_person_id_fkey on c.person_secret is E'@forwardDescription The `Person` this `PersonSecret` belongs to.\n@backwardDescription This `Person`''s `PersonSecret`.';
 
-comment on table c.person_secret is 'Tracks the person''s secret';
+comment on table c.person_secret is E'@deprecated This is deprecated.\nTracks the person''s secret';
 
 -- This is to test that "one-to-one" relationships also work on unique keys
 create table c.left_arm (

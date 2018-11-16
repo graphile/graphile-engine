@@ -2835,7 +2835,10 @@ input PersonPatch {
   site: WrappedUrlInput
 }
 
-\\"\\"\\"Tracks the person's secret\\"\\"\\"
+\\"\\"\\"
+@deprecated This is deprecated.
+Tracks the person's secret
+\\"\\"\\"
 type PersonSecret implements Node {
   \\"\\"\\"
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
