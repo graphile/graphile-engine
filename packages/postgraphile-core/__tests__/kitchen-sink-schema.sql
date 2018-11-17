@@ -398,6 +398,8 @@ create function a.post_with_suffix(post a.post,suffix text) returns a.post as $$
   returning *; 
 $$ language sql volatile;
 
+comment on function a.post_with_suffix(post a.post,suffix text) is '@deprecated This is deprecated.';
+
 create function a.static_big_integer() returns setof int8 as $$
   -- See https://github.com/graphile/postgraphile/issues/678#issuecomment-363659705
   select generate_series(30894622507013190, 30894622507013200);
