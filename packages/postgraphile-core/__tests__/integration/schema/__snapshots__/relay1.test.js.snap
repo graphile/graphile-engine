@@ -2630,7 +2630,7 @@ type Person implements Node {
   config: KeyValueHash
   createdAt: Datetime
   email: Email!
-  exists(email: Email): Boolean
+  exists(email: Email): Boolean @deprecated(reason: \\"This is deprecated.\\")
   firstName: String
   firstPost: Post
 

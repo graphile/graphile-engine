@@ -2630,6 +2630,8 @@ type Person implements Node {
   config: KeyValueHash
   createdAt: Datetime
   email: Email!
+
+  \\"\\"\\"@deprecated This is deprecated.\\"\\"\\"
   exists(email: Email): Boolean
   firstName: String
   firstPost: Post

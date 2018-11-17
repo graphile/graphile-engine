@@ -78,6 +78,8 @@ create function c.person_exists(person c.person, email b.email) returns boolean 
 select exists(select 1 from c.person where person.email = person_exists.email);
 $$ language sql stable;
 
+comment on function c.person_exists(person c.person, email b.email) is '@deprecated This is deprecated.';
+
 create type a.an_enum as enum('awaiting',
   'rejected',
   'published',
