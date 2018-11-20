@@ -236,7 +236,7 @@ export default (async function PgIntrospectionPlugin(
           } catch (error) {
             // If Redshift, `show server_version_num` will not be available
             // Fall back to version 90600
-            console.warn(`⚠️ WARNING ⚠️ Failed to check server_version_num, returned error: ${error}, falling back to 90600.`); // eslint-disable-line no-console
+            console.warn(`⚠️ WARNING ⚠️ Failed to check server_version_num, falling back to 90600.`); // eslint-disable-line no-console
             serverVersionNum = 90600;
           }
           const introspectionQuery = makeIntrospectionQuery(serverVersionNum, {
