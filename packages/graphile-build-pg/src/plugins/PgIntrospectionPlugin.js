@@ -223,14 +223,21 @@ export default (async function PgIntrospectionPlugin(
     };
     const introspectionResultsByKind = cloneResults(
       await persistentMemoizeWithKey(cacheKey, () =>
-        withPgClient(pgConfig, async pgClient => {
-          const versionResult = await pgClient.query(
-            "show server_version_num;"
-          );
-          const serverVersionNum = parseInt(
-            versionResult.rows[0].server_version_num,
-            10
-          );
+        withPgClient(pgConfig, async pgClient => {          
+          try {
+            const versionResult = await pgClient.query(
+              "show server_version_num;"
+            );
+            const serverVersionNum = parseInt(
+              versionResult.rows[0].server_version_num,
+              10
+            );
+          } catch (error) {
+            // If Redshift, `show server_version_num` will not be available
+            // Fall back to version 90600
+            console.warn(`⚠️ WARNING ⚠️ Failed to check server_version_num, returned error: ${error}, falling back to 90600.`); 
+            const serverVersionNum = 90600;
+          }
           const introspectionQuery = makeIntrospectionQuery(serverVersionNum, {
             pgLegacyFunctionsOnly,
           });
