@@ -225,8 +225,9 @@ export default (async function PgIntrospectionPlugin(
       await persistentMemoizeWithKey(cacheKey, () =>
         withPgClient(pgConfig, async pgClient => {
           let serverVersionNum;
+          let versionResult;
           try {
-            const versionResult = await pgClient.query(
+            versionResult = await pgClient.query(
               "show server_version_num;"
             );
             serverVersionNum = parseInt(
@@ -235,9 +236,13 @@ export default (async function PgIntrospectionPlugin(
             );
           } catch (error) {
             // If Redshift, `show server_version_num` will not be available
-            // Fall back to version 90600
-            console.warn('⚠️ WARNING ⚠️ Failed to check server_version_num, falling back to 90600.'); // eslint-disable-line no-console
-            serverVersionNum = 90600;
+            versionResult = await pgClient.query(
+              "select version();"
+            );
+            serverVersionNum = parseInt(
+              versionResult.split(" ")[1].split(".").map(s => s.padStart(2, "0")).join("").padEnd(6, "0"),
+              10
+            );
           }
           const introspectionQuery = makeIntrospectionQuery(serverVersionNum, {
             pgLegacyFunctionsOnly,
