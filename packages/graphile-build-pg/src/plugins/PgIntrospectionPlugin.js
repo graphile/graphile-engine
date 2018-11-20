@@ -227,20 +227,21 @@ export default (async function PgIntrospectionPlugin(
           let serverVersionNum;
           let versionResult;
           try {
-            versionResult = await pgClient.query(
-              "show server_version_num;"
-            );
+            versionResult = await pgClient.query("show server_version_num;");
             serverVersionNum = parseInt(
               versionResult.rows[0].server_version_num,
               10
             );
           } catch (error) {
             // If Redshift, `show server_version_num` will not be available
-            versionResult = await pgClient.query(
-              "select version();"
-            );
+            versionResult = await pgClient.query("select version();");
             serverVersionNum = parseInt(
-              versionResult.split(" ")[1].split(".").map(s => s.padStart(2, "0")).join("").padEnd(6, "0"),
+              versionResult
+                .split(" ")[1]
+                .split(".")
+                .map(s => s.padStart(2, "0"))
+                .join("")
+                .padEnd(6, "0"),
               10
             );
           }
