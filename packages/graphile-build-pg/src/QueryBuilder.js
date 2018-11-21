@@ -2,6 +2,7 @@
 import * as sql from "pg-sql2";
 import type { SQL } from "pg-sql2";
 import isSafeInteger from "lodash/isSafeInteger";
+import chunk from "lodash/chunk";
 
 const isDev = process.env.POSTGRAPHILE_ENV === "development";
 
@@ -29,7 +30,7 @@ function callIfNecessaryArray<T>(
   }
 }
 
-type RawAlias = Symbol | string;
+export type RawAlias = Symbol | string;
 type SQLAlias = SQL;
 type SQLGen = Gen<SQL> | SQL;
 type NumberGen = Gen<number> | number;
@@ -37,6 +38,19 @@ type CursorValue = {};
 type CursorComparator = (val: CursorValue, isAfter: boolean) => void;
 
 class QueryBuilder {
+  // Helper function
+  static jsonbBuildObject(fields: Array<[SQL, RawAlias]>) {
+    const fieldsChunks = chunk(fields, 50);
+    const chunkToJson = fieldsChunk =>
+      sql.fragment`jsonb_build_object(${sql.join(
+        fieldsChunk.map(
+          ([expr, alias]) => sql.fragment`${sql.literal(alias)}::text, ${expr}`
+        ),
+        ", "
+      )})`;
+    return sql.join(fieldsChunks.map(chunkToJson), " || ");
+  }
+
   locks: {
     [string]: true | string,
   };
@@ -52,7 +66,7 @@ class QueryBuilder {
       lower: Array<SQLGen>,
       upper: Array<SQLGen>,
     },
-    orderBy: Array<[SQLGen, boolean]>,
+    orderBy: Array<[SQLGen, boolean, boolean]>,
     orderIsUnique: boolean,
     limit: ?NumberGen,
     offset: ?NumberGen,
@@ -74,7 +88,7 @@ class QueryBuilder {
       lower: Array<SQL>,
       upper: Array<SQL>,
     },
-    orderBy: Array<[SQL, boolean]>,
+    orderBy: Array<[SQL, boolean, boolean]>,
     orderIsUnique: boolean,
     limit: ?number,
     offset: ?number,
@@ -222,9 +236,9 @@ class QueryBuilder {
   setOrderIsUnique() {
     this.data.orderIsUnique = true;
   }
-  orderBy(exprGen: SQLGen, ascending: boolean = true) {
+  orderBy(exprGen: SQLGen, ascending: boolean = true, nullsFirst: boolean) {
     this.checkLock("orderBy");
-    this.data.orderBy.push([exprGen, ascending]);
+    this.data.orderBy.push([exprGen, ascending, nullsFirst]);
   }
   limit(limitGen: NumberGen) {
     this.checkLock("limit");
@@ -370,13 +384,7 @@ class QueryBuilder {
   buildSelectJson({ addNullCase }: { addNullCase?: boolean }) {
     this.lockEverything();
     let buildObject = this.compiledData.select.length
-      ? sql.fragment`json_build_object(${sql.join(
-          this.compiledData.select.map(
-            ([sqlFragment, alias]) =>
-              sql.fragment`${sql.literal(alias)}::text, ${sqlFragment}`
-          ),
-          ", "
-        )})`
+      ? QueryBuilder.jsonbBuildObject(this.compiledData.select)
       : sql.fragment`to_json(${this.getTableAlias()})`;
     if (addNullCase) {
       buildObject = sql.fragment`(case when (${this.getTableAlias()} is null) then null else ${buildObject} end)`;
@@ -465,11 +473,17 @@ class QueryBuilder {
         this.compiledData.orderBy.length
           ? sql.fragment`order by ${sql.join(
               this.compiledData.orderBy.map(
-                ([expr, ascending]) =>
+                ([expr, ascending, nullsFirst]) =>
                   sql.fragment`${expr} ${
                     Number(ascending) ^ Number(flip)
                       ? sql.fragment`ASC`
                       : sql.fragment`DESC`
+                  }${
+                    nullsFirst === true
+                      ? sql.fragment` NULLS FIRST`
+                      : nullsFirst === false
+                        ? sql.fragment` NULLS LAST`
+                        : null
                   }`
               ),
               ","
@@ -546,9 +560,10 @@ class QueryBuilder {
       }, []);
     } else if (type === "orderBy") {
       const context = getContext();
-      this.compiledData[type] = this.data[type].map(([a, b]) => [
+      this.compiledData[type] = this.data[type].map(([a, b, c]) => [
         callIfNecessary(a, context),
         b,
+        c,
       ]);
     } else if (type === "from") {
       if (this.data.from) {
