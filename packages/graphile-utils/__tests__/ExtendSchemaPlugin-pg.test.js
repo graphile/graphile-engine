@@ -183,7 +183,7 @@ it("allows adding a simple mutation field to PG schema", async () => {
             }
 
             type RegisterUserPayload {
-              user: User @recurseDataGenerators
+              user: User @pgField
             }
 
             extend type Mutation {
@@ -220,7 +220,7 @@ it("allows adding a simple mutation field to PG schema", async () => {
 
                   await pgClient.query("commit");
                   return {
-                    user: row,
+                    data: row,
                   };
                 } catch (e) {
                   await pgClient.query("rollback");
