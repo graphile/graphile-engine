@@ -249,7 +249,9 @@ it("can supports options modify result of resolver", async () => {
       options = _options;
       return {
         Query: {
-          echo: wrapper,
+          echo: {
+            resolve: wrapper,
+          },
         },
       };
     }),

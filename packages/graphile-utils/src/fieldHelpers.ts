@@ -52,3 +52,39 @@ export function makeFieldHelpers<TSource>(
   };
   return graphileHelpers;
 }
+
+export function requireColumn<Type>(
+  build: Build,
+  context: Context<Type>,
+  method: "addArgDataGenerator" | "addDataGenerator",
+  col: string,
+  alias: string
+): void {
+  const { pgSql: sql } = build;
+  context[method](() => ({
+    pgQuery: (queryBuilder: QueryBuilder) => {
+      queryBuilder.select(
+        sql.query`${queryBuilder.getTableAlias()}.${sql.identifier(col)}`,
+        alias
+      );
+    },
+  }));
+}
+
+export function requireChildColumn<Type>(
+  build: Build,
+  context: Context<Type>,
+  col: string,
+  alias: string
+): void {
+  return requireColumn(build, context, "addArgDataGenerator", col, alias);
+}
+
+export function requireSiblingColumn<Type>(
+  build: Build,
+  context: Context<Type>,
+  col: string,
+  alias: string
+): void {
+  return requireColumn(build, context, "addDataGenerator", col, alias);
+}

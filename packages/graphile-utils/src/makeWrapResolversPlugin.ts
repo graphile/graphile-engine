@@ -1,6 +1,10 @@
 import { SchemaBuilder, Options, Plugin } from "graphile-build";
 import { GraphQLFieldResolver, GraphQLResolveInfo } from "graphql";
-import { makeFieldHelpers } from "./fieldHelpers";
+import {
+  makeFieldHelpers,
+  requireChildColumn,
+  requireSiblingColumn,
+} from "./fieldHelpers";
 
 type ResolverWrapperFn<
   TSource = any,
@@ -13,10 +17,20 @@ type ResolverWrapperFn<
   context: TContext,
   resolveInfo: GraphQLResolveInfo
 ) => any;
+interface ResolverWrapperRequirements {
+  childColumns?: Array<{ column: string; alias: string }>;
+  siblingColumns?: Array<{ column: string; alias: string }>;
+}
+
+interface ResolverWrapperRule {
+  requires?: ResolverWrapperRequirements;
+  resolve?: ResolverWrapperFn;
+  // subscribe?: ResolverWrapperFn;
+}
 
 interface ResolverWrapperRules {
   [typeName: string]: {
-    [fieldName: string]: ResolverWrapperFn;
+    [fieldName: string]: ResolverWrapperRule | ResolverWrapperFn;
   };
 }
 
@@ -39,7 +53,37 @@ export default function makeWrapResolversPlugin(
       if (!typeRules) {
         return field;
       }
-      const resolveWrapper = typeRules[fieldName];
+      const resolveWrapperOrSpec = typeRules[fieldName];
+      if (!resolveWrapperOrSpec) {
+        return field;
+      }
+      const resolveWrapper: ResolverWrapperFn | undefined =
+        typeof resolveWrapperOrSpec === "function"
+          ? resolveWrapperOrSpec
+          : resolveWrapperOrSpec.resolve;
+      const resolveWrapperRequirements:
+        | ResolverWrapperRequirements
+        | undefined =
+        typeof resolveWrapperOrSpec === "function"
+          ? undefined
+          : resolveWrapperOrSpec.requires;
+      if (resolveWrapperRequirements) {
+        // Perform requirements
+        if (resolveWrapperRequirements.childColumns) {
+          resolveWrapperRequirements.childColumns.forEach(
+            ({ column, alias }) => {
+              requireChildColumn(build, context, column, alias);
+            }
+          );
+        }
+        if (resolveWrapperRequirements.siblingColumns) {
+          resolveWrapperRequirements.siblingColumns.forEach(
+            ({ column, alias }) => {
+              requireSiblingColumn(build, context, column, alias);
+            }
+          );
+        }
+      }
       if (!resolveWrapper) {
         return field;
       }
