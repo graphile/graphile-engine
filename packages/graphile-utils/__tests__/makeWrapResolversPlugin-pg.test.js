@@ -20,11 +20,10 @@ afterAll(() => {
 
 const makeSchemaWithPlugins = plugins =>
   createPostGraphileSchema(pgPool, ["a"], {
-    disableDefaultMutations: true,
     appendPlugins: plugins,
   });
 
-it("requests the required columns", async () => {
+it("requests the required sibling columns", async () => {
   const schema = await makeSchemaWithPlugins([
     makeChangeNullabilityPlugin({
       User: {
@@ -35,10 +34,10 @@ it("requests the required columns", async () => {
       User: {
         email: {
           requires: {
-            siblingColumns: [{ column: "id", alias: "__user_id" }],
+            siblingColumns: [{ column: "id", alias: "$user_id" }],
           },
           resolve(resolver, user, args, context, _resolveInfo) {
-            if (context.jwtClaims.user_id !== user.__user_id) {
+            if (context.jwtClaims.user_id !== user.$user_id) {
               return null; // Don't allow users to see other users' emails
             }
             return resolver();
@@ -102,6 +101,70 @@ Object {
   },
 }
 `);
+  } finally {
+    pgClient.query("rollback");
+    pgClient.release();
+  }
+});
+
+it("requests the required child columns", async () => {
+  let newUserId;
+  const schema = await makeSchemaWithPlugins([
+    makeWrapResolversPlugin({
+      Mutation: {
+        createUser: {
+          requires: {
+            childColumns: [{ column: "id", alias: "$new_id" }],
+          },
+          async resolve(resolver, mutation, args, _context, _resolveInfo) {
+            const {
+              input: {
+                user: { name },
+              },
+            } = args;
+            if (name.length < 3) throw new Error("Name is too short");
+            const result = await resolver();
+            const { data: user } = result;
+            newUserId = user.$new_id;
+            return result;
+          },
+        },
+      },
+    }),
+  ]);
+  const pgClient = await pgPool.connect();
+  await pgClient.query("begin");
+  try {
+    const result = await graphql(
+      schema,
+      `
+        mutation {
+          createUser(
+            input: { user: { name: "Bobby Tables", email: "drop@table.plz" } }
+          ) {
+            user {
+              nodeId
+              id
+              name
+              email
+            }
+          }
+        }
+      `,
+      null,
+      {
+        pgClient,
+        jwtClaims: {
+          user_id: 2,
+        },
+      }
+    );
+    expect(result.errors).toBeFalsy();
+    expect(result.data.createUser).toBeTruthy();
+    expect(newUserId).not.toBeUndefined();
+    const { user } = result.data.createUser;
+    expect(user.id).toEqual(newUserId);
+    expect(user.name).toEqual("Bobby Tables");
   } finally {
     pgClient.query("rollback");
     pgClient.release();
