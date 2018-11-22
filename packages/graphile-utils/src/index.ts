@@ -3,6 +3,7 @@ import makeAddInflectorsPlugin from "./makeAddInflectorsPlugin";
 import makeExtendSchemaPlugin from "./makeExtendSchemaPlugin";
 import makePluginByCombiningPlugins from "./makePluginByCombiningPlugins";
 import makeWrapResolversPlugin from "./makeWrapResolversPlugin";
+import makeChangeNullabilityPlugin from "./makeChangeNullabilityPlugin";
 
 export {
   embed,
@@ -11,4 +12,5 @@ export {
   makeExtendSchemaPlugin,
   makePluginByCombiningPlugins,
   makeWrapResolversPlugin,
+  makeChangeNullabilityPlugin,
 };
