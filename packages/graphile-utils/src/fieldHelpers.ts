@@ -8,6 +8,7 @@ export type SelectGraphQLResultFromTable = (
 ) => Promise<any>;
 
 export type GraphileHelpers<TSource> = {
+  build: Build;
   fieldContext: Context<TSource>;
   selectGraphQLResultFromTable: SelectGraphQLResultFromTable;
 };
@@ -45,6 +46,7 @@ export function makeFieldHelpers<TSource>(
   };
 
   const graphileHelpers: GraphileHelpers<TSource> = {
+    build,
     fieldContext,
     selectGraphQLResultFromTable,
   };
