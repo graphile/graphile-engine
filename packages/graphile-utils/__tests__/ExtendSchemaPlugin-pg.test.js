@@ -100,7 +100,7 @@ it("allows adding a custom single field to PG schema", async () => {
     expect(data.randomUser.name).toBeTruthy();
     expect(data.randomUser.email).toBeTruthy();
   } finally {
-    pgClient.release();
+    await pgClient.release();
   }
 });
 
@@ -285,8 +285,8 @@ it("allows adding a simple mutation field to PG schema", async () => {
     expect(data.user1.user.id).not.toEqual(data.user2.user.id);
     expect(clean(data)).toMatchSnapshot();
   } finally {
-    pgClient.query("rollback");
-    pgClient.release();
+    await pgClient.query("rollback");
+    await pgClient.release();
   }
 });
 
@@ -336,6 +336,6 @@ it("allows adding a field to an existing table, and requesting necessary data al
       `User 1 fetched (name: Alice) [{"number_int":1,"string_text":"hi"},{"number_int":2,"string_text":"bye"}]`
     );
   } finally {
-    pgClient.release();
+    await pgClient.release();
   }
 });

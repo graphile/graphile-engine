@@ -102,8 +102,8 @@ Object {
 }
 `);
   } finally {
-    pgClient.query("rollback");
-    pgClient.release();
+    await pgClient.query("rollback");
+    await pgClient.release();
   }
 });
 
@@ -166,7 +166,7 @@ it("requests the required child columns", async () => {
     expect(user.id).toEqual(newUserId);
     expect(user.name).toEqual("Bobby Tables");
   } finally {
-    pgClient.query("rollback");
-    pgClient.release();
+    await pgClient.query("rollback");
+    await pgClient.release();
   }
 });
