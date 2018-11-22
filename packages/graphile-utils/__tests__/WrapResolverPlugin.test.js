@@ -13,26 +13,31 @@ import { graphql } from "graphql";
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const makeSchemaWithSpyAndPlugins = (spy, plugins) =>
-  buildSchema([
-    StandardTypesPlugin,
-    QueryPlugin,
-    MutationPlugin,
-    SubscriptionPlugin,
-    MutationPayloadQueryPlugin,
-    makeExtendSchemaPlugin(_build => ({
-      typeDefs: gql`
-        extend type Query {
-          echo(message: String!): String
-        }
-      `,
-      resolvers: {
-        Query: {
-          echo: spy,
+  buildSchema(
+    [
+      StandardTypesPlugin,
+      QueryPlugin,
+      MutationPlugin,
+      SubscriptionPlugin,
+      MutationPayloadQueryPlugin,
+      makeExtendSchemaPlugin(_build => ({
+        typeDefs: gql`
+          extend type Query {
+            echo(message: String!): String
+          }
+        `,
+        resolvers: {
+          Query: {
+            echo: spy,
+          },
         },
-      },
-    })),
-    ...plugins,
-  ]);
+      })),
+      ...plugins,
+    ],
+    {
+      optionKey: "optionValue",
+    }
+  );
 
 const makeEchoSpy = fn =>
   jest.fn(
@@ -221,6 +226,47 @@ it("can modify result of resolver", async () => {
     rootValue,
     { test: true }
   );
+  expect(result.errors).toBeFalsy();
+  expect(result.data.echo).toBe("hello");
+  expect(spy).toHaveBeenCalledTimes(1);
+  const spyArgs = spy.mock.calls[0];
+  const [parent, args, context, resolveInfo] = spyArgs;
+  expect(parent).toBe(rootValue);
+  expect(args).toEqual({ message: "Hello" });
+  expect(context).toEqual({ test: true });
+  expect(resolveInfo).toBeTruthy();
+});
+
+it("can supports options modify result of resolver", async () => {
+  const wrapper = async resolve => {
+    const result = await resolve();
+    return result.toLowerCase();
+  };
+  const spy = makeEchoSpy();
+  let options;
+  const schema = await makeSchemaWithSpyAndPlugins(spy, [
+    makeWrapResolversPlugin(_options => {
+      options = _options;
+      return {
+        Query: {
+          echo: wrapper,
+        },
+      };
+    }),
+  ]);
+  const rootValue = { root: true };
+  const result = await graphql(
+    schema,
+    `
+      {
+        echo(message: "Hello")
+      }
+    `,
+    rootValue,
+    { test: true }
+  );
+  expect(options).toBeTruthy();
+  expect(options.optionKey).toEqual("optionValue");
   expect(result.errors).toBeFalsy();
   expect(result.data.echo).toBe("hello");
   expect(spy).toHaveBeenCalledTimes(1);
