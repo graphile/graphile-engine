@@ -196,3 +196,38 @@ it("can asynchronously abort resolver after", async () => {
   expect(called).toBe(true);
   expect(result.errors[0]).toMatchInlineSnapshot(`[GraphQLError: Abort]`);
 });
+
+it("can modify result of resolver", async () => {
+  const wrapper = async resolve => {
+    const result = await resolve();
+    return result.toLowerCase();
+  };
+  const spy = makeEchoSpy();
+  const schema = await makeSchemaWithSpyAndPlugins(spy, [
+    makeWrapResolversPlugin({
+      Query: {
+        echo: wrapper,
+      },
+    }),
+  ]);
+  const rootValue = { root: true };
+  const result = await graphql(
+    schema,
+    `
+      {
+        echo(message: "Hello")
+      }
+    `,
+    rootValue,
+    { test: true }
+  );
+  expect(result.errors).toBeFalsy();
+  expect(result.data.echo).toBe("hello");
+  expect(spy).toHaveBeenCalledTimes(1);
+  const spyArgs = spy.mock.calls[0];
+  const [parent, args, context, resolveInfo] = spyArgs;
+  expect(parent).toBe(rootValue);
+  expect(args).toEqual({ message: "Hello" });
+  expect(context).toEqual({ test: true });
+  expect(resolveInfo).toBeTruthy();
+});
