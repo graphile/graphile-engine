@@ -7,11 +7,11 @@ export type SelectGraphQLResultFromTable = (
   builderCallback: (alias: SQL, sqlBuilder: QueryBuilder) => void
 ) => Promise<any>;
 
-export type GraphileHelpers<TSource> = {
+export interface GraphileHelpers<TSource> {
   build: Build;
   fieldContext: Context<TSource>;
   selectGraphQLResultFromTable: SelectGraphQLResultFromTable;
-};
+}
 
 export function makeFieldHelpers<TSource>(
   build: Build,
