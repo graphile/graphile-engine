@@ -10,7 +10,8 @@ import assert from "assert";
 
 const identity = _ => _ !== null && _ !== undefined;
 
-export default (queryBuilderOptions: QueryBuilderOptions) => (
+// $FlowFixMe
+export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   from: SQL,
   fromAlias: ?SQL,
   resolveData: DataForType,
@@ -41,6 +42,7 @@ export default (queryBuilderOptions: QueryBuilderOptions) => (
   const rawCursorPrefix =
     reallyRawCursorPrefix && reallyRawCursorPrefix.filter(identity);
 
+  // $FlowFixMe
   const queryBuilder = new QueryBuilder(queryBuilderOptions);
   queryBuilder.from(from, fromAlias ? fromAlias : undefined);
 

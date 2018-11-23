@@ -245,6 +245,7 @@ export default (async function PgIntrospectionPlugin(
           ]);
 
           const result = {
+            __pgVersion: serverVersionNum,
             namespace: [],
             class: [],
             attribute: [],
@@ -291,10 +292,19 @@ export default (async function PgIntrospectionPlugin(
               extensionConfigurationClassIds.indexOf(klass.id) >= 0;
           });
 
-          for (const k in result) {
+          [
+            "namespace",
+            "class",
+            "attribute",
+            "type",
+            "constraint",
+            "procedure",
+            "extension",
+            "index",
+          ].forEach(k => {
             result[k].forEach(Object.freeze);
-          }
-          result.__pgVersion = serverVersionNum;
+          });
+
           return Object.freeze(result);
         })
       )
@@ -686,6 +696,7 @@ export default (async function PgIntrospectionPlugin(
       // TODO:v5: remove this workaround
       // This is a bit of a hack, but until we have plugin priorities it's the
       // easiest way to conditionally support PG9.4.
+      // $FlowFixMe
       build.pgQueryFromResolveData = queryFromResolveDataFactory({
         supportsJSONB: false,
       });

@@ -89,7 +89,7 @@ class QueryBuilder {
     cursorComparator: ?CursorComparator,
   };
 
-  constructor(options = {}) {
+  constructor(options: QueryBuilderOptions = {}) {
     this.supportsJSONB =
       options.supportsJSONB == null ? true : !!options.supportsJSONB;
 
