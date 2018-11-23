@@ -192,6 +192,7 @@ for (let i = 0; i < queryFileNames.length; i++) {
     if (testsToSkip.indexOf(filename) >= 0) {
       // eslint-disable-next-line no-console
       console.log(`SKIPPED '${filename}'`);
+      // Technically this will never be ran because we handle it in scripts/test
     } else {
       expect(await queryResults[i]).toMatchSnapshot();
     }
