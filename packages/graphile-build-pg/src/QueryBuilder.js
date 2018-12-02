@@ -175,10 +175,10 @@ class QueryBuilder {
           ),
           ", "
         )})`;
-      return sql.fragment`${sql.join(
+      return sql.fragment`(${sql.join(
         fieldsChunks.map(chunkToJson),
         " || "
-      )}::json`;
+      )})::json`;
     } else {
       // PG9.4 will have issues with more than 100 parameters (50 keys)
       return sql.fragment`json_build_object(${sql.join(
