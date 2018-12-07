@@ -859,6 +859,9 @@ create table inheritence.user_file (
   user_id INTEGER NOT NULL REFERENCES inheritence.user(id)
 ) inherits (inheritence.file);
 
+
+
+
 create schema smart_comment_relations;
 
 create table smart_comment_relations.streets (
@@ -892,8 +895,8 @@ create unique index on smart_comment_relations.buildings (property_id) where is_
 
 create view smart_comment_relations.houses as (
   select 
-    json_build_array(streets.id, properties.id)::text as key,
-    properties.name_or_number,
+    buildings.name as building_name,
+    properties.name_or_number as property_name_or_number,
     streets.name as street_name,
     streets.id as street_id,
     buildings.id as building_id,
@@ -905,11 +908,9 @@ create view smart_comment_relations.houses as (
   inner join smart_comment_relations.streets
   on (properties.street_id = streets.id)
 );
-comment on view smart_comment_relations.houses is E'@uniqueKey key
+comment on view smart_comment_relations.houses is E'@primaryKey street_id,property_id
 @foreignKey (street_id) references smart_comment_relations.streets
 @foreignKey (building_id) references smart_comment_relations.buildings (id)
 @foreignKey (property_id) references properties
 @foreignKey (street_id, property_id) references street_property (str_id, prop_id)
 ';
-
---comment on column smart_comment_relations.houses.key is E'@omit';

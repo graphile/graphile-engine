@@ -199,13 +199,99 @@ function readFile(filename, encoding) {
   });
 }
 
-function smartCommentRelations(introspectionResults) {
+const removeQuotes = str => {
+  const trimmed = str.trim();
+  if (trimmed[0] === '"') {
+    if (trimmed[trimmed.length - 1] !== '"') {
+      throw new Error(
+        `We failed to parse a quoted identifier '${str}'. Please avoid putting quotes or commas in smart comment identifiers (or file a PR to fix the parser).`
+      );
+    }
+    return trimmed.substr(1, trimmed.length - 2);
+  } else {
+    // PostgreSQL lower-cases unquoted columns, so we should too.
+    return trimmed.toLowerCase();
+  }
+};
+
+const parseSqlColumn = (str, array = false) => {
+  if (!str) {
+    throw new Error(`Cannot parse '${str}'`);
+  }
+  const parts = array ? str.split(",") : [str];
+  const parsedParts = parts.map(removeQuotes);
+  return array ? parsedParts : parsedParts[0];
+};
+
+function smartCommentConstraints(introspectionResults) {
+  const attrnums = (tbl, cols, debugStr) => {
+    if (!cols) {
+      const pk = introspectionResults.constraint.find(
+        c => c.classId == tbl.id && c.type === "p"
+      );
+      if (pk) {
+        return pk.keyAttributeNums;
+      } else {
+        throw new Error(
+          `No columns specified for '${tbl.namespaceName}.${tbl.name}' (oid: ${
+            tbl.id
+          }) and no PK found (${debugStr}).`
+        );
+      }
+    }
+    const attributes = introspectionResults.attribute
+      .filter(a => a.classId === tbl.id)
+      .sort((a, b) => a.num - b.num);
+    return cols.map(colName => {
+      const attr = attributes.find(a => a.name === colName);
+      if (!attr) {
+        throw new Error(
+          `Could not find attribute '${colName}' in '${tbl.namespaceName}.${
+            tbl.name
+          }'`
+        );
+      }
+      return attr.num;
+    });
+  };
+
   introspectionResults.class.forEach(klass => {
     const namespace = introspectionResults.namespace.find(
       n => n.id === klass.namespaceId
     );
     if (!namespace) {
       return;
+    }
+    if (klass.tags.primaryKey) {
+      if (typeof klass.tags.primaryKey !== "string") {
+        throw new Error(
+          `@primaryKey configuration of '${klass.namespaceName}.${
+            klass.name
+          }' is invalid; please specify just once "@primaryKey col1,col2"`
+        );
+      }
+      const columns = parseSqlColumn(klass.tags.primaryKey, true);
+      const keyAttributeNums = attrnums(
+        klass,
+        columns,
+        `@primaryKey ${klass.tags.primaryKey}`
+      );
+      // Now we need to fake a constraint for this:
+      const fakeConstraint = {
+        kind: "constraint",
+        isFake: true,
+        id: Math.random(),
+        name: `FAKE_${klass.namespaceName}_${klass.name}_primaryKey`,
+        type: "p", // primary key
+        classId: klass.id,
+        foreignClassId: null,
+        comment: null,
+        description: null,
+        keyAttributeNums,
+        foreignKeyAttributeNums: null,
+        tags: {},
+      };
+      introspectionResults.constraint.push(fakeConstraint);
     }
     if (klass.tags.foreignKey) {
       const foreignKeys =
@@ -237,20 +323,6 @@ function smartCommentRelations(introspectionResults) {
             }'; expected something like "(col1,col2) references schema.table (c1, c2)", you passed '${fkSpec}'`
           );
         }
-        const removeQuotes = str => {
-          const trimmed = str.trim();
-          if (trimmed[0] === '"') {
-            if (trimmed[trimmed.length - 1] !== '"') {
-              throw new Error(
-                `We failed to parse a quoted identifier '${str}'. Please avoid putting quotes or commas in smart comment identifiers (or file a PR to fix the parser).`
-              );
-            }
-            return trimmed.substr(1, trimmed.length - 2);
-          } else {
-            // PostgreSQL lower-cases unquoted columns, so we should too.
-            return trimmed.toLowerCase();
-          }
-        };
         const [
           ,
           rawColumns,
@@ -258,23 +330,15 @@ function smartCommentRelations(introspectionResults) {
           rawTableOnly,
           rawForeignColumns,
         ] = matches;
-        const parse = (str, array = false) => {
-          if (!str) {
-            throw new Error(`Cannot parse '${str}'`);
-          }
-          const parts = array ? str.split(",") : [str];
-          const parsedParts = parts.map(removeQuotes);
-          return array ? parsedParts : parsedParts[0];
-        };
         const rawSchema = rawTableOnly
           ? rawSchemaOrTable
           : `"${klass.namespaceName}"`;
         const rawTable = rawTableOnly || rawSchemaOrTable;
-        const columns = parse(rawColumns, true);
-        const foreignSchema = parse(rawSchema);
-        const foreignTable = parse(rawTable);
+        const columns = parseSqlColumn(rawColumns, true);
+        const foreignSchema = parseSqlColumn(rawSchema);
+        const foreignTable = parseSqlColumn(rawTable);
         const foreignColumns = rawForeignColumns
-          ? parse(rawForeignColumns, true)
+          ? parseSqlColumn(rawForeignColumns, true)
           : null;
 
         const foreignKlass = introspectionResults.class.find(
@@ -287,46 +351,23 @@ function smartCommentRelations(introspectionResults) {
           return;
         }
 
-        const attrnums = (tbl, cols) => {
-          if (!cols) {
-            const pk = introspectionResults.constraint.find(
-              c => c.classId == tbl.id && c.type === "p"
-            );
-            if (pk) {
-              return pk.keyAttributeNums;
-            } else {
-              throw new Error(
-                `No columns specified for '${tbl.namespaceName}.${
-                  tbl.name
-                }' (oid: ${tbl.id}) and no PK found (@foreignKey ${fkSpec}).`
-              );
-            }
-          }
-          const attributes = introspectionResults.attribute
-            .filter(a => a.classId === tbl.id)
-            .sort((a, b) => a.num - b.num);
-          return cols.map(colName => {
-            const attr = attributes.find(a => a.name === colName);
-            if (!attr) {
-              throw new Error(
-                `Could not find attribute '${colName}' in '${
-                  tbl.namespaceName
-                }.${tbl.name}'`
-              );
-            }
-            return attr.num;
-          });
-        };
-
-        const keyAttributeNums = attrnums(klass, columns);
-        const foreignKeyAttributeNums = attrnums(foreignKlass, foreignColumns);
+        const keyAttributeNums = attrnums(
+          klass,
+          columns,
+          `@foreignKey ${fkSpec}`
+        );
+        const foreignKeyAttributeNums = attrnums(
+          foreignKlass,
+          foreignColumns,
+          `@foreignKey ${fkSpec}`
+        );
 
         // Now we need to fake a constraint for this:
         const fakeConstraint = {
           kind: "constraint",
           isFake: true,
           id: Math.random(),
-          name: `FAKE_${klass.namespaceName}_${klass.name}_${index}`,
+          name: `FAKE_${klass.namespaceName}_${klass.name}_foreignKey_${index}`,
           type: "f", // foreign key
           classId: klass.id,
           foreignClassId: foreignKlass.id,
@@ -357,11 +398,9 @@ export default (async function PgIntrospectionPlugin(
   }
 ) {
   const augment = introspectionResults => {
-    [
-      pgAugmentIntrospectionResults,
-      smartCommentRelations,
-      /*smartCommentPrimaryKey,*/
-    ].forEach(fn => (fn ? fn(introspectionResults) : null));
+    [pgAugmentIntrospectionResults, smartCommentConstraints].forEach(
+      fn => (fn ? fn(introspectionResults) : null)
+    );
   };
   async function introspect() {
     // Perform introspection

@@ -1,7 +1,8 @@
 {
   allHouses {
     nodes {
-      nameOrNumber
+      buildingName
+      propertyNameOrNumber
       streetName
       streetId
       buildingId
@@ -27,6 +28,14 @@
         }
       }
     }
+  }
+  brothersGotADateToKeep: houseByStreetIdAndPropertyId(
+    streetId: 2
+    propertyId: 3
+  ) {
+    cantHangAround: buildingName
+    in: propertyNameOrNumber
+    of: streetName
   }
 }
 
