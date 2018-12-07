@@ -7371,6 +7371,32 @@ Object {
           },
         },
         Object {
+          "buildingByBuildingId": null,
+          "buildingId": null,
+          "buildingName": null,
+          "propertyByPropertyId": Object {
+            "id": 2,
+            "nameOrNumber": "10",
+            "nodeId": "WyJwcm9wZXJ0aWVzIiwyXQ==",
+            "streetByStreetId": Object {
+              "id": 1,
+              "name": "My Street",
+              "nodeId": "WyJzdHJlZXRzIiwxXQ==",
+            },
+            "streetId": 1,
+          },
+          "propertyId": 2,
+          "propertyNameOrNumber": "10",
+          "streetByStreetId": Object {
+            "id": 1,
+            "name": "My Street",
+            "nodeId": "WyJzdHJlZXRzIiwxXQ==",
+          },
+          "streetId": 1,
+          "streetName": "My Street",
+          "streetPropertyByStreetIdAndPropertyId": null,
+        },
+        Object {
           "buildingByBuildingId": Object {
             "floors": 3,
             "id": 1,

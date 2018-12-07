@@ -903,10 +903,10 @@ create view smart_comment_relations.houses as (
     properties.id as property_id,
     buildings.floors
   from smart_comment_relations.properties
-  inner join smart_comment_relations.buildings
-  on (buildings.property_id = properties.id and buildings.is_primary is true)
   inner join smart_comment_relations.streets
   on (properties.street_id = streets.id)
+  left join smart_comment_relations.buildings
+  on (buildings.property_id = properties.id and buildings.is_primary is true)
 );
 comment on view smart_comment_relations.houses is E'@primaryKey street_id,property_id
 @foreignKey (street_id) references smart_comment_relations.streets
@@ -914,3 +914,6 @@ comment on view smart_comment_relations.houses is E'@primaryKey street_id,proper
 @foreignKey (property_id) references properties
 @foreignKey (street_id, property_id) references street_property (str_id, prop_id)
 ';
+
+comment on column smart_comment_relations.houses.property_name_or_number is E'@notNull';
+comment on column smart_comment_relations.houses.street_name is E'@notNull';
