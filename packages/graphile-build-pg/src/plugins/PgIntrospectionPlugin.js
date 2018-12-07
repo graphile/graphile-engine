@@ -1,3 +1,4 @@
+// @flow
 import type { Plugin } from "graphile-build";
 import withPgClient from "../withPgClient";
 import { parseTags } from "../utils";
@@ -269,7 +270,8 @@ function smartCommentConstraints(introspectionResults) {
           }' is invalid; please specify just once "@primaryKey col1,col2"`
         );
       }
-      const columns = parseSqlColumn(klass.tags.primaryKey, true);
+      // $FlowFixMe
+      const columns: string[] = parseSqlColumn(klass.tags.primaryKey, true);
       const attributes = attributesByNames(
         klass,
         columns,
@@ -337,10 +339,14 @@ function smartCommentConstraints(introspectionResults) {
           ? rawSchemaOrTable
           : `"${klass.namespaceName}"`;
         const rawTable = rawTableOnly || rawSchemaOrTable;
-        const columns = parseSqlColumn(rawColumns, true);
-        const foreignSchema = parseSqlColumn(rawSchema);
-        const foreignTable = parseSqlColumn(rawTable);
-        const foreignColumns = rawForeignColumns
+        // $FlowFixMe
+        const columns: string[] = parseSqlColumn(rawColumns, true);
+        // $FlowFixMe
+        const foreignSchema: string = parseSqlColumn(rawSchema);
+        // $FlowFixMe
+        const foreignTable: string = parseSqlColumn(rawTable);
+        // $FlowFixMe
+        const foreignColumns: string[] = rawForeignColumns
           ? parseSqlColumn(rawForeignColumns, true)
           : null;
 
