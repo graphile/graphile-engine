@@ -1,4 +1,3 @@
-// @flow
 import type { Plugin } from "graphile-build";
 import withPgClient from "../withPgClient";
 import { parseTags } from "../utils";
