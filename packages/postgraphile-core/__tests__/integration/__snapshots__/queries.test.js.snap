@@ -7328,6 +7328,7 @@ Object {
           },
           "buildingId": 4,
           "buildingName": "Home sweet home",
+          "nodeId": "WyJob3VzZXMiLDEsMV0=",
           "propertyByPropertyId": Object {
             "id": 1,
             "nameOrNumber": "My House",
@@ -7374,6 +7375,7 @@ Object {
           "buildingByBuildingId": null,
           "buildingId": null,
           "buildingName": null,
+          "nodeId": "WyJob3VzZXMiLDEsMl0=",
           "propertyByPropertyId": Object {
             "id": 2,
             "nameOrNumber": "10",
@@ -7417,6 +7419,7 @@ Object {
           },
           "buildingId": 1,
           "buildingName": "Our House",
+          "nodeId": "WyJob3VzZXMiLDIsM10=",
           "propertyByPropertyId": Object {
             "id": 3,
             "nameOrNumber": "The middle",
@@ -7480,6 +7483,7 @@ Object {
           },
           "buildingId": 5,
           "buildingName": "The Tower",
+          "nodeId": "WyJob3VzZXMiLDMsNF0=",
           "propertyByPropertyId": Object {
             "id": 4,
             "nameOrNumber": "Your house",
@@ -7528,6 +7532,13 @@ Object {
       "cantHangAround": "Our House",
       "in": "The middle",
       "of": "Our Street",
+      "z": "WyJob3VzZXMiLDIsM10=",
+    },
+    "nothingEverSlowsHerDown": Object {
+      "andAMessIsNotAllowed": "Our House",
+      "in": "The middle",
+      "of": "Our Street",
+      "z": "WyJob3VzZXMiLDIsM10=",
     },
   },
 }
