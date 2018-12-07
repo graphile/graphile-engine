@@ -224,13 +224,16 @@ const parseSqlColumn = (str, array = false) => {
 };
 
 function smartCommentConstraints(introspectionResults) {
-  const attrnums = (tbl, cols, debugStr) => {
+  const attributesByNames = (tbl, cols, debugStr) => {
+    const attributes = introspectionResults.attribute
+      .filter(a => a.classId === tbl.id)
+      .sort((a, b) => a.num - b.num);
     if (!cols) {
       const pk = introspectionResults.constraint.find(
         c => c.classId == tbl.id && c.type === "p"
       );
       if (pk) {
-        return pk.keyAttributeNums;
+        return pk.keyAttributeNums.map(n => attributes.find(a => a.num === n));
       } else {
         throw new Error(
           `No columns specified for '${tbl.namespaceName}.${tbl.name}' (oid: ${
@@ -239,9 +242,6 @@ function smartCommentConstraints(introspectionResults) {
         );
       }
     }
-    const attributes = introspectionResults.attribute
-      .filter(a => a.classId === tbl.id)
-      .sort((a, b) => a.num - b.num);
     return cols.map(colName => {
       const attr = attributes.find(a => a.name === colName);
       if (!attr) {
@@ -251,7 +251,7 @@ function smartCommentConstraints(introspectionResults) {
           }'`
         );
       }
-      return attr.num;
+      return attr;
     });
   };
 
@@ -271,11 +271,15 @@ function smartCommentConstraints(introspectionResults) {
         );
       }
       const columns = parseSqlColumn(klass.tags.primaryKey, true);
-      const keyAttributeNums = attrnums(
+      const attributes = attributesByNames(
         klass,
         columns,
         `@primaryKey ${klass.tags.primaryKey}`
       );
+      attributes.forEach(attr => {
+        attr.tags.notNull = true;
+      });
+      const keyAttributeNums = attributes.map(a => a.num);
       // Now we need to fake a constraint for this:
       const fakeConstraint = {
         kind: "constraint",
@@ -351,16 +355,16 @@ function smartCommentConstraints(introspectionResults) {
           return;
         }
 
-        const keyAttributeNums = attrnums(
+        const keyAttributeNums = attributesByNames(
           klass,
           columns,
           `@foreignKey ${fkSpec}`
-        );
-        const foreignKeyAttributeNums = attrnums(
+        ).map(a => a.num);
+        const foreignKeyAttributeNums = attributesByNames(
           foreignKlass,
           foreignColumns,
           `@foreignKey ${fkSpec}`
-        );
+        ).map(a => a.num);
 
         // Now we need to fake a constraint for this:
         const fakeConstraint = {
