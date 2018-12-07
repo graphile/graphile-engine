@@ -1,5 +1,5 @@
 -- WARNING: this database is shared with graphile-utils, don't run the tests in parallel!
-drop schema if exists a, b, c, d, inheritence cascade;
+drop schema if exists a, b, c, d, inheritence, smart_comment_relations cascade;
 drop extension if exists hstore;
 
 create schema a;
@@ -858,3 +858,58 @@ create table inheritence.file (
 create table inheritence.user_file (
   user_id INTEGER NOT NULL REFERENCES inheritence.user(id)
 ) inherits (inheritence.file);
+
+create schema smart_comment_relations;
+
+create table smart_comment_relations.streets (
+  id serial primary key,
+  name text not null
+);
+
+create table smart_comment_relations.properties (
+  id serial primary key,
+  street_id int not null references smart_comment_relations.streets on delete cascade,
+  name_or_number text not null
+);
+
+create table smart_comment_relations.street_property (
+  str_id int not null references smart_comment_relations.streets on delete cascade,
+  prop_id int not null references smart_comment_relations.properties on delete cascade,
+  current_owner text,
+  primary key (str_id, prop_id)
+);
+
+create table smart_comment_relations.buildings (
+  id serial primary key,
+  property_id int not null references smart_comment_relations.properties on delete cascade,
+  name text not null,
+  floors int not null default 1,
+  is_primary boolean not null default true
+);
+
+-- Only one primary building
+create unique index on smart_comment_relations.buildings (property_id) where is_primary is true;
+
+create view smart_comment_relations.houses as (
+  select 
+    json_build_array(streets.id, properties.id)::text as key,
+    properties.name_or_number,
+    streets.name as street_name,
+    streets.id as street_id,
+    buildings.id as building_id,
+    properties.id as property_id,
+    buildings.floors
+  from smart_comment_relations.properties
+  inner join smart_comment_relations.buildings
+  on (buildings.property_id = properties.id and buildings.is_primary is true)
+  inner join smart_comment_relations.streets
+  on (properties.street_id = streets.id)
+);
+comment on view smart_comment_relations.houses is E'@uniqueKey key
+@foreignKey (street_id) references smart_comment_relations.streets
+@foreignKey (building_id) references smart_comment_relations.buildings (id)
+@foreignKey (property_id) references properties
+@foreignKey (street_id, property_id) references street_property (str_id, prop_id)
+';
+
+--comment on column smart_comment_relations.houses.key is E'@omit';

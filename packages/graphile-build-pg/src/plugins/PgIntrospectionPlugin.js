@@ -199,6 +199,149 @@ function readFile(filename, encoding) {
   });
 }
 
+function smartCommentRelations(introspectionResults) {
+  introspectionResults.class.forEach(klass => {
+    const namespace = introspectionResults.namespace.find(
+      n => n.id === klass.namespaceId
+    );
+    if (!namespace) {
+      return;
+    }
+    if (klass.tags.foreignKey) {
+      const foreignKeys =
+        typeof klass.tags.foreignKey === "string"
+          ? [klass.tags.foreignKey]
+          : klass.tags.foreignKey;
+      if (!Array.isArray(foreignKeys)) {
+        throw new Error(
+          `Invalid foreign key smart comment specified on '${
+            klass.namespaceName
+          }.${klass.name}'`
+        );
+      }
+      foreignKeys.forEach((fkSpec, index) => {
+        if (typeof fkSpec !== "string") {
+          throw new Error(
+            `Invalid foreign key spec (${index}) on '${klass.namespaceName}.${
+              klass.name
+            }'`
+          );
+        }
+        const matches = fkSpec.match(
+          /^\(([^()]+)\) references ([^().]+)(?:\.([^().]+))?(?:\s*\([^()]+\))?$/i
+        );
+        if (!matches) {
+          throw new Error(
+            `Invalid foreignKey syntax for '${klass.namespaceName}.${
+              klass.name
+            }'; expected something like "(col1,col2) references schema.table (c1, c2)", you passed '${fkSpec}'`
+          );
+        }
+        const removeQuotes = str => {
+          const trimmed = str.trim();
+          if (trimmed[0] === '"') {
+            if (trimmed[trimmed.length - 1] !== '"') {
+              throw new Error(
+                `We failed to parse a quoted identifier '${str}'. Please avoid putting quotes or commas in smart comment identifiers (or file a PR to fix the parser).`
+              );
+            }
+            return trimmed.substr(1, trimmed.length - 2);
+          } else {
+            // PostgreSQL lower-cases unquoted columns, so we should too.
+            return trimmed.toLowerCase();
+          }
+        };
+        const [
+          ,
+          rawColumns,
+          rawSchemaOrTable,
+          rawTableOnly,
+          rawForeignColumns,
+        ] = matches;
+        const parse = (str, array = false) => {
+          if (!str) {
+            throw new Error(`Cannot parse '${str}'`);
+          }
+          const parts = array ? str.split(",") : [str];
+          const parsedParts = parts.map(removeQuotes);
+          return array ? parsedParts : parsedParts[0];
+        };
+        const rawSchema = rawTableOnly
+          ? rawSchemaOrTable
+          : `"${klass.namespaceName}"`;
+        const rawTable = rawTableOnly || rawSchemaOrTable;
+        const columns = parse(rawColumns, true);
+        const foreignSchema = parse(rawSchema);
+        const foreignTable = parse(rawTable);
+        const foreignColumns = rawForeignColumns
+          ? parse(rawForeignColumns, true)
+          : null;
+
+        const foreignKlass = introspectionResults.class.find(
+          k => k.name === foreignTable && k.namespaceName === foreignSchema
+        );
+        const foreignNamespace = introspectionResults.namespace.find(
+          n => n.id === foreignKlass.namespaceId
+        );
+        if (!foreignNamespace) {
+          return;
+        }
+
+        const attrnums = (tbl, cols) => {
+          if (!cols) {
+            const pk = introspectionResults.constraint.find(
+              c => c.classId == tbl.id && c.type === "p"
+            );
+            if (pk) {
+              return pk.keyAttributeNums;
+            } else {
+              throw new Error(
+                `No columns specified for '${tbl.namespaceName}.${
+                  tbl.name
+                }' (oid: ${tbl.id}) and no PK found (@foreignKey ${fkSpec}).`
+              );
+            }
+          }
+          const attributes = introspectionResults.attribute
+            .filter(a => a.classId === tbl.id)
+            .sort((a, b) => a.num - b.num);
+          return cols.map(colName => {
+            const attr = attributes.find(a => a.name === colName);
+            if (!attr) {
+              throw new Error(
+                `Could not find attribute '${colName}' in '${
+                  tbl.namespaceName
+                }.${tbl.name}'`
+              );
+            }
+            return attr.num;
+          });
+        };
+
+        const keyAttributeNums = attrnums(klass, columns);
+        const foreignKeyAttributeNums = attrnums(foreignKlass, foreignColumns);
+
+        // Now we need to fake a constraint for this:
+        const fakeConstraint = {
+          kind: "constraint",
+          isFake: true,
+          id: Math.random(),
+          name: `FAKE_${klass.namespaceName}_${klass.name}_${index}`,
+          type: "f", // foreign key
+          classId: klass.id,
+          foreignClassId: foreignKlass.id,
+          comment: null,
+          description: null,
+          keyAttributeNums,
+          foreignKeyAttributeNums,
+          tags: {},
+        };
+        introspectionResults.constraint.push(fakeConstraint);
+      });
+    }
+  });
+}
+
 export default (async function PgIntrospectionPlugin(
   builder,
   {
@@ -210,8 +353,16 @@ export default (async function PgIntrospectionPlugin(
     pgIncludeExtensionResources = false,
     pgLegacyFunctionsOnly = false,
     pgSkipInstallingWatchFixtures = false,
+    pgAugmentIntrospectionResults,
   }
 ) {
+  const augment = introspectionResults => {
+    [
+      pgAugmentIntrospectionResults,
+      smartCommentRelations,
+      /*smartCommentPrimaryKey,*/
+    ].forEach(fn => (fn ? fn(introspectionResults) : null));
+  };
   async function introspect() {
     // Perform introspection
     if (!Array.isArray(schemas)) {
@@ -395,6 +546,8 @@ export default (async function PgIntrospectionPlugin(
         }
       });
     };
+
+    augment(introspectionResultsByKind);
 
     relate(
       introspectionResultsByKind.class,

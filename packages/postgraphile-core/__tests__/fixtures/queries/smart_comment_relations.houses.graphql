@@ -1,0 +1,56 @@
+{
+  allHouses {
+    nodes {
+      nameOrNumber
+      streetName
+      streetId
+      buildingId
+      propertyId
+      streetByStreetId {
+        ...StreetFrag
+      }
+      buildingByBuildingId {
+        ...BuildingFrag
+      }
+      propertyByPropertyId {
+        ...PropertyFrag
+      }
+      streetPropertyByStreetIdAndPropertyId {
+        strId
+        propId
+        currentOwner
+        streetByStrId {
+          ...StreetFrag
+        }
+        propertyByPropId {
+          ...PropertyFrag
+        }
+      }
+    }
+  }
+}
+
+fragment BuildingFrag on Building {
+  nodeId
+  id
+  name
+  floors
+  isPrimary
+  propertyByPropertyId {
+    ...PropertyFrag
+  }
+}
+fragment PropertyFrag on Property {
+  nodeId
+  id
+  streetId
+  nameOrNumber
+  streetByStreetId {
+    ...StreetFrag
+  }
+}
+fragment StreetFrag on Street {
+  nodeId
+  id
+  name
+}

@@ -7302,6 +7302,16 @@ Object {
 }
 `;
 
+exports[`smart_comment_relations.houses.graphql 1`] = `
+Object {
+  "data": Object {
+    "allHouses": Object {
+      "nodes": Array [],
+    },
+  },
+}
+`;
+
 exports[`types.graphql 1`] = `
 Object {
   "data": Object {
