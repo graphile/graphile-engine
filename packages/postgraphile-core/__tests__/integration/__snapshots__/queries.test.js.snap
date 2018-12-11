@@ -7313,12 +7313,16 @@ Object {
             "id": 4,
             "isPrimary": true,
             "name": "Home sweet home",
+            "namedAfterStreet": null,
             "nodeId": "WyJidWlsZGluZ3MiLDRd",
             "propertyByPropertyId": Object {
               "id": 1,
               "nameOrNumber": "My House",
               "nodeId": "WyJwcm9wZXJ0aWVzIiwxXQ==",
               "streetByStreetId": Object {
+                "buildingsNamedAfterStreet": Object {
+                  "nodes": Array [],
+                },
                 "id": 1,
                 "name": "My Street",
                 "nodeId": "WyJzdHJlZXRzIiwxXQ==",
@@ -7334,6 +7338,9 @@ Object {
             "nameOrNumber": "My House",
             "nodeId": "WyJwcm9wZXJ0aWVzIiwxXQ==",
             "streetByStreetId": Object {
+              "buildingsNamedAfterStreet": Object {
+                "nodes": Array [],
+              },
               "id": 1,
               "name": "My Street",
               "nodeId": "WyJzdHJlZXRzIiwxXQ==",
@@ -7343,6 +7350,9 @@ Object {
           "propertyId": 1,
           "propertyNameOrNumber": "My House",
           "streetByStreetId": Object {
+            "buildingsNamedAfterStreet": Object {
+              "nodes": Array [],
+            },
             "id": 1,
             "name": "My Street",
             "nodeId": "WyJzdHJlZXRzIiwxXQ==",
@@ -7357,6 +7367,9 @@ Object {
               "nameOrNumber": "My House",
               "nodeId": "WyJwcm9wZXJ0aWVzIiwxXQ==",
               "streetByStreetId": Object {
+                "buildingsNamedAfterStreet": Object {
+                  "nodes": Array [],
+                },
                 "id": 1,
                 "name": "My Street",
                 "nodeId": "WyJzdHJlZXRzIiwxXQ==",
@@ -7365,6 +7378,9 @@ Object {
             },
             "strId": 1,
             "streetByStrId": Object {
+              "buildingsNamedAfterStreet": Object {
+                "nodes": Array [],
+              },
               "id": 1,
               "name": "My Street",
               "nodeId": "WyJzdHJlZXRzIiwxXQ==",
@@ -7381,6 +7397,9 @@ Object {
             "nameOrNumber": "10",
             "nodeId": "WyJwcm9wZXJ0aWVzIiwyXQ==",
             "streetByStreetId": Object {
+              "buildingsNamedAfterStreet": Object {
+                "nodes": Array [],
+              },
               "id": 1,
               "name": "My Street",
               "nodeId": "WyJzdHJlZXRzIiwxXQ==",
@@ -7390,6 +7409,9 @@ Object {
           "propertyId": 2,
           "propertyNameOrNumber": "10",
           "streetByStreetId": Object {
+            "buildingsNamedAfterStreet": Object {
+              "nodes": Array [],
+            },
             "id": 1,
             "name": "My Street",
             "nodeId": "WyJzdHJlZXRzIiwxXQ==",
@@ -7404,12 +7426,16 @@ Object {
             "id": 1,
             "isPrimary": true,
             "name": "Our House",
+            "namedAfterStreet": null,
             "nodeId": "WyJidWlsZGluZ3MiLDFd",
             "propertyByPropertyId": Object {
               "id": 3,
               "nameOrNumber": "The middle",
               "nodeId": "WyJwcm9wZXJ0aWVzIiwzXQ==",
               "streetByStreetId": Object {
+                "buildingsNamedAfterStreet": Object {
+                  "nodes": Array [],
+                },
                 "id": 2,
                 "name": "Our Street",
                 "nodeId": "WyJzdHJlZXRzIiwyXQ==",
@@ -7425,6 +7451,9 @@ Object {
             "nameOrNumber": "The middle",
             "nodeId": "WyJwcm9wZXJ0aWVzIiwzXQ==",
             "streetByStreetId": Object {
+              "buildingsNamedAfterStreet": Object {
+                "nodes": Array [],
+              },
               "id": 2,
               "name": "Our Street",
               "nodeId": "WyJzdHJlZXRzIiwyXQ==",
@@ -7434,6 +7463,9 @@ Object {
           "propertyId": 3,
           "propertyNameOrNumber": "The middle",
           "streetByStreetId": Object {
+            "buildingsNamedAfterStreet": Object {
+              "nodes": Array [],
+            },
             "id": 2,
             "name": "Our Street",
             "nodeId": "WyJzdHJlZXRzIiwyXQ==",
@@ -7448,6 +7480,9 @@ Object {
               "nameOrNumber": "The middle",
               "nodeId": "WyJwcm9wZXJ0aWVzIiwzXQ==",
               "streetByStreetId": Object {
+                "buildingsNamedAfterStreet": Object {
+                  "nodes": Array [],
+                },
                 "id": 2,
                 "name": "Our Street",
                 "nodeId": "WyJzdHJlZXRzIiwyXQ==",
@@ -7456,6 +7491,9 @@ Object {
             },
             "strId": 2,
             "streetByStrId": Object {
+              "buildingsNamedAfterStreet": Object {
+                "nodes": Array [],
+              },
               "id": 2,
               "name": "Our Street",
               "nodeId": "WyJzdHJlZXRzIiwyXQ==",
@@ -7468,14 +7506,24 @@ Object {
             "id": 5,
             "isPrimary": true,
             "name": "The Tower",
+            "namedAfterStreet": null,
             "nodeId": "WyJidWlsZGluZ3MiLDVd",
             "propertyByPropertyId": Object {
               "id": 4,
               "nameOrNumber": "Your house",
               "nodeId": "WyJwcm9wZXJ0aWVzIiw0XQ==",
               "streetByStreetId": Object {
+                "buildingsNamedAfterStreet": Object {
+                  "nodes": Array [
+                    Object {
+                      "id": 2,
+                      "name": "Dunroamin",
+                      "nodeId": "WyJidWlsZGluZ3MiLDJd",
+                    },
+                  ],
+                },
                 "id": 3,
-                "name": "Your Street",
+                "name": "Dunroamin",
                 "nodeId": "WyJzdHJlZXRzIiwzXQ==",
               },
               "streetId": 3,
@@ -7489,8 +7537,17 @@ Object {
             "nameOrNumber": "Your house",
             "nodeId": "WyJwcm9wZXJ0aWVzIiw0XQ==",
             "streetByStreetId": Object {
+              "buildingsNamedAfterStreet": Object {
+                "nodes": Array [
+                  Object {
+                    "id": 2,
+                    "name": "Dunroamin",
+                    "nodeId": "WyJidWlsZGluZ3MiLDJd",
+                  },
+                ],
+              },
               "id": 3,
-              "name": "Your Street",
+              "name": "Dunroamin",
               "nodeId": "WyJzdHJlZXRzIiwzXQ==",
             },
             "streetId": 3,
@@ -7498,12 +7555,21 @@ Object {
           "propertyId": 4,
           "propertyNameOrNumber": "Your house",
           "streetByStreetId": Object {
+            "buildingsNamedAfterStreet": Object {
+              "nodes": Array [
+                Object {
+                  "id": 2,
+                  "name": "Dunroamin",
+                  "nodeId": "WyJidWlsZGluZ3MiLDJd",
+                },
+              ],
+            },
             "id": 3,
-            "name": "Your Street",
+            "name": "Dunroamin",
             "nodeId": "WyJzdHJlZXRzIiwzXQ==",
           },
           "streetId": 3,
-          "streetName": "Your Street",
+          "streetName": "Dunroamin",
           "streetPropertyByStreetIdAndPropertyId": Object {
             "currentOwner": "You",
             "propId": 4,
@@ -7512,16 +7578,34 @@ Object {
               "nameOrNumber": "Your house",
               "nodeId": "WyJwcm9wZXJ0aWVzIiw0XQ==",
               "streetByStreetId": Object {
+                "buildingsNamedAfterStreet": Object {
+                  "nodes": Array [
+                    Object {
+                      "id": 2,
+                      "name": "Dunroamin",
+                      "nodeId": "WyJidWlsZGluZ3MiLDJd",
+                    },
+                  ],
+                },
                 "id": 3,
-                "name": "Your Street",
+                "name": "Dunroamin",
                 "nodeId": "WyJzdHJlZXRzIiwzXQ==",
               },
               "streetId": 3,
             },
             "strId": 3,
             "streetByStrId": Object {
+              "buildingsNamedAfterStreet": Object {
+                "nodes": Array [
+                  Object {
+                    "id": 2,
+                    "name": "Dunroamin",
+                    "nodeId": "WyJidWlsZGluZ3MiLDJd",
+                  },
+                ],
+              },
               "id": 3,
-              "name": "Your Street",
+              "name": "Dunroamin",
               "nodeId": "WyJzdHJlZXRzIiwzXQ==",
             },
           },

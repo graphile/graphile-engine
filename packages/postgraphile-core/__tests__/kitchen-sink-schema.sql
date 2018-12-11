@@ -890,6 +890,8 @@ create table smart_comment_relations.buildings (
   is_primary boolean not null default true
 );
 
+comment on table smart_comment_relations.buildings is E'@foreignKey (name) references streets (name)|@fieldName namedAfterStreet|@foreignFieldName buildingsNamedAfterStreet';
+
 -- Only one primary building
 create unique index on smart_comment_relations.buildings (property_id) where is_primary is true;
 
@@ -917,3 +919,33 @@ comment on view smart_comment_relations.houses is E'@primaryKey street_id,proper
 
 comment on column smart_comment_relations.houses.property_name_or_number is E'@notNull';
 comment on column smart_comment_relations.houses.street_name is E'@notNull';
+
+create table smart_comment_relations.post (
+  id text primary key
+);
+comment on table smart_comment_relations.post is E'@name post_table
+@omit';
+
+create table smart_comment_relations.offer (
+  id serial primary key,
+  post_id text references smart_comment_relations.post(id) not null
+);
+comment on table smart_comment_relations.offer is E'@name offer_table
+@omit';
+
+create view smart_comment_relations.post_view as
+  SELECT 
+    post.id
+    FROM smart_comment_relations.post post;
+comment on view smart_comment_relations.post_view is E'@name posts
+@primaryKey id';
+
+create view smart_comment_relations.offer_view as
+  SELECT
+    offer.id,
+    offer.post_id
+
+    FROM smart_comment_relations.offer offer;
+comment on view smart_comment_relations.offer_view is E'@name offers
+@primaryKey id
+@foreignKey (post_id) references post_view (id)';
