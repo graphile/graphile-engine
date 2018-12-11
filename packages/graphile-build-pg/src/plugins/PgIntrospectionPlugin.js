@@ -319,7 +319,7 @@ function smartCommentConstraints(introspectionResults) {
           );
         }
         const matches = fkSpec.match(
-          /^\(([^()]+)\) references ([^().]+)(?:\.([^().]+))?(?:\s*\([^()]+\))?$/i
+          /^\(([^()]+)\) references ([^().]+)(?:\.([^().]+))?(?:\s*\(([^()]+)\))?$/i
         );
         if (!matches) {
           throw new Error(
