@@ -890,6 +890,8 @@ create table smart_comment_relations.buildings (
   is_primary boolean not null default true
 );
 
+comment on table smart_comment_relations.buildings is E'@foreignKey (name) references streets (name)|@fieldName namedAfterStreet|@foreignFieldName buildingsNamedAfterStreet';
+
 -- Only one primary building
 create unique index on smart_comment_relations.buildings (property_id) where is_primary is true;
 

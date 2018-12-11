@@ -223,6 +223,16 @@ const parseSqlColumn = (str, array = false) => {
   return array ? parsedParts : parsedParts[0];
 };
 
+function parseConstraintSpec(rawSpec) {
+  const [spec, ...tagComponents] = rawSpec.split(/\|/);
+  const parsed = parseTags(tagComponents.join("\n"));
+  return {
+    spec,
+    tags: parsed.tags,
+    description: parsed.description,
+  };
+}
+
 function smartCommentConstraints(introspectionResults) {
   const attributesByNames = (tbl, cols, debugStr) => {
     const attributes = introspectionResults.attribute
@@ -271,8 +281,11 @@ function smartCommentConstraints(introspectionResults) {
           }' is invalid; please specify just once "@primaryKey col1,col2"`
         );
       }
+      const { spec: pkSpec, tags, description } = parseConstraintSpec(
+        klass.tags.primaryKey
+      );
       // $FlowFixMe
-      const columns: string[] = parseSqlColumn(klass.tags.primaryKey, true);
+      const columns: string[] = parseSqlColumn(pkSpec, true);
       const attributes = attributesByNames(
         klass,
         columns,
@@ -292,10 +305,10 @@ function smartCommentConstraints(introspectionResults) {
         classId: klass.id,
         foreignClassId: null,
         comment: null,
-        description: null,
+        description,
         keyAttributeNums,
         foreignKeyAttributeNums: null,
-        tags: {},
+        tags,
       };
       introspectionResults.constraint.push(fakeConstraint);
     }
@@ -320,14 +333,17 @@ function smartCommentConstraints(introspectionResults) {
           }.${klass.name}'`
         );
       }
-      foreignKeys.forEach((fkSpec, index) => {
-        if (typeof fkSpec !== "string") {
+      foreignKeys.forEach((fkSpecRaw, index) => {
+        if (typeof fkSpecRaw !== "string") {
           throw new Error(
             `Invalid foreign key spec (${index}) on '${klass.namespaceName}.${
               klass.name
             }'`
           );
         }
+        const { spec: fkSpec, tags, description } = parseConstraintSpec(
+          fkSpecRaw
+        );
         const matches = fkSpec.match(
           /^\(([^()]+)\) references ([^().]+)(?:\.([^().]+))?(?:\s*\(([^()]+)\))?$/i
         );
@@ -335,7 +351,7 @@ function smartCommentConstraints(introspectionResults) {
           throw new Error(
             `Invalid foreignKey syntax for '${klass.namespaceName}.${
               klass.name
-            }'; expected something like "(col1,col2) references schema.table (c1, c2)", you passed '${fkSpec}'`
+            }'; expected something like "(col1,col2) references schema.table (c1, c2)", you passed '${fkSpecRaw}'`
           );
         }
         const [
@@ -365,7 +381,7 @@ function smartCommentConstraints(introspectionResults) {
         );
         if (!foreignKlass) {
           throw new Error(
-            `@foreignKey smart comment referenced non-existant table/view '${foreignSchema}'.'${foreignTable}'. Note that this reference must use *database names* (i.e. it does not respect @name). (${fkSpec})`
+            `@foreignKey smart comment referenced non-existant table/view '${foreignSchema}'.'${foreignTable}'. Note that this reference must use *database names* (i.e. it does not respect @name). (${fkSpecRaw})`
           );
         }
         const foreignNamespace = introspectionResults.namespace.find(
@@ -378,12 +394,12 @@ function smartCommentConstraints(introspectionResults) {
         const keyAttributeNums = attributesByNames(
           klass,
           columns,
-          `@foreignKey ${fkSpec}`
+          `@foreignKey ${fkSpecRaw}`
         ).map(a => a.num);
         const foreignKeyAttributeNums = attributesByNames(
           foreignKlass,
           foreignColumns,
-          `@foreignKey ${fkSpec}`
+          `@foreignKey ${fkSpecRaw}`
         ).map(a => a.num);
 
         // Now we need to fake a constraint for this:
@@ -396,10 +412,10 @@ function smartCommentConstraints(introspectionResults) {
           classId: klass.id,
           foreignClassId: foreignKlass.id,
           comment: null,
-          description: null,
+          description,
           keyAttributeNums,
           foreignKeyAttributeNums,
-          tags: {},
+          tags,
         };
         introspectionResults.constraint.push(fakeConstraint);
       });
