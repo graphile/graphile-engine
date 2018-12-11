@@ -53,6 +53,9 @@ fragment BuildingFrag on Building {
   name
   floors
   isPrimary
+  namedAfterStreet {
+    ...StreetFrag
+  }
   propertyByPropertyId {
     ...PropertyFrag
   }
@@ -70,4 +73,11 @@ fragment StreetFrag on Street {
   nodeId
   id
   name
+  buildingsNamedAfterStreet {
+    nodes {
+      nodeId
+      id
+      name
+    }
+  }
 }
