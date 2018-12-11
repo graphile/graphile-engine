@@ -353,6 +353,11 @@ function smartCommentConstraints(introspectionResults) {
         const foreignKlass = introspectionResults.class.find(
           k => k.name === foreignTable && k.namespaceName === foreignSchema
         );
+        if (!foreignKlass) {
+          throw new Error(
+            `@foreignKey smart comment referenced non-existant table/view '${foreignSchema}'.'${foreignTable}'. Note that this reference must use *database names* (i.e. it does not respect @name). (${fkSpec})`
+          );
+        }
         const foreignNamespace = introspectionResults.namespace.find(
           n => n.id === foreignKlass.namespaceId
         );
