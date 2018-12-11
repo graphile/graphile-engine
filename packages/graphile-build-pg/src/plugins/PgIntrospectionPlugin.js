@@ -229,7 +229,7 @@ function parseConstraintSpec(rawSpec) {
   return {
     spec,
     tags: parsed.tags,
-    description: parsed.description,
+    description: parsed.text,
   };
 }
 
