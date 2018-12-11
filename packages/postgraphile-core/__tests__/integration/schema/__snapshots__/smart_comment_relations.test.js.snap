@@ -168,6 +168,79 @@ type CreateBuildingPayload {
   query: Query
 }
 
+\\"\\"\\"All input for the create \`Offer\` mutation.\\"\\"\\"
+input CreateOfferInput {
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"The \`Offer\` to be created by this mutation.\\"\\"\\"
+  offer: OfferInput!
+}
+
+\\"\\"\\"The output of our create \`Offer\` mutation.\\"\\"\\"
+type CreateOfferPayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"The \`Offer\` that was created by this mutation.\\"\\"\\"
+  offer: Offer
+
+  \\"\\"\\"An edge for our \`Offer\`. May be used by Relay 1.\\"\\"\\"
+  offerEdge(
+    \\"\\"\\"The method to use when ordering \`Offer\`.\\"\\"\\"
+    orderBy: [OffersOrderBy!] = [NATURAL]
+  ): OffersEdge
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Offer\`.\\"\\"\\"
+  postByPostId: Post
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
+}
+
+\\"\\"\\"All input for the create \`Post\` mutation.\\"\\"\\"
+input CreatePostInput {
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"The \`Post\` to be created by this mutation.\\"\\"\\"
+  post: PostInput!
+}
+
+\\"\\"\\"The output of our create \`Post\` mutation.\\"\\"\\"
+type CreatePostPayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"The \`Post\` that was created by this mutation.\\"\\"\\"
+  post: Post
+
+  \\"\\"\\"An edge for our \`Post\`. May be used by Relay 1.\\"\\"\\"
+  postEdge(
+    \\"\\"\\"The method to use when ordering \`Post\`.\\"\\"\\"
+    orderBy: [PostsOrderBy!] = [NATURAL]
+  ): PostsEdge
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
+}
+
 \\"\\"\\"All input for the create \`Property\` mutation.\\"\\"\\"
 input CreatePropertyInput {
   \\"\\"\\"
@@ -601,6 +674,22 @@ type Mutation {
     input: CreateBuildingInput!
   ): CreateBuildingPayload
 
+  \\"\\"\\"Creates a single \`Offer\`.\\"\\"\\"
+  createOffer(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: CreateOfferInput!
+  ): CreateOfferPayload
+
+  \\"\\"\\"Creates a single \`Post\`.\\"\\"\\"
+  createPost(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: CreatePostInput!
+  ): CreatePostPayload
+
   \\"\\"\\"Creates a single \`Property\`.\\"\\"\\"
   createProperty(
     \\"\\"\\"
@@ -764,6 +853,66 @@ interface Node {
   nodeId: ID!
 }
 
+type Offer {
+  id: Int
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Offer\`.\\"\\"\\"
+  postByPostId: Post
+  postId: String
+}
+
+\\"\\"\\"
+A condition to be used against \`Offer\` object types. All fields are tested for equality and combined with a logical ‘and.’
+\\"\\"\\"
+input OfferCondition {
+  \\"\\"\\"Checks for equality with the object’s \`id\` field.\\"\\"\\"
+  id: Int
+
+  \\"\\"\\"Checks for equality with the object’s \`postId\` field.\\"\\"\\"
+  postId: String
+}
+
+\\"\\"\\"An input for mutations affecting \`Offer\`\\"\\"\\"
+input OfferInput {
+  id: Int
+  postId: String
+}
+
+\\"\\"\\"A connection to a list of \`Offer\` values.\\"\\"\\"
+type OffersConnection {
+  \\"\\"\\"
+  A list of edges which contains the \`Offer\` and cursor to aid in pagination.
+  \\"\\"\\"
+  edges: [OffersEdge!]!
+
+  \\"\\"\\"A list of \`Offer\` objects.\\"\\"\\"
+  nodes: [Offer]!
+
+  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
+  pageInfo: PageInfo!
+
+  \\"\\"\\"The count of *all* \`Offer\` you could get from the connection.\\"\\"\\"
+  totalCount: Int
+}
+
+\\"\\"\\"A \`Offer\` edge in the connection.\\"\\"\\"
+type OffersEdge {
+  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
+  cursor: Cursor
+
+  \\"\\"\\"The \`Offer\` at the end of the edge.\\"\\"\\"
+  node: Offer
+}
+
+\\"\\"\\"Methods to use when ordering \`Offer\`.\\"\\"\\"
+enum OffersOrderBy {
+  ID_ASC
+  ID_DESC
+  NATURAL
+  POST_ID_ASC
+  POST_ID_DESC
+}
+
 \\"\\"\\"Information about pagination in a connection.\\"\\"\\"
 type PageInfo {
   \\"\\"\\"When paginating forwards, the cursor to continue.\\"\\"\\"
@@ -777,6 +926,85 @@ type PageInfo {
 
   \\"\\"\\"When paginating backwards, the cursor to continue.\\"\\"\\"
   startCursor: Cursor
+}
+
+type Post {
+  id: String
+
+  \\"\\"\\"Reads and enables pagination through a set of \`Offer\`.\\"\\"\\"
+  offersByPostId(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"
+    A condition to be used in determining which values should be returned by the collection.
+    \\"\\"\\"
+    condition: OfferCondition
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+
+    \\"\\"\\"The method to use when ordering \`Offer\`.\\"\\"\\"
+    orderBy: [OffersOrderBy!] = [NATURAL]
+  ): OffersConnection!
+}
+
+\\"\\"\\"
+A condition to be used against \`Post\` object types. All fields are tested for equality and combined with a logical ‘and.’
+\\"\\"\\"
+input PostCondition {
+  \\"\\"\\"Checks for equality with the object’s \`id\` field.\\"\\"\\"
+  id: String
+}
+
+\\"\\"\\"An input for mutations affecting \`Post\`\\"\\"\\"
+input PostInput {
+  id: String
+}
+
+\\"\\"\\"A connection to a list of \`Post\` values.\\"\\"\\"
+type PostsConnection {
+  \\"\\"\\"
+  A list of edges which contains the \`Post\` and cursor to aid in pagination.
+  \\"\\"\\"
+  edges: [PostsEdge!]!
+
+  \\"\\"\\"A list of \`Post\` objects.\\"\\"\\"
+  nodes: [Post]!
+
+  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
+  pageInfo: PageInfo!
+
+  \\"\\"\\"The count of *all* \`Post\` you could get from the connection.\\"\\"\\"
+  totalCount: Int
+}
+
+\\"\\"\\"A \`Post\` edge in the connection.\\"\\"\\"
+type PostsEdge {
+  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
+  cursor: Cursor
+
+  \\"\\"\\"The \`Post\` at the end of the edge.\\"\\"\\"
+  node: Post
+}
+
+\\"\\"\\"Methods to use when ordering \`Post\`.\\"\\"\\"
+enum PostsOrderBy {
+  ID_ASC
+  ID_DESC
+  NATURAL
 }
 
 \\"\\"\\"A connection to a list of \`Property\` values.\\"\\"\\"
@@ -1008,6 +1236,64 @@ type Query implements Node {
     \\"\\"\\"The method to use when ordering \`House\`.\\"\\"\\"
     orderBy: [HousesOrderBy!] = [PRIMARY_KEY_ASC]
   ): HousesConnection
+
+  \\"\\"\\"Reads and enables pagination through a set of \`Offer\`.\\"\\"\\"
+  allOffers(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"
+    A condition to be used in determining which values should be returned by the collection.
+    \\"\\"\\"
+    condition: OfferCondition
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+
+    \\"\\"\\"The method to use when ordering \`Offer\`.\\"\\"\\"
+    orderBy: [OffersOrderBy!] = [NATURAL]
+  ): OffersConnection
+
+  \\"\\"\\"Reads and enables pagination through a set of \`Post\`.\\"\\"\\"
+  allPosts(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"
+    A condition to be used in determining which values should be returned by the collection.
+    \\"\\"\\"
+    condition: PostCondition
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+
+    \\"\\"\\"The method to use when ordering \`Post\`.\\"\\"\\"
+    orderBy: [PostsOrderBy!] = [NATURAL]
+  ): PostsConnection
 
   \\"\\"\\"Reads and enables pagination through a set of \`Property\`.\\"\\"\\"
   allProperties(
