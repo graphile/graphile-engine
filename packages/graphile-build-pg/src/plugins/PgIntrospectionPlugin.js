@@ -255,6 +255,7 @@ function smartCommentConstraints(introspectionResults) {
     });
   };
 
+  // First: primary keys
   introspectionResults.class.forEach(klass => {
     const namespace = introspectionResults.namespace.find(
       n => n.id === klass.namespaceId
@@ -297,6 +298,15 @@ function smartCommentConstraints(introspectionResults) {
         tags: {},
       };
       introspectionResults.constraint.push(fakeConstraint);
+    }
+  });
+  // Now primary keys are in place, we can apply foreign keys
+  introspectionResults.class.forEach(klass => {
+    const namespace = introspectionResults.namespace.find(
+      n => n.id === klass.namespaceId
+    );
+    if (!namespace) {
+      return;
     }
     if (klass.tags.foreignKey) {
       const foreignKeys =

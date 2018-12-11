@@ -936,7 +936,7 @@ create view smart_comment_relations.post_view as
     post.id
     FROM smart_comment_relations.post post;
 comment on view smart_comment_relations.post_view is E'@name posts
-@uniqueKey id';
+@primaryKey id';
 
 create view smart_comment_relations.offer_view as
   SELECT
@@ -945,5 +945,5 @@ create view smart_comment_relations.offer_view as
 
     FROM smart_comment_relations.offer offer;
 comment on view smart_comment_relations.offer_view is E'@name offers
-@uniqueKey id
+@primaryKey id
 @foreignKey (post_id) references post_view (id)';
