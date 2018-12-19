@@ -156,6 +156,7 @@ const omitUnindexed = omit => (
     let klass = entity.class;
     if (klass) {
       if (!entity._omitUnindexedReadWarningGiven) {
+        // $FlowFixMe
         entity._omitUnindexedReadWarningGiven = true;
         // eslint-disable-next-line no-console
         console.log(
