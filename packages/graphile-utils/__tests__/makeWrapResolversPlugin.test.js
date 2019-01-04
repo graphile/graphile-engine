@@ -281,3 +281,95 @@ describe("wrapping named resolvers", () => {
     expect(resolveInfo).toBeTruthy();
   });
 });
+
+describe("wrapping resolvers matching a filter", () => {
+  it("filters correctly", async () => {
+    const filter = context => {
+      if (context.scope.isRootMutation) {
+        return { scope: context.scope };
+      }
+      return null;
+    };
+    const before = [];
+    const after = [];
+    const rule = ({ scope }) => async (
+      resolver,
+      user,
+      args,
+      _context,
+      _resolveInfo
+    ) => {
+      before.push([
+        `Mutation '${scope.fieldName}' starting with arguments:`,
+        args,
+      ]);
+      const result = await resolver();
+      after.push([`Mutation '${scope.fieldName}' result:`, result]);
+      return result;
+    };
+    const schema = await makeSchemaWithSpyAndPlugins(null, [
+      makeExtendSchemaPlugin({
+        typeDefs: gql`
+          extend type Mutation {
+            a(arg1: Int = 1, arg2: Int = 2): Int
+            b(arg1: String = "1", arg2: String = "2"): String
+          }
+        `,
+        resolvers: {
+          Mutation: {
+            a: (_, { arg1, arg2 }) => arg1 + arg2,
+            b: (_, { arg1, arg2 }) => arg1 + arg2,
+          },
+        },
+      }),
+      makeWrapResolversPlugin(filter, rule),
+    ]);
+    const rootValue = { root: true };
+    const result = await graphql(
+      schema,
+      `
+        mutation {
+          a(arg2: 7)
+          b(arg2: "ARG2")
+        }
+      `,
+      rootValue,
+      { test: true }
+    );
+    expect(result.errors).toBeFalsy();
+    expect(result.data.a).toBe(8);
+    expect(result.data.b).toBe("1ARG2");
+    expect(before.length).toEqual(2);
+    expect(after.length).toEqual(2);
+    expect(before).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "Mutation 'a' starting with arguments:",
+    Object {
+      "arg1": 1,
+      "arg2": 7,
+    },
+  ],
+  Array [
+    "Mutation 'b' starting with arguments:",
+    Object {
+      "arg1": "1",
+      "arg2": "ARG2",
+    },
+  ],
+]
+`);
+    expect(after).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "Mutation 'a' result:",
+    8,
+  ],
+  Array [
+    "Mutation 'b' result:",
+    "1ARG2",
+  ],
+]
+`);
+  });
+});
