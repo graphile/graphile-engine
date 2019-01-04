@@ -285,7 +285,7 @@ describe("wrapping named resolvers", () => {
 describe("wrapping resolvers matching a filter", () => {
   it("filters correctly", async () => {
     const filter = context => {
-      if (context.scope.isRootMutation) {
+      if (context.scope.isRootMutation && context.scope.fieldName !== "c") {
         return { scope: context.scope };
       }
       return null;
@@ -313,12 +313,14 @@ describe("wrapping resolvers matching a filter", () => {
           extend type Mutation {
             a(arg1: Int = 1, arg2: Int = 2): Int
             b(arg1: String = "1", arg2: String = "2"): String
+            c(arg1: String = "1", arg2: String = "2"): String
           }
         `,
         resolvers: {
           Mutation: {
             a: (_, { arg1, arg2 }) => arg1 + arg2,
             b: (_, { arg1, arg2 }) => arg1 + arg2,
+            c: (_, { arg1, arg2 }) => arg1 + arg2,
           },
         },
       }),
@@ -331,6 +333,7 @@ describe("wrapping resolvers matching a filter", () => {
         mutation {
           a(arg2: 7)
           b(arg2: "ARG2")
+          c(arg2: "NOWRAP")
         }
       `,
       rootValue,
@@ -339,6 +342,7 @@ describe("wrapping resolvers matching a filter", () => {
     expect(result.errors).toBeFalsy();
     expect(result.data.a).toBe(8);
     expect(result.data.b).toBe("1ARG2");
+    expect(result.data.c).toBe("1NOWRAP");
     expect(before.length).toEqual(2);
     expect(after.length).toEqual(2);
     expect(before).toMatchInlineSnapshot(`
