@@ -23,6 +23,8 @@
     "lint": "eslint packages && lerna run tslint",
     "flow": "flow",
     "flow:check": "flow check",
+    "prettier": "prettier 'packages/*/src/**/*.{ts,js,tsx,jsx}'",
+    "prettier:fix": "yarn prettier --write",
     "test": "lerna run --concurrency 1 test",
     "prepack:all": "scripts/prepack-all",
     "watch": "for I in packages/*/; do echo \"cd $I && npm run watch\" | perl -p -e 's/\\n/\\0/;'; done | xargs -0 node_modules/.bin/concurrently --kill-others",
