@@ -58,6 +58,24 @@ const tests = [
     },
   },
   {
+    name: "jwt pgJwtTypeIdentifier, big numbers",
+    query: `mutation {
+      authenticate(input: {a: 1, b: "1234567890123456789.123456789", c: "987654321098765432"}) {
+        jwtToken
+      }
+    }`,
+    schema: "withJwt",
+    process: ({
+      data: {
+        authenticate: { jwtToken: str },
+      },
+    }) => {
+      return Object.assign(jwt.verify(str, jwtSecret), {
+        iat: "[timestamp]",
+      });
+    },
+  },
+  {
     name: "jwt authenticate fail",
     query: `mutation {
       authenticateFail(input: {}) {
