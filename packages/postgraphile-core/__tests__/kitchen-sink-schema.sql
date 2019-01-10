@@ -1,5 +1,5 @@
 -- WARNING: this database is shared with graphile-utils, don't run the tests in parallel!
-drop schema if exists a, b, c, d, inheritence, smart_comment_relations cascade;
+drop schema if exists a, b, c, d, inheritence, smart_comment_relations, ranges cascade;
 drop extension if exists tablefunc;
 drop extension if exists intarray;
 drop extension if exists hstore;
@@ -952,3 +952,10 @@ create view smart_comment_relations.offer_view as
 comment on view smart_comment_relations.offer_view is E'@name offers
 @primaryKey id
 @foreignKey (post_id) references post_view (id)';
+
+create schema ranges;
+create table ranges.range_test (
+  id serial primary key,
+  num numrange default null,
+  int8 int8range default null
+);
