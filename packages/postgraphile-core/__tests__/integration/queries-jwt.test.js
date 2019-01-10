@@ -2,7 +2,7 @@ const { graphql } = require("graphql");
 const { withPgClient } = require("../helpers");
 const { createPostGraphileSchema } = require("../..");
 const { readFile: rawReadFile } = require("fs");
-const { printSchema } = require("graphql/utilities");
+//const { printSchema } = require("graphql/utilities");
 //const debug = require("debug")("graphile-build:schema");
 const jwt = require("jsonwebtoken");
 
