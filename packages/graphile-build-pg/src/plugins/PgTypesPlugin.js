@@ -630,11 +630,21 @@ export default (function PgTypesPlugin(
           when (${fragment}) is null then null else json_build_object(
             'start', case
               when lower(${fragment}) is null then null
-              else json_build_object('value', lower(${fragment}), 'inclusive', lower_inc(${fragment}))
+              else json_build_object('value', ${pgTweakFragmentForTypeAndModifier(
+                sql.fragment`lower(${fragment})`,
+                subtype,
+                typeModifier,
+                {}
+              )}, 'inclusive', lower_inc(${fragment}))
             end,
             'end', case
               when upper(${fragment}) is null then null
-              else json_build_object('value', upper(${fragment}), 'inclusive', upper_inc(${fragment}))
+              else json_build_object('value', ${pgTweakFragmentForTypeAndModifier(
+                sql.fragment`upper(${fragment})`,
+                subtype,
+                typeModifier,
+                {}
+              )}, 'inclusive', upper_inc(${fragment}))
             end
         ) end`;
         pg2GqlMapper[type.id] = {
