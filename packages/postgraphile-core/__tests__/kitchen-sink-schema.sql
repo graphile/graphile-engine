@@ -13,6 +13,7 @@ alter default privileges revoke execute on functions from public;
 -- ensure this doesn't make us crash.
 create extension tablefunc with schema a;
 create extension hstore;
+create extension intarray;
 
 comment on schema a is 'The a schema.';
 comment on schema b is 'qwerty';
