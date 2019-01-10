@@ -30,10 +30,8 @@ export default function pgField(
       const isLeafType = build.graphql.isLeafType(FieldType);
       if (isLeafType && !options.pgType) {
         // eslint-disable-next-line no-console
-        console.warn(
-          new Error(
-            "pgField call omits options.pgType for a leaf type; certain tweaks may not be applied!"
-          )
+        throw new Error(
+          "pgField call omits options.pgType for a leaf type; certain tweaks may not be applied!"
         );
       }
       const {
