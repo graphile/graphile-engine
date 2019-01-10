@@ -50,4 +50,33 @@ test("numeric range", () =>
       },
     });
   }));
-//int8range(-98765432109876543, 22222222222222222)
+
+test("bigint range", () =>
+  withPgClient(async pgClient => {
+    const {
+      rows: [row],
+    } = await pgClient.query(
+      "insert into ranges.range_test (num) values (numrange($1, $2)) returning *",
+      ["-98765432109876543", "22222222222222222"]
+    );
+    const result = await graphql(
+      schema,
+      "query ($id: Int!) {rangeTestById(id:$id) {num{start {value inclusive} end { value inclusive } }}}",
+      null,
+      {
+        pgClient: pgClient,
+      },
+      { id: row.id }
+    );
+    expect(result.errors).toBeFalsy();
+    expect(result.data.rangeTestById.num).toEqual({
+      start: {
+        value: "-98765432109876543",
+        inclusive: true,
+      },
+      end: {
+        value: "22222222222222222",
+        inclusive: false,
+      },
+    });
+  }));
