@@ -30,8 +30,8 @@ exports[`jwt pgJwtTypeIdentifier 1`] = `
 Object {
   "a": 1,
   "aud": "postgraphile",
-  "b": 2,
-  "c": 3,
+  "b": "2",
+  "c": "3",
   "exp": 2130969600,
   "iat": "[timestamp]",
   "iss": "postgraphile",
