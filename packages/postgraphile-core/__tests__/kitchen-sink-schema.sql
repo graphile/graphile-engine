@@ -1,5 +1,7 @@
 -- WARNING: this database is shared with graphile-utils, don't run the tests in parallel!
 drop schema if exists a, b, c, d, inheritence, smart_comment_relations cascade;
+drop extension if exists tablefunc;
+drop extension if exists intarray;
 drop extension if exists hstore;
 
 create schema a;
