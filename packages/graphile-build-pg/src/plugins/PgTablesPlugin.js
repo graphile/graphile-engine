@@ -499,7 +499,11 @@ export default (function PgTablesPlugin(
             return TableBaseInputType;
           }
           if (TableType) {
-            return getTypeByName(inflection.inputType(TableType));
+            return (
+              getTypeByName(inflection.inputType(TableType)) ||
+              // If no columns are added to the input type then it's null - fall back to the base type
+              TableBaseInputType
+            );
           }
           return null;
         },
