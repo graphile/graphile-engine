@@ -3,7 +3,7 @@ const { withPgClient } = require("../helpers");
 const { createPostGraphileSchema } = require("../..");
 const { readFile: rawReadFile } = require("fs");
 const { printSchema } = require("graphql/utilities");
-const debug = require("debug")("graphile-build:schema");
+//const debug = require("debug")("graphile-build:schema");
 const jwt = require("jsonwebtoken");
 
 function readFile(filename, encoding) {
@@ -27,7 +27,7 @@ const tests = [
   {
     name: "jwt normal",
     query: `mutation {
-      authenticate(input: {a: 1, b: 2, c: 3}) {
+      authenticate(input: {a: 1, b: "2", c: "3"}) {
         jwtToken {
           role
           exp
@@ -42,7 +42,7 @@ const tests = [
   {
     name: "jwt pgJwtTypeIdentifier",
     query: `mutation {
-      authenticate(input: {a: 1, b: 2, c: 3}) {
+      authenticate(input: {a: 1, b: "2", c: "3"}) {
         jwtToken
       }
     }`,
@@ -69,7 +69,7 @@ const tests = [
   {
     name: "jwt pgJwtTypeIdentifier with payload",
     query: `mutation {
-      authenticatePayload(input: {a: 1, b: 2, c: 3}) {
+      authenticatePayload(input: {a: 1, b: "2", c: "3"}) {
         authPayload {
           jwt
           id
@@ -106,7 +106,7 @@ beforeAll(() => {
         jwtSecret: jwtSecret,
       }),
     ]);
-    debug(printSchema(withJwt));
+    //debug(printSchema(withJwt));
     return {
       normal,
       withJwt,

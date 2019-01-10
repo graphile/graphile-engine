@@ -16,8 +16,8 @@ Object {
     "authenticate": Object {
       "jwtToken": Object {
         "a": 1,
-        "b": 2,
-        "c": 3,
+        "b": "2",
+        "c": "3",
         "exp": 2130969600,
         "role": "yay",
       },
