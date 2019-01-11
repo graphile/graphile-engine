@@ -99,7 +99,7 @@ type PgConfig = Client | Pool | string;
  */
 
 export const inflections = errorProxy(
-  "Passing an inflector via PostGraphile options was deprecated in v4.0.0-beta.7; instead please write an inflector plugin: https://www.graphile.org/postgraphile/inflection/"
+  "`inflections` was deprecated in v4.0.0-beta.7; instead please write an inflector plugin: https://www.graphile.org/postgraphile/inflection/"
 );
 
 export const postGraphileBaseOverrides = errorProxy(
@@ -335,7 +335,7 @@ const getPostGraphileBuilder = async (
     pgExtendedTypes: !!dynamicJson,
     pgColumnFilter: pgColumnFilter || (() => true),
     pgInflection: errorProxy(
-      "Passing an inflector via PostGraphile options was deprecated in v4.0.0-beta.7; instead please write an inflector plugin: https://www.graphile.org/postgraphile/inflection/"
+      "The PostGraphile options `pgInflection` key was deprecated in v4.0.0-beta.7; instead please use `build.inflection` (and note that the call signatures are now simpler): https://www.graphile.org/postgraphile/inflection/"
     ),
     nodeIdFieldName: nodeIdFieldName || (classicIds ? "id" : "nodeId"),
     pgJwtTypeIdentifier: jwtPgTypeIdentifier,
