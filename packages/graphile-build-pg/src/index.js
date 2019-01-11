@@ -17,6 +17,7 @@ import PgRowByUniqueConstraint from "./plugins/PgRowByUniqueConstraint";
 import PgComputedColumnsPlugin from "./plugins/PgComputedColumnsPlugin";
 import PgQueryProceduresPlugin from "./plugins/PgQueryProceduresPlugin";
 import PgOrderAllColumnsPlugin from "./plugins/PgOrderAllColumnsPlugin";
+import PgOrderComputedColumnsPlugin from "./plugins/PgOrderComputedColumnsPlugin";
 import PgOrderByPrimaryKeyPlugin from "./plugins/PgOrderByPrimaryKeyPlugin";
 import PgRowNode from "./plugins/PgRowNode";
 import PgNodeAliasPostGraphile from "./plugins/PgNodeAliasPostGraphile";
@@ -57,6 +58,7 @@ export const defaultPlugins = [
   PgComputedColumnsPlugin,
   PgQueryProceduresPlugin,
   PgOrderAllColumnsPlugin,
+  PgOrderComputedColumnsPlugin,
   PgOrderByPrimaryKeyPlugin,
   PgRowNode,
   PgNodeAliasPostGraphile,
@@ -92,6 +94,7 @@ export {
   PgComputedColumnsPlugin,
   PgQueryProceduresPlugin,
   PgOrderAllColumnsPlugin,
+  PgOrderComputedColumnsPlugin,
   PgOrderByPrimaryKeyPlugin,
   PgRowNode,
   PgNodeAliasPostGraphile,

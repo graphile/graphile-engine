@@ -5352,6 +5352,8 @@ type PeopleEdge {
 
 \\"\\"\\"Methods to use when ordering \`Person\`.\\"\\"\\"
 enum PeopleOrderBy {
+  COMPUTED_OUT_ASC
+  COMPUTED_OUT_DESC
   EMAIL_ASC
   EMAIL_DESC
   ID_ASC

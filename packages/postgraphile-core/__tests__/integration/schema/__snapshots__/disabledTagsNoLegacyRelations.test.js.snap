@@ -2625,6 +2625,8 @@ type Person implements Node {
   computedFirstArgInoutOut: PersonComputedFirstArgInoutOutRecord
   computedInout(ino: String): String
   computedInoutOut(ino: String): PersonComputedInoutOutRecord
+
+  \\"\\"\\"@sortable\\"\\"\\"
   computedOut: String
   computedOutOut: PersonComputedOutOutRecord
   config: KeyValueHash

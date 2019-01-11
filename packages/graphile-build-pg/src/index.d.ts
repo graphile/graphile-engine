@@ -63,6 +63,7 @@ export const PgRowByUniqueConstraint: Plugin;
 export const PgComputedColumnsPlugin: Plugin;
 export const PgQueryProceduresPlugin: Plugin;
 export const PgOrderAllColumnsPlugin: Plugin;
+export const PgOrderComputedColumnsPlugin: Plugin;
 export const PgOrderByPrimaryKeyPlugin: Plugin;
 export const PgRowNode: Plugin;
 export const PgNodeAliasPostGraphile: Plugin;
