@@ -57,70 +57,67 @@ export default (function PgOrderComputedColumnsPlugin(builder) {
         if (isVoid) return memo;
 
         // Looks good
-        memo.push({ proc, table, pseudoColumnName });
+        memo.push({ proc, pseudoColumnName });
         return memo;
       },
       []
     );
     return extend(
       values,
-      compatibleComputedColumns.reduce(
-        (memo, { proc, table, pseudoColumnName }) => {
-          const ascFieldName = inflection.orderByComputedColumnEnum(
-            pseudoColumnName,
-            proc,
-            table,
-            true
-          );
-          const descFieldName = inflection.orderByComputedColumnEnum(
-            pseudoColumnName,
-            proc,
-            table,
-            false
-          );
+      compatibleComputedColumns.reduce((memo, { proc, pseudoColumnName }) => {
+        const ascFieldName = inflection.orderByComputedColumnEnum(
+          pseudoColumnName,
+          proc,
+          table,
+          true
+        );
+        const descFieldName = inflection.orderByComputedColumnEnum(
+          pseudoColumnName,
+          proc,
+          table,
+          false
+        );
 
-          const unique = !!proc.tags.isUnique;
+        const unique = !!proc.tags.isUnique;
 
-          const functionCall = queryBuilder =>
-            sql.fragment`(${sql.identifier(
-              proc.namespaceName,
-              proc.name
-            )}(${queryBuilder.getTableAlias()}))`;
+        const functionCall = queryBuilder =>
+          sql.fragment`(${sql.identifier(
+            proc.namespaceName,
+            proc.name
+          )}(${queryBuilder.getTableAlias()}))`;
 
-          memo = extend(
-            memo,
-            {
-              [ascFieldName]: {
-                value: {
-                  alias: ascFieldName.toLowerCase(),
-                  specs: [[functionCall, true]],
-                  unique,
-                },
+        memo = extend(
+          memo,
+          {
+            [ascFieldName]: {
+              value: {
+                alias: ascFieldName.toLowerCase(),
+                specs: [[functionCall, true]],
+                unique,
               },
             },
-            `Adding ascending orderBy enum value for ${describePgEntity(
-              proc
-            )}. You can rename this field by removing the '@sortable' smart comment from the function.`
-          );
-          memo = extend(
-            memo,
-            {
-              [descFieldName]: {
-                value: {
-                  alias: descFieldName.toLowerCase(),
-                  specs: [[functionCall, false]],
-                  unique,
-                },
+          },
+          `Adding ascending orderBy enum value for ${describePgEntity(
+            proc
+          )}. You can rename this field by removing the '@sortable' smart comment from the function.`
+        );
+        memo = extend(
+          memo,
+          {
+            [descFieldName]: {
+              value: {
+                alias: descFieldName.toLowerCase(),
+                specs: [[functionCall, false]],
+                unique,
               },
             },
-            `Adding descending orderBy enum value for ${describePgEntity(
-              proc
-            )}. You can rename this field by removing the '@sortable' smart comment from the function.`
-          );
-          return memo;
-        },
-        {}
-      ),
+          },
+          `Adding descending orderBy enum value for ${describePgEntity(
+            proc
+          )}. You can rename this field by removing the '@sortable' smart comment from the function.`
+        );
+        return memo;
+      }, {}),
       `Adding order values from table '${table.name}'`
     );
   });
