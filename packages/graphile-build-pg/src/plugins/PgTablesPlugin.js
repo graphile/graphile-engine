@@ -108,7 +108,7 @@ export default (function PgTablesPlugin(
               name: tableTypeName,
               interfaces: () => {
                 if (shouldHaveNodeId) {
-                  return [getTypeByName("Node")];
+                  return [getTypeByName(inflection.node())];
                 } else {
                   return [];
                 }

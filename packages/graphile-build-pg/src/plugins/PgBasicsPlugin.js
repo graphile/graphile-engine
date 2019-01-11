@@ -352,6 +352,11 @@ export default (function PgBasicsPlugin(
     return build.extend(
       inflection,
       preventEmptyResult({
+        query: () => "Query",
+        mutation: () => "Mutation",
+        subscription: () => "Subscription",
+        node: () => "Node",
+
         // These helpers are passed GraphQL type names as strings
         conditionType(typeName: string) {
           return this.upperCamelCase(`${typeName}-condition`);
