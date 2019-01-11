@@ -390,7 +390,7 @@ export default (function PgTablesPlugin(
               pgIntrospection: table,
             }
           );
-          const PageInfo = getTypeByName("PageInfo");
+          const PageInfo = getTypeByName(inflection.pageInfo());
 
           /*const ConnectionType = */
           newWithHooks(
