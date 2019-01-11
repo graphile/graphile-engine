@@ -352,13 +352,6 @@ export default (function PgBasicsPlugin(
     return build.extend(
       inflection,
       preventEmptyResult({
-        // Core type names
-        query: () => "Query",
-        mutation: () => "Mutation",
-        subscription: () => "Subscription",
-        node: () => "Node",
-        pageInfo: () => "PageInfo",
-
         // Postgres type names
         pgIntervalType: () => "Interval",
         pgIntervalInputType: () => "IntervalInput",
