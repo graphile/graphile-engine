@@ -48,7 +48,7 @@ export default (async function PgMutationUpdateDeletePlugin(
       fieldWithHooks,
     } = context;
 
-    const { pluralize, singularize, camelCase } = inflection;
+    const { pluralize, _singularizedTableName } = inflection;
 
     if (!isRootMutation) {
       return fields;
@@ -164,7 +164,7 @@ export default (async function PgMutationUpdateDeletePlugin(
               if (!row) {
                 throw new Error(
                   `No values were ${mode}d in collection '${pluralize(
-                    table.name
+                    _singularizedTableName(table)
                   )}' because no values were found.`
                 );
               }
@@ -197,8 +197,8 @@ export default (async function PgMutationUpdateDeletePlugin(
                   fields: ({ fieldWithHooks }) => {
                     const tableName = inflection.tableFieldName(table);
                     // This should really be `-node-id` but for compatibility with PostGraphQL v3 we haven't made that change.
-                    const deletedNodeIdFieldName = camelCase(
-                      `deleted-${singularize(table.name)}-id`
+                    const deletedNodeIdFieldName = inflection.deletedNodeId(
+                      table
                     );
                     return Object.assign(
                       {

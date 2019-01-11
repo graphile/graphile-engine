@@ -747,6 +747,9 @@ export default (function PgBasicsPlugin(
         deleteNode(table: PgClass) {
           return this.camelCase(`delete-${this._singularizedTableName(table)}`);
         },
+        deletedNodeId(table: PgClass) {
+          return this.camelCase(`deleted-${this.singularize(table.name)}-id`);
+        },
         updateNodeInputType(table: PgClass) {
           return this.upperCamelCase(
             `update-${this._singularizedTableName(table)}-input`
