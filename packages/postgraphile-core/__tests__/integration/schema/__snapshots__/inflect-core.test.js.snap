@@ -5637,6 +5637,9 @@ type Person implements N {
     based pagination. May not be used with \`last\`.
     \\"\\"\\"
     offset: Int
+
+    \\"\\"\\"The method to use when ordering \`Person\`.\\"\\"\\"
+    orderBy: [PeopleOrderBy!]
   ): PeopleConnection!
 
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
@@ -7251,6 +7254,9 @@ type Q implements N {
     based pagination. May not be used with \`last\`.
     \\"\\"\\"
     offset: Int
+
+    \\"\\"\\"The method to use when ordering \`Person\`.\\"\\"\\"
+    orderBy: [PeopleOrderBy!]
   ): PeopleConnection!
 
   \\"\\"\\"Reads a single \`Type\` using its globally unique \`ID\`.\\"\\"\\"

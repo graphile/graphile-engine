@@ -4837,6 +4837,52 @@ Object {
         "startCursor": "WyJuYXR1cmFsIiwxXQ==",
       },
     },
+    "tableSetQuery_sorted": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYW1lX2FzYyIsM10=",
+          "node": Object {
+            "name": "Budd Deey",
+          },
+        },
+        Object {
+          "cursor": "WyJuYW1lX2FzYyIsNV0=",
+          "node": Object {
+            "name": "Joe Tucker",
+          },
+        },
+        Object {
+          "cursor": "WyJuYW1lX2FzYyIsMV0=",
+          "node": Object {
+            "name": "John Smith",
+          },
+        },
+        Object {
+          "cursor": "WyJuYW1lX2FzYyIsNF0=",
+          "node": Object {
+            "name": "Kathryn Ramirez",
+          },
+        },
+        Object {
+          "cursor": "WyJuYW1lX2FzYyIsMl0=",
+          "node": Object {
+            "name": "Sara Smith",
+          },
+        },
+        Object {
+          "cursor": "WyJuYW1lX2FzYyIsNl0=",
+          "node": Object {
+            "name": "Twenty Seventwo",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYW1lX2FzYyIsNl0=",
+        "hasNextPage": false,
+        "hasPreviousPage": false,
+        "startCursor": "WyJuYW1lX2FzYyIsM10=",
+      },
+    },
     "typesQuery": false,
   },
 }

@@ -2690,6 +2690,9 @@ type Person implements Node {
     based pagination. May not be used with \`last\`.
     \\"\\"\\"
     offset: Int
+
+    \\"\\"\\"The method to use when ordering \`Person\`.\\"\\"\\"
+    orderBy: [PeopleOrderBy!]
   ): PeopleConnection!
 
   \\"\\"\\"Reads and enables pagination through a set of \`Person\`.\\"\\"\\"
@@ -2699,6 +2702,9 @@ type Person implements Node {
 
     \\"\\"\\"Skip the first \`n\` values.\\"\\"\\"
     offset: Int
+
+    \\"\\"\\"The method to use when ordering \`Person\`.\\"\\"\\"
+    orderBy: [PeopleOrderBy!]
   ): [Person]
 
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
@@ -3650,6 +3656,9 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     \\"\\"\\"
     offset: Int
+
+    \\"\\"\\"The method to use when ordering \`Person\`.\\"\\"\\"
+    orderBy: [PeopleOrderBy!]
   ): PeopleConnection!
 
   \\"\\"\\"Reads and enables pagination through a set of \`Person\`.\\"\\"\\"
@@ -3659,6 +3668,9 @@ type Query implements Node {
 
     \\"\\"\\"Skip the first \`n\` values.\\"\\"\\"
     offset: Int
+
+    \\"\\"\\"The method to use when ordering \`Person\`.\\"\\"\\"
+    orderBy: [PeopleOrderBy!]
   ): [Person]
   typesQuery(a: BigInt!, b: Boolean!, c: String!, d: [Int]!, e: JSON!, f: FloatRangeInput!): Boolean
 }
