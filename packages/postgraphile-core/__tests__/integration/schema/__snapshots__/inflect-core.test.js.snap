@@ -5582,7 +5582,7 @@ type Person implements N {
   computedFirstArgInoutOut: PersonComputedFirstArgInoutOutRecord
   computedInout(ino: String): String
   computedInoutOut(ino: String): PersonComputedInoutOutRecord
-  computedOut: String
+  computedOut: String!
   computedOutOut: PersonComputedOutOutRecord
   config: KeyValueHash
   createdAt: Datetime
