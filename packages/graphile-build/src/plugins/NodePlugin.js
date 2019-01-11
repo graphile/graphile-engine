@@ -150,7 +150,7 @@ export default (function NodePlugin(
     build,
     context
   ) {
-    const { getTypeByName } = build;
+    const { getTypeByName, inflection } = build;
     const {
       scope: { isRootQuery },
     } = context;
