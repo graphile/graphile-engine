@@ -48,8 +48,6 @@ export default (async function PgMutationUpdateDeletePlugin(
       fieldWithHooks,
     } = context;
 
-    const { pluralize, _singularizedTableName } = inflection;
-
     if (!isRootMutation) {
       return fields;
     }
@@ -163,8 +161,8 @@ export default (async function PgMutationUpdateDeletePlugin(
               }
               if (!row) {
                 throw new Error(
-                  `No values were ${mode}d in collection '${pluralize(
-                    _singularizedTableName(table)
+                  `No values were ${mode}d in collection '${inflection.pluralize(
+                    inflection._singularizedTableName(table)
                   )}' because no values were found.`
                 );
               }
