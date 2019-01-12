@@ -754,6 +754,7 @@ returns varchar as $$
   select n.first_name || ' ' || n.last_name;
 $$ language sql stable;
 
+create index full_name_idx on d.person ((first_name || ' ' || last_name));
 
 create table d.post (
   id serial primary key,
