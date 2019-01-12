@@ -4915,6 +4915,22 @@ Object {
         "startCursor": "WyJuYXR1cmFsIiwxXQ==",
       },
     },
+    "tableSetQuery_condition": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwxXQ==",
+          "node": Object {
+            "name": "Budd Deey",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiwxXQ==",
+        "hasNextPage": false,
+        "hasPreviousPage": false,
+        "startCursor": "WyJuYXR1cmFsIiwxXQ==",
+      },
+    },
     "tableSetQuery_sorted": Object {
       "edges": Array [
         Object {
