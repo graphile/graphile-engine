@@ -5217,6 +5217,9 @@ input PersonCondition {
   \\"\\"\\"Checks for equality with the object’s \`aliases\` field.\\"\\"\\"
   aliases: [String]
 
+  \\"\\"\\"Checks for equality with the object’s \`computedOut\` field.\\"\\"\\"
+  computedOut: String
+
   \\"\\"\\"Checks for equality with the object’s \`config\` field.\\"\\"\\"
   config: KeyValueHash
 

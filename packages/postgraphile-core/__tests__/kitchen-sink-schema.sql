@@ -544,7 +544,7 @@ $$ language sql stable;
 create function c.person_computed_out (person c.person, out o1 text) as $$
   select 'o1 ' || person.person_full_name;
 $$ language sql stable;
-comment on function c.person_computed_out (person c.person, out o1 text) is E'@notNull\n@sortable';
+comment on function c.person_computed_out (person c.person, out o1 text) is E'@notNull\n@sortable\n@filterable';
 
 create function c.person_computed_out_out (person c.person, out o1 text, out o2 text) as $$
   select 'o1 ' || person.person_full_name, 'o2 ' || person.person_full_name;

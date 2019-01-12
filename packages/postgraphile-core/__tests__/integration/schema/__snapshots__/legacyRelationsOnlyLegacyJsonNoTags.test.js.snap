@@ -2629,6 +2629,7 @@ type Person implements Node {
   \\"\\"\\"
   @notNull
   @sortable
+  @filterable
   \\"\\"\\"
   computedOut: String
   computedOutOut: PersonComputedOutOutRecord

@@ -1010,6 +1010,21 @@ Object {
 }
 `;
 
+exports[`connections-condition-computed-column.graphql 1`] = `
+Object {
+  "data": Object {
+    "allPeople": Object {
+      "nodes": Array [
+        Object {
+          "id": 3,
+          "name": "Budd Deey",
+        },
+      ],
+    },
+  },
+}
+`;
+
 exports[`connections-order-computed-column.graphql 1`] = `
 Object {
   "data": Object {

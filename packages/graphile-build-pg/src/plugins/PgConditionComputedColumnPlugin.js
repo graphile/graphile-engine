@@ -39,7 +39,7 @@ function getCompatibleComputedColumns(build, table) {
     if (isVoid) return memo;
 
     // Looks good
-    memo.push({ proc, pseudoColumnName });
+    memo.push({ proc, pseudoColumnName, returnType });
     return memo;
   }, []);
 }
@@ -48,10 +48,8 @@ export default (function PgConditionComputedColumnPlugin(builder) {
   builder.hook("GraphQLInputObjectType:fields", (fields, build, context) => {
     const {
       extend,
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
       pgGetGqlInputTypeByTypeIdAndModifier,
       inflection,
-      pgOmit: omit,
       describePgEntity,
     } = build;
     const {
@@ -181,14 +179,14 @@ export default (function PgConditionComputedColumnPlugin(builder) {
           pgQuery: queryBuilder => {
             if (condition != null) {
               compatibleComputedColumns.forEach(
-                ({ proc, fieldName, sqlFnName }) => {
+                ({ fieldName, sqlFnName, returnType }) => {
                   const val = condition[fieldName];
                   const sqlCall = sql.fragment`${sqlFnName}(${queryBuilder.getTableAlias()})`;
                   if (val != null) {
                     queryBuilder.where(
                       sql.fragment`${sqlCall} = ${gql2pg(
                         val,
-                        proc.returnType,
+                        returnType,
                         null
                       )}`
                     );
