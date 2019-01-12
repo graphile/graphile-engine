@@ -380,9 +380,8 @@ with
       pg_catalog.pg_index as idx
       inner join pg_catalog.pg_class idx_more on (idx.indexrelid = idx_more.oid)
       inner join class on (idx.indrelid = class.id)
-      inner join pg_class as idxclass on (idx.indexrelid = idxclass.oid)
       inner join pg_catalog.pg_namespace as nsp on (nsp.oid = idx_more.relnamespace)
-      inner join pg_am as am on (am.oid = idxclass.relam)
+      inner join pg_catalog.pg_am as am on (am.oid = idx_more.relam)
       left join pg_catalog.pg_description as dsc on dsc.objoid = idx.indexrelid and dsc.objsubid = 0 and dsc.classoid = 'pg_catalog.pg_class'::regclass
     where
       idx.indislive is not false and
