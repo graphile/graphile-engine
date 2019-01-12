@@ -3368,7 +3368,10 @@ type Query implements Node {
   returnTableWithoutGrants: CompoundKey
   tableQuery(id: Int): Post
 
-  \\"\\"\\"@sortable\\"\\"\\"
+  \\"\\"\\"
+  @sortable
+  @filterable
+  \\"\\"\\"
   tableSetQuery(
     \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
     after: Cursor
