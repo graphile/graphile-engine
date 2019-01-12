@@ -54,6 +54,7 @@ export const PgConnectionArgFirstLastBeforeAfter: Plugin;
 export const PgConnectionArgOrderBy: Plugin;
 export const PgConnectionArgOrderByDefaultValue: Plugin;
 export const PgConnectionArgCondition: Plugin;
+export const PgConditionComputedColumnPlugin: Plugin;
 export const PgAllRows: Plugin;
 export const PgColumnsPlugin: Plugin;
 export const PgColumnDeprecationPlugin: Plugin;

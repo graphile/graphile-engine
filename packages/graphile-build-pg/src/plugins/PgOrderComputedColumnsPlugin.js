@@ -21,6 +21,7 @@ export default (function PgOrderComputedColumnsPlugin(builder) {
 
     const compatibleComputedColumns = introspectionResultsByKind.procedure.reduce(
       (memo, proc) => {
+        /* ALSO SEE PgConditionComputedColumnPlugin */
         // Must be marked @sortable
         if (!proc.tags.sortable) return memo;
 

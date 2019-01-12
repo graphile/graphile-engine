@@ -8,6 +8,7 @@ import PgConnectionArgFirstLastBeforeAfter from "./plugins/PgConnectionArgFirstL
 import PgConnectionArgOrderBy from "./plugins/PgConnectionArgOrderBy";
 import PgConnectionArgOrderByDefaultValue from "./plugins/PgConnectionArgOrderByDefaultValue";
 import PgConnectionArgCondition from "./plugins/PgConnectionArgCondition";
+import PgConditionComputedColumnPlugin from "./plugins/PgConditionComputedColumnPlugin";
 import PgAllRows from "./plugins/PgAllRows";
 import PgColumnsPlugin from "./plugins/PgColumnsPlugin";
 import PgColumnDeprecationPlugin from "./plugins/PgColumnDeprecationPlugin";
@@ -49,6 +50,7 @@ export const defaultPlugins = [
   PgConnectionArgOrderBy,
   PgConnectionArgOrderByDefaultValue,
   PgConnectionArgCondition,
+  PgConditionComputedColumnPlugin,
   PgAllRows,
   PgColumnsPlugin,
   PgColumnDeprecationPlugin,
@@ -85,6 +87,7 @@ export {
   PgConnectionArgOrderBy,
   PgConnectionArgOrderByDefaultValue,
   PgConnectionArgCondition,
+  PgConditionComputedColumnPlugin,
   PgAllRows,
   PgColumnsPlugin,
   PgColumnDeprecationPlugin,
