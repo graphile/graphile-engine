@@ -7,14 +7,14 @@ test(
 
 test(
   "prints a schema for index_expressions",
-  core.test(["index_expressions"], {})
+  core.test(["index_expressions"], { disableDefaultMutations: true })
 );
 
 const IndexTypeCheckerPlugin = builder => {
   builder.hook("build", build => {
     const { pgIntrospectionResultsByKind } = build;
     if (
-      !pgIntrospectionResultsByKind.index.every(idx => idx.indexType !== null)
+      !pgIntrospectionResultsByKind.index.every(idx => idx.indexType != null)
     ) {
       throw new Error("indexType missing");
     }
