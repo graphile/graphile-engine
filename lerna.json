@@ -5,10 +5,13 @@
   "packages": [
     "packages/*"
   ],
-  "version": "4.1.0-rc.2",
+  "version": "4.3.1",
   "command": {
     "publish": {
-      "allowBranch": "master"
+      "allowBranch": [
+        "master",
+        "canary/*"
+      ]
     }
   }
 }

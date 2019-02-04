@@ -17,6 +17,7 @@ import {
   inflections,
   Inflector,
   PgAttribute,
+  formatSQLForDebugging,
 } from "graphile-build-pg";
 import { Pool, Client } from "pg";
 
@@ -28,6 +29,7 @@ export {
   SchemaListener,
   Inflection,
   Options,
+  formatSQLForDebugging,
 };
 
 export type mixed = {} | string | number | boolean | undefined | null;
@@ -161,6 +163,12 @@ const getPostGraphileBuilder = async (
   schemas: string | Array<string>,
   options: PostGraphileCoreOptions = {}
 ) => {
+  // @ts-ignore
+  if (options.inflector) {
+    throw new Error(
+      "Passing an inflector via PostGraphile options was deprecated in v4.0.0-beta.7; instead please write an inflector plugin: https://www.graphile.org/postgraphile/inflection/"
+    );
+  }
   const {
     dynamicJson,
     classicIds,
@@ -287,7 +295,7 @@ const getPostGraphileBuilder = async (
   ensureValidPlugins("skipPlugins", skipPlugins);
   if (inflector) {
     throw new Error(
-      "Custom inflector arguments are no longer supported, please use the inflector plugin API instead"
+      "Custom inflector arguments are not supported, please use the inflector plugin API instead: https://www.graphile.org/postgraphile/inflection/"
     );
   }
   const inflectionOverridePlugins = classicIds

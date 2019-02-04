@@ -48,7 +48,7 @@ const debug = debugFactory("graphile-build");
  * produce half a million hashes per second on my machine, the LRU only gives
  * us a 10x speedup!
  */
-const hashCache = LRUCache(100000);
+const hashCache = new LRUCache(100000);
 
 /*
  * This function must never return a string longer than 56 characters.
@@ -843,6 +843,38 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
       upperCamelCase,
       camelCase,
       constantCase,
+
+      // Built-in names (allows you to override these in the output schema)
+      builtin: name => {
+        /*
+         * e.g.:
+         *
+         * graphile-build:
+         *
+         * - Query
+         * - Mutation
+         * - Subscription
+         * - Node
+         * - PageInfo
+         *
+         * graphile-build-pg:
+         *
+         * - Interval
+         * - BigInt
+         * - BigFloat
+         * - BitString
+         * - Point
+         * - Date
+         * - Datetime
+         * - Time
+         * - JSON
+         * - UUID
+         * - InternetAddress
+         *
+         * Other plugins may add their own builtins too; try and avoid conflicts!
+         */
+        return name;
+      },
     },
     swallowError,
     // resolveNode: EXPERIMENTAL, API might change!
