@@ -1,0 +1,41 @@
+{
+  "name": "@graphile/lds",
+  "version": "0.0.1",
+  "description": "Logical decoding server for PostgreSQL, monitors for new/edited/deleted rows and announces them to interested clients.",
+  "main": "dist/index.js",
+  "scripts": {
+    "db:init": "createdb lds_test || true; psql -X1v ON_ERROR_STOP=1 -v VERBOSITY=verbose -f __tests__/schema.sql lds_test",
+    "prepack": "tsc",
+    "watch": "tsc --watch",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/graphile/lds.git"
+  },
+  "keywords": [
+    "pg",
+    "Postgres",
+    "PostgreSQL",
+    "logicial",
+    "decoding",
+    "logical",
+    "replication",
+    "changes",
+    "Graphile",
+    "PostGraphile"
+  ],
+  "author": "Benjie Gillam <code@benjiegillam.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/graphile/lds/issues"
+  },
+  "homepage": "https://github.com/graphile/lds#readme",
+  "dependencies": {
+    "@types/pg": "^7.4.11",
+    "pg": ">=6.5 <8"
+  },
+  "devDependencies": {
+    "typescript": "^3.3.1"
+  }
+}
