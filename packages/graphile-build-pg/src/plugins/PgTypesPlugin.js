@@ -1018,7 +1018,11 @@ export default (function PgTypesPlugin(
       // node-postgres parses hstore for us, no action required on map
       map: identity,
       // When unmapping we need to convert back to hstore
-      unmap: o => sql.fragment`(${sql.value(hstoreStringify(o))}::hstore)`,
+      unmap: o =>
+        sql.fragment`(${sql.value(hstoreStringify(o))}::${sql.identifier(
+          hstoreType.namespaceName,
+          hstoreType.name
+        )})`,
     };
 
     return build;
