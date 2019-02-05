@@ -48,6 +48,7 @@ async function main() {
 
   // Now slot is created, create websocket server
   const wss = new WebSocket.Server({ port: PORT });
+  const clients: Array<WebSocket> = [];
   const channels: {
     [schema: string]: {
       [table: string]: {
@@ -55,6 +56,17 @@ async function main() {
       };
     };
   } = {};
+
+  // Send keepalive every 25 seconds
+  setInterval(() => {
+    clients.forEach(ws =>
+      ws.send(
+        JSON.stringify({
+          kind: "KA",
+        })
+      )
+    );
+  }, 25000);
 
   wss.on("connection", function connection(ws) {
     ws.on("message", function incoming(rawMessage) {
@@ -117,7 +129,18 @@ async function main() {
       }
     });
 
-    ws.send("ACK");
+    clients.push(ws);
+    ws.on("close", () => {
+      const i = clients.indexOf(ws);
+      if (i >= 0) {
+        clients.splice(i, 1);
+      }
+    });
+    ws.send(
+      JSON.stringify({
+        kind: "ACK",
+      })
+    );
   });
 
   function announce(
