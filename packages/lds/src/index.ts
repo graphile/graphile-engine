@@ -62,7 +62,7 @@ async function main() {
     clients.forEach(ws =>
       ws.send(
         JSON.stringify({
-          kind: "KA",
+          _: "KA",
         })
       )
     );
@@ -138,7 +138,7 @@ async function main() {
     });
     ws.send(
       JSON.stringify({
-        kind: "ACK",
+        _: "ACK",
       })
     );
   });
@@ -158,7 +158,7 @@ async function main() {
       if (socket) {
         socket.send(
           JSON.stringify({
-            kind,
+            _: kind,
             schema,
             table,
             key,
