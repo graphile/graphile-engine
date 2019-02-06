@@ -3,21 +3,37 @@ import { GraphQLObjectType } from "graphql";
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-async function* ai() {
+class Monitor {
+  reset() {
+    // clear monitoring
+  }
+  release() {
+    this.reset();
+  }
+  live() {
+    console.log("Live...");
+  }
+}
+
+async function* ai(monitor) {
   try {
     let counter = 0;
     while (true) {
+      monitor.reset();
       yield counter++;
       console.log("Tick " + counter);
       await sleep(1000);
     }
   } finally {
+    monitor.release();
     console.log("ENDED SUBSCRIPTION");
   }
 }
 
-function subscribe() {
-  return ai();
+function subscribe(_parent, _args, context, _info) {
+  const monitor = new Monitor();
+  context.live = monitor.live.bind(monitor);
+  return ai(monitor);
 }
 
 const SubscriptionFieldsPlugin: Plugin = function(builder) {
