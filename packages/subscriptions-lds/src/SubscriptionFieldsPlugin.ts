@@ -4,11 +4,15 @@ import { GraphQLObjectType } from "graphql";
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 async function* ai() {
-  let counter = 0;
-  while (true) {
-    yield counter++;
-    console.log("Tick");
-    await sleep(1000);
+  try {
+    let counter = 0;
+    while (true) {
+      yield counter++;
+      console.log("Tick " + counter);
+      await sleep(1000);
+    }
+  } finally {
+    console.log("ENDED SUBSCRIPTION");
   }
 }
 
