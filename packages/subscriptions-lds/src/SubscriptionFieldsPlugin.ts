@@ -1,26 +1,29 @@
 import { Plugin } from "postgraphile-core";
 import { GraphQLObjectType } from "graphql";
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 class Monitor {
-  reset() {
+  public reset() {
     // clear monitoring
   }
-  release() {
+  public release() {
     this.reset();
   }
-  live() {
-    console.log("Live...");
+  public live(schema: string, table: string, identifiers: any[]) {
+    console.log("Live...", schema, table, identifiers);
   }
 }
 
-async function* ai(monitor) {
+async function* ai(monitor: Monitor) {
   try {
     let counter = 0;
     while (true) {
       monitor.reset();
       yield counter++;
+      if (counter > 5) {
+        throw new Error("Counter too high!");
+      }
       console.log("Tick " + counter);
       await sleep(1000);
     }
@@ -30,7 +33,7 @@ async function* ai(monitor) {
   }
 }
 
-function subscribe(_parent, _args, context, _info) {
+function subscribe(_parent: any, _args: any, context: any, _info: any) {
   const monitor = new Monitor();
   context.live = monitor.live.bind(monitor);
   return ai(monitor);
