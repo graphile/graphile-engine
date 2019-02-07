@@ -55,10 +55,7 @@ export default (async function PgAllRows(
         const attributes = table.attributes;
         const primaryKeyConstraint = table.primaryKeyConstraint;
         const primaryKeys =
-          primaryKeyConstraint &&
-          primaryKeyConstraint.keyAttributeNums.map(num =>
-            attributes.find(attr => attr.num === num)
-          );
+          primaryKeyConstraint && primaryKeyConstraint.keyAttributes;
         const isView = t => t.classKind === "v";
         const viewUniqueKey = table.tags.uniqueKey || pgViewUniqueKey;
         const uniqueIdAttribute = viewUniqueKey

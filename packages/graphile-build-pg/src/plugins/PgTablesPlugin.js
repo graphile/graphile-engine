@@ -120,18 +120,7 @@ export default (function PgTablesPlugin(
                   addDataGeneratorForField(nodeIdFieldName, () => {
                     return {
                       pgQuery: queryBuilder => {
-                        queryBuilder.select(
-                          sql.fragment`json_build_array(${sql.join(
-                            primaryKeys.map(
-                              key =>
-                                sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
-                                  key.name
-                                )}`
-                            ),
-                            ", "
-                          )})`,
-                          "__identifiers"
-                        );
+                        queryBuilder.selectIdentifiers(table);
                       },
                     };
                   });
@@ -322,18 +311,7 @@ export default (function PgTablesPlugin(
                         usesCursor: [true],
                         pgQuery: queryBuilder => {
                           if (primaryKeys) {
-                            queryBuilder.select(
-                              sql.fragment`json_build_array(${sql.join(
-                                primaryKeys.map(
-                                  key =>
-                                    sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
-                                      key.name
-                                    )}`
-                                ),
-                                ", "
-                              )})`,
-                              "__identifiers"
-                            );
+                            queryBuilder.selectIdentifiers(table);
                           }
                         },
                       }));

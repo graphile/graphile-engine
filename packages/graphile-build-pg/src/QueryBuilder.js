@@ -3,6 +3,7 @@ import * as sql from "pg-sql2";
 import type { SQL } from "pg-sql2";
 import isSafeInteger from "lodash/isSafeInteger";
 import chunk from "lodash/chunk";
+import type { PgClass } from "./plugins/PgIntrospectionPlugin";
 
 const isDev = process.env.POSTGRAPHILE_ENV === "development";
 
@@ -47,6 +48,7 @@ class QueryBuilder {
     [string]: true | string,
   };
   finalized: boolean;
+  selectedIdentifiers: boolean;
   data: {
     cursorPrefix: Array<string>,
     select: Array<[SQLGen, RawAlias]>,
@@ -95,6 +97,7 @@ class QueryBuilder {
 
     this.locks = {};
     this.finalized = false;
+    this.selectedIdentifiers = false;
     this.data = {
       // TODO: refactor `cursorPrefix`, it shouldn't be here (or should at least have getters/setters)
       cursorPrefix: ["natural"],
@@ -229,6 +232,23 @@ class QueryBuilder {
       }
     }
     this.data.select.push([exprGen, alias]);
+  }
+  selectedIdentifiers(table: PgClass) {
+    if (this.selectedIdentifiers) return;
+    const primaryKey = table.primaryKeyConstraint;
+    if (!primaryKey) return;
+    const primaryKeys = primaryKey.keyAttributes;
+    this.select(
+      sql.fragment`json_build_array(${sql.join(
+        primaryKeys.map(
+          key =>
+            sql.fragment`${this.getTableAlias()}.${sql.identifier(key.name)}`
+        ),
+        ", "
+      )})`,
+      "__identifiers"
+    );
+    this.selectedIdentifiers = true;
   }
   selectCursor(exprGen: SQLGen) {
     this.checkLock("selectCursor");
