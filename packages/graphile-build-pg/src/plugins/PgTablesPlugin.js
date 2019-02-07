@@ -345,7 +345,12 @@ export default (function PgTablesPlugin(
                           resolveInfo
                         );
                         const record = handleNullRow(data[safeAlias]);
-                        if (record && primaryKeys && context.liveRecord) {
+                        if (
+                          record &&
+                          primaryKeys &&
+                          context.liveRecord &&
+                          data.__identifiers
+                        ) {
                           context.liveRecord(
                             resolveInfo,
                             "pg",
@@ -408,7 +413,12 @@ export default (function PgTablesPlugin(
                         );
                         return data.data.map(entry => {
                           const record = handleNullRow(entry[safeAlias]);
-                          if (record && context.liveRecord && primaryKeys) {
+                          if (
+                            record &&
+                            context.liveRecord &&
+                            primaryKeys &&
+                            entry.__identifiers
+                          ) {
                             context.liveRecord(
                               resolveInfo,
                               "pg",
