@@ -36,7 +36,6 @@ class LDSLiveSource {
     collectionIdentifier: any,
     recordIdentifier: any
   ): SubscriptionReleaser | null {
-    console.log("record", collectionIdentifier.name, recordIdentifier);
     return this.sub(
       JSON.stringify([
         collectionIdentifier.namespaceName,
