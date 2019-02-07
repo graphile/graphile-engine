@@ -11,7 +11,6 @@ const SubscriptionFieldsPlugin: Plugin = function(builder) {
       return fields;
     }
 
-    console.log("Hello");
     const Query: GraphQLObjectType = getTypeByName(inflection.builtin("Query"));
     const queryFields = Query.getFields();
     const subscriptionFields = Object.keys(queryFields).reduce(
