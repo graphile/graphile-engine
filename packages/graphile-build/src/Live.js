@@ -1,13 +1,15 @@
 // @flow
 /* eslint-disable flowtype/no-weak-types */
 import callbackToAsyncIterator from "./callbackToAsyncIterator";
-import type { GraphQLResolveInfo, ResponsePath } from "graphql";
+import type { GraphQLResolveInfo } from "graphql";
 import { debounce } from "lodash";
 
 type SubscriptionReleaser = () => void;
+type SubscriptionCallback = () => void;
 
 export class LiveSource {
   subscribeCollection(
+    _callback: SubscriptionCallback,
     _collectionIdentifier: any,
     _predicate?: (record: any) => boolean
   ): SubscriptionReleaser | null {
@@ -15,6 +17,7 @@ export class LiveSource {
   }
 
   subscribeRecord(
+    _callback: SubscriptionCallback,
     _collectionIdentifier: any,
     _recordIdentifier: any
   ): SubscriptionReleaser | null {
@@ -79,7 +82,7 @@ export class LiveMonitor {
     }
   }
 
-  onChange(callback) {
+  onChange(callback: () => void) {
     if (this.changeCallback) {
       throw new Error("Already monitoring for changes");
     }
@@ -92,7 +95,7 @@ export class LiveMonitor {
   }
 
   liveCollection(
-    path: ResponsePath,
+    info: GraphQLResolveInfo,
     namespace: string,
     collectionIdentifier: any,
     predicate?: (record: any) => boolean
@@ -104,7 +107,7 @@ export class LiveMonitor {
         `Invalid collection identifier passed to LiveMonitor[${namespace}]: ${collectionIdentifier}`
       );
     }
-    for (const source of this.sources) {
+    for (const source of provider.sources) {
       const releaser = source.subscribeCollection(
         this.handleChange,
         collectionIdentifier,
@@ -117,7 +120,7 @@ export class LiveMonitor {
   }
 
   liveRecord(
-    path: ResponsePath,
+    info: GraphQLResolveInfo,
     namespace: string,
     collectionIdentifier: any,
     recordIdentifier: any
@@ -133,10 +136,10 @@ export class LiveMonitor {
       !provider.recordIdentifierIsValid(collectionIdentifier, recordIdentifier)
     ) {
       throw new Error(
-        `Invalid collection identifier passed to LiveMonitor[${namespace}]: ${collectionIdentifier}`
+        `Invalid record identifier passed to LiveMonitor[${namespace}]: ${collectionIdentifier}`
       );
     }
-    for (const source of this.sources) {
+    for (const source of provider.sources) {
       const releaser = source.subscribeRecord(
         this.handleChange,
         collectionIdentifier,

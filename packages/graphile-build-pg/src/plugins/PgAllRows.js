@@ -90,7 +90,12 @@ export default (async function PgAllRows(
                   ? ConnectionType
                   : new GraphQLList(new GraphQLNonNull(TableType)),
                 args: {},
-                async resolve(parent, args, { pgClient }, resolveInfo) {
+                async resolve(
+                  parent,
+                  args,
+                  { pgClient, liveRecord },
+                  resolveInfo
+                ) {
                   const parsedResolveInfoFragment = parseResolveInfo(
                     resolveInfo
                   );
@@ -107,6 +112,9 @@ export default (async function PgAllRows(
                     },
                     queryBuilder => {
                       if (primaryKeys) {
+                        if (liveRecord) {
+                          queryBuilder.selectIdentifiers(table);
+                        }
                         queryBuilder.beforeLock("orderBy", () => {
                           if (!queryBuilder.isOrderUnique(false)) {
                             // Order by PK if no order specified
@@ -151,6 +159,16 @@ export default (async function PgAllRows(
                     } = result;
                     return addStartEndCursor(row);
                   } else {
+                    if (primaryKeys && context.liveRecord) {
+                      result.rows.forEach(row =>
+                        context.liveRecord(
+                          resolveInfo,
+                          "pg",
+                          table,
+                          row.__identifiers
+                        )
+                      );
+                    }
                     return result.rows;
                   }
                 },

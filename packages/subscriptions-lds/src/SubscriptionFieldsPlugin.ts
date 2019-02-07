@@ -1,5 +1,5 @@
 import { Plugin } from "postgraphile-core";
-import { GraphQLObjectType, GraphQLResolveInfo } from "graphql";
+import { GraphQLObjectType } from "graphql";
 
 const SubscriptionFieldsPlugin: Plugin = function(builder) {
   builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
@@ -14,7 +14,6 @@ const SubscriptionFieldsPlugin: Plugin = function(builder) {
     console.log("Hello");
     const Query: GraphQLObjectType = getTypeByName(inflection.builtin("Query"));
     const queryFields = Query.getFields();
-    console.log(queryFields);
     const subscriptionFields = Object.keys(queryFields).reduce(
       (memo, queryFieldName) => {
         const queryField = queryFields[queryFieldName];

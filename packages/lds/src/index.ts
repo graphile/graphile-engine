@@ -59,16 +59,40 @@ async function main() {
 
   // Send keepalive every 25 seconds
   setInterval(() => {
-    clients.forEach(ws =>
-      ws.send(
-        JSON.stringify({
-          _: "KA",
-        })
-      )
-    );
+    clients.forEach(ws => {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(
+          JSON.stringify({
+            _: "KA",
+          })
+        );
+      }
+    });
   }, 25000);
 
   wss.on("connection", function connection(ws) {
+    clients.push(ws);
+
+    ws.on("close", () => {
+      const i = clients.indexOf(ws);
+      if (i >= 0) {
+        clients.splice(i, 1);
+      }
+      // Release all the subscriptions
+      // TODO: do this more performantly!!
+      for (const schema of Object.keys(channels)) {
+        for (const table of Object.keys(channels[schema])) {
+          for (const stringifiedKey of Object.keys(channels[schema][table])) {
+            const channelClients = channels[schema][table][stringifiedKey];
+            const index = channelClients.indexOf(ws);
+            if (index >= 0) {
+              channelClients[index] = null;
+            }
+          }
+        }
+      }
+    });
+
     ws.on("message", function incoming(rawMessage) {
       const message = rawMessage.toString("utf8");
       let topicJSON: string;
@@ -88,14 +112,13 @@ async function main() {
       if (topic.length < 2) return console.error("Too short");
       if (topic.length > 3) return console.error("Too long");
       const [schema, table, key] = topic;
-      if (typeof schema !== "string")
+      if (typeof schema !== "string") {
         return console.error("Schema not a string");
+      }
       if (typeof table !== "string") return console.error("Table not a string");
-      if (
-        key &&
-        (!Array.isArray(key) || key.some((s: unknown) => typeof s !== "string"))
-      )
-        return console.error("Invalid key spec");
+      if (key && !Array.isArray(key)) {
+        return console.error("Invalid key spec", topic);
+      }
 
       const stringifiedKey = stringify(key);
       if (!channels[schema]) {
@@ -107,35 +130,28 @@ async function main() {
       if (!channels[schema][table][stringifiedKey]) {
         channels[schema][table][stringifiedKey] = new Array(SLOTS);
       }
-      const sockets = channels[schema][table][stringifiedKey]!;
-      const i = sockets.indexOf(ws);
+      const channelClients = channels[schema][table][stringifiedKey]!;
+      const i = channelClients.indexOf(ws);
       if (sub) {
         if (i >= 0) {
           console.error("Socket is already registered for ", stringifiedKey);
           return;
         }
-        const emptyIndex = sockets.findIndex(s => !s);
+        const emptyIndex = channelClients.findIndex(s => !s);
         if (emptyIndex < 0) {
           console.error("All sockets are full");
           return;
         }
-        sockets[emptyIndex] = ws;
+        channelClients[emptyIndex] = ws;
       } else {
         if (i < 0) {
           console.error("Socket is not registered for ", stringifiedKey);
           return;
         }
-        sockets[i] = null;
+        channelClients[i] = null;
       }
     });
 
-    clients.push(ws);
-    ws.on("close", () => {
-      const i = clients.indexOf(ws);
-      if (i >= 0) {
-        clients.splice(i, 1);
-      }
-    });
     ws.send(
       JSON.stringify({
         _: "ACK",
@@ -152,19 +168,18 @@ async function main() {
   ) {
     if (!channels[schema] || !channels[schema][table]) return;
     const stringifiedKey = stringify(key);
-    const sockets = channels[schema][table][stringifiedKey];
-    if (!sockets) return;
-    for (const socket of sockets) {
-      if (socket) {
-        socket.send(
-          JSON.stringify({
-            _: kind,
-            schema,
-            table,
-            key,
-            data,
-          })
-        );
+    const channelClients = channels[schema][table][stringifiedKey];
+    if (!channelClients) return;
+    const msg = JSON.stringify({
+      _: kind,
+      schema,
+      table,
+      key,
+      data,
+    });
+    for (const socket of channelClients) {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(msg);
       }
     }
     if (kind === "delete") {

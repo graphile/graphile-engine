@@ -1,5 +1,6 @@
 import { makePluginByCombiningPlugins } from "graphile-utils";
 import SubscriptionFieldsPlugin from "./SubscriptionFieldsPlugin";
+import PgLDSSourcePlugin from "./PgLDSSourcePlugin";
 
 /*
  * Create subscription fields for query fields (and instant-trigger).
@@ -8,6 +9,7 @@ import SubscriptionFieldsPlugin from "./SubscriptionFieldsPlugin";
  * When LDS announces change to relevant record/collection, re-run subscription.
  */
 const SubscriptionsLdsPlugin = makePluginByCombiningPlugins(
+  PgLDSSourcePlugin,
   SubscriptionFieldsPlugin
 );
 
