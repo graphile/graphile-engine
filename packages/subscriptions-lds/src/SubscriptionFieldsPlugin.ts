@@ -19,14 +19,14 @@ const SubscriptionFieldsPlugin: Plugin = function(builder) {
         memo[queryFieldName] = {
           description: (queryField.description || "") + " (live)",
           type: queryField.type,
-          args: (queryField.args || []).reduce((memo, arg) => {
+          args: (queryField.args || []).reduce((newArgs, arg) => {
             const { name, description, type, defaultValue } = arg;
-            memo[name] = {
+            newArgs[name] = {
               description,
               type,
               defaultValue,
             };
-            return memo;
+            return newArgs;
           }, {}),
           resolve: queryField.resolve,
           subscribe: build.liveCoordinator.subscribe,
