@@ -233,7 +233,7 @@ class QueryBuilder {
     }
     this.data.select.push([exprGen, alias]);
   }
-  selectedIdentifiers(table: PgClass) {
+  selectIdentifiers(table: PgClass) {
     if (this.selectedIdentifiers) return;
     const primaryKey = table.primaryKeyConstraint;
     if (!primaryKey) return;
