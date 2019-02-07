@@ -5,18 +5,20 @@ type SubscriptionReleaser = () => void;
 type SubscriptionCallback = () => void;
 
 class LDSLiveSource {
-  private ws: WebSocket;
+  private url: string;
+  private reconnecting: boolean;
+  private live: boolean;
   private subscriptions: {
     [topic: string]: Array<SubscriptionCallback>;
   };
+  private ws: WebSocket;
 
   constructor(url: string) {
-    this.ws = new WebSocket(url);
-    this.ws.on("open", () => {
-      console.log("Connected to LDS server");
-    });
-    this.ws.on("message", this.handleMessage);
+    this.url = url;
+    this.reconnecting = false;
+    this.live = true;
     this.subscriptions = {};
+    this.connect();
   }
 
   public subscribeCollection(
@@ -43,6 +45,40 @@ class LDSLiveSource {
       ]),
       callback
     );
+  }
+
+  private connect() {
+    this.ws = new WebSocket(this.url);
+    this.ws.on("error", err => {
+      console.error("Websocket error");
+      console.error(err);
+      this.reconnect();
+    });
+    this.ws.on("open", () => {
+      // Resubscribe
+      for (const topic of Object.keys(this.subscriptions)) {
+        if (this.subscriptions[topic] && this.subscriptions[topic].length) {
+          this.ws.send("SUB " + topic);
+        }
+      }
+    });
+    this.ws.on("message", this.handleMessage);
+    this.ws.on("close", () => {
+      if (this.live) {
+        this.reconnect();
+      }
+    });
+  }
+
+  private reconnect() {
+    if (this.reconnecting) {
+      return;
+    }
+    this.reconnecting = true;
+    setTimeout(() => {
+      this.reconnecting = false;
+      this.connect();
+    }, 1000);
   }
 
   private sub(topic: string, cb: () => void) {
@@ -72,6 +108,9 @@ class LDSLiveSource {
       const messageString = message.toString("utf8");
       const payload = JSON.parse(messageString);
       switch (payload._) {
+        case "ACK":
+          // Connected, no action necessary.
+          return;
         case "KA":
           // Keep alive, no action necessary.
           return;
