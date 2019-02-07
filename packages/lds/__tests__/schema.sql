@@ -24,6 +24,10 @@ drop schema if exists app_public cascade;
 create schema app_public;
 set search_path to app_public, public;
 
+create function viewer_id() returns int as $$
+  select nullif(current_setting('jwt.claims.user_id', true), '')::int;
+$$ language sql stable;
+
 create table foo (
   id serial primary key,
   name text,
