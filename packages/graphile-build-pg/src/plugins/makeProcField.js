@@ -394,6 +394,11 @@ export default function makeProcField(
                   "value"
                 );
               }
+            } else if (
+              returnTypeTable &&
+              returnTypeTable.primaryKeyConstraint
+            ) {
+              innerQueryBuilder.selectIdentifiers(returnTypeTable);
             }
           }
         );
@@ -566,6 +571,7 @@ export default function makeProcField(
               const safeAlias = getSafeAliasFromResolveInfo(resolveInfo);
               const value = data[safeAlias];
               if (returnFirstValueAsValue) {
+                // Is not table like; is not record like.
                 if (proc.returnsSet && !forceList) {
                   // EITHER `isMutation` is true, or `ConnectionType` does not
                   // exist - either way, we're not returning a connection.
@@ -588,7 +594,7 @@ export default function makeProcField(
                 }
               }
             }
-          : async (data, args, { pgClient }, resolveInfo) => {
+          : async (data, args, { pgClient, liveRecord }, resolveInfo) => {
               const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
               const functionAlias = sql.identifier(Symbol());
               const sqlMutationQuery = makeMutationCall(
@@ -676,13 +682,44 @@ export default function makeProcField(
                 } else {
                   if (proc.returnsSet && !isMutation && !forceList) {
                     // Connection
+                    const data = row.data
+                      ? row.data.map(scalarAwarePg2gql)
+                      : null;
+                    if (isTableLike && data && returnTypeTable && liveRecord) {
+                      data.forEach(row =>
+                        liveRecord(
+                          resolveInfo,
+                          "pg",
+                          returnTypeTable,
+                          row.__identifiers
+                        )
+                      );
+                    }
                     return addStartEndCursor({
                       ...row,
-                      data: row.data ? row.data.map(scalarAwarePg2gql) : null,
+                      data,
                     });
                   } else if (proc.returnsSet || rawReturnType.isPgArray) {
+                    if (isTableLike && returnTypeTable && liveRecord) {
+                      rows.forEach(row =>
+                        liveRecord(
+                          resolveInfo,
+                          "pg",
+                          returnTypeTable,
+                          row.__identifiers
+                        )
+                      );
+                    }
                     return rows.map(row => pg2gql(row, returnType));
                   } else {
+                    if (isTableLike && row && returnTypeTable && liveRecord) {
+                      liveRecord(
+                        resolveInfo,
+                        "pg",
+                        returnTypeTable,
+                        row.__identifiers
+                      );
+                    }
                     return pg2gql(row, returnType);
                   }
                 }

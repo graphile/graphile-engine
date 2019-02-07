@@ -43,6 +43,18 @@ create table bar (
   updated_at timestamptz not null default now()
 );
 
+create function odd_foos() returns setof foo as $$
+  select * from app_public.foo where id % 2 = 1;
+$$ language sql stable;
+
+create function odd_foos_list() returns foo[] as $$
+  select array_agg(foo.*) from app_public.foo where id % 2 = 1;
+$$ language sql stable;
+
+create function foo_one() returns foo as $$
+  select * from app_public.foo where id = 1;
+$$ language sql stable;
+
 create function tg__update_timestamps() returns trigger as $$
 begin
   if tg_op = 'INSERT' then
