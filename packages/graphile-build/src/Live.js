@@ -87,7 +87,10 @@ export class LiveMonitor {
       throw new Error("Already monitoring for changes");
     }
     // Debounce to every 250ms
-    this.changeCallback = debounce(callback, 250);
+    this.changeCallback = debounce(callback, 250, {
+      leading: true,
+      trailing: true,
+    });
     setTimeout(this.handleChange, 0);
     return () => {
       this.changeCallback = null;
@@ -125,6 +128,7 @@ export class LiveMonitor {
     collectionIdentifier: any,
     recordIdentifier: any
   ) {
+    // TODO: if (recordIdentifier == null) {return}
     const provider = this.providers[namespace];
     if (!provider || provider.sources.length === 0) return;
     if (!provider.collectionIdentifierIsValid(collectionIdentifier)) {
