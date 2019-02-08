@@ -4,7 +4,7 @@ import type QueryBuilderOptions from "./QueryBuilder";
 import type { RawAlias } from "./QueryBuilder";
 import * as sql from "pg-sql2";
 import type { SQL } from "pg-sql2";
-import type { DataForType } from "graphile-build";
+import type { Context, DataForType } from "graphile-build";
 import isSafeInteger from "lodash/isSafeInteger";
 import assert from "assert";
 
@@ -23,7 +23,9 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
     addNullCase?: boolean,
     onlyJsonField?: boolean,
   },
-  withBuilder?: (builder: QueryBuilder) => void
+  // TODO:v5: context is not optional
+  withBuilder?: ((builder: QueryBuilder) => void) | null | void,
+  context?: Context = {}
 ) => {
   const {
     pgQuery,
@@ -43,7 +45,7 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
     reallyRawCursorPrefix && reallyRawCursorPrefix.filter(identity);
 
   // $FlowFixMe
-  const queryBuilder = new QueryBuilder(queryBuilderOptions);
+  const queryBuilder = new QueryBuilder(queryBuilderOptions, context);
   queryBuilder.from(from, fromAlias ? fromAlias : undefined);
 
   if (withBuilder) {

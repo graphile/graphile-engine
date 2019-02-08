@@ -346,7 +346,8 @@ export default function makeProcField(
         ReturnType,
         sqlMutationQuery,
         functionAlias,
-        parentQueryBuilder
+        parentQueryBuilder,
+        resolveContext
       ) {
         const resolveData = getDataFromParsedResolveInfoFragment(
           parsedResolveInfoFragment,
@@ -402,7 +403,8 @@ export default function makeProcField(
             ) {
               innerQueryBuilder.selectIdentifiers(returnTypeTable);
             }
-          }
+          },
+          parentQueryBuilder ? parentQueryBuilder.context : resolveContext
         );
         return query;
       }
@@ -596,7 +598,8 @@ export default function makeProcField(
                 }
               }
             }
-          : async (data, args, { pgClient, liveRecord }, resolveInfo) => {
+          : async (data, args, resolveContext, resolveInfo) => {
+              const { pgClient, liveRecord } = resolveContext;
               const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
               const functionAlias = sql.identifier(Symbol());
               const sqlMutationQuery = makeMutationCall(
@@ -612,7 +615,8 @@ export default function makeProcField(
                   resolveInfo.returnType,
                   functionAlias,
                   functionAlias,
-                  null
+                  null,
+                  resolveContext
                 );
                 const intermediateIdentifier = sql.identifier(Symbol());
                 const isVoid = returnType.id === "2278";
@@ -660,7 +664,8 @@ export default function makeProcField(
                   resolveInfo.returnType,
                   sqlMutationQuery,
                   functionAlias,
-                  null
+                  null,
+                  resolveContext
                 );
                 const { text, values } = sql.compile(query);
                 if (debugSql.enabled) debugSql(text);

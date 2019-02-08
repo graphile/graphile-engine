@@ -90,12 +90,8 @@ export default (async function PgAllRows(
                   ? ConnectionType
                   : new GraphQLList(new GraphQLNonNull(TableType)),
                 args: {},
-                async resolve(
-                  parent,
-                  args,
-                  { pgClient, liveRecord },
-                  resolveInfo
-                ) {
+                async resolve(parent, args, resolveContext, resolveInfo) {
+                  const { pgClient, liveRecord } = resolveContext;
                   const parsedResolveInfoFragment = parseResolveInfo(
                     resolveInfo
                   );
@@ -111,6 +107,9 @@ export default (async function PgAllRows(
                       withPaginationAsFields: isConnection,
                     },
                     queryBuilder => {
+                      if (subscriptions) {
+                        queryBuilder.makeLiveCollection(table);
+                      }
                       if (primaryKeys) {
                         if (subscriptions && liveRecord) {
                           queryBuilder.selectIdentifiers(table);
@@ -148,7 +147,8 @@ export default (async function PgAllRows(
                           }
                         });
                       }
-                    }
+                    },
+                    resolveContext
                   );
                   const { text, values } = sql.compile(query);
                   if (debugSql.enabled) debugSql(text);

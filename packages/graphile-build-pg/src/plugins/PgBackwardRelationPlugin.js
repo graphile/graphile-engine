@@ -178,7 +178,8 @@ export default (function PgBackwardRelationPlugin(
                                   )}`
                                 );
                               });
-                            }
+                            },
+                            queryBuilder.context
                           );
                           return sql.fragment`(${query})`;
                         }, getSafeAliasFromAlias(parsedResolveInfoFragment.alias));
@@ -274,6 +275,9 @@ export default (function PgBackwardRelationPlugin(
                               },
                               innerQueryBuilder => {
                                 innerQueryBuilder.parentQueryBuilder = queryBuilder;
+                                if (subscriptions) {
+                                  innerQueryBuilder.makeLiveCollection(table);
+                                }
                                 if (primaryKeys) {
                                   if (
                                     subscriptions &&
@@ -314,7 +318,8 @@ export default (function PgBackwardRelationPlugin(
                                     )}`
                                   );
                                 });
-                              }
+                              },
+                              queryBuilder.context
                             );
                             return sql.fragment`(${query})`;
                           }, getSafeAliasFromAlias(parsedResolveInfoFragment.alias));

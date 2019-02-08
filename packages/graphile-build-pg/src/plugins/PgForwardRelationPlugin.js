@@ -140,7 +140,8 @@ export default (function PgForwardRelationPlugin(builder, { subscriptions }) {
                                 )}`
                               );
                             });
-                          }
+                          },
+                          queryBuilder.context
                         );
                         return sql.fragment`(${query})`;
                       }, getSafeAliasFromAlias(parsedResolveInfoFragment.alias));

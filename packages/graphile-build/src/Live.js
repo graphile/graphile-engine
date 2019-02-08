@@ -101,7 +101,7 @@ export class LiveMonitor {
     info: GraphQLResolveInfo,
     namespace: string,
     collectionIdentifier: any,
-    predicate?: (record: any) => boolean
+    predicate: (record: any) => boolean = () => true
   ) {
     const provider = this.providers[namespace];
     if (!provider || provider.sources.length === 0) return;

@@ -35,12 +35,13 @@ export default (async function PgRowNode(builder, { subscriptions }) {
       async (
         data,
         identifiers,
-        { pgClient, liveRecord },
+        resolveContext,
         parsedResolveInfoFragment,
         ReturnType,
         resolveData,
         resolveInfo
       ) => {
+        const { pgClient, liveRecord } = resolveContext;
         if (identifiers.length !== primaryKeys.length) {
           throw new Error("Invalid ID");
         }
@@ -64,7 +65,8 @@ export default (async function PgRowNode(builder, { subscriptions }) {
                 )}`
               );
             });
-          }
+          },
+          resolveContext
         );
         const { text, values } = sql.compile(query);
         if (debugSql.enabled) debugSql(text);
@@ -145,12 +147,8 @@ export default (async function PgRowNode(builder, { subscriptions }) {
                         type: new GraphQLNonNull(GraphQLID),
                       },
                     },
-                    async resolve(
-                      parent,
-                      args,
-                      { pgClient, liveRecord },
-                      resolveInfo
-                    ) {
+                    async resolve(parent, args, resolveContext, resolveInfo) {
+                      const { pgClient, liveRecord } = resolveContext;
                       const nodeId = args[nodeIdFieldName];
                       try {
                         const {
@@ -191,7 +189,8 @@ export default (async function PgRowNode(builder, { subscriptions }) {
                                 )}`
                               );
                             });
-                          }
+                          },
+                          resolveContext
                         );
                         const { text, values } = sql.compile(query);
                         if (debugSql.enabled) debugSql(text);

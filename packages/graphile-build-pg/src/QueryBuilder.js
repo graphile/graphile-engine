@@ -4,6 +4,7 @@ import type { SQL } from "pg-sql2";
 import isSafeInteger from "lodash/isSafeInteger";
 import chunk from "lodash/chunk";
 import type { PgClass } from "./plugins/PgIntrospectionPlugin";
+import type { Context } from "graphile-build";
 
 const isDev = process.env.POSTGRAPHILE_ENV === "development";
 
@@ -43,12 +44,15 @@ export type QueryBuilderOptions = {
 };
 
 class QueryBuilder {
+  context: Context;
   supportsJSONB: boolean;
   locks: {
     [string]: true | string,
   };
   finalized: boolean;
   selectedIdentifiers: boolean;
+  // eslint-disable-next-line flowtype/no-weak-types
+  liveConditions: Array<(record: any) => boolean>;
   data: {
     cursorPrefix: Array<string>,
     select: Array<[SQLGen, RawAlias]>,
@@ -91,11 +95,13 @@ class QueryBuilder {
     cursorComparator: ?CursorComparator,
   };
 
-  constructor(options: QueryBuilderOptions = {}) {
+  constructor(options: QueryBuilderOptions = {}, context: Context = {}) {
+    this.context = context || {};
     this.supportsJSONB =
       options.supportsJSONB == null ? true : !!options.supportsJSONB;
 
     this.locks = {};
+    this.liveConditions = [];
     this.finalized = false;
     this.selectedIdentifiers = false;
     this.data = {
@@ -200,6 +206,16 @@ class QueryBuilder {
     this.data.beforeLock[field] = this.data.beforeLock[field] || [];
     this.data.beforeLock[field].push(fn);
   }
+
+  makeLiveCollection(table) {
+    if (!this.context.liveCollection) return;
+    this.beforeLock(() => {
+      this.liveCollection(null, "pg", table, record => {
+        return this.liveConditions.all(c => c(record));
+      });
+    });
+  }
+
   setCursorComparator(fn: CursorComparator) {
     this.checkLock("cursorComparator");
     this.data.cursorComparator = fn;
