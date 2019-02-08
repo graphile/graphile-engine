@@ -74,6 +74,12 @@ Very optional:
 - `LD_MAX_CLIENTS` - set to the maximum number of clients to allow to connect to the server. Defaults to `50`. (Each PostGraphile instance counts as one client.)
 - `LD_WAIT` - duration in milliseconds to pause between logical decoding polls; defaults to `200`, reduce for lower latency but higher CPU usage.
 
+## Running
+
+This package installs the `graphile-lds` command. If you installed it globally you should be able to execute it directly, otherwise we advise you run `npx` to run it:
+
+`LD_DATABASE_URL="my_db" npx graphile-lds`
+
 ## Cleaning up
 
 It's essential that you drop the logical replication slot when you no longer
