@@ -11,7 +11,7 @@ You need `wal2json`; this is available on:
 - Amazon RDS
 - (please send a PR adding more compatible providers)
 
-On your Unix-based OS (assuming `pg_config` is in your path) you can add it in a few seconds with:
+If you don't already have it, you can install it. On your Unix-based OS (assuming `pg_config` is in your path) you can add it in a few seconds with:
 
 ```bash
 git clone https://github.com/eulerto/wal2json.git
