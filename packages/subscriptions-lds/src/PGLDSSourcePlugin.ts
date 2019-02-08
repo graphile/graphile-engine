@@ -167,7 +167,7 @@ class LDSLiveSource {
 
 const PgLDSSourcePlugin: Plugin = async function(
   builder,
-  { pgLDSUrl = process.env.LDS_SERVER_URL }
+  { pgLDSUrl = process.env.LDS_SERVER_URL || "ws://127.0.0.1:9876" }
 ) {
   if (typeof pgLDSUrl !== "string") {
     return;
