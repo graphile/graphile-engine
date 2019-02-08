@@ -2,7 +2,7 @@
 import type { Plugin } from "graphile-build";
 import debugSql from "./debugSql";
 
-export default (async function PgRowNode(builder) {
+export default (async function PgRowNode(builder, { subscriptions }) {
   builder.hook("GraphQLObjectType", (object, build, context) => {
     const {
       addNodeFetcherForTypeName,
@@ -35,10 +35,11 @@ export default (async function PgRowNode(builder) {
       async (
         data,
         identifiers,
-        { pgClient },
+        { pgClient, liveRecord },
         parsedResolveInfoFragment,
         ReturnType,
-        resolveData
+        resolveData,
+        resolveInfo
       ) => {
         if (identifiers.length !== primaryKeys.length) {
           throw new Error("Invalid ID");
@@ -49,6 +50,9 @@ export default (async function PgRowNode(builder) {
           resolveData,
           {},
           queryBuilder => {
+            if (subscriptions) {
+              queryBuilder.selectIdentifiers(table);
+            }
             primaryKeys.forEach((key, idx) => {
               queryBuilder.where(
                 sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
@@ -67,6 +71,9 @@ export default (async function PgRowNode(builder) {
         const {
           rows: [row],
         } = await pgClient.query(text, values);
+        if (subscriptions && liveRecord) {
+          liveRecord(resolveInfo, "pg", table, row.__identifiers);
+        }
         return row;
       }
     );
@@ -138,7 +145,12 @@ export default (async function PgRowNode(builder) {
                         type: new GraphQLNonNull(GraphQLID),
                       },
                     },
-                    async resolve(parent, args, { pgClient }, resolveInfo) {
+                    async resolve(
+                      parent,
+                      args,
+                      { pgClient, liveRecord },
+                      resolveInfo
+                    ) {
                       const nodeId = args[nodeIdFieldName];
                       try {
                         const {
@@ -165,6 +177,9 @@ export default (async function PgRowNode(builder) {
                           resolveData,
                           {},
                           queryBuilder => {
+                            if (subscriptions) {
+                              queryBuilder.selectIdentifiers(table);
+                            }
                             primaryKeys.forEach((key, idx) => {
                               queryBuilder.where(
                                 sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
@@ -183,6 +198,14 @@ export default (async function PgRowNode(builder) {
                         const {
                           rows: [row],
                         } = await pgClient.query(text, values);
+                        if (liveRecord) {
+                          liveRecord(
+                            resolveInfo,
+                            "pg",
+                            table,
+                            row.__identifiers
+                          );
+                        }
                         return row;
                       } catch (e) {
                         return null;

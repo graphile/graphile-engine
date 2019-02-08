@@ -11,7 +11,7 @@ const ONLY = 2;
 
 export default (function PgBackwardRelationPlugin(
   builder,
-  { pgLegacyRelations, pgSimpleCollections }
+  { pgLegacyRelations, pgSimpleCollections, subscriptions }
 ) {
   const hasConnections = pgSimpleCollections !== "only";
   const hasSimpleCollections =
@@ -166,6 +166,9 @@ export default (function PgBackwardRelationPlugin(
                             },
                             innerQueryBuilder => {
                               innerQueryBuilder.parentQueryBuilder = queryBuilder;
+                              if (subscriptions) {
+                                innerQueryBuilder.selectIdentifiers(table);
+                              }
                               keys.forEach((key, i) => {
                                 innerQueryBuilder.where(
                                   sql.fragment`${tableAlias}.${sql.identifier(
@@ -188,11 +191,20 @@ export default (function PgBackwardRelationPlugin(
                       `Reads a single \`${tableTypeName}\` that is related to this \`${foreignTableTypeName}\`.`,
                     type: gqlTableType,
                     args: {},
-                    resolve: (data, _args, _context, resolveInfo) => {
+                    resolve: (data, _args, resolveContext, resolveInfo) => {
                       const safeAlias = getSafeAliasFromResolveInfo(
                         resolveInfo
                       );
-                      return data[safeAlias];
+                      const record = data[safeAlias];
+                      if (resolveContext.liveRecord) {
+                        resolveContext.liveRecord(
+                          resolveInfo,
+                          "pg",
+                          table,
+                          record.__identifiers
+                        );
+                      }
+                      return record;
                     },
                   };
                 },
@@ -263,6 +275,9 @@ export default (function PgBackwardRelationPlugin(
                               innerQueryBuilder => {
                                 innerQueryBuilder.parentQueryBuilder = queryBuilder;
                                 if (primaryKeys) {
+                                  if (subscriptions) {
+                                    innerQueryBuilder.selectIdentifiers(table);
+                                  }
                                   innerQueryBuilder.beforeLock(
                                     "orderBy",
                                     () => {
@@ -320,14 +335,25 @@ export default (function PgBackwardRelationPlugin(
                             new GraphQLList(new GraphQLNonNull(TableType))
                           ),
                       args: {},
-                      resolve: (data, _args, _context, resolveInfo) => {
+                      resolve: (data, _args, resolveContext, resolveInfo) => {
                         const safeAlias = getSafeAliasFromResolveInfo(
                           resolveInfo
                         );
                         if (isConnection) {
                           return addStartEndCursor(data[safeAlias]);
                         } else {
-                          return data[safeAlias];
+                          const records = data[safeAlias];
+                          if (resolveContext.liveRecord) {
+                            records.forEach(r =>
+                              resolveContext.liveRecord(
+                                resolveInfo,
+                                "pg",
+                                table,
+                                r.__identifiers
+                              )
+                            );
+                          }
+                          return records;
                         }
                       },
                       ...(isDeprecated

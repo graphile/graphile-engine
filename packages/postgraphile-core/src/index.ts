@@ -82,6 +82,7 @@ export interface PostGraphileCoreOptions {
   ignoreRBAC?: boolean;
   legacyFunctionsOnly?: boolean;
   ignoreIndexes?: boolean;
+  subscriptions?: boolean;
 }
 
 type PgConfig = Client | Pool | string;
@@ -197,6 +198,7 @@ const getPostGraphileBuilder = async (
     ignoreRBAC = true, // TODO:v5: Change to 'false' in v5
     legacyFunctionsOnly = false, // TODO:v5: Remove in v5
     ignoreIndexes = true, // TODO:v5: Change to 'false' in v5
+    subscriptions = false, // TODO:v5: Change to 'true' in v5
   } = options;
 
   if (
@@ -354,6 +356,17 @@ const getPostGraphileBuilder = async (
     pgIgnoreRBAC: ignoreRBAC,
     pgLegacyFunctionsOnly: legacyFunctionsOnly,
     pgIgnoreIndexes: ignoreIndexes,
+
+    /*
+     * `subscriptions` acts as a feature flag telling us to fetch all the
+     * relevant database identifiers. We can't enable this by default in v4
+     * because it's possible that someone has used column-level select grants
+     * on a table in their DB but has not granted select access to one of their
+     * primary key columns. This flag requires that if a table is selectable
+     * then the PKs must be also.
+     */
+    subscriptions,
+
     ...graphileBuildOptions,
     ...graphqlBuildOptions, // DEPRECATED!
   });

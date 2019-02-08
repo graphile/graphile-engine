@@ -2,7 +2,10 @@
 import type { Plugin } from "graphile-build";
 import debugSql from "./debugSql";
 
-export default (async function PgRowByUniqueConstraint(builder) {
+export default (async function PgRowByUniqueConstraint(
+  builder,
+  { subscriptions }
+) {
   builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
     const {
       extend,
@@ -82,7 +85,12 @@ export default (async function PgRowByUniqueConstraint(builder) {
                     };
                     return memo;
                   }, {}),
-                  async resolve(parent, args, { pgClient }, resolveInfo) {
+                  async resolve(
+                    parent,
+                    args,
+                    { pgClient, liveRecord },
+                    resolveInfo
+                  ) {
                     const parsedResolveInfoFragment = parseResolveInfo(
                       resolveInfo
                     );
@@ -96,6 +104,9 @@ export default (async function PgRowByUniqueConstraint(builder) {
                       resolveData,
                       {},
                       queryBuilder => {
+                        if (subscriptions && table.primaryKeyConstraint) {
+                          queryBuilder.selectIdentifiers(table);
+                        }
                         keys.forEach(key => {
                           queryBuilder.where(
                             sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
@@ -114,6 +125,9 @@ export default (async function PgRowByUniqueConstraint(builder) {
                     const {
                       rows: [row],
                     } = await pgClient.query(text, values);
+                    if (subscriptions && liveRecord) {
+                      liveRecord(resolveInfo, "pg", table, row.__identifiers);
+                    }
                     return row;
                   },
                 };
