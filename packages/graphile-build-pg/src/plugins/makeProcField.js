@@ -64,6 +64,7 @@ export default function makeProcField(
     describePgEntity,
     sqlCommentByAddingTags,
     pgField,
+    options: { subscriptions = false },
   } = build;
 
   if (computed && isMutation) {
@@ -395,6 +396,7 @@ export default function makeProcField(
                 );
               }
             } else if (
+              subscriptions &&
               returnTypeTable &&
               returnTypeTable.primaryKeyConstraint
             ) {
@@ -685,7 +687,13 @@ export default function makeProcField(
                     const data = row.data
                       ? row.data.map(scalarAwarePg2gql)
                       : null;
-                    if (isTableLike && data && returnTypeTable && liveRecord) {
+                    if (
+                      subscriptions &&
+                      isTableLike &&
+                      data &&
+                      returnTypeTable &&
+                      liveRecord
+                    ) {
                       data.forEach(row =>
                         liveRecord(
                           resolveInfo,
@@ -700,7 +708,12 @@ export default function makeProcField(
                       data,
                     });
                   } else if (proc.returnsSet || rawReturnType.isPgArray) {
-                    if (isTableLike && returnTypeTable && liveRecord) {
+                    if (
+                      subscriptions &&
+                      isTableLike &&
+                      returnTypeTable &&
+                      liveRecord
+                    ) {
                       rows.forEach(row =>
                         liveRecord(
                           resolveInfo,
@@ -712,7 +725,13 @@ export default function makeProcField(
                     }
                     return rows.map(row => pg2gql(row, returnType));
                   } else {
-                    if (isTableLike && row && returnTypeTable && liveRecord) {
+                    if (
+                      subscriptions &&
+                      isTableLike &&
+                      row &&
+                      returnTypeTable &&
+                      liveRecord
+                    ) {
                       liveRecord(
                         resolveInfo,
                         "pg",

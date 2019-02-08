@@ -50,7 +50,7 @@ export default (async function PgRowNode(builder, { subscriptions }) {
           resolveData,
           {},
           queryBuilder => {
-            if (subscriptions) {
+            if (subscriptions && table.primaryKeyConstraint) {
               queryBuilder.selectIdentifiers(table);
             }
             primaryKeys.forEach((key, idx) => {
@@ -177,7 +177,7 @@ export default (async function PgRowNode(builder, { subscriptions }) {
                           resolveData,
                           {},
                           queryBuilder => {
-                            if (subscriptions) {
+                            if (subscriptions && table.primaryKeyConstraint) {
                               queryBuilder.selectIdentifiers(table);
                             }
                             primaryKeys.forEach((key, idx) => {

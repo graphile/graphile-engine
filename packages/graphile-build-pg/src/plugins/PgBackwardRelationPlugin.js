@@ -166,7 +166,7 @@ export default (function PgBackwardRelationPlugin(
                             },
                             innerQueryBuilder => {
                               innerQueryBuilder.parentQueryBuilder = queryBuilder;
-                              if (subscriptions) {
+                              if (subscriptions && table.primaryKeyConstraint) {
                                 innerQueryBuilder.selectIdentifiers(table);
                               }
                               keys.forEach((key, i) => {
@@ -275,7 +275,10 @@ export default (function PgBackwardRelationPlugin(
                               innerQueryBuilder => {
                                 innerQueryBuilder.parentQueryBuilder = queryBuilder;
                                 if (primaryKeys) {
-                                  if (subscriptions) {
+                                  if (
+                                    subscriptions &&
+                                    table.primaryKeyConstraint
+                                  ) {
                                     innerQueryBuilder.selectIdentifiers(table);
                                   }
                                   innerQueryBuilder.beforeLock(

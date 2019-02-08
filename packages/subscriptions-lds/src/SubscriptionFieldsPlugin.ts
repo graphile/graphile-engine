@@ -1,7 +1,10 @@
 import { Plugin } from "postgraphile-core";
 import { GraphQLObjectType } from "graphql";
 
-const SubscriptionFieldsPlugin: Plugin = function(builder) {
+const SubscriptionFieldsPlugin: Plugin = function(builder, { subscriptions }) {
+  if (!subscriptions) {
+    return;
+  }
   builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
     const { extend, getTypeByName, inflection } = build;
     const {

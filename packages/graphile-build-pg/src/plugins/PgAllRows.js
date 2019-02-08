@@ -5,7 +5,7 @@ import debugSql from "./debugSql";
 
 export default (async function PgAllRows(
   builder,
-  { pgViewUniqueKey, pgSimpleCollections }
+  { pgViewUniqueKey, pgSimpleCollections, subscriptions }
 ) {
   const hasConnections = pgSimpleCollections !== "only";
   const hasSimpleCollections =
@@ -112,7 +112,7 @@ export default (async function PgAllRows(
                     },
                     queryBuilder => {
                       if (primaryKeys) {
-                        if (liveRecord) {
+                        if (subscriptions && liveRecord) {
                           queryBuilder.selectIdentifiers(table);
                         }
                         queryBuilder.beforeLock("orderBy", () => {
