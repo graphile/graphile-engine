@@ -9,6 +9,9 @@
     "watch": "tsc --watch",
     "test": "jest"
   },
+  "bin": {
+    "graphile-lds": "./dist/index.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/graphile/lds.git"
