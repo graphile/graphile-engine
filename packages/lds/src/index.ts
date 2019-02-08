@@ -13,9 +13,10 @@ const TABLE_PATTERN = process.env.LD_TABLE_PATTERN || "*.*";
 const SLOT_NAME = process.env.LD_SLOT_NAME || "postgraphile";
 const PORT =
   parseInt(process.env.LD_PORT || process.env.PORT || "", 10) || 9876;
+const HOST = process.env.LD_HOST || "127.0.0.1";
 
 // Maximum number of expected clients
-const SLOTS = parseInt(process.env.LD_SLOTS || "", 10) || 50;
+const SLOTS = parseInt(process.env.LD_MAX_CLIENTS || "", 10) || 50;
 
 const SLEEP_DURATION = Math.max(
   1,
@@ -47,7 +48,7 @@ async function main() {
   }
 
   // Now slot is created, create websocket server
-  const wss = new WebSocket.Server({ port: PORT });
+  const wss = new WebSocket.Server({ port: PORT, host: HOST });
   const clients: Array<WebSocket> = [];
   const channels: {
     [schema: string]: {
