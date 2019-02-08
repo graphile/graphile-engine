@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/graphile/lds.git"
+    "url": "git+ssh://git@github.com/graphile/graphile-engine.git"
   },
   "keywords": [
     "pg",
@@ -31,9 +31,9 @@
   "author": "Benjie Gillam <code@benjiegillam.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/graphile/lds/issues"
+    "url": "https://github.com/graphile/graphile-engine/issues"
   },
-  "homepage": "https://github.com/graphile/lds#readme",
+  "homepage": "https://github.com/graphile/graphile-engine/tree/master/packages/lds#readme",
   "dependencies": {
     "@types/pg": "^7.4.11",
     "@types/ws": "^6.0.1",
