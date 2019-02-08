@@ -137,7 +137,7 @@ export default class PgLogicalDecoding extends EventEmitter {
   public async getChanges(
     uptoLsn: string | null = null,
     uptoNchanges: number | null = null
-  ) {
+  ): Promise<Array<Payload>> {
     await this.connect();
     try {
       const { rows } = await this.client.query({
