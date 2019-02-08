@@ -250,6 +250,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
   const fieldArgDataGeneratorsByFieldNameByType = new Map();
 
   return {
+    options: builder.options,
     graphileBuildVersion: version,
     versions: {
       graphql: require("graphql/package.json").version,

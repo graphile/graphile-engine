@@ -47,7 +47,7 @@ export const getBuilder = async (
   plugins: Array<Plugin>,
   options: Options = {}
 ): Promise<SchemaBuilder> => {
-  const builder = new SchemaBuilder();
+  const builder = new SchemaBuilder(options);
   for (let i = 0, l = plugins.length; i < l; i++) {
     const plugin = plugins[i];
     if (typeof plugin !== "function") {
