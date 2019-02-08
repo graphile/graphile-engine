@@ -123,7 +123,7 @@ export default (async function PgRowByUniqueConstraint(
                       rows: [row],
                     } = await pgClient.query(text, values);
                     if (subscriptions && liveRecord) {
-                      liveRecord(resolveInfo, "pg", table, row.__identifiers);
+                      liveRecord("pg", table, row.__identifiers);
                     }
                     return row;
                   },

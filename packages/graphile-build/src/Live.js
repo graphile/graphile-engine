@@ -98,7 +98,6 @@ export class LiveMonitor {
   }
 
   liveCollection(
-    info: GraphQLResolveInfo,
     namespace: string,
     collectionIdentifier: any,
     predicate: (record: any) => boolean = () => true
@@ -123,7 +122,6 @@ export class LiveMonitor {
   }
 
   liveRecord(
-    info: GraphQLResolveInfo,
     namespace: string,
     collectionIdentifier: any,
     recordIdentifier: any
@@ -190,6 +188,7 @@ export class LiveCoordinator {
       context: {
         liveCollection: monitor.liveCollection.bind(monitor),
         liveRecord: monitor.liveRecord.bind(monitor),
+        liveConditions: [],
       },
     };
   }

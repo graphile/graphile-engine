@@ -99,6 +99,7 @@ export default (async function PgAllRows(
                     parsedResolveInfoFragment,
                     resolveInfo.returnType
                   );
+                  let checkerGenerator;
                   const query = queryFromResolveData(
                     sqlFullTableName,
                     undefined,
@@ -108,7 +109,11 @@ export default (async function PgAllRows(
                     },
                     queryBuilder => {
                       if (subscriptions) {
-                        queryBuilder.makeLiveCollection(table);
+                        queryBuilder.makeLiveCollection(
+                          table,
+                          _checkerGenerator =>
+                            (checkerGenerator = _checkerGenerator)
+                        );
                       }
                       if (primaryKeys) {
                         if (subscriptions && liveRecord) {
@@ -153,6 +158,12 @@ export default (async function PgAllRows(
                   const { text, values } = sql.compile(query);
                   if (debugSql.enabled) debugSql(text);
                   const result = await pgClient.query(text, values);
+
+                  if (subscriptions && resolveContext.liveCollection) {
+                    const checker = checkerGenerator();
+                    resolveContext.liveCollection("pg", table, checker);
+                  }
+
                   if (isConnection) {
                     const {
                       rows: [row],
@@ -161,12 +172,7 @@ export default (async function PgAllRows(
                   } else {
                     if (primaryKeys && context.liveRecord) {
                       result.rows.forEach(row =>
-                        context.liveRecord(
-                          resolveInfo,
-                          "pg",
-                          table,
-                          row.__identifiers
-                        )
+                        context.liveRecord("pg", table, row.__identifiers)
                       );
                     }
                     return result.rows;

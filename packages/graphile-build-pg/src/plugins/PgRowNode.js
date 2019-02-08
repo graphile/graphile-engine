@@ -74,7 +74,7 @@ export default (async function PgRowNode(builder, { subscriptions }) {
           rows: [row],
         } = await pgClient.query(text, values);
         if (subscriptions && liveRecord) {
-          liveRecord(resolveInfo, "pg", table, row.__identifiers);
+          liveRecord("pg", table, row.__identifiers);
         }
         return row;
       }
@@ -198,12 +198,7 @@ export default (async function PgRowNode(builder, { subscriptions }) {
                           rows: [row],
                         } = await pgClient.query(text, values);
                         if (liveRecord) {
-                          liveRecord(
-                            resolveInfo,
-                            "pg",
-                            table,
-                            row.__identifiers
-                          );
+                          liveRecord("pg", table, row.__identifiers);
                         }
                         return row;
                       } catch (e) {

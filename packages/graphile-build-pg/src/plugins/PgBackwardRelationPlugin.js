@@ -199,7 +199,6 @@ export default (function PgBackwardRelationPlugin(
                       const record = data[safeAlias];
                       if (resolveContext.liveRecord) {
                         resolveContext.liveRecord(
-                          resolveInfo,
                           "pg",
                           table,
                           record.__identifiers
@@ -277,6 +276,22 @@ export default (function PgBackwardRelationPlugin(
                                 innerQueryBuilder.parentQueryBuilder = queryBuilder;
                                 if (subscriptions) {
                                   innerQueryBuilder.makeLiveCollection(table);
+                                  innerQueryBuilder.addLiveCondition(
+                                    data => record => {
+                                      return keys.every(
+                                        key =>
+                                          record[key.name] === data[key.name]
+                                      );
+                                    },
+                                    keys.reduce((memo, key, i) => {
+                                      memo[
+                                        key.name
+                                      ] = sql.fragment`${foreignTableAlias}.${sql.identifier(
+                                        foreignKeys[i].name
+                                      )}`;
+                                      return memo;
+                                    }, {})
+                                  );
                                 }
                                 if (primaryKeys) {
                                   if (
@@ -347,6 +362,17 @@ export default (function PgBackwardRelationPlugin(
                         const safeAlias = getSafeAliasFromResolveInfo(
                           resolveInfo
                         );
+                        if (
+                          subscriptions &&
+                          resolveContext.liveCollection &&
+                          data.__live
+                        ) {
+                          const { __id, ...rest } = data.__live;
+                          const condition = resolveContext.liveConditions[__id];
+                          const checker = condition(rest);
+
+                          resolveContext.liveCollection("pg", table, checker);
+                        }
                         if (isConnection) {
                           return addStartEndCursor(data[safeAlias]);
                         } else {
@@ -354,7 +380,6 @@ export default (function PgBackwardRelationPlugin(
                           if (resolveContext.liveRecord) {
                             records.forEach(r =>
                               resolveContext.liveRecord(
-                                resolveInfo,
                                 "pg",
                                 table,
                                 r.__identifiers

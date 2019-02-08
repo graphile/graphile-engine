@@ -159,7 +159,6 @@ export default (function PgForwardRelationPlugin(builder, { subscriptions }) {
                     const record = data[safeAlias];
                     if (resolveContext.liveRecord) {
                       resolveContext.liveRecord(
-                        resolveInfo,
                         "pg",
                         foreignTable,
                         record.__identifiers

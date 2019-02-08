@@ -51,8 +51,6 @@ class QueryBuilder {
   };
   finalized: boolean;
   selectedIdentifiers: boolean;
-  // eslint-disable-next-line flowtype/no-weak-types
-  liveConditions: Array<(record: any) => boolean>;
   data: {
     cursorPrefix: Array<string>,
     select: Array<[SQLGen, RawAlias]>,
@@ -74,6 +72,8 @@ class QueryBuilder {
       [string]: Array<() => void>,
     },
     cursorComparator: ?CursorComparator,
+    // eslint-disable-next-line flowtype/no-weak-types
+    liveConditions: Array<(record: any) => boolean>,
   };
   compiledData: {
     cursorPrefix: Array<string>,
@@ -101,7 +101,6 @@ class QueryBuilder {
       options.supportsJSONB == null ? true : !!options.supportsJSONB;
 
     this.locks = {};
-    this.liveConditions = [];
     this.finalized = false;
     this.selectedIdentifiers = false;
     this.data = {
@@ -124,6 +123,7 @@ class QueryBuilder {
       last: null,
       beforeLock: {},
       cursorComparator: null,
+      liveConditions: [],
     };
     this.compiledData = {
       cursorPrefix: ["natural"],
@@ -207,13 +207,69 @@ class QueryBuilder {
     this.data.beforeLock[field].push(fn);
   }
 
-  makeLiveCollection(table) {
+  makeLiveCollection(
+    table,
+    // eslint-disable-next-line flowtype/no-weak-types
+    cb?: (checker: (data: any) => (record: any) => boolean) => void
+  ) {
     if (!this.context.liveCollection) return;
-    this.beforeLock(() => {
-      this.liveCollection(null, "pg", table, record => {
-        return this.liveConditions.all(c => c(record));
+    if (!this.context.liveConditions) return;
+    /* the actual condition doesn't matter hugely, 'select' should work */
+    const checkerGenerator = data => {
+      // Compute this once.
+      const checkers = this.data.liveConditions.map(([c]) => c(data));
+      return record => checkers.every(c => c(record));
+    };
+    if (this.parentQueryBuilder) {
+      if (cb) {
+        throw new Error(
+          "Either use parentQueryBuilder or pass callback, not both."
+        );
+      }
+      this.parentQueryBuilder.beforeLock("select", () => {
+        const id = this.context.liveConditions.push(checkerGenerator) - 1;
+        // BEWARE: it's easy to override others' conditions, and that will cause issues. Be sensible.
+        const allRequirements = this.data.liveConditions.reduce(
+          (memo, [, c]) => Object.assign(memo, c),
+          {}
+        );
+        this.parentQueryBuilder.select(
+          sql.fragment`json_build_object(
+          '__id', ${sql.value(id)}::int
+          ${sql.join(
+            Object.keys(allRequirements).map(
+              key =>
+                sql.fragment`, ${sql.literal(key)}::text, ${
+                  allRequirements[key]
+                }`
+            ),
+
+            ", "
+          )}
+          )`,
+          "__live"
+        );
       });
-    });
+    } else if (cb) {
+      cb(checkerGenerator);
+    } else {
+      throw new Error(
+        "makeLiveCollection was called without parentQueryBuilder and without callback"
+      );
+    }
+  }
+
+  addLiveCondition(
+    // eslint-disable-next-line flowtype/no-weak-types
+    checker: (data: {}) => (record: any) => boolean,
+    requirements: { [key: string]: SQL }
+  ) {
+    if (requirements && !this.parentQueryBuilder) {
+      throw new Error(
+        "There's no parentQueryBuilder, so there cannot be requirements"
+      );
+    }
+    this.data.liveConditions.push([checker, requirements]);
   }
 
   setCursorComparator(fn: CursorComparator) {
@@ -590,11 +646,15 @@ class QueryBuilder {
       queryBuilder: this,
     });
     const beforeLocks = this.data.beforeLock[type];
-    this.data.beforeLock[type] = [];
-    for (const fn of beforeLocks || []) {
-      fn();
+    if (beforeLocks && beforeLocks.length) {
+      this.data.beforeLock[type] = null;
+      for (const fn of beforeLocks) {
+        fn();
+      }
     }
-    this.locks[type] = isDev ? new Error("Initally locked here").stack : true;
+    if (type !== "select") {
+      this.locks[type] = isDev ? new Error("Initally locked here").stack : true;
+    }
     if (type === "cursorComparator") {
       // It's meant to be a function
       this.compiledData[type] = this.data[type];
@@ -610,18 +670,38 @@ class QueryBuilder {
         context
       );
     } else if (type === "select") {
-      // Assume that duplicate fields must be identical, don't output the same key multiple times
+      /*
+       * NOTICE: locking select can cause additional selects to be added, so the
+       * length of this.data[type] may increase during the operation. This is
+       * why we handle this.locks[type] separately.
+       */
+
+      // Assume that duplicate fields must be identical, don't output the same
+      // key multiple times
       const seenFields = {};
       const context = getContext();
-      this.compiledData[type] = this.data[type].reduce((memo, [a, b]) => {
+      const data = [];
+      const selects = this.data[type];
+
+      // DELIBERATE slow loop, see NOTICE above
+      for (let i = 0; i < selects.length; i++) {
+        const [valueOrGenerator, columnName] = selects[i];
         // $FlowFixMe
-        if (!seenFields[b]) {
+        if (!seenFields[columnName]) {
           // $FlowFixMe
-          seenFields[b] = true;
-          memo.push([callIfNecessary(a, context), b]);
+          seenFields[columnName] = true;
+          data.push([callIfNecessary(valueOrGenerator, context), columnName]);
+          const newBeforeLocks = this.data.beforeLock[type];
+          if (newBeforeLocks && newBeforeLocks.length) {
+            this.data.beforeLock[type] = null;
+            for (const fn of newBeforeLocks) {
+              fn();
+            }
+          }
         }
-        return memo;
-      }, []);
+      }
+      this.locks[type] = isDev ? new Error("Initally locked here").stack : true;
+      this.compiledData[type] = data;
     } else if (type === "orderBy") {
       const context = getContext();
       this.compiledData[type] = this.data[type].map(([a, b, c]) => [

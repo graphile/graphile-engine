@@ -3,13 +3,14 @@ import { Plugin } from "postgraphile-core";
 import * as WebSocket from "ws";
 type SubscriptionReleaser = () => void;
 type SubscriptionCallback = () => void;
+type Predicate = (record: any) => boolean;
 
 class LDSLiveSource {
   private url: string;
   private reconnecting: boolean;
   private live: boolean;
   private subscriptions: {
-    [topic: string]: Array<SubscriptionCallback>;
+    [topic: string]: Array<[SubscriptionCallback, Predicate | void]>;
   };
   private ws: WebSocket;
 
@@ -24,11 +25,16 @@ class LDSLiveSource {
   public subscribeCollection(
     callback: () => void,
     collectionIdentifier: any,
-    predicate?: (record: any) => boolean
+    predicate?: Predicate
   ): SubscriptionReleaser | null {
-    console.log("collection", collectionIdentifier.name, predicate, callback);
-
-    return null;
+    return this.sub(
+      JSON.stringify([
+        collectionIdentifier.namespaceName,
+        collectionIdentifier.name,
+      ]),
+      callback,
+      predicate
+    );
   }
 
   public subscribeRecord(
@@ -80,12 +86,16 @@ class LDSLiveSource {
     }, 1000);
   }
 
-  private sub(topic: string, cb: () => void) {
+  private sub(
+    topic: string,
+    cb: SubscriptionCallback,
+    predicate?: Predicate | void
+  ) {
+    const entry: [SubscriptionCallback, Predicate | void] = [cb, predicate];
     if (!this.subscriptions[topic]) {
       this.subscriptions[topic] = [];
     }
-
-    const newLength = this.subscriptions[topic].push(cb);
+    const newLength = this.subscriptions[topic].push(entry);
     if (newLength === 1) {
       this.ws.send("SUB " + topic);
     }
@@ -96,12 +106,23 @@ class LDSLiveSource {
         return;
       }
       done = true;
-      const i = this.subscriptions[topic].indexOf(cb);
+      const i = this.subscriptions[topic].indexOf(entry);
       this.subscriptions[topic].splice(i, 1);
       this.ws.send("UNSUB " + topic);
     };
   }
 
+  private announce(topic: string, dataOrKey: any) {
+    const subs = this.subscriptions[topic];
+    if (subs) {
+      subs.forEach(([callback, predicate]) => {
+        if (predicate && !predicate(dataOrKey)) {
+          return;
+        }
+        callback();
+      });
+    }
+  }
   private handleMessage = (message: WebSocket.Data) => {
     try {
       const messageString = message.toString("utf8");
@@ -113,14 +134,24 @@ class LDSLiveSource {
         case "KA":
           // Keep alive, no action necessary.
           return;
-        case "update":
+        case "insert": {
+          const { schema, table, data } = payload;
+          const topic = JSON.stringify([schema, table]);
+          this.announce(topic, data);
+          return;
+        }
+        case "update": {
           const { schema, table, key, data } = payload;
           const topic = JSON.stringify([schema, table, key]);
-          const subs = this.subscriptions[topic];
-          if (subs) {
-            subs.forEach(s => s());
-          }
+          this.announce(topic, data);
           return;
+        }
+        case "delete": {
+          const { schema, table, key } = payload;
+          const topic = JSON.stringify([schema, table, key]);
+          this.announce(topic, key);
+          return;
+        }
         default:
           console.log("Unhandled message", payload);
       }

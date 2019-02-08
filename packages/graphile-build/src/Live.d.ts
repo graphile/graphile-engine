@@ -46,14 +46,12 @@ export class LiveMonitor {
   handleChange(): void;
   onChange(callback: () => void): void;
   liveCollection(
-    info: GraphQLResolveInfo,
     namespace: string,
     collectionIdentifier: any,
     predicate?: (record: any) => boolean
   ): void;
 
   liveRecord(
-    info: GraphQLResolveInfo,
     namespace: string,
     collectionIdentifier: any,
     recordIdentifier: any

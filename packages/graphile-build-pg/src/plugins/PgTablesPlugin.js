@@ -351,12 +351,7 @@ export default (function PgTablesPlugin(
                           context.liveRecord &&
                           data.__identifiers
                         ) {
-                          context.liveRecord(
-                            resolveInfo,
-                            "pg",
-                            table,
-                            data.__identifiers
-                          );
+                          context.liveRecord("pg", table, data.__identifiers);
                         }
                         return record;
                       },
@@ -420,7 +415,6 @@ export default (function PgTablesPlugin(
                             entry.__identifiers
                           ) {
                             context.liveRecord(
-                              resolveInfo,
                               "pg",
                               table,
                               entry.__identifiers
