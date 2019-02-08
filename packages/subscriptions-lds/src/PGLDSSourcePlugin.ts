@@ -103,12 +103,15 @@ class LDSLiveSource {
     let done = false;
     return () => {
       if (done) {
+        console.warn("Double release?!");
         return;
       }
       done = true;
       const i = this.subscriptions[topic].indexOf(entry);
       this.subscriptions[topic].splice(i, 1);
-      this.ws.send("UNSUB " + topic);
+      if (this.subscriptions[topic].length === 0) {
+        this.ws.send("UNSUB " + topic);
+      }
     };
   }
 

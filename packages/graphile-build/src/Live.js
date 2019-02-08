@@ -57,7 +57,10 @@ export class LiveMonitor {
   constructor(providers: { [namespace: string]: LiveProvider }) {
     this.providers = providers;
     this.subscriptionReleasers = [];
-    this.handleChange = this.handleChange.bind(this);
+    this.handleChange = debounce(this.handleChange.bind(this), 250, {
+      leading: true,
+      trailing: true,
+    });
     this.onChange = this.onChange.bind(this);
   }
 
@@ -75,6 +78,7 @@ export class LiveMonitor {
 
   handleChange() {
     if (this.changeCallback) {
+      this.reset();
       this.changeCallback();
     } else {
       // eslint-disable-next-line no-console
@@ -87,13 +91,12 @@ export class LiveMonitor {
       throw new Error("Already monitoring for changes");
     }
     // Debounce to every 250ms
-    this.changeCallback = debounce(callback, 250, {
-      leading: true,
-      trailing: true,
-    });
-    setTimeout(this.handleChange, 0);
+    this.changeCallback = callback;
+    setImmediate(this.handleChange);
     return () => {
-      this.changeCallback = null;
+      if (this.changeCallback === callback) {
+        this.changeCallback = null;
+      }
     };
   }
 
