@@ -41,7 +41,8 @@ export type {
   WatchUnwatch,
   SchemaListener,
 } from "./SchemaBuilder";
-export * from "./Live";
+
+export { LiveSource, LiveProvider, LiveMonitor, LiveCoordinator } from "./Live";
 
 export const getBuilder = async (
   plugins: Array<Plugin>,

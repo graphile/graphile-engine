@@ -77,7 +77,3 @@ export class LiveCoordinator {
     _info: GraphQLResolveInfo
   ): AsyncIterable<void>;
 }
-
-export function makeAsyncIteratorFromMonitor(
-  monitor: LiveMonitor
-): AsyncIterable<void>;

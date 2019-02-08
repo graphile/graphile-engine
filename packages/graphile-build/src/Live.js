@@ -203,7 +203,7 @@ export class LiveCoordinator {
   }
 }
 
-export function makeAsyncIteratorFromMonitor(monitor: LiveMonitor) {
+function makeAsyncIteratorFromMonitor(monitor: LiveMonitor) {
   return callbackToAsyncIterator(monitor.onChange, {
     onClose: release => {
       release();
