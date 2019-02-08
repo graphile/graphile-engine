@@ -6,8 +6,7 @@
   "scripts": {
     "db:init": "createdb lds_test || true; psql -X1v ON_ERROR_STOP=1 -v VERBOSITY=verbose -f __tests__/schema.sql lds_test",
     "prepack": "tsc",
-    "watch": "tsc --watch",
-    "test": "jest"
+    "watch": "tsc --watch"
   },
   "repository": {
     "type": "git",
