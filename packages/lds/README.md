@@ -33,3 +33,16 @@ max_replication_slots = 10
 ```
 
 (You can set max_wal_senders and max_replication_slots to a number at least 1.)
+
+## Cleaning up
+
+It's essential that you drop the logical replication slot when you no longer
+need it, otherwise your disk will fill up. To do so:
+
+```sql
+SELECT pg_drop_replication_slot('postgraphile');
+```
+
+(It's okay to keep it active whilst you're running the LDS because we'll keep
+consuming the data and it'll be cleared automatically. It's only when LDS
+isn't running that data will build up.)
