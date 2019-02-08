@@ -1,35 +1,44 @@
-# @graphile/lds
+# @graphile/subscriptions-lds
 
-Logical decoding server for PostGraphile.
+PostGraphile plugin to enable GraphQL subscriptions/live queries powered by PostgreSQL logical decoding.
 
-Connects to a database and streams logical decoding events to interested parties.
+For more background, see: https://github.com/graphile/postgraphile/issues/92#issuecomment-313476989
+
+Also includes a plugin that automatically re-exports all query fields as subscriptions. This is likely to be moved into a separate package in future.
 
 ## Requirements
 
-You need `wal2json`; this is available on:
+You need to run the Graphile LDS server: `@graphile/lds`
 
-- Amazon RDS
-- (please send a PR adding more compatible providers)
+Then set environmental variable `LDS_SERVER_URL` to the full websocket URL to your LDS server, e.g.
+`ws://127.0.0.1:9876` (default).
 
-On your Unix-based OS (assuming `pg_config` is in your path) you can add it in a few seconds with:
+## Installation:
 
-```bash
-git clone https://github.com/eulerto/wal2json.git
-cd wal2json
-USE_PGXS=1 make
-USE_PGXS=1 make install
-```
-
-(No need to restart PostgreSQL?)
-
-## PostgreSQL configuration
-
-In your `postgresql.conf` you need to ensure that the following settings are set:
+Install alongside `postgraphile`, e.g.:
 
 ```
-wal_level = logical
-max_wal_senders = 10
-max_replication_slots = 10
+yarn add @graphile/subscriptions-lds
 ```
 
-(You can set max_wal_senders and max_replication_slots to a number at least 1.)
+### Usage:
+
+CLI:
+
+```
+postgraphile --append-plugins @graphile/subscriptions-lds
+```
+
+Library:
+
+```js
+app.use(
+  postgraphile(DB, SCHEMA, {
+    //...
+    appendPlugins: [
+      //...
+      require("@graphile/subscriptions-lds").default,
+    ],
+  })
+);
+```
