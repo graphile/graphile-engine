@@ -340,7 +340,7 @@ export default (function PgTablesPlugin(
                         !pgForbidSetofFunctionsToReturnNull,
                         TableType
                       ),
-                      resolve(data, _args, context, resolveInfo) {
+                      resolve(data, _args, resolveContext, resolveInfo) {
                         const safeAlias = getSafeAliasFromResolveInfo(
                           resolveInfo
                         );
@@ -348,10 +348,14 @@ export default (function PgTablesPlugin(
                         if (
                           record &&
                           primaryKeys &&
-                          context.liveRecord &&
+                          resolveContext.liveRecord &&
                           data.__identifiers
                         ) {
-                          context.liveRecord("pg", table, data.__identifiers);
+                          resolveContext.liveRecord(
+                            "pg",
+                            table,
+                            data.__identifiers
+                          );
                         }
                         return record;
                       },
@@ -402,7 +406,7 @@ export default (function PgTablesPlugin(
                           )
                         )
                       ),
-                      resolve(data, _args, context, resolveInfo) {
+                      resolve(data, _args, resolveContext, resolveInfo) {
                         const safeAlias = getSafeAliasFromResolveInfo(
                           resolveInfo
                         );
@@ -410,11 +414,11 @@ export default (function PgTablesPlugin(
                           const record = handleNullRow(entry[safeAlias]);
                           if (
                             record &&
-                            context.liveRecord &&
+                            resolveContext.liveRecord &&
                             primaryKeys &&
                             entry.__identifiers
                           ) {
-                            context.liveRecord(
+                            resolveContext.liveRecord(
                               "pg",
                               table,
                               entry.__identifiers

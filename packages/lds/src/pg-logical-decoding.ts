@@ -139,12 +139,22 @@ export default class PgLogicalDecoding extends EventEmitter {
     uptoNchanges: number | null = null
   ) {
     await this.connect();
-    const { rows } = await this.client.query({
-      text: `SELECT lsn, data FROM pg_logical_slot_get_changes($1, $2, $3, 'add-tables', $4::text, 'format-version', '1')`,
-      values: [this.slotName, uptoLsn, uptoNchanges, this.tablePattern],
-      rowMode: "array",
-    });
-    return rows.map(toLsnData);
+    try {
+      const { rows } = await this.client.query({
+        text: `SELECT lsn, data FROM pg_logical_slot_get_changes($1, $2, $3, 'add-tables', $4::text, 'format-version', '1')`,
+        values: [this.slotName, uptoLsn, uptoNchanges, this.tablePattern],
+        rowMode: "array",
+      });
+      return rows.map(toLsnData);
+    } catch (e) {
+      if (e.code === "42704") {
+        console.warn("Replication slot went away?");
+        await this.createSlot();
+        console.warn("Recreated slot; retrying getChanges");
+        return this.getChanges(uptoLsn, uptoNchanges);
+      }
+      throw e;
+    }
   }
 
   /****************************************************************************/

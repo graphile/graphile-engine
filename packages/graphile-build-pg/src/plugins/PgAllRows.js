@@ -170,9 +170,13 @@ export default (async function PgAllRows(
                     } = result;
                     return addStartEndCursor(row);
                   } else {
-                    if (primaryKeys && context.liveRecord) {
+                    if (primaryKeys && resolveContext.liveRecord) {
                       result.rows.forEach(row =>
-                        context.liveRecord("pg", table, row.__identifiers)
+                        resolveContext.liveRecord(
+                          "pg",
+                          table,
+                          row.__identifiers
+                        )
                       );
                     }
                     return result.rows;

@@ -120,7 +120,7 @@ async function main() {
         return console.error("Invalid key spec", topic);
       }
 
-      const stringifiedKey = stringify(key);
+      const stringifiedKey = key ? stringify(key) : "";
       if (!channels[schema]) {
         channels[schema] = {};
       }
@@ -167,7 +167,7 @@ async function main() {
     }: { kind: "insert" | "update" | "delete"; data?: {} | null }
   ) {
     if (!channels[schema] || !channels[schema][table]) return;
-    const stringifiedKey = stringify(key);
+    const stringifiedKey = key ? stringify(key) : "";
     const channelClients = channels[schema][table][stringifiedKey];
     if (!channelClients) return;
     const msg = JSON.stringify({
