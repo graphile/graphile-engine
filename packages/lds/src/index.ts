@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /* tslint:disable no-console curly */
 import PgLogicalDecoding, {
   changeToRecord,
