@@ -83,6 +83,7 @@ export interface PostGraphileCoreOptions {
   legacyFunctionsOnly?: boolean;
   ignoreIndexes?: boolean;
   subscriptions?: boolean;
+  ownerConnectionString?: string;
 }
 
 type PgConfig = Client | Pool | string;
@@ -199,6 +200,7 @@ const getPostGraphileBuilder = async (
     legacyFunctionsOnly = false, // TODO:v5: Remove in v5
     ignoreIndexes = true, // TODO:v5: Change to 'false' in v5
     subscriptions = false, // TODO:v5: Change to 'true' in v5
+    ownerConnectionString,
   } = options;
 
   if (
@@ -366,6 +368,8 @@ const getPostGraphileBuilder = async (
      * then the PKs must be also.
      */
     subscriptions,
+
+    pgOwnerConnectionString: ownerConnectionString,
 
     ...graphileBuildOptions,
     ...graphqlBuildOptions, // DEPRECATED!
