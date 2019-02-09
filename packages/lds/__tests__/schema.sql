@@ -19,7 +19,7 @@ create table foo (
 create table bar (
   id serial primary key,
   foo_id int not null references foo on delete cascade,
-  name text,
+  label text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -60,7 +60,7 @@ insert into foo (name) values
   ('Ellie'),
   ('Francine');
 
-insert into bar(foo_id, name) values
+insert into bar(foo_id, label) values
   (1, 'China'),
   (2, 'PostGraphile'),
   (2, 'GraphQL'),
