@@ -118,7 +118,14 @@ export default class PgLogicalDecoding extends EventEmitter {
             delete from postgraphile_meta.logical_decoding_slots
             where last_checkin < now() - interval '1 hour'
             returning *
-          ) select pg_drop_replication_slot(slot_name) from deleted_slots
+          )
+          select pg_drop_replication_slot(slot_name)
+          from deleted_slots
+          where exists (
+            select 1
+            from pg_catalog.pg_replication_slots
+            where pg_replication_slots.slot_name = deleted_slots.slot_name
+          )
         `
       );
     } catch (e) {
