@@ -70,12 +70,12 @@ class QueryBuilder {
     first: ?number,
     last: ?number,
     beforeLock: {
-      [string]: Array<() => void>,
-    } | null,
+      [string]: Array<() => void> | null,
+    },
     cursorComparator: ?CursorComparator,
     liveConditions: Array<
       // eslint-disable-next-line flowtype/no-weak-types
-      [(record: any) => boolean, { [key: string]: SQL } | void]
+      [(data: {}) => (record: any) => boolean, { [key: string]: SQL } | void]
     >,
   };
   compiledData: {
@@ -206,7 +206,10 @@ class QueryBuilder {
 
   beforeLock(field: string, fn: () => void) {
     this.checkLock(field);
-    this.data.beforeLock[field] = this.data.beforeLock[field] || [];
+    if (!this.data.beforeLock[field]) {
+      this.data.beforeLock[field] = [];
+    }
+    // $FlowFixMe
     this.data.beforeLock[field].push(fn);
   }
 
@@ -239,6 +242,7 @@ class QueryBuilder {
             requirements ? Object.assign(memo, requirements) : memo,
           {}
         );
+        // $FlowFixMe
         this.parentQueryBuilder.select(
           sql.fragment`json_build_object(
           '__id', ${sql.value(id)}::int

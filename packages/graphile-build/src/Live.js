@@ -82,8 +82,10 @@ export class LiveMonitor {
   handleChange: () => void;
   handleChange() {
     if (this.changeCallback) {
+      // Convince Flow this won't suddenly become null
+      const cb = this.changeCallback;
       this.reset();
-      this.changeCallback();
+      cb();
     } else {
       // eslint-disable-next-line no-console
       console.warn("Change occurred, but no-one was listening");
