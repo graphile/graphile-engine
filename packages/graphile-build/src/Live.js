@@ -53,10 +53,12 @@ export class LiveProvider {
 export class LiveMonitor {
   providers: { [namespace: string]: LiveProvider };
   subscriptionReleasers: (() => void)[];
+  changeCallback: (() => void) | null;
 
   constructor(providers: { [namespace: string]: LiveProvider }) {
     this.providers = providers;
     this.subscriptionReleasers = [];
+    this.changeCallback = null;
     this.handleChange = debounce(this.handleChange.bind(this), 250, {
       leading: true,
       trailing: true,
@@ -76,6 +78,8 @@ export class LiveMonitor {
     this.reset();
   }
 
+  // Tell Flow that we're okay with overwriting this
+  handleChange: () => void;
   handleChange() {
     if (this.changeCallback) {
       this.reset();
@@ -86,6 +90,8 @@ export class LiveMonitor {
     }
   }
 
+  // Tell Flow that we're okay with overwriting this
+  onChange: (callback: () => void) => void;
   onChange(callback: () => void) {
     if (this.changeCallback) {
       throw new Error("Already monitoring for changes");
@@ -196,6 +202,13 @@ export class LiveCoordinator {
     };
   }
 
+  // Tell Flow that we're okay with overwriting this
+  subscribe: (
+    _parent: any,
+    _args: any,
+    context: any,
+    _info: GraphQLResolveInfo
+  ) => any;
   subscribe(_parent: any, _args: any, context: any, _info: GraphQLResolveInfo) {
     const { monitor, context: additionalContext } = this.getMonitorAndContext();
     Object.assign(context, additionalContext);
@@ -206,7 +219,7 @@ export class LiveCoordinator {
 function makeAsyncIteratorFromMonitor(monitor: LiveMonitor) {
   return callbackToAsyncIterator(monitor.onChange, {
     onClose: release => {
-      release();
+      if (release) release();
     },
   });
 }

@@ -137,7 +137,7 @@ class SchemaBuilder extends EventEmitter {
   _busy: boolean;
   _watching: boolean;
 
-  constructor(options) {
+  constructor(options: Options) {
     super();
 
     this.options = options;

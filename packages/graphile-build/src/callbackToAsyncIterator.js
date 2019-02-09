@@ -14,7 +14,7 @@ export default function callbackToAsyncIterator<
   CallbackInput: any,
   ReturnVal: any
 >(
-  listener: ((arg: CallbackInput) => any) => Promise<?ReturnVal>,
+  listener: ((arg: CallbackInput) => any) => ?ReturnVal | Promise<?ReturnVal>,
   options?: {
     onError?: (err: Error) => void,
     onClose?: (arg?: ?ReturnVal) => void,

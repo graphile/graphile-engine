@@ -111,8 +111,9 @@ export default (async function PgAllRows(
                       if (subscriptions) {
                         queryBuilder.makeLiveCollection(
                           table,
-                          _checkerGenerator =>
-                            (checkerGenerator = _checkerGenerator)
+                          _checkerGenerator => {
+                            checkerGenerator = _checkerGenerator;
+                          }
                         );
                       }
                       if (primaryKeys) {
@@ -159,7 +160,11 @@ export default (async function PgAllRows(
                   if (debugSql.enabled) debugSql(text);
                   const result = await pgClient.query(text, values);
 
-                  if (subscriptions && resolveContext.liveCollection) {
+                  if (
+                    subscriptions &&
+                    resolveContext.liveCollection &&
+                    checkerGenerator
+                  ) {
                     const checker = checkerGenerator();
                     resolveContext.liveCollection("pg", table, checker);
                   }

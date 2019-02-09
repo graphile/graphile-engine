@@ -44,6 +44,7 @@ export type QueryBuilderOptions = {
 };
 
 class QueryBuilder {
+  parentQueryBuilder: QueryBuilder | void;
   context: Context;
   supportsJSONB: boolean;
   locks: {
@@ -70,10 +71,12 @@ class QueryBuilder {
     last: ?number,
     beforeLock: {
       [string]: Array<() => void>,
-    },
+    } | null,
     cursorComparator: ?CursorComparator,
-    // eslint-disable-next-line flowtype/no-weak-types
-    liveConditions: Array<(record: any) => boolean>,
+    liveConditions: Array<
+      // eslint-disable-next-line flowtype/no-weak-types
+      [(record: any) => boolean, { [key: string]: SQL } | void]
+    >,
   };
   compiledData: {
     cursorPrefix: Array<string>,
@@ -208,7 +211,7 @@ class QueryBuilder {
   }
 
   makeLiveCollection(
-    table,
+    table: PgClass,
     // eslint-disable-next-line flowtype/no-weak-types
     cb?: (checker: (data: any) => (record: any) => boolean) => void
   ) {
@@ -217,8 +220,10 @@ class QueryBuilder {
     /* the actual condition doesn't matter hugely, 'select' should work */
     const checkerGenerator = data => {
       // Compute this once.
-      const checkers = this.data.liveConditions.map(([c]) => c(data));
-      return record => checkers.every(c => c(record));
+      const checkers = this.data.liveConditions.map(([checkerGenerator]) =>
+        checkerGenerator(data)
+      );
+      return record => checkers.every(checker => checker(record));
     };
     if (this.parentQueryBuilder) {
       if (cb) {
@@ -230,7 +235,8 @@ class QueryBuilder {
         const id = this.context.liveConditions.push(checkerGenerator) - 1;
         // BEWARE: it's easy to override others' conditions, and that will cause issues. Be sensible.
         const allRequirements = this.data.liveConditions.reduce(
-          (memo, [, c]) => Object.assign(memo, c),
+          (memo, [_checkerGenerator, requirements]) =>
+            requirements ? Object.assign(memo, requirements) : memo,
           {}
         );
         this.parentQueryBuilder.select(
@@ -261,15 +267,15 @@ class QueryBuilder {
 
   addLiveCondition(
     // eslint-disable-next-line flowtype/no-weak-types
-    checker: (data: {}) => (record: any) => boolean,
-    requirements: { [key: string]: SQL }
+    checkerGenerator: (data: {}) => (record: any) => boolean,
+    requirements?: { [key: string]: SQL }
   ) {
     if (requirements && !this.parentQueryBuilder) {
       throw new Error(
         "There's no parentQueryBuilder, so there cannot be requirements"
       );
     }
-    this.data.liveConditions.push([checker, requirements]);
+    this.data.liveConditions.push([checkerGenerator, requirements]);
   }
 
   setCursorComparator(fn: CursorComparator) {
