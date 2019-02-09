@@ -139,7 +139,9 @@ async function main() {
     const { _: kind, schema, table } = announcement;
     if (!channels[schema] || !channels[schema][table]) return;
     const stringifiedKey =
-      announcement._ !== "insert" ? stringify(announcement.keys) : "";
+      announcement._ !== "insertC" && announcement._ !== "updateC"
+        ? stringify(announcement.keys)
+        : "";
     const channelClients = channels[schema][table][stringifiedKey];
     if (!channelClients) return;
     const msg = JSON.stringify(announcement);

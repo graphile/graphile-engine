@@ -82,6 +82,7 @@ const toLsnData = ([lsn, data]: [string, string]): Payload => ({
 interface Options {
   tablePattern?: string;
   slotName?: string;
+  temporary?: boolean;
 }
 
 export default class PgLogicalDecoding extends EventEmitter {
@@ -89,44 +90,53 @@ export default class PgLogicalDecoding extends EventEmitter {
   private connectionString: string;
   private tablePattern: string;
   private slotName: string;
+  private temporary: boolean;
   private client: pg.Client | null;
 
   constructor(connectionString: string, options?: Options) {
     super();
     this.connectionString = connectionString;
-    const { tablePattern = "*.*", slotName = "postgraphile" } = options || {};
+    const {
+      tablePattern = "*.*",
+      slotName = "postgraphile",
+      temporary = false,
+    } = options || {};
     this.tablePattern = tablePattern;
     this.slotName = slotName;
+    this.temporary = temporary;
     this.createClient();
   }
 
-  public connect(): Promise<void> {
-    if (this.connected) {
-      return Promise.resolve();
+  public async dropStaleSlots() {
+    if (!this.client) {
+      throw new Error("Client has been released");
     }
-    return new Promise((resolve, reject) => {
-      if (!this.client) {
-        throw new Error("Client has been released");
-      }
-      this.client.connect(err => {
-        if (err) {
-          reject(err);
-        }
-        this.connected = true;
-        resolve();
-      });
-    });
+    try {
+      await this.client.query(
+        `
+          with deleted_slots as (
+            delete from postgraphile_meta.logical_decoding_slots
+            where last_checkin < now() - interval '1 hour'
+            returning *
+          ) select pg_drop_replication_slot(slot_name) from deleted_slots
+        `
+      );
+    } catch (e) {
+      console.error("Error clearing stale slots:");
+      console.error(e);
+    }
   }
 
   public async createSlot(): Promise<void> {
-    if (!this.client) {
+    const client = this.client;
+    if (!client) {
       throw new Error("Client has been released");
     }
     await this.connect();
     try {
-      await this.client.query(
-        `SELECT pg_create_logical_replication_slot($1, 'wal2json')`,
-        [this.slotName]
+      await client.query(
+        `SELECT pg_create_logical_replication_slot($1, 'wal2json', $2)`,
+        [this.slotName, !!this.temporary]
       );
     } catch (e) {
       if (e.code === "58P01") {
@@ -150,6 +160,7 @@ export default class PgLogicalDecoding extends EventEmitter {
       throw new Error("Client has been released");
     }
     await this.connect();
+    await this.trackSelf();
     try {
       const { rows } = await this.client.query({
         text: `SELECT lsn, data FROM pg_logical_slot_get_changes($1, $2, $3, 'add-tables', $4::text, 'format-version', '1')`,
@@ -184,7 +195,68 @@ export default class PgLogicalDecoding extends EventEmitter {
   }
 
   private onClientError = (err: Error) => {
+    console.log("client error", err);
     this.connected = false;
     this.emit("error", err);
   };
+
+  private connect(): Promise<void> {
+    if (this.connected) {
+      return Promise.resolve();
+    }
+    return new Promise((resolve, reject) => {
+      if (!this.client) {
+        throw new Error("Client has been released");
+      }
+      this.client.connect(err => {
+        if (err) {
+          reject(err);
+        }
+        this.connected = true;
+        resolve(this.trackSelf());
+      });
+    });
+  }
+
+  private async installSchema(): Promise<void> {
+    if (!this.client) {
+      throw new Error("Client has been released");
+    }
+    await this.client.query(`
+      create schema if not exists postgraphile_meta;
+      create table if not exists postgraphile_meta.logical_decoding_slots (
+        slot_name text primary key,
+        last_checkin timestamptz not null default now()
+      );
+    `);
+  }
+
+  private async trackSelf(skipSchema = false): Promise<void> {
+    if (this.temporary) {
+      // No need to track temporary replication slots
+      return;
+    }
+    const client = this.client;
+    if (!client) {
+      throw new Error("Client has been released");
+    }
+    try {
+      await client.query(
+        `
+        insert into postgraphile_meta.logical_decoding_slots(slot_name)
+        values ($1)
+        on conflict (slot_name)
+        do update set last_checkin = now();
+        `,
+        [this.slotName]
+      );
+    } catch (e) {
+      if (!skipSchema) {
+        await this.installSchema();
+        return this.trackSelf(true);
+      } else {
+        throw e;
+      }
+    }
+  }
 }

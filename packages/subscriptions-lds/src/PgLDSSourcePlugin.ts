@@ -9,10 +9,20 @@ type SubscriptionReleaser = () => void;
 type SubscriptionCallback = () => void;
 type Predicate = (record: any) => boolean;
 
+const LETTERS = "abcdefghijklmnopqrstuvwxyz";
+function generateRandomString(length: number): string {
+  let str = "";
+  for (let i = 0; i < length; i++) {
+    str += LETTERS[Math.floor(Math.random() * LETTERS.length)];
+  }
+  return str;
+}
+
 class LDSLiveSource {
   private url: string | null;
   private connectionString: string | null;
   private lds: LDSubscription | null;
+  private slotName: string | null;
 
   private reconnecting: boolean;
   private live: boolean;
@@ -32,6 +42,7 @@ class LDSLiveSource {
     this.url = ldsURL || null;
     this.connectionString = connectionString || null;
     this.lds = null;
+    this.slotName = null;
     this.ws = null;
     this.reconnecting = false;
     this.live = true;
@@ -45,9 +56,14 @@ class LDSLiveSource {
       if (!this.connectionString) {
         throw new Error("No PG connection string given");
       }
+      this.slotName = generateRandomString(30);
       this.lds = await subscribeToLogicalDecoding(
         this.connectionString,
-        this.handleAnnouncement
+        this.handleAnnouncement,
+        {
+          slotName: this.slotName,
+          temporary: true,
+        }
       );
     }
   }
@@ -234,7 +250,7 @@ class LDSLiveSource {
           // Keep alive, no action necessary.
           return;
         default:
-          console.log("Unhandled message", payload);
+          console.warn("Unhandled message", payload);
       }
     } catch (e) {
       console.error("Error occurred when processing message", message);
