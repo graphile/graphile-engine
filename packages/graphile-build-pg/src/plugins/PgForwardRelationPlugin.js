@@ -129,7 +129,13 @@ export default (function PgForwardRelationPlugin(builder, { subscriptions }) {
                           innerQueryBuilder => {
                             innerQueryBuilder.parentQueryBuilder = queryBuilder;
                             if (subscriptions && table.primaryKeyConstraint) {
-                              innerQueryBuilder.selectIdentifiers(table);
+                              queryBuilder.selectIdentifiers(table);
+                            }
+                            if (
+                              subscriptions &&
+                              foreignTable.primaryKeyConstraint
+                            ) {
+                              innerQueryBuilder.selectIdentifiers(foreignTable);
                             }
                             keys.forEach((key, i) => {
                               innerQueryBuilder.where(
