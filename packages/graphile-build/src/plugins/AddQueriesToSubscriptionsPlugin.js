@@ -1,11 +1,12 @@
-import { Plugin } from "postgraphile-core";
-import { GraphQLObjectType } from "graphql";
+// @flow
+import type { Plugin } from "../SchemaBuilder";
+import type { GraphQLObjectType } from "graphql";
 
 const AddQueriesToSubscriptionsPlugin: Plugin = function(
   builder,
-  { subscriptions }
+  { subscriptions, live }
 ) {
-  if (!subscriptions) {
+  if (!subscriptions || !live) {
     return;
   }
   builder.hook("GraphQLObjectType:fields", (fields, build, context) => {

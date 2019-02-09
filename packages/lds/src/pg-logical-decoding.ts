@@ -79,20 +79,22 @@ const toLsnData = ([lsn, data]: [string, string]): Payload => ({
   data: JSON.parse(data),
 });
 
+interface Options {
+  tablePattern?: string;
+  slotName?: string;
+}
+
 export default class PgLogicalDecoding extends EventEmitter {
   public connected: boolean = false;
-  private config: pg.ClientConfig;
+  private connectionString: string;
   private tablePattern: string;
   private slotName: string;
-  private client: pg.Client;
+  private client: pg.Client | null;
 
-  constructor(
-    config: pg.ClientConfig,
-    tablePattern = "*.*",
-    slotName = "postgraphile"
-  ) {
+  constructor(connectionString: string, options?: Options) {
     super();
-    this.config = config;
+    this.connectionString = connectionString;
+    const { tablePattern = "*.*", slotName = "postgraphile" } = options || {};
     this.tablePattern = tablePattern;
     this.slotName = slotName;
     this.createClient();
@@ -103,6 +105,9 @@ export default class PgLogicalDecoding extends EventEmitter {
       return Promise.resolve();
     }
     return new Promise((resolve, reject) => {
+      if (!this.client) {
+        throw new Error("Client has been released");
+      }
       this.client.connect(err => {
         if (err) {
           reject(err);
@@ -114,6 +119,9 @@ export default class PgLogicalDecoding extends EventEmitter {
   }
 
   public async createSlot(): Promise<void> {
+    if (!this.client) {
+      throw new Error("Client has been released");
+    }
     await this.connect();
     try {
       await this.client.query(
@@ -138,6 +146,9 @@ export default class PgLogicalDecoding extends EventEmitter {
     uptoLsn: string | null = null,
     uptoNchanges: number | null = null
   ): Promise<Array<Payload>> {
+    if (!this.client) {
+      throw new Error("Client has been released");
+    }
     await this.connect();
     try {
       const { rows } = await this.client.query({
@@ -157,10 +168,18 @@ export default class PgLogicalDecoding extends EventEmitter {
     }
   }
 
+  public close() {
+    if (!this.client) {
+      return;
+    }
+    this.client.end();
+    this.client = null;
+  }
+
   /****************************************************************************/
 
   private createClient() {
-    this.client = new pg.Client(this.config);
+    this.client = new pg.Client({ connectionString: this.connectionString });
     this.client.on("error", this.onClientError);
   }
 

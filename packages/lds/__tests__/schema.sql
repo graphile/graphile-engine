@@ -28,7 +28,7 @@ create function odd_foos() returns setof foo as $$
   select * from app_public.foo where id % 2 = 1;
 $$ language sql stable;
 
-create function odd_foos_list() returns foo[] as $$
+create function odd_foos_array() returns foo[] as $$
   select array_agg(foo.*) from app_public.foo where id % 2 = 1;
 $$ language sql stable;
 

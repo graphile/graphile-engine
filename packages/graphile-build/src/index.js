@@ -11,6 +11,7 @@ import {
   SubscriptionPlugin,
   ClientMutationIdDescriptionPlugin,
   MutationPayloadQueryPlugin,
+  AddQueriesToSubscriptionsPlugin,
 } from "./plugins";
 import resolveNode from "./resolveNode";
 import type { GraphQLSchema } from "graphql";
@@ -82,6 +83,7 @@ export const defaultPlugins: Array<Plugin> = [
   SubscriptionPlugin,
   ClientMutationIdDescriptionPlugin,
   MutationPayloadQueryPlugin,
+  AddQueriesToSubscriptionsPlugin,
 ];
 
 export {
@@ -93,6 +95,7 @@ export {
   SubscriptionPlugin,
   ClientMutationIdDescriptionPlugin,
   MutationPayloadQueryPlugin,
+  AddQueriesToSubscriptionsPlugin,
   // resolveNode: EXPERIMENTAL, API might change!
   resolveNode,
 };

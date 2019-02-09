@@ -9,7 +9,7 @@
     "watch": "tsc --watch"
   },
   "bin": {
-    "graphile-lds": "./dist/index.js"
+    "graphile-lds": "./dist/cli.js"
   },
   "repository": {
     "type": "git",

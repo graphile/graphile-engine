@@ -83,6 +83,7 @@ export interface PostGraphileCoreOptions {
   legacyFunctionsOnly?: boolean;
   ignoreIndexes?: boolean;
   subscriptions?: boolean;
+  live?: boolean;
   ownerConnectionString?: string;
 }
 
@@ -199,9 +200,11 @@ const getPostGraphileBuilder = async (
     ignoreRBAC = true, // TODO:v5: Change to 'false' in v5
     legacyFunctionsOnly = false, // TODO:v5: Remove in v5
     ignoreIndexes = true, // TODO:v5: Change to 'false' in v5
-    subscriptions = false, // TODO:v5: Change to 'true' in v5
+    subscriptions: inSubscriptions = false, // TODO:v5: Change to 'true' in v5
+    live = false,
     ownerConnectionString,
   } = options;
+  const subscriptions = live || inSubscriptions;
 
   if (
     legacyRelations &&
@@ -358,6 +361,7 @@ const getPostGraphileBuilder = async (
     pgIgnoreRBAC: ignoreRBAC,
     pgLegacyFunctionsOnly: legacyFunctionsOnly,
     pgIgnoreIndexes: ignoreIndexes,
+    pgOwnerConnectionString: ownerConnectionString,
 
     /*
      * `subscriptions` acts as a feature flag telling us to fetch all the
@@ -368,8 +372,7 @@ const getPostGraphileBuilder = async (
      * then the PKs must be also.
      */
     subscriptions,
-
-    pgOwnerConnectionString: ownerConnectionString,
+    live,
 
     ...graphileBuildOptions,
     ...graphqlBuildOptions, // DEPRECATED!

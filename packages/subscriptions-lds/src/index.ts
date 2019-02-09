@@ -1,5 +1,3 @@
-import { makePluginByCombiningPlugins } from "graphile-utils";
-import AddQueriesToSubscriptionsPlugin from "./AddQueriesToSubscriptionsPlugin";
 import PgLDSSourcePlugin from "./PgLDSSourcePlugin";
 
 /*
@@ -8,9 +6,6 @@ import PgLDSSourcePlugin from "./PgLDSSourcePlugin";
  * Subscribe to LDS for these records/collections.
  * When LDS announces change to relevant record/collection, re-run subscription.
  */
-const SubscriptionsLdsPlugin = makePluginByCombiningPlugins(
-  PgLDSSourcePlugin,
-  AddQueriesToSubscriptionsPlugin
-);
+const SubscriptionsLdsPlugin = PgLDSSourcePlugin;
 
 export default SubscriptionsLdsPlugin;
