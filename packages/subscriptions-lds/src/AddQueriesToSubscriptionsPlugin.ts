@@ -1,7 +1,10 @@
 import { Plugin } from "postgraphile-core";
 import { GraphQLObjectType } from "graphql";
 
-const SubscriptionFieldsPlugin: Plugin = function(builder, { subscriptions }) {
+const AddQueriesToSubscriptionsPlugin: Plugin = function(
+  builder,
+  { subscriptions }
+) {
   if (!subscriptions) {
     return;
   }
@@ -44,4 +47,4 @@ const SubscriptionFieldsPlugin: Plugin = function(builder, { subscriptions }) {
     return extend(fields, subscriptionFields);
   });
 };
-export default SubscriptionFieldsPlugin;
+export default AddQueriesToSubscriptionsPlugin;

@@ -1,5 +1,5 @@
 import { makePluginByCombiningPlugins } from "graphile-utils";
-import SubscriptionFieldsPlugin from "./SubscriptionFieldsPlugin";
+import AddQueriesToSubscriptionsPlugin from "./AddQueriesToSubscriptionsPlugin";
 import PgLDSSourcePlugin from "./PgLDSSourcePlugin";
 
 /*
@@ -10,7 +10,7 @@ import PgLDSSourcePlugin from "./PgLDSSourcePlugin";
  */
 const SubscriptionsLdsPlugin = makePluginByCombiningPlugins(
   PgLDSSourcePlugin,
-  SubscriptionFieldsPlugin
+  AddQueriesToSubscriptionsPlugin
 );
 
 export default SubscriptionsLdsPlugin;
