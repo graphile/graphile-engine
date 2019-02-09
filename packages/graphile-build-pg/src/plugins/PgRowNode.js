@@ -38,8 +38,7 @@ export default (async function PgRowNode(builder, { subscriptions }) {
         resolveContext,
         parsedResolveInfoFragment,
         ReturnType,
-        resolveData,
-        resolveInfo
+        resolveData
       ) => {
         const { pgClient, liveRecord } = resolveContext;
         if (identifiers.length !== primaryKeys.length) {
