@@ -185,7 +185,13 @@ class LDSLiveSource {
   }
   private handleAnnouncement = (announcement: Announcement) => {
     switch (announcement._) {
-      case "insert": {
+      case "insertC": {
+        const { schema, table, data } = announcement;
+        const topic = JSON.stringify([schema, table]);
+        this.announce(topic, data);
+        return;
+      }
+      case "updateC": {
         const { schema, table, data } = announcement;
         const topic = JSON.stringify([schema, table]);
         this.announce(topic, data);

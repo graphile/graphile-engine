@@ -10,30 +10,37 @@ export interface Options {
   sleepDuration?: number;
 }
 
-export interface InsertAnnouncement {
-  _: "insert";
+interface CollectionAnnouncement {
   schema: string;
   table: string;
-  data: {};
 }
-export interface UpdateAnnouncement {
-  _: "update";
-  schema: string;
-  table: string;
-  keys: Array<string>;
-  data: {};
-}
-export interface DeleteAnnouncement {
-  _: "delete";
+interface RowAnnouncement {
   schema: string;
   table: string;
   keys: Array<string>;
 }
 
+export interface InsertCollectionAnnouncement extends CollectionAnnouncement {
+  _: "insertC";
+  data: {};
+}
+export interface UpdateCollectionAnnouncement extends CollectionAnnouncement {
+  _: "updateC";
+  data: {};
+}
+export interface UpdateRowAnnouncement extends RowAnnouncement {
+  _: "update";
+  data: {};
+}
+export interface DeleteRowAnnouncement extends RowAnnouncement {
+  _: "delete";
+}
+
 export type Announcement =
-  | InsertAnnouncement
-  | UpdateAnnouncement
-  | DeleteAnnouncement;
+  | InsertCollectionAnnouncement
+  | UpdateCollectionAnnouncement
+  | UpdateRowAnnouncement
+  | DeleteRowAnnouncement;
 
 export type AnnounceCallback = (announcement: Announcement) => void;
 
@@ -81,24 +88,31 @@ export default async function subscribeToLogicalDecoding(
         for (const change of changes) {
           const { schema, table } = change;
           if (change.kind === "insert") {
-            const announcement: InsertAnnouncement = {
-              _: "insert",
+            const announcement: InsertCollectionAnnouncement = {
+              _: "insertC",
               schema,
               table,
               data: changeToRecord(change),
             };
             callback(announcement);
           } else if (change.kind === "update") {
-            const announcement: UpdateAnnouncement = {
+            const rowAnnouncement: UpdateRowAnnouncement = {
               _: "update",
               schema,
               table,
               keys: changeToPk(change),
               data: changeToRecord(change),
             };
-            callback(announcement);
+            callback(rowAnnouncement);
+            const collectionAnnouncement: UpdateCollectionAnnouncement = {
+              _: "updateC",
+              schema,
+              table,
+              data: changeToRecord(change),
+            };
+            callback(collectionAnnouncement);
           } else if (change.kind === "delete") {
-            const announcement: DeleteAnnouncement = {
+            const announcement: DeleteRowAnnouncement = {
               _: "delete",
               schema,
               table,
