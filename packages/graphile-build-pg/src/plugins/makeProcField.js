@@ -699,8 +699,10 @@ export default function makeProcField(
                       returnTypeTable &&
                       liveRecord
                     ) {
-                      data.forEach(row =>
-                        liveRecord("pg", returnTypeTable, row.__identifiers)
+                      data.forEach(
+                        row =>
+                          row &&
+                          liveRecord("pg", returnTypeTable, row.__identifiers)
                       );
                     }
                     return addStartEndCursor({
@@ -714,8 +716,10 @@ export default function makeProcField(
                       returnTypeTable &&
                       liveRecord
                     ) {
-                      rows.forEach(row =>
-                        liveRecord("pg", returnTypeTable, row.__identifiers)
+                      rows.forEach(
+                        row =>
+                          row &&
+                          liveRecord("pg", returnTypeTable, row.__identifiers)
                       );
                     }
                     return rows.map(row => pg2gql(row, returnType));

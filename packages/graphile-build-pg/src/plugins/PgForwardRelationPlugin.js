@@ -163,7 +163,7 @@ export default (function PgForwardRelationPlugin(builder, { subscriptions }) {
                     const data = isMutationPayload ? rawData.data : rawData;
                     const safeAlias = getSafeAliasFromResolveInfo(resolveInfo);
                     const record = data[safeAlias];
-                    if (resolveContext.liveRecord) {
+                    if (record && resolveContext.liveRecord) {
                       resolveContext.liveRecord(
                         "pg",
                         foreignTable,

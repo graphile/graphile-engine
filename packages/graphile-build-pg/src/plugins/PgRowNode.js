@@ -72,7 +72,7 @@ export default (async function PgRowNode(builder, { subscriptions }) {
         const {
           rows: [row],
         } = await pgClient.query(text, values);
-        if (subscriptions && liveRecord) {
+        if (subscriptions && liveRecord && row) {
           liveRecord("pg", table, row.__identifiers);
         }
         return row;
@@ -196,7 +196,7 @@ export default (async function PgRowNode(builder, { subscriptions }) {
                         const {
                           rows: [row],
                         } = await pgClient.query(text, values);
-                        if (liveRecord) {
+                        if (liveRecord && row) {
                           liveRecord("pg", table, row.__identifiers);
                         }
                         return row;

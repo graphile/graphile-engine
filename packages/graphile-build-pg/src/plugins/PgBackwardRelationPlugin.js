@@ -197,7 +197,7 @@ export default (function PgBackwardRelationPlugin(
                         resolveInfo
                       );
                       const record = data[safeAlias];
-                      if (resolveContext.liveRecord) {
+                      if (record && resolveContext.liveRecord) {
                         resolveContext.liveRecord(
                           "pg",
                           table,
@@ -378,12 +378,14 @@ export default (function PgBackwardRelationPlugin(
                         } else {
                           const records = data[safeAlias];
                           if (resolveContext.liveRecord) {
-                            records.forEach(r =>
-                              resolveContext.liveRecord(
-                                "pg",
-                                table,
-                                r.__identifiers
-                              )
+                            records.forEach(
+                              r =>
+                                r &&
+                                resolveContext.liveRecord(
+                                  "pg",
+                                  table,
+                                  r.__identifiers
+                                )
                             );
                           }
                           return records;

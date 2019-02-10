@@ -122,7 +122,7 @@ export default (async function PgRowByUniqueConstraint(
                     const {
                       rows: [row],
                     } = await pgClient.query(text, values);
-                    if (subscriptions && liveRecord) {
+                    if (subscriptions && liveRecord && row) {
                       liveRecord("pg", table, row.__identifiers);
                     }
                     return row;
