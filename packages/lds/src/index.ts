@@ -12,6 +12,8 @@ export interface Options {
   temporary?: boolean;
 }
 
+const DROP_STALE_SLOTS_INTERVAL = 15 * 60 * 1000;
+
 interface CollectionAnnouncement {
   schema: string;
   table: string;
@@ -68,6 +70,9 @@ export default async function subscribeToLogicalDecoding(
     temporary,
   });
 
+  // We must do this before we create the temporary slot, since errors will release a temporary slot immediately
+  await client.dropStaleSlots();
+
   try {
     await client.createSlot();
   } catch (e) {
@@ -88,7 +93,7 @@ export default async function subscribeToLogicalDecoding(
     },
   };
 
-  let nextStaleCheck = Date.now();
+  let nextStaleCheck = Date.now() + DROP_STALE_SLOTS_INTERVAL;
   async function loop() {
     try {
       const rows = await client.getChanges(null, 500);
@@ -139,9 +144,9 @@ export default async function subscribeToLogicalDecoding(
           }
         }
       }
-      if (nextStaleCheck < Date.now()) {
+      if (!temporary && nextStaleCheck < Date.now()) {
         // Roughly every 15 minutes, drop stale slots.
-        nextStaleCheck = Date.now() + 15 * 60 * 1000;
+        nextStaleCheck = Date.now() + DROP_STALE_SLOTS_INTERVAL;
         client.dropStaleSlots();
       }
     } catch (e) {

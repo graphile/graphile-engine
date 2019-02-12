@@ -3,6 +3,8 @@ import * as pg from "pg";
 import { EventEmitter } from "events";
 import FatalError from "./fatal-error";
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 declare module "pg" {
   interface ConnectionConfig {
     replication?: string;
@@ -86,12 +88,12 @@ interface Options {
 }
 
 export default class PgLogicalDecoding extends EventEmitter {
-  public connected: boolean = false;
   private connectionString: string;
   private tablePattern: string;
   private slotName: string;
   private temporary: boolean;
-  private client: pg.Client | null;
+  private pool: pg.Pool | null;
+  private client: Promise<pg.PoolClient> | null;
 
   constructor(connectionString: string, options?: Options) {
     super();
@@ -104,15 +106,19 @@ export default class PgLogicalDecoding extends EventEmitter {
     this.tablePattern = tablePattern;
     this.slotName = slotName;
     this.temporary = temporary;
-    this.createClient();
+    // We just use the pool to get better error handling
+    this.pool = new pg.Pool({
+      connectionString: this.connectionString,
+      max: 1,
+    });
+    this.pool.on("error", this.onPoolError);
+    this.getClient();
   }
 
   public async dropStaleSlots() {
-    if (!this.client) {
-      throw new Error("Client has been released");
-    }
+    const client = await this.getClient();
     try {
-      await this.client.query(
+      await client.query(
         `
           with deleted_slots as (
             delete from postgraphile_meta.logical_decoding_slots
@@ -129,17 +135,19 @@ export default class PgLogicalDecoding extends EventEmitter {
         `
       );
     } catch (e) {
-      console.error("Error clearing stale slots:");
-      console.error(e);
+      if (e.code === "42P01" && this.temporary) {
+        // The `postgraphile_meta.logical_decoding_slots` table doesn't exist.
+        // Ignore.
+      } else {
+        console.error("Error clearing stale slots:");
+        console.error(e);
+      }
     }
   }
 
   public async createSlot(): Promise<void> {
-    const client = this.client;
-    if (!client) {
-      throw new Error("Client has been released");
-    }
-    await this.connect();
+    const client = await this.getClient();
+    await this.trackSelf(client);
     try {
       await client.query(
         `SELECT pg_create_logical_replication_slot($1, 'wal2json', $2)`,
@@ -163,13 +171,10 @@ export default class PgLogicalDecoding extends EventEmitter {
     uptoLsn: string | null = null,
     uptoNchanges: number | null = null
   ): Promise<Array<Payload>> {
-    if (!this.client) {
-      throw new Error("Client has been released");
-    }
-    await this.connect();
-    await this.trackSelf();
+    const client = await this.getClient();
+    await this.trackSelf(client);
     try {
-      const { rows } = await this.client.query({
+      const { rows } = await client.query({
         text: `SELECT lsn, data FROM pg_logical_slot_get_changes($1, $2, $3, 'add-tables', $4::text, 'format-version', '1')`,
         values: [this.slotName, uptoLsn, uptoNchanges, this.tablePattern],
         rowMode: "array",
@@ -179,7 +184,10 @@ export default class PgLogicalDecoding extends EventEmitter {
       if (e.code === "42704") {
         console.warn("Replication slot went away?");
         await this.createSlot();
-        console.warn("Recreated slot; retrying getChanges");
+        console.warn(
+          "Recreated slot; retrying getChanges (no further output implies success)"
+        );
+        await sleep(500);
         return this.getChanges(uptoLsn, uptoNchanges);
       }
       throw e;
@@ -187,49 +195,43 @@ export default class PgLogicalDecoding extends EventEmitter {
   }
 
   public close() {
-    if (!this.client) {
-      return;
+    if (this.client) {
+      this.client.release();
+      this.client = null;
     }
-    this.client.end();
-    this.client = null;
+    if (this.pool) {
+      this.pool.end();
+      this.pool = null;
+    }
   }
 
   /****************************************************************************/
 
-  private createClient() {
-    this.client = new pg.Client({ connectionString: this.connectionString });
-    this.client.on("error", this.onClientError);
+  private async getClient() {
+    if (this.client) {
+      return this.client;
+    }
+    if (!this.pool) {
+      throw new Error("Pool has been closed");
+    }
+    this.client = this.pool.connect();
+    return this.client;
   }
 
-  private onClientError = (err: Error) => {
-    console.log("client error", err);
-    this.connected = false;
-    this.emit("error", err);
+  private onPoolError = (err: Error) => {
+    if (this.client) {
+      this.client.then(c => c.release()).catch(e => {
+        // noop
+      });
+    }
+    this.client = null;
+    console.log("LDS pool error", err);
+    // this.emit("error", err);
   };
 
-  private connect(): Promise<void> {
-    if (this.connected) {
-      return Promise.resolve();
-    }
-    return new Promise((resolve, reject) => {
-      if (!this.client) {
-        throw new Error("Client has been released");
-      }
-      this.client.connect(err => {
-        if (err) {
-          reject(err);
-        }
-        this.connected = true;
-        resolve(this.trackSelf());
-      });
-    });
-  }
-
   private async installSchema(): Promise<void> {
-    if (!this.client) {
-      throw new Error("Client has been released");
-    }
-    await this.client.query(`
+    const client = await this.getClient();
+    await client.query(`
       create schema if not exists postgraphile_meta;
       create table if not exists postgraphile_meta.logical_decoding_slots (
         slot_name text primary key,
@@ -238,14 +240,13 @@ export default class PgLogicalDecoding extends EventEmitter {
     `);
   }
 
-  private async trackSelf(skipSchema = false): Promise<void> {
+  private async trackSelf(
+    client: pg.PoolClient,
+    skipSchema = false
+  ): Promise<void> {
     if (this.temporary) {
       // No need to track temporary replication slots
       return;
-    }
-    const client = this.client;
-    if (!client) {
-      throw new Error("Client has been released");
     }
     try {
       await client.query(
@@ -260,7 +261,7 @@ export default class PgLogicalDecoding extends EventEmitter {
     } catch (e) {
       if (!skipSchema) {
         await this.installSchema();
-        return this.trackSelf(true);
+        return this.trackSelf(client, true);
       } else {
         throw e;
       }
