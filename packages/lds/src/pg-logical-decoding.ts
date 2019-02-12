@@ -196,7 +196,9 @@ export default class PgLogicalDecoding extends EventEmitter {
 
   public close() {
     if (this.client) {
-      this.client.release();
+      this.client.then(c => c.release()).catch(() => {
+        /*noop*/
+      });
       this.client = null;
     }
     if (this.pool) {
@@ -220,7 +222,7 @@ export default class PgLogicalDecoding extends EventEmitter {
 
   private onPoolError = (err: Error) => {
     if (this.client) {
-      this.client.then(c => c.release()).catch(e => {
+      this.client.then(c => c.release()).catch(() => {
         // noop
       });
     }
