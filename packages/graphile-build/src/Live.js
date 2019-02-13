@@ -2,10 +2,13 @@
 /* eslint-disable flowtype/no-weak-types */
 import callbackToAsyncIterator from "./callbackToAsyncIterator";
 import type { GraphQLResolveInfo } from "graphql";
-import { debounce } from "lodash";
+import { throttle } from "lodash";
 
 type SubscriptionReleaser = () => void;
 type SubscriptionCallback = () => void;
+
+const MONITOR_THROTTLE_DURATION =
+  parseInt(process.env.LD_THROTTLE || "", 10) || 500;
 
 export class LiveSource {
   subscribeCollection(
@@ -59,10 +62,14 @@ export class LiveMonitor {
     this.providers = providers;
     this.subscriptionReleasers = [];
     this.changeCallback = null;
-    this.handleChange = debounce(this.handleChange.bind(this), 250, {
-      leading: true,
-      trailing: true,
-    });
+    this.handleChange = throttle(
+      this.handleChange.bind(this),
+      MONITOR_THROTTLE_DURATION,
+      {
+        leading: true,
+        trailing: true,
+      }
+    );
     this.onChange = this.onChange.bind(this);
   }
 
@@ -98,7 +105,7 @@ export class LiveMonitor {
     if (this.changeCallback) {
       throw new Error("Already monitoring for changes");
     }
-    // Debounce to every 250ms
+    // Throttle to every 250ms
     this.changeCallback = callback;
     setImmediate(this.handleChange);
     return () => {
