@@ -54,11 +54,13 @@ export class LiveProvider {
 }
 
 export class LiveMonitor {
+  released: boolean;
   providers: { [namespace: string]: LiveProvider };
   subscriptionReleasers: (() => void)[];
   changeCallback: (() => void) | null;
 
   constructor(providers: { [namespace: string]: LiveProvider }) {
+    this.released = false;
     this.providers = providers;
     this.subscriptionReleasers = [];
     this.changeCallback = null;
@@ -83,6 +85,7 @@ export class LiveMonitor {
 
   release() {
     this.reset();
+    this.released = true;
   }
 
   // Tell Flow that we're okay with overwriting this
@@ -102,6 +105,9 @@ export class LiveMonitor {
   // Tell Flow that we're okay with overwriting this
   onChange: (callback: () => void) => void;
   onChange(callback: () => void) {
+    if (this.released) {
+      throw new Error("Monitors cannot be reused.");
+    }
     if (this.changeCallback) {
       throw new Error("Already monitoring for changes");
     }
@@ -109,6 +115,7 @@ export class LiveMonitor {
     this.changeCallback = callback;
     setImmediate(this.handleChange);
     return () => {
+      this.release();
       if (this.changeCallback === callback) {
         this.changeCallback = null;
       }
