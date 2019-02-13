@@ -3,7 +3,7 @@
 PostGraphile schema plugin to provide live updates powered by PostgreSQL
 logical decoding. Used as part of PostGraphile's live queries support.
 
-For more background, see: https://github.com/graphile/postgraphile/issues/92#issuecomment-313476989
+For more background, see [postgraphile issue #92](https://github.com/graphile/postgraphile/issues/92#issuecomment-313476989).
 
 ## Installation:
 

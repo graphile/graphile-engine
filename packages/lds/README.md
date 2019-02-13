@@ -1,8 +1,10 @@
 # @graphile/lds
 
-Logical decoding server for PostGraphile.
+Logical decoding server for PostGraphile. (Can also act as a library with no server.)
 
 Connects to a database and streams logical decoding events to interested parties.
+
+**NOTICE**: If you're just getting started, [refer to `@graphile/subscriptions-lds` instead](https://www.npmjs.com/package/@graphile/subscriptions-lds)
 
 ## Requirements
 
@@ -11,7 +13,7 @@ You need `wal2json`; this is available on:
 - Amazon RDS
 - (please send a PR adding more compatible providers)
 
-If you don't already have it, you can install it. On your Unix-based OS (assuming `pg_config` is in your path) you can add it in a few seconds with:
+If you don't already have it, you can install it. On your Unix-based OS (assuming `pg_config` is in your path, and points to the correct PostgreSQL installation) you can add it in a few seconds with:
 
 ```bash
 git clone https://github.com/eulerto/wal2json.git
@@ -20,7 +22,7 @@ USE_PGXS=1 make
 USE_PGXS=1 make install
 ```
 
-(No need to restart PostgreSQL?)
+(No need to restart PostgreSQL)
 
 ## PostgreSQL configuration
 
@@ -34,7 +36,7 @@ max_replication_slots = 10
 
 (You can set max_wal_senders and max_replication_slots to a number at least 1.)
 
-You can check this with the following SQL:
+You can determine if your PostgreSQL instance is configured correctly with this:
 
 ```sql
 DO $$
@@ -48,11 +50,18 @@ BEGIN
   if (current_setting('max_wal_senders')::int >= 1) is not true then
     raise exception 'Your max_wal_senders setting is too low, it must be greater than 1. Please edit your `%` file and restart PostgreSQL.', current_setting('config_file');
   end if;
+  perform pg_create_logical_replication_slot('compatibility_test', 'wal2json');
+  perform pg_drop_replication_slot('compatibility_test');
+  raise notice 'Everything seems to be in order.';
 end;
 $$ LANGUAGE plpgsql;
 ```
 
-If no error is output then you're good to go.
+If you see the following message then all should be good:
+
+```
+NOTICE:  00000: Everything seems to be in order.
+```
 
 ## Environmental variables
 
@@ -83,12 +92,13 @@ This package installs the `graphile-lds` command. If you installed it globally y
 ## Cleaning up
 
 It's essential that you drop the logical replication slot when you no longer
-need it, otherwise your disk will fill up. To do so:
+need it, otherwise your disk will fill up. PostgreSQL does this for you with
+slots marked as "temporary", but for normal slots you must do this manually:
 
 ```sql
 SELECT pg_drop_replication_slot('postgraphile'); -- or whatever slot name you were using.
 ```
 
-(It's okay to keep it active whilst you're running the LDS because we'll keep
-consuming the data and it'll be cleared automatically. It's only when LDS
-isn't running that data will build up.)
+(It's okay to keep the slot active whilst you're running the LDS because
+we'll keep consuming the data and it'll be cleared automatically. It's only
+when LDS isn't running that data will build up.)
