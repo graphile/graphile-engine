@@ -5,6 +5,53 @@ logical decoding. Used as part of PostGraphile's live queries support.
 
 For more background, see: https://github.com/graphile/postgraphile/issues/92#issuecomment-313476989
 
+## Installation:
+
+Install alongside `postgraphile`, e.g.:
+
+```
+yarn add @graphile/subscriptions-lds
+```
+
+### Usage:
+
+To use this plugin:
+
+- Ensure your PostgreSQL server has `wal_level = logical` and the `wal2json` plugin (see "Setting up PostgreSQL" below)
+- Load this plugin with `--append-plugins` (or `appendPlugins`)
+- Enable PostGraphile live with `--live` (or `live: true`)
+- If you don't use a superuser or database owner PostgreSQL user with PostGraphile normally (or if you pass a pool to the PostGraphile library), you must provide a superuser or database owner connection string via `--owner-connection` (or `ownerConnectionString`)
+
+CLI:
+
+```
+postgraphile \
+  --live \
+  --owner-connection postgres://db_owner:db_owner_pass@host/db \
+  --append-plugins @graphile/subscriptions-lds \
+  ...
+```
+
+Library:
+
+```js
+app.use(
+  postgraphile(DB, SCHEMA, {
+    // ...
+
+    // Enable live support in PostGraphile
+    live: true,
+    // We need elevated privileges for logical decoding
+    ownerConnectionString: "postgres://db_owner:db_owner_pass@host/db",
+    // Add this plugin
+    appendPlugins: [
+      //...
+      require("@graphile/subscriptions-lds").default,
+    ],
+  })
+);
+```
+
 ## Setting up PostgreSQL
 
 TL;DR: set `wal_level = logical` in `postgresql.conf` and ensure `wal2json`
@@ -18,7 +65,7 @@ PostgreSQL database to support this.
 In your `postgresql.conf` you need to enable `wal_level = logical`. You
 should ensure that the following settings are set (the `10`s can be any
 number greater than 1; set them to how many PostGraphile instances you're
-expecting to run, plus a little buffer):
+expecting to run, plus a little buffer for regular replication needs):
 
 ```
 wal_level = logical
@@ -46,53 +93,6 @@ USE_PGXS=1 make install
 ```
 
 3. (optional) delete the wal2json folder
-
-## Installation:
-
-Install alongside `postgraphile`, e.g.:
-
-```
-yarn add @graphile/subscriptions-lds
-```
-
-### Usage:
-
-To use this plugin:
-
-- You need to load the plugin with `--append-plugins` (or `appendPlugins`)
-- You need to enable live support in PostGraphile with `--live` (or `live: true`)
-- If you don't use a superuser or database owner PostgreSQL user with PostGraphile normally (or if you pass a pool to the PostGraphile library), you must provide a superuser or database owner connection string via `--owner-connection` (or `ownerConnectionString`)
-
-CLI:
-
-```
-postgraphile \
-  --live \
-  --append-plugins @graphile/subscriptions-lds \
-  --owner-connection postgres://db_owner:db_owner_pass@host/db \
-  ...
-```
-
-Library:
-
-```js
-app.use(
-  postgraphile(DB, SCHEMA, {
-    //...
-
-    // Enable live support in PostGraphile
-    live: true,
-    // We need elevated privileges for logical decoding
-    ownerConnectionString: "postgres://db_owner:db_owner_pass@host/db",
-    appendPlugins: [
-      //...
-
-      // Add this plugin
-      require("@graphile/subscriptions-lds").default,
-    ],
-  })
-);
-```
 
 ## Optimising
 
