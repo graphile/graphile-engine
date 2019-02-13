@@ -88,6 +88,7 @@ export class LiveMonitor {
   }
 
   release() {
+    this.handleChange.cancel();
     this.handleChange = null;
     this.reset();
     this.providers = {};
