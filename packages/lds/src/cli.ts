@@ -13,7 +13,7 @@ const HOST = process.env.LD_HOST || "127.0.0.1";
 const SLOTS = parseInt(process.env.LD_MAX_CLIENTS || "", 10) || 50;
 const SLEEP_DURATION = Math.max(
   1,
-  parseInt(process.env.LD_WAIT || "", 10) || 200
+  parseInt(process.env.LD_WAIT || "", 10) || 125
 );
 const stringify = JSON.stringify;
 

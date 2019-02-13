@@ -8,7 +8,7 @@ type SubscriptionReleaser = () => void;
 type SubscriptionCallback = () => void;
 
 const MONITOR_THROTTLE_DURATION =
-  parseInt(process.env.LD_THROTTLE || "", 10) || 500;
+  parseInt(process.env.LIVE_THROTTLE || "", 10) || 500;
 
 export class LiveSource {
   subscribeCollection(
