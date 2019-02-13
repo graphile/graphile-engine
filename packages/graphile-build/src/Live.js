@@ -58,12 +58,14 @@ export class LiveMonitor {
   providers: { [namespace: string]: LiveProvider };
   subscriptionReleasers: (() => void)[];
   changeCallback: (() => void) | null;
+  liveConditions: [];
 
   constructor(providers: { [namespace: string]: LiveProvider }) {
     this.released = false;
     this.providers = providers;
     this.subscriptionReleasers = [];
     this.changeCallback = null;
+    this.liveConditions = [];
     this.handleChange = throttle(
       this.handleChange.bind(this),
       MONITOR_THROTTLE_DURATION,
@@ -81,10 +83,14 @@ export class LiveMonitor {
       releaser();
     }
     this.subscriptionReleasers = [];
+    // Delete everything from liveConditions, we'll be getting fresh conditions soon enough
+    this.liveConditions.splice(0, this.liveCollection.length);
   }
 
   release() {
+    this.handleChange = null;
     this.reset();
+    this.providers = {};
     this.released = true;
   }
 
@@ -115,10 +121,10 @@ export class LiveMonitor {
     this.changeCallback = callback;
     setImmediate(this.handleChange);
     return () => {
-      this.release();
       if (this.changeCallback === callback) {
         this.changeCallback = null;
       }
+      this.release();
     };
   }
 
@@ -127,6 +133,9 @@ export class LiveMonitor {
     collectionIdentifier: any,
     predicate: (record: any) => boolean = () => true
   ) {
+    if (this.released) {
+      return;
+    }
     const provider = this.providers[namespace];
     if (!provider || provider.sources.length === 0) return;
     if (!provider.collectionIdentifierIsValid(collectionIdentifier)) {
@@ -151,6 +160,9 @@ export class LiveMonitor {
     collectionIdentifier: any,
     recordIdentifier: any
   ) {
+    if (this.released) {
+      return;
+    }
     // TODO: if (recordIdentifier == null) {return}
     const provider = this.providers[namespace];
     if (!provider || provider.sources.length === 0) return;
@@ -213,7 +225,7 @@ export class LiveCoordinator {
       context: {
         liveCollection: monitor.liveCollection.bind(monitor),
         liveRecord: monitor.liveRecord.bind(monitor),
-        liveConditions: [],
+        liveConditions: monitor.liveConditions,
       },
     };
   }

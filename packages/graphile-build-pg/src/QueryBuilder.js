@@ -221,9 +221,10 @@ class QueryBuilder {
     if (!this.context.liveCollection) return;
     if (!this.context.liveConditions) return;
     /* the actual condition doesn't matter hugely, 'select' should work */
+    const liveConditions = this.data.liveConditions;
     const checkerGenerator = data => {
       // Compute this once.
-      const checkers = this.data.liveConditions.map(([checkerGenerator]) =>
+      const checkers = liveConditions.map(([checkerGenerator]) =>
         checkerGenerator(data)
       );
       return record => checkers.every(checker => checker(record));
