@@ -7,6 +7,9 @@ import { throttle } from "lodash";
 type SubscriptionReleaser = () => void;
 type SubscriptionCallback = () => void;
 
+type Predicate = (record: any) => boolean;
+type PredicateGenerator = (data: any) => Predicate;
+
 const MONITOR_THROTTLE_DURATION =
   parseInt(process.env.LIVE_THROTTLE || "", 10) || 500;
 
@@ -14,7 +17,7 @@ export class LiveSource {
   subscribeCollection(
     _callback: SubscriptionCallback,
     _collectionIdentifier: any,
-    _predicate?: (record: any) => boolean
+    _predicate?: Predicate
   ): SubscriptionReleaser | null {
     return null;
   }
@@ -58,7 +61,7 @@ export class LiveMonitor {
   providers: { [namespace: string]: LiveProvider };
   subscriptionReleasers: (() => void)[];
   changeCallback: (() => void) | null;
-  liveConditions: [];
+  liveConditions: Array<PredicateGenerator>;
 
   constructor(providers: { [namespace: string]: LiveProvider }) {
     this.released = false;
@@ -66,6 +69,9 @@ export class LiveMonitor {
     this.subscriptionReleasers = [];
     this.changeCallback = null;
     this.liveConditions = [];
+    if (!this.handleChange) {
+      throw new Error("This is just to make flow happy");
+    }
     this.handleChange = throttle(
       this.handleChange.bind(this),
       MONITOR_THROTTLE_DURATION,
@@ -88,7 +94,9 @@ export class LiveMonitor {
   }
 
   release() {
-    this.handleChange.cancel();
+    if (this.handleChange) {
+      this.handleChange.cancel();
+    }
     this.handleChange = null;
     this.reset();
     this.providers = {};
@@ -96,7 +104,7 @@ export class LiveMonitor {
   }
 
   // Tell Flow that we're okay with overwriting this
-  handleChange: () => void;
+  handleChange: (() => void) | null;
   handleChange() {
     if (this.changeCallback) {
       // Convince Flow this won't suddenly become null
@@ -120,7 +128,9 @@ export class LiveMonitor {
     }
     // Throttle to every 250ms
     this.changeCallback = callback;
-    setImmediate(this.handleChange);
+    if (this.handleChange) {
+      setImmediate(this.handleChange);
+    }
     return () => {
       if (this.changeCallback === callback) {
         this.changeCallback = null;
@@ -134,7 +144,8 @@ export class LiveMonitor {
     collectionIdentifier: any,
     predicate: (record: any) => boolean = () => true
   ) {
-    if (this.released) {
+    const handleChange = this.handleChange;
+    if (this.released || !handleChange) {
       return;
     }
     const provider = this.providers[namespace];
@@ -146,7 +157,7 @@ export class LiveMonitor {
     }
     for (const source of provider.sources) {
       const releaser = source.subscribeCollection(
-        this.handleChange,
+        handleChange,
         collectionIdentifier,
         predicate
       );
@@ -161,7 +172,8 @@ export class LiveMonitor {
     collectionIdentifier: any,
     recordIdentifier: any
   ) {
-    if (this.released) {
+    const handleChange = this.handleChange;
+    if (this.released || !handleChange) {
       return;
     }
     // TODO: if (recordIdentifier == null) {return}
@@ -181,7 +193,7 @@ export class LiveMonitor {
     }
     for (const source of provider.sources) {
       const releaser = source.subscribeRecord(
-        this.handleChange,
+        handleChange,
         collectionIdentifier,
         recordIdentifier
       );
