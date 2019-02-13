@@ -135,3 +135,32 @@ easily. Follow the steps in the `@graphile/lds` README to get the server up
 and running, and then set environmental variable `LDS_SERVER_URL` to the full
 websocket URL to your LDS server, e.g. `ws://127.0.0.1:9876` (default) before
 loading this plugin.
+
+## Compatibility check
+
+You can determine if your PostgreSQL instance is configured correctly with this:
+
+```sql
+DO $$
+BEGIN
+  if current_setting('wal_level') is distinct from 'logical' then
+    raise exception 'wal_level must be set to ''logical'', your database has it set to ''%''. Please edit your `%` file and restart PostgreSQL.', current_setting('wal_level'), current_setting('config_file');
+  end if;
+  if (current_setting('max_replication_slots')::int >= 1) is not true then
+    raise exception 'Your max_replication_slots setting is too low, it must be greater than 1. Please edit your `%` file and restart PostgreSQL.', current_setting('config_file');
+  end if;
+  if (current_setting('max_wal_senders')::int >= 1) is not true then
+    raise exception 'Your max_wal_senders setting is too low, it must be greater than 1. Please edit your `%` file and restart PostgreSQL.', current_setting('config_file');
+  end if;
+  perform pg_create_logical_replication_slot('compatibility_test', 'wal2json');
+  perform pg_drop_replication_slot('compatibility_test');
+  raise notice 'Everything seems to be in order.';
+end;
+$$ LANGUAGE plpgsql;
+```
+
+If you see the following message then all should be good:
+
+```
+NOTICE:  00000: Everything seems to be in order.
+```
