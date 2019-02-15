@@ -93,3 +93,72 @@ test("notified on insert", () =>
     const changes3 = await ld.getChanges();
     expect(changes3.length).toEqual(0);
   }));
+
+test("notified on update", () =>
+  withLdAndClient(async (ld, client) => {
+    const changes1 = await ld.getChanges();
+    expect(changes1.length).toEqual(0);
+    // Do something
+    await client.query("update app_public.foo set name = $1 where id = $2", [
+      "Hello World",
+      1,
+    ]);
+    const changes2 = await ld.getChanges();
+    expect(changes2.length).toEqual(1);
+    const [
+      {
+        data: { change: change2changes },
+      },
+    ] = changes2;
+    expect(change2changes).toHaveLength(1);
+    const change = change2changes[0];
+    if (change.kind !== "update") {
+      throw new Error("Unexpected type");
+    }
+    expect(change.schema).toEqual("app_public");
+    expect(change.table).toEqual("foo");
+    expect(change.columnvalues).toBeTruthy();
+    expect(change.columnvalues).toHaveLength(4);
+    expect(change.oldkeys).toBeTruthy();
+    expect(typeof change.oldkeys).toEqual("object");
+    expect(change.oldkeys.keynames).toEqual(["id"]);
+    expect(change.oldkeys.keyvalues).toEqual([1]);
+
+    const changes3 = await ld.getChanges();
+    expect(changes3.length).toEqual(0);
+  }));
+
+test("notified on delete", () =>
+  withLdAndClient(async (ld, client) => {
+    const {
+      rows: [{ id }],
+    } = await client.query(
+      "insert into app_public.foo(name) values('temporary') returning id"
+    );
+    await ld.getChanges(); // clear changes from this insert
+    const changes1 = await ld.getChanges();
+    expect(changes1.length).toEqual(0);
+    // Do something
+    await client.query("delete from app_public.foo where id = $1", [id]);
+    const changes2 = await ld.getChanges();
+    expect(changes2.length).toEqual(1);
+    const [
+      {
+        data: { change: change2changes },
+      },
+    ] = changes2;
+    expect(change2changes).toHaveLength(1);
+    const change = change2changes[0];
+    if (change.kind !== "delete") {
+      throw new Error("Unexpected type");
+    }
+    expect(change.schema).toEqual("app_public");
+    expect(change.table).toEqual("foo");
+    expect(change.oldkeys).toBeTruthy();
+    expect(typeof change.oldkeys).toEqual("object");
+    expect(change.oldkeys.keynames).toEqual(["id"]);
+    expect(change.oldkeys.keyvalues).toEqual([id]);
+
+    const changes3 = await ld.getChanges();
+    expect(changes3.length).toEqual(0);
+  }));
