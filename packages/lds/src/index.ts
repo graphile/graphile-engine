@@ -87,9 +87,12 @@ export default async function subscribeToLogicalDecoding(
     }
   }
 
+  let loopTimeout: NodeJS.Timer;
+
   const ldSubscription = {
-    close: () => {
-      throw new Error("Not implemented yet");
+    close: async () => {
+      clearTimeout(loopTimeout);
+      await client.close();
     },
   };
 
@@ -152,10 +155,10 @@ export default async function subscribeToLogicalDecoding(
     } catch (e) {
       console.error(e);
       // Recovery time...
-      setTimeout(loop, sleepDuration * 10);
+      loopTimeout = setTimeout(loop, sleepDuration * 10);
       return;
     }
-    setTimeout(loop, sleepDuration);
+    loopTimeout = setTimeout(loop, sleepDuration);
   }
   loop();
   return ldSubscription;
