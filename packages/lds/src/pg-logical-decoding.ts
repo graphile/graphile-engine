@@ -135,7 +135,7 @@ export default class PgLogicalDecoding extends EventEmitter {
         `
       );
     } catch (e) {
-      if (e.code === "42P01" && this.temporary) {
+      if (e.code === "42P01") {
         // The `postgraphile_meta.logical_decoding_slots` table doesn't exist.
         // Ignore.
       } else {
@@ -194,15 +194,27 @@ export default class PgLogicalDecoding extends EventEmitter {
     }
   }
 
-  public close() {
+  public async close() {
+    if (!this.temporary) {
+      const client = await this.getClient();
+      await client.query("select pg_drop_replication_slot($1)", [
+        this.slotName,
+      ]);
+      await client.query(
+        "delete from postgraphile_meta.logical_decoding_slots where slot_name = $1",
+        [this.slotName]
+      );
+    }
     if (this.client) {
-      this.client.then(c => c.release()).catch(() => {
+      try {
+        (await this.client).release();
+      } catch (e) {
         /*noop*/
-      });
+      }
       this.client = null;
     }
     if (this.pool) {
-      this.pool.end();
+      await this.pool.end();
       this.pool = null;
     }
   }
