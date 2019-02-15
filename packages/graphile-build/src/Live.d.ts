@@ -5,21 +5,21 @@ import { GraphQLResolveInfo } from "graphql";
 type SubscriptionReleaser = () => void;
 type SubscriptionCallback = () => void;
 
-export class LiveSource {
-  subscribeCollection(
+export abstract class LiveSource {
+  abstract subscribeCollection(
     _callback: SubscriptionCallback,
     _collectionIdentifier: any,
     _predicate?: (record: any) => boolean
   ): SubscriptionReleaser | null;
 
-  subscribeRecord(
+  abstract subscribeRecord(
     _callback: SubscriptionCallback,
     _collectionIdentifier: any,
     _recordIdentifier: any
   ): SubscriptionReleaser | null;
 }
 
-export class LiveProvider {
+export abstract class LiveProvider {
   sources: Array<LiveSource>;
   namespace: string;
 
@@ -27,9 +27,9 @@ export class LiveProvider {
 
   registerSource(source: LiveSource): void;
 
-  collectionIdentifierIsValid(_collectionIdentifier: any): boolean;
+  abstract collectionIdentifierIsValid(_collectionIdentifier: any): boolean;
 
-  recordIdentifierIsValid(
+  abstract recordIdentifierIsValid(
     _collectionIdentifier: any,
     _recordIdentifier: any
   ): boolean;
