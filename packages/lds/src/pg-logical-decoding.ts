@@ -29,7 +29,7 @@ interface Change {
 }
 
 // https://github.com/eulerto/wal2json/blob/f81bf7af09324da656be87dfd53d20741c01e1e0/wal2json.c#L941-L949
-interface InsertChange extends Change {
+export interface InsertChange extends Change {
   kind: "insert";
 
   // https://github.com/eulerto/wal2json/blob/f81bf7af09324da656be87dfd53d20741c01e1e0/wal2json.c#L969
@@ -38,7 +38,7 @@ interface InsertChange extends Change {
   columnvalues: Array<any>;
 }
 
-interface UpdateChange extends Change {
+export interface UpdateChange extends Change {
   kind: "update";
 
   // https://github.com/eulerto/wal2json/blob/f81bf7af09324da656be87dfd53d20741c01e1e0/wal2json.c#L973
@@ -50,7 +50,7 @@ interface UpdateChange extends Change {
   oldkeys: Keys;
 }
 
-interface DeleteChange extends Change {
+export interface DeleteChange extends Change {
   kind: "delete";
 
   // https://github.com/eulerto/wal2json/blob/f81bf7af09324da656be87dfd53d20741c01e1e0/wal2json.c#L1009-L1018

@@ -1,5 +1,5 @@
 import PgLogicalDecoding from "../src/pg-logical-decoding";
-import { tryDropSlot, DATABASE_URL, query } from "./helpers";
+import { tryDropSlot, DATABASE_URL, query, withLdAndClient } from "./helpers";
 
 test("opens and closes cleanly", async () => {
   const ld = new PgLogicalDecoding(DATABASE_URL, {
@@ -64,3 +64,32 @@ test("temporary creates slot for itself, PostgreSQL automatically cleans up for 
   );
   expect(finalPgRows.length).toEqual(0);
 });
+
+test("notified on insert", () =>
+  withLdAndClient(async (ld, client) => {
+    const changes1 = await ld.getChanges();
+    expect(changes1.length).toEqual(0);
+    // Do something
+    await client.query("insert into app_public.foo(name) values ($1)", [
+      "Hello World",
+    ]);
+    const changes2 = await ld.getChanges();
+    expect(changes2.length).toEqual(1);
+    const [
+      {
+        data: { change: change2changes },
+      },
+    ] = changes2;
+    expect(change2changes).toHaveLength(1);
+    const change = change2changes[0];
+    if (change.kind !== "insert") {
+      throw new Error("Unexpected type");
+    }
+    expect(change.schema).toEqual("app_public");
+    expect(change.table).toEqual("foo");
+    expect(change.columnvalues).toBeTruthy();
+    expect(change.columnvalues).toHaveLength(4);
+
+    const changes3 = await ld.getChanges();
+    expect(changes3.length).toEqual(0);
+  }));
