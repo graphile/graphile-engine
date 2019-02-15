@@ -18,11 +18,11 @@ function generateRandomString(length: number): string {
   return str;
 }
 
-class LDSLiveSource {
+export class LDSLiveSource {
+  public readonly slotName: string | null;
+  private lds: LDSubscription | null;
   private url: string | null;
   private connectionString: string | null;
-  private lds: LDSubscription | null;
-  private slotName: string | null;
 
   private reconnecting: boolean;
   private live: boolean;
@@ -30,6 +30,7 @@ class LDSLiveSource {
     [topic: string]: Array<[SubscriptionCallback, Predicate | void]>;
   };
   private ws: WebSocket | null;
+  private sleepDuration?: number;
 
   /**
    * @param url - If not specified, we'll spawn our own LDS listener
@@ -42,7 +43,7 @@ class LDSLiveSource {
     this.url = ldsURL || null;
     this.connectionString = connectionString || null;
     this.lds = null;
-    this.slotName = null;
+    this.slotName = this.url ? null : generateRandomString(30);
     this.ws = null;
     this.reconnecting = false;
     this.live = true;
@@ -56,13 +57,16 @@ class LDSLiveSource {
       if (!this.connectionString) {
         throw new Error("No PG connection string given");
       }
-      this.slotName = generateRandomString(30);
+      if (!this.slotName) {
+        throw new Error("this.slotName is blank");
+      }
       this.lds = await subscribeToLogicalDecoding(
         this.connectionString,
         this.handleAnnouncement,
         {
           slotName: this.slotName,
           temporary: true,
+          sleepDuration: this.sleepDuration,
         }
       );
     }
@@ -98,7 +102,7 @@ class LDSLiveSource {
     );
   }
 
-  public close() {
+  public async close() {
     if (!this.live) {
       return;
     }
@@ -108,7 +112,7 @@ class LDSLiveSource {
       this.ws = null;
     }
     if (this.lds) {
-      this.lds.close();
+      await this.lds.close();
       this.lds = null;
     }
   }
@@ -199,6 +203,7 @@ class LDSLiveSource {
       });
     }
   }
+
   private handleAnnouncement = (announcement: Announcement) => {
     switch (announcement._) {
       case "insertC": {
@@ -234,8 +239,10 @@ class LDSLiveSource {
       }
     }
   };
+
   private handleMessage = (message: WebSocket.Data) => {
     try {
+      // @ts-ignore Buffer, string, whatever -> toString("utf8") is safe.
       const messageString = message.toString("utf8");
       const payload = JSON.parse(messageString);
       switch (payload._) {
@@ -262,6 +269,7 @@ class LDSLiveSource {
 interface Options {
   ldsURL?: string;
   connectionString?: string;
+  sleepDuration?: number;
 }
 
 async function makeLDSLiveSource(options: Options): Promise<LDSLiveSource> {
@@ -279,7 +287,7 @@ const PgLDSSourcePlugin: Plugin = async function(
     const source = await makeLDSLiveSource({
       ldsURL: typeof pgLDSUrl === "string" ? pgLDSUrl : undefined,
       // @ts-ignore
-      connectionString: pgOwnerConnectionString,
+      connectionString: pgOwnerConnectionString as string,
     });
     builder.hook("build", build => {
       build.liveCoordinator.registerSource("pg", source);

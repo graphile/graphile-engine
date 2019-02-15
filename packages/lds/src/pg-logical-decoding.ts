@@ -88,10 +88,10 @@ interface Options {
 }
 
 export default class PgLogicalDecoding extends EventEmitter {
+  public readonly slotName: string;
+  public readonly temporary: boolean;
   private connectionString: string;
   private tablePattern: string;
-  private slotName: string;
-  private temporary: boolean;
   private pool: pg.Pool | null;
   private client: Promise<pg.PoolClient> | null;
 
