@@ -219,6 +219,17 @@ export default class PgLogicalDecoding extends EventEmitter {
     }
   }
 
+  public async installSchema(): Promise<void> {
+    const client = await this.getClient();
+    await client.query(`
+      create schema if not exists postgraphile_meta;
+      create table if not exists postgraphile_meta.logical_decoding_slots (
+        slot_name text primary key,
+        last_checkin timestamptz not null default now()
+      );
+    `);
+  }
+
   /****************************************************************************/
 
   private async getClient() {
@@ -242,17 +253,6 @@ export default class PgLogicalDecoding extends EventEmitter {
     console.log("LDS pool error", err);
     // this.emit("error", err);
   };
-
-  private async installSchema(): Promise<void> {
-    const client = await this.getClient();
-    await client.query(`
-      create schema if not exists postgraphile_meta;
-      create table if not exists postgraphile_meta.logical_decoding_slots (
-        slot_name text primary key,
-        last_checkin timestamptz not null default now()
-      );
-    `);
-  }
 
   private async trackSelf(
     client: pg.PoolClient,
