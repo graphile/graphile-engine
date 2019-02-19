@@ -272,7 +272,11 @@ export class LiveCoordinator {
   subscribe(_parent: any, _args: any, context: any, _info: GraphQLResolveInfo) {
     const { monitor, context: additionalContext } = this.getMonitorAndContext();
     Object.assign(context, additionalContext);
-    return makeAsyncIteratorFromMonitor(monitor);
+    const iterator = makeAsyncIteratorFromMonitor(monitor);
+    context.liveAbort = e => {
+      iterator.throw(e);
+    };
+    return iterator;
   }
 }
 

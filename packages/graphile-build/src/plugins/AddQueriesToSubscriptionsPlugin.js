@@ -35,7 +35,17 @@ const AddQueriesToSubscriptionsPlugin: Plugin = function(
             };
             return newArgs;
           }, {}),
-          resolve: queryField.resolve,
+          resolve: async (...args) => {
+            try {
+              return await queryField.resolve(...args);
+            } catch (e) {
+              const context = args[2];
+              if (typeof context.liveAbort === "function") {
+                context.liveAbort(e);
+              }
+              throw e;
+            }
+          },
           subscribe: build.liveCoordinator.subscribe,
           deprecationReason: queryField.isDeprecated
             ? queryField.deprecationReason
