@@ -125,7 +125,7 @@ export default class PgLogicalDecoding extends EventEmitter {
             where last_checkin < now() - interval '1 hour'
             returning *
           )
-          select pg_drop_replication_slot(slot_name)
+          select pg_catalog.pg_drop_replication_slot(slot_name)
           from deleted_slots
           where exists (
             select 1
@@ -150,7 +150,7 @@ export default class PgLogicalDecoding extends EventEmitter {
     await this.trackSelf(client);
     try {
       await client.query(
-        `SELECT pg_create_logical_replication_slot($1, 'wal2json', $2)`,
+        `SELECT pg_catalog.pg_create_logical_replication_slot($1, 'wal2json', $2)`,
         [this.slotName, !!this.temporary]
       );
     } catch (e) {
@@ -175,7 +175,7 @@ export default class PgLogicalDecoding extends EventEmitter {
     await this.trackSelf(client);
     try {
       const { rows } = await client.query({
-        text: `SELECT lsn, data FROM pg_logical_slot_get_changes($1, $2, $3, 'add-tables', $4::text, 'format-version', '1')`,
+        text: `SELECT lsn, data FROM pg_catalog.pg_logical_slot_get_changes($1, $2, $3, 'add-tables', $4::text, 'format-version', '1')`,
         values: [this.slotName, uptoLsn, uptoNchanges, this.tablePattern],
         rowMode: "array",
       });
@@ -197,7 +197,7 @@ export default class PgLogicalDecoding extends EventEmitter {
   public async close() {
     if (!this.temporary) {
       const client = await this.getClient();
-      await client.query("select pg_drop_replication_slot($1)", [
+      await client.query("select pg_catalog.pg_drop_replication_slot($1)", [
         this.slotName,
       ]);
       await client.query(
