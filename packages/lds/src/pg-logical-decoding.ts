@@ -112,7 +112,6 @@ export default class PgLogicalDecoding extends EventEmitter {
       max: 1,
     });
     this.pool.on("error", this.onPoolError);
-    this.getClient();
   }
 
   public async dropStaleSlots() {
@@ -139,8 +138,7 @@ export default class PgLogicalDecoding extends EventEmitter {
         // The `postgraphile_meta.logical_decoding_slots` table doesn't exist.
         // Ignore.
       } else {
-        console.error("Error clearing stale slots:");
-        console.error(e);
+        console.error("Error clearing stale slots:", e.message);
       }
     }
   }
@@ -232,25 +230,28 @@ export default class PgLogicalDecoding extends EventEmitter {
 
   /****************************************************************************/
 
-  private async getClient() {
-    if (this.client) {
-      return this.client;
-    }
+  private async getClient(): Promise<pg.PoolClient> {
     if (!this.pool) {
       throw new Error("Pool has been closed");
     }
+    if (this.client) {
+      return this.client;
+    }
     this.client = this.pool.connect();
-    return this.client;
+    return this.client.catch(e => {
+      this.client = null;
+      return Promise.reject(e);
+    });
   }
 
   private onPoolError = (err: Error) => {
     if (this.client) {
-      this.client.then(c => c.release()).catch(() => {
+      this.client.then(c => c.release(err)).catch(() => {
         // noop
       });
     }
     this.client = null;
-    console.log("LDS pool error", err);
+    console.error("LDS pool error:", err.message);
     // this.emit("error", err);
   };
 

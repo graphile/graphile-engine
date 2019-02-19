@@ -83,7 +83,11 @@ export default async function subscribeToLogicalDecoding(
     } else if (e.code === "42602") {
       throw new FatalError(`Invalid slot name '${slotName}'?`, e);
     } else {
+      console.error(
+        "An unhandled error occurred when attempting to create the replication slot:"
+      );
       console.trace(e);
+      throw e;
     }
   }
 
@@ -150,10 +154,12 @@ export default async function subscribeToLogicalDecoding(
       if (!temporary && nextStaleCheck < Date.now()) {
         // Roughly every 15 minutes, drop stale slots.
         nextStaleCheck = Date.now() + DROP_STALE_SLOTS_INTERVAL;
-        client.dropStaleSlots();
+        client.dropStaleSlots().catch(e => {
+          console.error("Failed to drop stale slots:", e.message);
+        });
       }
     } catch (e) {
-      console.error(e);
+      console.error("Error during LDS loop:", e.message);
       // Recovery time...
       loopTimeout = setTimeout(loop, sleepDuration * 10);
       return;

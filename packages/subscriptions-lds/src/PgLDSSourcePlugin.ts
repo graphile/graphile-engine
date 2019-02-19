@@ -130,8 +130,7 @@ export class LDSLiveSource {
     }
     this.ws = new WebSocket(this.url);
     this.ws.on("error", err => {
-      console.error("Websocket error");
-      console.error(err);
+      console.error("Websocket error: ", err.message);
       this.reconnect();
     });
     this.ws.on("open", () => {
@@ -260,11 +259,15 @@ export class LDSLiveSource {
           // Keep alive, no action necessary.
           return;
         default:
-          console.warn("Unhandled message", payload);
+          console.warn("Unhandled message:", payload);
       }
     } catch (e) {
-      console.error("Error occurred when processing message", message);
-      console.error(e);
+      console.error(
+        "Error occurred when processing message,",
+        message,
+        ":",
+        e.message
+      );
     }
   };
 }
@@ -298,9 +301,9 @@ const PgLDSSourcePlugin: Plugin = async function(
     });
   } catch (e) {
     console.error(
-      "Could not Initiate PgLDSSourcePlugin, continuing without LDS live subscriptions"
+      "Could not Initiate PgLDSSourcePlugin, continuing without LDS live subscriptions. Error:",
+      e.message
     );
-    console.error(e);
     return;
   }
 };
