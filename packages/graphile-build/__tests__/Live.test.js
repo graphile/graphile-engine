@@ -1,7 +1,10 @@
 import { LiveSource, LiveCoordinator, LiveProvider } from "../src/Live";
 
 class DummyProvider extends LiveProvider {
-  namespace = "dummy";
+  constructor() {
+    super();
+    this.namespace = "dummy";
+  }
 
   collectionIdentifierIsValid() {
     return true;
@@ -13,8 +16,12 @@ class DummyProvider extends LiveProvider {
 }
 
 class DummySource extends LiveSource {
-  collectionListeners = [];
-  recordListeners = [];
+  constructor() {
+    super();
+    this.collectionListeners = [];
+    this.recordListeners = [];
+  }
+
   subscribeCollection(callback, collectionIdentifier, predicate) {
     const entry = [collectionIdentifier, predicate];
     this.collectionListeners.push(entry);

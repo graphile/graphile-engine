@@ -168,6 +168,9 @@ export class LDSLiveSource {
     cb: SubscriptionCallback,
     predicate?: Predicate | void
   ) {
+    if (!this.live) {
+      return null;
+    }
     const entry: [SubscriptionCallback, Predicate | void] = [cb, predicate];
     if (!this.subscriptions[topic]) {
       this.subscriptions[topic] = [];

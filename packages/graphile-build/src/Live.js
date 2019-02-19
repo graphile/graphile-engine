@@ -13,6 +13,10 @@ type PredicateGenerator = (data: any) => Predicate;
 const MONITOR_THROTTLE_DURATION =
   parseInt(process.env.LIVE_THROTTLE || "", 10) || 500;
 
+/*
+ * Sources are long-lived (i.e. in "watch" mode you just re-use the same one
+ * over and over) because there is no release for them
+ */
 export class LiveSource {
   subscribeCollection(
     _callback: SubscriptionCallback,
@@ -31,6 +35,12 @@ export class LiveSource {
   }
 }
 
+/*
+ * Providers enable a namespace, perform validation, and track the sources used
+ * by that namespace within one single schema build. The should not directly use
+ * any long-lived features as they do not have an explicit "release"/"close"
+ * command when a new schema is built.
+ */
 export class LiveProvider {
   sources: Array<LiveSource>;
   namespace: string;
@@ -56,6 +66,10 @@ export class LiveProvider {
   }
 }
 
+/*
+ * During a single execution of GraphQL (specifically a subscription request),
+ * the LiveMonitor tracks the resources viewed and subscribes to updates in them.
+ */
 export class LiveMonitor {
   released: boolean;
   providers: { [namespace: string]: LiveProvider };
@@ -204,6 +218,11 @@ export class LiveMonitor {
   }
 }
 
+/*
+ * There is one coordinator for each build of the GraphQL schema, it tracks the providers
+ * and gives a handy `subscribe` method that can be used for live subscriptions (assuming
+ * that the `resolve` is provided the same as in a Query).
+ */
 export class LiveCoordinator {
   providers: { [namespace: string]: LiveProvider };
 
