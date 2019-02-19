@@ -276,7 +276,7 @@ export class LiveCoordinator {
   }
 }
 
-function makeAsyncIteratorFromMonitor(monitor: LiveMonitor) {
+export function makeAsyncIteratorFromMonitor(monitor: LiveMonitor) {
   return callbackToAsyncIterator(monitor.onChange, {
     onClose: release => {
       if (release) release();
