@@ -25,6 +25,7 @@ install:
   - lerna bootstrap
 
 before_script:
+  - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
   - sudo bash -c "echo -e 'wal_level = logical\nmax_replication_slots = 10\nmax_wal_senders = 10' >> /etc/postgresql/$PGVERSION/main/postgresql.conf"
   - sudo service postgresql restart
   - git clone https://github.com/eulerto/wal2json.git
@@ -48,5 +49,3 @@ matrix:
         - PGVERSION=10
       sudo: false
       dist: trusty
-      before_script:
-        - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
