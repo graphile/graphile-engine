@@ -8,6 +8,9 @@ Connects to a database and streams logical decoding events to interested parties
 
 ## Requirements
 
+We currently only support PG10+; if you need support for 9.x please get in
+touch.
+
 You need `wal2json`; this is available on:
 
 - Amazon RDS

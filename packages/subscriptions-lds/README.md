@@ -54,6 +54,9 @@ app.use(
 
 ## Setting up PostgreSQL
 
+We currently only support PG10+; if you need support for 9.x please get in
+touch.
+
 TL;DR: set `wal_level = logical` in `postgresql.conf` and ensure `wal2json`
 is installed.
 
