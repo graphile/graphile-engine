@@ -28,9 +28,7 @@ before_script:
   - sudo bash -c "echo 'wal_level = logical' >> /etc/postgresql/$PGVERSION/main/postgresql.conf"
   - sudo service postgresql restart
   - git clone https://github.com/eulerto/wal2json.git
-  - cd wal2json
-  - USE_PGXS=1 make
-  - USE_PGXS=1 sudo make install
+  - sudo bash -c "cd wal2json && USE_PGXS=1 make && USE_PGXS=1 make install"
 
 script:
   - scripts/ci
