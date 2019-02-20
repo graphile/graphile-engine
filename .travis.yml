@@ -30,7 +30,7 @@ before_script:
   - git clone https://github.com/eulerto/wal2json.git
   - cd wal2json
   - USE_PGXS=1 make
-  - USE_PGXS=1 make install
+  - USE_PGXS=1 sudo make install
 
 script:
   - scripts/ci
