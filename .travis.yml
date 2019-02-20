@@ -25,7 +25,7 @@ install:
   - lerna bootstrap
 
 before_script:
-  - sudo bash -c "echo 'wal_level = logical' >> /etc/postgresql/$PGVERSION/main/postgresql.conf"
+  - sudo bash -c "echo -e 'wal_level = logical\nmax_replication_slots = 10\nmax_wal_senders = 10' >> /etc/postgresql/$PGVERSION/main/postgresql.conf"
   - sudo service postgresql restart
   - git clone https://github.com/eulerto/wal2json.git
   - sudo bash -c "cd wal2json && USE_PGXS=1 make && USE_PGXS=1 make install"
