@@ -1,7 +1,7 @@
 import * as pg from "pg";
 import { LDSLiveSource } from "../src/PgLDSSourcePlugin";
 
-export const DATABASE_URL = "lds_test";
+export const DATABASE_URL = process.env.LDS_TEST_DATABASE_URL || "lds_test";
 export { PoolClient } from "pg";
 
 export async function withClient<T = void>(

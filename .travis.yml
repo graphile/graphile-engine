@@ -46,6 +46,7 @@ matrix:
       env:
         - PGPORT=5433
         - TEST_DATABASE_URL=postgres://travis:travis@localhost:5433/travis
+        - LDS_TEST_DATABASE_URL=postgres://travis:travis@localhost:5433/lds_test
         - PGVERSION=10
       sudo: false
       dist: trusty
