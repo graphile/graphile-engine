@@ -23,6 +23,7 @@ const AddQueriesToSubscriptionsPlugin: Plugin = function(
     const subscriptionFields = Object.keys(queryFields).reduce(
       (memo, queryFieldName) => {
         const queryField = queryFields[queryFieldName];
+        const oldResolve = queryField.resolve;
         memo[queryFieldName] = {
           description: (queryField.description || "") + " (live)",
           type: queryField.type,
@@ -35,17 +36,21 @@ const AddQueriesToSubscriptionsPlugin: Plugin = function(
             };
             return newArgs;
           }, {}),
-          resolve: async (...args) => {
-            try {
-              return await queryField.resolve(...args);
-            } catch (e) {
-              const context = args[2];
-              if (typeof context.liveAbort === "function") {
-                context.liveAbort(e);
+          ...(oldResolve
+            ? {
+                resolve: async (...args) => {
+                  try {
+                    return await oldResolve(...args);
+                  } catch (e) {
+                    const context = args[2];
+                    if (typeof context.liveAbort === "function") {
+                      context.liveAbort(e);
+                    }
+                    throw e;
+                  }
+                },
               }
-              throw e;
-            }
-          },
+            : null),
           subscribe: build.liveCoordinator.subscribe,
           deprecationReason: queryField.isDeprecated
             ? queryField.deprecationReason
