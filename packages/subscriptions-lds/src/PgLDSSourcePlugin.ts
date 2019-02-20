@@ -38,7 +38,9 @@ export class LDSLiveSource {
   constructor(options: Options) {
     const { ldsURL, connectionString } = options;
     if (!ldsURL && !connectionString) {
-      throw new Error("No LDS URL or connectionString was passed");
+      throw new Error(
+        "No LDS URL or connectionString was passed to LDSLiveSource; this likely means that you don't have `ownerConnectionString` specified in the PostGraphile library call."
+      );
     }
     this.url = ldsURL || null;
     this.connectionString = connectionString || null;
