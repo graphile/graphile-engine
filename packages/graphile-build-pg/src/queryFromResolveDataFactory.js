@@ -4,9 +4,12 @@ import type QueryBuilderOptions from "./QueryBuilder";
 import type { RawAlias } from "./QueryBuilder";
 import * as sql from "pg-sql2";
 import type { SQL } from "pg-sql2";
-import type { Context, DataForType } from "graphile-build";
+import type { DataForType } from "graphile-build";
 import isSafeInteger from "lodash/isSafeInteger";
 import assert from "assert";
+
+// eslint-disable-next-line flowtype/no-weak-types
+type GraphQLContext = any;
 
 const identity = _ => _ !== null && _ !== undefined;
 
@@ -25,7 +28,7 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   },
   // TODO:v5: context is not optional
   withBuilder?: ((builder: QueryBuilder) => void) | null | void,
-  context?: Context = {}
+  context?: GraphQLContext = {}
 ) => {
   const {
     pgQuery,

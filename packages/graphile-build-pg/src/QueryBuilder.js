@@ -4,7 +4,9 @@ import type { SQL } from "pg-sql2";
 import isSafeInteger from "lodash/isSafeInteger";
 import chunk from "lodash/chunk";
 import type { PgClass } from "./plugins/PgIntrospectionPlugin";
-import type { Context } from "graphile-build";
+
+// eslint-disable-next-line flowtype/no-weak-types
+type GraphQLContext = any;
 
 const isDev = process.env.POSTGRAPHILE_ENV === "development";
 
@@ -45,7 +47,7 @@ export type QueryBuilderOptions = {
 
 class QueryBuilder {
   parentQueryBuilder: QueryBuilder | void;
-  context: Context;
+  context: GraphQLContext;
   supportsJSONB: boolean;
   locks: {
     [string]: true | string,
@@ -98,7 +100,7 @@ class QueryBuilder {
     cursorComparator: ?CursorComparator,
   };
 
-  constructor(options: QueryBuilderOptions = {}, context: Context = {}) {
+  constructor(options: QueryBuilderOptions = {}, context: GraphQLContext = {}) {
     this.context = context || {};
     this.supportsJSONB =
       options.supportsJSONB == null ? true : !!options.supportsJSONB;
