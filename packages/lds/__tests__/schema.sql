@@ -5,9 +5,22 @@ drop schema if exists app_public cascade;
 create schema app_public;
 set search_path to app_public, public;
 
-create function viewer_id() returns int as $$
-  select nullif(current_setting('jwt.claims.user_id', true), '')::int;
-$$ language sql stable;
+do $_$
+begin
+if current_setting('server_version_num')::int >= 90500 then
+  -- JSONB supported
+  -- current_setting(x, true) supported
+  create function viewer_id() returns int as $$
+    select nullif(current_setting('jwt.claims.user_id', true), '')::int;
+  $$ language sql stable;
+else
+  execute 'alter database ' || quote_ident(current_database()) || ' set jwt.claims.user_id to ''''';
+  create function viewer_id() returns int as $$
+    select nullif(current_setting('jwt.claims.user_id'), '')::int;
+  $$ language sql stable;
+end if;
+end;
+$_$ language plpgsql;
 
 create table foo (
   id serial primary key,
