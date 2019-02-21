@@ -6,6 +6,7 @@
   "scripts": {
     "test": "jest -i",
     "prepack": "tsc",
+    "tslint": "prettier --list-different 'src/**/*' && tslint --config ../../tslint.json --project tsconfig.json",
     "watch": "tsc --watch"
   },
   "repository": {
