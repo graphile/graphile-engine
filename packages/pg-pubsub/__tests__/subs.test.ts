@@ -24,7 +24,7 @@ const init = async (options: PostGraphileOptions = {}) => {
     throw new Error("CTX wasn't torn down");
   }
   const pgPool = new Pool({
-    connectionString: "postgres://localhost/pggql_test",
+    connectionString: process.env.TEST_DATABASE_URL || "pggql_test",
   });
 
   // Keep track of the clients, one of them is our subscriptions client which we
