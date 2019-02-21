@@ -4,7 +4,8 @@
   "description": "Subscriptions plugin for PostGraphile using PostgreSQL's LISTEN/NOTIFY",
   "main": "dist/index.js",
   "scripts": {
-    "test": "jest -i",
+    "db:init": "psql -X1v ON_ERROR_STOP=1 -v VERBOSITY=verbose -f __tests__/schema.sql \"$TEST_DATABASE_URL\"",
+    "test": "npm run db:init && jest -i",
     "prepack": "tsc",
     "tslint": "prettier --list-different 'src/**/*' && tslint --config ../../tslint.json --project tsconfig.json",
     "watch": "tsc --watch"
