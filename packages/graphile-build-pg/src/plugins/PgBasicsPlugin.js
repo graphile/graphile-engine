@@ -30,9 +30,7 @@ import parseIdentifier from "../parseIdentifier";
 import viaTemporaryTable from "./viaTemporaryTable";
 import chalk from "chalk";
 import pickBy from "lodash/pickBy";
-import debugFactory from "debug";
-
-const warn = debugFactory("graphile-build-pg:warn");
+import PgLiveProvider from "../PgLiveProvider";
 
 const defaultPgColumnFilter = (_attr, _build, _context) => true;
 type Keys = Array<{
@@ -158,12 +156,15 @@ const omitUnindexed = omit => (
   ) {
     let klass = entity.class;
     if (klass) {
-      if (warn.enabled) {
-        warn(
+      if (!entity._omitUnindexedReadWarningGiven) {
+        // $FlowFixMe
+        entity._omitUnindexedReadWarningGiven = true;
+        // eslint-disable-next-line no-console
+        console.log(
           "%s",
-          `We've disabled the 'read' permission for ${describePgEntity(
+          `Disabled 'read' permission for ${describePgEntity(
             entity
-          )} because it isn't indexed. For more information see https://graphile.org/postgraphile/best-practices/ To fix this, perform\n\n  CREATE INDEX ON ${`"${
+          )} because it isn't indexed. For more information see https://graphile.org/postgraphile/best-practices/ To fix, perform\n\n  CREATE INDEX ON ${`"${
             klass.namespaceName
           }"."${klass.name}"`}("${entity.keyAttributes
             .map(a => a.name)
@@ -261,7 +262,7 @@ function sqlCommentByAddingTags(entity, tagsToAdd) {
     .reduce((memo, tag) => {
       const tagValue = tags[tag];
       const valueArray = Array.isArray(tagValue) ? tagValue : [tagValue];
-      const highlightOrNot = tag in tagsToAdd ? chalk.bold : identity;
+      const highlightOrNot = tag in tagsToAdd ? chalk.bold.green : identity;
       valueArray.forEach(value => {
         memo.push(
           highlightOrNot(
@@ -316,6 +317,7 @@ export default (function PgBasicsPlugin(
     pgColumnFilter = defaultPgColumnFilter,
     pgIgnoreRBAC = false,
     pgIgnoreIndexes = true, // TODO:v5: change this to false
+    pgLegacyJsonUuid = false, // TODO:v5: remove this
   }
 ) {
   let pgOmit = baseOmit;
@@ -327,6 +329,7 @@ export default (function PgBasicsPlugin(
   }
   builder.hook("build", build => {
     build.versions["graphile-build-pg"] = version;
+    build.liveCoordinator.registerProvider(new PgLiveProvider());
     return build.extend(build, {
       graphileBuildPgVersion: version,
       pgSql: sql,
@@ -349,6 +352,14 @@ export default (function PgBasicsPlugin(
   });
 
   builder.hook("inflection", (inflection, build) => {
+    // TODO:v5: move this to postgraphile-core
+    const oldBuiltin = inflection.builtin;
+    inflection.builtin = function(name) {
+      if (pgLegacyJsonUuid && name === "JSON") return "Json";
+      if (pgLegacyJsonUuid && name === "UUID") return "Uuid";
+      return oldBuiltin.call(this, name);
+    };
+
     return build.extend(
       inflection,
       preventEmptyResult({
@@ -417,13 +428,25 @@ export default (function PgBasicsPlugin(
         argument(name: ?string, index: number) {
           return this.camelCase(name || `arg${index}`);
         },
+        orderByEnum(columnName, ascending) {
+          return this.constantCase(
+            `${columnName}_${ascending ? "asc" : "desc"}`
+          );
+        },
         orderByColumnEnum(attr: PgAttribute, ascending: boolean) {
           const columnName = this._columnName(attr, {
             skipRowId: true, // Because we messed up 😔
           });
-          return this.constantCase(
-            `${columnName}_${ascending ? "asc" : "desc"}`
-          );
+          return this.orderByEnum(columnName, ascending);
+        },
+        orderByComputedColumnEnum(
+          pseudoColumnName: string,
+          proc: PgProc,
+          table: PgClass,
+          ascending: boolean
+        ) {
+          const columnName = this.computedColumn(pseudoColumnName, proc, table);
+          return this.orderByEnum(columnName, ascending);
         },
         domainType(type: PgType) {
           return this.upperCamelCase(this._typeName(type));
@@ -746,6 +769,9 @@ export default (function PgBasicsPlugin(
         },
         deleteNode(table: PgClass) {
           return this.camelCase(`delete-${this._singularizedTableName(table)}`);
+        },
+        deletedNodeId(table: PgClass) {
+          return this.camelCase(`deleted-${this.singularize(table.name)}-id`);
         },
         updateNodeInputType(table: PgClass) {
           return this.upperCamelCase(

@@ -22,6 +22,7 @@ export interface PgProc {
   argTypeIds: Array<string>;
   argNames: Array<string>;
   argModes: Array<"i" | "o" | "b" | "v" | "t">;
+  inputArgsCount: number;
   argDefaultsNum: number;
   namespace: PgNamespace;
   tags: { [tag: string]: true | string | Array<string> };
@@ -99,6 +100,7 @@ export interface PgAttribute {
   aclInsertable: boolean;
   aclUpdatable: boolean;
   isIndexed: boolean | void;
+  isUnique: boolean | void;
 }
 
 export interface PgConstraint {
@@ -109,6 +111,7 @@ export interface PgConstraint {
   classId: string;
   class: PgClass;
   foreignClassId: string | void;
+  foreignClass: PgClass | void;
   comment: string | void;
   description: string | void;
   keyAttributeNums: Array<number>;
@@ -140,6 +143,7 @@ export interface PgIndex {
   namespaceName: string;
   classId: string;
   numberOfAttributes: number;
+  indexType: string;
   isUnique: boolean;
   isPrimary: boolean;
   attributeNums: Array<number>;

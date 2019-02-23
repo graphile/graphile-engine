@@ -48,8 +48,6 @@ export default (async function PgMutationUpdateDeletePlugin(
       fieldWithHooks,
     } = context;
 
-    const { pluralize, singularize, camelCase } = inflection;
-
     if (!isRootMutation) {
       return fields;
     }
@@ -81,7 +79,8 @@ export default (async function PgMutationUpdateDeletePlugin(
               PayloadType,
               input,
               condition,
-              context
+              context,
+              resolveContext
             ) {
               const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
               const resolveData = getDataFromParsedResolveInfoFragment(
@@ -143,7 +142,9 @@ export default (async function PgMutationUpdateDeletePlugin(
                 modifiedRowAlias,
                 modifiedRowAlias,
                 resolveData,
-                {}
+                {},
+                null,
+                resolveContext
               );
               let row;
               try {
@@ -163,9 +164,9 @@ export default (async function PgMutationUpdateDeletePlugin(
               }
               if (!row) {
                 throw new Error(
-                  `No values were ${mode}d in collection '${pluralize(
-                    table.name
-                  )}' because no values were found.`
+                  `No values were ${mode}d in collection '${inflection.pluralize(
+                    inflection._singularizedTableName(table)
+                  )}' because no values you can ${mode} were found matching these criteria.`
                 );
               }
               return {
@@ -197,8 +198,8 @@ export default (async function PgMutationUpdateDeletePlugin(
                   fields: ({ fieldWithHooks }) => {
                     const tableName = inflection.tableFieldName(table);
                     // This should really be `-node-id` but for compatibility with PostGraphQL v3 we haven't made that change.
-                    const deletedNodeIdFieldName = camelCase(
-                      `deleted-${singularize(table.name)}-id`
+                    const deletedNodeIdFieldName = inflection.deletedNodeId(
+                      table
                     );
                     return Object.assign(
                       {
@@ -328,7 +329,8 @@ export default (async function PgMutationUpdateDeletePlugin(
                     isPgUpdateNodeInputType: mode === "update",
                     isPgDeleteInputType: mode === "delete",
                     isPgDeleteNodeInputType: mode === "delete",
-                    pgInflection: table,
+                    pgInflection: table, // TODO:v5: remove - TYPO!
+                    pgIntrospection: table,
                     isMutationInput: true,
                   }
                 );
@@ -356,9 +358,10 @@ export default (async function PgMutationUpdateDeletePlugin(
                           async resolve(
                             parent,
                             { input },
-                            { pgClient },
+                            resolveContext,
                             resolveInfo
                           ) {
+                            const { pgClient } = resolveContext;
                             const nodeId = input[nodeIdFieldName];
                             try {
                               const {
@@ -391,7 +394,8 @@ export default (async function PgMutationUpdateDeletePlugin(
                                   ),
                                   ") and ("
                                 )})`,
-                                context
+                                context,
+                                resolveContext
                               );
                             } catch (e) {
                               debug(e);
@@ -484,7 +488,8 @@ export default (async function PgMutationUpdateDeletePlugin(
                     isPgUpdateByKeysInputType: mode === "update",
                     isPgDeleteInputType: mode === "delete",
                     isPgDeleteByKeysInputType: mode === "delete",
-                    pgInflection: table,
+                    pgInflection: table, // TODO:v5: remove - TYPO!
+                    pgIntrospection: table,
                     pgKeys: keys,
                     isMutationInput: true,
                   }
@@ -513,9 +518,10 @@ export default (async function PgMutationUpdateDeletePlugin(
                           async resolve(
                             parent,
                             { input },
-                            { pgClient },
+                            resolveContext,
                             resolveInfo
                           ) {
+                            const { pgClient } = resolveContext;
                             return commonCodeRenameMe(
                               pgClient,
                               resolveInfo,
@@ -535,7 +541,8 @@ export default (async function PgMutationUpdateDeletePlugin(
                                 ),
                                 ") and ("
                               )})`,
-                              context
+                              context,
+                              resolveContext
                             );
                           },
                         };
@@ -543,6 +550,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                       {
                         isPgNodeMutation: false,
                         pgFieldIntrospection: table,
+                        pgFieldConstraint: constraint,
                         [mode === "update"
                           ? "isPgUpdateMutationField"
                           : "isPgDeleteMutationField"]: true,

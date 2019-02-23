@@ -1,5 +1,7 @@
 -- WARNING: this database is shared with graphile-utils, don't run the tests in parallel!
-drop schema if exists a, b, c, d cascade;
+drop schema if exists a, b, c, d, inheritence, smart_comment_relations, ranges, index_expressions cascade;
+drop extension if exists tablefunc;
+drop extension if exists intarray;
 drop extension if exists hstore;
 
 create schema a;
@@ -13,6 +15,7 @@ alter default privileges revoke execute on functions from public;
 -- ensure this doesn't make us crash.
 create extension tablefunc with schema a;
 create extension hstore;
+create extension intarray;
 
 comment on schema a is 'The a schema.';
 comment on schema b is 'qwerty';
@@ -64,7 +67,7 @@ create table c.person_secret (
   sekrit text
 );
 
-comment on column c.person_secret.sekrit is E'@name secret\nA secret held by the associated Person';
+comment on column c.person_secret.sekrit is E'@name secret\r\nA secret held by the associated Person';
 comment on constraint person_secret_person_id_fkey on c.person_secret is E'@forwardDescription The `Person` this `PersonSecret` belongs to.\n@backwardDescription This `Person`''s `PersonSecret`.';
 
 comment on table c.person_secret is E'@deprecated This is deprecated (comment on table c.person_secret).\nTracks the person''s secret';
@@ -318,6 +321,7 @@ create function b.compound_type_array_mutation(object c.compound_type) returns c
 create function c.table_query(id int) returns a.post as $$ select * from a.post where id = $1 $$ language sql stable;
 create function c.table_mutation(id int) returns a.post as $$ select * from a.post where id = $1 $$ language sql;
 create function c.table_set_query() returns setof c.person as $$ select * from c.person $$ language sql stable;
+comment on function c.table_set_query() is E'@sortable\n@filterable';
 create function c.table_set_mutation() returns setof c.person as $$ select * from c.person order by id asc $$ language sql;
 create function c.int_set_query(x int, y int, z int) returns setof integer as $$ values (1), (2), (3), (4), (x), (y), (z) $$ language sql stable;
 create function c.int_set_mutation(x int, y int, z int) returns setof integer as $$ values (1), (2), (3), (4), (x), (y), (z) $$ language sql;
@@ -327,6 +331,7 @@ create function a.return_void_mutation() returns void as $$ begin return; end; $
 
 create function c.person_first_name(person c.person) returns text as $$ select split_part(person.person_full_name, ' ', 1) $$ language sql stable;
 create function c.person_friends(person c.person) returns setof c.person as $$ select friend.* from c.person as friend where friend.id in (person.id + 1, person.id + 2) $$ language sql stable;
+comment on function c.person_friends(c.person) is E'@sortable';
 create function c.person_first_post(person c.person) returns a.post as $$ select * from a.post where a.post.author_id = person.id order by id asc limit 1 $$ language sql stable;
 create function c.compound_type_computed_field(compound_type c.compound_type) returns integer as $$ select compound_type.a + compound_type.foo_bar $$ language sql stable;
 create function a.post_headline_trimmed(post a.post, length int default 10, omission text default '…') returns text as $$ select substr(post.headline, 0, length) || omission $$ language sql stable;
@@ -360,12 +365,12 @@ create type b.jwt_token as (
   role text,
   exp integer,
   a integer,
-  b integer,
-  c integer
+  b numeric,
+  c bigint
 );
 
-create function b.authenticate(a integer, b integer, c integer) returns b.jwt_token as $$ select ('yay', extract(epoch from '2037-07-12'::timestamp), a, b, c)::b.jwt_token $$ language sql;
-create function b.authenticate_many(a integer, b integer, c integer) returns b.jwt_token[] as $$ select array[('foo', 1, a, b, c)::b.jwt_token, ('bar', 2, a + 1, b + 1, c + 1)::b.jwt_token, ('baz', 3, a + 2, b + 2, c + 2)::b.jwt_token] $$ language sql;
+create function b.authenticate(a integer, b numeric, c bigint) returns b.jwt_token as $$ select ('yay', extract(epoch from '2037-07-12'::timestamp), a, b, c)::b.jwt_token $$ language sql;
+create function b.authenticate_many(a integer, b numeric, c bigint) returns b.jwt_token[] as $$ select array[('foo', 1, a, b, c)::b.jwt_token, ('bar', 2, a + 1, b + 1, c + 1)::b.jwt_token, ('baz', 3, a + 2, b + 2, c + 2)::b.jwt_token] $$ language sql;
 create function b.authenticate_fail() returns b.jwt_token as $$ select null::b.jwt_token $$ language sql;
 
 create type b.auth_payload as (
@@ -374,7 +379,7 @@ create type b.auth_payload as (
   admin bool
 );
 
-create function b.authenticate_payload(a integer, b integer, c integer) returns b.auth_payload as $$ select (('yay', extract(epoch from '2037-07-12'::timestamp), a, b, c)::b.jwt_token, 1, true)::b.auth_payload $$ language sql;
+create function b.authenticate_payload(a integer, b numeric, c bigint) returns b.auth_payload as $$ select (('yay', extract(epoch from '2037-07-12'::timestamp), a, b, c)::b.jwt_token, 1, true)::b.auth_payload $$ language sql;
 
 create table a.similar_table_1 (
   id serial primary key,
@@ -408,7 +413,7 @@ create view a.testview as
 create function a.post_with_suffix(post a.post,suffix text) returns a.post as $$
   insert into a.post(id,headline,body,author_id,enums,comptypes) values
   (post.id,post.headline || suffix,post.body,post.author_id,post.enums,post.comptypes)
-  returning *; 
+  returning *;
 $$ language sql volatile;
 
 comment on function a.post_with_suffix(post a.post,suffix text) is '@deprecated This is deprecated (comment on function a.post_with_suffix).';
@@ -539,6 +544,7 @@ $$ language sql stable;
 create function c.person_computed_out (person c.person, out o1 text) as $$
   select 'o1 ' || person.person_full_name;
 $$ language sql stable;
+comment on function c.person_computed_out (person c.person, out o1 text) is E'@notNull\n@sortable\n@filterable';
 
 create function c.person_computed_out_out (person c.person, out o1 text, out o2 text) as $$
   select 'o1 ' || person.person_full_name, 'o2 ' || person.person_full_name;
@@ -751,6 +757,7 @@ returns varchar as $$
   select n.first_name || ' ' || n.last_name;
 $$ language sql stable;
 
+create index full_name_idx on d.person ((first_name || ' ' || last_name));
 
 create table d.post (
   id serial primary key,
@@ -841,3 +848,131 @@ CREATE INDEX ON "c"."left_arm"("person_id");
 CREATE INDEX ON "c"."person_secret"("person_id");
 
 */
+
+create schema inheritence;
+
+create table inheritence.user (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL
+);
+
+create table inheritence.file (
+  id SERIAL PRIMARY KEY,
+  filename TEXT NOT NULL
+);
+
+create table inheritence.user_file (
+  user_id INTEGER NOT NULL REFERENCES inheritence.user(id)
+) inherits (inheritence.file);
+
+
+
+
+create schema smart_comment_relations;
+
+create table smart_comment_relations.streets (
+  id serial primary key,
+  name text not null
+);
+
+create table smart_comment_relations.properties (
+  id serial primary key,
+  street_id int not null references smart_comment_relations.streets on delete cascade,
+  name_or_number text not null
+);
+
+create table smart_comment_relations.street_property (
+  str_id int not null references smart_comment_relations.streets on delete cascade,
+  prop_id int not null references smart_comment_relations.properties on delete cascade,
+  current_owner text,
+  primary key (str_id, prop_id)
+);
+
+create table smart_comment_relations.buildings (
+  id serial primary key,
+  property_id int not null references smart_comment_relations.properties on delete cascade,
+  name text not null,
+  floors int not null default 1,
+  is_primary boolean not null default true
+);
+
+comment on table smart_comment_relations.buildings is E'@foreignKey (name) references streets (name)|@fieldName namedAfterStreet|@foreignFieldName buildingsNamedAfterStreet';
+
+-- Only one primary building
+create unique index on smart_comment_relations.buildings (property_id) where is_primary is true;
+
+create view smart_comment_relations.houses as (
+  select
+    buildings.name as building_name,
+    properties.name_or_number as property_name_or_number,
+    streets.name as street_name,
+    streets.id as street_id,
+    buildings.id as building_id,
+    properties.id as property_id,
+    buildings.floors
+  from smart_comment_relations.properties
+  inner join smart_comment_relations.streets
+  on (properties.street_id = streets.id)
+  left join smart_comment_relations.buildings
+  on (buildings.property_id = properties.id and buildings.is_primary is true)
+);
+comment on view smart_comment_relations.houses is E'@primaryKey street_id,property_id
+@foreignKey (street_id) references smart_comment_relations.streets
+@foreignKey (building_id) references smart_comment_relations.buildings (id)
+@foreignKey (property_id) references properties
+@foreignKey (street_id, property_id) references street_property (str_id, prop_id)
+';
+
+comment on column smart_comment_relations.houses.property_name_or_number is E'@notNull';
+comment on column smart_comment_relations.houses.street_name is E'@notNull';
+
+create table smart_comment_relations.post (
+  id text primary key
+);
+comment on table smart_comment_relations.post is E'@name post_table
+@omit';
+
+create table smart_comment_relations.offer (
+  id serial primary key,
+  post_id text references smart_comment_relations.post(id) not null
+);
+comment on table smart_comment_relations.offer is E'@name offer_table
+@omit';
+
+create view smart_comment_relations.post_view as
+  SELECT
+    post.id
+    FROM smart_comment_relations.post post;
+comment on view smart_comment_relations.post_view is E'@name posts
+@primaryKey id';
+
+create view smart_comment_relations.offer_view as
+  SELECT
+    offer.id,
+    offer.post_id
+
+    FROM smart_comment_relations.offer offer;
+comment on view smart_comment_relations.offer_view is E'@name offers
+@primaryKey id
+@foreignKey (post_id) references post_view (id)';
+
+create schema ranges;
+create table ranges.range_test (
+  id serial primary key,
+  num numrange default null,
+  int8 int8range default null,
+  ts tsrange default null,
+  tstz tstzrange default null
+);
+
+create schema index_expressions;
+
+create table index_expressions.employee (
+  id serial primary key,
+  first_name text not null,
+  last_name text not null
+);
+
+create unique index employee_name on index_expressions.employee ((first_name || ' ' || last_name));
+create index employee_lower_name on index_expressions.employee (lower(first_name));
+create index employee_first_name_idx on index_expressions.employee (first_name);

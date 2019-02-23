@@ -53,30 +53,42 @@ beforeAll(() => {
       dSchema,
       simpleCollections,
       orderByNullsLast,
+      smartCommentRelations,
     ] = await Promise.all([
-      createPostGraphileSchema(pgClient, ["a", "b", "c"]),
-      createPostGraphileSchema(pgClient, ["a", "b", "c"], { classicIds: true }),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
+        subscriptions: true,
+      }),
+      createPostGraphileSchema(pgClient, ["a", "b", "c"], {
+        subscriptions: true,
+        classicIds: true,
+      }),
+      createPostGraphileSchema(pgClient, ["a", "b", "c"], {
+        subscriptions: true,
         dynamicJson: true,
         setofFunctionsContainNulls: null,
       }),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
+        subscriptions: true,
         pgColumnFilter: attr => attr.name !== "headline",
         setofFunctionsContainNulls: false,
       }),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
+        subscriptions: true,
         viewUniqueKey: "testviewid",
         setofFunctionsContainNulls: true,
       }),
       createPostGraphileSchema(pgClient, ["d"], {}),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
+        subscriptions: true,
         simpleCollections: "both",
       }),
       createPostGraphileSchema(pgClient, ["a"], {
+        subscriptions: true,
         graphileBuildOptions: {
           orderByNullsLast: true,
         },
       }),
+      createPostGraphileSchema(pgClient, ["smart_comment_relations"], {}),
     ]);
     // Now for RBAC-enabled tests
     await pgClient.query("set role postgraphile_test_authenticator");
@@ -96,6 +108,7 @@ beforeAll(() => {
       simpleCollections,
       orderByNullsLast,
       rbac,
+      smartCommentRelations,
     };
   });
 
@@ -148,6 +161,8 @@ beforeAll(() => {
               gqlSchema = gqlSchemas.dSchema;
             } else if (fileName.startsWith("rbac.")) {
               gqlSchema = gqlSchemas.rbac;
+            } else if (fileName.startsWith("smart_comment_relations.")) {
+              gqlSchema = gqlSchemas.smartCommentRelations;
             } else {
               gqlSchema = gqlSchemas.normal;
             }
@@ -167,7 +182,7 @@ beforeAll(() => {
             });
             if (result.errors) {
               // eslint-disable-next-line no-console
-              console.log(result.errors.map(e => e.originalError));
+              console.log(result.errors.map(e => e.originalError || e));
             }
             return result;
           } finally {

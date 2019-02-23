@@ -106,7 +106,8 @@ export default (function PgMutationCreatePlugin(
               }
             )}`,
             isPgCreateInputType: true,
-            pgInflection: table,
+            pgInflection: table, // TODO:v5: remove - TYPO!
+            pgIntrospection: table,
           }
         );
         const PayloadType = newWithHooks(
@@ -176,7 +177,8 @@ export default (function PgMutationCreatePlugin(
                       type: new GraphQLNonNull(InputType),
                     },
                   },
-                  async resolve(data, { input }, { pgClient }, resolveInfo) {
+                  async resolve(data, { input }, resolveContext, resolveInfo) {
+                    const { pgClient } = resolveContext;
                     const parsedResolveInfoFragment = parseResolveInfo(
                       resolveInfo
                     );
@@ -189,7 +191,9 @@ export default (function PgMutationCreatePlugin(
                       insertedRowAlias,
                       insertedRowAlias,
                       resolveData,
-                      {}
+                      {},
+                      null,
+                      resolveContext
                     );
                     const sqlColumns = [];
                     const sqlValues = [];

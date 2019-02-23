@@ -5,7 +5,7 @@ import debugSql from "./debugSql";
 
 export default (async function PgAllRows(
   builder,
-  { pgViewUniqueKey, pgSimpleCollections }
+  { pgViewUniqueKey, pgSimpleCollections, subscriptions }
 ) {
   const hasConnections = pgSimpleCollections !== "only";
   const hasSimpleCollections =
@@ -55,15 +55,19 @@ export default (async function PgAllRows(
         const attributes = table.attributes;
         const primaryKeyConstraint = table.primaryKeyConstraint;
         const primaryKeys =
-          primaryKeyConstraint &&
-          primaryKeyConstraint.keyAttributeNums.map(num =>
-            attributes.find(attr => attr.num === num)
-          );
+          primaryKeyConstraint && primaryKeyConstraint.keyAttributes;
         const isView = t => t.classKind === "v";
         const viewUniqueKey = table.tags.uniqueKey || pgViewUniqueKey;
         const uniqueIdAttribute = viewUniqueKey
           ? attributes.find(attr => attr.name === viewUniqueKey)
           : undefined;
+        if (isView && table.tags.uniqueKey && !uniqueIdAttribute) {
+          throw new Error(
+            `Could not find the named unique key '${
+              table.tags.uniqueKey
+            }' on view '${table.namespaceName}.${table.name}'`
+          );
+        }
         if (!ConnectionType) {
           throw new Error(
             `Could not find GraphQL connection type for table '${table.name}'`
@@ -86,7 +90,8 @@ export default (async function PgAllRows(
                   ? ConnectionType
                   : new GraphQLList(new GraphQLNonNull(TableType)),
                 args: {},
-                async resolve(parent, args, { pgClient }, resolveInfo) {
+                async resolve(parent, args, resolveContext, resolveInfo) {
+                  const { pgClient, liveRecord } = resolveContext;
                   const parsedResolveInfoFragment = parseResolveInfo(
                     resolveInfo
                   );
@@ -94,6 +99,7 @@ export default (async function PgAllRows(
                     parsedResolveInfoFragment,
                     resolveInfo.returnType
                   );
+                  let checkerGenerator;
                   const query = queryFromResolveData(
                     sqlFullTableName,
                     undefined,
@@ -102,7 +108,18 @@ export default (async function PgAllRows(
                       withPaginationAsFields: isConnection,
                     },
                     queryBuilder => {
+                      if (subscriptions) {
+                        queryBuilder.makeLiveCollection(
+                          table,
+                          _checkerGenerator => {
+                            checkerGenerator = _checkerGenerator;
+                          }
+                        );
+                      }
                       if (primaryKeys) {
+                        if (subscriptions && liveRecord) {
+                          queryBuilder.selectIdentifiers(table);
+                        }
                         queryBuilder.beforeLock("orderBy", () => {
                           if (!queryBuilder.isOrderUnique(false)) {
                             // Order by PK if no order specified
@@ -136,17 +153,39 @@ export default (async function PgAllRows(
                           }
                         });
                       }
-                    }
+                    },
+                    resolveContext
                   );
                   const { text, values } = sql.compile(query);
                   if (debugSql.enabled) debugSql(text);
                   const result = await pgClient.query(text, values);
+
+                  if (
+                    subscriptions &&
+                    resolveContext.liveCollection &&
+                    checkerGenerator
+                  ) {
+                    const checker = checkerGenerator();
+                    resolveContext.liveCollection("pg", table, checker);
+                  }
+
                   if (isConnection) {
                     const {
                       rows: [row],
                     } = result;
                     return addStartEndCursor(row);
                   } else {
+                    if (primaryKeys && resolveContext.liveRecord) {
+                      result.rows.forEach(
+                        row =>
+                          row &&
+                          resolveContext.liveRecord(
+                            "pg",
+                            table,
+                            row.__identifiers
+                          )
+                      );
+                    }
                     return result.rows;
                   }
                 },
