@@ -4600,15 +4600,6 @@ input CompoundKeyPatch {
   personId2: Int
 }
 
-\\"\\"\\"A \`CompoundKey\` edge in the connection.\\"\\"\\"
-type CompoundKeysEdge {
-  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
-  cursor: Cursor
-
-  \\"\\"\\"The \`CompoundKey\` at the end of the edge.\\"\\"\\"
-  node: CompoundKey!
-}
-
 \\"\\"\\"Methods to use when ordering \`CompoundKey\`.\\"\\"\\"
 enum CompoundKeysOrderBy {
   EXTRA_ASC
@@ -4663,12 +4654,6 @@ type CreateCompoundKeyPayload {
   \\"\\"\\"The \`CompoundKey\` that was created by this mutation.\\"\\"\\"
   compoundKey: CompoundKey
 
-  \\"\\"\\"An edge for our \`CompoundKey\`. May be used by Relay 1.\\"\\"\\"
-  compoundKeyEdge(
-    \\"\\"\\"The method to use when ordering \`CompoundKey\`.\\"\\"\\"
-    orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
-  ): CompoundKeysEdge
-
   \\"\\"\\"Reads a single \`Person\` that is related to this \`CompoundKey\`.\\"\\"\\"
   personByPersonId1: Person
 
@@ -4704,12 +4689,6 @@ type CreateEdgeCasePayload {
   \\"\\"\\"The \`EdgeCase\` that was created by this mutation.\\"\\"\\"
   edgeCase: EdgeCase
 
-  \\"\\"\\"An edge for our \`EdgeCase\`. May be used by Relay 1.\\"\\"\\"
-  edgeCaseEdge(
-    \\"\\"\\"The method to use when ordering \`EdgeCase\`.\\"\\"\\"
-    orderBy: [EdgeCasesOrderBy!] = [NATURAL]
-  ): EdgeCasesEdge
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -4739,12 +4718,6 @@ type CreateIssue756Payload {
   \\"\\"\\"The \`Issue756\` that was created by this mutation.\\"\\"\\"
   issue756: Issue756
 
-  \\"\\"\\"An edge for our \`Issue756\`. May be used by Relay 1.\\"\\"\\"
-  issue756Edge(
-    \\"\\"\\"The method to use when ordering \`Issue756\`.\\"\\"\\"
-    orderBy: [Issue756SOrderBy!] = [PRIMARY_KEY_ASC]
-  ): Issue756SEdge
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -4773,12 +4746,6 @@ type CreateLeftArmPayload {
 
   \\"\\"\\"The \`LeftArm\` that was created by this mutation.\\"\\"\\"
   leftArm: LeftArm
-
-  \\"\\"\\"An edge for our \`LeftArm\`. May be used by Relay 1.\\"\\"\\"
-  leftArmEdge(
-    \\"\\"\\"The method to use when ordering \`LeftArm\`.\\"\\"\\"
-    orderBy: [LeftArmsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): LeftArmsEdge
 
   \\"\\"\\"Reads a single \`Person\` that is related to this \`LeftArm\`.\\"\\"\\"
   personByPersonId: Person
@@ -4812,12 +4779,6 @@ type CreateMyTablePayload {
   \\"\\"\\"The \`MyTable\` that was created by this mutation.\\"\\"\\"
   myTable: MyTable
 
-  \\"\\"\\"An edge for our \`MyTable\`. May be used by Relay 1.\\"\\"\\"
-  myTableEdge(
-    \\"\\"\\"The method to use when ordering \`MyTable\`.\\"\\"\\"
-    orderBy: [MyTablesOrderBy!] = [PRIMARY_KEY_ASC]
-  ): MyTablesEdge
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -4847,12 +4808,6 @@ type CreateNullTestRecordPayload {
   \\"\\"\\"The \`NullTestRecord\` that was created by this mutation.\\"\\"\\"
   nullTestRecord: NullTestRecord
 
-  \\"\\"\\"An edge for our \`NullTestRecord\`. May be used by Relay 1.\\"\\"\\"
-  nullTestRecordEdge(
-    \\"\\"\\"The method to use when ordering \`NullTestRecord\`.\\"\\"\\"
-    orderBy: [NullTestRecordsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): NullTestRecordsEdge
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -4881,12 +4836,6 @@ type CreatePersonPayload {
 
   \\"\\"\\"The \`Person\` that was created by this mutation.\\"\\"\\"
   person: Person
-
-  \\"\\"\\"An edge for our \`Person\`. May be used by Relay 1.\\"\\"\\"
-  personEdge(
-    \\"\\"\\"The method to use when ordering \`Person\`.\\"\\"\\"
-    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PeopleEdge
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -4920,20 +4869,11 @@ type CreatePersonSecretPayload {
   \\"\\"\\"The \`PersonSecret\` that was created by this mutation.\\"\\"\\"
   personSecret: PersonSecret @deprecated(reason: \\"This is deprecated (comment on table c.person_secret).\\")
 
-  \\"\\"\\"An edge for our \`PersonSecret\`. May be used by Relay 1.\\"\\"\\"
-  personSecretEdge(
-    \\"\\"\\"The method to use when ordering \`PersonSecret\`.\\"\\"\\"
-    orderBy: [PersonSecretsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PersonSecretsEdge @deprecated(reason: \\"This is deprecated (comment on table c.person_secret).\\")
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
   query: Query
 }
-
-\\"\\"\\"A location in a connection that can be used for resuming pagination.\\"\\"\\"
-scalar Cursor
 
 \\"\\"\\"
 A point in time as described by the [ISO
@@ -4978,12 +4918,6 @@ type DeleteCompoundKeyPayload {
 
   \\"\\"\\"The \`CompoundKey\` that was deleted by this mutation.\\"\\"\\"
   compoundKey: CompoundKey
-
-  \\"\\"\\"An edge for our \`CompoundKey\`. May be used by Relay 1.\\"\\"\\"
-  compoundKeyEdge(
-    \\"\\"\\"The method to use when ordering \`CompoundKey\`.\\"\\"\\"
-    orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
-  ): CompoundKeysEdge
   deletedCompoundKeyId: ID
 
   \\"\\"\\"Reads a single \`Person\` that is related to this \`CompoundKey\`.\\"\\"\\"
@@ -5033,12 +4967,6 @@ type DeleteIssue756Payload {
 
   \\"\\"\\"The \`Issue756\` that was deleted by this mutation.\\"\\"\\"
   issue756: Issue756
-
-  \\"\\"\\"An edge for our \`Issue756\`. May be used by Relay 1.\\"\\"\\"
-  issue756Edge(
-    \\"\\"\\"The method to use when ordering \`Issue756\`.\\"\\"\\"
-    orderBy: [Issue756SOrderBy!] = [PRIMARY_KEY_ASC]
-  ): Issue756SEdge
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -5092,12 +5020,6 @@ type DeleteLeftArmPayload {
   \\"\\"\\"The \`LeftArm\` that was deleted by this mutation.\\"\\"\\"
   leftArm: LeftArm
 
-  \\"\\"\\"An edge for our \`LeftArm\`. May be used by Relay 1.\\"\\"\\"
-  leftArmEdge(
-    \\"\\"\\"The method to use when ordering \`LeftArm\`.\\"\\"\\"
-    orderBy: [LeftArmsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): LeftArmsEdge
-
   \\"\\"\\"Reads a single \`Person\` that is related to this \`LeftArm\`.\\"\\"\\"
   personByPersonId: Person
 
@@ -5143,12 +5065,6 @@ type DeleteMyTablePayload {
   \\"\\"\\"The \`MyTable\` that was deleted by this mutation.\\"\\"\\"
   myTable: MyTable
 
-  \\"\\"\\"An edge for our \`MyTable\`. May be used by Relay 1.\\"\\"\\"
-  myTableEdge(
-    \\"\\"\\"The method to use when ordering \`MyTable\`.\\"\\"\\"
-    orderBy: [MyTablesOrderBy!] = [PRIMARY_KEY_ASC]
-  ): MyTablesEdge
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -5190,12 +5106,6 @@ type DeleteNullTestRecordPayload {
 
   \\"\\"\\"The \`NullTestRecord\` that was deleted by this mutation.\\"\\"\\"
   nullTestRecord: NullTestRecord
-
-  \\"\\"\\"An edge for our \`NullTestRecord\`. May be used by Relay 1.\\"\\"\\"
-  nullTestRecordEdge(
-    \\"\\"\\"The method to use when ordering \`NullTestRecord\`.\\"\\"\\"
-    orderBy: [NullTestRecordsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): NullTestRecordsEdge
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -5251,12 +5161,6 @@ type DeletePersonPayload {
   \\"\\"\\"The \`Person\` that was deleted by this mutation.\\"\\"\\"
   person: Person
 
-  \\"\\"\\"An edge for our \`Person\`. May be used by Relay 1.\\"\\"\\"
-  personEdge(
-    \\"\\"\\"The method to use when ordering \`Person\`.\\"\\"\\"
-    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PeopleEdge
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -5302,12 +5206,6 @@ type DeletePersonSecretPayload {
   \\"\\"\\"The \`PersonSecret\` that was deleted by this mutation.\\"\\"\\"
   personSecret: PersonSecret
 
-  \\"\\"\\"An edge for our \`PersonSecret\`. May be used by Relay 1.\\"\\"\\"
-  personSecretEdge(
-    \\"\\"\\"The method to use when ordering \`PersonSecret\`.\\"\\"\\"
-    orderBy: [PersonSecretsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PersonSecretsEdge @deprecated(reason: \\"This is deprecated (comment on table c.person_secret).\\")
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -5341,15 +5239,6 @@ input EdgeCaseInput {
   notNullHasDefault: Boolean
   rowId: Int
   wontCastEasy: Int
-}
-
-\\"\\"\\"A \`EdgeCase\` edge in the connection.\\"\\"\\"
-type EdgeCasesEdge {
-  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
-  cursor: Cursor
-
-  \\"\\"\\"The \`EdgeCase\` at the end of the edge.\\"\\"\\"
-  node: EdgeCase!
 }
 
 \\"\\"\\"Methods to use when ordering \`EdgeCase\`.\\"\\"\\"
@@ -5552,12 +5441,6 @@ type Issue756MutationPayload {
   clientMutationId: String
   issue756: Issue756
 
-  \\"\\"\\"An edge for our \`Issue756\`. May be used by Relay 1.\\"\\"\\"
-  issue756Edge(
-    \\"\\"\\"The method to use when ordering \`Issue756\`.\\"\\"\\"
-    orderBy: [Issue756SOrderBy!] = [PRIMARY_KEY_ASC]
-  ): Issue756SEdge
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -5570,15 +5453,6 @@ Represents an update to a \`Issue756\`. Fields that are set will be updated.
 input Issue756Patch {
   id: Int
   ts: NotNullTimestamp
-}
-
-\\"\\"\\"A \`Issue756\` edge in the connection.\\"\\"\\"
-type Issue756SEdge {
-  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
-  cursor: Cursor
-
-  \\"\\"\\"The \`Issue756\` at the end of the edge.\\"\\"\\"
-  node: Issue756!
 }
 
 \\"\\"\\"All input for the \`issue756SetMutation\` mutation.\\"\\"\\"
@@ -5597,12 +5471,6 @@ type Issue756SetMutationPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-
-  \\"\\"\\"An edge for our \`Issue756\`. May be used by Relay 1.\\"\\"\\"
-  issue756Edge(
-    \\"\\"\\"The method to use when ordering \`Issue756\`.\\"\\"\\"
-    orderBy: [Issue756SOrderBy!] = [PRIMARY_KEY_ASC]
-  ): Issue756SEdge
   issue756S: [Issue756]
 
   \\"\\"\\"
@@ -5794,12 +5662,6 @@ type LeftArmIdentityPayload {
   clientMutationId: String
   leftArm: LeftArm
 
-  \\"\\"\\"An edge for our \`LeftArm\`. May be used by Relay 1.\\"\\"\\"
-  leftArmEdge(
-    \\"\\"\\"The method to use when ordering \`LeftArm\`.\\"\\"\\"
-    orderBy: [LeftArmsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): LeftArmsEdge
-
   \\"\\"\\"Reads a single \`Person\` that is related to this \`LeftArm\`.\\"\\"\\"
   personByPersonId: Person
 
@@ -5825,15 +5687,6 @@ input LeftArmPatch {
   lengthInMetres: Float
   mood: String
   personId: Int
-}
-
-\\"\\"\\"A \`LeftArm\` edge in the connection.\\"\\"\\"
-type LeftArmsEdge {
-  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
-  cursor: Cursor
-
-  \\"\\"\\"The \`LeftArm\` at the end of the edge.\\"\\"\\"
-  node: LeftArm!
 }
 
 \\"\\"\\"Methods to use when ordering \`LeftArm\`.\\"\\"\\"
@@ -6662,12 +6515,6 @@ type MutationOutTablePayload {
   clientMutationId: String
   person: Person
 
-  \\"\\"\\"An edge for our \`Person\`. May be used by Relay 1.\\"\\"\\"
-  personEdge(
-    \\"\\"\\"The method to use when ordering \`Person\`.\\"\\"\\"
-    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PeopleEdge
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -6691,12 +6538,6 @@ type MutationOutTableSetofPayload {
   \\"\\"\\"
   clientMutationId: String
   people: [Person]
-
-  \\"\\"\\"An edge for our \`Person\`. May be used by Relay 1.\\"\\"\\"
-  personEdge(
-    \\"\\"\\"The method to use when ordering \`Person\`.\\"\\"\\"
-    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PeopleEdge
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -6850,15 +6691,6 @@ input MyTablePatch {
   jsonData: JSON
 }
 
-\\"\\"\\"A \`MyTable\` edge in the connection.\\"\\"\\"
-type MyTablesEdge {
-  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
-  cursor: Cursor
-
-  \\"\\"\\"The \`MyTable\` at the end of the edge.\\"\\"\\"
-  node: MyTable!
-}
-
 \\"\\"\\"Methods to use when ordering \`MyTable\`.\\"\\"\\"
 enum MyTablesOrderBy {
   ID_ASC
@@ -6954,15 +6786,6 @@ input NullTestRecordPatch {
   nullableText: String
 }
 
-\\"\\"\\"A \`NullTestRecord\` edge in the connection.\\"\\"\\"
-type NullTestRecordsEdge {
-  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
-  cursor: Cursor
-
-  \\"\\"\\"The \`NullTestRecord\` at the end of the edge.\\"\\"\\"
-  node: NullTestRecord!
-}
-
 \\"\\"\\"Methods to use when ordering \`NullTestRecord\`.\\"\\"\\"
 enum NullTestRecordsOrderBy {
   ID_ASC
@@ -6976,15 +6799,6 @@ enum NullTestRecordsOrderBy {
   NULLABLE_TEXT_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
-}
-
-\\"\\"\\"A \`Person\` edge in the connection.\\"\\"\\"
-type PeopleEdge {
-  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
-  cursor: Cursor
-
-  \\"\\"\\"The \`Person\` at the end of the edge.\\"\\"\\"
-  node: Person!
 }
 
 \\"\\"\\"Methods to use when ordering \`Person\`.\\"\\"\\"
@@ -7237,15 +7051,6 @@ input PersonSecretPatch {
 
   \\"\\"\\"A secret held by the associated Person\\"\\"\\"
   secret: String
-}
-
-\\"\\"\\"A \`PersonSecret\` edge in the connection.\\"\\"\\"
-type PersonSecretsEdge {
-  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
-  cursor: Cursor
-
-  \\"\\"\\"The \`PersonSecret\` at the end of the edge.\\"\\"\\"
-  node: PersonSecret!
 }
 
 \\"\\"\\"Methods to use when ordering \`PersonSecret\`.\\"\\"\\"
@@ -7643,12 +7448,6 @@ type TableSetMutationPayload {
   clientMutationId: String
   people: [Person]
 
-  \\"\\"\\"An edge for our \`Person\`. May be used by Relay 1.\\"\\"\\"
-  personEdge(
-    \\"\\"\\"The method to use when ordering \`Person\`.\\"\\"\\"
-    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PeopleEdge
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -7735,12 +7534,6 @@ type UpdateCompoundKeyPayload {
   \\"\\"\\"The \`CompoundKey\` that was updated by this mutation.\\"\\"\\"
   compoundKey: CompoundKey
 
-  \\"\\"\\"An edge for our \`CompoundKey\`. May be used by Relay 1.\\"\\"\\"
-  compoundKeyEdge(
-    \\"\\"\\"The method to use when ordering \`CompoundKey\`.\\"\\"\\"
-    orderBy: [CompoundKeysOrderBy!] = [PRIMARY_KEY_ASC]
-  ): CompoundKeysEdge
-
   \\"\\"\\"Reads a single \`Person\` that is related to this \`CompoundKey\`.\\"\\"\\"
   personByPersonId1: Person
 
@@ -7797,12 +7590,6 @@ type UpdateIssue756Payload {
 
   \\"\\"\\"The \`Issue756\` that was updated by this mutation.\\"\\"\\"
   issue756: Issue756
-
-  \\"\\"\\"An edge for our \`Issue756\`. May be used by Relay 1.\\"\\"\\"
-  issue756Edge(
-    \\"\\"\\"The method to use when ordering \`Issue756\`.\\"\\"\\"
-    orderBy: [Issue756SOrderBy!] = [PRIMARY_KEY_ASC]
-  ): Issue756SEdge
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -7870,12 +7657,6 @@ type UpdateLeftArmPayload {
   \\"\\"\\"The \`LeftArm\` that was updated by this mutation.\\"\\"\\"
   leftArm: LeftArm
 
-  \\"\\"\\"An edge for our \`LeftArm\`. May be used by Relay 1.\\"\\"\\"
-  leftArmEdge(
-    \\"\\"\\"The method to use when ordering \`LeftArm\`.\\"\\"\\"
-    orderBy: [LeftArmsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): LeftArmsEdge
-
   \\"\\"\\"Reads a single \`Person\` that is related to this \`LeftArm\`.\\"\\"\\"
   personByPersonId: Person
 
@@ -7930,12 +7711,6 @@ type UpdateMyTablePayload {
   \\"\\"\\"The \`MyTable\` that was updated by this mutation.\\"\\"\\"
   myTable: MyTable
 
-  \\"\\"\\"An edge for our \`MyTable\`. May be used by Relay 1.\\"\\"\\"
-  myTableEdge(
-    \\"\\"\\"The method to use when ordering \`MyTable\`.\\"\\"\\"
-    orderBy: [MyTablesOrderBy!] = [PRIMARY_KEY_ASC]
-  ): MyTablesEdge
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -7986,12 +7761,6 @@ type UpdateNullTestRecordPayload {
 
   \\"\\"\\"The \`NullTestRecord\` that was updated by this mutation.\\"\\"\\"
   nullTestRecord: NullTestRecord
-
-  \\"\\"\\"An edge for our \`NullTestRecord\`. May be used by Relay 1.\\"\\"\\"
-  nullTestRecordEdge(
-    \\"\\"\\"The method to use when ordering \`NullTestRecord\`.\\"\\"\\"
-    orderBy: [NullTestRecordsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): NullTestRecordsEdge
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -8061,12 +7830,6 @@ type UpdatePersonPayload {
   \\"\\"\\"The \`Person\` that was updated by this mutation.\\"\\"\\"
   person: Person
 
-  \\"\\"\\"An edge for our \`Person\`. May be used by Relay 1.\\"\\"\\"
-  personEdge(
-    \\"\\"\\"The method to use when ordering \`Person\`.\\"\\"\\"
-    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PeopleEdge
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -8120,12 +7883,6 @@ type UpdatePersonSecretPayload {
 
   \\"\\"\\"The \`PersonSecret\` that was updated by this mutation.\\"\\"\\"
   personSecret: PersonSecret
-
-  \\"\\"\\"An edge for our \`PersonSecret\`. May be used by Relay 1.\\"\\"\\"
-  personSecretEdge(
-    \\"\\"\\"The method to use when ordering \`PersonSecret\`.\\"\\"\\"
-    orderBy: [PersonSecretsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PersonSecretsEdge @deprecated(reason: \\"This is deprecated (comment on table c.person_secret).\\")
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
