@@ -26,7 +26,22 @@ test(
     },
     pgClient =>
       pgClient.query(`
-  comment on table simple_collections.people is E'@simpleCollections omit';
-  `)
+        comment on table simple_collections.people is E'@simpleCollections omit';
+      `)
+  )
+);
+
+test(
+  "simple collection for computed column",
+  core.test(
+    "simple_collections",
+    {
+      simpleCollections: "omit",
+      setofFunctionsContainNulls: false,
+    },
+    pgClient =>
+      pgClient.query(`
+        comment on function simple_collections.people_odd_pets(simple_collections.people) is E'@simpleCollections only';
+      `)
   )
 );
