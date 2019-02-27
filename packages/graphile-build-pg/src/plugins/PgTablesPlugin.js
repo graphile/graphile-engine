@@ -24,7 +24,7 @@ export default (function PgTablesPlugin(
   { pgForbidSetofFunctionsToReturnNull = false }
 ) {
   const handleNullRow = pgForbidSetofFunctionsToReturnNull
-    ? row => row
+    ? (row, _identifiers) => row
     : (row, identifiers) => {
         if ((identifiers && hasNonNullKey(identifiers)) || hasNonNullKey(row)) {
           return row;
