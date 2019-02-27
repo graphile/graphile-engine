@@ -25,8 +25,8 @@ export default (function PgTablesPlugin(
 ) {
   const handleNullRow = pgForbidSetofFunctionsToReturnNull
     ? row => row
-    : row => {
-        if (hasNonNullKey(row)) {
+    : (row, identifiers) => {
+        if ((identifiers && hasNonNullKey(identifiers)) || hasNonNullKey(row)) {
           return row;
         } else {
           return null;
@@ -344,7 +344,10 @@ export default (function PgTablesPlugin(
                         const safeAlias = getSafeAliasFromResolveInfo(
                           resolveInfo
                         );
-                        const record = handleNullRow(data[safeAlias]);
+                        const record = handleNullRow(
+                          data[safeAlias],
+                          data.__identifiers
+                        );
                         if (
                           record &&
                           primaryKeys &&
@@ -411,7 +414,10 @@ export default (function PgTablesPlugin(
                           resolveInfo
                         );
                         return data.data.map(entry => {
-                          const record = handleNullRow(entry[safeAlias]);
+                          const record = handleNullRow(
+                            entry[safeAlias],
+                            entry.__identifiers
+                          );
                           if (
                             record &&
                             resolveContext.liveRecord &&

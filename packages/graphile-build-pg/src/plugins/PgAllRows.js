@@ -117,7 +117,7 @@ export default (async function PgAllRows(
                         );
                       }
                       if (primaryKeys) {
-                        if (subscriptions && liveRecord) {
+                        if (subscriptions) {
                           queryBuilder.selectIdentifiers(table);
                         }
                         queryBuilder.beforeLock("orderBy", () => {
