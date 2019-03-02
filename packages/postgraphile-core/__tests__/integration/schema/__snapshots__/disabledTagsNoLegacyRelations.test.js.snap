@@ -3821,7 +3821,10 @@ The exact time of day, does not include the date. May or may not have a timezone
 \\"\\"\\"
 scalar Time
 
-\\"\\"\\"@foreignKey (smallint) references a.post\\"\\"\\"
+\\"\\"\\"
+@foreignKey (smallint) references a.post
+@foreignKey (id) references a.post
+\\"\\"\\"
 type Type {
   anIntRange: AnIntRange!
   bigint: BigInt!
