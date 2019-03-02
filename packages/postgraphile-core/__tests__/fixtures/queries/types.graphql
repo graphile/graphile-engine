@@ -1,8 +1,6 @@
 query {
   allTypes {
-    nodes {
-      ...type
-    }
+    ...typesConnection
   }
   allTypesList {
     ...type
@@ -23,14 +21,7 @@ query {
     ...type
   }
   typeFunctionConnection {
-    nodes {
-      ...type
-    }
-    edges {
-      node {
-        ...type
-      }
-    }
+    ...typesConnection
   }
   personById(id: 1) {
     typeFunction(id: 11) {
@@ -40,14 +31,17 @@ query {
       ...type
     }
     typeFunctionConnection {
-      nodes {
-        ...type
-      }
-      edges {
-        node {
-          ...type
-        }
-      }
+      ...typesConnection
+    }
+  }
+  postById(id: 11) {
+    id
+    headline
+    typeById {
+      ...type
+    }
+    typesBySmallint {
+      ...typesConnection
     }
   }
 }
@@ -135,5 +129,31 @@ fragment type on Type {
   nullablePoint {
     x
     y
+  }
+  postBySmallint {
+    id
+    headline
+  }
+  postById {
+    id
+    headline
+  }
+}
+
+fragment typesConnection on TypesConnection {
+  nodes {
+    ...type
+  }
+  edges {
+    node {
+      ...type
+    }
+  }
+  totalCount
+  pageInfo {
+    hasNextPage
+    hasPreviousPage
+    startCursor
+    endCursor
   }
 }

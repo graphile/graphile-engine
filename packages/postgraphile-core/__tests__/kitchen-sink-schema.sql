@@ -266,7 +266,7 @@ create table b.types (
   "nullablePoint" point
 );
 
-comment on table b.types is E'@foreignKey (smallint) references a.post';
+comment on table b.types is E'@foreignKey (smallint) references a.post\n@foreignKey (id) references a.post';
 
 create function b.throw_error() returns trigger as $$
 begin
