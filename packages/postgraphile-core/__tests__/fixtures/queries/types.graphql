@@ -7,16 +7,16 @@ query {
   allTypesList {
     ...type
   }
-  typeById(id: 12) {
+  typeById(id: 11) {
     ...type
   }
-  type(nodeId: "WyJ0eXBlcyIsMTJd") {
+  type(nodeId: "WyJ0eXBlcyIsMTFd") {
     ...type
   }
-  node(nodeId: "WyJ0eXBlcyIsMTJd") {
+  node(nodeId: "WyJ0eXBlcyIsMTFd") {
     ...type
   }
-  typeFunction(id: 12) {
+  typeFunction(id: 11) {
     ...type
   }
   typeFunctionList {
@@ -33,7 +33,7 @@ query {
     }
   }
   personById(id: 1) {
-    typeFunction(id: 12) {
+    typeFunction(id: 11) {
       ...type
     }
     typeFunctionList {

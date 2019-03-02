@@ -61,7 +61,7 @@ insert into a.unique_foreign_key (compound_key_1, compound_key_2) values
   (2, 5);
 
 insert into b.types values (
-  12,
+  11,
   50,
   467131188225,
   15.2,

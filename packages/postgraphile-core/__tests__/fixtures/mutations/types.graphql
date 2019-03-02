@@ -1,5 +1,5 @@
 mutation {
-  typeFunctionMutation(input: { id: 12 }) {
+  typeFunctionMutation(input: { id: 11 }) {
     type {
       ...type
     }
@@ -17,7 +17,7 @@ mutation {
   # Must come next to last
   updateTypeById(
     input: {
-      id: 12
+      id: 11
       typePatch: {
         point: { x: 99, y: 77 }
         smallint: 1

@@ -584,7 +584,7 @@ create function c.person_computed_complex (person c.person, in a int, in b text,
     b.types.compound_type as y,
     person as z
   from c.person
-    inner join b.types on c.person.id = (b.types.id - 11)
+    inner join b.types on c.person.id = (b.types.id - 10)
   limit 1;
 $$ language sql stable;
 
@@ -614,7 +614,7 @@ create function c.func_out_complex(in a int, in b text, out x int, out y c.compo
     b.types.compound_type as y,
     person as z
   from c.person
-    inner join b.types on c.person.id = (b.types.id - 11)
+    inner join b.types on c.person.id = (b.types.id - 10)
   limit 1;
 $$ language sql stable;
 
@@ -624,7 +624,7 @@ create function c.func_out_complex_setof(in a int, in b text, out x int, out y c
     b.types.compound_type as y,
     person as z
   from c.person
-    inner join b.types on c.person.id = (b.types.id - 11)
+    inner join b.types on c.person.id = (b.types.id - 10)
   limit 1;
 $$ language sql stable;
 
@@ -658,7 +658,7 @@ create function c.mutation_out_complex(in a int, in b text, out x int, out y c.c
     b.types.compound_type as y,
     person as z
   from c.person
-    inner join b.types on c.person.id = (b.types.id - 11)
+    inner join b.types on c.person.id = (b.types.id - 10)
   limit 1;
 $$ language sql volatile;
 
@@ -668,7 +668,7 @@ create function c.mutation_out_complex_setof(in a int, in b text, out x int, out
     b.types.compound_type as y,
     person as z
   from c.person
-    inner join b.types on c.person.id = (b.types.id - 11)
+    inner join b.types on c.person.id = (b.types.id - 10)
   limit 1;
 $$ language sql volatile;
 
