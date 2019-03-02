@@ -1389,6 +1389,9 @@ type CreateTypePayload {
   \\"\\"\\"
   clientMutationId: String
 
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postBySmallint: Post
+
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -2230,6 +2233,9 @@ type DeleteTypePayload {
   \\"\\"\\"
   clientMutationId: String
   deletedTypeId: ID
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postBySmallint: Post
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -5622,6 +5628,35 @@ type Post {
 
   \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
   personByAuthorId: Person
+
+  \\"\\"\\"Reads and enables pagination through a set of \`Type\`.\\"\\"\\"
+  typesBySmallint(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"
+    A condition to be used in determining which values should be returned by the collection.
+    \\"\\"\\"
+    condition: TypeCondition
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+
+    \\"\\"\\"The method to use when ordering \`Type\`.\\"\\"\\"
+    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): TypesConnection!
 }
 
 \\"\\"\\"A connection to a list of \`Interval\` values.\\"\\"\\"
@@ -7433,6 +7468,9 @@ type Type {
   numeric: BigFloat!
   numrange: BigFloatRange!
   point: Point!
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postBySmallint: Post
   smallint: Int!
   textArray: [String]!
   time: Time!
@@ -7562,6 +7600,9 @@ type TypeFunctionConnectionMutationPayload {
   \\"\\"\\"
   clientMutationId: String
 
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postBySmallint: Post
+
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -7591,6 +7632,9 @@ type TypeFunctionListMutationPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postBySmallint: Post
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -7622,6 +7666,9 @@ type TypeFunctionMutationPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postBySmallint: Post
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -8670,6 +8717,9 @@ type UpdateTypePayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postBySmallint: Post
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
