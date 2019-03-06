@@ -1,7 +1,7 @@
 import pg from "pg";
 import { graphql, printSchema } from "graphql";
 import { createPostGraphileSchema } from "postgraphile-core";
-import { makeExtendSchemaPlugin, gql } from "../";
+import { makeExtendSchemaPlugin, gql, embed } from "../";
 
 const clean = data => {
   if (Array.isArray(data)) {
@@ -337,5 +337,89 @@ it("allows adding a field to an existing table, and requesting necessary data al
     );
   } finally {
     await pgClient.release();
+  }
+});
+
+it("allows adding a custom connection", async () => {
+  const schema = await createPostGraphileSchema(pgPool, ["graphile_utils"], {
+    disableDefaultMutations: true,
+    appendPlugins: [
+      makeExtendSchemaPlugin(build => {
+        const { pgSql: sql } = build;
+        const table = build.pgIntrospectionResultsByKind.class.find(
+          tbl => tbl.namespaceName === "graphile_utils" && tbl.name === "users"
+        );
+        return {
+          typeDefs: gql`
+            extend type Query {
+              myCustomConnection: UsersConnection
+                @scope(isPgFieldConnection: true, pgFieldIntrospection: ${embed(
+                  table
+                )})
+            }
+          `,
+          resolvers: {
+            Query: {
+              myCustomConnection(_parent, args, context, resolveInfo) {
+                return resolveInfo.graphile.selectGraphQLResultFromTable(
+                  sql.fragment`graphile_utils.users`
+                );
+              },
+            },
+          },
+        };
+      }),
+    ],
+  });
+  const printedSchema = printSchema(schema);
+  expect(printedSchema).toMatchSnapshot();
+  const pgClient = await pgPool.connect();
+  try {
+    const { data, errors } = await graphql(
+      schema,
+      `
+        query {
+          myCustomConnection(first: 2, offset: 1) {
+            edges {
+              cursor
+              node {
+                bio
+              }
+            }
+            nodes {
+              name
+            }
+            totalCount
+            pageInfo {
+              hasNextPage
+              hasPreviousPage
+              startCursor
+              endCursor
+            }
+          }
+        }
+      `,
+      null,
+      { pgClient },
+      {}
+    );
+    expect(errors).toBeFalsy();
+    expect(data).toBeTruthy();
+    expect(data.myCustomConnection).toBeTruthy();
+    expect(data.myCustomConnection.edges.length).toEqual(2);
+    expect(data.myCustomConnection.nodes.length).toEqual(2);
+    expect(data.myCustomConnection.edges[0].cursor).toBeTruthy();
+    expect(data.myCustomConnection.edges[0].node).toBeTruthy();
+    expect(data.myCustomConnection.edges[0].node.bio).not.toBe(undefined);
+    expect(data.myCustomConnection.nodes[0]).toBeTruthy();
+    expect(data.myCustomConnection.nodes[0].name).toBeTruthy();
+    expect(data.myCustomConnection.totalCount).toEqual(3);
+    expect(data.myCustomConnection.pageInfo).toBeTruthy();
+    expect(data.myCustomConnection.pageInfo.hasNextPage).toBe(false);
+    expect(data.myCustomConnection.pageInfo.hasPreviousPage).toBe(true);
+    expect(data.myCustomConnection.pageInfo.startCursor).toBeTruthy();
+    expect(data.myCustomConnection.pageInfo.endCursor).toBeTruthy();
+  } finally {
+    pgClient.release();
   }
 });

@@ -21,7 +21,9 @@ export function makeFieldHelpers<TSource>(
 ) {
   const { parseResolveInfo, pgQueryFromResolveData, pgSql: sql } = build;
   const { getDataFromParsedResolveInfoFragment, scope } = fieldContext;
-  const { pgFieldIntrospection } = scope;
+  const { isRootQuery, pgFieldIntrospection, isPgFieldConnection } = scope;
+
+  const isConnection = !!isPgFieldConnection;
 
   const table =
     pgFieldIntrospection && pgFieldIntrospection.kind === "class"
@@ -47,7 +49,10 @@ export function makeFieldHelpers<TSource>(
       tableFragment,
       tableAlias,
       resolveData,
-      {},
+      {
+        withPagination: isConnection && !isRootQuery,
+        withPaginationAsFields: isConnection && isRootQuery,
+      },
       (sqlBuilder: QueryBuilder) => {
         if (primaryKeys && build.options.subscriptions && table) {
           sqlBuilder.selectIdentifiers(table);
@@ -60,7 +65,11 @@ export function makeFieldHelpers<TSource>(
     );
     const { text, values } = sql.compile(query);
     const { rows } = await pgClient.query(text, values);
-    return rows;
+    if (isConnection) {
+      return build.pgAddStartEndCursor(rows[0]);
+    } else {
+      return rows;
+    }
   };
 
   const graphileHelpers: GraphileHelpers<TSource> = {
