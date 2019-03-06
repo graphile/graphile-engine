@@ -23,7 +23,7 @@ export function makeFieldHelpers<TSource>(
   const { getDataFromParsedResolveInfoFragment } = fieldContext;
   const selectGraphQLResultFromTable: SelectGraphQLResultFromTable = async (
     tableFragment: SQL,
-    builderCallback: (alias: SQL, sqlBuilder: QueryBuilder) => void
+    builderCallback?: (alias: SQL, sqlBuilder: QueryBuilder) => void
   ) => {
     const { pgClient } = context;
     const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
@@ -38,7 +38,11 @@ export function makeFieldHelpers<TSource>(
       tableAlias,
       resolveData,
       {},
-      (sqlBuilder: QueryBuilder) => builderCallback(tableAlias, sqlBuilder)
+      (sqlBuilder: QueryBuilder) => {
+        if (typeof builderCallback === "function") {
+          builderCallback(tableAlias, sqlBuilder);
+        }
+      }
     );
     const { text, values } = sql.compile(query);
     const { rows } = await pgClient.query(text, values);
