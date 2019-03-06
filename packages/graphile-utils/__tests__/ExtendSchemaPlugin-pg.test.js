@@ -594,12 +594,16 @@ it("allows adding a custom list to a nested type", async () => {
         return {
           typeDefs: gql`
             extend type User {
-              myCustomList: [User] @pgQuery(
+              myCustomList(idLessThan: Int): [User] @pgQuery(
                 source: ${embed(sql.fragment`graphile_utils.users`)}
-                withQueryBuilder: ${embed(queryBuilder => {
-                  queryBuilder.where(
-                    sql.fragment`${queryBuilder.getTableAlias()}.id < 3`
-                  );
+                withQueryBuilder: ${embed((queryBuilder, args) => {
+                  if (args.idLessThan) {
+                    queryBuilder.where(
+                      sql.fragment`${queryBuilder.getTableAlias()}.id < ${sql.value(
+                        args.idLessThan
+                      )}`
+                    );
+                  }
                 })}
               )
             }
@@ -619,7 +623,7 @@ it("allows adding a custom list to a nested type", async () => {
           user: userById(id: 1) {
             id
             name
-            myCustomList {
+            myCustomList(idLessThan: 3) {
               bio
               email
             }
@@ -650,11 +654,13 @@ it("allows adding a single table entry to a nested type", async () => {
         return {
           typeDefs: gql`
             extend type User {
-              myCustomRecord: User @pgQuery(
+              myCustomRecord(id: Int!): User @pgQuery(
                 source: ${embed(sql.fragment`graphile_utils.users`)}
-                withQueryBuilder: ${embed(queryBuilder => {
+                withQueryBuilder: ${embed((queryBuilder, args) => {
                   queryBuilder.where(
-                    sql.fragment`${queryBuilder.getTableAlias()}.id = 3`
+                    sql.fragment`${queryBuilder.getTableAlias()}.id = ${sql.value(
+                      args.id
+                    )}`
                   );
                   queryBuilder.limit(1);
                 })}
@@ -676,7 +682,8 @@ it("allows adding a single table entry to a nested type", async () => {
           user: userById(id: 1) {
             id
             name
-            myCustomRecord {
+            myCustomRecord(id: 2) {
+              id
               bio
               email
             }
@@ -691,6 +698,7 @@ it("allows adding a single table entry to a nested type", async () => {
     expect(data).toBeTruthy();
     expect(data.user).toBeTruthy();
     expect(data.user.myCustomRecord).toBeTruthy();
+    expect(data.user.myCustomRecord.id).toBe(2);
     expect(data.user.myCustomRecord.bio).not.toBe(undefined);
     expect(data.user.myCustomRecord.email).toBeTruthy();
   } finally {

@@ -767,7 +767,8 @@ function getFields<TSource>(
                           "function"
                         ) {
                           directives.pgQuery.withQueryBuilder(
-                            innerQueryBuilder
+                            innerQueryBuilder,
+                            parsedResolveInfoFragment.args
                           );
                         }
                       },

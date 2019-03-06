@@ -925,7 +925,7 @@ type User implements Node {
   bio: String
   renamedComplexColumn: [Complex]
   createdAt: Datetime!
-  myCustomList: [User]
+  myCustomList(idLessThan: Int): [User]
 }
 
 \\"\\"\\"
@@ -1705,7 +1705,7 @@ type User implements Node {
   bio: String
   renamedComplexColumn: [Complex]
   createdAt: Datetime!
-  myCustomRecord: User
+  myCustomRecord(id: Int!): User
 }
 
 \\"\\"\\"
