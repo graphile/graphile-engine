@@ -21,7 +21,7 @@ export function makeFieldHelpers<TSource>(
 ) {
   const { parseResolveInfo, pgQueryFromResolveData, pgSql: sql } = build;
   const { getDataFromParsedResolveInfoFragment, scope } = fieldContext;
-  const { isRootQuery, pgFieldIntrospection, isPgFieldConnection } = scope;
+  const { pgFieldIntrospection, isPgFieldConnection } = scope;
 
   const isConnection = !!isPgFieldConnection;
 
@@ -50,8 +50,7 @@ export function makeFieldHelpers<TSource>(
       tableAlias,
       resolveData,
       {
-        withPagination: isConnection && !isRootQuery,
-        withPaginationAsFields: isConnection && isRootQuery,
+        withPaginationAsFields: isConnection,
       },
       (sqlBuilder: QueryBuilder) => {
         if (primaryKeys && build.options.subscriptions && table) {
