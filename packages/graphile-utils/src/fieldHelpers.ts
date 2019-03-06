@@ -20,7 +20,17 @@ export function makeFieldHelpers<TSource>(
   resolveInfo: GraphQLResolveInfo
 ) {
   const { parseResolveInfo, pgQueryFromResolveData, pgSql: sql } = build;
-  const { getDataFromParsedResolveInfoFragment } = fieldContext;
+  const { getDataFromParsedResolveInfoFragment, scope } = fieldContext;
+  const { pgFieldIntrospection } = scope;
+
+  const table =
+    pgFieldIntrospection && pgFieldIntrospection.kind === "class"
+      ? pgFieldIntrospection
+      : null;
+  const primaryKeyConstraint = table && table.primaryKeyConstraint;
+  const primaryKeys =
+    primaryKeyConstraint && primaryKeyConstraint.keyAttributes;
+
   const selectGraphQLResultFromTable: SelectGraphQLResultFromTable = async (
     tableFragment: SQL,
     builderCallback?: (alias: SQL, sqlBuilder: QueryBuilder) => void
@@ -39,6 +49,10 @@ export function makeFieldHelpers<TSource>(
       resolveData,
       {},
       (sqlBuilder: QueryBuilder) => {
+        if (primaryKeys && build.options.subscriptions && table) {
+          sqlBuilder.selectIdentifiers(table);
+        }
+
         if (typeof builderCallback === "function") {
           builderCallback(tableAlias, sqlBuilder);
         }
