@@ -303,10 +303,11 @@ it("allows adding a field to an existing table, and requesting necessary data al
         `,
         resolvers: {
           User: {
-            customField: user =>
-              `User ${user.id} fetched (name: ${user.name}) ${JSON.stringify(
-                user.renamedComplexColumn
-              )}`,
+            customField: user => {
+              return `User ${user.id} fetched (name: ${
+                user.name
+              }) ${JSON.stringify(user.renamedComplexColumn)}`;
+            },
           },
         },
       })),
@@ -321,6 +322,7 @@ it("allows adding a field to an existing table, and requesting necessary data al
       `
         query {
           userById(id: 1) {
+            id
             customField
           }
         }
@@ -497,6 +499,200 @@ it("allows adding a custom connection without requiring directives", async () =>
     expect(data.myCustomConnection.pageInfo.hasPreviousPage).toBe(true);
     expect(data.myCustomConnection.pageInfo.startCursor).toBeTruthy();
     expect(data.myCustomConnection.pageInfo.endCursor).toBeTruthy();
+  } finally {
+    pgClient.release();
+  }
+});
+
+it("allows adding a custom connection to a nested type", async () => {
+  const schema = await createPostGraphileSchema(pgPool, ["graphile_utils"], {
+    disableDefaultMutations: true,
+    appendPlugins: [
+      makeExtendSchemaPlugin(build => {
+        const { pgSql: sql } = build;
+        return {
+          typeDefs: gql`
+            extend type User {
+              myCustomConnection: UsersConnection @pgQuery(
+                source: ${embed(sql.fragment`graphile_utils.users`)}
+                withQueryBuilder: ${embed(queryBuilder => {
+                  queryBuilder.where(
+                    sql.fragment`${queryBuilder.getTableAlias()}.id < 3`
+                  );
+                })}
+              )
+            }
+          `,
+        };
+      }),
+    ],
+  });
+  const printedSchema = printSchema(schema);
+  expect(printedSchema).toMatchSnapshot();
+  const pgClient = await pgPool.connect();
+  try {
+    const { data, errors } = await graphql(
+      schema,
+      `
+        query {
+          user: userById(id: 1) {
+            id
+            name
+            myCustomConnection(first: 1, offset: 1) {
+              edges {
+                cursor
+                node {
+                  bio
+                }
+              }
+              nodes {
+                name
+              }
+              totalCount
+              pageInfo {
+                hasNextPage
+                hasPreviousPage
+                startCursor
+                endCursor
+              }
+            }
+          }
+        }
+      `,
+      null,
+      { pgClient },
+      {}
+    );
+    expect(errors).toBeFalsy();
+    expect(data).toBeTruthy();
+    expect(data.user).toBeTruthy();
+    expect(data.user.myCustomConnection).toBeTruthy();
+    expect(data.user.myCustomConnection.edges.length).toEqual(1);
+    expect(data.user.myCustomConnection.nodes.length).toEqual(1);
+    expect(data.user.myCustomConnection.edges[0].cursor).toBeTruthy();
+    expect(data.user.myCustomConnection.edges[0].node).toBeTruthy();
+    expect(data.user.myCustomConnection.edges[0].node.bio).not.toBe(undefined);
+    expect(data.user.myCustomConnection.nodes[0]).toBeTruthy();
+    expect(data.user.myCustomConnection.nodes[0].name).toBeTruthy();
+    expect(data.user.myCustomConnection.totalCount).toEqual(2);
+    expect(data.user.myCustomConnection.pageInfo).toBeTruthy();
+    expect(data.user.myCustomConnection.pageInfo.hasNextPage).toBe(false);
+    expect(data.user.myCustomConnection.pageInfo.hasPreviousPage).toBe(true);
+    expect(data.user.myCustomConnection.pageInfo.startCursor).toBeTruthy();
+    expect(data.user.myCustomConnection.pageInfo.endCursor).toBeTruthy();
+  } finally {
+    pgClient.release();
+  }
+});
+
+it("allows adding a custom list to a nested type", async () => {
+  const schema = await createPostGraphileSchema(pgPool, ["graphile_utils"], {
+    disableDefaultMutations: true,
+    appendPlugins: [
+      makeExtendSchemaPlugin(build => {
+        const { pgSql: sql } = build;
+        return {
+          typeDefs: gql`
+            extend type User {
+              myCustomList: [User] @pgQuery(
+                source: ${embed(sql.fragment`graphile_utils.users`)}
+                withQueryBuilder: ${embed(queryBuilder => {
+                  queryBuilder.where(
+                    sql.fragment`${queryBuilder.getTableAlias()}.id < 3`
+                  );
+                })}
+              )
+            }
+          `,
+        };
+      }),
+    ],
+  });
+  const printedSchema = printSchema(schema);
+  expect(printedSchema).toMatchSnapshot();
+  const pgClient = await pgPool.connect();
+  try {
+    const { data, errors } = await graphql(
+      schema,
+      `
+        query {
+          user: userById(id: 1) {
+            id
+            name
+            myCustomList {
+              bio
+              email
+            }
+          }
+        }
+      `,
+      null,
+      { pgClient },
+      {}
+    );
+    expect(errors).toBeFalsy();
+    expect(data).toBeTruthy();
+    expect(data.user).toBeTruthy();
+    expect(data.user.myCustomList).toBeTruthy();
+    expect(data.user.myCustomList[0].bio).not.toBe(undefined);
+    expect(data.user.myCustomList[0].email).toBeTruthy();
+  } finally {
+    pgClient.release();
+  }
+});
+
+it("allows adding a single table entry to a nested type", async () => {
+  const schema = await createPostGraphileSchema(pgPool, ["graphile_utils"], {
+    disableDefaultMutations: true,
+    appendPlugins: [
+      makeExtendSchemaPlugin(build => {
+        const { pgSql: sql } = build;
+        return {
+          typeDefs: gql`
+            extend type User {
+              myCustomRecord: User @pgQuery(
+                source: ${embed(sql.fragment`graphile_utils.users`)}
+                withQueryBuilder: ${embed(queryBuilder => {
+                  queryBuilder.where(
+                    sql.fragment`${queryBuilder.getTableAlias()}.id = 3`
+                  );
+                  queryBuilder.limit(1);
+                })}
+              )
+            }
+          `,
+        };
+      }),
+    ],
+  });
+  const printedSchema = printSchema(schema);
+  expect(printedSchema).toMatchSnapshot();
+  const pgClient = await pgPool.connect();
+  try {
+    const { data, errors } = await graphql(
+      schema,
+      `
+        query {
+          user: userById(id: 1) {
+            id
+            name
+            myCustomRecord {
+              bio
+              email
+            }
+          }
+        }
+      `,
+      null,
+      { pgClient },
+      {}
+    );
+    expect(errors).toBeFalsy();
+    expect(data).toBeTruthy();
+    expect(data.user).toBeTruthy();
+    expect(data.user.myCustomRecord).toBeTruthy();
+    expect(data.user.myCustomRecord.bio).not.toBe(undefined);
+    expect(data.user.myCustomRecord.email).toBeTruthy();
   } finally {
     pgClient.release();
   }
