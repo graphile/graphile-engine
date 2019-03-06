@@ -4,6 +4,8 @@ import { PgClass } from "./plugins/PgIntrospectionPlugin";
 type SQL = sql.SQL;
 export { sql, SQL };
 
+export type GraphQLContext = any;
+
 export interface GenContext {
   queryBuilder: QueryBuilder;
 }
@@ -17,7 +19,17 @@ export type CursorValue = object;
 export type CursorComparator = (val: CursorValue, isAfter: boolean) => void;
 
 export default class QueryBuilder {
+  public parentQueryBuilder: QueryBuilder | void;
+  public context: GraphQLContext;
   public beforeLock(field: string, fn: () => void): void;
+  public makeLiveCollection(
+    table: PgClass,
+    cb?: (checker: (data: any) => (record: any) => boolean) => void
+  ): void;
+  public addLiveCondition(
+    checkerGenerator: (data: {}) => (record: any) => boolean,
+    requirements?: { [key: string]: SQL }
+  ): void;
   public setCursorComparator(fn: CursorComparator): void;
   public addCursorCondition(cursorValue: CursorValue, isAfter: boolean): void;
   public select(exprGen: SQLGen, alias: RawAlias): void;
