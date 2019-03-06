@@ -40,6 +40,7 @@ export function makeFieldHelpers<TSource>(
     const { pgClient } = context;
     const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
     const PayloadType = resolveInfo.returnType;
+
     const resolveData = getDataFromParsedResolveInfoFragment(
       parsedResolveInfoFragment,
       PayloadType

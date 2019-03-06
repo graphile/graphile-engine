@@ -515,6 +515,7 @@ function getFields<TSource>(
   },
   build: Build
 ) {
+  const scopeByType = build.scopeByType || new Map();
   if (!build.graphql.isNamedType(SelfGeneric)) {
     throw new Error("getFields only supports named types");
   }
@@ -575,8 +576,15 @@ function getFields<TSource>(
         const fieldName = getName(field.name);
         const args = getArguments(field.arguments, build);
         const type = getType(field.type, build);
+        const typeScope = scopeByType.get(type) || {};
         const directives = getDirectives(field.directives);
         const scope = {
+          ...(typeScope.isPgRowConnectionType && typeScope.pgIntrospection
+            ? {
+                isPgFieldConnection: true,
+                pgFieldIntrospection: typeScope.pgIntrospection,
+              }
+            : null),
           fieldDirectives: directives,
           ...(directives.scope || {}),
         };
