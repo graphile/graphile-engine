@@ -42,7 +42,7 @@ afterAll(() => {
 });
 
 it("allows adding a custom single field to PG schema", async () => {
-  const schema = await createPostGraphileSchema(pgPool, ["a"], {
+  const schema = await createPostGraphileSchema(pgPool, ["graphile_utils"], {
     disableDefaultMutations: true,
     appendPlugins: [
       makeExtendSchemaPlugin(build => {
@@ -57,7 +57,7 @@ it("allows adding a custom single field to PG schema", async () => {
             Query: {
               async randomUser(_query, args, context, resolveInfo) {
                 const rows = await resolveInfo.graphile.selectGraphQLResultFromTable(
-                  sql.fragment`a.users`,
+                  sql.fragment`graphile_utils.users`,
                   (tableAlias, sqlBuilder) => {
                     sqlBuilder.orderBy(sql.fragment`random()`);
                     sqlBuilder.limit(1);
@@ -105,7 +105,7 @@ it("allows adding a custom single field to PG schema", async () => {
 });
 
 it("allows adding a custom field returning a list to PG schema", async () => {
-  const schema = await createPostGraphileSchema(pgPool, ["a"], {
+  const schema = await createPostGraphileSchema(pgPool, ["graphile_utils"], {
     disableDefaultMutations: true,
     appendPlugins: [
       makeExtendSchemaPlugin(build => {
@@ -120,7 +120,7 @@ it("allows adding a custom field returning a list to PG schema", async () => {
             Query: {
               async randomUsers(_query, args, context, resolveInfo) {
                 const rows = await resolveInfo.graphile.selectGraphQLResultFromTable(
-                  sql.fragment`a.users`,
+                  sql.fragment`graphile_utils.users`,
                   (tableAlias, sqlBuilder) => {
                     sqlBuilder.orderBy(sql.fragment`random()`);
                     sqlBuilder.limit(3);
@@ -169,7 +169,7 @@ it("allows adding a custom field returning a list to PG schema", async () => {
 });
 
 it("allows adding a simple mutation field to PG schema", async () => {
-  const schema = await createPostGraphileSchema(pgPool, ["a"], {
+  const schema = await createPostGraphileSchema(pgPool, ["graphile_utils"], {
     disableDefaultMutations: true,
     appendPlugins: [
       makeExtendSchemaPlugin(build => {
@@ -199,13 +199,13 @@ it("allows adding a simple mutation field to PG schema", async () => {
                   const {
                     rows: [user],
                   } = await pgClient.query(
-                    `insert into a.users(name, email, bio) values ($1, $2, $3) returning *`,
+                    `insert into graphile_utils.users(name, email, bio) values ($1, $2, $3) returning *`,
                     [args.input.name, args.input.email, args.input.bio]
                   );
                   const [
                     row,
                   ] = await resolveInfo.graphile.selectGraphQLResultFromTable(
-                    sql.fragment`a.users`,
+                    sql.fragment`graphile_utils.users`,
                     (tableAlias, sqlBuilder) => {
                       sqlBuilder.where(
                         sql.fragment`${tableAlias}.id = ${sql.value(user.id)}`
@@ -291,7 +291,7 @@ it("allows adding a simple mutation field to PG schema", async () => {
 });
 
 it("allows adding a field to an existing table, and requesting necessary data along with it", async () => {
-  const schema = await createPostGraphileSchema(pgPool, ["a"], {
+  const schema = await createPostGraphileSchema(pgPool, ["graphile_utils"], {
     disableDefaultMutations: true,
     appendPlugins: [
       makeExtendSchemaPlugin(() => ({
