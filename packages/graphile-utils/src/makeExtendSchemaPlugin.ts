@@ -32,7 +32,6 @@ import {
   StringValueNode,
   TypeNode,
   ValueNode,
-  getNullableType,
 } from "graphql";
 import { GraphileEmbed } from "./gql";
 // tslint:disable-next-line
