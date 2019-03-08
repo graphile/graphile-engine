@@ -226,16 +226,112 @@ class SchemaBuilder extends EventEmitter {
    *
    * The function must either return a replacement object for `obj` or `obj` itself
    */
-  hook<T: *>(hookName: string, fn: Hook<T, *, *>) {
+  hook<T: *>(
+    hookName: string,
+    fn: Hook<T, *, *>,
+    provides?: [string],
+    before?: [string],
+    after?: [string]
+  ) {
     if (!this.hooks[hookName]) {
       throw new Error(`Sorry, '${hookName}' is not a supported hook`);
     }
     if (this._currentPluginName) {
-      fn.displayName = `${
-        this._currentPluginName
-      }/${hookName}/${fn.displayName || fn.name || "unnamed"}`;
+      fn.displayName = `${this._currentPluginName}/${hookName}/${(provides &&
+        provides.length &&
+        provides.join("+")) ||
+        fn.displayName ||
+        fn.name ||
+        "unnamed"}`;
     }
-    this.hooks[hookName].push(fn);
+    if (provides) {
+      fn.provides = provides;
+    }
+    if (before) {
+      fn.before = before;
+    }
+    if (after) {
+      fn.after = after;
+    }
+    if (!fn.provides && !fn.before && !fn.after) {
+      // No explicit dependencies - add to the end
+      this.hooks[hookName].push(fn);
+    } else {
+      // We need to figure out where it can go, respecting all the dependencies.
+      // TODO: I think there are situations in which this algorithm may result in unnecessary conflict errors; we should take a more iterative approach or find a better algorithm
+      const relevantHooks = this.hooks[hookName];
+      let minIndex = 0;
+      let minReason = null;
+      let maxIndex = relevantHooks.length;
+      let maxReason = null;
+      const { provides: newProvides, before: newBefore, after: newAfter } = fn;
+      const describe = (hook, index) => {
+        return `${hook.displayName} (${
+          index ? `index: ${index}, ` : ""
+        }provides: ${hook.provides}, before: ${hook.before}, after: ${
+          hook.after
+        })`;
+      };
+      const check = () => {
+        if (minIndex > maxIndex) {
+          throw new Error(
+            `Cannot resolve plugin order - ${describe(
+              fn
+            )} cannot be before ${describe(
+              maxReason,
+              maxIndex
+            )} and after ${describe(
+              minReason,
+              minIndex
+            )} - please report this issue`
+          );
+        }
+      };
+      const setMin = (newMin, reason) => {
+        if (newMin > minIndex) {
+          minIndex = newMin;
+          minReason = reason;
+          check();
+        }
+      };
+      const setMax = (newMax, reason) => {
+        if (newMax < maxIndex) {
+          maxIndex = newMax;
+          maxReason = reason;
+          check();
+        }
+      };
+      relevantHooks.forEach((oldHook, idx) => {
+        const {
+          provides: oldProvides,
+          before: oldBefore,
+          after: oldAfter,
+        } = oldHook;
+        if (newProvides) {
+          if (oldBefore && oldBefore.some(dep => newProvides.includes(dep))) {
+            // Old says it has to come before new
+            setMin(idx + 1, oldHook);
+          }
+          if (oldAfter && oldAfter.some(dep => newProvides.includes(dep))) {
+            // Old says it has to be after new
+            setMax(idx, oldHook);
+          }
+        }
+        if (oldProvides) {
+          if (newBefore && newBefore.some(dep => oldProvides.includes(dep))) {
+            // New says it has to come before old
+            setMax(idx, oldHook);
+          }
+          if (newAfter && newAfter.some(dep => oldProvides.includes(dep))) {
+            // New says it has to be after old
+            setMin(idx + 1, oldHook);
+          }
+        }
+      });
+
+      // We've already validated everything, so we can now insert the record.
+      this.hooks[hookName].splice(maxIndex, 0, fn);
+    }
   }
 
   applyHooks<T: *, Context>(
