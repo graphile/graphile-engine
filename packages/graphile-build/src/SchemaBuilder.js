@@ -112,11 +112,17 @@ export type Hook<
   Type: SupportedHookTypes,
   BuildExtensions: *,
   ContextExtensions: *
-> = (
-  input: Type,
-  build: { ...Build, ...BuildExtensions },
-  context: { ...Context, ...ContextExtensions }
-) => Type;
+> = {
+  (
+    input: Type,
+    build: { ...Build, ...BuildExtensions },
+    context: { ...Context, ...ContextExtensions }
+  ): Type,
+  displayName?: string,
+  provides?: Array<string>,
+  before?: Array<string>,
+  after?: Array<string>,
+};
 
 export type WatchUnwatch = (triggerChange: TriggerChangeType) => void;
 
@@ -229,9 +235,9 @@ class SchemaBuilder extends EventEmitter {
   hook<T: *>(
     hookName: string,
     fn: Hook<T, *, *>,
-    provides?: [string],
-    before?: [string],
-    after?: [string]
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
   ) {
     if (!this.hooks[hookName]) {
       throw new Error(`Sorry, '${hookName}' is not a supported hook`);
@@ -245,6 +251,9 @@ class SchemaBuilder extends EventEmitter {
         "unnamed"}`;
     }
     if (provides) {
+      if (!fn.displayName && provides.length) {
+        fn.displayName = `unknown/${hookName}/${provides[0]}`;
+      }
       fn.provides = provides;
     }
     if (before) {
@@ -266,11 +275,14 @@ class SchemaBuilder extends EventEmitter {
       let maxReason = null;
       const { provides: newProvides, before: newBefore, after: newAfter } = fn;
       const describe = (hook, index) => {
-        return `${hook.displayName} (${
+        if (!hook) {
+          return "-";
+        }
+        return `${hook.displayName || hook.name || "anonymous"} (${
           index ? `index: ${index}, ` : ""
-        }provides: ${hook.provides}, before: ${hook.before}, after: ${
-          hook.after
-        })`;
+        }provides: ${hook.provides ? hook.provides.join(",") : "-"}, before: ${
+          hook.before ? hook.before.join(",") : "-"
+        }, after: ${hook.after ? hook.after.join(",") : "-"})`;
       };
       const check = () => {
         if (minIndex > maxIndex) {

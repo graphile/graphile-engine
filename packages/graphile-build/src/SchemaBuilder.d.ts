@@ -50,11 +50,13 @@ export interface Context<Type> {
   [str: string]: any;
 }
 
-export type Hook<Type> = (
-  input: Type,
-  build: Build,
-  context: Context<Type>
-) => Type;
+export interface Hook<Type> {
+  (input: Type, build: Build, context: Context<Type>): Type;
+  displayName?: string;
+  provides?: Array<string>;
+  before?: Array<string>;
+  after?: Array<string>;
+}
 
 export default class SchemaBuilder extends EventEmitter {
   hook(
