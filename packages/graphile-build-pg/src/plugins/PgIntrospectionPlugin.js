@@ -48,6 +48,7 @@ export type PgProc = {
   tags: { [string]: string },
   cost: number,
   aclExecutable: boolean,
+  language: string,
 };
 
 export type PgClass = {
@@ -76,6 +77,7 @@ export type PgClass = {
   aclInsertable: boolean,
   aclUpdatable: boolean,
   aclDeletable: boolean,
+  canUseAsterisk: boolean,
 };
 
 export type PgType = {
@@ -121,6 +123,7 @@ export type PgAttribute = {
   aclUpdatable: boolean,
   isIndexed: ?boolean,
   isUnique: ?boolean,
+  columnLevelSelectGrant: boolean,
 };
 
 export type PgConstraint = {
@@ -148,6 +151,7 @@ export type PgExtension = {
   id: string,
   name: string,
   namespaceId: string,
+  namespaceName: string,
   relocatable: boolean,
   version: string,
   configurationClassIds?: Array<string>,
@@ -461,7 +465,7 @@ export default (async function PgIntrospectionPlugin(
     };
     const introspectionResultsByKind = cloneResults(
       await persistentMemoizeWithKey(cacheKey, () =>
-        withPgClient(pgOwnerConnectionString || pgConfig, async pgClient => {
+        withPgClient(pgConfig, async pgClient => {
           const versionResult = await pgClient.query(
             "show server_version_num;"
           );
@@ -740,6 +744,9 @@ export default (async function PgIntrospectionPlugin(
       klass.attributes = introspectionResultsByKind.attribute.filter(
         attr => attr.classId === klass.id
       );
+      klass.canUseAsterisk = !klass.attributes.some(
+        attr => attr.columnLevelSelectGrant
+      );
       klass.constraints = introspectionResultsByKind.constraint.filter(
         constraint => constraint.classId === klass.id
       );
@@ -853,7 +860,9 @@ export default (async function PgIntrospectionPlugin(
       const watchSqlInner = await readFile(WATCH_FIXTURES_PATH, "utf8");
       const sql = `begin; ${watchSqlInner}; commit;`;
       try {
-        await pgClient.query(sql);
+        await withPgClient(pgOwnerConnectionString || pgConfig, pgClient =>
+          pgClient.query(sql)
+        );
       } catch (error) {
         /* eslint-disable no-console */
         console.warn(
@@ -930,18 +939,24 @@ export default (async function PgIntrospectionPlugin(
     introspectionResultsByKind = await introspect();
   }, stopListening);
 
-  builder.hook("build", build => {
-    if (introspectionResultsByKind.__pgVersion < 90500) {
-      // TODO:v5: remove this workaround
-      // This is a bit of a hack, but until we have plugin priorities it's the
-      // easiest way to conditionally support PG9.4.
-      // $FlowFixMe
-      build.pgQueryFromResolveData = queryFromResolveDataFactory({
-        supportsJSONB: false,
+  builder.hook(
+    "build",
+    build => {
+      if (introspectionResultsByKind.__pgVersion < 90500) {
+        // TODO:v5: remove this workaround
+        // This is a bit of a hack, but until we have plugin priorities it's the
+        // easiest way to conditionally support PG9.4.
+        // $FlowFixMe
+        build.pgQueryFromResolveData = queryFromResolveDataFactory({
+          supportsJSONB: false,
+        });
+      }
+      return build.extend(build, {
+        pgIntrospectionResultsByKind: introspectionResultsByKind,
       });
-    }
-    return build.extend(build, {
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
-    });
-  });
+    },
+    ["PgIntrospection"],
+    [],
+    ["PgBasics"]
+  );
 }: Plugin);

@@ -819,6 +819,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
         }
       }
 
+      this.scopeByType.set(Self, scope);
       if (finalSpec.name) {
         this.addType(
           Self,
@@ -881,6 +882,9 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
          */
         return name;
       },
+
+      // When converting a query field to a subscription (live query) field, this allows you to rename it
+      live: name => name,
     },
     swallowError,
     // resolveNode: EXPERIMENTAL, API might change!
@@ -890,5 +894,6 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
       currentHookEvent: null,
     },
     liveCoordinator: new LiveCoordinator(),
+    scopeByType: new Map(),
   };
 }

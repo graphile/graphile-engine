@@ -61,8 +61,8 @@ insert into a.unique_foreign_key (compound_key_1, compound_key_2) values
   (2, 5);
 
 insert into b.types values (
-  12,
-  50,
+  11,
+  10,
   467131188225,
   15.2,
   15.2,
@@ -85,6 +85,7 @@ insert into b.types values (
   '04:05:06',
   '04:05:06 -8:00',
   '1 year 2 months 3 days 4 hours 5 minutes 6 seconds',
+  ARRAY['1 year 2 months 3 days 4 hours 5 minutes 6 seconds', '1 year 1 months 1 days 1 hours 1 minutes 1 seconds']::interval[],
   '9876543.21',
   (1, '2', 'blue', '4be8a712-3ff7-432e-aa34-fdb43fbd838d', 'FOO_BAR', '', interval '6 hours', 8),
   ((3, '456', 'red', 'aed18400-2a92-46df-8204-b70c728b3520', 'BAR_FOO', 'one', interval '6 hours', 93), (42, 'Hello, world!', 'blue', 'd34df5e0-83f1-11e6-8dd0-abee917ffd1e', 'BAZ_QUX', '', interval '6 hours', -5), 7),
@@ -97,7 +98,8 @@ insert into b.types values (
 insert into c.edge_case values
   (default, 20, 1),
   (true, null, 2),
-  (false, -512, 3);
+  (false, -512, 3),
+  (default, null, 4);
 
 insert into a.similar_table_1 (id, col1, col2, col3) values
   (1, null, 6, 3),
@@ -127,6 +129,13 @@ insert into c.my_table(id, json_data) values
   (3, '{"stringField":"notTest"}');
 
 alter sequence c.my_table_id_seq restart with 10;
+
+insert into c.null_test_record (id, nullable_text, nullable_int, non_null_text) values
+  (1, 'Hello', 99, 'World'),
+  (2, null, 98, 'Ninety eight'),
+  (3, null, null, 'Ninety seven'),
+  (4, 'Hey', null, 'Ninety six'),
+  (5, 'Hey', 95, 'Ninety five');
 
 -- Begin tests for smart comments
 

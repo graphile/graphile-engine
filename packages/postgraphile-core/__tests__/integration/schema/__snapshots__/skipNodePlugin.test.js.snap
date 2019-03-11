@@ -486,7 +486,7 @@ type CompoundKeysConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`CompoundKey\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`CompoundKey\` edge in the connection.\\"\\"\\"
@@ -600,7 +600,7 @@ type CompoundTypesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`CompoundType\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`CompoundType\` edge in the connection.\\"\\"\\"
@@ -971,6 +971,41 @@ type CreateNoPrimaryKeyPayload {
     \\"\\"\\"The method to use when ordering \`NoPrimaryKey\`.\\"\\"\\"
     orderBy: [NoPrimaryKeysOrderBy!] = [NATURAL]
   ): NoPrimaryKeysEdge
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
+}
+
+\\"\\"\\"All input for the create \`NullTestRecord\` mutation.\\"\\"\\"
+input CreateNullTestRecordInput {
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"The \`NullTestRecord\` to be created by this mutation.\\"\\"\\"
+  nullTestRecord: NullTestRecordInput!
+}
+
+\\"\\"\\"The output of our create \`NullTestRecord\` mutation.\\"\\"\\"
+type CreateNullTestRecordPayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"The \`NullTestRecord\` that was created by this mutation.\\"\\"\\"
+  nullTestRecord: NullTestRecord
+
+  \\"\\"\\"An edge for our \`NullTestRecord\`. May be used by Relay 1.\\"\\"\\"
+  nullTestRecordEdge(
+    \\"\\"\\"The method to use when ordering \`NullTestRecord\`.\\"\\"\\"
+    orderBy: [NullTestRecordsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): NullTestRecordsEdge
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -1354,6 +1389,12 @@ type CreateTypePayload {
   \\"\\"\\"
   clientMutationId: String
 
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postById: Post
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postBySmallint: Post
+
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -1536,7 +1577,7 @@ type DefaultValuesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`DefaultValue\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`DefaultValue\` edge in the connection.\\"\\"\\"
@@ -1812,6 +1853,40 @@ type DeleteNoPrimaryKeyPayload {
     \\"\\"\\"The method to use when ordering \`NoPrimaryKey\`.\\"\\"\\"
     orderBy: [NoPrimaryKeysOrderBy!] = [NATURAL]
   ): NoPrimaryKeysEdge
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
+}
+
+\\"\\"\\"All input for the \`deleteNullTestRecordById\` mutation.\\"\\"\\"
+input DeleteNullTestRecordByIdInput {
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+  id: Int!
+}
+
+\\"\\"\\"The output of our delete \`NullTestRecord\` mutation.\\"\\"\\"
+type DeleteNullTestRecordPayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+  deletedNullTestRecordId: ID
+
+  \\"\\"\\"The \`NullTestRecord\` that was deleted by this mutation.\\"\\"\\"
+  nullTestRecord: NullTestRecord
+
+  \\"\\"\\"An edge for our \`NullTestRecord\`. May be used by Relay 1.\\"\\"\\"
+  nullTestRecordEdge(
+    \\"\\"\\"The method to use when ordering \`NullTestRecord\`.\\"\\"\\"
+    orderBy: [NullTestRecordsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): NullTestRecordsEdge
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -2162,6 +2237,12 @@ type DeleteTypePayload {
   clientMutationId: String
   deletedTypeId: ID
 
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postById: Post
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postBySmallint: Post
+
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -2254,7 +2335,7 @@ type EdgeCasesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`EdgeCase\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`EdgeCase\` edge in the connection.\\"\\"\\"
@@ -2360,7 +2441,7 @@ type ForeignKeysConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`ForeignKey\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`ForeignKey\` edge in the connection.\\"\\"\\"
@@ -2600,7 +2681,7 @@ type InputsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Input\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Input\` edge in the connection.\\"\\"\\"
@@ -2745,7 +2826,7 @@ input Issue756Condition {
 \\"\\"\\"An input for mutations affecting \`Issue756\`\\"\\"\\"
 input Issue756Input {
   id: Int
-  ts: NotNullTimestamp!
+  ts: NotNullTimestamp
 }
 
 \\"\\"\\"All input for the \`issue756Mutation\` mutation.\\"\\"\\"
@@ -2800,7 +2881,7 @@ type Issue756SConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Issue756\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Issue756\` edge in the connection.\\"\\"\\"
@@ -3075,7 +3156,7 @@ type LeftArmsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`LeftArm\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`LeftArm\` edge in the connection.\\"\\"\\"
@@ -3368,6 +3449,14 @@ type Mutation {
     input: CreateNoPrimaryKeyInput!
   ): CreateNoPrimaryKeyPayload
 
+  \\"\\"\\"Creates a single \`NullTestRecord\`.\\"\\"\\"
+  createNullTestRecord(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: CreateNullTestRecordInput!
+  ): CreateNullTestRecordPayload
+
   \\"\\"\\"Creates a single \`Patch\`.\\"\\"\\"
   createPatch(
     \\"\\"\\"
@@ -3535,6 +3624,14 @@ type Mutation {
     \\"\\"\\"
     input: DeleteNoPrimaryKeyByIdInput!
   ): DeleteNoPrimaryKeyPayload
+
+  \\"\\"\\"Deletes a single \`NullTestRecord\` using a unique key.\\"\\"\\"
+  deleteNullTestRecordById(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: DeleteNullTestRecordByIdInput!
+  ): DeleteNullTestRecordPayload
 
   \\"\\"\\"Deletes a single \`Patch\` using a unique key.\\"\\"\\"
   deletePatchById(
@@ -3873,6 +3970,26 @@ type Mutation {
     \\"\\"\\"
     input: TableSetMutationInput!
   ): TableSetMutationPayload
+
+  \\"\\"\\"Reads and enables pagination through a set of \`Type\`.\\"\\"\\"
+  typeFunctionConnectionMutation(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: TypeFunctionConnectionMutationInput!
+  ): TypeFunctionConnectionMutationPayload
+  typeFunctionListMutation(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: TypeFunctionListMutationInput!
+  ): TypeFunctionListMutationPayload
+  typeFunctionMutation(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: TypeFunctionMutationInput!
+  ): TypeFunctionMutationPayload
   typesMutation(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -3943,6 +4060,14 @@ type Mutation {
     \\"\\"\\"
     input: UpdateNoPrimaryKeyByIdInput!
   ): UpdateNoPrimaryKeyPayload
+
+  \\"\\"\\"Updates a single \`NullTestRecord\` using a unique key and a patch.\\"\\"\\"
+  updateNullTestRecordById(
+    \\"\\"\\"
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    \\"\\"\\"
+    input: UpdateNullTestRecordByIdInput!
+  ): UpdateNullTestRecordPayload
 
   \\"\\"\\"Updates a single \`Patch\` using a unique key and a patch.\\"\\"\\"
   updatePatchById(
@@ -4645,7 +4770,7 @@ type MyTablesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`MyTable\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`MyTable\` edge in the connection.\\"\\"\\"
@@ -4734,7 +4859,7 @@ type NonUpdatableViewsConnection {
   \\"\\"\\"
   The count of *all* \`NonUpdatableView\` you could get from the connection.
   \\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`NonUpdatableView\` edge in the connection.\\"\\"\\"
@@ -4798,7 +4923,7 @@ type NoPrimaryKeysConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`NoPrimaryKey\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`NoPrimaryKey\` edge in the connection.\\"\\"\\"
@@ -4822,6 +4947,92 @@ enum NoPrimaryKeysOrderBy {
 scalar NotNullTimestamp
 
 scalar NotNullUrl
+
+type NullTestRecord {
+  id: Int!
+  nonNullText: String!
+  nullableInt: Int
+  nullableText: String
+}
+
+\\"\\"\\"
+A condition to be used against \`NullTestRecord\` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+\\"\\"\\"
+input NullTestRecordCondition {
+  \\"\\"\\"Checks for equality with the object’s \`id\` field.\\"\\"\\"
+  id: Int
+
+  \\"\\"\\"Checks for equality with the object’s \`nonNullText\` field.\\"\\"\\"
+  nonNullText: String
+
+  \\"\\"\\"Checks for equality with the object’s \`nullableInt\` field.\\"\\"\\"
+  nullableInt: Int
+
+  \\"\\"\\"Checks for equality with the object’s \`nullableText\` field.\\"\\"\\"
+  nullableText: String
+}
+
+\\"\\"\\"An input for mutations affecting \`NullTestRecord\`\\"\\"\\"
+input NullTestRecordInput {
+  id: Int
+  nonNullText: String!
+  nullableInt: Int
+  nullableText: String
+}
+
+\\"\\"\\"
+Represents an update to a \`NullTestRecord\`. Fields that are set will be updated.
+\\"\\"\\"
+input NullTestRecordPatch {
+  id: Int
+  nonNullText: String
+  nullableInt: Int
+  nullableText: String
+}
+
+\\"\\"\\"A connection to a list of \`NullTestRecord\` values.\\"\\"\\"
+type NullTestRecordsConnection {
+  \\"\\"\\"
+  A list of edges which contains the \`NullTestRecord\` and cursor to aid in pagination.
+  \\"\\"\\"
+  edges: [NullTestRecordsEdge!]!
+
+  \\"\\"\\"A list of \`NullTestRecord\` objects.\\"\\"\\"
+  nodes: [NullTestRecord]!
+
+  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
+  pageInfo: PageInfo!
+
+  \\"\\"\\"
+  The count of *all* \`NullTestRecord\` you could get from the connection.
+  \\"\\"\\"
+  totalCount: Int!
+}
+
+\\"\\"\\"A \`NullTestRecord\` edge in the connection.\\"\\"\\"
+type NullTestRecordsEdge {
+  \\"\\"\\"A cursor for use in pagination.\\"\\"\\"
+  cursor: Cursor
+
+  \\"\\"\\"The \`NullTestRecord\` at the end of the edge.\\"\\"\\"
+  node: NullTestRecord
+}
+
+\\"\\"\\"Methods to use when ordering \`NullTestRecord\`.\\"\\"\\"
+enum NullTestRecordsOrderBy {
+  ID_ASC
+  ID_DESC
+  NATURAL
+  NON_NULL_TEXT_ASC
+  NON_NULL_TEXT_DESC
+  NULLABLE_INT_ASC
+  NULLABLE_INT_DESC
+  NULLABLE_TEXT_ASC
+  NULLABLE_TEXT_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
 
 \\"\\"\\"Information about pagination in a connection.\\"\\"\\"
 type PageInfo {
@@ -4865,7 +5076,7 @@ type PatchesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Patch\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Patch\` edge in the connection.\\"\\"\\"
@@ -4912,7 +5123,7 @@ type PeopleConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Person\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Person\` edge in the connection.\\"\\"\\"
@@ -5180,6 +5391,29 @@ type Person {
     orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsConnection!
   site: WrappedUrl @deprecated(reason: \\"Don’t use me\\")
+  typeFunction(id: Int): Type
+
+  \\"\\"\\"Reads and enables pagination through a set of \`Type\`.\\"\\"\\"
+  typeFunctionConnection(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+  ): TypesConnection!
+  typeFunctionList: [Type]
 }
 
 \\"\\"\\"The return type of our \`computedComplex\` query.\\"\\"\\"
@@ -5332,7 +5566,7 @@ type PersonSecretsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`PersonSecret\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`PersonSecret\` edge in the connection.\\"\\"\\"
@@ -5400,6 +5634,67 @@ type Post {
 
   \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
   personByAuthorId: Person
+
+  \\"\\"\\"Reads a single \`Type\` that is related to this \`Post\`.\\"\\"\\"
+  typeById: Type
+
+  \\"\\"\\"Reads and enables pagination through a set of \`Type\`.\\"\\"\\"
+  typesById(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"
+    A condition to be used in determining which values should be returned by the collection.
+    \\"\\"\\"
+    condition: TypeCondition
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+
+    \\"\\"\\"The method to use when ordering \`Type\`.\\"\\"\\"
+    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): TypesConnection! @deprecated(reason: \\"Please use typeById instead\\")
+
+  \\"\\"\\"Reads and enables pagination through a set of \`Type\`.\\"\\"\\"
+  typesBySmallint(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"
+    A condition to be used in determining which values should be returned by the collection.
+    \\"\\"\\"
+    condition: TypeCondition
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+
+    \\"\\"\\"The method to use when ordering \`Type\`.\\"\\"\\"
+    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): TypesConnection!
 }
 
 \\"\\"\\"A connection to a list of \`Interval\` values.\\"\\"\\"
@@ -5515,7 +5810,7 @@ type PostsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Post\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Post\` edge in the connection.\\"\\"\\"
@@ -5884,6 +6179,35 @@ type Query {
     \\"\\"\\"The method to use when ordering \`NonUpdatableView\`.\\"\\"\\"
     orderBy: [NonUpdatableViewsOrderBy!] = [NATURAL]
   ): NonUpdatableViewsConnection
+
+  \\"\\"\\"Reads and enables pagination through a set of \`NullTestRecord\`.\\"\\"\\"
+  allNullTestRecords(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"
+    A condition to be used in determining which values should be returned by the collection.
+    \\"\\"\\"
+    condition: NullTestRecordCondition
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+
+    \\"\\"\\"The method to use when ordering \`NullTestRecord\`.\\"\\"\\"
+    orderBy: [NullTestRecordsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): NullTestRecordsConnection
 
   \\"\\"\\"Reads and enables pagination through a set of \`Patch\`.\\"\\"\\"
   allPatches(
@@ -6470,6 +6794,7 @@ type Query {
   myTableById(id: Int!): MyTable
   noArgsQuery: Int
   noPrimaryKeyById(id: Int!): NoPrimaryKey
+  nullTestRecordById(id: Int!): NullTestRecord
   optionalMissingMiddle1(arg0: Int!, b: Int, c: Int): Int
   optionalMissingMiddle2(a: Int!, b: Int, c: Int): Int
   optionalMissingMiddle3(a: Int!, arg1: Int, c: Int): Int
@@ -6565,6 +6890,29 @@ type Query {
     orderBy: [PeopleOrderBy!]
   ): PeopleConnection!
   typeById(id: Int!): Type
+  typeFunction(id: Int): Type
+
+  \\"\\"\\"Reads and enables pagination through a set of \`Type\`.\\"\\"\\"
+  typeFunctionConnection(
+    \\"\\"\\"Read all values in the set after (below) this cursor.\\"\\"\\"
+    after: Cursor
+
+    \\"\\"\\"Read all values in the set before (above) this cursor.\\"\\"\\"
+    before: Cursor
+
+    \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Only read the last \`n\` values of the set.\\"\\"\\"
+    last: Int
+
+    \\"\\"\\"
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    \\"\\"\\"
+    offset: Int
+  ): TypesConnection!
+  typeFunctionList: [Type]
   typesQuery(a: BigInt!, b: Boolean!, c: String!, d: [Int]!, e: JSON!, f: FloatRangeInput!): Boolean
   uniqueForeignKeyByCompoundKey1AndCompoundKey2(compoundKey1: Int!, compoundKey2: Int!): UniqueForeignKey
   viewTableById(id: Int!): ViewTable
@@ -6659,7 +7007,7 @@ type ReservedInputRecordsConnection {
   \\"\\"\\"
   The count of *all* \`ReservedInputRecord\` you could get from the connection.
   \\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`ReservedInputRecord\` edge in the connection.\\"\\"\\"
@@ -6731,7 +7079,7 @@ type ReservedPatchRecordsConnection {
   \\"\\"\\"
   The count of *all* \`ReservedPatchRecord\` you could get from the connection.
   \\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`ReservedPatchRecord\` edge in the connection.\\"\\"\\"
@@ -6766,7 +7114,7 @@ type ReservedsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Reserved\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Reserved\` edge in the connection.\\"\\"\\"
@@ -6867,7 +7215,7 @@ type SimilarTable1SConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`SimilarTable1\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`SimilarTable1\` edge in the connection.\\"\\"\\"
@@ -6951,7 +7299,7 @@ type SimilarTable2SConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`SimilarTable2\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`SimilarTable2\` edge in the connection.\\"\\"\\"
@@ -7104,7 +7452,7 @@ type TestviewsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Testview\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Testview\` edge in the connection.\\"\\"\\"
@@ -7146,6 +7494,7 @@ type Type {
   enumArray: [Color]!
   id: Int!
   interval: Interval!
+  intervalArray: [Interval]!
   json: JSON!
   jsonb: JSON!
   money: Float!
@@ -7157,6 +7506,12 @@ type Type {
   numeric: BigFloat!
   numrange: BigFloatRange!
   point: Point!
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postById: Post
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postBySmallint: Post
   smallint: Int!
   textArray: [String]!
   time: Time!
@@ -7208,6 +7563,9 @@ input TypeCondition {
 
   \\"\\"\\"Checks for equality with the object’s \`interval\` field.\\"\\"\\"
   interval: IntervalInput
+
+  \\"\\"\\"Checks for equality with the object’s \`intervalArray\` field.\\"\\"\\"
+  intervalArray: [IntervalInput]
 
   \\"\\"\\"Checks for equality with the object’s \`json\` field.\\"\\"\\"
   json: JSON
@@ -7266,6 +7624,115 @@ input TypeCondition {
   varchar: String
 }
 
+\\"\\"\\"All input for the \`typeFunctionConnectionMutation\` mutation.\\"\\"\\"
+input TypeFunctionConnectionMutationInput {
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+}
+
+\\"\\"\\"The output of our \`typeFunctionConnectionMutation\` mutation.\\"\\"\\"
+type TypeFunctionConnectionMutationPayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postById: Post
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postBySmallint: Post
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
+
+  \\"\\"\\"An edge for our \`Type\`. May be used by Relay 1.\\"\\"\\"
+  typeEdge(
+    \\"\\"\\"The method to use when ordering \`Type\`.\\"\\"\\"
+    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): TypesEdge
+  types: [Type]
+}
+
+\\"\\"\\"All input for the \`typeFunctionListMutation\` mutation.\\"\\"\\"
+input TypeFunctionListMutationInput {
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+}
+
+\\"\\"\\"The output of our \`typeFunctionListMutation\` mutation.\\"\\"\\"
+type TypeFunctionListMutationPayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postById: Post
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postBySmallint: Post
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
+
+  \\"\\"\\"An edge for our \`Type\`. May be used by Relay 1.\\"\\"\\"
+  typeEdge(
+    \\"\\"\\"The method to use when ordering \`Type\`.\\"\\"\\"
+    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): TypesEdge
+  types: [Type]
+}
+
+\\"\\"\\"All input for the \`typeFunctionMutation\` mutation.\\"\\"\\"
+input TypeFunctionMutationInput {
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+  id: Int
+}
+
+\\"\\"\\"The output of our \`typeFunctionMutation\` mutation.\\"\\"\\"
+type TypeFunctionMutationPayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postById: Post
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postBySmallint: Post
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
+  type: Type
+
+  \\"\\"\\"An edge for our \`Type\`. May be used by Relay 1.\\"\\"\\"
+  typeEdge(
+    \\"\\"\\"The method to use when ordering \`Type\`.\\"\\"\\"
+    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): TypesEdge
+}
+
 \\"\\"\\"An input for mutations affecting \`Type\`\\"\\"\\"
 input TypeInput {
   anIntRange: AnIntRangeInput!
@@ -7281,6 +7748,7 @@ input TypeInput {
   enumArray: [Color]!
   id: Int
   interval: IntervalInput!
+  intervalArray: [IntervalInput]!
   json: JSON!
   jsonb: JSON!
   money: Float!
@@ -7318,6 +7786,7 @@ input TypePatch {
   enumArray: [Color]
   id: Int
   interval: IntervalInput
+  intervalArray: [IntervalInput]
   json: JSON
   jsonb: JSON
   money: Float
@@ -7352,7 +7821,7 @@ type TypesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Type\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Type\` edge in the connection.\\"\\"\\"
@@ -7422,6 +7891,8 @@ enum TypesOrderBy {
   ENUM_DESC
   ID_ASC
   ID_DESC
+  INTERVAL_ARRAY_ASC
+  INTERVAL_ARRAY_DESC
   INTERVAL_ASC
   INTERVAL_DESC
   JSON_ASC
@@ -7491,7 +7962,7 @@ type UniqueForeignKeysConnection {
   \\"\\"\\"
   The count of *all* \`UniqueForeignKey\` you could get from the connection.
   \\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`UniqueForeignKey\` edge in the connection.\\"\\"\\"
@@ -7553,7 +8024,7 @@ type UpdatableViewsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`UpdatableView\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`UpdatableView\` edge in the connection.\\"\\"\\"
@@ -7864,6 +8335,44 @@ type UpdateNoPrimaryKeyPayload {
     \\"\\"\\"The method to use when ordering \`NoPrimaryKey\`.\\"\\"\\"
     orderBy: [NoPrimaryKeysOrderBy!] = [NATURAL]
   ): NoPrimaryKeysEdge
+
+  \\"\\"\\"
+  Our root query field type. Allows us to run any query from our mutation payload.
+  \\"\\"\\"
+  query: Query
+}
+
+\\"\\"\\"All input for the \`updateNullTestRecordById\` mutation.\\"\\"\\"
+input UpdateNullTestRecordByIdInput {
+  \\"\\"\\"
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  \\"\\"\\"
+  clientMutationId: String
+  id: Int!
+
+  \\"\\"\\"
+  An object where the defined keys will be set on the \`NullTestRecord\` being updated.
+  \\"\\"\\"
+  nullTestRecordPatch: NullTestRecordPatch!
+}
+
+\\"\\"\\"The output of our update \`NullTestRecord\` mutation.\\"\\"\\"
+type UpdateNullTestRecordPayload {
+  \\"\\"\\"
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  \\"\\"\\"
+  clientMutationId: String
+
+  \\"\\"\\"The \`NullTestRecord\` that was updated by this mutation.\\"\\"\\"
+  nullTestRecord: NullTestRecord
+
+  \\"\\"\\"An edge for our \`NullTestRecord\`. May be used by Relay 1.\\"\\"\\"
+  nullTestRecordEdge(
+    \\"\\"\\"The method to use when ordering \`NullTestRecord\`.\\"\\"\\"
+    orderBy: [NullTestRecordsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): NullTestRecordsEdge
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -8259,6 +8768,12 @@ type UpdateTypePayload {
   \\"\\"\\"
   clientMutationId: String
 
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postById: Post
+
+  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
+  postBySmallint: Post
+
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -8368,7 +8883,7 @@ type ViewTablesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`ViewTable\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`ViewTable\` edge in the connection.\\"\\"\\"
