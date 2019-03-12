@@ -41,6 +41,7 @@ export default async function viaTemporaryTable(
   isPgClassLike: boolean = true,
   pgRecordInfo:
     | {
+        // eslint-disable-next-line flowtype/no-weak-types
         outputArgTypes: Array<any>;
         outputArgNames: Array<string>;
       }

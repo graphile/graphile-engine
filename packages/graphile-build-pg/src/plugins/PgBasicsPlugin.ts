@@ -42,7 +42,7 @@ const identity = _ => _;
 
 export function preventEmptyResult<
   O extends {
-    [key: string]: () => string;
+    [key: string]: (...args: Array<any>) => string;
   }
 >(obj: O): $ObjMap<O, <V>(a: V) => V> {
   return Object.keys(obj).reduce((memo, key) => {

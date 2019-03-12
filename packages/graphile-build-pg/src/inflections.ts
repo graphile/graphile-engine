@@ -9,7 +9,7 @@ import {
 import { preventEmptyResult } from "./plugins/PgBasicsPlugin";
 const outputMessages = []; // eslint-disable-next-line flowtype/no-weak-types
 
-function deprecate(fn: () => string, message: string) {
+function deprecate(fn: (...input: Array<any>) => string, message: string) {
   if (typeof fn !== "function") {
     return fn;
   }
@@ -25,7 +25,9 @@ function deprecate(fn: () => string, message: string) {
   };
 }
 
-function deprecateEverything(obj: { [a: string]: () => string }) {
+function deprecateEverything(obj: {
+  [a: string]: (...input: Array<any>) => string;
+}) {
   return Object.keys(obj).reduce((memo, key) => {
     memo[key] = deprecate(
       obj[key],
@@ -55,7 +57,7 @@ export const defaultUtils: InflectorUtils = {
   singularize,
 };
 export type Inflector = {
-  [a: string]: () => string;
+  [a: string]: (...input: Array<any>) => string;
 };
 export const newInflector = (
   overrides:

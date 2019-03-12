@@ -28,7 +28,10 @@ export type BuildExtensionNode = {
   nodeFetcherByTypeName: {
     [a: string]: NodeFetcher;
   };
-  getNodeIdForTypeAndIdentifiers: (Type: GraphQLType) => string;
+  getNodeIdForTypeAndIdentifiers: (
+    Type: GraphQLType,
+    ...identifiers: Array<unknown>
+  ) => string;
   getTypeAndIdentifiersFromNodeId: (
     nodeId: string
   ) => {

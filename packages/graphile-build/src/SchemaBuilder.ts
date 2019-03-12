@@ -36,6 +36,7 @@ export type Build = {
   graphql: any;
   parseResolveInfo: parseResolveInfo;
   simplifyParsedResolveInfoFragmentWithType: simplifyParsedResolveInfoFragmentWithType;
+  // DEPRECATED: getAliasFromResolveInfo: (resolveInfo: GraphQLResolveInfo) => string,
   getSafeAliasFromResolveInfo: (resolveInfo: GraphQLResolveInfo) => string;
   getSafeAliasFromAlias: (alias: string) => string;
   resolveAlias: (
@@ -64,10 +65,11 @@ export type Build = {
     performNonEmptyFieldsCheck: boolean
   ) => T | null | undefined;
   fieldDataGeneratorsByType: Map<any, any>;
+  // @deprecated - use fieldDataGeneratorsByFieldNameByType instead
   fieldDataGeneratorsByFieldNameByType: Map<any, any>;
   fieldArgDataGeneratorsByFieldNameByType: Map<any, any>;
   inflection: {
-    [a: string]: () => string;
+    [a: string]: (...args: Array<any>) => string;
   };
   swallowError: (e: Error) => undefined;
   status: {
@@ -95,6 +97,7 @@ export type ContextGraphQLObjectTypeFields = {
     fn: DataGeneratorFunction
   ) => undefined;
   recurseDataGeneratorsForField: (fieldName: string) => undefined;
+  // @deprecated - DO NOT USE!
   Self: GraphQLNamedType;
   GraphQLObjectType: GraphQLObjectTypeConfig<any, any>;
   fieldWithHooks: FieldWithHooksFunction;

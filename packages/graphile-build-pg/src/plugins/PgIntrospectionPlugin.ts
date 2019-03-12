@@ -172,6 +172,14 @@ export type PgIndex = {
   indexType: string;
   isUnique: boolean;
   isPrimary: boolean;
+
+  /*
+  Though these exist, we don't want to officially
+  support them yet.
+   isImmediate: boolean,
+  isReplicaIdentity: boolean,
+  isValid: boolean,
+  */
   attributeNums: Array<number>;
   attributePropertiesAsc: Array<boolean> | null | undefined;
   attributePropertiesNullsFirst: Array<boolean> | null | undefined;

@@ -106,7 +106,8 @@ type MetaData = {
 };
 type DataGeneratorFunction = (
   parsedResolveInfoFragment: ResolveTree,
-  ReturnType: GraphQLType
+  ReturnType: GraphQLType,
+  ...args: Array<unknown>
 ) => Array<MetaData>;
 type FieldSpecIsh = {
   type?: GraphQLType;
