@@ -71,6 +71,7 @@ class QueryBuilder {
     };
     cursorComparator: CursorComparator | null | undefined;
     liveConditions: Array<
+      // eslint-disable-next-line flowtype/no-weak-types
       [
         (data: {}) => (record: any) => boolean,
 

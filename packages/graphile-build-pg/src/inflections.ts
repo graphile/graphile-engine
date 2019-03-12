@@ -26,6 +26,7 @@ function deprecate(fn: (...input: Array<any>) => string, message: string) {
 }
 
 function deprecateEverything(obj: {
+  // eslint-disable-next-line flowtype/no-weak-types
   [a: string]: (...input: Array<any>) => string;
 }) {
   return Object.keys(obj).reduce((memo, key) => {
@@ -57,6 +58,8 @@ export const defaultUtils: InflectorUtils = {
   singularize,
 };
 export type Inflector = {
+  // TODO: tighten this up!
+  // eslint-disable-next-line flowtype/no-weak-types
   [a: string]: (...input: Array<any>) => string;
 };
 export const newInflector = (

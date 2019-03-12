@@ -69,6 +69,7 @@ export type Build = {
   fieldDataGeneratorsByFieldNameByType: Map<any, any>;
   fieldArgDataGeneratorsByFieldNameByType: Map<any, any>;
   inflection: {
+    // eslint-disable-next-line flowtype/no-weak-types
     [a: string]: (...args: Array<any>) => string;
   };
   swallowError: (e: Error) => undefined;
