@@ -46,9 +46,18 @@ export default (function PgTypesPlugin(
         graphql,
       } = build;
 
-      // TODO:v5: these should reference the final methods, not the current methods.
-      const newWithHooks = build.newWithHooks.bind(build);
-      const addType = build.addType.bind(build);
+      /*
+       * Note these do not do `foo.bind(build)` because they want to reference
+       * the *latest* value of foo (i.e. after all the build hooks run) rather
+       * than the current value of foo in this current hook.
+       *
+       * Also don't use this in your own code, only construct types *after* the
+       * build hook has completed (i.e. 'init' or later).
+       *
+       * TODO:v5: move this to the 'init' hook.
+       */
+      const newWithHooks = (...args) => build.newWithHooks(...args);
+      const addType = (...args) => build.addType(...args);
 
       const {
         GraphQLNonNull,
