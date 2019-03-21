@@ -44,10 +44,12 @@ export default (function PgTypesPlugin(
         pgSql: sql,
         inflection,
         graphql,
-        newWithHooks,
       } = build;
 
+      // TODO:v5: these should reference the final methods, not the current methods.
+      const newWithHooks = build.newWithHooks.bind(build);
       const addType = build.addType.bind(build);
+
       const {
         GraphQLNonNull,
         GraphQLString,
