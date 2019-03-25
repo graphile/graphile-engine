@@ -604,7 +604,7 @@ export default function makeProcField(
                           );
                         }
                       }
-                    : () => {};
+                    : _record => {};
                 if (proc.returnsSet && !isMutation && !forceList) {
                   // Connection - do not make live (the connection will handle this)
                   return addStartEndCursor({
@@ -716,7 +716,7 @@ export default function makeProcField(
                           );
                         }
                       }
-                    : () => {};
+                    : _record => {};
                 if (returnFirstValueAsValue) {
                   // `returnFirstValueAsValue` implies either `isMutation` is
                   // true, or `ConnectionType` does not exist - either way,
