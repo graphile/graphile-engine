@@ -362,17 +362,16 @@ export default (function PgTablesPlugin(
                             data[safeAlias],
                             data.__identifiers
                           );
+                          const liveRecord =
+                            resolveInfo.rootValue &&
+                            resolveInfo.rootValue.liveRecord;
                           if (
                             record &&
                             primaryKeys &&
-                            resolveContext.liveRecord &&
+                            liveRecord &&
                             data.__identifiers
                           ) {
-                            resolveContext.liveRecord(
-                              "pg",
-                              table,
-                              data.__identifiers
-                            );
+                            liveRecord("pg", table, data.__identifiers);
                           }
                           return record;
                         },
@@ -439,17 +438,16 @@ export default (function PgTablesPlugin(
                               entry[safeAlias],
                               entry.__identifiers
                             );
+                            const liveRecord =
+                              resolveInfo.rootValue &&
+                              resolveInfo.rootValue.liveRecord;
                             if (
                               record &&
-                              resolveContext.liveRecord &&
+                              liveRecord &&
                               primaryKeys &&
                               entry.__identifiers
                             ) {
-                              resolveContext.liveRecord(
-                                "pg",
-                                table,
-                                entry.__identifiers
-                              );
+                              liveRecord("pg", table, entry.__identifiers);
                             }
 
                             return record;
