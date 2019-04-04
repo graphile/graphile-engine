@@ -433,21 +433,25 @@ export default (function PgTablesPlugin(
                           const safeAlias = getSafeAliasFromResolveInfo(
                             resolveInfo
                           );
+                          const liveRecord =
+                            resolveInfo.rootValue &&
+                            resolveInfo.rootValue.liveRecord;
                           return data.data.map(entry => {
                             const record = handleNullRow(
                               entry[safeAlias],
-                              entry.__identifiers
+                              entry[safeAlias].__identifiers
                             );
-                            const liveRecord =
-                              resolveInfo.rootValue &&
-                              resolveInfo.rootValue.liveRecord;
                             if (
                               record &&
                               liveRecord &&
                               primaryKeys &&
-                              entry.__identifiers
+                              entry[safeAlias].__identifiers
                             ) {
-                              liveRecord("pg", table, entry.__identifiers);
+                              liveRecord(
+                                "pg",
+                                table,
+                                entry[safeAlias].__identifiers
+                              );
                             }
 
                             return record;
