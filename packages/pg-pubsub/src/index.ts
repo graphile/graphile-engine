@@ -6,7 +6,7 @@ import PgGenericSubscriptionPlugin from "./PgGenericSubscriptionPlugin";
 import PgSubscriptionResolverPlugin from "./PgSubscriptionResolverPlugin";
 import * as pg from "pg";
 
-declare module "postgraphile" {
+declare module "postgraphile/build/interfaces" {
   interface PostGraphileOptions {
     simpleSubscriptions?: boolean;
     subscriptionAuthorizationFunction?: string;
