@@ -13,7 +13,7 @@ declare module "postgraphile/build/interfaces" {
   }
 }
 
-declare module "graphile-build" {
+declare module "graphile-build/node8plus/SchemaBuilder" {
   interface Options {
     pubsub: PubSub;
   }
