@@ -1,12 +1,10 @@
 // @flow
 import type { Plugin } from "graphile-build";
 import withPgClient, {
-  quacksLikePgPool,
   getPgClientAndReleaserFromConfig,
 } from "../withPgClient";
 import { parseTags } from "../utils";
 import { readFile as rawReadFile } from "fs";
-import pg from "pg";
 import debugFactory from "debug";
 import chalk from "chalk";
 import throttle from "lodash/throttle";
