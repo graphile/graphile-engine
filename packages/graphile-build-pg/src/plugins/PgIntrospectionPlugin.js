@@ -1,6 +1,9 @@
 // @flow
 import type { Plugin } from "graphile-build";
-import withPgClient, { quacksLikePgPool } from "../withPgClient";
+import withPgClient, {
+  quacksLikePgPool,
+  getPgClientAndReleaserFromConfig,
+} from "../withPgClient";
 import { parseTags } from "../utils";
 import { readFile as rawReadFile } from "fs";
 import pg from "pg";
@@ -810,102 +813,108 @@ export default (async function PgIntrospectionPlugin(
 
   let introspectionResultsByKind = await introspect();
 
-  let pgClient, releasePgClient, listener;
+  let listener;
 
-  function stopListening() {
-    if (pgClient) {
-      pgClient.query("unlisten postgraphile_watch").catch(e => {
-        debug(`Error occurred trying to unlisten watch: ${e}`);
-      });
-      pgClient.removeListener("notification", listener);
-    }
-    if (releasePgClient) {
-      releasePgClient();
-      pgClient = null;
-    }
-  }
-
-  builder.registerWatcher(async triggerRebuild => {
-    // In case we started listening before, clean up
-    await stopListening();
-
-    // Check we can get a pgClient
-    if (pgConfig instanceof pg.Pool || quacksLikePgPool(pgConfig)) {
-      pgClient = await pgConfig.connect();
-      releasePgClient = () => pgClient && pgClient.release();
-    } else if (typeof pgConfig === "string") {
-      pgClient = new pg.Client(pgConfig);
-      pgClient.on("error", e => {
-        debug("pgClient error occurred: %s", e);
-      });
-      releasePgClient = () =>
-        new Promise((resolve, reject) => {
-          if (pgClient) pgClient.end(err => (err ? reject(err) : resolve()));
-          else resolve();
-        });
-      await new Promise((resolve, reject) => {
-        if (pgClient) {
-          pgClient.connect(err => (err ? reject(err) : resolve()));
-        } else {
-          resolve();
+  class Listener {
+    constructor(triggerRebuild) {
+      this.handleChange = throttle(
+        async () => {
+          debug(`Schema change detected: re-inspecting schema...`);
+          introspectionResultsByKind = await introspect();
+          debug(`Schema change detected: re-inspecting schema complete`);
+          triggerRebuild();
+        },
+        750,
+        {
+          leading: true,
+          trailing: true,
         }
-      });
-    } else {
-      throw new Error(
-        "Cannot watch schema with this configuration - need a string or pg.Pool"
       );
+      this._listener = this._listener.bind(this);
+      this._handleClientError = this._handleClientError.bind(this);
+      this._start();
     }
-    // Install the watch fixtures.
-    if (!pgSkipInstallingWatchFixtures) {
-      const watchSqlInner = await readFile(WATCH_FIXTURES_PATH, "utf8");
-      const sql = `begin; ${watchSqlInner}; commit;`;
+
+    async _start() {
+      if (this.stopped) {
+        return;
+      }
+      // Install the watch fixtures.
+      if (!pgSkipInstallingWatchFixtures) {
+        const watchSqlInner = await readFile(WATCH_FIXTURES_PATH, "utf8");
+        const sql = `begin; ${watchSqlInner}; commit;`;
+        try {
+          await withPgClient(pgOwnerConnectionString || pgConfig, pgClient =>
+            pgClient.query(sql)
+          );
+        } catch (error) {
+          /* eslint-disable no-console */
+          console.warn(
+            `${chalk.bold.yellow(
+              "Failed to setup watch fixtures in Postgres database"
+            )} ️️⚠️`
+          );
+          console.warn(
+            chalk.yellow(
+              "This is likely because the PostgreSQL user in the connection string does not have sufficient privileges; you can solve this by passing the 'owner' connection string via '--owner-connection-string' / 'ownerConnectionString'. If the fixtures already exist, the watch functionality may still work."
+            )
+          );
+          console.warn(
+            chalk.yellow("Enable DEBUG='graphile-build-pg' to see the error")
+          );
+          debug(error);
+          /* eslint-enable no-console */
+        }
+      }
+      // Connect to DB
       try {
-        await withPgClient(pgOwnerConnectionString || pgConfig, pgClient =>
-          pgClient.query(sql)
-        );
-      } catch (error) {
-        /* eslint-disable no-console */
-        console.warn(
-          `${chalk.bold.yellow(
-            "Failed to setup watch fixtures in Postgres database"
-          )} ️️⚠️`
-        );
-        console.warn(
-          chalk.yellow(
-            "This is likely because your Postgres user is not a superuser. If the"
-          )
-        );
-        console.warn(
-          chalk.yellow(
-            "fixtures already exist, the watch functionality may still work."
-          )
-        );
-        console.warn(
-          chalk.yellow("Enable DEBUG='graphile-build-pg' to see the error")
-        );
-        debug(error);
-        /* eslint-enable no-console */
-        await pgClient.query("rollback");
+        const {
+          pgClient,
+          releasePgClient,
+        } = await getPgClientAndReleaserFromConfig(pgConfig);
+        this.client = pgClient;
+        this._reallyReleaseClient = releasePgClient;
+        pgClient.on("notification", this._listener);
+        pgClient.on("error", this._handleClientError);
+        if (this.stopped) {
+          // In case watch mode was cancelled in the interrim.
+          return this._releaseClient();
+        } else {
+          await pgClient.query("listen postgraphile_watch");
+        }
+      } catch (e) {
+        // If something goes wrong, disconnect and try again after a short delay
+        this._reconnect(e);
       }
     }
 
-    await pgClient.query("listen postgraphile_watch");
-
-    const handleChange = throttle(
-      async () => {
-        debug(`Schema change detected: re-inspecting schema...`);
-        introspectionResultsByKind = await introspect();
-        debug(`Schema change detected: re-inspecting schema complete`);
-        triggerRebuild();
-      },
-      750,
-      {
-        leading: true,
-        trailing: true,
+    _handleClientError(e) {
+      // Client is already cleaned up
+      this.client = null;
+      this._reallyReleaseClient = null;
+      this._reconnect(e);
+    }
+    async _reconnect(e) {
+      if (this.stopped) {
+        return;
       }
-    );
+      // eslint-disable-next-line no-console
+      console.error(
+        "Error occurred for PG watching client; reconnecting in 2 seconds.",
+        e.message
+      );
+      await this._releaseClient();
+      setTimeout(() => {
+        if (!this.stopped) {
+          // Trigger re-introspection on server reconnect
+          this.handleChange();
+          // Listen for further changes
+          this._start();
+        }
+      }, 2000);
+    }
 
-    listener = async notification => {
+    async _listener(notification) {
       if (notification.channel !== "postgraphile_watch") {
         return;
       }
@@ -919,14 +928,14 @@ export default (async function PgIntrospectionPlugin(
             )
             .map(({ command }) => command);
           if (commands.length) {
-            handleChange();
+            this.handleChange();
           }
         } else if (payload.type === "drop") {
           const affectsOurSchemas = payload.payload.some(
             schemaName => schemas.indexOf(schemaName) >= 0
           );
           if (affectsOurSchemas) {
-            handleChange();
+            this.handleChange();
           }
         } else {
           throw new Error(`Payload type '${payload.type}' not recognised`);
@@ -934,10 +943,44 @@ export default (async function PgIntrospectionPlugin(
       } catch (e) {
         debug(`Error occurred parsing notification payload: ${e}`);
       }
-    };
-    pgClient.on("notification", listener);
-    introspectionResultsByKind = await introspect();
-  }, stopListening);
+    }
+
+    async stop() {
+      this.stopped = true;
+      await this._releaseClient();
+    }
+
+    async _releaseClient() {
+      const pgClient = this.client;
+      this.client = null;
+      if (pgClient) {
+        pgClient.query("unlisten postgraphile_watch").catch(e => {
+          debug(`Error occurred trying to unlisten watch: ${e}`);
+        });
+        pgClient.removeListener("notification", this._listener);
+        pgClient.removeListener("error", this._handleClientError);
+        await this._reallyReleaseClient();
+      }
+    }
+  }
+
+  builder.registerWatcher(
+    async triggerRebuild => {
+      // In case we started listening before, clean up
+      if (listener) {
+        await listener.stop();
+      }
+      listener = new Listener(triggerRebuild);
+      introspectionResultsByKind = await introspect();
+    },
+    async () => {
+      const l = listener;
+      listener = null;
+      if (l) {
+        await l.stop();
+      }
+    }
+  );
 
   builder.hook(
     "build",
