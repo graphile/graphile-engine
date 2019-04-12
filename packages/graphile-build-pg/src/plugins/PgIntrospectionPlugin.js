@@ -1,5 +1,6 @@
 // @flow
 import type { Plugin } from "graphile-build";
+import type { Client } from "pg";
 import withPgClient, {
   getPgClientAndReleaserFromConfig,
 } from "../withPgClient";
@@ -814,8 +815,13 @@ export default (async function PgIntrospectionPlugin(
   let listener;
 
   class Listener {
+    _handleChange: () => void;
+    client: Client | null;
+    stopped: boolean;
+    _reallyReleaseClient: (() => Promise<void>) | null;
     constructor(triggerRebuild) {
-      this.handleChange = throttle(
+      this.stopped = false;
+      this._handleChange = throttle(
         async () => {
           debug(`Schema change detected: re-inspecting schema...`);
           introspectionResultsByKind = await introspect();
@@ -869,6 +875,7 @@ export default (async function PgIntrospectionPlugin(
         const {
           pgClient,
           releasePgClient,
+          // $FlowFixMe: 'Cannot call await with getPgClientAndReleaserFromConfig(...) bound to p because property pgClient is missing in Promise [1].'
         } = await getPgClientAndReleaserFromConfig(pgConfig);
         this.client = pgClient;
         this._reallyReleaseClient = releasePgClient;
@@ -886,6 +893,7 @@ export default (async function PgIntrospectionPlugin(
       }
     }
 
+    _handleClientError: (e: Error) => void;
     _handleClientError(e) {
       // Client is already cleaned up
       this.client = null;
@@ -905,14 +913,17 @@ export default (async function PgIntrospectionPlugin(
       setTimeout(() => {
         if (!this.stopped) {
           // Trigger re-introspection on server reconnect
-          this.handleChange();
+          this._handleChange();
           // Listen for further changes
           this._start();
         }
       }, 2000);
     }
 
-    async _listener(notification) {
+    // eslint-disable-next-line flowtype/no-weak-types
+    _listener: (notification: any) => void;
+    // eslint-disable-next-line flowtype/no-weak-types
+    async _listener(notification: any) {
       if (notification.channel !== "postgraphile_watch") {
         return;
       }
@@ -926,14 +937,14 @@ export default (async function PgIntrospectionPlugin(
             )
             .map(({ command }) => command);
           if (commands.length) {
-            this.handleChange();
+            this._handleChange();
           }
         } else if (payload.type === "drop") {
           const affectsOurSchemas = payload.payload.some(
             schemaName => schemas.indexOf(schemaName) >= 0
           );
           if (affectsOurSchemas) {
-            this.handleChange();
+            this._handleChange();
           }
         } else {
           throw new Error(`Payload type '${payload.type}' not recognised`);
@@ -950,14 +961,18 @@ export default (async function PgIntrospectionPlugin(
 
     async _releaseClient() {
       const pgClient = this.client;
+      const reallyReleaseClient = this._reallyReleaseClient;
       this.client = null;
+      this._reallyReleaseClient = null;
       if (pgClient) {
         pgClient.query("unlisten postgraphile_watch").catch(e => {
           debug(`Error occurred trying to unlisten watch: ${e}`);
         });
         pgClient.removeListener("notification", this._listener);
         pgClient.removeListener("error", this._handleClientError);
-        await this._reallyReleaseClient();
+        if (reallyReleaseClient) {
+          await reallyReleaseClient();
+        }
       }
     }
   }
