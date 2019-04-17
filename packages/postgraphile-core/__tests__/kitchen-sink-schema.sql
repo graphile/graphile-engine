@@ -1027,7 +1027,7 @@ create table live_test.users (
 
 create table live_test.todos (
   id serial primary key,
-  user_id int not null references live_test.users,
+  user_id int not null references live_test.users on delete cascade,
   task text not null,
   completed boolean not null default false
 );
