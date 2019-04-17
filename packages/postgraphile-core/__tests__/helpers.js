@@ -32,8 +32,12 @@ const withTransactionlessPgClient = async (url, fn) => {
   }
 };
 
-const withPgClient = (url, fn) =>
-  withTransactionlessPgClient(url, async client => {
+const withPgClient = (url, fn) => {
+  if (!fn) {
+    fn = url;
+    url = process.env.TEST_DATABASE_URL;
+  }
+  return withTransactionlessPgClient(url, async client => {
     await client.query("begin");
     try {
       await client.query("set local timezone to '+04:00'");
@@ -42,6 +46,7 @@ const withPgClient = (url, fn) =>
       await client.query("rollback");
     }
   });
+};
 
 const transactionlessQuery = (query, variables) => {
   return withTransactionlessPgClient(pgClient =>
