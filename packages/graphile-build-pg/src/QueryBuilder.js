@@ -522,12 +522,32 @@ class QueryBuilder {
       ", "
     );
   }
-  buildSelectJson({ addNullCase }: { addNullCase?: boolean }) {
+  buildSelectJson({
+    addNullCase,
+    addNotDistinctFromNullCase,
+  }: {
+    addNullCase?: boolean,
+    addNotDistinctFromNullCase?: boolean,
+  }) {
     this.lockEverything();
     let buildObject = this.compiledData.select.length
       ? this.jsonbBuildObject(this.compiledData.select)
       : sql.fragment`to_json(${this.getTableAlias()})`;
-    if (addNullCase) {
+    if (addNotDistinctFromNullCase) {
+      /*
+       * `is null` is not sufficient here because the record might exist but
+       * have null as each of its values; so we use `is not distinct from null`
+       * to assert that the record itself doesn't exist. This is typically used
+       * with column values.
+       */
+      buildObject = sql.fragment`(case when (${this.getTableAlias()} is not distinct from null) then null else ${buildObject} end)`;
+    } else if (addNullCase) {
+      /*
+       * `is null` is probably used here because it's the result of a function;
+       * functions seem to have trouble differentiating between `null::my_type`
+       * and  `(null,null,null)::my_type`, always opting for the latter which
+       * then causes issues with the `GraphQLNonNull`s in the schema.
+       */
       buildObject = sql.fragment`(case when (${this.getTableAlias()} is null) then null else ${buildObject} end)`;
     }
     return buildObject;
@@ -563,9 +583,15 @@ class QueryBuilder {
            * `not (foo is null)`
            *   true if there's at least one field that is not null
            *
-           * So don't "simplify" the line below! We're probably checking if
-           * the result of a function call returning a compound type was
-           * indeed null.
+           * `is [not] distinct from null` does differentiate between these
+           * cases, but when a function does something like `select * into $1
+           * from my_table where false`, it actually selects `(null, null,
+           * null)::my_table` into the first argument, which will cause issues
+           * when we apply the `GraphQLNonNull` constraints to it.
+           *
+           * So don't "simplify" the line below! We're probably checking if the
+           * result of a function call returning a compound type was indeed
+           * null.
            */
           [sql.fragment`not (${this.getTableAlias()} is null)`]
         : []),
@@ -591,17 +617,21 @@ class QueryBuilder {
       asJsonAggregate = false,
       onlyJsonField = false,
       addNullCase = false,
+      addNotDistinctFromNullCase = false,
       useAsterisk = false,
     } = options;
 
     this.lockEverything();
     if (onlyJsonField) {
-      return this.buildSelectJson({ addNullCase });
+      return this.buildSelectJson({ addNullCase, addNotDistinctFromNullCase });
     }
     const { limit, offset, flip } = this.getFinalLimitAndOffset();
     const fields =
       asJson || asJsonAggregate
-        ? sql.fragment`${this.buildSelectJson({ addNullCase })} as object`
+        ? sql.fragment`${this.buildSelectJson({
+            addNullCase,
+            addNotDistinctFromNullCase,
+          })} as object`
         : this.buildSelectFields();
 
     let fragment = sql.fragment`
