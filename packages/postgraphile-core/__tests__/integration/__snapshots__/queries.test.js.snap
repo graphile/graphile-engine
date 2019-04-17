@@ -8022,11 +8022,8 @@ Object {
               "y": 3,
             },
             "postById": null,
-            "postBySmallint": Object {
-              "headline": "What’s with you kids? Every other day it’s food, food, food.",
-              "id": 10,
-            },
-            "smallint": 10,
+            "postBySmallint": null,
+            "smallint": 9999,
             "textArray": Array [
               "hey",
               "i",
@@ -8198,11 +8195,8 @@ Object {
             "y": 3,
           },
           "postById": null,
-          "postBySmallint": Object {
-            "headline": "What’s with you kids? Every other day it’s food, food, food.",
-            "id": 10,
-          },
-          "smallint": 10,
+          "postBySmallint": null,
+          "smallint": 9999,
           "textArray": Array [
             "hey",
             "i",
@@ -8381,11 +8375,8 @@ Object {
           "y": 3,
         },
         "postById": null,
-        "postBySmallint": Object {
-          "headline": "What’s with you kids? Every other day it’s food, food, food.",
-          "id": 10,
-        },
-        "smallint": 10,
+        "postBySmallint": null,
+        "smallint": 9999,
         "textArray": Array [
           "hey",
           "i",
@@ -8737,11 +8728,8 @@ Object {
                 "y": 3,
               },
               "postById": null,
-              "postBySmallint": Object {
-                "headline": "What’s with you kids? Every other day it’s food, food, food.",
-                "id": 10,
-              },
-              "smallint": 10,
+              "postBySmallint": null,
+              "smallint": 9999,
               "textArray": Array [
                 "hey",
                 "i",
@@ -8913,11 +8901,8 @@ Object {
               "y": 3,
             },
             "postById": null,
-            "postBySmallint": Object {
-              "headline": "What’s with you kids? Every other day it’s food, food, food.",
-              "id": 10,
-            },
-            "smallint": 10,
+            "postBySmallint": null,
+            "smallint": 9999,
             "textArray": Array [
               "hey",
               "i",
@@ -9096,11 +9081,8 @@ Object {
             "y": 3,
           },
           "postById": null,
-          "postBySmallint": Object {
-            "headline": "What’s with you kids? Every other day it’s food, food, food.",
-            "id": 10,
-          },
-          "smallint": 10,
+          "postBySmallint": null,
+          "smallint": 9999,
           "textArray": Array [
             "hey",
             "i",
@@ -9643,11 +9625,8 @@ Object {
               "y": 3,
             },
             "postById": null,
-            "postBySmallint": Object {
-              "headline": "What’s with you kids? Every other day it’s food, food, food.",
-              "id": 10,
-            },
-            "smallint": 10,
+            "postBySmallint": null,
+            "smallint": 9999,
             "textArray": Array [
               "hey",
               "i",
@@ -9819,11 +9798,8 @@ Object {
             "y": 3,
           },
           "postById": null,
-          "postBySmallint": Object {
-            "headline": "What’s with you kids? Every other day it’s food, food, food.",
-            "id": 10,
-          },
-          "smallint": 10,
+          "postBySmallint": null,
+          "smallint": 9999,
           "textArray": Array [
             "hey",
             "i",
@@ -10002,11 +9978,8 @@ Object {
           "y": 3,
         },
         "postById": null,
-        "postBySmallint": Object {
-          "headline": "What’s with you kids? Every other day it’s food, food, food.",
-          "id": 10,
-        },
-        "smallint": 10,
+        "postBySmallint": null,
+        "smallint": 9999,
         "textArray": Array [
           "hey",
           "i",

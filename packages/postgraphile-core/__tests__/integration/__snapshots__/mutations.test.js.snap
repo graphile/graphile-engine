@@ -1874,7 +1874,7 @@ Object {
             "x": 1,
             "y": 3,
           },
-          "smallint": 10,
+          "smallint": 9999,
           "textArray": Array [
             "hey",
             "i",
@@ -2038,7 +2038,7 @@ Object {
             "x": 1,
             "y": 3,
           },
-          "smallint": 10,
+          "smallint": 9999,
           "textArray": Array [
             "hey",
             "i",

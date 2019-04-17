@@ -564,37 +564,41 @@ class QueryBuilder {
   buildWhereClause(
     includeLowerBound: boolean,
     includeUpperBound: boolean,
-    { addNullCase }: { addNullCase?: boolean }
+    {
+      addNullCase,
+      addNotDistinctFromNullCase,
+    }: { addNullCase?: boolean, addNotDistinctFromNullCase?: boolean }
   ) {
     this.lock("where");
     const clauses = [
-      ...(addNullCase
-        ? /*
-           * Okay... so this is quite interesting. When we're talking about
-           * composite types, `(foo is not null)` and `not (foo is null)` are
-           * NOT equivalent! Here's why:
-           *
-           * `(foo is null)`
-           *   true if every field of the row is null
-           *
-           * `(foo is not null)`
-           *   true if every field of the row is not null
-           *
-           * `not (foo is null)`
-           *   true if there's at least one field that is not null
-           *
-           * `is [not] distinct from null` does differentiate between these
-           * cases, but when a function does something like `select * into $1
-           * from my_table where false`, it actually selects `(null, null,
-           * null)::my_table` into the first argument, which will cause issues
-           * when we apply the `GraphQLNonNull` constraints to it.
-           *
-           * So don't "simplify" the line below! We're probably checking if the
-           * result of a function call returning a compound type was indeed
-           * null.
-           */
-          [sql.fragment`not (${this.getTableAlias()} is null)`]
-        : []),
+      /*
+       * Okay... so this is quite interesting. When we're talking about
+       * composite types, `(foo is not null)` and `not (foo is null)` are NOT
+       * equivalent! Here's why:
+       *
+       * `(foo is null)`
+       *   true if every field of the row is null
+       *
+       * `(foo is not null)`
+       *   true if every field of the row is not null
+       *
+       * `not (foo is null)`
+       *   true if there's at least one field that is not null
+       *
+       * `is [not] distinct from null` does differentiate between these cases,
+       * but when a function returns something like `select * from my_table
+       * where false`, it actually returns `(null, null, null)::my_table`,
+       * which will cause issues when we apply the `GraphQLNonNull` constraints
+       * to the results - we want to treat this as null.
+       *
+       * So don't "simplify" the line below! We're probably checking if the
+       * result of a function call returning a compound type was indeed null.
+       */
+      ...(addNotDistinctFromNullCase
+        ? [sql.fragment`(${this.getTableAlias()} is distinct from null)`]
+        : addNullCase
+          ? [sql.fragment`not (${this.getTableAlias()} is null)`]
+          : []),
       ...this.compiledData.where,
       ...(includeLowerBound ? [this.buildWhereBoundClause(true)] : []),
       ...(includeUpperBound ? [this.buildWhereBoundClause(false)] : []),

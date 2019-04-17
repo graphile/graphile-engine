@@ -97,7 +97,7 @@ insert into b.types values (
 
 insert into b.types values (
   12,
-  10,
+  9999, -- deliberately don't reference a real post ID
   467131188225,
   15.2,
   15.2,
