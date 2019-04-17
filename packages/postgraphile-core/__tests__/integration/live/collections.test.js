@@ -11,7 +11,7 @@ const {
 const { transactionlessQuery } = require("../../helpers");
 
 if (skipLDSTests) {
-  test.skip("Skipping LDS tests");
+  test.todo("Skipping LDS tests");
 } else {
   beforeEach(() => resetDatabase());
   beforeAll(() => createSchema());
