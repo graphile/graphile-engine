@@ -310,6 +310,17 @@ const PgLDSSourcePlugin: Plugin = async function(
       },
       ["PgLDSSource"]
     );
+    if (process.env.NODE_ENV === "test") {
+      // Need a way of releasing it
+      builder.hook("finalize", schema => {
+        Object.defineProperty(schema, "__pgLdsSource", {
+          value: source,
+          enumerable: false,
+          configurable: false,
+        });
+        return schema;
+      });
+    }
   } catch (e) {
     console.error(
       "Could not Initiate PgLDSSourcePlugin, continuing without LDS live queries. Error:",
