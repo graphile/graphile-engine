@@ -115,7 +115,20 @@ exports.next = async function next(getLatest, duration = 5000) {
     if (values.length === 1) {
       return values[0];
     }
-    await sleep(500);
+    await sleep(50);
   }
   throw new Error("Timeout");
+};
+
+exports.expectNoChange = async function next(getLatest, duration = 250) {
+  const start = Date.now();
+  while (Date.now() - start <= duration) {
+    const { values, ended, error } = getLatest();
+    if (error) throw error;
+    if (ended) throw new Error("Iterator has ended");
+    if (values.length) {
+      throw new Error("Found an unexpected change " + JSON.stringify(values));
+    }
+    await sleep(50);
+  }
 };
