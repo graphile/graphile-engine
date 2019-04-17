@@ -36,7 +36,7 @@ export class LDSLiveSource {
    * @param url - If not specified, we'll spawn our own LDS listener
    */
   constructor(options: Options) {
-    const { ldsURL, connectionString } = options;
+    const { ldsURL, connectionString, sleepDuration } = options;
     if (!ldsURL && !connectionString) {
       throw new Error(
         "No LDS URL or connectionString was passed to LDSLiveSource; this likely means that you don't have `ownerConnectionString` specified in the PostGraphile library call."
@@ -44,6 +44,8 @@ export class LDSLiveSource {
     }
     this.url = ldsURL || null;
     this.connectionString = connectionString || null;
+    this.sleepDuration = sleepDuration;
+
     this.lds = null;
     this.slotName = this.url ? null : generateRandomString(30);
     this.ws = null;
@@ -293,7 +295,7 @@ async function makeLDSLiveSource(options: Options): Promise<LDSLiveSource> {
 
 const PgLDSSourcePlugin: Plugin = async function(
   builder,
-  { pgLDSUrl = process.env.LDS_URL, pgOwnerConnectionString }
+  { pgLDSUrl = process.env.LDS_URL, pgOwnerConnectionString, ldsSleepDuration }
 ) {
   // Connect to LDS server
   try {
@@ -301,6 +303,7 @@ const PgLDSSourcePlugin: Plugin = async function(
       ldsURL: typeof pgLDSUrl === "string" ? pgLDSUrl : undefined,
       // @ts-ignore
       connectionString: pgOwnerConnectionString as string,
+      sleepDuration: ldsSleepDuration,
     });
     builder.hook(
       "build",

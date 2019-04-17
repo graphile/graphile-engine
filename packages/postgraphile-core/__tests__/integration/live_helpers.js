@@ -22,6 +22,9 @@ exports.createSchema = async function createSchema() {
       live: true,
       ownerConnectionString: process.env.TEST_DATABASE_URL,
       simpleCollections: "both",
+      graphileBuildOptions: {
+        ldsSleepDuration: 50, // Run tighter LDS loops to reduce test time
+      },
       appendPlugins: [SubscriptionsLDS],
     });
   });
@@ -119,7 +122,7 @@ exports.next = async function next(getLatest, duration = 5000) {
     if (values.length === 1) {
       return values[0];
     }
-    await sleep(50);
+    await sleep(10);
   }
   throw new Error("Timeout");
 };
@@ -133,6 +136,6 @@ exports.expectNoChange = async function next(getLatest, duration = 250) {
     if (values.length) {
       throw new Error("Found an unexpected change " + JSON.stringify(values));
     }
-    await sleep(50);
+    await sleep(10);
   }
 };
