@@ -6,15 +6,18 @@ const { default: SubscriptionsLDS } = require("@graphile/subscriptions-lds");
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 let schema;
-exports.createSchema = async function createSchema() {
+exports.resetDatabase = async function resetDatabase() {
   await withTransactionlessPgClient(pgClient =>
     pgClient.query("delete from live_test.users")
   );
+};
 
+exports.createSchema = async function createSchema() {
   await withTransactionlessPgClient(async pgClient => {
     schema = await createPostGraphileSchema(pgClient, "live_test", {
       live: true,
       ownerConnectionString: process.env.TEST_DATABASE_URL,
+      simpleCollections: "both",
       appendPlugins: [SubscriptionsLDS],
     });
   });
@@ -31,9 +34,19 @@ exports.releaseSchema = function releaseSchema() {
   }
 };
 
-exports.liveTest = (query, cb) =>
-  withTransactionlessPgClient(async pgClient => {
-    const iterator = await subscribe(schema, query, null, { pgClient });
+exports.liveTest = (query, variables, cb) => {
+  if (!cb) {
+    cb = variables;
+    variables = null;
+  }
+  return withTransactionlessPgClient(async pgClient => {
+    const iterator = await subscribe(
+      schema,
+      query,
+      null,
+      { pgClient },
+      variables
+    );
     if (iterator.errors) {
       // Not actually an iterator
       throw iterator.errors[0].originalError || iterator.errors[0];
@@ -86,6 +99,7 @@ exports.liveTest = (query, cb) =>
       );
     }
   });
+};
 
 exports.sleep = sleep;
 

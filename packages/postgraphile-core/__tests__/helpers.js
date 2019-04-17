@@ -43,6 +43,12 @@ const withPgClient = (url, fn) =>
     }
   });
 
+const transactionlessQuery = (query, variables) => {
+  return withTransactionlessPgClient(pgClient =>
+    pgClient.query(query, variables)
+  );
+};
+
 const withDbFromUrl = async (url, fn) => {
   return withPgClient(url, async client => {
     try {
@@ -128,3 +134,4 @@ exports.withRootDb = withRootDb;
 exports.withPrepopulatedDb = withPrepopulatedDb;
 exports.withPgClient = withPgClient;
 exports.withTransactionlessPgClient = withTransactionlessPgClient;
+exports.transactionlessQuery = transactionlessQuery;
