@@ -184,6 +184,74 @@ afterAll(() => releaseSchema());
           }
         );
       });
+
+      test("backward relation delete", async () => {
+        const {
+          rows: [user],
+        } = await transactionlessQuery(
+          "insert into live_test.users(name) values($1) returning *",
+          ["Stuart"]
+        );
+        const {
+          rows: [todo],
+        } = await transactionlessQuery(
+          "insert into live_test.todos(user_id, task) values($1, $2) returning *",
+          [user.id, "Write tests"]
+        );
+
+        await liveTest(
+          simpleCollection
+            ? gql`
+                subscription($id: Int) {
+                  user: userById(id: $id) {
+                    id
+                    name
+                    todosByUserIdList {
+                      id
+                      task
+                      completed
+                    }
+                  }
+                }
+              `
+            : gql`
+                subscription($id: Int) {
+                  user: userById(id: $id) {
+                    id
+                    name
+                    todosByUserId {
+                      nodes {
+                        id
+                        task
+                        completed
+                      }
+                    }
+                  }
+                }
+              `,
+          { id: user.id },
+          async (pgClient, getLatest) => {
+            let data;
+            let getNodes = () =>
+              simpleCollection
+                ? data.data.user.todosByUserIdList
+                : data.data.user.todosByUserId.nodes;
+
+            data = await next(getLatest);
+            expect(data.data.user).toBeTruthy();
+            expect(data.data.user.name).toEqual("Stuart");
+            expect(data.data.user.id).toEqual(user.id);
+            expect(getNodes()).toHaveLength(1);
+            expect(getNodes()[0].completed).toBe(false);
+
+            await pgClient.query("delete from live_test.todos where id = $1", [
+              todo.id,
+            ]);
+            data = await next(getLatest);
+            expect(getNodes()).toHaveLength(0);
+          }
+        );
+      });
     }
   );
 });
