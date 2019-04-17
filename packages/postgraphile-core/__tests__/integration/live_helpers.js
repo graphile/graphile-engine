@@ -5,6 +5,10 @@ const { default: SubscriptionsLDS } = require("@graphile/subscriptions-lds");
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+const v = parseFloat(process.env.PGVERSION);
+
+exports.skipLDSTests = v && v < 10;
+
 let schema;
 exports.resetDatabase = async function resetDatabase() {
   await withTransactionlessPgClient(pgClient =>
