@@ -613,6 +613,7 @@ class QueryBuilder {
       asJsonAggregate?: boolean,
       onlyJsonField?: boolean,
       addNullCase?: boolean,
+      addNotDistinctFromNullCase?: boolean,
       useAsterisk?: boolean,
     } = {}
   ) {
