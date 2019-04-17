@@ -38,18 +38,21 @@ afterAll(() => releaseSchema());
               `,
           async (pgClient, getLatest) => {
             let data;
-            data = await next(getLatest);
             let getNodes = () =>
               simpleCollection
                 ? data.data.allUsersList
                 : data.data.allUsers.nodes;
+
+            data = await next(getLatest);
             expect(getNodes()).toHaveLength(0);
+
             await pgClient.query(
               "insert into live_test.users (name, favorite_color) values ($1, $2), ($3, $4)",
               ["Alice", "red", "Bob", "green"]
             );
             data = await next(getLatest);
             expect(getNodes()).toHaveLength(2);
+
             await pgClient.query(
               "insert into live_test.users (name, favorite_color) values ($1, $2), ($3, $4)",
               ["Caroline", "red", "Dave", "blue"]
@@ -80,12 +83,14 @@ afterAll(() => releaseSchema());
               `,
           async (pgClient, getLatest) => {
             let data;
-            data = await next(getLatest);
             let getNodes = () =>
               simpleCollection
                 ? data.data.allUsersList
                 : data.data.allUsers.nodes;
+
+            data = await next(getLatest);
             expect(getNodes()).toHaveLength(0);
+
             await pgClient.query(
               "insert into live_test.users (name, favorite_color) values ($1, $2), ($3, $4)",
               ["Alice", "red", "Bob", "green"]
@@ -93,6 +98,7 @@ afterAll(() => releaseSchema());
             data = await next(getLatest);
             expect(getNodes()).toHaveLength(1);
             expect(getNodes().map(n => n.name)).toEqual(["Alice"]);
+
             await pgClient.query(
               "insert into live_test.users (name, favorite_color) values ($1, $2)",
               ["Caroline", "blue"]
@@ -100,6 +106,7 @@ afterAll(() => releaseSchema());
             await expectNoChange(getLatest);
           }
         ));
+
       test("backward relation change", async () => {
         const {
           rows: [user],
@@ -151,12 +158,14 @@ afterAll(() => releaseSchema());
               simpleCollection
                 ? data.data.user.todosByUserIdList
                 : data.data.user.todosByUserId.nodes;
+
             data = await next(getLatest);
             expect(data.data.user).toBeTruthy();
             expect(data.data.user.name).toEqual("Stuart");
             expect(data.data.user.id).toEqual(user.id);
             expect(getNodes()).toHaveLength(1);
             expect(getNodes()[0].completed).toBe(false);
+
             await pgClient.query(
               "update live_test.todos set completed = true where id = $1",
               [todo.id]
@@ -164,6 +173,14 @@ afterAll(() => releaseSchema());
             data = await next(getLatest);
             expect(getNodes()).toHaveLength(1);
             expect(getNodes()[0].completed).toBe(true);
+
+            await pgClient.query(
+              "update live_test.todos set completed = false where id = $1",
+              [todo.id]
+            );
+            data = await next(getLatest);
+            expect(getNodes()).toHaveLength(1);
+            expect(getNodes()[0].completed).toBe(false);
           }
         );
       });
