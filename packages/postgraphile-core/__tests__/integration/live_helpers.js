@@ -116,10 +116,8 @@ exports.next = async function next(getLatest, duration = 5000) {
     const { values, ended, error } = getLatest();
     if (error) throw error;
     if (ended) throw new Error("Iterator has ended");
-    if (values.length > 1) {
-      throw new Error("Expected 1 value, got " + values.length);
-    }
-    if (values.length === 1) {
+    if (values.length > 0) {
+      expect(values).toHaveLength(1);
       return values[0];
     }
     await sleep(10);

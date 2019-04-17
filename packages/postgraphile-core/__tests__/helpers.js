@@ -3,7 +3,7 @@ const { readFile } = require("fs");
 const pgConnectionString = require("pg-connection-string");
 
 // Reduce throttling on CI
-process.env.LIVE_THROTTLE = "50";
+process.env.LIVE_THROTTLE = "100";
 
 // This test suite can be flaky. Increase it’s timeout.
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 60;
