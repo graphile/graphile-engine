@@ -1,4 +1,4 @@
-const { subscribe } = require("graphql");
+const { subscribe, validate } = require("graphql");
 const { withTransactionlessPgClient } = require("../helpers");
 const { createPostGraphileSchema } = require("../..");
 const { default: SubscriptionsLDS } = require("@graphile/subscriptions-lds");
@@ -46,6 +46,10 @@ exports.liveTest = (query, variables, cb) => {
     cb = variables;
     variables = null;
   }
+
+  const errors = validate(schema, query);
+  if (errors && errors.length) throw errors[0];
+
   return withTransactionlessPgClient(async pgClient => {
     const iterator = await subscribe(
       schema,

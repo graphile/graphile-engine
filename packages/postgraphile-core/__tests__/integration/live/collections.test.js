@@ -111,6 +111,78 @@ if (skipLDSTests) {
             }
           ));
 
+        test("composite key", async () => {
+          const {
+            rows: [user],
+          } = await transactionlessQuery(
+            "insert into live_test.users(name) values($1) returning *",
+            ["Stuart"]
+          );
+
+          const {
+            rows: [todo],
+          } = await transactionlessQuery(
+            "insert into live_test.todos(user_id, task) values($1, $2) returning *",
+            [user.id, "Write tests"]
+          );
+
+          const {
+            rows: [action],
+          } = await transactionlessQuery(
+            "insert into live_test.todos_log(user_id, todo_id, action) values($1, $2, $3) returning *",
+            [user.id, todo.id, "checked"]
+          );
+
+          await liveTest(
+            simpleCollection
+              ? gql`
+                  subscription($todoId: Int!, $userId: Int!) {
+                    log: todosLogByTodoIdAndUserId(
+                      todoId: $todoId
+                      userId: $userId
+                    ) {
+                      todosLogViewedsByUserIdAndTodoIdList {
+                        viewedAt
+                      }
+                      action
+                    }
+                  }
+                `
+              : gql`
+                  subscription($todoId: Int!, $userId: Int!) {
+                    log: todosLogByTodoIdAndUserId(
+                      todoId: $todoId
+                      userId: $userId
+                    ) {
+                      todosLogViewedsByUserIdAndTodoId {
+                        nodes {
+                          viewedAt
+                        }
+                      }
+                      action
+                    }
+                  }
+                `,
+            { userId: user.id, todoId: todo.id },
+            async (pgClient, getLatest) => {
+              let data;
+
+              let getViewedAtNodes = () =>
+                simpleCollection
+                  ? data.data.log.todosLogViewedsByUserIdAndTodoId
+                  : data.data.log.todosLogViewedsByUserIdAndTodoId.nodes;
+
+              data = await next(getLatest);
+              console.log({ a: data.data.log });
+              expect(data.data.log).toBeTruthy();
+              // expect(data.data.user.name).toEqual("Stuart");
+              // expect(getNodes()[0].completed).toBe(false);
+
+              // expect(getViewedAtNodes()).toHaveLength(1);
+            }
+          );
+        });
+
         test("backward relation change", async () => {
           const {
             rows: [user],
@@ -128,7 +200,7 @@ if (skipLDSTests) {
           await liveTest(
             simpleCollection
               ? gql`
-                  subscription($id: Int) {
+                  subscription($id: Int!) {
                     user: userById(id: $id) {
                       id
                       name
@@ -141,7 +213,7 @@ if (skipLDSTests) {
                   }
                 `
               : gql`
-                  subscription($id: Int) {
+                  subscription($id: Int!) {
                     user: userById(id: $id) {
                       id
                       name
@@ -206,7 +278,7 @@ if (skipLDSTests) {
           await liveTest(
             simpleCollection
               ? gql`
-                  subscription($id: Int) {
+                  subscription($id: Int!) {
                     user: userById(id: $id) {
                       id
                       name
@@ -219,7 +291,7 @@ if (skipLDSTests) {
                   }
                 `
               : gql`
-                  subscription($id: Int) {
+                  subscription($id: Int!) {
                     user: userById(id: $id) {
                       id
                       name
@@ -273,7 +345,7 @@ if (skipLDSTests) {
           await liveTest(
             simpleCollection
               ? gql`
-                  subscription($id: Int) {
+                  subscription($id: Int!) {
                     user: userById(id: $id) {
                       id
                       name
@@ -286,7 +358,7 @@ if (skipLDSTests) {
                   }
                 `
               : gql`
-                  subscription($id: Int) {
+                  subscription($id: Int!) {
                     user: userById(id: $id) {
                       id
                       name
