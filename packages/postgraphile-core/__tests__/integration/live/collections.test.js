@@ -169,7 +169,7 @@ if (skipLDSTests) {
 
               let getViewedAtNodes = () =>
                 simpleCollection
-                  ? data.data.log.todosLogViewedsByUserIdAndTodoId
+                  ? data.data.log.todosLogViewedsByUserIdAndTodoIdList
                   : data.data.log.todosLogViewedsByUserIdAndTodoId.nodes;
 
               data = await next(getLatest);
