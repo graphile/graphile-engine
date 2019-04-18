@@ -1040,6 +1040,7 @@ create table live_test.todos_log (
 );
 
 create table live_test.todos_log_viewed (
+  id serial primary key,
   user_id int not null,
   todo_id int not null,
   viewed_at timestamp not null default now(),
