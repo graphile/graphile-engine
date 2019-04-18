@@ -87,7 +87,13 @@ exports.liveTest = (query, variables, cb) => {
           if (done) {
             break;
           } else {
-            changes.push(value);
+            if (value.errors) {
+              ended = true;
+              error = value.errors[0];
+              iterator.throw(value.errors[0]);
+            } else {
+              changes.push(value);
+            }
           }
         }
       } catch (e) {
@@ -119,14 +125,19 @@ exports.next = async function next(getLatest, duration = 5000) {
   while (Date.now() - start <= duration) {
     const { values, ended, error } = getLatest();
     if (error) throw error;
-    if (ended) throw new Error("Iterator has ended");
+    if (ended)
+      throw new Error(
+        "You called `next` but the iterator has already ended - maybe an error occurred"
+      );
     if (values.length > 0) {
       expect(values).toHaveLength(1);
       return values[0];
     }
     await sleep(10);
   }
-  throw new Error("Timeout");
+  throw new Error(
+    `Your call to \`next\` timed out waiting for new data (timeout: ${duration}ms)`
+  );
 };
 
 exports.expectNoChange = async function next(getLatest, duration = 250) {
