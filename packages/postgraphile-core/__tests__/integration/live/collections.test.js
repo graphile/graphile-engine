@@ -126,11 +126,14 @@ if (skipLDSTests) {
             [user.id, "Write tests"]
           );
 
-          const {
-            rows: [action],
-          } = await transactionlessQuery(
+          await transactionlessQuery(
             "insert into live_test.todos_log(user_id, todo_id, action) values($1, $2, $3) returning *",
             [user.id, todo.id, "checked"]
+          );
+
+          await transactionlessQuery(
+            "insert into live_test.todos_log_viewed(user_id, todo_id) values($1, $2) returning *",
+            [user.id, todo.id]
           );
 
           await liveTest(
@@ -173,12 +176,16 @@ if (skipLDSTests) {
                   : data.data.log.todosLogViewedsByUserIdAndTodoId.nodes;
 
               data = await next(getLatest);
-              console.log({ a: data.data.log });
               expect(data.data.log).toBeTruthy();
-              // expect(data.data.user.name).toEqual("Stuart");
-              // expect(getNodes()[0].completed).toBe(false);
+              expect(getViewedAtNodes()).toHaveLength(1);
 
-              // expect(getViewedAtNodes()).toHaveLength(1);
+              await pgClient.query(
+                "insert into live_test.todos_log_viewed(user_id, todo_id) values($1, $2) returning *",
+                [user.id, todo.id]
+              );
+              data = await next(getLatest);
+              expect(data.data.log).toBeTruthy();
+              expect(getViewedAtNodes()).toHaveLength(2);
             }
           );
         });
