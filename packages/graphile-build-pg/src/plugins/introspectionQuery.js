@@ -286,13 +286,13 @@ with
     where
       typ.id in (
         select "typeId" from class
-      union
+      union all
         select "typeId" from attribute
-      union
+      union all
         select "returnTypeId" from procedure
-      union
+      union all
         select unnest("argTypeIds") from procedure
-      union
+      union all
       -- If this type is a base type for *any* domain type, we will include it
       -- in our selection. This may mean we fetch more types than we need, but
       -- the alternative is to do some funky SQL recursion which would be hard
@@ -301,9 +301,9 @@ with
       --
       -- We also do this for range sub types and array item types.
         select "domainBaseTypeId" from type_all
-      union
+      union all
         select "rangeSubTypeId" from type_all
-      union
+      union all
         select "arrayItemTypeId" from type_all
       )
     order by
