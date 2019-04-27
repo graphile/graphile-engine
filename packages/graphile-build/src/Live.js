@@ -92,11 +92,15 @@ export class LiveMonitor {
     this.changeCallback = null;
     this.changeCounter = 0;
     this.liveConditionsByCounter = {};
-    if (!this.handleChange) {
+    if (!this.handleChange || !this._reallyHandleChange) {
       throw new Error("This is just to make flow happy");
     }
-    this.handleChange = throttle(
-      this.handleChange.bind(this),
+    this.handleChange = throttle(this.handleChange.bind(this), 25, {
+      leading: false,
+      trailing: true,
+    });
+    this._reallyHandleChange = throttle(
+      this._reallyHandleChange.bind(this),
       MONITOR_THROTTLE_DURATION,
       {
         leading: true,
@@ -137,6 +141,10 @@ export class LiveMonitor {
       this.handleChange.cancel();
     }
     this.handleChange = null;
+    if (this._reallyHandleChange) {
+      this._reallyHandleChange.cancel();
+    }
+    this._reallyHandleChange = null;
     this.resetBefore(Infinity);
     this.providers = {};
     this.released = true;
@@ -145,6 +153,19 @@ export class LiveMonitor {
   // Tell Flow that we're okay with overwriting this
   handleChange: (() => void) | null;
   handleChange() {
+    /* This function is throttled to ~25ms (see constructor); it's purpose is
+     * to bundle up all the changes that occur in a small window into the same
+     * handle change flow, so _reallyHandleChange doesn't get called twice in
+     * quick succession. _reallyHandleChange is then further throttled with a
+     * larger window, BUT it triggers on both leading and trailing edge,
+     * whereas this only triggers on the trailing edge.
+     */
+    this._reallyHandleChange();
+  }
+
+  // Tell Flow that we're okay with overwriting this
+  _reallyHandleChange: (() => void) | null;
+  _reallyHandleChange() {
     // This function is throttled to MONITOR_THROTTLE_DURATION (see constructor)
     if (this.changeCallback) {
       // Convince Flow this won't suddenly become null
