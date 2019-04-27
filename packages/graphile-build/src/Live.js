@@ -10,8 +10,12 @@ type SubscriptionCallback = () => void;
 type Predicate = (record: any) => boolean;
 type PredicateGenerator = (data: any) => Predicate;
 
-const MONITOR_THROTTLE_DURATION =
-  parseInt(process.env.LIVE_THROTTLE || "", 10) || 500;
+const DEBOUNCE_DURATION = 25;
+
+const MONITOR_THROTTLE_DURATION = Math.max(
+  DEBOUNCE_DURATION + 1,
+  parseInt(process.env.LIVE_THROTTLE || "", 10) || 500
+);
 
 /*
  * Sources are long-lived (i.e. in "watch" mode you just re-use the same one
@@ -95,13 +99,17 @@ export class LiveMonitor {
     if (!this.handleChange || !this._reallyHandleChange) {
       throw new Error("This is just to make flow happy");
     }
-    this.handleChange = throttle(this.handleChange.bind(this), 25, {
-      leading: false,
-      trailing: true,
-    });
+    this.handleChange = throttle(
+      this.handleChange.bind(this),
+      DEBOUNCE_DURATION,
+      {
+        leading: false,
+        trailing: true,
+      }
+    );
     this._reallyHandleChange = throttle(
       this._reallyHandleChange.bind(this),
-      MONITOR_THROTTLE_DURATION,
+      MONITOR_THROTTLE_DURATION - DEBOUNCE_DURATION,
       {
         leading: true,
         trailing: true,
