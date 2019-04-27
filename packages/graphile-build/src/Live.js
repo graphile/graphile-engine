@@ -96,7 +96,7 @@ export class LiveMonitor {
     this.changeCallback = null;
     this.changeCounter = 0;
     this.liveConditionsByCounter = {};
-    if (!this.handleChange || !this._reallyHandleChange) {
+    if (!this.handleChange) {
       throw new Error("This is just to make flow happy");
     }
     this.handleChange = throttle(
@@ -107,6 +107,9 @@ export class LiveMonitor {
         trailing: true,
       }
     );
+    if (!this._reallyHandleChange) {
+      throw new Error("This is just to make flow happy");
+    }
     this._reallyHandleChange = throttle(
       this._reallyHandleChange.bind(this),
       MONITOR_THROTTLE_DURATION - DEBOUNCE_DURATION,
@@ -168,7 +171,9 @@ export class LiveMonitor {
      * larger window, BUT it triggers on both leading and trailing edge,
      * whereas this only triggers on the trailing edge.
      */
-    this._reallyHandleChange();
+    if (this._reallyHandleChange) {
+      this._reallyHandleChange();
+    }
   }
 
   // Tell Flow that we're okay with overwriting this
