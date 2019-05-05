@@ -49,6 +49,7 @@
     "typescript": "^3.4.5"
   },
   "jest": {
+    "transform": { "^.+\\.jsx?$": "../../.jest-wrapper.js" },
     "testRegex": "__tests__/.*\\.test\\.js$"
   },
   "files": [

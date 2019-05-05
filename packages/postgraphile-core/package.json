@@ -45,6 +45,7 @@
     "pg": ">=6.1.0 <8"
   },
   "jest": {
+    "transform": { "^.+\\.jsx?$": "../../.jest-wrapper.js" },
     "testRegex": "__tests__/.*\\.test\\.js$"
   },
   "files": [

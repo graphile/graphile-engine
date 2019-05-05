@@ -57,6 +57,7 @@
     "jest": "^24.8.0"
   },
   "jest": {
+    "transform": { "^.+\\.jsx?$": "../../.jest-wrapper.js" },
     "testRegex": "__tests__/.*\\.test\\.js$"
   },
   "files": [

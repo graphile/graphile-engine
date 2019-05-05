@@ -52,6 +52,7 @@
     "graphql": ">=0.9 <0.14 || ^14.0.2"
   },
   "jest": {
+    "transform": { "^.+\\.jsx?$": "../../.jest-wrapper.js" },
     "testRegex": "__tests__/.*\\.test\\.js$"
   },
   "files": [
