@@ -77,8 +77,12 @@ function ensureNonEmptyArray<T>(
 }
 
 export function compile(sql: SQLQuery | SQLNode): QueryConfig {
+  const items = Array.isArray(sql) ? sql : [sql];
+
+  const itemCount = items.length;
+
   // Join this to generate the SQL query
-  const sqlFragments = [];
+  const sqlFragments = new Array(itemCount);
 
   // Values hold the JavaScript values that are represented in the query
   // string by placeholders. They are eager because they were provided before
@@ -91,60 +95,54 @@ export function compile(sql: SQLQuery | SQLNode): QueryConfig {
   let nextSymbolId = 0;
   const symbolToIdentifier = new Map();
 
-  const items = Array.isArray(sql) ? sql : [sql];
-
-  for (let i = 0, l = items.length; i < l; i++) {
-    const rawItem = items[i];
+  for (let itemIndex = 0; itemIndex < itemCount; itemIndex++) {
+    const rawItem = items[itemIndex];
     const item: SQLNode = enforceValidNode(rawItem);
     switch (item.type) {
       case "RAW":
         if (typeof item.text !== "string") {
           throw new Error("RAW node expected string");
         }
-        sqlFragments.push(item.text);
+        sqlFragments[itemIndex] = item.text;
         break;
       case "IDENTIFIER":
         if (item.names.length === 0) {
           throw new Error("Identifier must have a name");
         }
 
-        sqlFragments.push(
-          item.names
-            .map(rawName => {
-              if (typeof rawName === "string") {
-                const name: string = rawName;
-                return escapeSqlIdentifier(name);
-              } else if (typeof rawName === "symbol") {
-                const name: symbol = rawName;
+        const nameCount = item.names.length;
+        const mappedNames = new Array(nameCount);
+        for (let nameIndex = 0; nameIndex < nameCount; nameIndex++) {
+          const name: string | symbol = item.names[nameIndex];
+          if (typeof name === "string") {
+            mappedNames[nameIndex] = escapeSqlIdentifier(name);
+          } else if (typeof name === "symbol") {
+            // Get the correct identifier string for this symbol.
+            let identifierForSymbol = symbolToIdentifier.get(name);
 
-                // Get the correct identifier string for this symbol.
-                let identifierForSymbol = symbolToIdentifier.get(name);
+            // If there is no identifier, create one and set it.
+            if (!identifierForSymbol) {
+              identifierForSymbol = `__local_${nextSymbolId++}__`;
+              symbolToIdentifier.set(name, identifierForSymbol);
+            }
 
-                // If there is no identifier, create one and set it.
-                if (!identifierForSymbol) {
-                  identifierForSymbol = `__local_${nextSymbolId++}__`;
-                  symbolToIdentifier.set(name, identifierForSymbol);
-                }
-
-                // Return the identifier. Since we create it, we won’t have to
-                // escape it because we know all of the characters are safe.
-                return identifierForSymbol;
-              } else {
-                throw debugError(
-                  new Error(
-                    `Expected string or symbol, received '${String(rawName)}'`
-                  )
-                );
-              }
-            })
-            .join(".")
-        );
+            // Return the identifier. Since we create it, we won’t have to
+            // escape it because we know all of the characters are safe.
+            mappedNames[nameIndex] = identifierForSymbol;
+          } else {
+            throw debugError(
+              new Error(`Expected string or symbol, received '${String(name)}'`)
+            );
+          }
+        }
+        sqlFragments[itemIndex] = mappedNames.join(".");
         break;
       case "VALUE":
         values.push(item.value);
-        sqlFragments.push(`$${values.length}`);
+        sqlFragments[itemIndex] = `$${values.length}`;
         break;
       default:
+      // This cannot happen
     }
   }
 
@@ -287,21 +285,16 @@ export function join(items: Array<SQL>, rawSeparator: string = ""): SQLQuery {
 
 // Copied from https://github.com/brianc/node-postgres/blob/860cccd53105f7bc32fed8b1de69805f0ecd12eb/lib/client.js#L285-L302
 // Ported from PostgreSQL 9.2.4 source code in src/interfaces/libpq/fe-exec.c
+// Trivial performance optimisations by Benjie.
 export function escapeSqlIdentifier(str: string) {
-  let escaped = '"';
+  let escaped = "";
 
   for (let i = 0, l = str.length; i < l; i++) {
     const c = str[i];
-    if (c === '"') {
-      escaped += c + c;
-    } else {
-      escaped += c;
-    }
+    escaped += c === '"' ? '""' : c;
   }
 
-  escaped += '"';
-
-  return escaped;
+  return '"' + escaped + '"';
 }
 
 export const blank = query``;
