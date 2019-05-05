@@ -255,7 +255,7 @@ export default (function PgTypesPlugin(
         sql.fragment`(${fragment})::numeric::text`;
       const pgTweaksByTypeIdAndModifer = {};
       const pgTweaksByTypeId = Object.assign(
-        // ::text rawTypes
+        // '::text' rawTypes
         rawTypes.reduce((memo, typeId) => {
           memo[typeId] = tweakToText;
           return memo;
