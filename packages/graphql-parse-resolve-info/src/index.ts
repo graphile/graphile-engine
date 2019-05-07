@@ -201,7 +201,7 @@ function fieldTreeFromAST<T extends SelectionNode>(
       const val: FieldNode = selectionVal;
       const name = val.name.value;
       const isReserved =
-        !!name && name !== "__id" && (name[0] === "_" && name[1] === "_");
+        name[0] === "_" && name[1] === "_" && name !== "__id";
       if (isReserved) {
         if (DEBUG_ENABLED)
           debug(
