@@ -50,6 +50,10 @@ function getArgVal(resolveInfo: GraphQLResolveInfo, argument: any) {
   }
 }
 
+function argNameIsIf(arg: any): boolean {
+  return arg && arg.name ? arg.name.value === "if" : false;
+}
+
 function skipField(
   resolveInfo: GraphQLResolveInfo,
   { directives = [] }: SelectionNode
@@ -58,9 +62,7 @@ function skipField(
   directives.forEach(directive => {
     const directiveName = directive.name.value;
     if (Array.isArray(directive.arguments)) {
-      const ifArgumentAst = directive.arguments.find(
-        arg => arg.name && arg.name.value === "if"
-      );
+      const ifArgumentAst = directive.arguments.find(argNameIsIf);
       if (ifArgumentAst) {
         const argumentValueAst = ifArgumentAst.value;
         if (directiveName === "skip") {
