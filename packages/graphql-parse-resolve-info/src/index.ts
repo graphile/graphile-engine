@@ -166,12 +166,13 @@ function fieldTreeFromAST<T extends SelectionNode>(
   depth = ""
 ): FieldsByTypeName {
   const instance = iNum++;
-  if (DEBUG_ENABLED) debug(
-    "%s[%d] Entering fieldTreeFromAST with parent type '%s'",
-    depth,
-    instance,
-    parentType
-  );
+  if (DEBUG_ENABLED)
+    debug(
+      "%s[%d] Entering fieldTreeFromAST with parent type '%s'",
+      depth,
+      instance,
+      parentType
+    );
   const { variableValues } = resolveInfo;
   const fragments = resolveInfo.fragments || {};
   const asts: ReadonlyArray<T> = Array.isArray(inASTs) ? inASTs : [inASTs];
@@ -182,31 +183,42 @@ function fieldTreeFromAST<T extends SelectionNode>(
   return asts.reduce((tree, selectionVal: SelectionNode, idx) => {
     // tslint:disable-next-line no-shadowed-variable
     const depth = DEBUG_ENABLED ? `${outerDepth}  ` : null;
-    if (DEBUG_ENABLED) debug(
-      "%s[%d] Processing AST %d of %d; kind = %s",
-      depth,
-      instance,
-      idx + 1,
-      asts.length,
-      selectionVal.kind
-    );
+    if (DEBUG_ENABLED)
+      debug(
+        "%s[%d] Processing AST %d of %d; kind = %s",
+        depth,
+        instance,
+        idx + 1,
+        asts.length,
+        selectionVal.kind
+      );
     if (skipField(resolveInfo, selectionVal)) {
-      if (DEBUG_ENABLED) debug("%s[%d] IGNORING due to directive", depth, instance);
+      if (DEBUG_ENABLED)
+        debug("%s[%d] IGNORING due to directive", depth, instance);
     } else if (selectionVal.kind === "Field") {
       const val: FieldNode = selectionVal;
       const name = val.name.value;
-      const isReserved = !!name && name !== "__id" && (name[0] === "_" && name[1] === "_");
+      const isReserved =
+        !!name && name !== "__id" && (name[0] === "_" && name[1] === "_");
       if (isReserved) {
-        if (DEBUG_ENABLED) debug(
-          "%s[%d] IGNORING because field '%s' is reserved",
-          depth,
-          instance,
-          name
-        );
+        if (DEBUG_ENABLED)
+          debug(
+            "%s[%d] IGNORING because field '%s' is reserved",
+            depth,
+            instance,
+            name
+          );
       } else {
         const alias: string =
           val.alias && val.alias.value ? val.alias.value : name;
-        if (DEBUG_ENABLED) debug("%s[%d] Field '%s' (alias = '%s')", depth, instance, name, alias);
+        if (DEBUG_ENABLED)
+          debug(
+            "%s[%d] Field '%s' (alias = '%s')",
+            depth,
+            instance,
+            name,
+            alias
+          );
         const field = getFieldFromAST(val, parentType);
         if (field == null) {
           return tree;
@@ -237,7 +249,8 @@ function fieldTreeFromAST<T extends SelectionNode>(
           isCompositeType(fieldGqlType)
         ) {
           const newParentType: GraphQLCompositeType = fieldGqlType;
-          if (DEBUG_ENABLED) debug("%s[%d] Recursing into subfields", depth, instance);
+          if (DEBUG_ENABLED)
+            debug("%s[%d] Recursing into subfields", depth, instance);
           fieldTreeFromAST(
             selectionSet.selections,
             resolveInfo,
@@ -248,13 +261,15 @@ function fieldTreeFromAST<T extends SelectionNode>(
           );
         } else {
           // No fields to add
-          if (DEBUG_ENABLED) debug("%s[%d] Exiting (no fields to add)", depth, instance);
+          if (DEBUG_ENABLED)
+            debug("%s[%d] Exiting (no fields to add)", depth, instance);
         }
       }
     } else if (selectionVal.kind === "FragmentSpread" && options.deep) {
       const val: FragmentSpreadNode = selectionVal;
       const name = val.name && val.name.value;
-      if (DEBUG_ENABLED) debug("%s[%d] Fragment spread '%s'", depth, instance, name);
+      if (DEBUG_ENABLED)
+        debug("%s[%d] Fragment spread '%s'", depth, instance, name);
       const fragment = fragments[name];
       assert(fragment, 'unknown fragment "' + name + '"');
       let fragmentType: GraphQLNamedType | null | undefined = parentType;
@@ -279,13 +294,14 @@ function fieldTreeFromAST<T extends SelectionNode>(
       if (fragment.typeCondition) {
         fragmentType = getType(resolveInfo, fragment.typeCondition);
       }
-      if (DEBUG_ENABLED) debug(
-        "%s[%d] Inline fragment (parent = '%s', type = '%s')",
-        depth,
-        instance,
-        parentType,
-        fragmentType
-      );
+      if (DEBUG_ENABLED)
+        debug(
+          "%s[%d] Inline fragment (parent = '%s', type = '%s')",
+          depth,
+          instance,
+          parentType,
+          fragmentType
+        );
       if (fragmentType && isCompositeType(fragmentType)) {
         const newParentType: GraphQLCompositeType = fragmentType;
         fieldTreeFromAST(
@@ -298,12 +314,13 @@ function fieldTreeFromAST<T extends SelectionNode>(
         );
       }
     } else {
-      if (DEBUG_ENABLED) debug(
-        "%s[%d] IGNORING because kind '%s' not understood",
-        depth,
-        instance,
-        selectionVal.kind
-      );
+      if (DEBUG_ENABLED)
+        debug(
+          "%s[%d] IGNORING because kind '%s' not understood",
+          depth,
+          instance,
+          selectionVal.kind
+        );
     }
     // Ref: https://github.com/graphile/postgraphile/pull/342/files#diff-d6702ec9fed755c88b9d70b430fda4d8R148
     return tree;
