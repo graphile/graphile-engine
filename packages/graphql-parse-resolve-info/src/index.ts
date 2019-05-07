@@ -194,7 +194,7 @@ function fieldTreeFromAST<T extends SelectionNode>(
       if (DEBUG_ENABLED) debug("%s[%d] IGNORING due to directive", depth, instance);
     } else if (selectionVal.kind === "Field") {
       const val: FieldNode = selectionVal;
-      const name = val.name ? val.name.value : null;
+      const name = val.name.value;
       const isReserved = !!name && name !== "__id" && (name[0] === "_" && name[1] === "_");
       if (isReserved) {
         if (DEBUG_ENABLED) debug(
@@ -205,7 +205,7 @@ function fieldTreeFromAST<T extends SelectionNode>(
         );
       } else {
         const alias: string =
-          val.alias && val.alias.value ? val.alias.value : val.name.value;
+          val.alias && val.alias.value ? val.alias.value : name;
         if (DEBUG_ENABLED) debug("%s[%d] Field '%s' (alias = '%s')", depth, instance, name, alias);
         const field = getFieldFromAST(val, parentType);
         if (field == null) {
