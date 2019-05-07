@@ -711,9 +711,9 @@ class QueryBuilder {
     const context = this.lockContext;
     const beforeLocks = this.data.beforeLock[type];
     if (beforeLocks && beforeLocks.length) {
-      this.data.beforeLock[type] = null;
-      for (const fn of beforeLocks) {
-        fn();
+      const locks = beforeLocks.splice(0, beforeLocks.length);
+      for (let i = 0, l = locks.length; i < l; i++) {
+        locks[i]();
       }
     }
     if (type !== "select") {
@@ -753,11 +753,10 @@ class QueryBuilder {
           // $FlowFixMe
           seenFields[columnName] = true;
           data.push([callIfNecessary(valueOrGenerator, context), columnName]);
-          const newBeforeLocks = this.data.beforeLock[type];
-          if (newBeforeLocks && newBeforeLocks.length) {
-            this.data.beforeLock[type] = null;
-            for (const fn of newBeforeLocks) {
-              fn();
+          if (beforeLocks && beforeLocks.length) {
+            const locks = beforeLocks.splice(0, beforeLocks.length);
+            for (let i = 0, l = locks.length; i < l; i++) {
+              locks[i]();
             }
           }
         }
