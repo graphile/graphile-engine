@@ -435,8 +435,8 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
         queryBuilder.getTableAlias()
       );
 
-      for (const fn of pgAggregateQuery) {
-        fn(aggregateQueryBuilder);
+      for (let i = 0, l = pgAggregateQuery.length; i < l; i++) {
+        pgAggregateQuery[i](aggregateQueryBuilder);
       }
       const aggregateJsonBuildObject = aggregateQueryBuilder.build({
         onlyJsonField: true,
