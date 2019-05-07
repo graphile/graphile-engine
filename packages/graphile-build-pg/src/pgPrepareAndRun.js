@@ -34,9 +34,8 @@ export default function pgPrepareAndRun(
     return pgClient.query(text, values);
   } else {
     const name = hash(text);
-    connection._graphilePreparedStatementCache =
-      connection._graphilePreparedStatementCache ||
-      LRU({
+    if (!connection._graphilePreparedStatementCache) {
+      connection._graphilePreparedStatementCache = LRU({
         max: POSTGRAPHILE_PREPARED_STATEMENT_CACHE_SIZE,
         dispose(key) {
           if (connection.parsedStatements[key]) {
@@ -52,6 +51,7 @@ export default function pgPrepareAndRun(
           }
         },
       });
+    }
     if (!connection._graphilePreparedStatementCache.get(name)) {
       // We're relying on dispose to clear out the old ones.
       connection._graphilePreparedStatementCache.set(name, true);
