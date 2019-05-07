@@ -21,6 +21,7 @@ export default (async function PgRowByUniqueConstraint(
         inflection,
         pgQueryFromResolveData: queryFromResolveData,
         pgOmit: omit,
+        pgPrepareAndRun,
       } = build;
       const {
         scope: { isRootQuery },
@@ -147,7 +148,7 @@ export default (async function PgRowByUniqueConstraint(
                       if (debugSql.enabled) debugSql(text);
                       const {
                         rows: [row],
-                      } = await pgClient.query(text, values);
+                      } = await pgPrepareAndRun(pgClient, text, values);
                       if (subscriptions && liveRecord && row) {
                         liveRecord("pg", table, row.__identifiers);
                       }
