@@ -44,7 +44,7 @@ function isStringOrSymbol(val: any): val is string | symbol {
 }
 
 function makeIdentifierNode(names: Array<string | symbol>): SQLIdentifierNode {
-  if (!Array.isArray(names) || !names.every(isStringOrSymbol)) {
+  if (!Array.isArray(names) || names.length === 0 || !names.every(isStringOrSymbol)) {
     throw new Error(
       "Invalid argument to makeIdentifierNode - expected array of strings/symbols"
     );
@@ -100,16 +100,9 @@ export function compile(sql: SQLQuery | SQLNode): QueryConfig {
     const item: SQLNode = enforceValidNode(rawItem);
     switch (item.type) {
       case "RAW":
-        if (typeof item.text !== "string") {
-          throw new Error("RAW node expected string");
-        }
         sqlFragments[itemIndex] = item.text;
         break;
       case "IDENTIFIER":
-        if (item.names.length === 0) {
-          throw new Error("Identifier must have a name");
-        }
-
         const nameCount = item.names.length;
         const mappedNames = new Array(nameCount);
         for (let nameIndex = 0; nameIndex < nameCount; nameIndex++) {
@@ -154,7 +147,7 @@ export function compile(sql: SQLQuery | SQLNode): QueryConfig {
 }
 
 function enforceValidNode(node: any): SQLNode {
-  if (node !== null && typeof node === "object" && node[$$trusted] === true) {
+  if (node !== null && node[$$trusted] === true) {
     return node;
   }
   throw new Error(`Expected SQL item, instead received '${String(node)}'.`);
