@@ -709,9 +709,10 @@ class QueryBuilder {
   lock(type: string) {
     if (this.locks[type]) return;
     const context = this.lockContext;
-    const beforeLocks = this.data.beforeLock[type];
-    if (beforeLocks && beforeLocks.length) {
-      const locks = beforeLocks.splice(0, beforeLocks.length);
+    const { beforeLock } = this.data;
+    let locks = beforeLock[type];
+    if (locks) {
+      beforeLock[type] = [];
       for (let i = 0, l = locks.length; i < l; i++) {
         locks[i]();
       }
@@ -753,8 +754,9 @@ class QueryBuilder {
           // $FlowFixMe
           seenFields[columnName] = true;
           data.push([callIfNecessary(valueOrGenerator, context), columnName]);
-          if (beforeLocks && beforeLocks.length) {
-            const locks = beforeLocks.splice(0, beforeLocks.length);
+          locks = beforeLock[type];
+          if (locks) {
+            beforeLock[type] = [];
             for (let i = 0, l = locks.length; i < l; i++) {
               locks[i]();
             }
