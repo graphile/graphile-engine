@@ -96,13 +96,12 @@ export function compile(sql: SQLQuery | SQLNode): QueryConfig {
   const symbolToIdentifier = new Map();
 
   for (let itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-    const rawItem = items[itemIndex];
-    const item: SQLNode = enforceValidNode(rawItem);
+    const item: SQLNode = enforceValidNode(items[itemIndex]);
     switch (item.type) {
       case "RAW":
         sqlFragments[itemIndex] = item.text;
         break;
-      case "IDENTIFIER":
+      case "IDENTIFIER": {
         const nameCount = item.names.length;
         const mappedNames = new Array(nameCount);
         for (let nameIndex = 0; nameIndex < nameCount; nameIndex++) {
@@ -130,6 +129,7 @@ export function compile(sql: SQLQuery | SQLNode): QueryConfig {
         }
         sqlFragments[itemIndex] = mappedNames.join(".");
         break;
+      }
       case "VALUE":
         values.push(item.value);
         sqlFragments[itemIndex] = `$${values.length}`;
