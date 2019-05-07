@@ -5,5 +5,5 @@ if (process.env.GRAPHILE_TURBO === "1") {
   }
   module.exports = require("./build-turbo/index.js");
 } else {
-  module.exports = require("./build/index.js");
+  module.exports = require("./node8plus/index.js");
 }
