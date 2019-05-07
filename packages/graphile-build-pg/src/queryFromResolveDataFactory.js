@@ -72,8 +72,10 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   if (withBuilder) {
     withBuilder(queryBuilder);
   }
-  for (const fn of pgQuery || []) {
-    fn(queryBuilder, resolveData);
+  if (pgQuery) {
+    for (let i = 0, l = pgQuery.length; i < l; i++) {
+      pgQuery[i](queryBuilder, resolveData);
+    }
   }
 
   function generateNextPrevPageSql(
