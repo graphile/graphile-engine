@@ -27,8 +27,9 @@ export default function pgPrepareAndRun(
   const connection = pgClient.connection;
   if (
     !values ||
+    POSTGRAPHILE_PREPARED_STATEMENT_CACHE_SIZE < 1 ||
     !connection ||
-    POSTGRAPHILE_PREPARED_STATEMENT_CACHE_SIZE < 1
+    !connection.parsedStatements
   ) {
     return pgClient.query(text, values);
   } else {
@@ -38,15 +39,17 @@ export default function pgPrepareAndRun(
       LRU({
         max: POSTGRAPHILE_PREPARED_STATEMENT_CACHE_SIZE,
         dispose(key) {
-          pgClient
-            .query(`deallocate ${pgClient.escapeIdentifier(key)}`)
-            .then(() => {
-              delete connection.parsedStatements[key];
-            })
-            .catch(e => {
-              // eslint-disable-next-line no-console
-              console.error("Error releasing prepared query", e);
-            });
+          if (connection.parsedStatements[key]) {
+            pgClient
+              .query(`deallocate ${pgClient.escapeIdentifier(key)}`)
+              .then(() => {
+                delete connection.parsedStatements[key];
+              })
+              .catch(e => {
+                // eslint-disable-next-line no-console
+                console.error("Error releasing prepared query", e);
+              });
+          }
         },
       });
     if (!connection._graphilePreparedStatementCache.get(name)) {
