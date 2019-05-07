@@ -175,7 +175,9 @@ function fieldTreeFromAST<T extends SelectionNode>(
   const { variableValues } = resolveInfo;
   const fragments = resolveInfo.fragments || {};
   const asts: ReadonlyArray<T> = Array.isArray(inASTs) ? inASTs : [inASTs];
-  initTree[parentType.name] = initTree[parentType.name] || {};
+  if (!initTree[parentType.name]) {
+    initTree[parentType.name] = {};
+  }
   const outerDepth = depth;
   return asts.reduce((tree, selectionVal: SelectionNode, idx) => {
     // tslint:disable-next-line no-shadowed-variable
@@ -192,8 +194,8 @@ function fieldTreeFromAST<T extends SelectionNode>(
       if (DEBUG_ENABLED) debug("%s[%d] IGNORING due to directive", depth, instance);
     } else if (selectionVal.kind === "Field") {
       const val: FieldNode = selectionVal;
-      const name = val.name && val.name.value;
-      const isReserved = name && name !== "__id" && name.substr(0, 2) === "__";
+      const name = val.name ? val.name.value : null;
+      const isReserved = !!name && name !== "__id" && (name[0] === "_" && name[1] === "_");
       if (isReserved) {
         if (DEBUG_ENABLED) debug(
           "%s[%d] IGNORING because field '%s' is reserved",
@@ -206,7 +208,7 @@ function fieldTreeFromAST<T extends SelectionNode>(
           val.alias && val.alias.value ? val.alias.value : val.name.value;
         if (DEBUG_ENABLED) debug("%s[%d] Field '%s' (alias = '%s')", depth, instance, name, alias);
         const field = getFieldFromAST(val, parentType);
-        if (!field) {
+        if (field == null) {
           return tree;
         }
         const fieldGqlTypeOrUndefined = getNamedType(field.type);
