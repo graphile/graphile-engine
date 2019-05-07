@@ -3,6 +3,9 @@ import { createHash } from "crypto";
 import LRU from "lru-cache";
 import type { PoolClient } from "pg";
 
+const POSTGRAPHILE_PREPARED_STATEMENT_CACHE_SIZE =
+  parseInt(process.env.POSTGRAPHILE_PREPARED_STATEMENT_CACHE_SIZE, 10) || 100;
+
 let lastString: string;
 let lastHash: string;
 const hash = (str: string): string => {
@@ -22,14 +25,18 @@ export default function pgPrepareAndRun(
   values: any
 ) {
   const connection = pgClient.connection;
-  if (!values || !connection) {
+  if (
+    !values ||
+    !connection ||
+    POSTGRAPHILE_PREPARED_STATEMENT_CACHE_SIZE < 1
+  ) {
     return pgClient.query(text, values);
   } else {
     const name = hash(text);
     connection._graphilePreparedStatementCache =
       connection._graphilePreparedStatementCache ||
       LRU({
-        max: 50,
+        max: POSTGRAPHILE_PREPARED_STATEMENT_CACHE_SIZE,
         dispose(key) {
           pgClient
             .query(`deallocate ${pgClient.escapeIdentifier(key)}`)
