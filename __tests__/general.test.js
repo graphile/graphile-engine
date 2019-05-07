@@ -108,9 +108,9 @@ describe("sql.compile", () => {
   it("more complex", () => {
     const node = sql.query`select ${sql.query`${sql.value(
       1
-    )} ${sql.query`from ${sql.identifier("foo", 'b"z')}`}`}`;
+    )} ${sql.query`from ${sql.identifier("foo", 'b"z"b"z""b')}`}`}`;
     expect(sql.compile(node)).toEqual({
-      text: 'select $1 from "foo"."b""z"',
+      text: 'select $1 from "foo"."b""z""b""z""""b"',
       values: [1],
     });
   });
