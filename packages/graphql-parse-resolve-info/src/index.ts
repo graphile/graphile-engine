@@ -308,9 +308,10 @@ function fieldTreeFromAST<T extends SelectionNode>(
   }, initTree);
 }
 
+const hasOwnProperty = Object.prototype.hasOwnProperty;
 function firstKey(obj: object) {
   for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+    if (hasOwnProperty.call(obj, key)) {
       return key;
     }
   }
