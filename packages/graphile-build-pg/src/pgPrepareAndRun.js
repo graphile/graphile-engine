@@ -3,10 +3,17 @@ import { createHash } from "crypto";
 import LRU from "lru-cache";
 import type { PoolClient } from "pg";
 
-const hash = (str: string) =>
-  createHash("sha1")
-    .update(str)
-    .digest("base64");
+let lastString: string;
+let lastHash: string;
+const hash = (str: string): string => {
+  if (str !== lastString) {
+    lastString = str;
+    lastHash = createHash("sha1")
+      .update(str)
+      .digest("base64");
+  }
+  return lastHash;
+};
 
 export default function pgPrepareAndRun(
   pgClient: PoolClient,
