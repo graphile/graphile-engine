@@ -82,7 +82,7 @@ export function compile(sql: SQLQuery | SQLNode): QueryConfig {
   const itemCount = items.length;
 
   // Join this to generate the SQL query
-  const sqlFragments = new Array(itemCount);
+  const sqlFragments = new Array();
 
   // Values hold the JavaScript values that are represented in the query
   // string by placeholders. They are eager because they were provided before
@@ -103,7 +103,7 @@ export function compile(sql: SQLQuery | SQLNode): QueryConfig {
         break;
       case "IDENTIFIER": {
         const nameCount = item.names.length;
-        const mappedNames = new Array(nameCount);
+        const mappedNames = new Array();
         for (let nameIndex = 0; nameIndex < nameCount; nameIndex++) {
           const name: string | symbol = item.names[nameIndex];
           if (typeof name === "string") {
