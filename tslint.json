@@ -1,19 +1,17 @@
 {
   "defaultSeverity": "error",
-  "extends": [
-    "tslint:recommended",
-    "tslint-config-prettier"
-  ],
+  "extends": ["tslint:recommended", "tslint-config-prettier"],
   "jsRules": {},
   "rules": {
-    "array-type": [
+    "array-type": [true, "generic"],
+    "interface-name": [true, "never-prefix"],
+    "variable-name": [
       true,
-      "generic"
+      "ban-keywords",
+      "check-format",
+      "allow-leading-underscore"
     ],
-    "interface-name": [
-      true,
-      "never-prefix"
-    ]
+    "object-literal-sort-keys": false
   },
   "rulesDirectory": []
 }

@@ -1,5 +1,6 @@
 import * as debugFactory from "debug";
 import { QueryConfig } from "pg";
+import LRU from "./lru";
 
 const debug = debugFactory("pg-sql2");
 
@@ -32,11 +33,19 @@ export type SQLNode = SQLRawNode | SQLValueNode | SQLIdentifierNode;
 export type SQLQuery = Array<SQLNode>;
 export type SQL = SQLNode | SQLQuery;
 
+const CACHE_RAW_NODES = new LRU<string, SQLRawNode>({ maxLength: 500 });
+
 function makeRawNode(text: string): SQLRawNode {
+  const n = CACHE_RAW_NODES.get(text);
+  if (n) {
+    return n;
+  }
   if (typeof text !== "string") {
     throw new Error("Invalid argument to makeRawNode - expected string");
   }
-  return { type: "RAW", text, [$$trusted]: true };
+  const newNode: SQLRawNode = { type: "RAW", text, [$$trusted]: true };
+  CACHE_RAW_NODES.set(text, newNode);
+  return newNode;
 }
 
 function isStringOrSymbol(val: any): val is string | symbol {
@@ -44,7 +53,11 @@ function isStringOrSymbol(val: any): val is string | symbol {
 }
 
 function makeIdentifierNode(names: Array<string | symbol>): SQLIdentifierNode {
-  if (!Array.isArray(names) || names.length === 0 || !names.every(isStringOrSymbol)) {
+  if (
+    !Array.isArray(names) ||
+    names.length === 0 ||
+    !names.every(isStringOrSymbol)
+  ) {
     throw new Error(
       "Invalid argument to makeIdentifierNode - expected array of strings/symbols"
     );
@@ -170,7 +183,7 @@ export function query(
       "sql.query should be used as a template literal, not a function call!"
     );
   }
-  const items = [];
+  const items = new Array();
   for (let i = 0, l = strings.length; i < l; i++) {
     const text = strings[i];
     if (typeof text !== "string") {
