@@ -1,6 +1,6 @@
 import * as debugFactory from "debug";
 import { QueryConfig } from "pg";
-import LRU from "./lru";
+import LRU from "@graphile/lru";
 
 const debug = debugFactory("pg-sql2");
 

@@ -1,6 +1,6 @@
 {
   "name": "pg-sql2",
-  "version": "2.2.3",
+  "version": "4.4.1-alpha.1",
   "description": "Generate safe Postgres-compliant SQL with tagged template literals",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -49,12 +49,11 @@
     "testRegex": "__tests__/.*\\.test\\.js$"
   },
   "dependencies": {
+    "@graphile/lru": "4.4.1-alpha.1",
     "@types/pg": ">=6 <8",
     "debug": ">=3 <5"
   },
-  "files": [
-    "lib"
-  ],
+  "files": ["lib"],
   "engines": {
     "node": ">=8.6"
   }
