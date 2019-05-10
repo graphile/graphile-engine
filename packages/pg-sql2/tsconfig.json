@@ -1,27 +1,9 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "declaration": true,
-    "allowJs": false,
-    "target": "es2017",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "pretty": true,
-    "importHelpers": true,
-    "experimentalDecorators": true,
-    "noImplicitAny": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "strictNullChecks": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUnusedParameters": true,
-    "noUnusedLocals": true,
-    "preserveWatchOutput": true,
-    "lib": [
-      "es2018",
-      "esnext.asynciterable"
-    ],
     "rootDir": "src",
-    "declarationDir": "./lib",
-    "outDir": "./lib"
-  }
+    "declarationDir": "./node8plus",
+    "outDir": "./node8plus"
+  },
+  "include": ["src/**/*"]
 }

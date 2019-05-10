@@ -1,7 +1,6 @@
-The MIT License (MIT)
-=====================
+# The MIT License (MIT)
 
-Copyright © `2017` Benjie Gillam
+Copyright © `2019` Benjie Gillam
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -23,4 +22,3 @@ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
-

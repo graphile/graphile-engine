@@ -2,13 +2,13 @@
   "name": "pg-sql2",
   "version": "4.4.1-alpha.1",
   "description": "Generate safe Postgres-compliant SQL with tagged template literals",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "node8plus/index.js",
+  "types": "node8plus/index.d.ts",
   "scripts": {
     "jest": "jest",
-    "lint": "tslint src/**/*.ts",
-    "test": "tslint src/**/*.ts && tsc && node lib/index.js && jest && markdown-doctest",
-    "test:u": "tslint src/**/*.ts && tsc && node lib/index.js && jest -u && markdown-doctest",
+    "tslint": "prettier --list-different 'src/**/*' && tslint --config ../../tslint.json --project tsconfig.json",
+    "test": "tsc && node node8plus/index.js && jest && markdown-doctest",
+    "test:u": "tsc && node node8plus/index.js && jest -u && markdown-doctest",
     "test:docs": "markdown-doctest",
     "watch": "tsc --watch",
     "prepack": "tsc"
@@ -54,7 +54,7 @@
     "@types/pg": ">=6 <8",
     "debug": ">=3 <5"
   },
-  "files": ["lib"],
+  "files": ["node8plus"],
   "engines": {
     "node": ">=8.6"
   }
