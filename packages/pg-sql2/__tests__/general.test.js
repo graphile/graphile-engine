@@ -1,7 +1,7 @@
 const sql = require("../src");
 
 function sansSymbols(obj) {
-  if (obj && typeof obj === 'object') {
+  if (obj && typeof obj === "object") {
     return Object.keys(obj).reduce((memo, key) => {
       memo[key] = obj[key];
       return memo;
@@ -11,10 +11,12 @@ function sansSymbols(obj) {
   }
 }
 
-
 it("sql.value", () => {
   const node = sql.value({ foo: { bar: 1 } });
-  expect(sansSymbols(node)).toEqual({ type: "VALUE", value: { foo: { bar: 1 } } });
+  expect(sansSymbols(node)).toEqual({
+    type: "VALUE",
+    value: { foo: { bar: 1 } },
+  });
 });
 
 describe("sql.identifier", () => {
@@ -25,7 +27,10 @@ describe("sql.identifier", () => {
 
   it("many", () => {
     const node = sql.identifier("foo", "bar", 'b"z');
-    expect(sansSymbols(node)).toEqual({ type: "IDENTIFIER", names: ["foo", "bar", 'b"z'] });
+    expect(sansSymbols(node)).toEqual({
+      type: "IDENTIFIER",
+      names: ["foo", "bar", 'b"z'],
+    });
   });
 });
 
@@ -135,7 +140,7 @@ describe("sql.compile", () => {
 describe("sqli", () => {
   it("subbing an object of similar layout", () => {
     expect(() => {
-      const node = sql.query`select ${sql.join(
+      sql.query`select ${sql.join(
         [
           { type: "VALUE", value: 1 },
           sql.identifier("foo", "bar"),
@@ -149,7 +154,7 @@ describe("sqli", () => {
 
   it("including a join", () => {
     expect(() => {
-      const node = sql.query`select ${sql.join(
+      sql.query`select ${sql.join(
         [
           sql.value(1),
           sql.identifier("foo", "bar"),
