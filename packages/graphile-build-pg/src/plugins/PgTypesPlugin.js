@@ -4,7 +4,7 @@ import type { Plugin } from "graphile-build";
 import makeGraphQLJSONType from "../GraphQLJSON";
 
 import rawParseInterval from "postgres-interval";
-import LRU from "lru-cache";
+import LRU from "@graphile/lru";
 
 function indent(str) {
   return "  " + str.replace(/\n/g, "\n  ");
@@ -14,7 +14,7 @@ function identity(value) {
   return value;
 }
 
-const parseCache = LRU(500);
+const parseCache = new LRU({ maxLength: 500 });
 function parseInterval(str) {
   let result = parseCache.get(str);
   if (!result) {

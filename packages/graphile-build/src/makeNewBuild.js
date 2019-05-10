@@ -15,7 +15,7 @@ import {
 import debugFactory from "debug";
 import type { ResolveTree } from "graphql-parse-resolve-info";
 import pluralize from "pluralize";
-import LRUCache from "lru-cache";
+import LRU from "@graphile/lru";
 import semver from "semver";
 import { upperCamelCase, camelCase, constantCase } from "./utils";
 import swallowError from "./swallowError";
@@ -49,7 +49,7 @@ const debug = debugFactory("graphile-build");
  * produce half a million hashes per second on my machine, the LRU only gives
  * us a 10x speedup!
  */
-const hashCache = new LRUCache(100000);
+const hashCache = new LRU({ maxLength: 100000 });
 
 /*
  * This function must never return a string longer than 56 characters.
