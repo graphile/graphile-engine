@@ -535,7 +535,8 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                 ] = argDataGenerators;
 
                 let newSpec = spec;
-                let context = Object.assign({}, commonContext, {
+                let context = {
+                  ...commonContext,
                   Self,
                   addDataGenerator(fn) {
                     return addDataGeneratorForField(fieldName, fn);
@@ -626,7 +627,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                       rawSpec.name
                     }'`
                   ),
-                });
+                };
                 if (typeof newSpec === "function") {
                   newSpec = newSpec(context);
                 }
@@ -704,7 +705,8 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
         newSpec.fields = newSpec.fields || {};
 
         const rawSpec = newSpec;
-        newSpec = Object.assign({}, newSpec, {
+        newSpec = {
+          ...newSpec,
           fields: () => {
             const processedFields = [];
             const fieldsContext = Object.assign({}, commonContext, {
@@ -716,7 +718,8 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                     "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
                   );
                 }
-                let context = Object.assign({}, commonContext, {
+                let context = {
+                  ...commonContext,
                   Self,
                   scope: extend(
                     extend(
@@ -733,7 +736,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                       rawSpec.name
                     }'`
                   ),
-                });
+                };
                 let newSpec = spec;
                 if (typeof newSpec === "function") {
                   newSpec = newSpec(context);
@@ -783,7 +786,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
             }
             return fieldsSpec;
           },
-        });
+        };
       } else if (Type === GraphQLEnumType) {
         const commonContext = {
           type: "GraphQLEnumType",
