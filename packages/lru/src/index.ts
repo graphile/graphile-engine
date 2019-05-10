@@ -111,6 +111,7 @@ export default class LRU<KeyType = any, ValueType = any> {
       const oldTail = this._tail!;
       this._cache.delete(oldTail.key);
       this._tail = oldTail.prev;
+      this._tail!.next = null;
       if (this._dispose) {
         this._dispose(oldTail.key, oldTail.value);
       }

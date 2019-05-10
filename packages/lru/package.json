@@ -5,7 +5,7 @@
   "main": "node8plus/index.js",
   "types": "node8plus/index.d.ts",
   "scripts": {
-    "test": "echo 'No tests'",
+    "test": "jest",
     "prepack": "mkdir -p node8plus && tsc",
     "tslint": "prettier --list-different 'src/**/*' && tslint --config ../../tslint.json --project tsconfig.json",
     "watch": "mkdir -p node8plus && tsc --watch"
