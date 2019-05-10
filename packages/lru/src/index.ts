@@ -49,13 +49,13 @@ export default class LRU<KeyType = any, ValueType = any> {
     }
   }
 
-  public get(key: KeyType): ValueType | null {
+  public get(key: KeyType): ValueType | undefined {
     const hit = this._cache.get(key);
     if (hit) {
       this._hoist(hit);
       return hit.value;
     }
-    return null;
+    return undefined;
   }
 
   public set(key: KeyType, value: ValueType): void {
