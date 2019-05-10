@@ -483,12 +483,14 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
         );
 
         const rawSpec = newSpec;
-        newSpec = Object.assign({}, newSpec, {
+        newSpec = {
+          ...newSpec,
           interfaces: () => {
-            const interfacesContext = Object.assign({}, commonContext, {
+            const interfacesContext = {
+              ...commonContext,
               Self,
               GraphQLObjectType: rawSpec,
-            });
+            };
             let rawInterfaces = rawSpec.interfaces || [];
             if (typeof rawInterfaces === "function") {
               rawInterfaces = rawInterfaces(interfacesContext);
@@ -503,7 +505,8 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
           },
           fields: () => {
             const processedFields = [];
-            const fieldsContext = Object.assign({}, commonContext, {
+            const fieldsContext = {
+              ...commonContext,
               addDataGeneratorForField,
               recurseDataGeneratorsForField,
               Self,
@@ -651,7 +654,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                 processedFields.push(finalSpec);
                 return finalSpec;
               }: FieldWithHooksFunction),
-            });
+            };
             let rawFields = rawSpec.fields || {};
             if (typeof rawFields === "function") {
               rawFields = rawFields(fieldsContext);
@@ -685,7 +688,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
             }
             return fieldsSpec;
           },
-        });
+        };
       } else if (Type === GraphQLInputObjectType) {
         const commonContext = {
           type: "GraphQLInputObjectType",
