@@ -21,7 +21,7 @@ export default class LRU<KeyType = any, ValueType = any> {
   private _cache: Map<KeyType, Node<KeyType, ValueType>>;
   private _dispose: ((key: KeyType, value: ValueType) => void) | null;
 
-  constructor({maxLength, dispose}: LRUOptions<KeyType, ValueType>) {
+  constructor({ maxLength, dispose }: LRUOptions<KeyType, ValueType>) {
     if (maxLength < 2) {
       throw new Error("Max length must be >= 2");
     }
@@ -67,7 +67,7 @@ export default class LRU<KeyType = any, ValueType = any> {
         key,
         value,
         next: null,
-        prev: null
+        prev: null,
       };
       this._cache.set(key, newHead);
       this._add(newHead);
