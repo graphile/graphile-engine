@@ -1,20 +1,27 @@
 import LRU from "..";
 
-function testLinkedList(cache) {
+function testLinkedList(cache, expectedList = null) {
+  if (expectedList) {
+    expect(cache.length).toEqual(expectedList.length);
+  }
   if (cache.length === 0) {
     expect(cache._head).toBe(null);
     expect(cache._tail).toBe(null);
   } else {
     let previous = null;
-    expect(cache._head).toBeTruthy();
     let current = cache._head;
-    while (current.next) {
+    // eslint-disable-next-line no-constant-condition
+    for (let index = 0; index < cache.length; index++) {
+      expect(current).toBeTruthy();
       expect(current.prev).toBe(previous);
+      if (expectedList) {
+        expect(current.key).toEqual(expectedList[index]);
+      }
       previous = current;
       current = current.next;
     }
-    expect(current.prev).toBe(previous);
-    expect(cache._tail).toBe(current);
+    expect(current).toBe(null);
+    expect(cache._tail).toBe(previous);
   }
 }
 
@@ -66,6 +73,7 @@ it("least recent 'get'", () => {
   expect(cache.get("baz")).toEqual(30);
   expect(cache.get("qux")).toEqual(31);
   expect(cache.get("quux")).toEqual(32);
+  testLinkedList(cache);
 });
 
 it("least recent 'set'", () => {
@@ -82,6 +90,7 @@ it("least recent 'set'", () => {
   expect(cache.get("baz")).toEqual(30);
   expect(cache.get("qux")).toEqual(31);
   expect(cache.get("quux")).toEqual(32);
+  testLinkedList(cache);
 });
 
 it("reset", () => {
