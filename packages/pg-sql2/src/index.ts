@@ -140,7 +140,9 @@ export function compile(sql: SQLQuery | SQLNode): QueryConfig {
             );
           }
         }
-        sqlFragments.push(nameCount === 1 ? mappedNames[0] : mappedNames.join("."));
+        sqlFragments.push(
+          nameCount === 1 ? mappedNames[0] : mappedNames.join(".")
+        );
         break;
       }
       case "VALUE":
@@ -155,7 +157,7 @@ export function compile(sql: SQLQuery | SQLNode): QueryConfig {
   const text = sqlFragments.join("");
   return {
     text,
-    values
+    values,
   };
 }
 
@@ -187,7 +189,7 @@ export function query(
   }
   const first = strings[0];
   // Reduce memory churn with a cache
-  if (strings.length === 1 && typeof first === 'string' && first.length < 20) {
+  if (strings.length === 1 && typeof first === "string" && first.length < 20) {
     const cached = CACHE_SIMPLE_FRAGMENTS.get(first);
     if (cached) {
       return cached;
