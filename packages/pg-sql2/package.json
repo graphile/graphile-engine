@@ -10,6 +10,7 @@
     "test": "tslint src/**/*.ts && tsc && node lib/index.js && jest && markdown-doctest",
     "test:u": "tslint src/**/*.ts && tsc && node lib/index.js && jest -u && markdown-doctest",
     "test:docs": "markdown-doctest",
+    "watch": "tsc --watch",
     "prepack": "tsc"
   },
   "repository": {
