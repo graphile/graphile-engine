@@ -289,12 +289,9 @@ export function join(items: Array<SQL>, rawSeparator: string = ""): SQLQuery {
   const sepNode = makeRawNode(separator);
   for (let i = 0, l = items.length; i < l; i++) {
     const rawItem: SQL = items[i];
-    let itemsToAppend: SQLNode | SQLQuery;
-    if (Array.isArray(rawItem)) {
-      itemsToAppend = rawItem.map(enforceValidNode);
-    } else {
-      itemsToAppend = [enforceValidNode(rawItem)];
-    }
+    const itemsToAppend: SQLNode | SQLQuery = Array.isArray(rawItem)
+      ? rawItem.map(enforceValidNode)
+      : [enforceValidNode(rawItem)];
     if (i === 0 || !separator) {
       currentItems.push(...itemsToAppend);
     } else {
