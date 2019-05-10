@@ -33,7 +33,7 @@ export type SQLNode = SQLRawNode | SQLValueNode | SQLIdentifierNode;
 export type SQLQuery = Array<SQLNode>;
 export type SQL = SQLNode | SQLQuery;
 
-const CACHE_RAW_NODES = new LRU<string, SQLRawNode>({ maxLength: 500 });
+const CACHE_RAW_NODES = new LRU<string, SQLRawNode>({ maxLength: 2000 });
 
 function makeRawNode(text: string): SQLRawNode {
   const n = CACHE_RAW_NODES.get(text);
