@@ -4,25 +4,20 @@ function testLinkedList(cache, expectedList = null) {
   if (expectedList) {
     expect(cache.length).toEqual(expectedList.length);
   }
-  if (cache.length === 0) {
-    expect(cache._head).toBe(null);
-    expect(cache._tail).toBe(null);
-  } else {
-    let previous = null;
-    let current = cache._head;
-    // eslint-disable-next-line no-constant-condition
-    for (let index = 0; index < cache.length; index++) {
-      expect(current).toBeTruthy();
-      expect(current.prev).toBe(previous);
-      if (expectedList) {
-        expect(current.key).toEqual(expectedList[index]);
-      }
-      previous = current;
-      current = current.next;
+  let previous = null;
+  let current = cache._head;
+  // eslint-disable-next-line no-constant-condition
+  for (let index = 0; index < cache.length; index++) {
+    expect(current).toBeTruthy();
+    expect(current.prev).toBe(previous);
+    if (expectedList) {
+      expect(current.key).toEqual(expectedList[index]);
     }
-    expect(current).toBe(null);
-    expect(cache._tail).toBe(previous);
+    previous = current;
+    current = current.next;
   }
+  expect(current).toBe(null);
+  expect(cache._tail).toBe(previous);
 }
 
 it("set 1", () => {
@@ -35,14 +30,14 @@ it("set 1", () => {
 
 it("change value", () => {
   const cache = new LRU({ maxLength: 3 });
-  testLinkedList(cache);
+  testLinkedList(cache, []);
   cache.set("foo", 27);
-  testLinkedList(cache);
+  testLinkedList(cache, ["foo"]);
   expect(cache.length).toEqual(1);
   cache.set("foo", 28);
   expect(cache.length).toEqual(1);
   expect(cache.get("foo")).toEqual(28);
-  testLinkedList(cache);
+  testLinkedList(cache, ["foo"]);
 });
 
 it("least recent 'get'", () => {
@@ -51,29 +46,29 @@ it("least recent 'get'", () => {
   cache.set("baz", 30);
   cache.set("bar", 29);
   expect(cache.length).toEqual(3);
-  testLinkedList(cache);
+  testLinkedList(cache, ["bar", "baz", "foo"]);
   expect(cache.get("foo")).toEqual(28);
   expect(cache.get("bar")).toEqual(29);
   expect(cache.get("baz")).toEqual(30);
   // foo is now the least recently used
-  testLinkedList(cache);
+  testLinkedList(cache, ["baz", "bar", "foo"]);
   cache.set("qux", 31);
-  testLinkedList(cache);
+  testLinkedList(cache, ["qux", "baz", "bar"]);
   expect(cache.length).toEqual(3);
   expect(cache.get("foo")).toBe(undefined);
   expect(cache.get("bar")).toEqual(29);
   expect(cache.get("baz")).toEqual(30);
   expect(cache.get("qux")).toEqual(31);
-  testLinkedList(cache);
+  testLinkedList(cache, ["qux", "baz", "bar"]);
   // bar is now the least recently fetched (but not the least recently set)
   cache.set("quux", 32);
-  testLinkedList(cache);
+  testLinkedList(cache, ["quux", "qux", "baz"]);
   expect(cache.length).toEqual(3);
   expect(cache.get("bar")).toBe(undefined);
-  expect(cache.get("baz")).toEqual(30);
   expect(cache.get("qux")).toEqual(31);
+  expect(cache.get("baz")).toEqual(30);
   expect(cache.get("quux")).toEqual(32);
-  testLinkedList(cache);
+  testLinkedList(cache, ["quux", "baz", "qux"]);
 });
 
 it("least recent 'set'", () => {
@@ -83,14 +78,14 @@ it("least recent 'set'", () => {
   cache.set("baz", 30);
   cache.set("qux", 31);
   cache.set("quux", 32);
-  testLinkedList(cache);
+  testLinkedList(cache, ["quux", "qux", "baz"]);
   expect(cache.length).toEqual(3);
   expect(cache.get("foo")).toBe(undefined);
   expect(cache.get("bar")).toBe(undefined);
   expect(cache.get("baz")).toEqual(30);
   expect(cache.get("qux")).toEqual(31);
   expect(cache.get("quux")).toEqual(32);
-  testLinkedList(cache);
+  testLinkedList(cache, ["quux", "qux", "baz"]);
 });
 
 it("reset", () => {
@@ -100,15 +95,15 @@ it("reset", () => {
   cache.set("bar", 29);
   cache.set("qux", 31);
   cache.set("quux", 32);
-  testLinkedList(cache);
+  testLinkedList(cache, ["quux", "qux", "bar"]);
   expect(cache.length).toEqual(3);
   cache.reset();
-  testLinkedList(cache);
+  testLinkedList(cache, []);
   expect(cache.length).toEqual(0);
   expect(cache.get("foo")).toBe(undefined);
   expect(cache.get("bar")).toBe(undefined);
   expect(cache.get("baz")).toBe(undefined);
   expect(cache.get("qux")).toBe(undefined);
   expect(cache.get("quux")).toBe(undefined);
-  testLinkedList(cache);
+  testLinkedList(cache, []);
 });
