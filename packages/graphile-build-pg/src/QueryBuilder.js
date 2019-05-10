@@ -117,7 +117,23 @@ class QueryBuilder {
         ? true
         : !!options.supportsJSONB;
 
-    this.locks = {};
+    this.locks = {
+      // As a performance optimisation, we're going to list a number of lock
+      // types so that V8 doesn't need to mutate the object too much
+      cursorComparator: false,
+      select: false,
+      selectCursor: false,
+      from: false,
+      join: false,
+      whereBound: false,
+      where: false,
+      orderBy: false,
+      orderIsUnique: false,
+      first: false,
+      last: false,
+      limit: false,
+      offset: false,
+    };
     this.finalized = false;
     this.selectedIdentifiers = false;
     this.data = {
@@ -138,7 +154,23 @@ class QueryBuilder {
       offset: null,
       first: null,
       last: null,
-      beforeLock: {},
+      beforeLock: {
+        // As a performance optimisation, we're going to list a number of lock
+        // types so that V8 doesn't need to mutate the object too much
+        cursorComparator: [],
+        select: [],
+        selectCursor: [],
+        from: [],
+        join: [],
+        whereBound: [],
+        where: [],
+        orderBy: [],
+        orderIsUnique: [],
+        first: [],
+        last: [],
+        limit: [],
+        offset: [],
+      },
       cursorComparator: null,
       liveConditions: [],
     };
