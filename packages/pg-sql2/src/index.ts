@@ -95,7 +95,7 @@ export function compile(sql: SQLQuery | SQLNode): QueryConfig {
   const itemCount = items.length;
 
   // Join this to generate the SQL query
-  const sqlFragments = new Array();
+  const sqlFragments = [];
 
   // Values hold the JavaScript values that are represented in the query
   // string by placeholders. They are eager because they were provided before
@@ -112,15 +112,15 @@ export function compile(sql: SQLQuery | SQLNode): QueryConfig {
     const item: SQLNode = enforceValidNode(items[itemIndex]);
     switch (item.type) {
       case "RAW":
-        sqlFragments[itemIndex] = item.text;
+        sqlFragments.push(item.text);
         break;
       case "IDENTIFIER": {
         const nameCount = item.names.length;
-        const mappedNames = new Array();
+        const mappedNames = [];
         for (let nameIndex = 0; nameIndex < nameCount; nameIndex++) {
           const name: string | symbol = item.names[nameIndex];
           if (typeof name === "string") {
-            mappedNames[nameIndex] = escapeSqlIdentifier(name);
+            mappedNames.push(escapeSqlIdentifier(name));
           } else if (typeof name === "symbol") {
             // Get the correct identifier string for this symbol.
             let identifierForSymbol = symbolToIdentifier.get(name);
@@ -133,19 +133,19 @@ export function compile(sql: SQLQuery | SQLNode): QueryConfig {
 
             // Return the identifier. Since we create it, we won’t have to
             // escape it because we know all of the characters are safe.
-            mappedNames[nameIndex] = identifierForSymbol;
+            mappedNames.push(identifierForSymbol);
           } else {
             throw debugError(
               new Error(`Expected string or symbol, received '${String(name)}'`)
             );
           }
         }
-        sqlFragments[itemIndex] = mappedNames.join(".");
+        sqlFragments.push(nameCount === 1 ? mappedNames[0] : mappedNames.join("."));
         break;
       }
       case "VALUE":
         values.push(item.value);
-        sqlFragments[itemIndex] = `$${values.length}`;
+        sqlFragments.push(`$${values.length}`);
         break;
       default:
       // This cannot happen
@@ -183,7 +183,7 @@ export function query(
       "sql.query should be used as a template literal, not a function call!"
     );
   }
-  const items = new Array();
+  const items = [];
   for (let i = 0, l = strings.length; i < l; i++) {
     const text = strings[i];
     if (typeof text !== "string") {
