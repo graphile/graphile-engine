@@ -174,6 +174,8 @@ function enforceValidNode(node: any): SQLNode {
  * Note that using this function, the user *must* specify if they are injecting
  * raw text. This makes a SQL injection vulnerability harder to create.
  */
+// LRU not necessary
+const CACHE_SIMPLE_FRAGMENTS = new Map<string, SQLQuery>();
 export function query(
   strings: TemplateStringsArray,
   ...values: Array<SQL>
@@ -182,6 +184,17 @@ export function query(
     throw new Error(
       "sql.query should be used as a template literal, not a function call!"
     );
+  }
+  const first = strings[0];
+  // Reduce memory churn with a cache
+  if (strings.length === 1 && typeof first === 'string' && first.length < 20) {
+    const cached = CACHE_SIMPLE_FRAGMENTS.get(first);
+    if (cached) {
+      return cached;
+    }
+    const node = [makeRawNode(first)];
+    CACHE_SIMPLE_FRAGMENTS.set(first, node);
+    return node;
   }
   const items = [];
   for (let i = 0, l = strings.length; i < l; i++) {
