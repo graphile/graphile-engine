@@ -1,12 +1,13 @@
-interface Node<KeyType = any, ValueType = any> {
+interface Node<KeyType, ValueType> {
   key: KeyType;
   value: ValueType;
-  next: Node | null;
-  prev: Node | null;
+  next: Node<KeyType, ValueType> | null;
+  prev: Node<KeyType, ValueType> | null;
 }
 
-interface LRUOptions {
+interface LRUOptions<KeyType, ValueType> {
   maxLength: number;
+  dispose?: (key: KeyType, value: ValueType) => void;
 }
 
 /**
@@ -18,10 +19,9 @@ export default class LRU<KeyType = any, ValueType = any> {
   private _head: Node<KeyType, ValueType> | null;
   private _tail: Node<KeyType, ValueType> | null;
   private _cache: Map<KeyType, Node<KeyType, ValueType>>;
+  private _dispose: ((key: KeyType, value: ValueType) => void) | null;
 
-  constructor({maxLength}: LRUOptions) {
-    this._cache = new Map();
-    this.length = 0;
+  constructor({maxLength, dispose}: LRUOptions<KeyType, ValueType>) {
     if (maxLength < 2) {
       throw new Error("Max length must be >= 2");
     }
@@ -29,8 +29,24 @@ export default class LRU<KeyType = any, ValueType = any> {
       throw new Error("Max length must be an integer");
     }
     this._maxLength = maxLength;
+
+    this._dispose = dispose || null;
+    this._cache = new Map();
+
+    this.reset();
+  }
+
+  public reset() {
+    const values = this._cache.values();
+    this._cache.clear();
     this._head = null;
     this._tail = null;
+    this.length = 0;
+    if (this._dispose) {
+      for (const hit of values) {
+        this._dispose(hit.key, hit.value);
+      }
+    }
   }
 
   public get(key: KeyType): ValueType | null {
@@ -92,8 +108,12 @@ export default class LRU<KeyType = any, ValueType = any> {
     this._head = newHead;
     if (this.length === this._maxLength) {
       // Remove the _tail
-      this._cache.delete(this._tail!.key);
-      this._tail = this._tail!.prev;
+      const oldTail = this._tail!;
+      this._cache.delete(oldTail.key);
+      this._tail = oldTail.prev;
+      if (this._dispose) {
+        this._dispose(oldTail.key, oldTail.value);
+      }
     } else {
       if (this.length === 0) {
         this._tail = newHead;
