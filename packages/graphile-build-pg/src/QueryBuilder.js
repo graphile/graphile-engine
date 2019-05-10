@@ -51,7 +51,7 @@ class QueryBuilder {
   rootValue: any; // eslint-disable-line flowtype/no-weak-types
   supportsJSONB: boolean;
   locks: {
-    [string]: true | string,
+    [string]: false | true | string,
   };
   finalized: boolean;
   selectedIdentifiers: boolean;
