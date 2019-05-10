@@ -91,31 +91,32 @@ export default (function PgTypesPlugin(
         {},
         build.pgGqlInputTypeByTypeIdAndModifier
       );
+      const isNull = val => val == null || val.__isNull;
       const pg2GqlMapper = {};
-      const pg2gql = (val, type) => {
-        if (val == null) {
-          return val;
-        }
-        if (val.__isNull) {
-          return null;
-        }
+      const pg2gqlForType = type => {
         if (pg2GqlMapper[type.id]) {
-          return pg2GqlMapper[type.id].map(val);
+          const map = pg2GqlMapper[type.id].map;
+          return val => (isNull(val) ? null : map(val));
         } else if (type.domainBaseType) {
-          return pg2gql(val, type.domainBaseType);
+          return pg2gqlForType(type.domainBaseType);
         } else if (type.isPgArray) {
-          if (!Array.isArray(val)) {
-            throw new Error(
-              `Expected array when converting PostgreSQL data into GraphQL; failing type: '${
-                type.namespaceName
-              }.${type.name}'`
-            );
-          }
-          return val.map(v => pg2gql(v, type.arrayItemType));
+          const elementHandler = pg2gqlForType(type.arrayItemType);
+          return val => {
+            if (isNull(val)) return null;
+            if (!Array.isArray(val)) {
+              throw new Error(
+                `Expected array when converting PostgreSQL data into GraphQL; failing type: '${
+                  type.namespaceName
+                }.${type.name}'`
+              );
+            }
+            return val.map(elementHandler);
+          };
         } else {
-          return val;
+          return identity;
         }
       };
+      const pg2gql = (val, type) => pg2gqlForType(type)(val);
       const gql2pg = (val, type, modifier) => {
         if (modifier === undefined) {
           let stack;
@@ -1030,6 +1031,7 @@ export default (function PgTypesPlugin(
         pgGetGqlInputTypeByTypeIdAndModifier: getGqlInputTypeByTypeIdAndModifier,
         pg2GqlMapper,
         pg2gql,
+        pg2gqlForType,
         gql2pg,
         pgTweakFragmentForTypeAndModifier,
         pgTweaksByTypeId,

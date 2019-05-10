@@ -89,7 +89,7 @@ export default (function PgColumnsPlugin(builder) {
         extend,
         pgGetGqlTypeByTypeIdAndModifier,
         pgSql: sql,
-        pg2gql,
+        pg2gqlForType,
         graphql: { GraphQLString, GraphQLNonNull },
         pgColumnFilter,
         inflection,
@@ -132,6 +132,8 @@ export default (function PgColumnsPlugin(builder) {
               [fieldName]: fieldWithHooks(
                 fieldName,
                 fieldContext => {
+                  const { type, typeModifier } = attr;
+                  const sqlColumn = sql.identifier(attr.name);
                   const { addDataGenerator } = fieldContext;
                   const ReturnType =
                     pgGetGqlTypeByTypeIdAndModifier(
@@ -146,17 +148,16 @@ export default (function PgColumnsPlugin(builder) {
                             ReturnType,
                             fieldContext,
                             parsedResolveInfoFragment,
-                            sql.fragment`(${queryBuilder.getTableAlias()}.${sql.identifier(
-                              attr.name
-                            )})`, // The brackets are necessary to stop the parser getting confused, ref: https://www.postgresql.org/docs/9.6/static/rowtypes.html#ROWTYPES-ACCESSING
-                            attr.type,
-                            attr.typeModifier
+                            sql.fragment`(${queryBuilder.getTableAlias()}.${sqlColumn})`, // The brackets are necessary to stop the parser getting confused, ref: https://www.postgresql.org/docs/9.6/static/rowtypes.html#ROWTYPES-ACCESSING
+                            type,
+                            typeModifier
                           ),
                           fieldName
                         );
                       },
                     };
                   });
+                  const convertFromPg = pg2gqlForType(type);
                   return {
                     description: attr.description,
                     type: nullableIf(
@@ -167,7 +168,7 @@ export default (function PgColumnsPlugin(builder) {
                       ReturnType
                     ),
                     resolve: (data, _args, _context, _resolveInfo) => {
-                      return pg2gql(data[fieldName], attr.type);
+                      return convertFromPg(data[fieldName]);
                     },
                   };
                 },
