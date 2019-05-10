@@ -293,18 +293,14 @@ class QueryBuilder {
         );
         // $FlowFixMe
         this.parentQueryBuilder.select(
-          sql.fragment`json_build_object(
-          '__id', ${sql.value(id)}::int
-          ${sql.join(
-            Object.keys(allRequirements).map(
-              key =>
-                sql.fragment`, ${sql.literal(key)}::text, ${
-                  allRequirements[key]
-                }`
-            ),
-            ""
-          )}
-          )`,
+          sql.fragment`\
+json_build_object('__id', ${sql.value(id)}::int
+${sql.join(
+  Object.keys(allRequirements).map(
+    key => sql.fragment`, ${sql.literal(key)}::text, ${allRequirements[key]}`
+  ),
+  ""
+)})`,
           "__live"
         );
       });
@@ -676,48 +672,44 @@ class QueryBuilder {
           })} as object`
         : this.buildSelectFields();
 
-    let fragment = sql.fragment`
-      select ${useAsterisk ? sql.fragment`${this.getTableAlias()}.*` : fields}
-      ${this.compiledData.from &&
-        sql.fragment`from ${
-          this.compiledData.from[0]
-        } as ${this.getTableAlias()}`}
-      ${this.compiledData.join.length && sql.join(this.compiledData.join, " ")}
-      where ${this.buildWhereClause(true, true, options)}
-      ${
-        this.compiledData.orderBy.length
-          ? sql.fragment`order by ${sql.join(
-              this.compiledData.orderBy.map(
-                ([expr, ascending, nullsFirst]) =>
-                  sql.fragment`${expr} ${
-                    Number(ascending) ^ Number(flip)
-                      ? sql.fragment`ASC`
-                      : sql.fragment`DESC`
-                  }${
-                    nullsFirst === true
-                      ? sql.fragment` NULLS FIRST`
-                      : nullsFirst === false
-                      ? sql.fragment` NULLS LAST`
-                      : null
-                  }`
-              ),
-              ","
-            )}`
-          : ""
-      }
-      ${isSafeInteger(limit) && sql.fragment`limit ${sql.literal(limit)}`}
-      ${offset && sql.fragment`offset ${sql.literal(offset)}`}
-    `;
+    let fragment = sql.fragment`\
+select ${useAsterisk ? sql.fragment`${this.getTableAlias()}.*` : fields}
+${this.compiledData.from &&
+  sql.fragment`from ${this.compiledData.from[0]} as ${this.getTableAlias()}`}
+${this.compiledData.join.length && sql.join(this.compiledData.join, " ")}
+where ${this.buildWhereClause(true, true, options)}
+${
+  this.compiledData.orderBy.length
+    ? sql.fragment`order by ${sql.join(
+        this.compiledData.orderBy.map(
+          ([expr, ascending, nullsFirst]) =>
+            sql.fragment`${expr} ${
+              Number(ascending) ^ Number(flip)
+                ? sql.fragment`ASC`
+                : sql.fragment`DESC`
+            }${
+              nullsFirst === true
+                ? sql.fragment` NULLS FIRST`
+                : nullsFirst === false
+                ? sql.fragment` NULLS LAST`
+                : null
+            }`
+        ),
+        ","
+      )}`
+    : ""
+}
+${isSafeInteger(limit) && sql.fragment`limit ${sql.literal(limit)}`}
+${offset && sql.fragment`offset ${sql.literal(offset)}`}`;
     if (flip) {
       const flipAlias = Symbol();
-      fragment = sql.fragment`
-        with ${sql.identifier(flipAlias)} as (
-          ${fragment}
-        )
-        select *
-        from ${sql.identifier(flipAlias)}
-        order by (row_number() over (partition by 1)) desc
-        `;
+      fragment = sql.fragment`\
+with ${sql.identifier(flipAlias)} as (
+  ${fragment}
+)
+select *
+from ${sql.identifier(flipAlias)}
+order by (row_number() over (partition by 1)) desc`;
     }
     if (useAsterisk) {
       fragment = sql.fragment`select ${fields} from (${fragment}) ${this.getTableAlias()}`;
