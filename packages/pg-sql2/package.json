@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/graphile/pg-sql2.git"
+    "url": "git+https://github.com/graphile/graphile-engine.git"
   },
   "keywords": [
     "sql",
@@ -31,9 +31,9 @@
   "author": "Benjie Gillam <benjie@jemjie.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/graphile/pg-sql2/issues"
+    "url": "https://github.com/graphile/graphile-engine/issues"
   },
-  "homepage": "https://github.com/graphile/pg-sql2#readme",
+  "homepage": "https://github.com/graphile/graphile-build/tree/master/packages/pg-sql2",
   "devDependencies": {
     "@types/debug": "4.1.4",
     "@types/node": "12.0.0",
