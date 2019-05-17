@@ -156,6 +156,7 @@ const omitUnindexed = (omit, hideIndexWarnings) => (
     permission === "read"
   ) {
     const klass = entity.class;
+    entity._omitUnindexedReadWarningGiven = true;
     const shouldOutputWarning = klass && !hideIndexWarnings && !entity._omitUnindexedReadWarningGiven;
     if (shouldOutputWarning) {
       // $FlowFixMe
