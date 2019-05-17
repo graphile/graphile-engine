@@ -156,24 +156,21 @@ const omitUnindexed = (omit, hideIndexWarnings) => (
     permission === "read"
   ) {
     let klass = entity.class;
-    if (klass) {
-      if (!entity._omitUnindexedReadWarningGiven) {
-        // $FlowFixMe
-        entity._omitUnindexedReadWarningGiven = true;
-        if (!hideIndexWarnings) {
-          // eslint-disable-next-line no-console
-          console.log(
-            "%s",
-            `Disabled 'read' permission for ${describePgEntity(
-              entity
-            )} because it isn't indexed. For more information see https://graphile.org/postgraphile/best-practices/ To fix, perform\n\n  CREATE INDEX ON ${`"${
-              klass.namespaceName
-            }"."${klass.name}"`}("${entity.keyAttributes
-              .map(a => a.name)
-              .join('", "')}");`
-          );
-        }
-      }
+    const shouldOutputWarning = klass && !entity._omitUnindexedReadWarningGiven && !hideIndexWarnings;
+    if (shouldOutputWarning) {
+      // $FlowFixMe
+      entity._omitUnindexedReadWarningGiven = true;
+      // eslint-disable-next-line no-console
+      console.log(
+        "%s",
+        `Disabled 'read' permission for ${describePgEntity(
+          entity
+        )} because it isn't indexed. For more information see https://graphile.org/postgraphile/best-practices/ To fix, perform\n\n  CREATE INDEX ON ${`"${
+          klass.namespaceName
+        }"."${klass.name}"`}("${entity.keyAttributes
+          .map(a => a.name)
+          .join('", "')}");`
+      );
     }
     return true;
   }
