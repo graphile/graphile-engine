@@ -138,7 +138,7 @@ const omitWithRBACChecks = omit => (
   return omit(entity, permission);
 };
 
-const omitUnindexed = omit => (
+const omitUnindexed = (omit, hideIndexWarnings) => (
   entity: PgProc | PgClass | PgAttribute | PgConstraint,
   permission: string
 ) => {
@@ -160,17 +160,19 @@ const omitUnindexed = omit => (
       if (!entity._omitUnindexedReadWarningGiven) {
         // $FlowFixMe
         entity._omitUnindexedReadWarningGiven = true;
-        // eslint-disable-next-line no-console
-        console.log(
-          "%s",
-          `Disabled 'read' permission for ${describePgEntity(
-            entity
-          )} because it isn't indexed. For more information see https://graphile.org/postgraphile/best-practices/ To fix, perform\n\n  CREATE INDEX ON ${`"${
-            klass.namespaceName
-          }"."${klass.name}"`}("${entity.keyAttributes
-            .map(a => a.name)
-            .join('", "')}");`
-        );
+        if (!hideIndexWarnings) {
+          // eslint-disable-next-line no-console
+          console.log(
+            "%s",
+            `Disabled 'read' permission for ${describePgEntity(
+              entity
+            )} because it isn't indexed. For more information see https://graphile.org/postgraphile/best-practices/ To fix, perform\n\n  CREATE INDEX ON ${`"${
+              klass.namespaceName
+            }"."${klass.name}"`}("${entity.keyAttributes
+              .map(a => a.name)
+              .join('", "')}");`
+          );
+        }
       }
     }
     return true;
@@ -320,6 +322,7 @@ export default (function PgBasicsPlugin(
     pgColumnFilter = defaultPgColumnFilter,
     pgIgnoreRBAC = false,
     pgIgnoreIndexes = true, // TODO:v5: change this to false
+    pgHideIndexWarnings = false,
     pgLegacyJsonUuid = false, // TODO:v5: remove this
   }
 ) {
@@ -328,7 +331,7 @@ export default (function PgBasicsPlugin(
     pgOmit = omitWithRBACChecks(pgOmit);
   }
   if (!pgIgnoreIndexes) {
-    pgOmit = omitUnindexed(pgOmit);
+    pgOmit = omitUnindexed(pgOmit, pgHideIndexWarnings);
   }
   builder.hook(
     "build",
