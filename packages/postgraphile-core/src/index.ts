@@ -20,6 +20,7 @@ import {
   formatSQLForDebugging,
 } from "graphile-build-pg";
 import { Pool, PoolClient } from "pg";
+import { SignOptions } from "jsonwebtoken";
 
 export {
   Plugin,
@@ -73,7 +74,7 @@ export interface PostGraphileCoreOptions {
   skipPlugins?: Array<Plugin>;
   jwtPgTypeIdentifier?: string;
   jwtSecret?: string;
-  jwtSignOptions?: string;
+  jwtSignOptions?: SignOptions;
   /**
    * @deprecated UNSUPPORTED! Use an inflector plugin instead.
    */
