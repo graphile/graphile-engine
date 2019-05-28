@@ -73,6 +73,7 @@ export interface PostGraphileCoreOptions {
   skipPlugins?: Array<Plugin>;
   jwtPgTypeIdentifier?: string;
   jwtSecret?: string;
+  jwtSignOptions?: string;
   /**
    * @deprecated UNSUPPORTED! Use an inflector plugin instead.
    */
@@ -201,6 +202,7 @@ const getPostGraphileBuilder = async (
     skipPlugins = [],
     jwtPgTypeIdentifier,
     jwtSecret,
+    jwtSignOptions,
     disableDefaultMutations,
     graphileBuildOptions,
     graphqlBuildOptions, // DEPRECATED!
@@ -368,6 +370,7 @@ const getPostGraphileBuilder = async (
     nodeIdFieldName: nodeIdFieldName || (classicIds ? "id" : "nodeId"),
     pgJwtTypeIdentifier: jwtPgTypeIdentifier,
     pgJwtSecret: jwtSecret,
+    pgJwtSignOptions: jwtSignOptions,
     pgDisableDefaultMutations: disableDefaultMutations,
     pgViewUniqueKey: viewUniqueKey,
     pgEnableTags: enableTags,
