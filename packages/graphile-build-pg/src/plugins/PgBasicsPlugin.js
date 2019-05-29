@@ -319,6 +319,7 @@ export default (function PgBasicsPlugin(
     pgStrictFunctions = false,
     pgColumnFilter = defaultPgColumnFilter,
     pgIgnoreRBAC = false,
+    pgIgnoreSchemas = false,
     pgIgnoreIndexes = true, // TODO:v5: change this to false
     pgLegacyJsonUuid = false, // TODO:v5: remove this
   }
@@ -343,7 +344,7 @@ export default (function PgBasicsPlugin(
 
         // TODO:v5: remove this workaround
         // BEWARE: this may be overridden in PgIntrospectionPlugin for PG < 9.5
-        pgQueryFromResolveData: queryFromResolveDataFactory(),
+        pgQueryFromResolveData: queryFromResolveDataFactory({ pgIgnoreSchemas }),
 
         pgAddStartEndCursor: addStartEndCursor,
         pgOmit,

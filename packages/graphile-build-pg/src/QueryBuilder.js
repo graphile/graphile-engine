@@ -43,6 +43,7 @@ type CursorComparator = (val: CursorValue, isAfter: boolean) => void;
 
 export type QueryBuilderOptions = {
   supportsJSONB?: boolean, // Defaults to true
+  ignoreSchemas?: boolean, // Defaults to false
 };
 
 class QueryBuilder {
@@ -50,6 +51,7 @@ class QueryBuilder {
   context: GraphQLContext;
   rootValue: any; // eslint-disable-line flowtype/no-weak-types
   supportsJSONB: boolean;
+  ignoreSchemas: boolean;
   locks: {
     [string]: false | true | string,
   };
@@ -116,7 +118,11 @@ class QueryBuilder {
       options.supportsJSONB === null
         ? true
         : !!options.supportsJSONB;
-
+    this.ignoreSchemas =
+      typeof options.ignoreSchemas === "undefined" ||
+      options.ignoreSchemas === null
+        ? false
+        : !!options.ignoreSchemas
     this.locks = {
       // As a performance optimisation, we're going to list a number of lock
       // types so that V8 doesn't need to mutate the object too much
@@ -798,7 +804,11 @@ order by (row_number() over (partition by 1)) desc`;
     } else if (type === "from") {
       if (this.data.from) {
         const f = this.data.from;
-        this.compiledData.from = [callIfNecessary(f[0], context), f[1]];
+        let _f = [callIfNecessary(f[0], context), f[1]];
+        if (this.ignoreSchemas) {
+          _f[0] = { ..._f[0], names: _f[0].names.slice(-1) };
+        }
+        this.compiledData.from = _f;
       }
     } else if (type === "join" || type === "where") {
       this.compiledData[type] = callIfNecessaryArray(this.data[type], context);
