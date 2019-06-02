@@ -122,7 +122,7 @@ class QueryBuilder {
       typeof options.ignoreSchemas === "undefined" ||
       options.ignoreSchemas === null
         ? false
-        : !!options.ignoreSchemas
+        : !!options.ignoreSchemas;
     this.locks = {
       // As a performance optimisation, we're going to list a number of lock
       // types so that V8 doesn't need to mutate the object too much
@@ -805,7 +805,7 @@ order by (row_number() over (partition by 1)) desc`;
       if (this.data.from) {
         const f = this.data.from;
         let _f = [callIfNecessary(f[0], context), f[1]];
-        if (this.ignoreSchemas) {
+        if (this.ignoreSchemas && _f[0].type === 'IDENTIFIER') {
           _f[0] = { ..._f[0], names: _f[0].names.slice(-1) };
         }
         this.compiledData.from = _f;
