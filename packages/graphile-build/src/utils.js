@@ -32,11 +32,22 @@ export const formatInsideUnderscores = (fn: (input: string) => string) => (
   return `${start}${fn(middle)}${end}`;
 };
 
+export const formatLastSegment = (fn: (input: string) => string) => (
+  str: string
+) => {
+  const matches = str.match(/^([\s\S]*?)([A-Z]?[a-z0-9]*)$/);
+  if (!matches) {
+    throw new Error("Impossible?"); // Satiate Flow
+  }
+  const [, start, end] = matches;
+  return `${start}${fn(end)}`;
+};
+
 export const upperFirst = formatInsideUnderscores(upperFirstAll);
 export const camelCase = formatInsideUnderscores(camelCaseAll);
 export const constantCase = formatInsideUnderscores(constantCaseAll);
 export const upperCamelCase = (str: string): string =>
   upperFirst(camelCase(str));
 
-export const pluralize = (str: string) => plz(str);
-export const singularize = (str: string) => plz.singular(str);
+export const pluralize = formatInsideUnderscores(formatLastSegment(plz));
+export const singularize = formatInsideUnderscores(formatLastSegment(plz.singular));

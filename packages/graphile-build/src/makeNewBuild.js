@@ -14,10 +14,15 @@ import {
 } from "graphql-parse-resolve-info";
 import debugFactory from "debug";
 import type { ResolveTree } from "graphql-parse-resolve-info";
-import pluralize from "pluralize";
 import LRU from "@graphile/lru";
 import semver from "semver";
-import { upperCamelCase, camelCase, constantCase } from "./utils";
+import {
+  upperCamelCase,
+  camelCase,
+  constantCase,
+  pluralize,
+  singularize
+} from "./utils";
 import swallowError from "./swallowError";
 import resolveNode from "./resolveNode";
 import { LiveCoordinator } from "./Live";
@@ -886,7 +891,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
     fieldArgDataGeneratorsByFieldNameByType,
     inflection: {
       pluralize,
-      singularize: pluralize.singular,
+      singularize,
       upperCamelCase,
       camelCase,
       constantCase,
