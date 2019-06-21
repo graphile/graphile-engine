@@ -4016,8 +4016,6 @@ type Mutation {
     \\"\\"\\"
     input: CompoundTypeMutationInput!
   ): CompoundTypeMutationPayload
-
-  \\"\\"\\"Reads and enables pagination through a set of \`CompoundType\`.\\"\\"\\"
   compoundTypeSetMutation(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -4538,8 +4536,6 @@ type Mutation {
     \\"\\"\\"
     input: Issue756MutationInput!
   ): Issue756MutationPayload
-
-  \\"\\"\\"Reads and enables pagination through a set of \`Issue756\`.\\"\\"\\"
   issue756SetMutation(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -4684,8 +4680,6 @@ type Mutation {
     \\"\\"\\"
     input: MutationOutTableInput!
   ): MutationOutTablePayload
-
-  \\"\\"\\"Reads and enables pagination through a set of \`Person\`.\\"\\"\\"
   mutationOutTableSetof(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -4728,8 +4722,6 @@ type Mutation {
     \\"\\"\\"
     input: NoArgsMutationInput!
   ): NoArgsMutationPayload
-
-  \\"\\"\\"Reads and enables pagination through a set of \`Post\`.\\"\\"\\"
   postMany(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -4754,16 +4746,12 @@ type Mutation {
     \\"\\"\\"
     input: TableMutationInput!
   ): TableMutationPayload
-
-  \\"\\"\\"Reads and enables pagination through a set of \`Person\`.\\"\\"\\"
   tableSetMutation(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     \\"\\"\\"
     input: TableSetMutationInput!
   ): TableSetMutationPayload
-
-  \\"\\"\\"Reads and enables pagination through a set of \`Type\`.\\"\\"\\"
   typeFunctionConnectionMutation(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
