@@ -25,6 +25,8 @@ export default (function PgBackwardRelationPlugin(
         extend,
         getTypeByName,
         pgGetGqlTypeByTypeIdAndModifier,
+        pgGetGqlInputTypeByTypeIdAndModifier,
+        gql2pg,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
         pgSql: sql,
         getSafeAliasFromResolveInfo,
@@ -234,6 +236,97 @@ export default (function PgBackwardRelationPlugin(
               )}`
             );
           }
+
+          const keyNumSet = new Set(keys.map(({num}) => num));
+          const partOfPrimaryKey = primaryKeys && !!primaryKeys.find(k => keyNumSet.has(k.num))
+          const shouldAddParamaterizedSingleRelation = partOfPrimaryKey && !isUnique && legacyRelationMode !== ONLY;
+          const paramaterizedSingleRelationFieldName = partOfPrimaryKey && inflection.rowByUniqueKeys(primaryKeys, table, constraint);
+
+          if (shouldAddParamaterizedSingleRelation && !omit(table, "read") && paramaterizedSingleRelationFieldName) {
+            const argKeys = primaryKeys.filter(k => !keyNumSet.has(k.num)).map(key => ({ ...key,
+              sqlIdentifier: sql.identifier(key.name),
+              columnName: inflection.column(key)
+            }));
+
+            memo = extend(memo, {
+              [paramaterizedSingleRelationFieldName]: fieldWithHooks(paramaterizedSingleRelationFieldName, ({
+                getDataFromParsedResolveInfoFragment,
+                addDataGenerator
+              }) => {
+                addDataGenerator(parsedResolveInfoFragment => {
+                  return {
+                    pgQuery: queryBuilder => {
+                      queryBuilder.select(() => {
+                        const resolveData = getDataFromParsedResolveInfoFragment(parsedResolveInfoFragment, gqlTableType);
+                        const tableAlias = sql.identifier(Symbol());
+                        const foreignTableAlias = queryBuilder.getTableAlias();
+                        const query = queryFromResolveData(sql.identifier(schema.name, table.name), tableAlias, resolveData, {
+                          useAsterisk: false, // Because it's only a single relation, no need
+                          asJson: true,
+                          addNullCase: true,
+                          withPagination: false
+                        }, innerQueryBuilder => {
+                          innerQueryBuilder.parentQueryBuilder = queryBuilder;
+                          if (subscriptions && table.primaryKeyConstraint) {
+                            innerQueryBuilder.selectIdentifiers(table);
+                          }
+                          keys.forEach((key, i) => {
+                            innerQueryBuilder.where(sql.fragment`${tableAlias}.${sql.identifier(key.name)} = ${foreignTableAlias}.${sql.identifier(foreignKeys[i].name)}`);
+                          });
+                          argKeys.forEach(({
+                            sqlIdentifier,
+                            columnName,
+                            type,
+                            typeModifier
+                          }) => {
+                            innerQueryBuilder.where(sql.fragment`${tableAlias}.${sqlIdentifier} = ${gql2pg(parsedResolveInfoFragment.args[columnName], type, typeModifier)}`);
+                          });
+                        }, queryBuilder.context, queryBuilder.rootValue);
+                        return sql.fragment`(${query})`;
+                      }, getSafeAliasFromAlias(parsedResolveInfoFragment.alias));
+                    }
+                  };
+                });
+                return {
+                  description: constraint.tags.backwardDescription || `Reads a single \`${tableTypeName}\` that is related to this \`${foreignTableTypeName}\`.`,
+                  type: gqlTableType,
+                  args: argKeys.reduce((memo, key) => {
+                    const {
+                      typeId,
+                      typeModifier,
+                      name,
+                      columnName
+                    } = key;
+                    const InputType = pgGetGqlInputTypeByTypeIdAndModifier(typeId, typeModifier);
+
+                    if (!InputType) {
+                      throw new Error(`Could not find input type for key '${name}' on type '${TableType.name}'`);
+                    }
+
+                    memo[columnName] = {
+                      type: new GraphQLNonNull(InputType)
+                    };
+                    return memo;
+                  }, {}),
+                  resolve: (data, args, resolveContext, resolveInfo) => {
+                    const safeAlias = getSafeAliasFromResolveInfo(resolveInfo);
+                    const record = data[safeAlias];
+                    const liveRecord = resolveInfo.rootValue && resolveInfo.rootValue.liveRecord;
+                    if (record && liveRecord) {
+                      liveRecord("pg", table, record.__identifiers);
+                    }
+                    return record;
+                  }
+                };
+              }, {
+                pgFieldIntrospection: table,
+                isPgBackwardSingleRelationField: true
+              })
+            }, `Backward relation (single) for ${describePgEntity(constraint)}. To rename this relation with smart comments:\n\n  ${sqlCommentByAddingTags(constraint, {
+              foreignSingleFieldName: "newNameHere"
+            })}`);
+          }
+
           function makeFields(isConnection) {
             if (isUnique && !isConnection) {
               // Don't need this, use the singular instead
