@@ -1169,12 +1169,6 @@ type TypeFunctionConnectionMutationPayload {
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
   query: Query
-
-  \\"\\"\\"An edge for our \`Type\`. May be used by Relay 1.\\"\\"\\"
-  typeEdge(
-    \\"\\"\\"The method to use when ordering \`Type\`.\\"\\"\\"
-    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
-  ): TypesEdge
   types: [Type]
 }
 
@@ -1199,12 +1193,6 @@ type TypeFunctionListMutationPayload {
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
   query: Query
-
-  \\"\\"\\"An edge for our \`Type\`. May be used by Relay 1.\\"\\"\\"
-  typeEdge(
-    \\"\\"\\"The method to use when ordering \`Type\`.\\"\\"\\"
-    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
-  ): TypesEdge
   types: [Type]
 }
 

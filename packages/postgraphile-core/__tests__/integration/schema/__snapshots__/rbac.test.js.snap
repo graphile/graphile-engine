@@ -4500,12 +4500,6 @@ type Issue756SetMutationPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-
-  \\"\\"\\"An edge for our \`Issue756\`. May be used by Relay 1.\\"\\"\\"
-  issue756Edge(
-    \\"\\"\\"The method to use when ordering \`Issue756\`.\\"\\"\\"
-    orderBy: [Issue756SOrderBy!] = [PRIMARY_KEY_ASC]
-  ): Issue756SEdge
   issue756S: [Issue756]
 
   \\"\\"\\"
@@ -6463,12 +6457,6 @@ type MutationOutTableSetofPayload {
   clientMutationId: String
   people: [Person]
 
-  \\"\\"\\"An edge for our \`Person\`. May be used by Relay 1.\\"\\"\\"
-  personEdge(
-    \\"\\"\\"The method to use when ordering \`Person\`.\\"\\"\\"
-    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PeopleEdge
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -7687,15 +7675,6 @@ type PostManyPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-
-  \\"\\"\\"Reads a single \`Person\` that is related to this \`Post\`.\\"\\"\\"
-  personByAuthorId: Person
-
-  \\"\\"\\"An edge for our \`Post\`. May be used by Relay 1.\\"\\"\\"
-  postEdge(
-    \\"\\"\\"The method to use when ordering \`Post\`.\\"\\"\\"
-    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PostsEdge
   posts: [Post]
 
   \\"\\"\\"
@@ -9476,12 +9455,6 @@ type TableSetMutationPayload {
   clientMutationId: String
   people: [Person]
 
-  \\"\\"\\"An edge for our \`Person\`. May be used by Relay 1.\\"\\"\\"
-  personEdge(
-    \\"\\"\\"The method to use when ordering \`Person\`.\\"\\"\\"
-    orderBy: [PeopleOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PeopleEdge
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
@@ -9724,22 +9697,10 @@ type TypeFunctionConnectionMutationPayload {
   \\"\\"\\"
   clientMutationId: String
 
-  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
-  postById: Post
-
-  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
-  postBySmallint: Post
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
   query: Query
-
-  \\"\\"\\"An edge for our \`Type\`. May be used by Relay 1.\\"\\"\\"
-  typeEdge(
-    \\"\\"\\"The method to use when ordering \`Type\`.\\"\\"\\"
-    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
-  ): TypesEdge
   types: [Type]
 }
 
@@ -9760,22 +9721,10 @@ type TypeFunctionListMutationPayload {
   \\"\\"\\"
   clientMutationId: String
 
-  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
-  postById: Post
-
-  \\"\\"\\"Reads a single \`Post\` that is related to this \`Type\`.\\"\\"\\"
-  postBySmallint: Post
-
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
   \\"\\"\\"
   query: Query
-
-  \\"\\"\\"An edge for our \`Type\`. May be used by Relay 1.\\"\\"\\"
-  typeEdge(
-    \\"\\"\\"The method to use when ordering \`Type\`.\\"\\"\\"
-    orderBy: [TypesOrderBy!] = [PRIMARY_KEY_ASC]
-  ): TypesEdge
   types: [Type]
 }
 
