@@ -208,7 +208,7 @@ const getPostGraphileBuilder = async (
     pgColumnFilter,
     viewUniqueKey,
     enableTags = true,
-    readCache,
+    readCache, // string or Object
     writeCache,
     setWriteCacheCallback,
     legacyRelations = "deprecated", // TODO:v5: Change to 'omit' in v5
@@ -261,7 +261,7 @@ const getPostGraphileBuilder = async (
   let persistentMemoizeWithKey; // NOT null, otherwise it won't default correctly.
   let memoizeCache = {};
 
-  if (readCache) {
+  if (readCache && typeof readCache === "string") {
     const cacheString: string = await new Promise<string>((resolve, reject) => {
       fs.readFile(readCache, "utf8", (err?: Error | null, data?: string) => {
         if (err) {
@@ -278,6 +278,8 @@ const getPostGraphileBuilder = async (
         `Failed to parse cache file '${readCache}', perhaps it is corrupted? ${e}`
       );
     }
+  } else if (readCache && typeof readCache === "object") {
+    memoizeCache = readCache;
   }
   if (readCache || writeCache) {
     persistentMemoizeWithKey = (key: string, fn: () => any) => {
