@@ -17,6 +17,7 @@ import type {
   parseResolveInfo,
 } from "graphql-parse-resolve-info";
 import type { GraphQLResolveInfo } from "graphql/type/definition";
+import type resolveNode from "./resolveNode";
 
 import type { FieldWithHooksFunction } from "./makeNewBuild";
 const { GraphQLSchema } = graphql;
@@ -71,6 +72,8 @@ export type Build = {|
     [string]: (...args: Array<any>) => string,
   },
   swallowError: (e: Error) => void,
+  // resolveNode: EXPERIMENTAL, API might change!
+  resolveNode: resolveNode,
   status: {
     currentHookName: ?string,
     currentHookEvent: ?string,
