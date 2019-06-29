@@ -217,6 +217,13 @@ class SchemaBuilder extends EventEmitter {
       GraphQLEnumType: [],
       "GraphQLEnumType:values": [],
       "GraphQLEnumType:values:value": [],
+
+      // When creating a GraphQLUnionType via `newWithHooks`, we'll
+      // execute, the following hooks:
+      // - 'GraphQLUnionType' to add any root-level attributes, e.g. add a description
+      // - 'GraphQLUnionType:types' to add additional types to this union
+      GraphQLUnionType: [],
+      "GraphQLUnionType:types": [],
     };
   }
 
