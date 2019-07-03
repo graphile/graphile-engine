@@ -7,7 +7,9 @@
   "scripts": {
     "test": "jest",
     "prepack": "mkdir -p node8plus && babel --root-mode upward --copy-files -s true --out-dir node8plus src && flow-copy-source src node8plus",
-    "watch": "mkdir -p node8plus && babel --root-mode upward --copy-files -s true --watch --out-dir node8plus src"
+    "watch": "mkdir -p node8plus && babel --root-mode upward --copy-files -s true --watch --out-dir node8plus src",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -46,7 +48,8 @@
     "lodash": ">=4 <5",
     "lru-cache": ">=4 <5",
     "pg-sql2": "4.4.1-alpha.2",
-    "postgres-interval": "^1.2.0"
+    "postgres-interval": "^1.2.0",
+    "snyk": "^1.189.0"
   },
   "peerDependencies": {
     "pg": ">=6.1.0 <8"
@@ -70,5 +73,6 @@
   ],
   "engines": {
     "node": ">=8.6"
-  }
+  },
+  "snyk": true
 }
