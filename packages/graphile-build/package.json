@@ -7,7 +7,9 @@
   "scripts": {
     "test": "jest",
     "prepack": "mkdir -p node8plus && babel --root-mode upward --copy-files -s true --out-dir node8plus src && flow-copy-source src node8plus",
-    "watch": "mkdir -p node8plus && babel --root-mode upward --copy-files -s true --watch --out-dir node8plus src"
+    "watch": "mkdir -p node8plus && babel --root-mode upward --copy-files -s true --watch --out-dir node8plus src",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -39,7 +41,8 @@
     "lodash": ">=4 <5",
     "lru-cache": "^5.0.0",
     "pluralize": "^7.0.0",
-    "semver": "^6.0.0"
+    "semver": "^6.0.0",
+    "snyk": "^1.189.0"
   },
   "engines": {
     "node": ">=8.6"
@@ -62,5 +65,6 @@
   "files": [
     "node8plus",
     "index.js"
-  ]
+  ],
+  "snyk": true
 }
