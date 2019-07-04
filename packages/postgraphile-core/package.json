@@ -7,7 +7,9 @@
     "test": "scripts/test",
     "prepack": "mkdir -p node8plus && tsc",
     "tslint": "prettier --list-different 'src/**/*' && tslint --config ../../tslint.json --project tsconfig.json",
-    "watch": "mkdir -p node8plus && tsc --watch"
+    "watch": "mkdir -p node8plus && tsc --watch",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -22,7 +24,8 @@
   "dependencies": {
     "@types/graphql": "^14.2.0",
     "graphile-build": "4.4.2",
-    "graphile-build-pg": "4.4.2"
+    "graphile-build-pg": "4.4.2",
+    "snyk": "^1.189.0"
   },
   "devDependencies": {
     "@types/node": "^12.0.0",
@@ -55,5 +58,6 @@
   ],
   "engines": {
     "node": ">=8.6"
-  }
+  },
+  "snyk": true
 }
