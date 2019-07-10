@@ -79,17 +79,17 @@ export default (function PgJWTPlugin(
                 Object.assign(
                   {},
                   pgJwtSignOptions,
-                  token.aud || pgJwtSignOptions.audience
+                  token.aud || (pgJwtSignOptions && pgJwtSignOptions.audience)
                     ? null
                     : {
                         audience: "postgraphile",
                       },
-                  token.iss || pgJwtSignOptions.issuer
+                  token.iss || (pgJwtSignOptions && pgJwtSignOptions.issuer)
                     ? null
                     : {
                         issuer: "postgraphile",
                       },
-                  token.exp || pgJwtSignOptions.expiresIn
+                  token.exp || (pgJwtSignOptions && pgJwtSignOptions.expiresIn)
                     ? null
                     : {
                         expiresIn: "1 day",
