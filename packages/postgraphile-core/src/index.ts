@@ -90,7 +90,7 @@ export interface PostGraphileCoreOptions {
    */
   viewUniqueKey?: string;
   enableTags?: boolean;
-  readCache?: string;
+  readCache?: string | object;
   writeCache?: string;
   setWriteCacheCallback?: (fn: () => Promise<void>) => void;
   legacyRelations?: "only" | "deprecated" | "omit";
@@ -208,7 +208,7 @@ const getPostGraphileBuilder = async (
     pgColumnFilter,
     viewUniqueKey,
     enableTags = true,
-    readCache, // string or Object
+    readCache,
     writeCache,
     setWriteCacheCallback,
     legacyRelations = "deprecated", // TODO:v5: Change to 'omit' in v5
