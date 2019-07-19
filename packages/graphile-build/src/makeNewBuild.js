@@ -641,7 +641,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                   `|${getNameFromType(Self)}.fields.${fieldName}`
                 );
                 newSpec.args = newSpec.args || {};
-                newSpec = Object.assign({}, newSpec, {
+                newSpec = Object.assign({}, { name: fieldName }, newSpec, {
                   args: builder.applyHooks(
                     this,
                     "GraphQLObjectType:fields:field:args",
