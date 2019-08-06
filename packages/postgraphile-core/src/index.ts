@@ -283,6 +283,8 @@ const getPostGraphileBuilder = async (
     }
   } else if (readCache && typeof readCache === "object") {
     memoizeCache = readCache;
+  } else {
+    throw new Error(`'readCache' not understood; expected string or object, but received '${typeof readCache}'`);
   }
   if (readCache || writeCache) {
     persistentMemoizeWithKey = (key: string, fn: () => any) => {
