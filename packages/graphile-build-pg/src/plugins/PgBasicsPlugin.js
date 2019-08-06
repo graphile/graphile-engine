@@ -157,7 +157,8 @@ const omitUnindexed = (omit, hideIndexWarnings) => (
   ) {
     let klass = entity.class;
     if (klass) {
-      const shouldOutputWarning = !entity._omitUnindexedReadWarningGiven && !hideIndexWarnings;
+      const shouldOutputWarning =
+        !entity._omitUnindexedReadWarningGiven && !hideIndexWarnings;
       if (shouldOutputWarning) {
         // $FlowFixMe
         entity._omitUnindexedReadWarningGiven = true;
@@ -172,7 +173,7 @@ const omitUnindexed = (omit, hideIndexWarnings) => (
             .map(a => a.name)
             .join('", "')}");`
         );
-      } 
+      }
     }
     return true;
   }
