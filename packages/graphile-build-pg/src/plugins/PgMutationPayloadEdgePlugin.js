@@ -38,6 +38,13 @@ export default (function PgMutationPayloadEdgePlugin(
       ) {
         return fields;
       }
+      if (
+        pgIntrospection.kind === "procedure" &&
+        (pgIntrospection.returnTypeId !== table.typeId ||
+          pgIntrospection.returnsSet)
+      ) {
+        return fields;
+      }
       const simpleCollections =
         table.tags.simpleCollections || pgSimpleCollections;
       const hasConnections = simpleCollections !== "only";
@@ -108,18 +115,20 @@ export default (function PgMutationPayloadEdgePlugin(
 
                 if (!order) {
                   if (edge.__identifiers) {
-                    return Object.assign({}, edge, {
+                    return {
+                      ...edge,
                       __cursor: ["primary_key_asc", edge.__identifiers],
-                    });
+                    };
                   } else {
                     return edge;
                   }
                 }
 
-                return Object.assign({}, edge, {
+                return {
+                  ...edge,
                   __cursor:
                     edge[`__order_${order.map(item => item.alias).join("__")}`],
-                });
+                };
               },
             },
             {

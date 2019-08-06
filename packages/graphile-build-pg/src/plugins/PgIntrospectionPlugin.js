@@ -101,6 +101,7 @@ export type PgType = {
   classId: ?string,
   class: ?PgClass,
   domainBaseTypeId: ?string,
+  domainBaseType: ?PgType,
   domainTypeModifier: ?number,
   tags: { [string]: string },
 };
@@ -460,9 +461,7 @@ export default (async function PgIntrospectionPlugin(
     const cacheKey = `PgIntrospectionPlugin-introspectionResultsByKind-v${version}`;
     const cloneResults = obj => {
       const result = Object.keys(obj).reduce((memo, k) => {
-        memo[k] = Array.isArray(obj[k])
-          ? obj[k].map(v => Object.assign({}, v))
-          : obj[k];
+        memo[k] = Array.isArray(obj[k]) ? obj[k].map(v => ({ ...v })) : obj[k];
         return memo;
       }, {});
       return result;
@@ -888,7 +887,7 @@ export default (async function PgIntrospectionPlugin(
                     );
                     console.warn(
                       chalk.yellow(
-                        "This is likely because the PostgreSQL user in the connection string does not have sufficient privileges; you can solve this by passing the 'owner' connection string via '--owner-connection-string' / 'ownerConnectionString'. If the fixtures already exist, the watch functionality may still work."
+                        "This is likely because the PostgreSQL user in the connection string does not have sufficient privileges; you can solve this by passing the 'owner' connection string via '--owner-connection' / 'ownerConnectionString'. If the fixtures already exist, the watch functionality may still work."
                       )
                     );
                     console.warn(

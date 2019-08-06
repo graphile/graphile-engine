@@ -160,6 +160,7 @@ const {
   GraphQLObjectType,
   GraphQLInputObjectType,
   GraphQLEnumType,
+  GraphQLUnionType,
   getNamedType,
   isCompositeType,
   isAbstractType,
@@ -199,6 +200,7 @@ const knownTypes = [
   GraphQLObjectType,
   GraphQLInputObjectType,
   GraphQLEnumType,
+  GraphQLUnionType,
 ];
 const knownTypeNames = knownTypes.map(k => k.name);
 
@@ -475,10 +477,11 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
           this,
           "GraphQLObjectType",
           newSpec,
-          Object.assign({}, commonContext, {
+          {
+            ...commonContext,
             addDataGeneratorForField,
             recurseDataGeneratorsForField,
-          }),
+          },
           `|${newSpec.name}`
         );
 
@@ -639,18 +642,20 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                   `|${getNameFromType(Self)}.fields.${fieldName}`
                 );
                 newSpec.args = newSpec.args || {};
-                newSpec = Object.assign({}, newSpec, {
+                newSpec = {
+                  ...newSpec,
                   args: builder.applyHooks(
                     this,
                     "GraphQLObjectType:fields:field:args",
                     newSpec.args,
-                    Object.assign({}, context, {
+                    {
+                      ...context,
                       field: newSpec,
                       returnType: newSpec.type,
-                    }),
+                    },
                     `|${getNameFromType(Self)}.fields.${fieldName}`
                   ),
-                });
+                };
                 const finalSpec = newSpec;
                 processedFields.push(finalSpec);
                 return finalSpec;
@@ -709,7 +714,8 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
           ...newSpec,
           fields: () => {
             const processedFields = [];
-            const fieldsContext = Object.assign({}, commonContext, {
+            const fieldsContext = {
+              ...commonContext,
               Self,
               GraphQLInputObjectType: rawSpec,
               fieldWithHooks: ((fieldName, spec, fieldScope = {}) => {
@@ -752,7 +758,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                 processedFields.push(finalSpec);
                 return finalSpec;
               }: InputFieldWithHooksFunction),
-            });
+            };
             let rawFields = rawSpec.fields;
             if (typeof rawFields === "function") {
               rawFields = rawFields(fieldsContext);
@@ -820,7 +826,43 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
           memo[valueKey] = newValue;
           return memo;
         }, {});
+      } else if (Type === GraphQLUnionType) {
+        const commonContext = {
+          type: "GraphQLUnionType",
+          scope,
+        };
+        newSpec = builder.applyHooks(
+          this,
+          "GraphQLUnionType",
+          newSpec,
+          { ...commonContext },
+          `|${newSpec.name}`
+        );
+
+        const rawSpec = newSpec;
+        newSpec = {
+          ...newSpec,
+          types: () => {
+            const typesContext = {
+              ...commonContext,
+              Self,
+              GraphQLUnionType: rawSpec,
+            };
+            let rawTypes = rawSpec.types || [];
+            if (typeof rawTypes === "function") {
+              rawTypes = rawTypes(typesContext);
+            }
+            return builder.applyHooks(
+              this,
+              "GraphQLUnionType:types",
+              rawTypes,
+              typesContext,
+              `|${getNameFromType(Self)}`
+            );
+          },
+        };
       }
+
       const finalSpec: ConfigType = newSpec;
 
       const Self: T = new Type(finalSpec);
