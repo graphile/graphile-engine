@@ -445,7 +445,9 @@ export default (function PgBasicsPlugin(
             return this.upperCamelCase(this._typeName(type));
           },
           argument(name: ?string, index: number) {
-            return this.camelCase(name || `arg${index}`);
+            return this.coerceToGraphQLName(
+              this.camelCase(name || `arg${index}`)
+            );
           },
           orderByEnum(columnName, ascending) {
             return this.constantCase(
