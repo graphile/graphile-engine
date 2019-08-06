@@ -1,0 +1,9 @@
+{
+  allLargeNodeIds {
+    nodes {
+      nodeId
+      id
+      text
+    }
+  }
+}
