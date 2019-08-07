@@ -94,6 +94,16 @@ export default (function NodePlugin(
             return this.getTypeByName(nodeTypeNameByAlias[alias] || alias);
           },
           setNodeAlias(typeName, alias) {
+            if (
+              nodeTypeNameByAlias[alias] &&
+              nodeTypeNameByAlias[alias] !== typeName
+            ) {
+              throw new Error(
+                `ERROR: two GraphQL types (${typeName} and ${
+                  nodeTypeNameByAlias[alias]
+                }) are trying to use the same node alias '${alias}'. To solve this, you should skip the PgNodeAliasPostGraphile plugin, but note this will change all your existing Node IDs. For alternative solutions, get in touch via GitHub or Discord`
+              );
+            }
             nodeAliasByTypeName[typeName] = alias;
             nodeTypeNameByAlias[alias] = typeName;
           },
