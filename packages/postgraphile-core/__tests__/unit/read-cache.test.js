@@ -62,3 +62,23 @@ test("when no readCache flag, persistentMemoizeWithKey should be undefined", asy
   } = graphileBuild.getBuilder.mock.calls[0][1];
   expect(persistentMemoizeWithKey).toBeUndefined();
 });
+
+test("when cache file has invalid content, getPostGraphileBuilder should error", async () => {
+  // mock fs.readFile to return an object
+  fs.readFile.mockImplementationOnce((path, options, cb) =>
+    cb(null, "thisisnotjson")
+  );
+
+  // call our method and check error
+
+  let error;
+  try {
+    await getPostGraphileBuilder({}, [], {
+      readCache: true,
+    });
+  } catch (e) {
+    error = e;
+  }
+  expect(error).toEqual(expect.any(Error));
+  expect(fs.readFile).toHaveBeenCalledTimes(1);
+});
