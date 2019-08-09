@@ -47,3 +47,18 @@ test("when cache file has empty object, persistentMemoizeWithKey should be a fun
   } = graphileBuild.getBuilder.mock.calls[0][1];
   expect(typeof persistentMemoizeWithKey).toBe("function");
 });
+
+test("when no readCache flag, persistentMemoizeWithKey should be undefined", async () => {
+  // mock getBuilder to fake output
+  const expectedOuput = {};
+  graphileBuild.getBuilder.mockResolvedValueOnce(expectedOuput);
+  // call our method and test output
+  const output = await getPostGraphileBuilder({}, [], {});
+  expect(output).toBe(expectedOuput);
+  expect(graphileBuild.getBuilder).toHaveBeenCalledTimes(1);
+  // check persistentMemoizeWithKey, the actual "result" of readCache flag
+  const {
+    persistentMemoizeWithKey,
+  } = graphileBuild.getBuilder.mock.calls[0][1];
+  expect(persistentMemoizeWithKey).toBeUndefined();
+});
