@@ -36,7 +36,7 @@ test("when cache file has empty object, persistentMemoizeWithKey should be a fun
   graphileBuild.getBuilder.mockResolvedValueOnce(expectedOuput);
   // call our method and test output
   const output = await getPostGraphileBuilder({}, [], {
-    readCache: true,
+    readCache: "path/to/cache",
   });
   expect(output).toBe(expectedOuput);
   expect(fs.readFile).toHaveBeenCalledTimes(1);
@@ -74,7 +74,7 @@ test("when cache file has invalid content, getPostGraphileBuilder should error",
   let error;
   try {
     await getPostGraphileBuilder({}, [], {
-      readCache: true,
+      readCache: "path/to/cache",
     });
   } catch (e) {
     error = e;
