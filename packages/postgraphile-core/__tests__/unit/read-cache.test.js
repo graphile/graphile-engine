@@ -34,13 +34,13 @@ test("when cache file has content, persistentMemoizeWithKey should be a valid fu
   );
 
   // mock getBuilder to fake output
-  const expectedOuput = {};
-  graphileBuild.getBuilder.mockResolvedValueOnce(expectedOuput);
+  const expectedOutput = {};
+  graphileBuild.getBuilder.mockResolvedValueOnce(expectedOutput);
   // call our method and test output
   const output = await getPostGraphileBuilder({}, [], {
     readCache: "path/to/cache",
   });
-  expect(output).toBe(expectedOuput);
+  expect(output).toBe(expectedOutput);
   expect(fs.readFile).toHaveBeenCalledTimes(1);
   expect(graphileBuild.getBuilder).toHaveBeenCalledTimes(1);
   // check persistentMemoizeWithKey, the actual "result" of readCache flag
@@ -54,11 +54,11 @@ test("when cache file has content, persistentMemoizeWithKey should be a valid fu
 
 test("when no readCache flag, persistentMemoizeWithKey should be undefined", async () => {
   // mock getBuilder to fake output
-  const expectedOuput = {};
-  graphileBuild.getBuilder.mockResolvedValueOnce(expectedOuput);
+  const expectedOutput = {};
+  graphileBuild.getBuilder.mockResolvedValueOnce(expectedOutput);
   // call our method and test output
   const output = await getPostGraphileBuilder({}, [], {});
-  expect(output).toBe(expectedOuput);
+  expect(output).toBe(expectedOutput);
   expect(graphileBuild.getBuilder).toHaveBeenCalledTimes(1);
   // check persistentMemoizeWithKey, the actual "result" of readCache flag
   const {
