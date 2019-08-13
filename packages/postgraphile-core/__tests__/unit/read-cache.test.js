@@ -79,6 +79,6 @@ test("when cache file has invalid content, getPostGraphileBuilder should error",
   } catch (e) {
     error = e;
   }
-  expect(error).toEqual(expect.any(Error));
+  expect(error).toMatchSnapshot();
   expect(fs.readFile).toHaveBeenCalledTimes(1);
 });
