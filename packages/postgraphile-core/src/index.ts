@@ -20,6 +20,7 @@ import {
   formatSQLForDebugging,
 } from "graphile-build-pg";
 import { Pool, PoolClient } from "pg";
+import { SignOptions } from "jsonwebtoken";
 
 export {
   Plugin,
@@ -73,6 +74,7 @@ export interface PostGraphileCoreOptions {
   skipPlugins?: Array<Plugin>;
   jwtPgTypeIdentifier?: string;
   jwtSecret?: string;
+  jwtSignOptions?: SignOptions;
   /**
    * @deprecated UNSUPPORTED! Use an inflector plugin instead.
    */
@@ -101,6 +103,7 @@ export interface PostGraphileCoreOptions {
   ignoreRBAC?: boolean;
   legacyFunctionsOnly?: boolean;
   ignoreIndexes?: boolean;
+  hideIndexWarnings?: boolean;
   subscriptions?: boolean;
   live?: boolean;
   ownerConnectionString?: string;
@@ -201,6 +204,7 @@ export const getPostGraphileBuilder = async (
     skipPlugins = [],
     jwtPgTypeIdentifier,
     jwtSecret,
+    jwtSignOptions,
     disableDefaultMutations,
     graphileBuildOptions,
     graphqlBuildOptions, // DEPRECATED!
@@ -219,6 +223,7 @@ export const getPostGraphileBuilder = async (
     ignoreRBAC = true, // TODO:v5: Change to 'false' in v5
     legacyFunctionsOnly = false, // TODO:v5: Remove in v5
     ignoreIndexes = true, // TODO:v5: Change to 'false' in v5
+    hideIndexWarnings = false,
     subscriptions: inSubscriptions = false, // TODO:v5: Change to 'true' in v5
     live = false,
     ownerConnectionString,
@@ -368,6 +373,7 @@ export const getPostGraphileBuilder = async (
     nodeIdFieldName: nodeIdFieldName || (classicIds ? "id" : "nodeId"),
     pgJwtTypeIdentifier: jwtPgTypeIdentifier,
     pgJwtSecret: jwtSecret,
+    pgJwtSignOptions: jwtSignOptions,
     pgDisableDefaultMutations: disableDefaultMutations,
     pgViewUniqueKey: viewUniqueKey,
     pgEnableTags: enableTags,
@@ -380,6 +386,7 @@ export const getPostGraphileBuilder = async (
     pgIgnoreRBAC: ignoreRBAC,
     pgLegacyFunctionsOnly: legacyFunctionsOnly,
     pgIgnoreIndexes: ignoreIndexes,
+    pgHideIndexWarnings: hideIndexWarnings,
     pgOwnerConnectionString: ownerConnectionString,
 
     /*

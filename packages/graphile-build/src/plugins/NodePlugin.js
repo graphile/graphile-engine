@@ -6,7 +6,6 @@ import type {
   Context,
   ContextGraphQLObjectTypeFields,
 } from "../SchemaBuilder";
-import resolveNode from "../resolveNode";
 import type { ResolveTree } from "graphql-parse-resolve-info";
 import type {
   GraphQLType,
@@ -95,6 +94,17 @@ export default (function NodePlugin(
             return this.getTypeByName(nodeTypeNameByAlias[alias] || alias);
           },
           setNodeAlias(typeName, alias) {
+            if (
+              nodeTypeNameByAlias[alias] &&
+              nodeTypeNameByAlias[alias] !== typeName
+            ) {
+              // eslint-disable-next-line no-console
+              console.warn(
+                `SERIOUS WARNING: two GraphQL types (${typeName} and ${
+                  nodeTypeNameByAlias[alias]
+                }) are trying to use the same node alias '${alias}' which may mean that the Relay Global Object Identification identifiers in your schema may not be unique. To solve this, you should skip the PgNodeAliasPostGraphile plugin, but note this will change all your existing Node IDs. For alternative solutions, get in touch via GitHub or Discord`
+              );
+            }
             nodeAliasByTypeName[typeName] = alias;
             nodeTypeNameByAlias[alias] = typeName;
           },
@@ -198,6 +208,7 @@ export default (function NodePlugin(
         extend,
         graphql: { GraphQLNonNull, GraphQLID },
         inflection,
+        resolveNode,
       } = build;
       return extend(
         fields,
