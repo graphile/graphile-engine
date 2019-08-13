@@ -27,9 +27,11 @@ Test strategy for readCache
 
 */
 
-test("when cache file has empty object, persistentMemoizeWithKey should be a function", async () => {
+test("when cache file has content, persistentMemoizeWithKey should be a valid function", async () => {
   // mock fs.readFile to return an object
-  fs.readFile.mockImplementationOnce((path, options, cb) => cb(null, "{}"));
+  fs.readFile.mockImplementationOnce((path, options, cb) =>
+    cb(null, '{ "__test": true }')
+  );
 
   // mock getBuilder to fake output
   const expectedOuput = {};
@@ -46,6 +48,8 @@ test("when cache file has empty object, persistentMemoizeWithKey should be a fun
     persistentMemoizeWithKey,
   } = graphileBuild.getBuilder.mock.calls[0][1];
   expect(typeof persistentMemoizeWithKey).toBe("function");
+  expect(persistentMemoizeWithKey("__test")).toEqual(true);
+  expect(() => persistentMemoizeWithKey("unknown_key")).toThrow();
 });
 
 test("when no readCache flag, persistentMemoizeWithKey should be undefined", async () => {
