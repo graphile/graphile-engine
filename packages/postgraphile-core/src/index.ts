@@ -263,28 +263,37 @@ const getPostGraphileBuilder = async (
 
   let persistentMemoizeWithKey; // NOT null, otherwise it won't default correctly.
   let memoizeCache = {};
-
-  if (readCache && typeof readCache === "string") {
-    const cacheString: string = await new Promise<string>((resolve, reject) => {
-      fs.readFile(readCache, "utf8", (err?: Error | null, data?: string) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
+  if (readCache) {
+    if (typeof readCache === "string") {
+      const cacheString: string = await new Promise<string>(
+        (resolve, reject) => {
+          fs.readFile(
+            readCache,
+            "utf8",
+            (err?: Error | null, data?: string) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(data);
+              }
+            }
+          );
         }
-      });
-    });
-    try {
-      memoizeCache = JSON.parse(cacheString);
-    } catch (e) {
+      );
+      try {
+        memoizeCache = JSON.parse(cacheString);
+      } catch (e) {
+        throw new Error(
+          `Failed to parse cache file '${readCache}', perhaps it is corrupted? ${e}`
+        );
+      }
+    } else if (typeof readCache === "object") {
+      memoizeCache = readCache;
+    } else {
       throw new Error(
-        `Failed to parse cache file '${readCache}', perhaps it is corrupted? ${e}`
+        `'readCache' not understood; expected string or object, but received '${typeof readCache}'`
       );
     }
-  } else if (readCache && typeof readCache === "object") {
-    memoizeCache = readCache;
-  } else {
-    throw new Error(`'readCache' not understood; expected string or object, but received '${typeof readCache}'`);
   }
   if (readCache || writeCache) {
     persistentMemoizeWithKey = (key: string, fn: () => any) => {
