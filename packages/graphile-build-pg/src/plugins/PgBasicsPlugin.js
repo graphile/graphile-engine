@@ -138,7 +138,7 @@ const omitWithRBACChecks = omit => (
   return omit(entity, permission);
 };
 
-const omitUnindexed = omit => (
+const omitUnindexed = (omit, hideIndexWarnings) => (
   entity: PgProc | PgClass | PgAttribute | PgConstraint,
   permission: string
 ) => {
@@ -157,7 +157,9 @@ const omitUnindexed = omit => (
   ) {
     let klass = entity.class;
     if (klass) {
-      if (!entity._omitUnindexedReadWarningGiven) {
+      const shouldOutputWarning =
+        !entity._omitUnindexedReadWarningGiven && !hideIndexWarnings;
+      if (shouldOutputWarning) {
         // $FlowFixMe
         entity._omitUnindexedReadWarningGiven = true;
         // eslint-disable-next-line no-console
@@ -256,7 +258,11 @@ function sqlCommentByAddingTags(entity, tagsToAdd) {
     );
 
   // tagsToAdd is here twice to ensure that the keys in tagsToAdd come first, but that they also "win" any conflicts.
-  const tags = Object.assign({}, tagsToAdd, entity.tags, tagsToAdd);
+  const tags = {
+    ...tagsToAdd,
+    ...entity.tags,
+    ...tagsToAdd,
+  };
 
   const description = entity.description;
   const tagsSql = Object.keys(tags)
@@ -320,6 +326,7 @@ export default (function PgBasicsPlugin(
     pgColumnFilter = defaultPgColumnFilter,
     pgIgnoreRBAC = false,
     pgIgnoreIndexes = true, // TODO:v5: change this to false
+    pgHideIndexWarnings = false,
     pgLegacyJsonUuid = false, // TODO:v5: remove this
   }
 ) {
@@ -328,7 +335,7 @@ export default (function PgBasicsPlugin(
     pgOmit = omitWithRBACChecks(pgOmit);
   }
   if (!pgIgnoreIndexes) {
-    pgOmit = omitUnindexed(pgOmit);
+    pgOmit = omitUnindexed(pgOmit, pgHideIndexWarnings);
   }
   builder.hook(
     "build",
@@ -414,14 +421,16 @@ export default (function PgBasicsPlugin(
           // lost, e.g.
           // `constantCase(camelCase('foo_1')) !== constantCase('foo_1')`
           _functionName(proc: PgProc) {
-            return proc.tags.name || proc.name;
+            return this.coerceToGraphQLName(proc.tags.name || proc.name);
           },
           _typeName(type: PgType) {
             // 'type' introspection result
-            return type.tags.name || type.name;
+            return this.coerceToGraphQLName(type.tags.name || type.name);
           },
           _tableName(table: PgClass) {
-            return table.tags.name || table.type.tags.name || table.name;
+            return this.coerceToGraphQLName(
+              table.tags.name || table.type.tags.name || table.name
+            );
           },
           _singularizedTableName(table: PgClass): string {
             return this.singularize(this._tableName(table)).replace(
@@ -430,7 +439,7 @@ export default (function PgBasicsPlugin(
             );
           },
           _columnName(attr: PgAttribute, _options?: { skipRowId?: boolean }) {
-            return attr.tags.name || attr.name;
+            return this.coerceToGraphQLName(attr.tags.name || attr.name);
           },
 
           // From here down, functions are passed database introspection results
@@ -438,7 +447,9 @@ export default (function PgBasicsPlugin(
             return this.upperCamelCase(this._typeName(type));
           },
           argument(name: ?string, index: number) {
-            return this.camelCase(name || `arg${index}`);
+            return this.coerceToGraphQLName(
+              this.camelCase(name || `arg${index}`)
+            );
           },
           orderByEnum(columnName, ascending) {
             return this.constantCase(

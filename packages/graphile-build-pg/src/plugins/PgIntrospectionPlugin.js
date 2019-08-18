@@ -101,6 +101,7 @@ export type PgType = {
   classId: ?string,
   class: ?PgClass,
   domainBaseTypeId: ?string,
+  domainBaseType: ?PgType,
   domainTypeModifier: ?number,
   tags: { [string]: string },
 };
@@ -307,6 +308,7 @@ function smartCommentConstraints(introspectionResults) {
       const fakeConstraint = {
         kind: "constraint",
         isFake: true,
+        isIndexed: true, // otherwise it gets ignored by ignoreIndexes
         id: Math.random(),
         name: `FAKE_${klass.namespaceName}_${klass.name}_primaryKey`,
         type: "p", // primary key
@@ -415,6 +417,7 @@ function smartCommentConstraints(introspectionResults) {
         const fakeConstraint = {
           kind: "constraint",
           isFake: true,
+          isIndexed: true, // otherwise it gets ignored by ignoreIndexes
           id: Math.random(),
           name: `FAKE_${klass.namespaceName}_${klass.name}_foreignKey_${index}`,
           type: "f", // foreign key
@@ -460,9 +463,7 @@ export default (async function PgIntrospectionPlugin(
     const cacheKey = `PgIntrospectionPlugin-introspectionResultsByKind-v${version}`;
     const cloneResults = obj => {
       const result = Object.keys(obj).reduce((memo, k) => {
-        memo[k] = Array.isArray(obj[k])
-          ? obj[k].map(v => Object.assign({}, v))
-          : obj[k];
+        memo[k] = Array.isArray(obj[k]) ? obj[k].map(v => ({ ...v })) : obj[k];
         return memo;
       }, {});
       return result;

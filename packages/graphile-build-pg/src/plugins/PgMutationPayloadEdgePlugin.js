@@ -89,7 +89,9 @@ export default (function PgMutationPayloadEdgePlugin(
                       type: new GraphQLList(
                         new GraphQLNonNull(TableOrderByType)
                       ),
-                      defaultValue: defaultValueEnum && defaultValueEnum.value,
+                      defaultValue: defaultValueEnum
+                        ? [defaultValueEnum.value]
+                        : null,
                     },
                   }
                 : {},
@@ -115,18 +117,20 @@ export default (function PgMutationPayloadEdgePlugin(
 
                 if (!order) {
                   if (edge.__identifiers) {
-                    return Object.assign({}, edge, {
+                    return {
+                      ...edge,
                       __cursor: ["primary_key_asc", edge.__identifiers],
-                    });
+                    };
                   } else {
                     return edge;
                   }
                 }
 
-                return Object.assign({}, edge, {
+                return {
+                  ...edge,
                   __cursor:
                     edge[`__order_${order.map(item => item.alias).join("__")}`],
-                });
+                };
               },
             },
             {
