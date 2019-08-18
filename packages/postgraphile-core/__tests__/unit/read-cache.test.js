@@ -86,3 +86,42 @@ test("when cache file has invalid content, getPostGraphileBuilder should error",
   expect(error).toMatchSnapshot();
   expect(fs.readFile).toHaveBeenCalledTimes(1);
 });
+
+describe("when readCache is not String or Object, getPostGraphileBuilder should error", () => {
+  test("when its Boolean", async () => {
+    // call our method with invalid readCache value and check error
+    let error;
+    try {
+      await getPostGraphileBuilder({}, [], {
+        readCache: true,
+      });
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toMatchSnapshot();
+  });
+  test("when its Array", async () => {
+    // call our method with invalid readCache value and check error
+    let error;
+    try {
+      await getPostGraphileBuilder({}, [], {
+        readCache: [],
+      });
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toMatchSnapshot();
+  });
+  test("when its Number", async () => {
+    // call our method with invalid readCache value and check error
+    let error;
+    try {
+      await getPostGraphileBuilder({}, [], {
+        readCache: 3,
+      });
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toMatchSnapshot();
+  });
+});
