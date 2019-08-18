@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`when cache file has invalid content, getPostGraphileBuilder should error 1`] = `[Error: Failed to parse cache file 'path/to/cache', perhaps it is corrupted? SyntaxError: Unexpected token h in JSON at position 1]`;
+exports[`When readCache is String if cache file has invalid content, getPostGraphileBuilder should error 1`] = `[Error: Failed to parse cache file 'path/to/cache', perhaps it is corrupted? SyntaxError: Unexpected token h in JSON at position 1]`;
 
 exports[`when readCache is not String or Object, getPostGraphileBuilder should error when its Array 1`] = `undefined`;
 
