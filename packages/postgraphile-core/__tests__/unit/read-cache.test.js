@@ -92,6 +92,27 @@ describe("When readCache is String", () => {
   });
 });
 
+describe("When readCache is Object", () => {
+  test("persistentMemoizeWithKey should be a valid function", async () => {
+    // mock getBuilder to fake output
+    const expectedOutput = {};
+    graphileBuild.getBuilder.mockResolvedValueOnce(expectedOutput);
+    // call our method and test output
+    const output = await getPostGraphileBuilder({}, [], {
+      readCache: { __test: true },
+    });
+    expect(output).toBe(expectedOutput);
+    expect(graphileBuild.getBuilder).toHaveBeenCalledTimes(1);
+    // check persistentMemoizeWithKey, the actual "result" of readCache flag
+    const {
+      persistentMemoizeWithKey,
+    } = graphileBuild.getBuilder.mock.calls[0][1];
+    expect(typeof persistentMemoizeWithKey).toBe("function");
+    expect(persistentMemoizeWithKey("__test")).toEqual(true);
+    expect(() => persistentMemoizeWithKey("unknown_key")).toThrow();
+  });
+});
+
 describe("when readCache is not String or Object, getPostGraphileBuilder should error", () => {
   test("when its Boolean", async () => {
     // call our method with invalid readCache value and check error
