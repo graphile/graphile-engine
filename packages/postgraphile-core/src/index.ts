@@ -289,7 +289,7 @@ export const getPostGraphileBuilder = async (
           `Failed to parse cache file '${readCache}', perhaps it is corrupted? ${e}`
         );
       }
-    } else if (typeof readCache === "object") {
+    } else if (typeof readCache === "object" && !Array.isArray(readCache)) {
       memoizeCache = readCache;
     } else {
       throw new Error(
