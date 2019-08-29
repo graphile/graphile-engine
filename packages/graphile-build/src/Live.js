@@ -162,6 +162,7 @@ export class LiveMonitor {
   }
 
   // Tell Flow that we're okay with overwriting this
+  // $FlowFixMe
   handleChange: (() => void) | null;
   handleChange() {
     /* This function is throttled to ~25ms (see constructor); it's purpose is
@@ -177,6 +178,7 @@ export class LiveMonitor {
   }
 
   // Tell Flow that we're okay with overwriting this
+  // $FlowFixMe
   _reallyHandleChange: (() => void) | null;
   _reallyHandleChange() {
     // This function is throttled to MONITOR_THROTTLE_DURATION (see constructor)

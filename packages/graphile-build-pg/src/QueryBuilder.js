@@ -17,6 +17,7 @@ type Gen<T> = (context: GenContext) => T;
 
 function callIfNecessary<T>(o: Gen<T> | T, context: GenContext): T {
   if (typeof o === "function") {
+    // $FlowFixMe
     return o(context);
   } else {
     return o;
@@ -38,7 +39,7 @@ export type RawAlias = Symbol | string;
 type SQLAlias = SQL;
 type SQLGen = Gen<SQL> | SQL;
 type NumberGen = Gen<number> | number;
-type CursorValue = {};
+type CursorValue = Array<number>;
 type CursorComparator = (val: CursorValue, isAfter: boolean) => void;
 
 export type QueryBuilderOptions = {

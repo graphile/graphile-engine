@@ -981,6 +981,7 @@ export default (async function PgIntrospectionPlugin(
     }
 
     async _releaseClient() {
+      // $FlowFixMe
       this._handleChange.cancel();
       const pgClient = this.client;
       const reallyReleaseClient = this._reallyReleaseClient;
@@ -1023,7 +1024,6 @@ export default (async function PgIntrospectionPlugin(
         // TODO:v5: remove this workaround
         // This is a bit of a hack, but until we have plugin priorities it's the
         // easiest way to conditionally support PG9.4.
-        // $FlowFixMe
         build.pgQueryFromResolveData = queryFromResolveDataFactory({
           supportsJSONB: false,
         });

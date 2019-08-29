@@ -1,6 +1,6 @@
 // @flow
 import QueryBuilder from "./QueryBuilder";
-import type QueryBuilderOptions from "./QueryBuilder";
+import type { QueryBuilderOptions } from "./QueryBuilder";
 import type { RawAlias } from "./QueryBuilder";
 import * as sql from "pg-sql2";
 import type { SQL } from "pg-sql2";
@@ -13,7 +13,6 @@ type GraphQLContext = any;
 
 const identity = _ => _ !== null && _ !== undefined;
 
-// $FlowFixMe
 export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   from: SQL,
   fromAlias: ?SQL,
@@ -27,6 +26,7 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
     addNotDistinctFromNullCase?: boolean,
     onlyJsonField?: boolean,
     useAsterisk?: boolean,
+    withCursor?: boolean,
   },
   // TODO:v5: context is not optional
   withBuilder?: ((builder: QueryBuilder) => void) | null | void,
@@ -60,9 +60,7 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   const rawCursorPrefix =
     reallyRawCursorPrefix && reallyRawCursorPrefix.filter(identity);
 
-  // $FlowFixMe
   const queryBuilder = new QueryBuilder(
-    // $FlowFixMe
     queryBuilderOptions,
     context,
     rootValue
@@ -283,6 +281,7 @@ exists(
   ) {
     // Sometimes we need a __cursor even if it's not a collection; e.g. to get the edge field on a mutation
     if (usesCursor) {
+      // $FlowFixMe
       queryBuilder.selectCursor(() => {
         const orderBy = queryBuilder
           .getOrderByExpressionsAndDirections()
@@ -437,7 +436,6 @@ OR\
     }
     if (pgAggregateQuery && pgAggregateQuery.length) {
       const aggregateQueryBuilder = new QueryBuilder(
-        // $FlowFixMe
         queryBuilderOptions,
         context,
         rootValue
