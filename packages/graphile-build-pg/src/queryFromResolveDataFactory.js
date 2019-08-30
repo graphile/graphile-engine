@@ -310,10 +310,12 @@ exists(
         queryBuilder.whereBound(sql.fragment`false`, isAfter);
       }
       const orderByExpressionsAndDirections = queryBuilder.getOrderByExpressionsAndDirections();
-      if (
-        orderByExpressionsAndDirections.length > 0 &&
-        queryBuilder.isOrderUnique()
-      ) {
+      if (orderByExpressionsAndDirections.length > 0) {
+        if (!queryBuilder.isOrderUnique()) {
+          throw new Error(
+            "The cursor requires a primary key or an unique key combination for orderBy clause"
+          );
+        }
         const rawPrefixes = cursorValue.slice(0, cursorValue.length - 1);
         const rawCursors = cursorValue[cursorValue.length - 1];
         if (rawPrefixes.length !== getPgCursorPrefix().length) {
