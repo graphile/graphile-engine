@@ -313,7 +313,7 @@ exists(
       if (orderByExpressionsAndDirections.length > 0) {
         if (!queryBuilder.isOrderUnique()) {
           throw new Error(
-            "The cursor requires a primary key or an unique key combination for orderBy clause"
+            "The order supplied is not unique, so before/after cursors cannot be used. Please ensure the supplied order includes all the columns from the primary key or a unique constraint."
           );
         }
         const rawPrefixes = cursorValue.slice(0, cursorValue.length - 1);
