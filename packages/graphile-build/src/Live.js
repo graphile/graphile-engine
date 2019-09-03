@@ -85,6 +85,10 @@ export class LiveMonitor {
   changeCounter: number;
   extraRootValue: any;
 
+  handleChange: (() => void) | null;
+  _reallyHandleChange: (() => void) | null;
+  onChange: (callback: () => void) => void;
+
   constructor(
     providers: { [namespace: string]: LiveProvider },
     extraRootValue: any
@@ -99,6 +103,72 @@ export class LiveMonitor {
     if (!this.handleChange) {
       throw new Error("This is just to make flow happy");
     }
+    this.handleChange = function() {
+      /* This function is throttled to ~25ms (see constructor); it's purpose is
+       * to bundle up all the changes that occur in a small window into the same
+       * handle change flow, so _reallyHandleChange doesn't get called twice in
+       * quick succession. _reallyHandleChange is then further throttled with a
+       * larger window, BUT it triggers on both leading and trailing edge,
+       * whereas this only triggers on the trailing edge.
+       */
+      if (this._reallyHandleChange) {
+        this._reallyHandleChange();
+      }
+    };
+
+    this._reallyHandleChange = function() {
+      // This function is throttled to MONITOR_THROTTLE_DURATION (see constructor)
+      if (this.changeCallback) {
+        // Convince Flow this won't suddenly become null
+        const cb = this.changeCallback;
+        const counter = this.changeCounter++;
+        /*
+         * In live queries we need to know when the current result set has
+         * finished being calculated so that we know we've received all the
+         * liveRecord / liveCollection calls and can release the out of date
+         * ones. To achieve this, we use a custom `subscribe` function which
+         * calls `rootValue.release()` once the result set has been calculated.
+         */
+        this.subscriptionReleasersByCounter[String(counter)] = [];
+        this.liveConditionsByCounter[String(counter)] = [];
+        const changeRootValue = {
+          ...this.extraRootValue,
+          counter,
+          liveCollection: this.liveCollection.bind(this, counter),
+          liveRecord: this.liveRecord.bind(this, counter),
+          liveConditions: this.liveConditionsByCounter[String(counter)],
+          release: () => {
+            // Despite it's name, this means that the execution has complete, which means we're actually releasing everything *before* this.
+            this.resetBefore(counter);
+          },
+        };
+        cb(changeRootValue);
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn("Change occurred, but no-one was listening");
+      }
+    };
+
+    this.onChange = function(callback: () => void) {
+      if (this.released) {
+        throw new Error("Monitors cannot be reused.");
+      }
+      if (this.changeCallback) {
+        throw new Error("Already monitoring for changes");
+      }
+      // Throttle to every 250ms
+      this.changeCallback = callback;
+      if (this.handleChange) {
+        setImmediate(this.handleChange);
+      }
+      return () => {
+        if (this.changeCallback === callback) {
+          this.changeCallback = null;
+        }
+        this.release();
+      };
+    };
+
     this.handleChange = throttle(
       this.handleChange.bind(this),
       DEBOUNCE_DURATION,
@@ -160,72 +230,6 @@ export class LiveMonitor {
     this.providers = {};
     this.released = true;
   }
-
-  handleChange = function() {
-    /* This function is throttled to ~25ms (see constructor); it's purpose is
-     * to bundle up all the changes that occur in a small window into the same
-     * handle change flow, so _reallyHandleChange doesn't get called twice in
-     * quick succession. _reallyHandleChange is then further throttled with a
-     * larger window, BUT it triggers on both leading and trailing edge,
-     * whereas this only triggers on the trailing edge.
-     */
-    if (this._reallyHandleChange) {
-      this._reallyHandleChange();
-    }
-  };
-
-  _reallyHandleChange = function() {
-    // This function is throttled to MONITOR_THROTTLE_DURATION (see constructor)
-    if (this.changeCallback) {
-      // Convince Flow this won't suddenly become null
-      const cb = this.changeCallback;
-      const counter = this.changeCounter++;
-      /*
-       * In live queries we need to know when the current result set has
-       * finished being calculated so that we know we've received all the
-       * liveRecord / liveCollection calls and can release the out of date
-       * ones. To achieve this, we use a custom `subscribe` function which
-       * calls `rootValue.release()` once the result set has been calculated.
-       */
-      this.subscriptionReleasersByCounter[String(counter)] = [];
-      this.liveConditionsByCounter[String(counter)] = [];
-      const changeRootValue = {
-        ...this.extraRootValue,
-        counter,
-        liveCollection: this.liveCollection.bind(this, counter),
-        liveRecord: this.liveRecord.bind(this, counter),
-        liveConditions: this.liveConditionsByCounter[String(counter)],
-        release: () => {
-          // Despite it's name, this means that the execution has complete, which means we're actually releasing everything *before* this.
-          this.resetBefore(counter);
-        },
-      };
-      cb(changeRootValue);
-    } else {
-      // eslint-disable-next-line no-console
-      console.warn("Change occurred, but no-one was listening");
-    }
-  };
-
-  onChange = function(callback: () => void) {
-    if (this.released) {
-      throw new Error("Monitors cannot be reused.");
-    }
-    if (this.changeCallback) {
-      throw new Error("Already monitoring for changes");
-    }
-    // Throttle to every 250ms
-    this.changeCallback = callback;
-    if (this.handleChange) {
-      setImmediate(this.handleChange);
-    }
-    return () => {
-      if (this.changeCallback === callback) {
-        this.changeCallback = null;
-      }
-      this.release();
-    };
-  };
 
   liveCollection(
     counter: number,
