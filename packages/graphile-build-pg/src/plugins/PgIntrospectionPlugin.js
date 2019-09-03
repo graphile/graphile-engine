@@ -223,16 +223,19 @@ const removeQuotes = str => {
   }
 };
 
-const parseSqlColumnArray = parts => {
-  return parts.map(removeQuotes);
-};
-const parseSqlColumnString = str => {
+const parseSqlColumnArray = str => {
   if (!str) {
     throw new Error(`Cannot parse '${str}'`);
   }
   const parts = str.split(",");
-  const parsedParts = parts.map(removeQuotes);
-  return parsedParts[0];
+  return parts.map(removeQuotes);
+};
+
+const parseSqlColumnString = str => {
+  if (!str) {
+    throw new Error(`Cannot parse '${str}'`);
+  }
+  return removeQuotes(str);
 };
 
 function parseConstraintSpec(rawSpec) {
