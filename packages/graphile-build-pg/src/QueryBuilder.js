@@ -15,16 +15,18 @@ type GenContext = {
 };
 type Gen<T> = (context: GenContext) => T;
 
-function callIfNecessary<T>(o: Gen<T> | T, context: GenContext): T {
+// Importantly, this cannot include a function
+type CallResult = null | string | number | boolean | SQL;
+
+function callIfNecessary<T: CallResult>(o: Gen<T> | T, context: GenContext): T {
   if (typeof o === "function") {
-    // $FlowFixMe
     return o(context);
   } else {
     return o;
   }
 }
 
-function callIfNecessaryArray<T>(
+function callIfNecessaryArray<T: CallResult>(
   o: Array<Gen<T> | T>,
   context: GenContext
 ): Array<T> {
