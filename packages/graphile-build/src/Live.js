@@ -100,9 +100,6 @@ export class LiveMonitor {
     this.changeCallback = null;
     this.changeCounter = 0;
     this.liveConditionsByCounter = {};
-    if (!this.handleChange) {
-      throw new Error("This is just to make flow happy");
-    }
     this.handleChange = function() {
       /* This function is throttled to ~25ms (see constructor); it's purpose is
        * to bundle up all the changes that occur in a small window into the same
