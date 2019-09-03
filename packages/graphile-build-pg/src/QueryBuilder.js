@@ -41,7 +41,7 @@ export type RawAlias = Symbol | string;
 type SQLAlias = SQL;
 type SQLGen = Gen<SQL> | SQL;
 type NumberGen = Gen<number> | number;
-type CursorValue = Array<number>;
+type CursorValue = Array<mixed>;
 type CursorComparator = (val: CursorValue, isAfter: boolean) => void;
 
 export type QueryBuilderOptions = {
