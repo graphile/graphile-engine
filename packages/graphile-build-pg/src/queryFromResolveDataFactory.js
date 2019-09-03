@@ -363,14 +363,17 @@ OR\
       } else if (
         cursorValue[0] === "natural" &&
         isSafeInteger(cursorValue[1]) &&
+        // $FlowFixMe: we know this is a number
         cursorValue[1] >= 0
       ) {
+        // $FlowFixMe: we know this is a number
+        const cursorValue1: number = cursorValue[1];
         if (isAfter) {
-          queryBuilder.offset(() => cursorValue[1]);
+          queryBuilder.offset(() => cursorValue1);
         } else {
           queryBuilder.limit(() => {
             const offset = queryBuilder.getOffset();
-            return Math.max(0, cursorValue[1] - offset - 1);
+            return Math.max(0, cursorValue1 - offset - 1);
           });
         }
       } else {

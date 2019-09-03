@@ -87,7 +87,7 @@ export class LiveMonitor {
 
   handleChange: (() => void) | null;
   _reallyHandleChange: (() => void) | null;
-  onChange: (callback: () => void) => void;
+  onChange: (callback: () => void) => () => void;
 
   constructor(
     providers: { [namespace: string]: LiveProvider },
@@ -219,10 +219,12 @@ export class LiveMonitor {
 
   release() {
     if (this.handleChange) {
+      // $FlowFixMe: throttled function
       this.handleChange.cancel();
     }
     this.handleChange = null;
     if (this._reallyHandleChange) {
+      // $FlowFixMe: throttled function
       this._reallyHandleChange.cancel();
     }
     this._reallyHandleChange = null;
