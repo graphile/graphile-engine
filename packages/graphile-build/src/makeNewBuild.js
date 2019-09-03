@@ -206,14 +206,13 @@ const knownTypes = [
 ];
 const knownTypeNames = knownTypes.map(k => k.name);
 
-function ensureArray<T>(val): void | Array<T> {
+function ensureArray<T>(val: null | T | Array<T>): void | Array<T> {
   if (val == null) {
     return;
   } else if (Array.isArray(val)) {
     // $FlowFixMe
     return (val: Array<T>);
   } else {
-    // $FlowFixMe
     return ([val]: Array<T>);
   }
 }
@@ -222,7 +221,7 @@ function ensureArray<T>(val): void | Array<T> {
 let ensureName = fn => {};
 if (["development", "test"].indexOf(process.env.NODE_ENV) >= 0) {
   ensureName = fn => {
-    // $FlowFixMe
+    // $FlowFixMe: displayName
     if (isDev && !fn.displayName && !fn.name && debug.enabled) {
       // eslint-disable-next-line no-console
       console.trace(
@@ -377,9 +376,9 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
           fieldName,
           fn: DataGeneratorFunction
         ) => {
-          // $FlowFixMe
+          // $FlowFixMe: displayName
           fn.displayName =
-            // $FlowFixMe
+            // $FlowFixMe: displayName
             fn.displayName ||
             `${getNameFromType(Self)}:${fieldName}[${fn.name || "anonymous"}]`;
           fieldDataGeneratorsByFieldName[fieldName] =

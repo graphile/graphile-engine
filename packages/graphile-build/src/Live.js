@@ -161,10 +161,7 @@ export class LiveMonitor {
     this.released = true;
   }
 
-  // Tell Flow that we're okay with overwriting this
-  // $FlowFixMe
-  handleChange: (() => void) | null;
-  handleChange() {
+  handleChange = function() {
     /* This function is throttled to ~25ms (see constructor); it's purpose is
      * to bundle up all the changes that occur in a small window into the same
      * handle change flow, so _reallyHandleChange doesn't get called twice in
@@ -175,12 +172,9 @@ export class LiveMonitor {
     if (this._reallyHandleChange) {
       this._reallyHandleChange();
     }
-  }
+  };
 
-  // Tell Flow that we're okay with overwriting this
-  // $FlowFixMe
-  _reallyHandleChange: (() => void) | null;
-  _reallyHandleChange() {
+  _reallyHandleChange = function() {
     // This function is throttled to MONITOR_THROTTLE_DURATION (see constructor)
     if (this.changeCallback) {
       // Convince Flow this won't suddenly become null
@@ -211,11 +205,9 @@ export class LiveMonitor {
       // eslint-disable-next-line no-console
       console.warn("Change occurred, but no-one was listening");
     }
-  }
+  };
 
-  // Tell Flow that we're okay with overwriting this
-  onChange: (callback: () => void) => void;
-  onChange(callback: () => void) {
+  onChange = function(callback: () => void) {
     if (this.released) {
       throw new Error("Monitors cannot be reused.");
     }
@@ -233,7 +225,7 @@ export class LiveMonitor {
       }
       this.release();
     };
-  }
+  };
 
   liveCollection(
     counter: number,
