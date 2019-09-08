@@ -87,6 +87,7 @@ describe("When readCache is String", () => {
     } catch (e) {
       error = e;
     }
+    expect(error).toBeDefined();
     expect(error).toMatchSnapshot();
     expect(fs.readFile).toHaveBeenCalledTimes(1);
   });
@@ -124,6 +125,7 @@ describe("when readCache is not String or Object, getPostGraphileBuilder should 
     } catch (e) {
       error = e;
     }
+    expect(error).toBeDefined();
     expect(error).toMatchSnapshot();
   });
   test("when its Array", async () => {
@@ -136,6 +138,7 @@ describe("when readCache is not String or Object, getPostGraphileBuilder should 
     } catch (e) {
       error = e;
     }
+    expect(error).toBeDefined();
     expect(error).toMatchSnapshot();
   });
   test("when its Number", async () => {
@@ -148,6 +151,7 @@ describe("when readCache is not String or Object, getPostGraphileBuilder should 
     } catch (e) {
       error = e;
     }
+    expect(error).toBeDefined();
     expect(error).toMatchSnapshot();
   });
 });
