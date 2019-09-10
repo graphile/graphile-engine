@@ -6213,6 +6213,7 @@ type Post implements Node {
     offset: Int
   ): PostComputedIntervalSetConnection!
   computedTextArray: [String]
+  computedWithRequiredArg(i: Int!): Int
   enums: [AnEnum]
   headline: String!
   headlineTrimmed(length: Int, omission: String): String
@@ -6323,6 +6324,9 @@ input PostCondition {
   \\"\\"\\"Checks for equality with the object’s \`comptypes\` field.\\"\\"\\"
   comptypes: [ComptypeInput]
 
+  \\"\\"\\"Checks for equality with the object’s \`computedWithRequiredArg\` field.\\"\\"\\"
+  computedWithRequiredArg: Int
+
   \\"\\"\\"Checks for equality with the object’s \`enums\` field.\\"\\"\\"
   enums: [AnEnum]
 
@@ -6412,6 +6416,8 @@ enum PostsOrderBy {
   BODY_DESC
   COMPTYPES_ASC
   COMPTYPES_DESC
+  COMPUTED_WITH_REQUIRED_ARG_ASC
+  COMPUTED_WITH_REQUIRED_ARG_DESC
   ENUMS_ASC
   ENUMS_DESC
   HEADLINE_ASC
