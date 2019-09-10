@@ -293,7 +293,9 @@ export const getPostGraphileBuilder = async (
       memoizeCache = readCache;
     } else {
       throw new Error(
-        `'readCache' not understood; expected string or object, but received '${Array.isArray(readCache) ? 'array' : typeof readCache}'`
+        `'readCache' not understood; expected string or object, but received '${
+          Array.isArray(readCache) ? "array" : typeof readCache
+        }'`
       );
     }
   }
