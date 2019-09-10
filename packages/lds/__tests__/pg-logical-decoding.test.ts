@@ -1,6 +1,8 @@
 import PgLogicalDecoding from "../src/pg-logical-decoding";
 import { tryDropSlot, DATABASE_URL, query, withLdAndClient } from "./helpers";
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 test("opens and closes cleanly", async () => {
   const ld = new PgLogicalDecoding(DATABASE_URL, {
     temporary: true,
@@ -58,11 +60,13 @@ test("temporary creates slot for itself, PostgreSQL automatically cleans up for 
   );
   expect(initialPgRows.length).toEqual(1);
   await ld.close();
+  // Give half a second to clean up the slot
+  await sleep(500);
   const { rows: finalPgRows } = await query(
     "select * from pg_catalog.pg_replication_slots where slot_name = $1",
     [slotName]
   );
-  expect(finalPgRows.length).toEqual(0);
+  expect(finalPgRows).toHaveLength(0);
 });
 
 test("notified on insert", () =>
@@ -177,8 +181,9 @@ test("multiple notifications", () =>
     } = await client.query(
       "insert into app_public.foo(name) values('temporary1'), ('temporary2') returning id"
     );
-    await client.query(
-      `
+    try {
+      await client.query(
+        `
         begin;
         -- NOTE: this string interpolation is safe because we're using ints, but
         -- NEVER do this in production code!!!
@@ -186,9 +191,11 @@ test("multiple notifications", () =>
         update app_public.foo set name = name || name where id = ${id2};
         update app_public.foo set name = name || name where id = ${id2};
         update app_public.foo set name = name || name where id = ${id2};
-        commit;
       `
-    );
+      );
+    } finally {
+      await client.query("commit;");
+    }
     await client.query("delete from app_public.foo where id = $1", [id2]);
 
     // Get first two changes

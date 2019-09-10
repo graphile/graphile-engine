@@ -19,7 +19,8 @@ import {
   PgAttribute,
   formatSQLForDebugging,
 } from "graphile-build-pg";
-import { Pool, Client } from "pg";
+import { Pool, PoolClient } from "pg";
+import { SignOptions } from "jsonwebtoken";
 
 export {
   Plugin,
@@ -55,23 +56,43 @@ export interface PostGraphileCoreOptions {
   classicIds?: boolean;
   disableDefaultMutations?: boolean;
   nodeIdFieldName?: string;
-  graphileBuildOptions?: Options;
-  graphqlBuildOptions?: Options; // DEPRECATED!
+  /**
+   * Additional Options to pass through into the graphile schema building
+   * system (received via the second argument of a plugin).
+   */
+  graphileBuildOptions?: Partial<Options>;
+  /**
+   * @deprecated Use graphileBuildOptions instead
+   */
+  graphqlBuildOptions?: Partial<Options>;
   replaceAllPlugins?: Array<Plugin>;
   appendPlugins?: Array<Plugin>;
+  /**
+   * @deprecated Use `appendPlugins` with dependencies instead.
+   */
   prependPlugins?: Array<Plugin>;
   skipPlugins?: Array<Plugin>;
   jwtPgTypeIdentifier?: string;
   jwtSecret?: string;
-  inflector?: Inflector; // NO LONGER SUPPORTED!
+  jwtSignOptions?: SignOptions;
+  /**
+   * @deprecated UNSUPPORTED! Use an inflector plugin instead.
+   */
+  inflector?: Inflector;
+  /**
+   * @deprecated Use smart comments/tags instead
+   */
   pgColumnFilter?: <TSource>(
     attr: mixed,
     build: Build,
     context: Context<TSource>
   ) => boolean;
+  /**
+   * @deprecated Use '@primaryKey' smart comment instead
+   */
   viewUniqueKey?: string;
   enableTags?: boolean;
-  readCache?: string;
+  readCache?: string | object;
   writeCache?: string;
   setWriteCacheCallback?: (fn: () => Promise<void>) => void;
   legacyRelations?: "only" | "deprecated" | "omit";
@@ -82,12 +103,13 @@ export interface PostGraphileCoreOptions {
   ignoreRBAC?: boolean;
   legacyFunctionsOnly?: boolean;
   ignoreIndexes?: boolean;
+  hideIndexWarnings?: boolean;
   subscriptions?: boolean;
   live?: boolean;
   ownerConnectionString?: string;
 }
 
-type PgConfig = Client | Pool | string;
+type PgConfig = Pool | PoolClient | string;
 
 /*
  * BELOW HERE IS DEPRECATED!!
@@ -161,7 +183,7 @@ const awaitKeys = async (obj: { [key: string]: Promise<any> }) => {
   return result;
 };
 
-const getPostGraphileBuilder = async (
+export const getPostGraphileBuilder = async (
   pgConfig: PgConfig,
   schemas: string | Array<string>,
   options: PostGraphileCoreOptions = {}
@@ -182,6 +204,7 @@ const getPostGraphileBuilder = async (
     skipPlugins = [],
     jwtPgTypeIdentifier,
     jwtSecret,
+    jwtSignOptions,
     disableDefaultMutations,
     graphileBuildOptions,
     graphqlBuildOptions, // DEPRECATED!
@@ -200,6 +223,7 @@ const getPostGraphileBuilder = async (
     ignoreRBAC = true, // TODO:v5: Change to 'false' in v5
     legacyFunctionsOnly = false, // TODO:v5: Remove in v5
     ignoreIndexes = true, // TODO:v5: Change to 'false' in v5
+    hideIndexWarnings = false,
     subscriptions: inSubscriptions = false, // TODO:v5: Change to 'true' in v5
     live = false,
     ownerConnectionString,
@@ -241,22 +265,37 @@ const getPostGraphileBuilder = async (
 
   let persistentMemoizeWithKey; // NOT null, otherwise it won't default correctly.
   let memoizeCache = {};
-
   if (readCache) {
-    const cacheString: string = await new Promise<string>((resolve, reject) => {
-      fs.readFile(readCache, "utf8", (err?: Error, data?: string) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
+    if (typeof readCache === "string") {
+      const cacheString: string = await new Promise<string>(
+        (resolve, reject) => {
+          fs.readFile(
+            readCache,
+            "utf8",
+            (err?: Error | null, data?: string) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(data);
+              }
+            }
+          );
         }
-      });
-    });
-    try {
-      memoizeCache = JSON.parse(cacheString);
-    } catch (e) {
+      );
+      try {
+        memoizeCache = JSON.parse(cacheString);
+      } catch (e) {
+        throw new Error(
+          `Failed to parse cache file '${readCache}', perhaps it is corrupted? ${e}`
+        );
+      }
+    } else if (typeof readCache === "object" && !Array.isArray(readCache)) {
+      memoizeCache = readCache;
+    } else {
       throw new Error(
-        `Failed to parse cache file '${readCache}', perhaps it is corrupted? ${e}`
+        `'readCache' not understood; expected string or object, but received '${
+          Array.isArray(readCache) ? "array" : typeof readCache
+        }'`
       );
     }
   }
@@ -349,6 +388,7 @@ const getPostGraphileBuilder = async (
     nodeIdFieldName: nodeIdFieldName || (classicIds ? "id" : "nodeId"),
     pgJwtTypeIdentifier: jwtPgTypeIdentifier,
     pgJwtSecret: jwtSecret,
+    pgJwtSignOptions: jwtSignOptions,
     pgDisableDefaultMutations: disableDefaultMutations,
     pgViewUniqueKey: viewUniqueKey,
     pgEnableTags: enableTags,
@@ -361,6 +401,7 @@ const getPostGraphileBuilder = async (
     pgIgnoreRBAC: ignoreRBAC,
     pgLegacyFunctionsOnly: legacyFunctionsOnly,
     pgIgnoreIndexes: ignoreIndexes,
+    pgHideIndexWarnings: hideIndexWarnings,
     pgOwnerConnectionString: ownerConnectionString,
 
     /*

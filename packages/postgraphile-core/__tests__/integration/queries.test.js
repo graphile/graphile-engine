@@ -5,6 +5,7 @@ const { readdirSync, readFile: rawReadFile } = require("fs");
 const { resolve: resolvePath } = require("path");
 const { printSchema } = require("graphql/utilities");
 const debug = require("debug")("graphile-build:schema");
+const { makeExtendSchemaPlugin, gql } = require("graphile-utils");
 
 function readFile(filename, encoding) {
   return new Promise((resolve, reject) => {
@@ -54,9 +55,24 @@ beforeAll(() => {
       simpleCollections,
       orderByNullsLast,
       smartCommentRelations,
+      largeBigint,
     ] = await Promise.all([
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
+        appendPlugins: [
+          makeExtendSchemaPlugin({
+            typeDefs: gql`
+              extend type Query {
+                extended: Boolean
+              }
+            `,
+            resolvers: {
+              Query: {
+                extended: () => true,
+              },
+            },
+          }),
+        ],
       }),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
@@ -89,6 +105,7 @@ beforeAll(() => {
         },
       }),
       createPostGraphileSchema(pgClient, ["smart_comment_relations"], {}),
+      createPostGraphileSchema(pgClient, ["large_bigint"], {}),
     ]);
     // Now for RBAC-enabled tests
     await pgClient.query("set role postgraphile_test_authenticator");
@@ -109,6 +126,7 @@ beforeAll(() => {
       orderByNullsLast,
       rbac,
       smartCommentRelations,
+      largeBigint,
     };
   });
 
@@ -153,6 +171,7 @@ beforeAll(() => {
             "simple-procedure-computed-fields.graphql":
               gqlSchemas.simpleCollections,
             "simple-procedure-query.graphql": gqlSchemas.simpleCollections,
+            "types.graphql": gqlSchemas.simpleCollections,
             "orderByNullsLast.graphql": gqlSchemas.orderByNullsLast,
           };
           let gqlSchema = schemas[fileName];
@@ -163,6 +182,8 @@ beforeAll(() => {
               gqlSchema = gqlSchemas.rbac;
             } else if (fileName.startsWith("smart_comment_relations.")) {
               gqlSchema = gqlSchemas.smartCommentRelations;
+            } else if (fileName.startsWith("large_bigint")) {
+              gqlSchema = gqlSchemas.largeBigint;
             } else {
               gqlSchema = gqlSchemas.normal;
             }

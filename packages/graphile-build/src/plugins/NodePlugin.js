@@ -6,9 +6,12 @@ import type {
   Context,
   ContextGraphQLObjectTypeFields,
 } from "../SchemaBuilder";
-import resolveNode from "../resolveNode";
 import type { ResolveTree } from "graphql-parse-resolve-info";
-import type { GraphQLType, GraphQLInterfaceType } from "graphql";
+import type {
+  GraphQLType,
+  GraphQLInterfaceType,
+  GraphQLResolveInfo,
+} from "graphql";
 import type { BuildExtensionQuery } from "./QueryPlugin";
 
 const base64 = str => Buffer.from(String(str)).toString("base64");
@@ -20,7 +23,8 @@ export type NodeFetcher = (
   context: mixed,
   parsedResolveInfoFragment: ResolveTree,
   type: GraphQLType,
-  resolveData: DataForType
+  resolveData: DataForType,
+  resolveInfo: GraphQLResolveInfo
 ) => {};
 
 export type BuildExtensionNode = {|
@@ -90,80 +94,100 @@ export default (function NodePlugin(
             return this.getTypeByName(nodeTypeNameByAlias[alias] || alias);
           },
           setNodeAlias(typeName, alias) {
+            if (
+              nodeTypeNameByAlias[alias] &&
+              nodeTypeNameByAlias[alias] !== typeName
+            ) {
+              // eslint-disable-next-line no-console
+              console.warn(
+                `SERIOUS WARNING: two GraphQL types (${typeName} and ${
+                  nodeTypeNameByAlias[alias]
+                }) are trying to use the same node alias '${alias}' which may mean that the Relay Global Object Identification identifiers in your schema may not be unique. To solve this, you should skip the PgNodeAliasPostGraphile plugin, but note this will change all your existing Node IDs. For alternative solutions, get in touch via GitHub or Discord`
+              );
+            }
             nodeAliasByTypeName[typeName] = alias;
             nodeTypeNameByAlias[alias] = typeName;
           },
         },
         `Adding 'Node' interface support to the Build`
       );
-    }
+    },
+    ["Node"]
   );
 
-  builder.hook("init", function defineNodeInterfaceType(
-    _: {},
-    build: {| ...Build, ...BuildExtensionQuery, ...BuildExtensionNode |}
-  ) {
-    const {
-      $$isQuery,
-      $$nodeType,
-      getTypeByName,
-      newWithHooks,
-      graphql: {
-        GraphQLNonNull,
-        GraphQLID,
-        GraphQLInterfaceType,
-        getNullableType,
-      },
-      inflection,
-    } = build;
-    let Query;
-    newWithHooks(
-      GraphQLInterfaceType,
-      {
-        name: inflection.builtin("Node"),
-        description: "An object with a globally unique `ID`.",
-        resolveType: value => {
-          if (value === $$isQuery) {
-            if (!Query) Query = getTypeByName(inflection.builtin("Query"));
-            return Query;
-          } else if (value[$$nodeType]) {
-            return getNullableType(value[$$nodeType]);
-          }
+  builder.hook(
+    "init",
+    function defineNodeInterfaceType(
+      _: {},
+      build: {| ...Build, ...BuildExtensionQuery, ...BuildExtensionNode |}
+    ) {
+      const {
+        $$isQuery,
+        $$nodeType,
+        getTypeByName,
+        newWithHooks,
+        graphql: {
+          GraphQLNonNull,
+          GraphQLID,
+          GraphQLInterfaceType,
+          getNullableType,
         },
-        fields: {
-          [nodeIdFieldName]: {
-            description:
-              "A globally unique identifier. Can be used in various places throughout the system to identify this single value.",
-            type: new GraphQLNonNull(GraphQLID),
+        inflection,
+      } = build;
+      let Query;
+      newWithHooks(
+        GraphQLInterfaceType,
+        {
+          name: inflection.builtin("Node"),
+          description: "An object with a globally unique `ID`.",
+          resolveType: value => {
+            if (value === $$isQuery) {
+              if (!Query) Query = getTypeByName(inflection.builtin("Query"));
+              return Query;
+            } else if (value[$$nodeType]) {
+              return getNullableType(value[$$nodeType]);
+            }
+          },
+          fields: {
+            [nodeIdFieldName]: {
+              description:
+                "A globally unique identifier. Can be used in various places throughout the system to identify this single value.",
+              type: new GraphQLNonNull(GraphQLID),
+            },
           },
         },
-      },
-      {
-        __origin: `graphile-build built-in (NodePlugin); you can omit this plugin if you like, but you'll lose compatibility with Relay`,
-      }
-    );
-    return _;
-  });
+        {
+          __origin: `graphile-build built-in (NodePlugin); you can omit this plugin if you like, but you'll lose compatibility with Relay`,
+        }
+      );
+      return _;
+    },
+    ["Node"]
+  );
 
-  builder.hook("GraphQLObjectType:interfaces", function addNodeIdToQuery(
-    interfaces: Array<GraphQLInterfaceType>,
-    build,
-    context
-  ) {
-    const { getTypeByName, inflection } = build;
-    const {
-      scope: { isRootQuery },
-    } = context;
-    if (!isRootQuery) {
-      return interfaces;
-    }
-    const Type = getTypeByName(inflection.builtin("Node"));
-    if (Type) {
-      return [...interfaces, Type];
-    } else {
-      return interfaces;
-    }
-  });
+  builder.hook(
+    "GraphQLObjectType:interfaces",
+    function addNodeIdToQuery(
+      interfaces: Array<GraphQLInterfaceType>,
+      build,
+      context
+    ) {
+      const { getTypeByName, inflection } = build;
+      const {
+        scope: { isRootQuery },
+      } = context;
+      if (!isRootQuery) {
+        return interfaces;
+      }
+      const Type = getTypeByName(inflection.builtin("Node"));
+      if (Type) {
+        return [...interfaces, Type];
+      } else {
+        return interfaces;
+      }
+    },
+    ["Node"]
+  );
 
   builder.hook(
     "GraphQLObjectType:fields",
@@ -184,6 +208,7 @@ export default (function NodePlugin(
         extend,
         graphql: { GraphQLNonNull, GraphQLID },
         inflection,
+        resolveNode,
       } = build;
       return extend(
         fields,
@@ -226,6 +251,7 @@ export default (function NodePlugin(
         },
         `Adding Relay Global Object Identification support to the root Query via 'node' and '${nodeIdFieldName}' fields`
       );
-    }
+    },
+    ["Node"]
   );
 }: Plugin);

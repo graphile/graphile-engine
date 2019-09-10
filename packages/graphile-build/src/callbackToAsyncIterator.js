@@ -7,7 +7,7 @@
 import { $$asyncIterator } from "iterall";
 
 const defaultOnError = (err: Error) => {
-  throw new Error(err);
+  throw err;
 };
 
 export default function callbackToAsyncIterator<
@@ -73,7 +73,7 @@ export default function callbackToAsyncIterator<
         emptyQueue();
         return Promise.resolve({ value: undefined, done: true });
       },
-      throw(error) {
+      throw(error: Error) {
         emptyQueue();
         onError(error);
         return Promise.reject(error);
@@ -91,7 +91,7 @@ export default function callbackToAsyncIterator<
       return() {
         return Promise.reject(err);
       },
-      throw(error) {
+      throw(error: Error) {
         return Promise.reject(error);
       },
       [$$asyncIterator]() {

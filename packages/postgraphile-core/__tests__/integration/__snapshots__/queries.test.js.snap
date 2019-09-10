@@ -727,6 +727,30 @@ Object {
       },
       "totalCount": 6,
     },
+    "nullTest1": Object {
+      "nodes": Array [
+        Object {
+          "nullableInt": 99,
+          "nullableText": "Hello",
+        },
+        Object {
+          "nullableInt": 98,
+          "nullableText": null,
+        },
+        Object {
+          "nullableInt": null,
+          "nullableText": null,
+        },
+        Object {
+          "nullableInt": null,
+          "nullableText": "Hey",
+        },
+        Object {
+          "nullableInt": 95,
+          "nullableText": "Hey",
+        },
+      ],
+    },
     "o": Object {
       "nodes": Array [
         Object {
@@ -1190,6 +1214,15 @@ Object {
 }
 `;
 
+exports[`directives.graphql 1`] = `
+Object {
+  "data": Object {
+    "a": "query",
+    "d": "query",
+  },
+}
+`;
+
 exports[`dynamic-json.condition-json-field-variable.graphql 1`] = `
 Object {
   "data": Object {
@@ -1233,6 +1266,42 @@ Object {
     "a": true,
     "allTypes": Object {
       "nodes": Array [
+        Object {
+          "json": Object {
+            "a": 1,
+            "b": 2,
+            "c": 3,
+            "d": Object {
+              "e": 4,
+              "f": 5,
+              "g": Array [
+                6,
+                7,
+                8,
+                "x",
+                false,
+                null,
+              ],
+            },
+          },
+          "jsonb": Object {
+            "1": "a",
+            "2": "b",
+            "3": "c",
+            "4": Object {
+              "5": "d",
+              "6": "e",
+              "7": Array [
+                "f",
+                "g",
+                "h",
+                42,
+                true,
+                null,
+              ],
+            },
+          },
+        },
         Object {
           "json": Object {
             "a": 1,
@@ -1750,6 +1819,37 @@ Object {
           "headline": "No… It’s a thing; it’s like a plan, but with more greatness.",
         },
       ],
+    },
+  },
+}
+`;
+
+exports[`large_bigint.issue491.graphql 1`] = `
+Object {
+  "data": Object {
+    "allLargeNodeIds": Object {
+      "nodes": Array [
+        Object {
+          "id": "9007199254740990",
+          "nodeId": "WyJsYXJnZV9ub2RlX2lkcyIsOTAwNzE5OTI1NDc0MDk5MF0=",
+          "text": "Should be fine",
+        },
+        Object {
+          "id": "2098288669218571760",
+          "nodeId": "WyJsYXJnZV9ub2RlX2lkcyIsIjIwOTgyODg2NjkyMTg1NzE3NjAiXQ==",
+          "text": "Graphile Engine issue #491",
+        },
+      ],
+    },
+    "largeInt": Object {
+      "id": "2098288669218571760",
+      "nodeId": "WyJsYXJnZV9ub2RlX2lkcyIsIjIwOTgyODg2NjkyMTg1NzE3NjAiXQ==",
+      "text": "Graphile Engine issue #491",
+    },
+    "safeInt": Object {
+      "id": "9007199254740990",
+      "nodeId": "WyJsYXJnZV9ub2RlX2lkcyIsOTAwNzE5OTI1NDc0MDk5MF0=",
+      "text": "Should be fine",
     },
   },
 }
@@ -2629,6 +2729,11 @@ Object {
           "computed": "hello world",
           "notNullHasDefault": false,
           "wontCastEasy": -512,
+        },
+        Object {
+          "computed": "hello world",
+          "notNullHasDefault": false,
+          "wontCastEasy": null,
         },
       ],
     },
@@ -4317,6 +4422,27 @@ Object {
               "a": 42,
               "computedField": 37,
               "fooBar": -5,
+            },
+          },
+          "nullableCompoundType": null,
+          "nullableNestedCompoundType": null,
+        },
+        Object {
+          "compoundType": Object {
+            "a": null,
+            "computedField": null,
+            "fooBar": null,
+          },
+          "nestedCompoundType": Object {
+            "a": Object {
+              "a": 3,
+              "computedField": 96,
+              "fooBar": 93,
+            },
+            "b": Object {
+              "a": null,
+              "computedField": null,
+              "fooBar": null,
             },
           },
           "nullableCompoundType": null,
@@ -7772,6 +7898,182 @@ exports[`types.graphql 1`] = `
 Object {
   "data": Object {
     "allTypes": Object {
+      "edges": Array [
+        Object {
+          "node": Object {
+            "anIntRange": Object {
+              "end": Object {
+                "inclusive": true,
+                "value": 53,
+              },
+              "start": Object {
+                "inclusive": true,
+                "value": 20,
+              },
+            },
+            "bigint": "467131188225",
+            "boolean": true,
+            "compoundType": Object {
+              "a": 1,
+              "b": "2",
+              "c": "BLUE",
+              "d": "4be8a712-3ff7-432e-aa34-fdb43fbd838d",
+              "e": "FOO_BAR",
+              "f": "_EMPTY_",
+              "fooBar": 8,
+            },
+            "domain": 5,
+            "domain2": 6,
+            "enum": "GREEN",
+            "enumArray": Array [
+              "GREEN",
+              "RED",
+            ],
+            "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+            "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+            "money": 9876543.21,
+            "nestedCompoundType": Object {
+              "a": Object {
+                "a": 3,
+                "b": "456",
+                "c": "RED",
+                "d": "aed18400-2a92-46df-8204-b70c728b3520",
+                "e": "BAR_FOO",
+                "f": "ONE",
+                "fooBar": 93,
+              },
+              "b": Object {
+                "a": 42,
+                "b": "Hello, world!",
+                "c": "BLUE",
+                "d": "d34df5e0-83f1-11e6-8dd0-abee917ffd1e",
+                "e": "BAZ_QUX",
+                "f": "_EMPTY_",
+                "fooBar": -5,
+              },
+              "bazBuz": 7,
+            },
+            "nullableCompoundType": null,
+            "nullableNestedCompoundType": null,
+            "nullablePoint": null,
+            "nullableRange": null,
+            "numrange": Object {
+              "end": Object {
+                "inclusive": false,
+                "value": "52",
+              },
+              "start": Object {
+                "inclusive": true,
+                "value": "-10",
+              },
+            },
+            "point": Object {
+              "x": 1,
+              "y": 3,
+            },
+            "postById": Object {
+              "headline": "They’re not aliens, they’re Earth…liens!",
+              "id": 11,
+            },
+            "postBySmallint": Object {
+              "headline": "What’s with you kids? Every other day it’s food, food, food.",
+              "id": 10,
+            },
+            "smallint": 10,
+            "textArray": Array [
+              "hey",
+              "i",
+              "just",
+              "met",
+              "you",
+            ],
+          },
+        },
+        Object {
+          "node": Object {
+            "anIntRange": Object {
+              "end": Object {
+                "inclusive": true,
+                "value": 53,
+              },
+              "start": Object {
+                "inclusive": true,
+                "value": 20,
+              },
+            },
+            "bigint": "467131188225",
+            "boolean": true,
+            "compoundType": Object {
+              "a": null,
+              "b": null,
+              "c": null,
+              "d": null,
+              "e": null,
+              "f": null,
+              "fooBar": null,
+            },
+            "domain": 5,
+            "domain2": 6,
+            "enum": "GREEN",
+            "enumArray": Array [
+              "GREEN",
+              "RED",
+            ],
+            "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+            "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+            "money": 9876543.21,
+            "nestedCompoundType": Object {
+              "a": Object {
+                "a": 3,
+                "b": "456",
+                "c": "RED",
+                "d": "aed18400-2a92-46df-8204-b70c728b3520",
+                "e": "BAR_FOO",
+                "f": "ONE",
+                "fooBar": 93,
+              },
+              "b": Object {
+                "a": null,
+                "b": null,
+                "c": null,
+                "d": null,
+                "e": null,
+                "f": null,
+                "fooBar": null,
+              },
+              "bazBuz": 7,
+            },
+            "nullableCompoundType": null,
+            "nullableNestedCompoundType": null,
+            "nullablePoint": null,
+            "nullableRange": null,
+            "numrange": Object {
+              "end": Object {
+                "inclusive": false,
+                "value": "52",
+              },
+              "start": Object {
+                "inclusive": true,
+                "value": "-10",
+              },
+            },
+            "point": Object {
+              "x": 1,
+              "y": 3,
+            },
+            "postById": null,
+            "postBySmallint": null,
+            "smallint": 9999,
+            "textArray": Array [
+              "hey",
+              "i",
+              "just",
+              "met",
+              "you",
+            ],
+          },
+        },
+      ],
       "nodes": Array [
         Object {
           "anIntRange": Object {
@@ -7844,7 +8146,15 @@ Object {
             "x": 1,
             "y": 3,
           },
-          "smallint": 50,
+          "postById": Object {
+            "headline": "They’re not aliens, they’re Earth…liens!",
+            "id": 11,
+          },
+          "postBySmallint": Object {
+            "headline": "What’s with you kids? Every other day it’s food, food, food.",
+            "id": 10,
+          },
+          "smallint": 10,
           "textArray": Array [
             "hey",
             "i",
@@ -7853,6 +8163,1165 @@ Object {
             "you",
           ],
         },
+        Object {
+          "anIntRange": Object {
+            "end": Object {
+              "inclusive": true,
+              "value": 53,
+            },
+            "start": Object {
+              "inclusive": true,
+              "value": 20,
+            },
+          },
+          "bigint": "467131188225",
+          "boolean": true,
+          "compoundType": Object {
+            "a": null,
+            "b": null,
+            "c": null,
+            "d": null,
+            "e": null,
+            "f": null,
+            "fooBar": null,
+          },
+          "domain": 5,
+          "domain2": 6,
+          "enum": "GREEN",
+          "enumArray": Array [
+            "GREEN",
+            "RED",
+          ],
+          "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+          "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+          "money": 9876543.21,
+          "nestedCompoundType": Object {
+            "a": Object {
+              "a": 3,
+              "b": "456",
+              "c": "RED",
+              "d": "aed18400-2a92-46df-8204-b70c728b3520",
+              "e": "BAR_FOO",
+              "f": "ONE",
+              "fooBar": 93,
+            },
+            "b": Object {
+              "a": null,
+              "b": null,
+              "c": null,
+              "d": null,
+              "e": null,
+              "f": null,
+              "fooBar": null,
+            },
+            "bazBuz": 7,
+          },
+          "nullableCompoundType": null,
+          "nullableNestedCompoundType": null,
+          "nullablePoint": null,
+          "nullableRange": null,
+          "numrange": Object {
+            "end": Object {
+              "inclusive": false,
+              "value": "52",
+            },
+            "start": Object {
+              "inclusive": true,
+              "value": "-10",
+            },
+          },
+          "point": Object {
+            "x": 1,
+            "y": 3,
+          },
+          "postById": null,
+          "postBySmallint": null,
+          "smallint": 9999,
+          "textArray": Array [
+            "hey",
+            "i",
+            "just",
+            "met",
+            "you",
+          ],
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJwcmltYXJ5X2tleV9hc2MiLFsxMl1d",
+        "hasNextPage": false,
+        "hasPreviousPage": false,
+        "startCursor": "WyJwcmltYXJ5X2tleV9hc2MiLFsxMV1d",
+      },
+      "totalCount": 2,
+    },
+    "allTypesList": Array [
+      Object {
+        "anIntRange": Object {
+          "end": Object {
+            "inclusive": true,
+            "value": 53,
+          },
+          "start": Object {
+            "inclusive": true,
+            "value": 20,
+          },
+        },
+        "bigint": "467131188225",
+        "boolean": true,
+        "compoundType": Object {
+          "a": 1,
+          "b": "2",
+          "c": "BLUE",
+          "d": "4be8a712-3ff7-432e-aa34-fdb43fbd838d",
+          "e": "FOO_BAR",
+          "f": "_EMPTY_",
+          "fooBar": 8,
+        },
+        "domain": 5,
+        "domain2": 6,
+        "enum": "GREEN",
+        "enumArray": Array [
+          "GREEN",
+          "RED",
+        ],
+        "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+        "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+        "money": 9876543.21,
+        "nestedCompoundType": Object {
+          "a": Object {
+            "a": 3,
+            "b": "456",
+            "c": "RED",
+            "d": "aed18400-2a92-46df-8204-b70c728b3520",
+            "e": "BAR_FOO",
+            "f": "ONE",
+            "fooBar": 93,
+          },
+          "b": Object {
+            "a": 42,
+            "b": "Hello, world!",
+            "c": "BLUE",
+            "d": "d34df5e0-83f1-11e6-8dd0-abee917ffd1e",
+            "e": "BAZ_QUX",
+            "f": "_EMPTY_",
+            "fooBar": -5,
+          },
+          "bazBuz": 7,
+        },
+        "nullableCompoundType": null,
+        "nullableNestedCompoundType": null,
+        "nullablePoint": null,
+        "nullableRange": null,
+        "numrange": Object {
+          "end": Object {
+            "inclusive": false,
+            "value": "52",
+          },
+          "start": Object {
+            "inclusive": true,
+            "value": "-10",
+          },
+        },
+        "point": Object {
+          "x": 1,
+          "y": 3,
+        },
+        "postById": Object {
+          "headline": "They’re not aliens, they’re Earth…liens!",
+          "id": 11,
+        },
+        "postBySmallint": Object {
+          "headline": "What’s with you kids? Every other day it’s food, food, food.",
+          "id": 10,
+        },
+        "smallint": 10,
+        "textArray": Array [
+          "hey",
+          "i",
+          "just",
+          "met",
+          "you",
+        ],
+      },
+      Object {
+        "anIntRange": Object {
+          "end": Object {
+            "inclusive": true,
+            "value": 53,
+          },
+          "start": Object {
+            "inclusive": true,
+            "value": 20,
+          },
+        },
+        "bigint": "467131188225",
+        "boolean": true,
+        "compoundType": Object {
+          "a": null,
+          "b": null,
+          "c": null,
+          "d": null,
+          "e": null,
+          "f": null,
+          "fooBar": null,
+        },
+        "domain": 5,
+        "domain2": 6,
+        "enum": "GREEN",
+        "enumArray": Array [
+          "GREEN",
+          "RED",
+        ],
+        "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+        "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+        "money": 9876543.21,
+        "nestedCompoundType": Object {
+          "a": Object {
+            "a": 3,
+            "b": "456",
+            "c": "RED",
+            "d": "aed18400-2a92-46df-8204-b70c728b3520",
+            "e": "BAR_FOO",
+            "f": "ONE",
+            "fooBar": 93,
+          },
+          "b": Object {
+            "a": null,
+            "b": null,
+            "c": null,
+            "d": null,
+            "e": null,
+            "f": null,
+            "fooBar": null,
+          },
+          "bazBuz": 7,
+        },
+        "nullableCompoundType": null,
+        "nullableNestedCompoundType": null,
+        "nullablePoint": null,
+        "nullableRange": null,
+        "numrange": Object {
+          "end": Object {
+            "inclusive": false,
+            "value": "52",
+          },
+          "start": Object {
+            "inclusive": true,
+            "value": "-10",
+          },
+        },
+        "point": Object {
+          "x": 1,
+          "y": 3,
+        },
+        "postById": null,
+        "postBySmallint": null,
+        "smallint": 9999,
+        "textArray": Array [
+          "hey",
+          "i",
+          "just",
+          "met",
+          "you",
+        ],
+      },
+    ],
+    "node": Object {
+      "anIntRange": Object {
+        "end": Object {
+          "inclusive": true,
+          "value": 53,
+        },
+        "start": Object {
+          "inclusive": true,
+          "value": 20,
+        },
+      },
+      "bigint": "467131188225",
+      "boolean": true,
+      "compoundType": Object {
+        "a": 1,
+        "b": "2",
+        "c": "BLUE",
+        "d": "4be8a712-3ff7-432e-aa34-fdb43fbd838d",
+        "e": "FOO_BAR",
+        "f": "_EMPTY_",
+        "fooBar": 8,
+      },
+      "domain": 5,
+      "domain2": 6,
+      "enum": "GREEN",
+      "enumArray": Array [
+        "GREEN",
+        "RED",
+      ],
+      "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+      "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+      "money": 9876543.21,
+      "nestedCompoundType": Object {
+        "a": Object {
+          "a": 3,
+          "b": "456",
+          "c": "RED",
+          "d": "aed18400-2a92-46df-8204-b70c728b3520",
+          "e": "BAR_FOO",
+          "f": "ONE",
+          "fooBar": 93,
+        },
+        "b": Object {
+          "a": 42,
+          "b": "Hello, world!",
+          "c": "BLUE",
+          "d": "d34df5e0-83f1-11e6-8dd0-abee917ffd1e",
+          "e": "BAZ_QUX",
+          "f": "_EMPTY_",
+          "fooBar": -5,
+        },
+        "bazBuz": 7,
+      },
+      "nullableCompoundType": null,
+      "nullableNestedCompoundType": null,
+      "nullablePoint": null,
+      "nullableRange": null,
+      "numrange": Object {
+        "end": Object {
+          "inclusive": false,
+          "value": "52",
+        },
+        "start": Object {
+          "inclusive": true,
+          "value": "-10",
+        },
+      },
+      "point": Object {
+        "x": 1,
+        "y": 3,
+      },
+      "postById": Object {
+        "headline": "They’re not aliens, they’re Earth…liens!",
+        "id": 11,
+      },
+      "postBySmallint": Object {
+        "headline": "What’s with you kids? Every other day it’s food, food, food.",
+        "id": 10,
+      },
+      "smallint": 10,
+      "textArray": Array [
+        "hey",
+        "i",
+        "just",
+        "met",
+        "you",
+      ],
+    },
+    "personById": Object {
+      "typeFunction": Object {
+        "anIntRange": Object {
+          "end": Object {
+            "inclusive": true,
+            "value": 53,
+          },
+          "start": Object {
+            "inclusive": true,
+            "value": 20,
+          },
+        },
+        "bigint": "467131188225",
+        "boolean": true,
+        "compoundType": Object {
+          "a": 1,
+          "b": "2",
+          "c": "BLUE",
+          "d": "4be8a712-3ff7-432e-aa34-fdb43fbd838d",
+          "e": "FOO_BAR",
+          "f": "_EMPTY_",
+          "fooBar": 8,
+        },
+        "domain": 5,
+        "domain2": 6,
+        "enum": "GREEN",
+        "enumArray": Array [
+          "GREEN",
+          "RED",
+        ],
+        "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+        "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+        "money": 9876543.21,
+        "nestedCompoundType": Object {
+          "a": Object {
+            "a": 3,
+            "b": "456",
+            "c": "RED",
+            "d": "aed18400-2a92-46df-8204-b70c728b3520",
+            "e": "BAR_FOO",
+            "f": "ONE",
+            "fooBar": 93,
+          },
+          "b": Object {
+            "a": 42,
+            "b": "Hello, world!",
+            "c": "BLUE",
+            "d": "d34df5e0-83f1-11e6-8dd0-abee917ffd1e",
+            "e": "BAZ_QUX",
+            "f": "_EMPTY_",
+            "fooBar": -5,
+          },
+          "bazBuz": 7,
+        },
+        "nullableCompoundType": null,
+        "nullableNestedCompoundType": null,
+        "nullablePoint": null,
+        "nullableRange": null,
+        "numrange": Object {
+          "end": Object {
+            "inclusive": false,
+            "value": "52",
+          },
+          "start": Object {
+            "inclusive": true,
+            "value": "-10",
+          },
+        },
+        "point": Object {
+          "x": 1,
+          "y": 3,
+        },
+        "postById": Object {
+          "headline": "They’re not aliens, they’re Earth…liens!",
+          "id": 11,
+        },
+        "postBySmallint": Object {
+          "headline": "What’s with you kids? Every other day it’s food, food, food.",
+          "id": 10,
+        },
+        "smallint": 10,
+        "textArray": Array [
+          "hey",
+          "i",
+          "just",
+          "met",
+          "you",
+        ],
+      },
+      "typeFunctionConnection": Object {
+        "edges": Array [
+          Object {
+            "node": Object {
+              "anIntRange": Object {
+                "end": Object {
+                  "inclusive": true,
+                  "value": 53,
+                },
+                "start": Object {
+                  "inclusive": true,
+                  "value": 20,
+                },
+              },
+              "bigint": "467131188225",
+              "boolean": true,
+              "compoundType": Object {
+                "a": 1,
+                "b": "2",
+                "c": "BLUE",
+                "d": "4be8a712-3ff7-432e-aa34-fdb43fbd838d",
+                "e": "FOO_BAR",
+                "f": "_EMPTY_",
+                "fooBar": 8,
+              },
+              "domain": 5,
+              "domain2": 6,
+              "enum": "GREEN",
+              "enumArray": Array [
+                "GREEN",
+                "RED",
+              ],
+              "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+              "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+              "money": 9876543.21,
+              "nestedCompoundType": Object {
+                "a": Object {
+                  "a": 3,
+                  "b": "456",
+                  "c": "RED",
+                  "d": "aed18400-2a92-46df-8204-b70c728b3520",
+                  "e": "BAR_FOO",
+                  "f": "ONE",
+                  "fooBar": 93,
+                },
+                "b": Object {
+                  "a": 42,
+                  "b": "Hello, world!",
+                  "c": "BLUE",
+                  "d": "d34df5e0-83f1-11e6-8dd0-abee917ffd1e",
+                  "e": "BAZ_QUX",
+                  "f": "_EMPTY_",
+                  "fooBar": -5,
+                },
+                "bazBuz": 7,
+              },
+              "nullableCompoundType": null,
+              "nullableNestedCompoundType": null,
+              "nullablePoint": null,
+              "nullableRange": null,
+              "numrange": Object {
+                "end": Object {
+                  "inclusive": false,
+                  "value": "52",
+                },
+                "start": Object {
+                  "inclusive": true,
+                  "value": "-10",
+                },
+              },
+              "point": Object {
+                "x": 1,
+                "y": 3,
+              },
+              "postById": Object {
+                "headline": "They’re not aliens, they’re Earth…liens!",
+                "id": 11,
+              },
+              "postBySmallint": Object {
+                "headline": "What’s with you kids? Every other day it’s food, food, food.",
+                "id": 10,
+              },
+              "smallint": 10,
+              "textArray": Array [
+                "hey",
+                "i",
+                "just",
+                "met",
+                "you",
+              ],
+            },
+          },
+          Object {
+            "node": Object {
+              "anIntRange": Object {
+                "end": Object {
+                  "inclusive": true,
+                  "value": 53,
+                },
+                "start": Object {
+                  "inclusive": true,
+                  "value": 20,
+                },
+              },
+              "bigint": "467131188225",
+              "boolean": true,
+              "compoundType": Object {
+                "a": null,
+                "b": null,
+                "c": null,
+                "d": null,
+                "e": null,
+                "f": null,
+                "fooBar": null,
+              },
+              "domain": 5,
+              "domain2": 6,
+              "enum": "GREEN",
+              "enumArray": Array [
+                "GREEN",
+                "RED",
+              ],
+              "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+              "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+              "money": 9876543.21,
+              "nestedCompoundType": Object {
+                "a": Object {
+                  "a": 3,
+                  "b": "456",
+                  "c": "RED",
+                  "d": "aed18400-2a92-46df-8204-b70c728b3520",
+                  "e": "BAR_FOO",
+                  "f": "ONE",
+                  "fooBar": 93,
+                },
+                "b": Object {
+                  "a": null,
+                  "b": null,
+                  "c": null,
+                  "d": null,
+                  "e": null,
+                  "f": null,
+                  "fooBar": null,
+                },
+                "bazBuz": 7,
+              },
+              "nullableCompoundType": null,
+              "nullableNestedCompoundType": null,
+              "nullablePoint": null,
+              "nullableRange": null,
+              "numrange": Object {
+                "end": Object {
+                  "inclusive": false,
+                  "value": "52",
+                },
+                "start": Object {
+                  "inclusive": true,
+                  "value": "-10",
+                },
+              },
+              "point": Object {
+                "x": 1,
+                "y": 3,
+              },
+              "postById": null,
+              "postBySmallint": null,
+              "smallint": 9999,
+              "textArray": Array [
+                "hey",
+                "i",
+                "just",
+                "met",
+                "you",
+              ],
+            },
+          },
+        ],
+        "nodes": Array [
+          Object {
+            "anIntRange": Object {
+              "end": Object {
+                "inclusive": true,
+                "value": 53,
+              },
+              "start": Object {
+                "inclusive": true,
+                "value": 20,
+              },
+            },
+            "bigint": "467131188225",
+            "boolean": true,
+            "compoundType": Object {
+              "a": 1,
+              "b": "2",
+              "c": "BLUE",
+              "d": "4be8a712-3ff7-432e-aa34-fdb43fbd838d",
+              "e": "FOO_BAR",
+              "f": "_EMPTY_",
+              "fooBar": 8,
+            },
+            "domain": 5,
+            "domain2": 6,
+            "enum": "GREEN",
+            "enumArray": Array [
+              "GREEN",
+              "RED",
+            ],
+            "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+            "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+            "money": 9876543.21,
+            "nestedCompoundType": Object {
+              "a": Object {
+                "a": 3,
+                "b": "456",
+                "c": "RED",
+                "d": "aed18400-2a92-46df-8204-b70c728b3520",
+                "e": "BAR_FOO",
+                "f": "ONE",
+                "fooBar": 93,
+              },
+              "b": Object {
+                "a": 42,
+                "b": "Hello, world!",
+                "c": "BLUE",
+                "d": "d34df5e0-83f1-11e6-8dd0-abee917ffd1e",
+                "e": "BAZ_QUX",
+                "f": "_EMPTY_",
+                "fooBar": -5,
+              },
+              "bazBuz": 7,
+            },
+            "nullableCompoundType": null,
+            "nullableNestedCompoundType": null,
+            "nullablePoint": null,
+            "nullableRange": null,
+            "numrange": Object {
+              "end": Object {
+                "inclusive": false,
+                "value": "52",
+              },
+              "start": Object {
+                "inclusive": true,
+                "value": "-10",
+              },
+            },
+            "point": Object {
+              "x": 1,
+              "y": 3,
+            },
+            "postById": Object {
+              "headline": "They’re not aliens, they’re Earth…liens!",
+              "id": 11,
+            },
+            "postBySmallint": Object {
+              "headline": "What’s with you kids? Every other day it’s food, food, food.",
+              "id": 10,
+            },
+            "smallint": 10,
+            "textArray": Array [
+              "hey",
+              "i",
+              "just",
+              "met",
+              "you",
+            ],
+          },
+          Object {
+            "anIntRange": Object {
+              "end": Object {
+                "inclusive": true,
+                "value": 53,
+              },
+              "start": Object {
+                "inclusive": true,
+                "value": 20,
+              },
+            },
+            "bigint": "467131188225",
+            "boolean": true,
+            "compoundType": Object {
+              "a": null,
+              "b": null,
+              "c": null,
+              "d": null,
+              "e": null,
+              "f": null,
+              "fooBar": null,
+            },
+            "domain": 5,
+            "domain2": 6,
+            "enum": "GREEN",
+            "enumArray": Array [
+              "GREEN",
+              "RED",
+            ],
+            "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+            "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+            "money": 9876543.21,
+            "nestedCompoundType": Object {
+              "a": Object {
+                "a": 3,
+                "b": "456",
+                "c": "RED",
+                "d": "aed18400-2a92-46df-8204-b70c728b3520",
+                "e": "BAR_FOO",
+                "f": "ONE",
+                "fooBar": 93,
+              },
+              "b": Object {
+                "a": null,
+                "b": null,
+                "c": null,
+                "d": null,
+                "e": null,
+                "f": null,
+                "fooBar": null,
+              },
+              "bazBuz": 7,
+            },
+            "nullableCompoundType": null,
+            "nullableNestedCompoundType": null,
+            "nullablePoint": null,
+            "nullableRange": null,
+            "numrange": Object {
+              "end": Object {
+                "inclusive": false,
+                "value": "52",
+              },
+              "start": Object {
+                "inclusive": true,
+                "value": "-10",
+              },
+            },
+            "point": Object {
+              "x": 1,
+              "y": 3,
+            },
+            "postById": null,
+            "postBySmallint": null,
+            "smallint": 9999,
+            "textArray": Array [
+              "hey",
+              "i",
+              "just",
+              "met",
+              "you",
+            ],
+          },
+        ],
+        "pageInfo": Object {
+          "endCursor": "WyJuYXR1cmFsIiwyXQ==",
+          "hasNextPage": false,
+          "hasPreviousPage": false,
+          "startCursor": "WyJuYXR1cmFsIiwxXQ==",
+        },
+        "totalCount": 2,
+      },
+      "typeFunctionList": Array [
+        Object {
+          "anIntRange": Object {
+            "end": Object {
+              "inclusive": true,
+              "value": 53,
+            },
+            "start": Object {
+              "inclusive": true,
+              "value": 20,
+            },
+          },
+          "bigint": "467131188225",
+          "boolean": true,
+          "compoundType": Object {
+            "a": 1,
+            "b": "2",
+            "c": "BLUE",
+            "d": "4be8a712-3ff7-432e-aa34-fdb43fbd838d",
+            "e": "FOO_BAR",
+            "f": "_EMPTY_",
+            "fooBar": 8,
+          },
+          "domain": 5,
+          "domain2": 6,
+          "enum": "GREEN",
+          "enumArray": Array [
+            "GREEN",
+            "RED",
+          ],
+          "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+          "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+          "money": 9876543.21,
+          "nestedCompoundType": Object {
+            "a": Object {
+              "a": 3,
+              "b": "456",
+              "c": "RED",
+              "d": "aed18400-2a92-46df-8204-b70c728b3520",
+              "e": "BAR_FOO",
+              "f": "ONE",
+              "fooBar": 93,
+            },
+            "b": Object {
+              "a": 42,
+              "b": "Hello, world!",
+              "c": "BLUE",
+              "d": "d34df5e0-83f1-11e6-8dd0-abee917ffd1e",
+              "e": "BAZ_QUX",
+              "f": "_EMPTY_",
+              "fooBar": -5,
+            },
+            "bazBuz": 7,
+          },
+          "nullableCompoundType": null,
+          "nullableNestedCompoundType": null,
+          "nullablePoint": null,
+          "nullableRange": null,
+          "numrange": Object {
+            "end": Object {
+              "inclusive": false,
+              "value": "52",
+            },
+            "start": Object {
+              "inclusive": true,
+              "value": "-10",
+            },
+          },
+          "point": Object {
+            "x": 1,
+            "y": 3,
+          },
+          "postById": Object {
+            "headline": "They’re not aliens, they’re Earth…liens!",
+            "id": 11,
+          },
+          "postBySmallint": Object {
+            "headline": "What’s with you kids? Every other day it’s food, food, food.",
+            "id": 10,
+          },
+          "smallint": 10,
+          "textArray": Array [
+            "hey",
+            "i",
+            "just",
+            "met",
+            "you",
+          ],
+        },
+        Object {
+          "anIntRange": Object {
+            "end": Object {
+              "inclusive": true,
+              "value": 53,
+            },
+            "start": Object {
+              "inclusive": true,
+              "value": 20,
+            },
+          },
+          "bigint": "467131188225",
+          "boolean": true,
+          "compoundType": Object {
+            "a": null,
+            "b": null,
+            "c": null,
+            "d": null,
+            "e": null,
+            "f": null,
+            "fooBar": null,
+          },
+          "domain": 5,
+          "domain2": 6,
+          "enum": "GREEN",
+          "enumArray": Array [
+            "GREEN",
+            "RED",
+          ],
+          "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+          "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+          "money": 9876543.21,
+          "nestedCompoundType": Object {
+            "a": Object {
+              "a": 3,
+              "b": "456",
+              "c": "RED",
+              "d": "aed18400-2a92-46df-8204-b70c728b3520",
+              "e": "BAR_FOO",
+              "f": "ONE",
+              "fooBar": 93,
+            },
+            "b": Object {
+              "a": null,
+              "b": null,
+              "c": null,
+              "d": null,
+              "e": null,
+              "f": null,
+              "fooBar": null,
+            },
+            "bazBuz": 7,
+          },
+          "nullableCompoundType": null,
+          "nullableNestedCompoundType": null,
+          "nullablePoint": null,
+          "nullableRange": null,
+          "numrange": Object {
+            "end": Object {
+              "inclusive": false,
+              "value": "52",
+            },
+            "start": Object {
+              "inclusive": true,
+              "value": "-10",
+            },
+          },
+          "point": Object {
+            "x": 1,
+            "y": 3,
+          },
+          "postById": null,
+          "postBySmallint": null,
+          "smallint": 9999,
+          "textArray": Array [
+            "hey",
+            "i",
+            "just",
+            "met",
+            "you",
+          ],
+        },
+      ],
+    },
+    "postById": Object {
+      "headline": "They’re not aliens, they’re Earth…liens!",
+      "id": 11,
+      "typeById": Object {
+        "anIntRange": Object {
+          "end": Object {
+            "inclusive": true,
+            "value": 53,
+          },
+          "start": Object {
+            "inclusive": true,
+            "value": 20,
+          },
+        },
+        "bigint": "467131188225",
+        "boolean": true,
+        "compoundType": Object {
+          "a": 1,
+          "b": "2",
+          "c": "BLUE",
+          "d": "4be8a712-3ff7-432e-aa34-fdb43fbd838d",
+          "e": "FOO_BAR",
+          "f": "_EMPTY_",
+          "fooBar": 8,
+        },
+        "domain": 5,
+        "domain2": 6,
+        "enum": "GREEN",
+        "enumArray": Array [
+          "GREEN",
+          "RED",
+        ],
+        "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+        "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+        "money": 9876543.21,
+        "nestedCompoundType": Object {
+          "a": Object {
+            "a": 3,
+            "b": "456",
+            "c": "RED",
+            "d": "aed18400-2a92-46df-8204-b70c728b3520",
+            "e": "BAR_FOO",
+            "f": "ONE",
+            "fooBar": 93,
+          },
+          "b": Object {
+            "a": 42,
+            "b": "Hello, world!",
+            "c": "BLUE",
+            "d": "d34df5e0-83f1-11e6-8dd0-abee917ffd1e",
+            "e": "BAZ_QUX",
+            "f": "_EMPTY_",
+            "fooBar": -5,
+          },
+          "bazBuz": 7,
+        },
+        "nullableCompoundType": null,
+        "nullableNestedCompoundType": null,
+        "nullablePoint": null,
+        "nullableRange": null,
+        "numrange": Object {
+          "end": Object {
+            "inclusive": false,
+            "value": "52",
+          },
+          "start": Object {
+            "inclusive": true,
+            "value": "-10",
+          },
+        },
+        "point": Object {
+          "x": 1,
+          "y": 3,
+        },
+        "postById": Object {
+          "headline": "They’re not aliens, they’re Earth…liens!",
+          "id": 11,
+        },
+        "postBySmallint": Object {
+          "headline": "What’s with you kids? Every other day it’s food, food, food.",
+          "id": 10,
+        },
+        "smallint": 10,
+        "textArray": Array [
+          "hey",
+          "i",
+          "just",
+          "met",
+          "you",
+        ],
+      },
+      "typesBySmallint": Object {
+        "edges": Array [],
+        "nodes": Array [],
+        "pageInfo": Object {
+          "endCursor": null,
+          "hasNextPage": false,
+          "hasPreviousPage": false,
+          "startCursor": null,
+        },
+        "totalCount": 0,
+      },
+    },
+    "type": Object {
+      "anIntRange": Object {
+        "end": Object {
+          "inclusive": true,
+          "value": 53,
+        },
+        "start": Object {
+          "inclusive": true,
+          "value": 20,
+        },
+      },
+      "bigint": "467131188225",
+      "boolean": true,
+      "compoundType": Object {
+        "a": 1,
+        "b": "2",
+        "c": "BLUE",
+        "d": "4be8a712-3ff7-432e-aa34-fdb43fbd838d",
+        "e": "FOO_BAR",
+        "f": "_EMPTY_",
+        "fooBar": 8,
+      },
+      "domain": 5,
+      "domain2": 6,
+      "enum": "GREEN",
+      "enumArray": Array [
+        "GREEN",
+        "RED",
+      ],
+      "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+      "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+      "money": 9876543.21,
+      "nestedCompoundType": Object {
+        "a": Object {
+          "a": 3,
+          "b": "456",
+          "c": "RED",
+          "d": "aed18400-2a92-46df-8204-b70c728b3520",
+          "e": "BAR_FOO",
+          "f": "ONE",
+          "fooBar": 93,
+        },
+        "b": Object {
+          "a": 42,
+          "b": "Hello, world!",
+          "c": "BLUE",
+          "d": "d34df5e0-83f1-11e6-8dd0-abee917ffd1e",
+          "e": "BAZ_QUX",
+          "f": "_EMPTY_",
+          "fooBar": -5,
+        },
+        "bazBuz": 7,
+      },
+      "nullableCompoundType": null,
+      "nullableNestedCompoundType": null,
+      "nullablePoint": null,
+      "nullableRange": null,
+      "numrange": Object {
+        "end": Object {
+          "inclusive": false,
+          "value": "52",
+        },
+        "start": Object {
+          "inclusive": true,
+          "value": "-10",
+        },
+      },
+      "point": Object {
+        "x": 1,
+        "y": 3,
+      },
+      "postById": Object {
+        "headline": "They’re not aliens, they’re Earth…liens!",
+        "id": 11,
+      },
+      "postBySmallint": Object {
+        "headline": "What’s with you kids? Every other day it’s food, food, food.",
+        "id": 10,
+      },
+      "smallint": 10,
+      "textArray": Array [
+        "hey",
+        "i",
+        "just",
+        "met",
+        "you",
       ],
     },
     "typeById": Object {
@@ -7926,7 +9395,15 @@ Object {
         "x": 1,
         "y": 3,
       },
-      "smallint": 50,
+      "postById": Object {
+        "headline": "They’re not aliens, they’re Earth…liens!",
+        "id": 11,
+      },
+      "postBySmallint": Object {
+        "headline": "What’s with you kids? Every other day it’s food, food, food.",
+        "id": 10,
+      },
+      "smallint": 10,
       "textArray": Array [
         "hey",
         "i",
@@ -7935,6 +9412,623 @@ Object {
         "you",
       ],
     },
+    "typeFunction": Object {
+      "anIntRange": Object {
+        "end": Object {
+          "inclusive": true,
+          "value": 53,
+        },
+        "start": Object {
+          "inclusive": true,
+          "value": 20,
+        },
+      },
+      "bigint": "467131188225",
+      "boolean": true,
+      "compoundType": Object {
+        "a": 1,
+        "b": "2",
+        "c": "BLUE",
+        "d": "4be8a712-3ff7-432e-aa34-fdb43fbd838d",
+        "e": "FOO_BAR",
+        "f": "_EMPTY_",
+        "fooBar": 8,
+      },
+      "domain": 5,
+      "domain2": 6,
+      "enum": "GREEN",
+      "enumArray": Array [
+        "GREEN",
+        "RED",
+      ],
+      "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+      "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+      "money": 9876543.21,
+      "nestedCompoundType": Object {
+        "a": Object {
+          "a": 3,
+          "b": "456",
+          "c": "RED",
+          "d": "aed18400-2a92-46df-8204-b70c728b3520",
+          "e": "BAR_FOO",
+          "f": "ONE",
+          "fooBar": 93,
+        },
+        "b": Object {
+          "a": 42,
+          "b": "Hello, world!",
+          "c": "BLUE",
+          "d": "d34df5e0-83f1-11e6-8dd0-abee917ffd1e",
+          "e": "BAZ_QUX",
+          "f": "_EMPTY_",
+          "fooBar": -5,
+        },
+        "bazBuz": 7,
+      },
+      "nullableCompoundType": null,
+      "nullableNestedCompoundType": null,
+      "nullablePoint": null,
+      "nullableRange": null,
+      "numrange": Object {
+        "end": Object {
+          "inclusive": false,
+          "value": "52",
+        },
+        "start": Object {
+          "inclusive": true,
+          "value": "-10",
+        },
+      },
+      "point": Object {
+        "x": 1,
+        "y": 3,
+      },
+      "postById": Object {
+        "headline": "They’re not aliens, they’re Earth…liens!",
+        "id": 11,
+      },
+      "postBySmallint": Object {
+        "headline": "What’s with you kids? Every other day it’s food, food, food.",
+        "id": 10,
+      },
+      "smallint": 10,
+      "textArray": Array [
+        "hey",
+        "i",
+        "just",
+        "met",
+        "you",
+      ],
+    },
+    "typeFunctionConnection": Object {
+      "edges": Array [
+        Object {
+          "node": Object {
+            "anIntRange": Object {
+              "end": Object {
+                "inclusive": true,
+                "value": 53,
+              },
+              "start": Object {
+                "inclusive": true,
+                "value": 20,
+              },
+            },
+            "bigint": "467131188225",
+            "boolean": true,
+            "compoundType": Object {
+              "a": 1,
+              "b": "2",
+              "c": "BLUE",
+              "d": "4be8a712-3ff7-432e-aa34-fdb43fbd838d",
+              "e": "FOO_BAR",
+              "f": "_EMPTY_",
+              "fooBar": 8,
+            },
+            "domain": 5,
+            "domain2": 6,
+            "enum": "GREEN",
+            "enumArray": Array [
+              "GREEN",
+              "RED",
+            ],
+            "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+            "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+            "money": 9876543.21,
+            "nestedCompoundType": Object {
+              "a": Object {
+                "a": 3,
+                "b": "456",
+                "c": "RED",
+                "d": "aed18400-2a92-46df-8204-b70c728b3520",
+                "e": "BAR_FOO",
+                "f": "ONE",
+                "fooBar": 93,
+              },
+              "b": Object {
+                "a": 42,
+                "b": "Hello, world!",
+                "c": "BLUE",
+                "d": "d34df5e0-83f1-11e6-8dd0-abee917ffd1e",
+                "e": "BAZ_QUX",
+                "f": "_EMPTY_",
+                "fooBar": -5,
+              },
+              "bazBuz": 7,
+            },
+            "nullableCompoundType": null,
+            "nullableNestedCompoundType": null,
+            "nullablePoint": null,
+            "nullableRange": null,
+            "numrange": Object {
+              "end": Object {
+                "inclusive": false,
+                "value": "52",
+              },
+              "start": Object {
+                "inclusive": true,
+                "value": "-10",
+              },
+            },
+            "point": Object {
+              "x": 1,
+              "y": 3,
+            },
+            "postById": Object {
+              "headline": "They’re not aliens, they’re Earth…liens!",
+              "id": 11,
+            },
+            "postBySmallint": Object {
+              "headline": "What’s with you kids? Every other day it’s food, food, food.",
+              "id": 10,
+            },
+            "smallint": 10,
+            "textArray": Array [
+              "hey",
+              "i",
+              "just",
+              "met",
+              "you",
+            ],
+          },
+        },
+        Object {
+          "node": Object {
+            "anIntRange": Object {
+              "end": Object {
+                "inclusive": true,
+                "value": 53,
+              },
+              "start": Object {
+                "inclusive": true,
+                "value": 20,
+              },
+            },
+            "bigint": "467131188225",
+            "boolean": true,
+            "compoundType": Object {
+              "a": null,
+              "b": null,
+              "c": null,
+              "d": null,
+              "e": null,
+              "f": null,
+              "fooBar": null,
+            },
+            "domain": 5,
+            "domain2": 6,
+            "enum": "GREEN",
+            "enumArray": Array [
+              "GREEN",
+              "RED",
+            ],
+            "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+            "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+            "money": 9876543.21,
+            "nestedCompoundType": Object {
+              "a": Object {
+                "a": 3,
+                "b": "456",
+                "c": "RED",
+                "d": "aed18400-2a92-46df-8204-b70c728b3520",
+                "e": "BAR_FOO",
+                "f": "ONE",
+                "fooBar": 93,
+              },
+              "b": Object {
+                "a": null,
+                "b": null,
+                "c": null,
+                "d": null,
+                "e": null,
+                "f": null,
+                "fooBar": null,
+              },
+              "bazBuz": 7,
+            },
+            "nullableCompoundType": null,
+            "nullableNestedCompoundType": null,
+            "nullablePoint": null,
+            "nullableRange": null,
+            "numrange": Object {
+              "end": Object {
+                "inclusive": false,
+                "value": "52",
+              },
+              "start": Object {
+                "inclusive": true,
+                "value": "-10",
+              },
+            },
+            "point": Object {
+              "x": 1,
+              "y": 3,
+            },
+            "postById": null,
+            "postBySmallint": null,
+            "smallint": 9999,
+            "textArray": Array [
+              "hey",
+              "i",
+              "just",
+              "met",
+              "you",
+            ],
+          },
+        },
+      ],
+      "nodes": Array [
+        Object {
+          "anIntRange": Object {
+            "end": Object {
+              "inclusive": true,
+              "value": 53,
+            },
+            "start": Object {
+              "inclusive": true,
+              "value": 20,
+            },
+          },
+          "bigint": "467131188225",
+          "boolean": true,
+          "compoundType": Object {
+            "a": 1,
+            "b": "2",
+            "c": "BLUE",
+            "d": "4be8a712-3ff7-432e-aa34-fdb43fbd838d",
+            "e": "FOO_BAR",
+            "f": "_EMPTY_",
+            "fooBar": 8,
+          },
+          "domain": 5,
+          "domain2": 6,
+          "enum": "GREEN",
+          "enumArray": Array [
+            "GREEN",
+            "RED",
+          ],
+          "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+          "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+          "money": 9876543.21,
+          "nestedCompoundType": Object {
+            "a": Object {
+              "a": 3,
+              "b": "456",
+              "c": "RED",
+              "d": "aed18400-2a92-46df-8204-b70c728b3520",
+              "e": "BAR_FOO",
+              "f": "ONE",
+              "fooBar": 93,
+            },
+            "b": Object {
+              "a": 42,
+              "b": "Hello, world!",
+              "c": "BLUE",
+              "d": "d34df5e0-83f1-11e6-8dd0-abee917ffd1e",
+              "e": "BAZ_QUX",
+              "f": "_EMPTY_",
+              "fooBar": -5,
+            },
+            "bazBuz": 7,
+          },
+          "nullableCompoundType": null,
+          "nullableNestedCompoundType": null,
+          "nullablePoint": null,
+          "nullableRange": null,
+          "numrange": Object {
+            "end": Object {
+              "inclusive": false,
+              "value": "52",
+            },
+            "start": Object {
+              "inclusive": true,
+              "value": "-10",
+            },
+          },
+          "point": Object {
+            "x": 1,
+            "y": 3,
+          },
+          "postById": Object {
+            "headline": "They’re not aliens, they’re Earth…liens!",
+            "id": 11,
+          },
+          "postBySmallint": Object {
+            "headline": "What’s with you kids? Every other day it’s food, food, food.",
+            "id": 10,
+          },
+          "smallint": 10,
+          "textArray": Array [
+            "hey",
+            "i",
+            "just",
+            "met",
+            "you",
+          ],
+        },
+        Object {
+          "anIntRange": Object {
+            "end": Object {
+              "inclusive": true,
+              "value": 53,
+            },
+            "start": Object {
+              "inclusive": true,
+              "value": 20,
+            },
+          },
+          "bigint": "467131188225",
+          "boolean": true,
+          "compoundType": Object {
+            "a": null,
+            "b": null,
+            "c": null,
+            "d": null,
+            "e": null,
+            "f": null,
+            "fooBar": null,
+          },
+          "domain": 5,
+          "domain2": 6,
+          "enum": "GREEN",
+          "enumArray": Array [
+            "GREEN",
+            "RED",
+          ],
+          "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+          "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+          "money": 9876543.21,
+          "nestedCompoundType": Object {
+            "a": Object {
+              "a": 3,
+              "b": "456",
+              "c": "RED",
+              "d": "aed18400-2a92-46df-8204-b70c728b3520",
+              "e": "BAR_FOO",
+              "f": "ONE",
+              "fooBar": 93,
+            },
+            "b": Object {
+              "a": null,
+              "b": null,
+              "c": null,
+              "d": null,
+              "e": null,
+              "f": null,
+              "fooBar": null,
+            },
+            "bazBuz": 7,
+          },
+          "nullableCompoundType": null,
+          "nullableNestedCompoundType": null,
+          "nullablePoint": null,
+          "nullableRange": null,
+          "numrange": Object {
+            "end": Object {
+              "inclusive": false,
+              "value": "52",
+            },
+            "start": Object {
+              "inclusive": true,
+              "value": "-10",
+            },
+          },
+          "point": Object {
+            "x": 1,
+            "y": 3,
+          },
+          "postById": null,
+          "postBySmallint": null,
+          "smallint": 9999,
+          "textArray": Array [
+            "hey",
+            "i",
+            "just",
+            "met",
+            "you",
+          ],
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiwyXQ==",
+        "hasNextPage": false,
+        "hasPreviousPage": false,
+        "startCursor": "WyJuYXR1cmFsIiwxXQ==",
+      },
+      "totalCount": 2,
+    },
+    "typeFunctionList": Array [
+      Object {
+        "anIntRange": Object {
+          "end": Object {
+            "inclusive": true,
+            "value": 53,
+          },
+          "start": Object {
+            "inclusive": true,
+            "value": 20,
+          },
+        },
+        "bigint": "467131188225",
+        "boolean": true,
+        "compoundType": Object {
+          "a": 1,
+          "b": "2",
+          "c": "BLUE",
+          "d": "4be8a712-3ff7-432e-aa34-fdb43fbd838d",
+          "e": "FOO_BAR",
+          "f": "_EMPTY_",
+          "fooBar": 8,
+        },
+        "domain": 5,
+        "domain2": 6,
+        "enum": "GREEN",
+        "enumArray": Array [
+          "GREEN",
+          "RED",
+        ],
+        "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+        "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+        "money": 9876543.21,
+        "nestedCompoundType": Object {
+          "a": Object {
+            "a": 3,
+            "b": "456",
+            "c": "RED",
+            "d": "aed18400-2a92-46df-8204-b70c728b3520",
+            "e": "BAR_FOO",
+            "f": "ONE",
+            "fooBar": 93,
+          },
+          "b": Object {
+            "a": 42,
+            "b": "Hello, world!",
+            "c": "BLUE",
+            "d": "d34df5e0-83f1-11e6-8dd0-abee917ffd1e",
+            "e": "BAZ_QUX",
+            "f": "_EMPTY_",
+            "fooBar": -5,
+          },
+          "bazBuz": 7,
+        },
+        "nullableCompoundType": null,
+        "nullableNestedCompoundType": null,
+        "nullablePoint": null,
+        "nullableRange": null,
+        "numrange": Object {
+          "end": Object {
+            "inclusive": false,
+            "value": "52",
+          },
+          "start": Object {
+            "inclusive": true,
+            "value": "-10",
+          },
+        },
+        "point": Object {
+          "x": 1,
+          "y": 3,
+        },
+        "postById": Object {
+          "headline": "They’re not aliens, they’re Earth…liens!",
+          "id": 11,
+        },
+        "postBySmallint": Object {
+          "headline": "What’s with you kids? Every other day it’s food, food, food.",
+          "id": 10,
+        },
+        "smallint": 10,
+        "textArray": Array [
+          "hey",
+          "i",
+          "just",
+          "met",
+          "you",
+        ],
+      },
+      Object {
+        "anIntRange": Object {
+          "end": Object {
+            "inclusive": true,
+            "value": 53,
+          },
+          "start": Object {
+            "inclusive": true,
+            "value": 20,
+          },
+        },
+        "bigint": "467131188225",
+        "boolean": true,
+        "compoundType": Object {
+          "a": null,
+          "b": null,
+          "c": null,
+          "d": null,
+          "e": null,
+          "f": null,
+          "fooBar": null,
+        },
+        "domain": 5,
+        "domain2": 6,
+        "enum": "GREEN",
+        "enumArray": Array [
+          "GREEN",
+          "RED",
+        ],
+        "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
+        "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+        "money": 9876543.21,
+        "nestedCompoundType": Object {
+          "a": Object {
+            "a": 3,
+            "b": "456",
+            "c": "RED",
+            "d": "aed18400-2a92-46df-8204-b70c728b3520",
+            "e": "BAR_FOO",
+            "f": "ONE",
+            "fooBar": 93,
+          },
+          "b": Object {
+            "a": null,
+            "b": null,
+            "c": null,
+            "d": null,
+            "e": null,
+            "f": null,
+            "fooBar": null,
+          },
+          "bazBuz": 7,
+        },
+        "nullableCompoundType": null,
+        "nullableNestedCompoundType": null,
+        "nullablePoint": null,
+        "nullableRange": null,
+        "numrange": Object {
+          "end": Object {
+            "inclusive": false,
+            "value": "52",
+          },
+          "start": Object {
+            "inclusive": true,
+            "value": "-10",
+          },
+        },
+        "point": Object {
+          "x": 1,
+          "y": 3,
+        },
+        "postById": null,
+        "postBySmallint": null,
+        "smallint": 9999,
+        "textArray": Array [
+          "hey",
+          "i",
+          "just",
+          "met",
+          "you",
+        ],
+      },
+    ],
   },
 }
 `;

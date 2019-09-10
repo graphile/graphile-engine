@@ -1,12 +1,12 @@
 {
   "name": "graphql-parse-resolve-info",
-  "version": "4.1.0",
+  "version": "4.4.3",
   "description": "Parse GraphQLResolveInfo (the 4th argument of resolve) into a simple tree",
-  "main": "node8plus/index.js",
+  "main": "index.js",
   "types": "node8plus/index.d.ts",
   "scripts": {
     "test": "jest",
-    "prepack": "mkdir -p node8plus && tsc",
+    "prepack": "mkdir -p node8plus && tsc && tsc --target esnext --lib esnext --outDir build-turbo --declarationDir build-turbo",
     "tslint": "prettier --list-different 'src/**/*' && tslint --config ../../tslint.json --project tsconfig.json",
     "watch": "mkdir -p node8plus && tsc --watch"
   },
@@ -33,25 +33,24 @@
     "graphql": ">=0.9 <0.14 || ^14.0.2"
   },
   "devDependencies": {
-    "@types/debug": "^0.0.30",
-    "@types/jest": "^23.3.1",
-    "@types/node": "^10.7.1",
-    "babel-cli": "^6.24.1",
-    "eslint_d": "^5.3.1",
-    "jest": "^23.5.0",
-    "ts-jest": "^23.1.3",
-    "ts-node": "^7.0.1",
-    "tslint": "^5.11.0",
-    "tslint-config-prettier": "^1.14.0",
-    "typescript": "^3.0.1"
+    "@types/debug": "^4.1.4",
+    "@types/jest": "^24.0.12",
+    "@types/node": "^12.0.0",
+    "eslint_d": "^7.3.0",
+    "jest": "^24.8.0",
+    "ts-jest": "^24.0.2",
+    "ts-node": "^8.1.0",
+    "tslint": "^5.16.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.4.5"
   },
   "dependencies": {
-    "@types/graphql": "^14.0.3",
-    "debug": ">=2 <3"
+    "debug": "^4.1.1"
   },
   "files": [
     "node8plus",
-    "index.js"
+    "index.js",
+    "build-turbo"
   ],
   "engines": {
     "node": ">=8.6"

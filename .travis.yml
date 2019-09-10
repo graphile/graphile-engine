@@ -14,11 +14,7 @@ env:
   TEST_DATABASE_URL: postgres://localhost:5432/travis
   PGVERSION: 9.4
 
-cache:
-  directories:
-    - node_modules
-    - $NVM_DIR
-    - $HOME/.yarn
+cache: yarn
 
 install:
   - yarn

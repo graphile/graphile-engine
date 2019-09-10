@@ -97,7 +97,15 @@ export default function makeExtendSchemaPlugin(
     // Add stuff to the schema
     builder.hook("build", build => {
       const {
-        graphql: { GraphQLEnumType, GraphQLInputObjectType, GraphQLObjectType },
+        graphql: {
+          GraphQLEnumType,
+          GraphQLInputObjectType,
+          GraphQLObjectType,
+          GraphQLScalarType,
+          GraphQLDirective,
+          GraphQLUnionType,
+        },
+        addType,
       } = build;
       const { typeDefs, resolvers = {} } =
         typeof generator === "function"
@@ -109,6 +117,10 @@ export default function makeExtendSchemaPlugin(
         );
       }
       const typeExtensions = {
+        GraphQLSchema: {
+          directives: [] as Array<any>,
+          types: [] as Array<any>,
+        },
         GraphQLInputObjectType: {},
         GraphQLObjectType: {},
       };
@@ -141,6 +153,36 @@ export default function makeExtendSchemaPlugin(
             type: GraphQLInputObjectType,
             definition,
           });
+        } else if (definition.kind === "UnionTypeDefinition") {
+          newTypes.push({
+            type: GraphQLUnionType,
+            definition,
+          });
+        } else if (definition.kind === "DirectiveDefinition") {
+          newTypes.push({
+            type: GraphQLDirective,
+            definition,
+          });
+        } else if (definition.kind === "ScalarTypeDefinition") {
+          // TODO: add validation
+          const name = getName(definition.name);
+          if (resolvers[name]) {
+            const gqlScalarType = resolvers[name];
+            if (gqlScalarType.name !== name) {
+              throw new Error(
+                `Names for scalar type do not match; schema: '${name}' vs type: '${String(
+                  gqlScalarType.name
+                )}'`
+              );
+            }
+            addType(gqlScalarType);
+          } else {
+            // Create a string type
+            newTypes.push({
+              type: GraphQLScalarType,
+              definition,
+            });
+          }
         } else {
           if ((definition.kind as any) === "TypeExtensionDefinition") {
             throw new Error(
@@ -164,9 +206,18 @@ export default function makeExtendSchemaPlugin(
     builder.hook("init", (_, build, _context) => {
       const {
         newWithHooks,
+        [`ExtendSchemaPlugin_${uniqueId}_typeExtensions`]: typeExtensions, // ONLY use this for GraphQLSchema in this hook
         [`ExtendSchemaPlugin_${uniqueId}_newTypes`]: newTypes,
         [`ExtendSchemaPlugin_${uniqueId}_resolvers`]: resolvers,
-        graphql: { GraphQLEnumType, GraphQLObjectType, GraphQLInputObjectType },
+        graphql: {
+          GraphQLEnumType,
+          GraphQLObjectType,
+          GraphQLInputObjectType,
+          GraphQLUnionType,
+          GraphQLScalarType,
+          GraphQLDirective,
+          Kind,
+        },
       } = build;
       newTypes.forEach(({ type, definition }: NewTypeDef) => {
         if (type === GraphQLEnumType) {
@@ -275,6 +326,75 @@ export default function makeExtendSchemaPlugin(
             },
             scope
           );
+        } else if (type === GraphQLUnionType) {
+          // https://graphql.org/graphql-js/type/#graphqluniontype
+          const name = getName(definition.name);
+          const description = getDescription(definition.description);
+          const directives = getDirectives(definition.directives);
+          const scope = {
+            __origin: `makeExtendSchemaPlugin`,
+            directives,
+            ...(directives.scope || {}),
+          };
+          const resolveType = resolvers[name] && resolvers[name].__resolveType;
+          newWithHooks(
+            type,
+            {
+              name,
+              types: () => {
+                if (Array.isArray(definition.types)) {
+                  return definition.types.map((typeAST: any) => {
+                    if (typeAST.kind !== "NamedType") {
+                      throw new Error("Only support unions of named types");
+                    }
+                    return getType(typeAST, build);
+                  });
+                }
+              },
+              ...(resolveType ? { resolveType } : null),
+              ...(description ? { description } : null),
+            },
+            scope
+          );
+        } else if (type === GraphQLScalarType) {
+          const name = getName(definition.name);
+          const description = getDescription(definition.description);
+          const directives = getDirectives(definition.directives);
+          const scope = {
+            __origin: `makeExtendSchemaPlugin`,
+            directives,
+            ...(directives.scope || {}),
+          };
+          newWithHooks(
+            type,
+            {
+              name,
+              description,
+              serialize: (value: any) => String(value),
+              parseValue: (value: any) => String(value),
+              parseLiteral: (ast: any) => {
+                if (ast.kind !== Kind.STRING) {
+                  throw new Error("Can only parse string values");
+                }
+                return ast.value;
+              },
+            },
+            scope
+          );
+        } else if (type === GraphQLDirective) {
+          // https://github.com/graphql/graphql-js/blob/3c54315ab13c6b9d337fb7c33ad7e27b92ca4a40/src/type/directives.js#L106-L113
+          const name = getName(definition.name);
+          const description = getDescription(definition.description);
+          const locations = definition.locations.map(getName);
+          const args = getArguments(definition.arguments, build);
+          // Ignoring isRepeatable and astNode for now
+          const directive = new GraphQLDirective({
+            name,
+            locations,
+            args,
+            ...(description ? { description } : null),
+          });
+          typeExtensions.GraphQLSchema.directives.push(directive);
         } else {
           throw new Error(
             `We have no code to build an object of type '${type}'; it should not have reached this area of the code.`
@@ -282,6 +402,20 @@ export default function makeExtendSchemaPlugin(
         }
       });
       return _;
+    });
+
+    builder.hook("GraphQLSchema", (schema, build, _context) => {
+      const {
+        [`ExtendSchemaPlugin_${uniqueId}_typeExtensions`]: typeExtensions,
+      } = build;
+      return {
+        ...schema,
+        directives: [
+          ...(schema.directives || build.graphql.specifiedDirectives || []),
+          ...typeExtensions.GraphQLSchema.directives,
+        ],
+        types: [...(schema.types || []), ...typeExtensions.GraphQLSchema.types],
+      };
     });
 
     builder.hook("GraphQLObjectType:fields", (fields, build, context: any) => {
@@ -515,6 +649,7 @@ function getFields<TSource>(
   },
   build: Build
 ) {
+  const scopeByType = build.scopeByType || new Map();
   if (!build.graphql.isNamedType(SelfGeneric)) {
     throw new Error("getFields only supports named types");
   }
@@ -525,13 +660,16 @@ function getFields<TSource>(
     fieldContext: Context<TSource>,
     type: GraphQLOutputType
   ) {
-    const namedType = build.graphql.getNamedType(type);
-    if (typeof namedType.getFields === "function") {
-      namedType.getFields(); // Ensure fields have been loaded, so workarounds are flagged
-    }
-    const recurseDataGeneratorsWorkaroundField = recurseDataGeneratorsWorkaroundFieldByType.get(
-      namedType
-    );
+    let got = false;
+    let val: any;
+    const getRecurseDataGeneratorsWorkaroundField = () => {
+      if (!got) {
+        got = true;
+        const namedType = build.graphql.getNamedType(type);
+        val = recurseDataGeneratorsWorkaroundFieldByType.get(namedType);
+      }
+      return val;
+    };
     const newResolver: GraphQLFieldResolver<TSource, any> = async (
       parent,
       args,
@@ -554,6 +692,7 @@ function getFields<TSource>(
         },
         graphileHelpers
       );
+      const recurseDataGeneratorsWorkaroundField = getRecurseDataGeneratorsWorkaroundField();
       if (
         result != null &&
         !result.data &&
@@ -575,8 +714,23 @@ function getFields<TSource>(
         const fieldName = getName(field.name);
         const args = getArguments(field.arguments, build);
         const type = getType(field.type, build);
+        const nullableType = build.graphql.getNullableType(type);
+        const namedType = build.graphql.getNamedType(type);
+        const typeScope = scopeByType.get(namedType) || {};
         const directives = getDirectives(field.directives);
-        const scope = {
+        const scope: any = {
+          ...(typeScope.pgIntrospection &&
+          typeScope.pgIntrospection.kind === "class"
+            ? {
+                pgFieldIntrospection: typeScope.pgIntrospection,
+              }
+            : null),
+          ...(typeScope.isPgRowConnectionType && typeScope.pgIntrospection
+            ? {
+                isPgFieldConnection: true,
+                pgFieldIntrospection: typeScope.pgIntrospection,
+              }
+            : null),
           fieldDirectives: directives,
           ...(directives.scope || {}),
         };
@@ -590,6 +744,48 @@ function getFields<TSource>(
           typeof functionOrResolveObject === "function"
             ? { resolve: functionOrResolveObject }
             : functionOrResolveObject;
+        const isConnection = !!scope.isPgFieldConnection;
+        const isListType =
+          nullableType !== namedType &&
+          nullableType.constructor === build.graphql.GraphQLList;
+        const table: PgClass | null =
+          scope.pgFieldIntrospection &&
+          scope.pgFieldIntrospection.kind === "class"
+            ? scope.pgFieldIntrospection
+            : null;
+
+        const generateImplicitResolverIfPossible = () => {
+          if (directives.pgQuery && table) {
+            return (
+              data: any,
+              _args: any,
+              _resolveContext: any,
+              resolveInfo: any
+            ) => {
+              const safeAlias = build.getSafeAliasFromResolveInfo(resolveInfo);
+              const liveRecord =
+                resolveInfo.rootValue && resolveInfo.rootValue.liveRecord;
+              if (isConnection) {
+                return build.pgAddStartEndCursor(data[safeAlias]);
+              } else if (isListType) {
+                const records = data[safeAlias];
+                if (table && liveRecord) {
+                  records.forEach(
+                    (r: any) => r && liveRecord("pg", table, r.__identifiers)
+                  );
+                }
+                return records;
+              } else {
+                const record = data[safeAlias];
+                if (record && liveRecord && table) {
+                  liveRecord("pg", table, record.__identifiers);
+                }
+                return record;
+              }
+            };
+          }
+          return null;
+        };
         /*
          * We accept a resolver function directly, or an object which can
          * define 'resolve', 'subscribe' and other relevant methods.
@@ -602,7 +798,7 @@ function getFields<TSource>(
           (typeof possibleResolver === "object" ||
             typeof possibleResolver === "function")
             ? possibleResolver
-            : null;
+            : generateImplicitResolverIfPossible();
         const rawResolversSpec = resolver
           ? functionToResolveObject(resolver)
           : null;
@@ -625,8 +821,9 @@ function getFields<TSource>(
           //   e.g. `@requires(columns: ["id", "name"])`
           //
           if (directives.requires && pgIntrospection.kind === "class") {
+            // tslint:disable-next-line no-shadowed-variable
+            const table: PgClass = pgIntrospection;
             if (Array.isArray(directives.requires.columns)) {
-              const table: PgClass = pgIntrospection;
               const attrs = table.attributes.filter(
                 attr => directives.requires.columns.indexOf(attr.name) >= 0
               );
@@ -668,6 +865,54 @@ function getFields<TSource>(
                 `@requires(columns: ["...", ...]) directive called with invalid arguments`
               );
             }
+          }
+          if (directives.pgQuery && table) {
+            fieldContext.addDataGenerator((parsedResolveInfoFragment: any) => {
+              return {
+                pgQuery: (queryBuilder: QueryBuilder) => {
+                  queryBuilder.select(() => {
+                    const resolveData = fieldContext.getDataFromParsedResolveInfoFragment(
+                      parsedResolveInfoFragment,
+                      namedType
+                    );
+                    const tableAlias = sql.identifier(Symbol());
+                    const query = build.pgQueryFromResolveData(
+                      directives.pgQuery.source,
+                      tableAlias,
+                      resolveData,
+                      {
+                        withPagination: isConnection,
+                        withPaginationAsFields: false,
+                        asJsonAggregate: isListType && !isConnection,
+                        asJson: !isConnection,
+                        addNullCase: !isConnection,
+                      },
+                      (innerQueryBuilder: QueryBuilder) => {
+                        innerQueryBuilder.parentQueryBuilder = queryBuilder;
+                        if (
+                          build.options.subscriptions &&
+                          table.primaryKeyConstraint
+                        ) {
+                          innerQueryBuilder.selectIdentifiers(table);
+                        }
+                        if (
+                          typeof directives.pgQuery.withQueryBuilder ===
+                          "function"
+                        ) {
+                          directives.pgQuery.withQueryBuilder(
+                            innerQueryBuilder,
+                            parsedResolveInfoFragment.args
+                          );
+                        }
+                      },
+                      queryBuilder.context,
+                      queryBuilder.rootValue
+                    );
+                    return sql.fragment`(${query})`;
+                  }, build.getSafeAliasFromAlias(parsedResolveInfoFragment.alias));
+                },
+              };
+            });
           }
 
           const resolversSpec = rawResolversSpec

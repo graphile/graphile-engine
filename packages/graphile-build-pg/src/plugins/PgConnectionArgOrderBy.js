@@ -3,53 +3,57 @@ import isString from "lodash/isString";
 import type { Plugin } from "graphile-build";
 
 export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
-  builder.hook("init", (_, build) => {
-    const {
-      newWithHooks,
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
-      graphql: { GraphQLEnumType },
-      inflection,
-      pgOmit: omit,
-      sqlCommentByAddingTags,
-      describePgEntity,
-    } = build;
-    introspectionResultsByKind.class.forEach(table => {
-      // PERFORMANCE: These used to be .filter(...) calls
-      if (!table.isSelectable || omit(table, "order")) return;
-      if (!table.namespace) return;
+  builder.hook(
+    "init",
+    (_, build) => {
+      const {
+        newWithHooks,
+        pgIntrospectionResultsByKind: introspectionResultsByKind,
+        graphql: { GraphQLEnumType },
+        inflection,
+        pgOmit: omit,
+        sqlCommentByAddingTags,
+        describePgEntity,
+      } = build;
+      introspectionResultsByKind.class.forEach(table => {
+        // PERFORMANCE: These used to be .filter(...) calls
+        if (!table.isSelectable || omit(table, "order")) return;
+        if (!table.namespace) return;
 
-      const tableTypeName = inflection.tableType(table);
-      /* const TableOrderByType = */
-      newWithHooks(
-        GraphQLEnumType,
-        {
-          name: inflection.orderByType(tableTypeName),
-          description: `Methods to use when ordering \`${tableTypeName}\`.`,
-          values: {
-            NATURAL: {
-              value: {
-                alias: null,
-                specs: [],
+        const tableTypeName = inflection.tableType(table);
+        /* const TableOrderByType = */
+        newWithHooks(
+          GraphQLEnumType,
+          {
+            name: inflection.orderByType(tableTypeName),
+            description: `Methods to use when ordering \`${tableTypeName}\`.`,
+            values: {
+              NATURAL: {
+                value: {
+                  alias: null,
+                  specs: [],
+                },
               },
             },
           },
-        },
-        {
-          __origin: `Adding connection "orderBy" argument for ${describePgEntity(
-            table
-          )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
-            table,
-            {
-              name: "newNameHere",
-            }
-          )}`,
-          pgIntrospection: table,
-          isPgRowSortEnum: true,
-        }
-      );
-    });
-    return _;
-  });
+          {
+            __origin: `Adding connection "orderBy" argument for ${describePgEntity(
+              table
+            )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+              table,
+              {
+                name: "newNameHere",
+              }
+            )}`,
+            pgIntrospection: table,
+            isPgRowSortEnum: true,
+          }
+        );
+      });
+      return _;
+    },
+    ["PgConnectionArgOrderBy"]
+  );
 
   builder.hook(
     "GraphQLObjectType:fields:field:args",
@@ -65,6 +69,7 @@ export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
       } = build;
       const {
         scope: {
+          fieldName,
           isPgFieldConnection,
           isPgFieldSimpleCollection,
           pgFieldIntrospection,
@@ -72,7 +77,6 @@ export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
         },
         addArgDataGenerator,
         Self,
-        field,
       } = context;
 
       if (!isPgFieldConnection && !isPgFieldSimpleCollection) {
@@ -85,8 +89,8 @@ export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
         pgFieldIntrospection.kind === "class"
           ? pgFieldIntrospection
           : proc
-            ? pgFieldIntrospectionTable
-            : null;
+          ? pgFieldIntrospectionTable
+          : null;
       if (
         !table ||
         !table.namespace ||
@@ -108,7 +112,12 @@ export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
       const cursorPrefixFromOrderBy = orderBy => {
         if (orderBy) {
           let cursorPrefixes = [];
-          for (const item of orderBy) {
+          for (
+            let itemIndex = 0, itemCount = orderBy.length;
+            itemIndex < itemCount;
+            itemIndex++
+          ) {
+            const item = orderBy[itemIndex];
             if (item.alias) {
               cursorPrefixes.push(sql.literal(item.alias));
             }
@@ -148,8 +157,8 @@ export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
                     specNullsFirst != null
                       ? specNullsFirst
                       : orderByNullsLast != null
-                        ? !orderByNullsLast
-                        : undefined;
+                      ? !orderByNullsLast
+                      : undefined;
                   queryBuilder.orderBy(expr, ascending, nullsFirst);
                 });
                 if (unique) {
@@ -169,8 +178,9 @@ export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
             type: new GraphQLList(new GraphQLNonNull(TableOrderByType)),
           },
         },
-        `Adding 'orderBy' argument to field '${field.name}' of '${Self.name}'`
+        `Adding 'orderBy' argument to field '${fieldName}' of '${Self.name}'`
       );
-    }
+    },
+    ["PgConnectionArgOrderBy"]
   );
 }: Plugin);

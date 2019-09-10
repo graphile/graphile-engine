@@ -31,12 +31,13 @@ export class LDSLiveSource {
   };
   private ws: WebSocket | null;
   private sleepDuration?: number;
+  private tablePattern?: string;
 
   /**
    * @param url - If not specified, we'll spawn our own LDS listener
    */
   constructor(options: Options) {
-    const { ldsURL, connectionString } = options;
+    const { ldsURL, connectionString, sleepDuration, tablePattern } = options;
     if (!ldsURL && !connectionString) {
       throw new Error(
         "No LDS URL or connectionString was passed to LDSLiveSource; this likely means that you don't have `ownerConnectionString` specified in the PostGraphile library call."
@@ -44,6 +45,9 @@ export class LDSLiveSource {
     }
     this.url = ldsURL || null;
     this.connectionString = connectionString || null;
+    this.sleepDuration = sleepDuration;
+    this.tablePattern = tablePattern;
+
     this.lds = null;
     this.slotName = this.url ? null : generateRandomString(30);
     this.ws = null;
@@ -69,6 +73,7 @@ export class LDSLiveSource {
           slotName: this.slotName,
           temporary: true,
           sleepDuration: this.sleepDuration,
+          tablePattern: this.tablePattern,
         }
       );
     }
@@ -190,8 +195,13 @@ export class LDSLiveSource {
       done = true;
       const i = this.subscriptions[topic].indexOf(entry);
       this.subscriptions[topic].splice(i, 1);
-      if (this.ws && this.subscriptions[topic].length === 0) {
-        this.ws.send("UNSUB " + topic);
+      if (this.subscriptions[topic].length === 0) {
+        // Solve potential memory leak
+        delete this.subscriptions[topic];
+
+        if (this.ws) {
+          this.ws.send("UNSUB " + topic);
+        }
       }
     };
   }
@@ -250,7 +260,8 @@ export class LDSLiveSource {
       const messageString = message.toString("utf8");
       const payload = JSON.parse(messageString);
       switch (payload._) {
-        case "insert":
+        case "insertC":
+        case "updateC":
         case "update":
         case "delete":
           return this.handleAnnouncement(payload);
@@ -278,6 +289,10 @@ interface Options {
   ldsURL?: string;
   connectionString?: string;
   sleepDuration?: number;
+  /*
+   * Not valid when used with `ldsUrl`
+   */
+  tablePattern?: string;
 }
 
 async function makeLDSLiveSource(options: Options): Promise<LDSLiveSource> {
@@ -286,9 +301,24 @@ async function makeLDSLiveSource(options: Options): Promise<LDSLiveSource> {
   return ldsLiveSource;
 }
 
+function getSafeNumber(str: string | undefined): number | undefined {
+  if (str) {
+    const n = parseInt(str, 10);
+    if (n && isFinite(n) && n > 0) {
+      return n;
+    }
+  }
+  return undefined;
+}
+
 const PgLDSSourcePlugin: Plugin = async function(
   builder,
-  { pgLDSUrl = process.env.LDS_URL, pgOwnerConnectionString }
+  {
+    pgLDSUrl = process.env.LDS_URL,
+    pgOwnerConnectionString,
+    ldsSleepDuration = getSafeNumber(process.env.LD_WAIT),
+    ldsTablePattern = process.env.LD_TABLE_PATTERN,
+  }
 ) {
   // Connect to LDS server
   try {
@@ -296,14 +326,31 @@ const PgLDSSourcePlugin: Plugin = async function(
       ldsURL: typeof pgLDSUrl === "string" ? pgLDSUrl : undefined,
       // @ts-ignore
       connectionString: pgOwnerConnectionString as string,
+      sleepDuration: ldsSleepDuration,
+      tablePattern: ldsTablePattern,
     });
-    builder.hook("build", build => {
-      build.liveCoordinator.registerSource("pg", source);
-      return build;
-    });
+    builder.hook(
+      "build",
+      build => {
+        build.liveCoordinator.registerSource("pg", source);
+        return build;
+      },
+      ["PgLDSSource"]
+    );
+    if (process.env.NODE_ENV === "test") {
+      // Need a way of releasing it
+      builder.hook("finalize", schema => {
+        Object.defineProperty(schema, "__pgLdsSource", {
+          value: source,
+          enumerable: false,
+          configurable: false,
+        });
+        return schema;
+      });
+    }
   } catch (e) {
     console.error(
-      "Could not Initiate PgLDSSourcePlugin, continuing without LDS live subscriptions. Error:",
+      "Could not Initiate PgLDSSourcePlugin, continuing without LDS live queries. Error:",
       e.message
     );
     return;

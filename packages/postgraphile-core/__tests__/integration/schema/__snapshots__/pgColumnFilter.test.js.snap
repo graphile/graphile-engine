@@ -158,7 +158,7 @@ enum AnEnum {
 }
 
 \\"\\"\\"
-A signed eight-byte integer. The upper big integer values are greater then the
+A signed eight-byte integer. The upper big integer values are greater than the
 max value for a JavaScript number. Therefore all big integers will be output as
 strings and not numbers.
 \\"\\"\\"
@@ -719,7 +719,7 @@ type DefaultValuesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`DefaultValue\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`DefaultValue\` edge in the connection.\\"\\"\\"
@@ -1311,7 +1311,7 @@ type ForeignKeysConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`ForeignKey\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`ForeignKey\` edge in the connection.\\"\\"\\"
@@ -1378,7 +1378,7 @@ type InputsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Input\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Input\` edge in the connection.\\"\\"\\"
@@ -1790,8 +1790,6 @@ type Mutation {
     \\"\\"\\"
     input: MutationTextArrayInput!
   ): MutationTextArrayPayload
-
-  \\"\\"\\"Reads and enables pagination through a set of \`Post\`.\\"\\"\\"
   postMany(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -1911,9 +1909,7 @@ type Mutation {
     input: UpdateReservedInputRecordInput!
   ): UpdateReservedInputRecordPayload
 
-  \\"\\"\\"
-  Updates a single \`ReservedInputRecord\` using a unique key and a patch.
-  \\"\\"\\"
+  \\"\\"\\"Updates a single \`ReservedInputRecord\` using a unique key and a patch.\\"\\"\\"
   updateReservedInputRecordById(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -1931,9 +1927,7 @@ type Mutation {
     input: UpdateReservedPatchRecordInput!
   ): UpdateReservedPatchRecordPayload
 
-  \\"\\"\\"
-  Updates a single \`ReservedPatchRecord\` using a unique key and a patch.
-  \\"\\"\\"
+  \\"\\"\\"Updates a single \`ReservedPatchRecord\` using a unique key and a patch.\\"\\"\\"
   updateReservedPatchRecordById(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -1977,9 +1971,7 @@ type Mutation {
     input: UpdateSimilarTable2ByIdInput!
   ): UpdateSimilarTable2Payload
 
-  \\"\\"\\"
-  Updates a single \`ViewTable\` using its globally unique id and a patch.
-  \\"\\"\\"
+  \\"\\"\\"Updates a single \`ViewTable\` using its globally unique id and a patch.\\"\\"\\"
   updateViewTable(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -2130,7 +2122,7 @@ type NonUpdatableViewsConnection {
   \\"\\"\\"
   The count of *all* \`NonUpdatableView\` you could get from the connection.
   \\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`NonUpdatableView\` edge in the connection.\\"\\"\\"
@@ -2194,7 +2186,7 @@ type NoPrimaryKeysConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`NoPrimaryKey\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`NoPrimaryKey\` edge in the connection.\\"\\"\\"
@@ -2262,7 +2254,7 @@ type PatchesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Patch\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Patch\` edge in the connection.\\"\\"\\"
@@ -2399,13 +2391,7 @@ type PostManyPayload {
   unchanged and unused. May be used by a client to track mutations.
   \\"\\"\\"
   clientMutationId: String
-
-  \\"\\"\\"An edge for our \`Post\`. May be used by Relay 1.\\"\\"\\"
-  postEdge(
-    \\"\\"\\"The method to use when ordering \`Post\`.\\"\\"\\"
-    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PostsEdge
-  posts: [Post]
+  posts: [Post!]
 
   \\"\\"\\"
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -2413,9 +2399,7 @@ type PostManyPayload {
   query: Query
 }
 
-\\"\\"\\"
-Represents an update to a \`Post\`. Fields that are set will be updated.
-\\"\\"\\"
+\\"\\"\\"Represents an update to a \`Post\`. Fields that are set will be updated.\\"\\"\\"
 input PostPatch {
   authorId: Int
   body: String
@@ -2438,7 +2422,7 @@ type PostsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Post\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Post\` edge in the connection.\\"\\"\\"
@@ -3059,9 +3043,7 @@ type Query implements Node {
 
   \\"\\"\\"Reads a single \`ViewTable\` using its globally unique \`ID\`.\\"\\"\\"
   viewTable(
-    \\"\\"\\"
-    The globally unique \`ID\` to be used in selecting a single \`ViewTable\`.
-    \\"\\"\\"
+    \\"\\"\\"The globally unique \`ID\` to be used in selecting a single \`ViewTable\`.\\"\\"\\"
     nodeId: ID!
   ): ViewTable
   viewTableById(id: Int!): ViewTable
@@ -3159,7 +3141,7 @@ type ReservedInputRecordsConnection {
   \\"\\"\\"
   The count of *all* \`ReservedInputRecord\` you could get from the connection.
   \\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`ReservedInputRecord\` edge in the connection.\\"\\"\\"
@@ -3236,7 +3218,7 @@ type ReservedPatchRecordsConnection {
   \\"\\"\\"
   The count of *all* \`ReservedPatchRecord\` you could get from the connection.
   \\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`ReservedPatchRecord\` edge in the connection.\\"\\"\\"
@@ -3271,7 +3253,7 @@ type ReservedsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Reserved\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Reserved\` edge in the connection.\\"\\"\\"
@@ -3377,7 +3359,7 @@ type SimilarTable1SConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`SimilarTable1\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`SimilarTable1\` edge in the connection.\\"\\"\\"
@@ -3466,7 +3448,7 @@ type SimilarTable2SConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`SimilarTable2\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`SimilarTable2\` edge in the connection.\\"\\"\\"
@@ -3555,7 +3537,7 @@ type TestviewsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Testview\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Testview\` edge in the connection.\\"\\"\\"
@@ -4252,7 +4234,7 @@ type ViewTablesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`ViewTable\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`ViewTable\` edge in the connection.\\"\\"\\"

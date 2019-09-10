@@ -72,7 +72,8 @@ with
       pro.pronargs as "inputArgsCount",
       pro.pronargdefaults as "argDefaultsNum",
       pro.procost as "cost",
-      exists(select 1 from accessible_roles where has_function_privilege(accessible_roles.oid, pro.oid, 'EXECUTE')) as "aclExecutable"
+      exists(select 1 from accessible_roles where has_function_privilege(accessible_roles.oid, pro.oid, 'EXECUTE')) as "aclExecutable",
+      (select lanname from pg_catalog.pg_language where pg_language.oid = pro.prolang) as "language"
     from
       pg_catalog.pg_proc as pro
       left join pg_catalog.pg_description as dsc on dsc.objoid = pro.oid and dsc.classoid = 'pg_catalog.pg_proc'::regclass
@@ -165,9 +166,9 @@ with
       -- - https://www.postgresql.org/message-id/CAEZATCV2_qN9P3zbvADwME_TkYf2gR_X2cLQR4R+pqkwxGxqJg@mail.gmail.com
       -- - https://github.com/postgres/postgres/blob/2410a2543e77983dab1f63f48b2adcd23dba994e/src/backend/utils/adt/misc.c#L684
       -- - https://github.com/postgres/postgres/blob/3aff33aa687e47d52f453892498b30ac98a296af/src/backend/rewrite/rewriteHandler.c#L2351
-      (pg_catalog.pg_relation_is_updatable(rel.oid, true)::bit(8) operator(pg_catalog.&) B'00010000') = B'00010000' as "isInsertable",
-      (pg_catalog.pg_relation_is_updatable(rel.oid, true)::bit(8) operator(pg_catalog.&) B'00001000') = B'00001000' as "isUpdatable",
-      (pg_catalog.pg_relation_is_updatable(rel.oid, true)::bit(8) operator(pg_catalog.&) B'00000100') = B'00000100' as "isDeletable",
+      (pg_catalog.pg_relation_is_updatable(rel.oid, true)::bit(8) operator(pg_catalog.&) B'00010000') = B'00010000' as "isDeletable",
+      (pg_catalog.pg_relation_is_updatable(rel.oid, true)::bit(8) operator(pg_catalog.&) B'00001000') = B'00001000' as "isInsertable",
+      (pg_catalog.pg_relation_is_updatable(rel.oid, true)::bit(8) operator(pg_catalog.&) B'00000100') = B'00000100' as "isUpdatable",
       exists(select 1 from accessible_roles where has_table_privilege(accessible_roles.oid, rel.oid, 'SELECT')) as "aclSelectable",
       exists(select 1 from accessible_roles where has_table_privilege(accessible_roles.oid, rel.oid, 'INSERT')) as "aclInsertable",
       exists(select 1 from accessible_roles where has_table_privilege(accessible_roles.oid, rel.oid, 'UPDATE')) as "aclUpdatable",
@@ -207,7 +208,9 @@ with
       ${serverVersionNum >= 100000 ? "att.attidentity" : "''"} as "identity",
       exists(select 1 from accessible_roles where has_column_privilege(accessible_roles.oid, att.attrelid, att.attname, 'SELECT')) as "aclSelectable",
       exists(select 1 from accessible_roles where has_column_privilege(accessible_roles.oid, att.attrelid, att.attname, 'INSERT')) as "aclInsertable",
-      exists(select 1 from accessible_roles where has_column_privilege(accessible_roles.oid, att.attrelid, att.attname, 'UPDATE')) as "aclUpdatable"
+      exists(select 1 from accessible_roles where has_column_privilege(accessible_roles.oid, att.attrelid, att.attname, 'UPDATE')) as "aclUpdatable",
+      -- https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=c62dd80cdf149e2792b13c13777a539f5abb0370
+      att.attacl is not null and exists(select 1 from aclexplode(att.attacl) aclitem where aclitem.privilege_type = 'SELECT' and grantee in (select oid from accessible_roles)) as "columnLevelSelectGrant"
     from
       pg_catalog.pg_attribute as att
       left join pg_catalog.pg_description as dsc on dsc.objoid = att.attrelid and dsc.objsubid = att.attnum and dsc.classoid = 'pg_catalog.pg_class'::regclass
@@ -245,6 +248,7 @@ with
         nullif(typ.typrelid, 0) as "classId",
         nullif(typ.typbasetype, 0) as "domainBaseTypeId",
         nullif(typ.typtypmod, -1) as "domainTypeModifier",
+        typ.typdefaultbin is not null as "domainHasDefault",
         -- If this type is an enum type, let’s select all of its enum variants.
         --
         -- @see https://www.postgresql.org/docs/9.5/static/catalog-pg-enum.html
@@ -280,10 +284,15 @@ with
     from
       type_all as typ
     where
-      typ.id in (select "typeId" from class) or
-      typ.id in (select "typeId" from attribute) or
-      typ.id in (select "returnTypeId" from procedure) or
-      typ.id in (select unnest("argTypeIds") from procedure) or
+      typ.id in (
+        select "typeId" from class
+      union all
+        select "typeId" from attribute
+      union all
+        select "returnTypeId" from procedure
+      union all
+        select unnest("argTypeIds") from procedure
+      union all
       -- If this type is a base type for *any* domain type, we will include it
       -- in our selection. This may mean we fetch more types than we need, but
       -- the alternative is to do some funky SQL recursion which would be hard
@@ -291,9 +300,12 @@ with
       -- 4 less type rows.
       --
       -- We also do this for range sub types and array item types.
-      typ.id in (select "domainBaseTypeId" from type_all) or
-      typ.id in (select "rangeSubTypeId" from type_all) or
-      typ.id in (select "arrayItemTypeId" from type_all)
+        select "domainBaseTypeId" from type_all
+      union all
+        select "rangeSubTypeId" from type_all
+      union all
+        select "arrayItemTypeId" from type_all
+      )
     order by
       "namespaceId", "name"
   ),
@@ -337,6 +349,7 @@ with
       ext.oid as "id",
       ext.extname as "name",
       ext.extnamespace as "namespaceId",
+      nsp.nspname as "namespaceName",
       ext.extrelocatable as "relocatable",
       ext.extversion as "version",
       ext.extconfig as "configurationClassIds",
@@ -344,6 +357,7 @@ with
     from
       pg_catalog.pg_extension as ext
       left join pg_catalog.pg_description as dsc on dsc.objoid = ext.oid and dsc.classoid = 'pg_catalog.pg_extension'::regclass
+      left join pg_catalog.pg_namespace as nsp on nsp.oid = ext.extnamespace
     order by
       ext.extname, ext.oid
   ),

@@ -10,8 +10,12 @@ type SubscriptionCallback = () => void;
 type Predicate = (record: any) => boolean;
 type PredicateGenerator = (data: any) => Predicate;
 
-const MONITOR_THROTTLE_DURATION =
-  parseInt(process.env.LIVE_THROTTLE || "", 10) || 500;
+const DEBOUNCE_DURATION = 25;
+
+const MONITOR_THROTTLE_DURATION = Math.max(
+  DEBOUNCE_DURATION + 1,
+  parseInt(process.env.LIVE_THROTTLE || "", 10) || 500
+);
 
 /*
  * Sources are long-lived (i.e. in "watch" mode you just re-use the same one
@@ -73,22 +77,109 @@ export class LiveProvider {
 export class LiveMonitor {
   released: boolean;
   providers: { [namespace: string]: LiveProvider };
-  subscriptionReleasers: (() => void)[];
-  changeCallback: (() => void) | null;
-  liveConditions: Array<PredicateGenerator>;
+  subscriptionReleasersByCounter: {
+    [counter: string]: (() => void)[],
+  };
+  liveConditionsByCounter: { [counter: string]: Array<PredicateGenerator> };
+  changeCallback: ((arg: any) => void) | null;
+  changeCounter: number;
+  extraRootValue: any;
 
-  constructor(providers: { [namespace: string]: LiveProvider }) {
+  handleChange: (() => void) | null;
+  _reallyHandleChange: (() => void) | null;
+  onChange: (callback: () => void) => () => void;
+
+  constructor(
+    providers: { [namespace: string]: LiveProvider },
+    extraRootValue: any
+  ) {
+    this.extraRootValue = extraRootValue;
     this.released = false;
     this.providers = providers;
-    this.subscriptionReleasers = [];
+    this.subscriptionReleasersByCounter = {};
     this.changeCallback = null;
-    this.liveConditions = [];
-    if (!this.handleChange) {
-      throw new Error("This is just to make flow happy");
-    }
+    this.changeCounter = 0;
+    this.liveConditionsByCounter = {};
+    this.handleChange = function() {
+      /* This function is throttled to ~25ms (see constructor); it's purpose is
+       * to bundle up all the changes that occur in a small window into the same
+       * handle change flow, so _reallyHandleChange doesn't get called twice in
+       * quick succession. _reallyHandleChange is then further throttled with a
+       * larger window, BUT it triggers on both leading and trailing edge,
+       * whereas this only triggers on the trailing edge.
+       */
+      if (this._reallyHandleChange) {
+        this._reallyHandleChange();
+      }
+    };
+
+    this._reallyHandleChange = function() {
+      // This function is throttled to MONITOR_THROTTLE_DURATION (see constructor)
+      if (this.changeCallback) {
+        // Convince Flow this won't suddenly become null
+        const cb = this.changeCallback;
+        const counter = this.changeCounter++;
+        /*
+         * In live queries we need to know when the current result set has
+         * finished being calculated so that we know we've received all the
+         * liveRecord / liveCollection calls and can release the out of date
+         * ones. To achieve this, we use a custom `subscribe` function which
+         * calls `rootValue.release()` once the result set has been calculated.
+         */
+        this.subscriptionReleasersByCounter[String(counter)] = [];
+        this.liveConditionsByCounter[String(counter)] = [];
+        const changeRootValue = {
+          ...this.extraRootValue,
+          counter,
+          liveCollection: this.liveCollection.bind(this, counter),
+          liveRecord: this.liveRecord.bind(this, counter),
+          liveConditions: this.liveConditionsByCounter[String(counter)],
+          release: () => {
+            // Despite it's name, this means that the execution has complete, which means we're actually releasing everything *before* this.
+            this.resetBefore(counter);
+          },
+        };
+        cb(changeRootValue);
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn("Change occurred, but no-one was listening");
+      }
+    };
+
+    this.onChange = function(callback: () => void) {
+      if (this.released) {
+        throw new Error("Monitors cannot be reused.");
+      }
+      if (this.changeCallback) {
+        throw new Error("Already monitoring for changes");
+      }
+      // Throttle to every 250ms
+      this.changeCallback = callback;
+      if (this.handleChange) {
+        setImmediate(this.handleChange);
+      }
+      return () => {
+        if (this.changeCallback === callback) {
+          this.changeCallback = null;
+        }
+        this.release();
+      };
+    };
+
     this.handleChange = throttle(
       this.handleChange.bind(this),
-      MONITOR_THROTTLE_DURATION,
+      DEBOUNCE_DURATION,
+      {
+        leading: false,
+        trailing: true,
+      }
+    );
+    if (!this._reallyHandleChange) {
+      throw new Error("This is just to make flow happy");
+    }
+    this._reallyHandleChange = throttle(
+      this._reallyHandleChange.bind(this),
+      MONITOR_THROTTLE_DURATION - DEBOUNCE_DURATION,
       {
         leading: true,
         trailing: true,
@@ -97,63 +188,50 @@ export class LiveMonitor {
     this.onChange = this.onChange.bind(this);
   }
 
-  reset() {
-    // clear monitoring
-    for (const releaser of this.subscriptionReleasers) {
-      releaser();
+  resetBefore(currentCounter: number) {
+    // Clear out of date subscriptionReleasers
+    {
+      const oldCounters = Object.keys(
+        this.subscriptionReleasersByCounter
+      ).filter(n => parseInt(n, 10) < currentCounter);
+      for (const oldCounter of oldCounters) {
+        for (const releaser of this.subscriptionReleasersByCounter[
+          oldCounter
+        ]) {
+          releaser();
+        }
+        delete this.subscriptionReleasersByCounter[oldCounter];
+      }
     }
-    this.subscriptionReleasers = [];
-    // Delete everything from liveConditions, we'll be getting fresh conditions soon enough
-    this.liveConditions.splice(0, this.liveCollection.length);
+    // Clear out of date liveConditions
+    {
+      const oldCounters = Object.keys(this.liveConditionsByCounter).filter(
+        n => parseInt(n, 10) < currentCounter
+      );
+      for (const oldCounter of oldCounters) {
+        delete this.liveConditionsByCounter[oldCounter];
+      }
+    }
   }
 
   release() {
     if (this.handleChange) {
+      // $FlowFixMe: throttled function
       this.handleChange.cancel();
     }
     this.handleChange = null;
-    this.reset();
+    if (this._reallyHandleChange) {
+      // $FlowFixMe: throttled function
+      this._reallyHandleChange.cancel();
+    }
+    this._reallyHandleChange = null;
+    this.resetBefore(Infinity);
     this.providers = {};
     this.released = true;
   }
 
-  // Tell Flow that we're okay with overwriting this
-  handleChange: (() => void) | null;
-  handleChange() {
-    if (this.changeCallback) {
-      // Convince Flow this won't suddenly become null
-      const cb = this.changeCallback;
-      this.reset();
-      cb();
-    } else {
-      // eslint-disable-next-line no-console
-      console.warn("Change occurred, but no-one was listening");
-    }
-  }
-
-  // Tell Flow that we're okay with overwriting this
-  onChange: (callback: () => void) => void;
-  onChange(callback: () => void) {
-    if (this.released) {
-      throw new Error("Monitors cannot be reused.");
-    }
-    if (this.changeCallback) {
-      throw new Error("Already monitoring for changes");
-    }
-    // Throttle to every 250ms
-    this.changeCallback = callback;
-    if (this.handleChange) {
-      setImmediate(this.handleChange);
-    }
-    return () => {
-      if (this.changeCallback === callback) {
-        this.changeCallback = null;
-      }
-      this.release();
-    };
-  }
-
   liveCollection(
+    counter: number,
     namespace: string,
     collectionIdentifier: any,
     predicate: (record: any) => boolean = () => true
@@ -176,12 +254,13 @@ export class LiveMonitor {
         predicate
       );
       if (releaser) {
-        this.subscriptionReleasers.push(releaser);
+        this.subscriptionReleasersByCounter[String(counter)].push(releaser);
       }
     }
   }
 
   liveRecord(
+    counter: number,
     namespace: string,
     collectionIdentifier: any,
     recordIdentifier: any
@@ -212,7 +291,7 @@ export class LiveMonitor {
         recordIdentifier
       );
       if (releaser) {
-        this.subscriptionReleasers.push(releaser);
+        this.subscriptionReleasersByCounter[String(counter)].push(releaser);
       }
     }
   }
@@ -220,7 +299,7 @@ export class LiveMonitor {
 
 /*
  * There is one coordinator for each build of the GraphQL schema, it tracks the providers
- * and gives a handy `subscribe` method that can be used for live subscriptions (assuming
+ * and gives a handy `subscribe` method that can be used for live queries (assuming
  * that the `resolve` is provided the same as in a Query).
  */
 export class LiveCoordinator {
@@ -250,16 +329,8 @@ export class LiveCoordinator {
     this.providers[namespace].registerSource(source);
   }
 
-  getMonitorAndContext() {
-    const monitor = new LiveMonitor(this.providers);
-    return {
-      monitor,
-      context: {
-        liveCollection: monitor.liveCollection.bind(monitor),
-        liveRecord: monitor.liveRecord.bind(monitor),
-        liveConditions: monitor.liveConditions,
-      },
-    };
+  getMonitor(extraRootValue: any) {
+    return new LiveMonitor(this.providers, extraRootValue);
   }
 
   // Tell Flow that we're okay with overwriting this
@@ -269,13 +340,18 @@ export class LiveCoordinator {
     context: any,
     _info: GraphQLResolveInfo
   ) => any;
-  subscribe(_parent: any, _args: any, context: any, _info: GraphQLResolveInfo) {
-    const { monitor, context: additionalContext } = this.getMonitorAndContext();
-    Object.assign(context, additionalContext);
+  subscribe(
+    _parent: any,
+    _args: any,
+    _context: any,
+    _info: GraphQLResolveInfo
+  ) {
+    const monitor = this.getMonitor({
+      liveAbort: e => {
+        if (iterator) iterator.throw(e);
+      },
+    });
     const iterator = makeAsyncIteratorFromMonitor(monitor);
-    context.liveAbort = e => {
-      iterator.throw(e);
-    };
     return iterator;
   }
 }

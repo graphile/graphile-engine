@@ -12,6 +12,25 @@ Graphile Engine enables you to build high-performance easily-extensible GraphQL 
 
 **NOTE**: _You might be looking for [PostGraphile](https://github.com/graphile/postgraphile) which is Graphile Engine applied to a PostgreSQL database._
 
+<!-- SPONSORS_BEGIN -->
+
+## Crowd-funded open-source software
+
+To help us develop this software sustainably under the MIT license, we ask
+all individuals and businesses that use it to help support its ongoing
+maintenance and development via sponsorship.
+
+### [Click here to find out more about sponsors and sponsorship.](https://www.graphile.org/sponsor/)
+
+And please give some love to our featured sponsors 🤩:
+
+<table><tr>
+<td align="center"><a href="http://chads.website/"><img src="https://www.graphile.org/images/sponsors/chadf.png" width="90" height="90" alt="Chad Furman" /><br />Chad Furman</a></td>
+<td align="center"><a href="https://timescale.com/"><img src="https://www.graphile.org/images/sponsors/timescale.svg" width="90" height="90" alt="Timescale" /><br />Timescale</a></td>
+</tr></table>
+
+<!-- SPONSORS_END -->
+
 ## Monorepo contents
 
 **[graphile-build][]**: The core of Graphile Engine: a plugin system that
@@ -44,6 +63,10 @@ Graphile Engine has matured into the production-ready system it is today.
 
 ## Development
 
+Below is a quick-start, for more detailed instructions, please [see the
+CONTRIBUTING.md doc in
+PostGraphile](https://github.com/graphile/postgraphile/blob/master/CONTRIBUTING.md).
+
 ```bash
 yarn
 yarn lerna bootstrap
@@ -53,15 +76,21 @@ yarn watch
 `yarn watch` will keep monitoring and compiling the babel files, so open
 another terminal to run the tests:
 
+(Note: before you can run the tests, you'll need to configure your PostgreSQL
+server to support logical decoding for our live queries tests. See
+[the @graphile/lds README](packages/lds/README.md#postgresql-configuration) for how
+to enable `wal_level = logical`.)
+
 ```bash
 createdb pggql_test
+createdb pubsub_test
 export TEST_DATABASE_URL="postgres:///pggql_test"
-lerna run test
+yarn lerna run test
 ```
 
 If the above succeeds, you're good to go! If not, please try again after
-running `yarn install --force` and failing that reach out on twitter:
-[@Benjie](https://twitter.com/benjie).
+running `yarn install --force` and always feel free to reach out via [our
+discord chat](http://discord.gg/graphile) on the #core-development channel.
 
 ### Working with Docker
 

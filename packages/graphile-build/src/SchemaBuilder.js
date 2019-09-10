@@ -17,6 +17,7 @@ import type {
   parseResolveInfo,
 } from "graphql-parse-resolve-info";
 import type { GraphQLResolveInfo } from "graphql/type/definition";
+import type resolveNode from "./resolveNode";
 
 import type { FieldWithHooksFunction } from "./makeNewBuild";
 const { GraphQLSchema } = graphql;
@@ -71,10 +72,13 @@ export type Build = {|
     [string]: (...args: Array<any>) => string,
   },
   swallowError: (e: Error) => void,
+  // resolveNode: EXPERIMENTAL, API might change!
+  resolveNode: resolveNode,
   status: {
     currentHookName: ?string,
     currentHookEvent: ?string,
   },
+  scopeByType: Map<GraphQLType, Scope>,
 |};
 
 export type BuildExtensionQuery = {|
@@ -111,11 +115,17 @@ export type Hook<
   Type: SupportedHookTypes,
   BuildExtensions: *,
   ContextExtensions: *
-> = (
-  input: Type,
-  build: { ...Build, ...BuildExtensions },
-  context: { ...Context, ...ContextExtensions }
-) => Type;
+> = {
+  (
+    input: Type,
+    build: { ...Build, ...BuildExtensions },
+    context: { ...Context, ...ContextExtensions }
+  ): Type,
+  displayName?: string,
+  provides?: Array<string>,
+  before?: Array<string>,
+  after?: Array<string>,
+};
 
 export type WatchUnwatch = (triggerChange: TriggerChangeType) => void;
 
@@ -210,6 +220,13 @@ class SchemaBuilder extends EventEmitter {
       GraphQLEnumType: [],
       "GraphQLEnumType:values": [],
       "GraphQLEnumType:values:value": [],
+
+      // When creating a GraphQLUnionType via `newWithHooks`, we'll
+      // execute, the following hooks:
+      // - 'GraphQLUnionType' to add any root-level attributes, e.g. add a description
+      // - 'GraphQLUnionType:types' to add additional types to this union
+      GraphQLUnionType: [],
+      "GraphQLUnionType:types": [],
     };
   }
 
@@ -225,16 +242,118 @@ class SchemaBuilder extends EventEmitter {
    *
    * The function must either return a replacement object for `obj` or `obj` itself
    */
-  hook<T: *>(hookName: string, fn: Hook<T, *, *>) {
+  hook<T: *>(
+    hookName: string,
+    fn: Hook<T, *, *>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ) {
     if (!this.hooks[hookName]) {
       throw new Error(`Sorry, '${hookName}' is not a supported hook`);
     }
     if (this._currentPluginName) {
-      fn.displayName = `${
-        this._currentPluginName
-      }/${hookName}/${fn.displayName || fn.name || "unnamed"}`;
+      fn.displayName = `${this._currentPluginName}/${hookName}/${(provides &&
+        provides.length &&
+        provides.join("+")) ||
+        fn.displayName ||
+        fn.name ||
+        "unnamed"}`;
     }
-    this.hooks[hookName].push(fn);
+    if (provides) {
+      if (!fn.displayName && provides.length) {
+        fn.displayName = `unknown/${hookName}/${provides[0]}`;
+      }
+      fn.provides = provides;
+    }
+    if (before) {
+      fn.before = before;
+    }
+    if (after) {
+      fn.after = after;
+    }
+    if (!fn.provides && !fn.before && !fn.after) {
+      // No explicit dependencies - add to the end
+      this.hooks[hookName].push(fn);
+    } else {
+      // We need to figure out where it can go, respecting all the dependencies.
+      // TODO: I think there are situations in which this algorithm may result in unnecessary conflict errors; we should take a more iterative approach or find a better algorithm
+      const relevantHooks = this.hooks[hookName];
+      let minIndex = 0;
+      let minReason = null;
+      let maxIndex = relevantHooks.length;
+      let maxReason = null;
+      const { provides: newProvides, before: newBefore, after: newAfter } = fn;
+      const describe = (hook, index) => {
+        if (!hook) {
+          return "-";
+        }
+        return `${hook.displayName || hook.name || "anonymous"} (${
+          index ? `index: ${index}, ` : ""
+        }provides: ${hook.provides ? hook.provides.join(",") : "-"}, before: ${
+          hook.before ? hook.before.join(",") : "-"
+        }, after: ${hook.after ? hook.after.join(",") : "-"})`;
+      };
+      const check = () => {
+        if (minIndex > maxIndex) {
+          throw new Error(
+            `Cannot resolve plugin order - ${describe(
+              fn
+            )} cannot be before ${describe(
+              maxReason,
+              maxIndex
+            )} and after ${describe(
+              minReason,
+              minIndex
+            )} - please report this issue`
+          );
+        }
+      };
+      const setMin = (newMin, reason) => {
+        if (newMin > minIndex) {
+          minIndex = newMin;
+          minReason = reason;
+          check();
+        }
+      };
+      const setMax = (newMax, reason) => {
+        if (newMax < maxIndex) {
+          maxIndex = newMax;
+          maxReason = reason;
+          check();
+        }
+      };
+      relevantHooks.forEach((oldHook, idx) => {
+        const {
+          provides: oldProvides,
+          before: oldBefore,
+          after: oldAfter,
+        } = oldHook;
+        if (newProvides) {
+          if (oldBefore && oldBefore.some(dep => newProvides.includes(dep))) {
+            // Old says it has to come before new
+            setMin(idx + 1, oldHook);
+          }
+          if (oldAfter && oldAfter.some(dep => newProvides.includes(dep))) {
+            // Old says it has to be after new
+            setMax(idx, oldHook);
+          }
+        }
+        if (oldProvides) {
+          if (newBefore && newBefore.some(dep => oldProvides.includes(dep))) {
+            // New says it has to come before old
+            setMax(idx, oldHook);
+          }
+          if (newAfter && newAfter.some(dep => oldProvides.includes(dep))) {
+            // New says it has to be after old
+            setMin(idx + 1, oldHook);
+          }
+        }
+      });
+
+      // We've already validated everything, so we can now insert the record.
+      this.hooks[hookName].splice(maxIndex, 0, fn);
+    }
   }
 
   applyHooks<T: *, Context>(
@@ -271,7 +390,27 @@ class SchemaBuilder extends EventEmitter {
           const previousHookEvent = build.status.currentHookEvent;
           build.status.currentHookName = hookDisplayName;
           build.status.currentHookEvent = hookName;
+          const oldObj = newObj;
           newObj = hook(newObj, build, context);
+          if (hookName === "build") {
+            /*
+             * Unlike all the other hooks, the `build` hook must always use the
+             * same `build` object - never returning a new object for fear of
+             * causing issues to other build hooks that reference the old
+             * object and don't get the new additions.
+             */
+            if (newObj !== oldObj) {
+              // TODO:v5: forbid this
+              // eslint-disable-next-line no-console
+              console.warn(
+                `Build hook '${hookDisplayName}' returned a new object; please use 'return build.extend(build, {...})' instead.`
+              );
+              // Copy everything from newObj back to oldObj
+              Object.assign(oldObj, newObj);
+              // Go back to the old objectect
+              newObj = oldObj;
+            }
+          }
           build.status.currentHookName = previousHookName;
           build.status.currentHookEvent = previousHookEvent;
 
@@ -337,7 +476,9 @@ class SchemaBuilder extends EventEmitter {
       const build = this.createBuild();
       const schema = build.newWithHooks(
         GraphQLSchema,
-        {},
+        {
+          directives: [...build.graphql.specifiedDirectives],
+        },
         {
           __origin: `GraphQL built-in`,
           isSchema: true,

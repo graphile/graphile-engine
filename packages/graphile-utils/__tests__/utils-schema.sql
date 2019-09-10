@@ -1,28 +1,39 @@
 -- WARNING: this database is shared with postgraphile-core, don't run the tests in parallel!
-drop schema if exists a, b, c, d cascade;
+drop schema if exists graphile_utils cascade;
 
-create schema a;
-create schema b;
-create schema c;
-create schema d;
+create schema graphile_utils;
 
-create type a.complex as (
+create type graphile_utils.complex as (
   number_int int,
   string_text text
 );
 
-create table a.users (
+create table graphile_utils.users (
   id serial primary key,
   name text not null,
   email text not null,
   bio text,
-  slightly_more_complex_column a.complex[] default array[row(1,'hi'),row(2, 'bye')]::a.complex[],
+  slightly_more_complex_column graphile_utils.complex[] default array[row(1,'hi'),row(2, 'bye')]::graphile_utils.complex[],
   created_at timestamptz not null default now()
 );
 
-comment on column a.users.slightly_more_complex_column is E'@name renamedComplexColumn';
+create table graphile_utils.pets (
+  id serial primary key,
+  user_id int not null, -- DELIBERATELY NO REFERENCE: references graphile_utils.users,
+  name text not null,
+  type text not null
+);
+create index on graphile_utils.pets(user_id);
 
-insert into a.users (name, email, bio) values
+comment on column graphile_utils.users.slightly_more_complex_column is E'@name renamedComplexColumn';
+
+insert into graphile_utils.users (name, email, bio) values
   ('Alice', 'alice@example.com', null),
   ('Bob', 'bob@example.com', 'I''m a thought leader!'),
   ('Caroline', 'caroline@example.com', 'Saving the world, one disease at a time');
+
+insert into graphile_utils.pets (user_id, type, name) values
+  (2, 'cat', 'Felix'),
+  (2, 'dog', 'Fido'),
+  (3, 'goldfish', 'Goldie'),
+  (3, 'goldfish', 'Spot');

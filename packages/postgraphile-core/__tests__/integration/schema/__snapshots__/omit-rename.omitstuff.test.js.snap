@@ -544,8 +544,6 @@ type Mutation {
     \\"\\"\\"
     input: DeleteTvEpisodeByCodeInput!
   ): DeleteTvEpisodePayload
-
-  \\"\\"\\"Reads and enables pagination through a set of \`Flamble\`.\\"\\"\\"
   getflamble(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -607,9 +605,7 @@ type Mutation {
     input: UpdateStudioByIdInput!
   ): UpdateStudioPayload
 
-  \\"\\"\\"
-  Updates a single \`TvEpisode\` using its globally unique id and a patch.
-  \\"\\"\\"
+  \\"\\"\\"Updates a single \`TvEpisode\` using its globally unique id and a patch.\\"\\"\\"
   updateTvEpisode(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -663,7 +659,7 @@ type PeopleConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Person\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Person\` edge in the connection.\\"\\"\\"
@@ -825,9 +821,7 @@ input PostInput {
   id: Int
 }
 
-\\"\\"\\"
-Represents an update to a \`Post\`. Fields that are set will be updated.
-\\"\\"\\"
+\\"\\"\\"Represents an update to a \`Post\`. Fields that are set will be updated.\\"\\"\\"
 input PostPatch {
   authorId: Int
   body: String
@@ -848,7 +842,7 @@ type PostsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Post\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Post\` edge in the connection.\\"\\"\\"
@@ -1083,9 +1077,7 @@ type Query implements Node {
 
   \\"\\"\\"Reads a single \`TvEpisode\` using its globally unique \`ID\`.\\"\\"\\"
   tvEpisode(
-    \\"\\"\\"
-    The globally unique \`ID\` to be used in selecting a single \`TvEpisode\`.
-    \\"\\"\\"
+    \\"\\"\\"The globally unique \`ID\` to be used in selecting a single \`TvEpisode\`.\\"\\"\\"
     nodeId: ID!
   ): TvEpisode
   tvEpisodeByCode(code: Int!): TvEpisode
@@ -1123,7 +1115,7 @@ type RenamedTablesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`RenamedTable\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`RenamedTable\` edge in the connection.\\"\\"\\"
@@ -1191,7 +1183,7 @@ type StudiosConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Studio\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Studio\` edge in the connection.\\"\\"\\"
@@ -1270,7 +1262,7 @@ type TvEpisodesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`TvEpisode\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`TvEpisode\` edge in the connection.\\"\\"\\"
@@ -2069,9 +2061,7 @@ input FilmCondition {
   title: String
 }
 
-\\"\\"\\"
-Represents an update to a \`Film\`. Fields that are set will be updated.
-\\"\\"\\"
+\\"\\"\\"Represents an update to a \`Film\`. Fields that are set will be updated.\\"\\"\\"
 input FilmPatch {
   code: Int
   title: String
@@ -2091,7 +2081,7 @@ type FilmsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Film\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Film\` edge in the connection.\\"\\"\\"
@@ -2321,8 +2311,6 @@ type Mutation {
     \\"\\"\\"
     input: DeleteTvShowByCodeInput!
   ): DeleteTvShowPayload
-
-  \\"\\"\\"Reads and enables pagination through a set of \`Flamble\`.\\"\\"\\"
   getflamble(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -2400,9 +2388,7 @@ type Mutation {
     input: UpdateStudioByIdInput!
   ): UpdateStudioPayload
 
-  \\"\\"\\"
-  Updates a single \`TvEpisode\` using its globally unique id and a patch.
-  \\"\\"\\"
+  \\"\\"\\"Updates a single \`TvEpisode\` using its globally unique id and a patch.\\"\\"\\"
   updateTvEpisode(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -2472,7 +2458,7 @@ type PeopleConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Person\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Person\` edge in the connection.\\"\\"\\"
@@ -2634,9 +2620,7 @@ input PostInput {
   id: Int
 }
 
-\\"\\"\\"
-Represents an update to a \`Post\`. Fields that are set will be updated.
-\\"\\"\\"
+\\"\\"\\"Represents an update to a \`Post\`. Fields that are set will be updated.\\"\\"\\"
 input PostPatch {
   authorId: Int
   body: String
@@ -2657,7 +2641,7 @@ type PostsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Post\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Post\` edge in the connection.\\"\\"\\"
@@ -2957,9 +2941,7 @@ type Query implements Node {
 
   \\"\\"\\"Reads a single \`TvEpisode\` using its globally unique \`ID\`.\\"\\"\\"
   tvEpisode(
-    \\"\\"\\"
-    The globally unique \`ID\` to be used in selecting a single \`TvEpisode\`.
-    \\"\\"\\"
+    \\"\\"\\"The globally unique \`ID\` to be used in selecting a single \`TvEpisode\`.\\"\\"\\"
     nodeId: ID!
   ): TvEpisode
   tvEpisodeByCode(code: Int!): TvEpisode
@@ -3004,7 +2986,7 @@ type RenamedTablesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`RenamedTable\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`RenamedTable\` edge in the connection.\\"\\"\\"
@@ -3101,7 +3083,7 @@ type StudiosConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Studio\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Studio\` edge in the connection.\\"\\"\\"
@@ -3183,7 +3165,7 @@ type TvEpisodesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`TvEpisode\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`TvEpisode\` edge in the connection.\\"\\"\\"
@@ -3295,7 +3277,7 @@ type TvShowsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`TvShow\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`TvShow\` edge in the connection.\\"\\"\\"
@@ -4180,7 +4162,7 @@ type FilmsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Film\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Film\` edge in the connection.\\"\\"\\"
@@ -4394,8 +4376,6 @@ type Mutation {
     \\"\\"\\"
     input: DeleteTvShowByCodeInput!
   ): DeleteTvShowPayload
-
-  \\"\\"\\"Reads and enables pagination through a set of \`Flamble\`.\\"\\"\\"
   getflamble(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -4457,9 +4437,7 @@ type Mutation {
     input: UpdateStudioByIdInput!
   ): UpdateStudioPayload
 
-  \\"\\"\\"
-  Updates a single \`TvEpisode\` using its globally unique id and a patch.
-  \\"\\"\\"
+  \\"\\"\\"Updates a single \`TvEpisode\` using its globally unique id and a patch.\\"\\"\\"
   updateTvEpisode(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -4529,7 +4507,7 @@ type PeopleConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Person\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Person\` edge in the connection.\\"\\"\\"
@@ -4691,9 +4669,7 @@ input PostInput {
   id: Int
 }
 
-\\"\\"\\"
-Represents an update to a \`Post\`. Fields that are set will be updated.
-\\"\\"\\"
+\\"\\"\\"Represents an update to a \`Post\`. Fields that are set will be updated.\\"\\"\\"
 input PostPatch {
   authorId: Int
   body: String
@@ -4714,7 +4690,7 @@ type PostsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Post\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Post\` edge in the connection.\\"\\"\\"
@@ -5014,9 +4990,7 @@ type Query implements Node {
 
   \\"\\"\\"Reads a single \`TvEpisode\` using its globally unique \`ID\`.\\"\\"\\"
   tvEpisode(
-    \\"\\"\\"
-    The globally unique \`ID\` to be used in selecting a single \`TvEpisode\`.
-    \\"\\"\\"
+    \\"\\"\\"The globally unique \`ID\` to be used in selecting a single \`TvEpisode\`.\\"\\"\\"
     nodeId: ID!
   ): TvEpisode
   tvEpisodeByCode(code: Int!): TvEpisode
@@ -5061,7 +5035,7 @@ type RenamedTablesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`RenamedTable\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`RenamedTable\` edge in the connection.\\"\\"\\"
@@ -5158,7 +5132,7 @@ type StudiosConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Studio\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Studio\` edge in the connection.\\"\\"\\"
@@ -5240,7 +5214,7 @@ type TvEpisodesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`TvEpisode\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`TvEpisode\` edge in the connection.\\"\\"\\"
@@ -5352,7 +5326,7 @@ type TvShowsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`TvShow\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`TvShow\` edge in the connection.\\"\\"\\"
@@ -6207,9 +6181,7 @@ input FilmInput {
   title: String
 }
 
-\\"\\"\\"
-Represents an update to a \`Film\`. Fields that are set will be updated.
-\\"\\"\\"
+\\"\\"\\"Represents an update to a \`Film\`. Fields that are set will be updated.\\"\\"\\"
 input FilmPatch {
   code: Int
   title: String
@@ -6229,7 +6201,7 @@ type FilmsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Film\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Film\` edge in the connection.\\"\\"\\"
@@ -6451,8 +6423,6 @@ type Mutation {
     \\"\\"\\"
     input: DeleteTvShowByCodeInput!
   ): DeleteTvShowPayload
-
-  \\"\\"\\"Reads and enables pagination through a set of \`Flamble\`.\\"\\"\\"
   getflamble(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -6530,9 +6500,7 @@ type Mutation {
     input: UpdateStudioByIdInput!
   ): UpdateStudioPayload
 
-  \\"\\"\\"
-  Updates a single \`TvEpisode\` using its globally unique id and a patch.
-  \\"\\"\\"
+  \\"\\"\\"Updates a single \`TvEpisode\` using its globally unique id and a patch.\\"\\"\\"
   updateTvEpisode(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -6602,7 +6570,7 @@ type PeopleConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Person\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Person\` edge in the connection.\\"\\"\\"
@@ -6764,9 +6732,7 @@ input PostInput {
   id: Int
 }
 
-\\"\\"\\"
-Represents an update to a \`Post\`. Fields that are set will be updated.
-\\"\\"\\"
+\\"\\"\\"Represents an update to a \`Post\`. Fields that are set will be updated.\\"\\"\\"
 input PostPatch {
   authorId: Int
   body: String
@@ -6787,7 +6753,7 @@ type PostsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Post\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Post\` edge in the connection.\\"\\"\\"
@@ -7087,9 +7053,7 @@ type Query implements Node {
 
   \\"\\"\\"Reads a single \`TvEpisode\` using its globally unique \`ID\`.\\"\\"\\"
   tvEpisode(
-    \\"\\"\\"
-    The globally unique \`ID\` to be used in selecting a single \`TvEpisode\`.
-    \\"\\"\\"
+    \\"\\"\\"The globally unique \`ID\` to be used in selecting a single \`TvEpisode\`.\\"\\"\\"
     nodeId: ID!
   ): TvEpisode
   tvEpisodeByCode(code: Int!): TvEpisode
@@ -7134,7 +7098,7 @@ type RenamedTablesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`RenamedTable\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`RenamedTable\` edge in the connection.\\"\\"\\"
@@ -7231,7 +7195,7 @@ type StudiosConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Studio\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Studio\` edge in the connection.\\"\\"\\"
@@ -7313,7 +7277,7 @@ type TvEpisodesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`TvEpisode\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`TvEpisode\` edge in the connection.\\"\\"\\"
@@ -7425,7 +7389,7 @@ type TvShowsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`TvShow\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`TvShow\` edge in the connection.\\"\\"\\"
@@ -8379,9 +8343,7 @@ input FilmInput {
   title: String
 }
 
-\\"\\"\\"
-Represents an update to a \`Film\`. Fields that are set will be updated.
-\\"\\"\\"
+\\"\\"\\"Represents an update to a \`Film\`. Fields that are set will be updated.\\"\\"\\"
 input FilmPatch {
   code: Int
   title: String
@@ -8401,7 +8363,7 @@ type FilmsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Film\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Film\` edge in the connection.\\"\\"\\"
@@ -8639,8 +8601,6 @@ type Mutation {
     \\"\\"\\"
     input: DeleteTvShowByCodeInput!
   ): DeleteTvShowPayload
-
-  \\"\\"\\"Reads and enables pagination through a set of \`Flamble\`.\\"\\"\\"
   getflamble(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -8718,9 +8678,7 @@ type Mutation {
     input: UpdateStudioByIdInput!
   ): UpdateStudioPayload
 
-  \\"\\"\\"
-  Updates a single \`TvEpisode\` using its globally unique id and a patch.
-  \\"\\"\\"
+  \\"\\"\\"Updates a single \`TvEpisode\` using its globally unique id and a patch.\\"\\"\\"
   updateTvEpisode(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -8790,7 +8748,7 @@ type PeopleConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Person\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Person\` edge in the connection.\\"\\"\\"
@@ -8952,9 +8910,7 @@ input PostInput {
   id: Int
 }
 
-\\"\\"\\"
-Represents an update to a \`Post\`. Fields that are set will be updated.
-\\"\\"\\"
+\\"\\"\\"Represents an update to a \`Post\`. Fields that are set will be updated.\\"\\"\\"
 input PostPatch {
   authorId: Int
   body: String
@@ -8975,7 +8931,7 @@ type PostsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Post\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Post\` edge in the connection.\\"\\"\\"
@@ -9272,9 +9228,7 @@ type Query implements Node {
 
   \\"\\"\\"Reads a single \`TvEpisode\` using its globally unique \`ID\`.\\"\\"\\"
   tvEpisode(
-    \\"\\"\\"
-    The globally unique \`ID\` to be used in selecting a single \`TvEpisode\`.
-    \\"\\"\\"
+    \\"\\"\\"The globally unique \`ID\` to be used in selecting a single \`TvEpisode\`.\\"\\"\\"
     nodeId: ID!
   ): TvEpisode
   tvEpisodeByCode(code: Int!): TvEpisode
@@ -9319,7 +9273,7 @@ type RenamedTablesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`RenamedTable\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`RenamedTable\` edge in the connection.\\"\\"\\"
@@ -9413,7 +9367,7 @@ type StudiosConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Studio\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Studio\` edge in the connection.\\"\\"\\"
@@ -9495,7 +9449,7 @@ type TvEpisodesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`TvEpisode\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`TvEpisode\` edge in the connection.\\"\\"\\"
@@ -9607,7 +9561,7 @@ type TvShowsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`TvShow\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`TvShow\` edge in the connection.\\"\\"\\"
@@ -10632,8 +10586,6 @@ type Mutation {
     \\"\\"\\"
     input: DeleteTvShowByCodeInput!
   ): DeleteTvShowPayload
-
-  \\"\\"\\"Reads and enables pagination through a set of \`Flamble\`.\\"\\"\\"
   getflamble(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -10695,9 +10647,7 @@ type Mutation {
     input: UpdateStudioByIdInput!
   ): UpdateStudioPayload
 
-  \\"\\"\\"
-  Updates a single \`TvEpisode\` using its globally unique id and a patch.
-  \\"\\"\\"
+  \\"\\"\\"Updates a single \`TvEpisode\` using its globally unique id and a patch.\\"\\"\\"
   updateTvEpisode(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -10767,7 +10717,7 @@ type PeopleConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Person\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Person\` edge in the connection.\\"\\"\\"
@@ -10929,9 +10879,7 @@ input PostInput {
   id: Int
 }
 
-\\"\\"\\"
-Represents an update to a \`Post\`. Fields that are set will be updated.
-\\"\\"\\"
+\\"\\"\\"Represents an update to a \`Post\`. Fields that are set will be updated.\\"\\"\\"
 input PostPatch {
   authorId: Int
   body: String
@@ -10952,7 +10900,7 @@ type PostsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Post\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Post\` edge in the connection.\\"\\"\\"
@@ -11216,9 +11164,7 @@ type Query implements Node {
 
   \\"\\"\\"Reads a single \`TvEpisode\` using its globally unique \`ID\`.\\"\\"\\"
   tvEpisode(
-    \\"\\"\\"
-    The globally unique \`ID\` to be used in selecting a single \`TvEpisode\`.
-    \\"\\"\\"
+    \\"\\"\\"The globally unique \`ID\` to be used in selecting a single \`TvEpisode\`.\\"\\"\\"
     nodeId: ID!
   ): TvEpisode
   tvEpisodeByCode(code: Int!): TvEpisode
@@ -11263,7 +11209,7 @@ type RenamedTablesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`RenamedTable\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`RenamedTable\` edge in the connection.\\"\\"\\"
@@ -11360,7 +11306,7 @@ type StudiosConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Studio\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Studio\` edge in the connection.\\"\\"\\"
@@ -11442,7 +11388,7 @@ type TvEpisodesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`TvEpisode\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`TvEpisode\` edge in the connection.\\"\\"\\"
@@ -11554,7 +11500,7 @@ type TvShowsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`TvShow\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`TvShow\` edge in the connection.\\"\\"\\"
@@ -12471,7 +12417,7 @@ type FilmsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Film\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Film\` edge in the connection.\\"\\"\\"
@@ -12709,8 +12655,6 @@ type Mutation {
     \\"\\"\\"
     input: DeleteTvShowByCodeInput!
   ): DeleteTvShowPayload
-
-  \\"\\"\\"Reads and enables pagination through a set of \`Flamble\`.\\"\\"\\"
   getflamble(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -12772,9 +12716,7 @@ type Mutation {
     input: UpdateStudioByIdInput!
   ): UpdateStudioPayload
 
-  \\"\\"\\"
-  Updates a single \`TvEpisode\` using its globally unique id and a patch.
-  \\"\\"\\"
+  \\"\\"\\"Updates a single \`TvEpisode\` using its globally unique id and a patch.\\"\\"\\"
   updateTvEpisode(
     \\"\\"\\"
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -12844,7 +12786,7 @@ type PeopleConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Person\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Person\` edge in the connection.\\"\\"\\"
@@ -13006,9 +12948,7 @@ input PostInput {
   id: Int
 }
 
-\\"\\"\\"
-Represents an update to a \`Post\`. Fields that are set will be updated.
-\\"\\"\\"
+\\"\\"\\"Represents an update to a \`Post\`. Fields that are set will be updated.\\"\\"\\"
 input PostPatch {
   authorId: Int
   body: String
@@ -13029,7 +12969,7 @@ type PostsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Post\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Post\` edge in the connection.\\"\\"\\"
@@ -13329,9 +13269,7 @@ type Query implements Node {
 
   \\"\\"\\"Reads a single \`TvEpisode\` using its globally unique \`ID\`.\\"\\"\\"
   tvEpisode(
-    \\"\\"\\"
-    The globally unique \`ID\` to be used in selecting a single \`TvEpisode\`.
-    \\"\\"\\"
+    \\"\\"\\"The globally unique \`ID\` to be used in selecting a single \`TvEpisode\`.\\"\\"\\"
     nodeId: ID!
   ): TvEpisode
   tvEpisodeByCode(code: Int!): TvEpisode
@@ -13376,7 +13314,7 @@ type RenamedTablesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`RenamedTable\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`RenamedTable\` edge in the connection.\\"\\"\\"
@@ -13473,7 +13411,7 @@ type StudiosConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`Studio\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`Studio\` edge in the connection.\\"\\"\\"
@@ -13555,7 +13493,7 @@ type TvEpisodesConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`TvEpisode\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`TvEpisode\` edge in the connection.\\"\\"\\"
@@ -13667,7 +13605,7 @@ type TvShowsConnection {
   pageInfo: PageInfo!
 
   \\"\\"\\"The count of *all* \`TvShow\` you could get from the connection.\\"\\"\\"
-  totalCount: Int
+  totalCount: Int!
 }
 
 \\"\\"\\"A \`TvShow\` edge in the connection.\\"\\"\\"

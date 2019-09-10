@@ -1,5 +1,5 @@
 -- WARNING: this database is shared with graphile-utils, don't run the tests in parallel!
-drop schema if exists a, b, c, d, inheritence, smart_comment_relations, ranges, index_expressions cascade;
+drop schema if exists a, b, c, d, inheritence, smart_comment_relations, ranges, index_expressions, simple_collections, live_test, large_bigint cascade;
 drop extension if exists tablefunc;
 drop extension if exists intarray;
 drop extension if exists hstore;
@@ -8,6 +8,7 @@ create schema a;
 create schema b;
 create schema c;
 create schema d;
+create schema large_bigint;
 
 alter default privileges revoke execute on functions from public;
 
@@ -256,6 +257,7 @@ create table b.types (
   "time" time not null,
   "timetz" timetz not null,
   "interval" interval not null,
+  "interval_array" interval[] not null,
   "money" money not null,
   "compound_type" c.compound_type not null,
   "nested_compound_type" b.nested_compound_type not null,
@@ -264,6 +266,8 @@ create table b.types (
   "point" point not null,
   "nullablePoint" point
 );
+
+comment on table b.types is E'@foreignKey (smallint) references a.post\n@foreignKey (id) references a.post';
 
 create function b.throw_error() returns trigger as $$
 begin
@@ -361,6 +365,17 @@ create function a.mutation_text_array() returns text[] as $$ select ARRAY['str1'
 create function a.mutation_interval_array() returns interval[] as $$ select ARRAY[interval '12 seconds', interval '3 hours', interval '34567 seconds']; $$ language sql volatile;
 create function a.mutation_interval_set() returns setof interval as $$ begin return next interval '12 seconds'; return next interval '3 hours'; return next interval '34567 seconds'; end; $$ language plpgsql volatile;
 
+-- Procs returning `type` record (to test JSON encoding)
+create function b.type_function(id int) returns b.types as $$ select * from b.types where types.id = $1; $$ language sql stable;
+create function b.type_function_list() returns b.types[] as $$ select array_agg(types) from b.types $$ language sql stable;
+create function b.type_function_connection() returns setof b.types as $$ select * from b.types $$ language sql stable;
+create function c.person_type_function(p c.person, id int) returns b.types as $$ select * from b.types where types.id = $2; $$ language sql stable;
+create function c.person_type_function_list(p c.person) returns b.types[] as $$ select array_agg(types) from b.types $$ language sql stable;
+create function c.person_type_function_connection(p c.person) returns setof b.types as $$ select * from b.types $$ language sql stable;
+create function b.type_function_mutation(id int) returns b.types as $$ select * from b.types where types.id = $1; $$ language sql;
+create function b.type_function_list_mutation() returns b.types[] as $$ select array_agg(types) from b.types $$ language sql;
+create function b.type_function_connection_mutation() returns setof b.types as $$ select * from b.types $$ language sql;
+
 create type b.jwt_token as (
   role text,
   exp integer,
@@ -378,6 +393,8 @@ create type b.auth_payload as (
   id int,
   admin bool
 );
+
+comment on type b.auth_payload is E'@foreignKey (id) references c.person';
 
 create function b.authenticate_payload(a integer, b numeric, c bigint) returns b.auth_payload as $$ select (('yay', extract(epoch from '2037-07-12'::timestamp), a, b, c)::b.jwt_token, 1, true)::b.auth_payload $$ language sql;
 
@@ -469,6 +486,14 @@ create table c.issue756 (
   id serial primary key,
   ts c.not_null_timestamp
 );
+
+create table c.null_test_record (
+  id serial primary key,
+  nullable_text text,
+  nullable_int int,
+  non_null_text text not null
+);
+
 create function c.issue756_mutation() returns c.issue756 as $$
 begin
   return null;
@@ -564,7 +589,7 @@ create function c.person_computed_complex (person c.person, in a int, in b text,
     b.types.compound_type as y,
     person as z
   from c.person
-    inner join b.types on c.person.id = (b.types.id - 11)
+    inner join b.types on c.person.id = (b.types.id - 10)
   limit 1;
 $$ language sql stable;
 
@@ -594,7 +619,7 @@ create function c.func_out_complex(in a int, in b text, out x int, out y c.compo
     b.types.compound_type as y,
     person as z
   from c.person
-    inner join b.types on c.person.id = (b.types.id - 11)
+    inner join b.types on c.person.id = (b.types.id - 10)
   limit 1;
 $$ language sql stable;
 
@@ -604,7 +629,7 @@ create function c.func_out_complex_setof(in a int, in b text, out x int, out y c
     b.types.compound_type as y,
     person as z
   from c.person
-    inner join b.types on c.person.id = (b.types.id - 11)
+    inner join b.types on c.person.id = (b.types.id - 10)
   limit 1;
 $$ language sql stable;
 
@@ -638,7 +663,7 @@ create function c.mutation_out_complex(in a int, in b text, out x int, out y c.c
     b.types.compound_type as y,
     person as z
   from c.person
-    inner join b.types on c.person.id = (b.types.id - 11)
+    inner join b.types on c.person.id = (b.types.id - 10)
   limit 1;
 $$ language sql volatile;
 
@@ -648,7 +673,7 @@ create function c.mutation_out_complex_setof(in a int, in b text, out x int, out
     b.types.compound_type as y,
     person as z
   from c.person
-    inner join b.types on c.person.id = (b.types.id - 11)
+    inner join b.types on c.person.id = (b.types.id - 10)
   limit 1;
 $$ language sql volatile;
 
@@ -681,7 +706,7 @@ create function c.mutation_out_table(out c.person) as $$
 $$ language sql volatile;
 
 create function c.mutation_out_table_setof(out c.person) returns setof c.person as $$
-  select * from c.person;
+  select * from c.person order by id;
 $$ language sql volatile;
 
 create function c.mutation_out_unnamed(out int) as $$
@@ -896,7 +921,7 @@ create table smart_comment_relations.buildings (
   is_primary boolean not null default true
 );
 
-comment on table smart_comment_relations.buildings is E'@foreignKey (name) references streets (name)|@fieldName namedAfterStreet|@foreignFieldName buildingsNamedAfterStreet';
+comment on table smart_comment_relations.buildings is E'@foreignKey (name) references streets (name)|@fieldName namedAfterStreet|@foreignFieldName buildingsNamedAfterStreet|@foreignSimpleFieldName buildingsNamedAfterStreetList';
 
 -- Only one primary building
 create unique index on smart_comment_relations.buildings (property_id) where is_primary is true;
@@ -976,3 +1001,56 @@ create table index_expressions.employee (
 create unique index employee_name on index_expressions.employee ((first_name || ' ' || last_name));
 create index employee_lower_name on index_expressions.employee (lower(first_name));
 create index employee_first_name_idx on index_expressions.employee (first_name);
+
+
+create schema simple_collections;
+
+create table simple_collections.people (
+  id serial primary key,
+  name text
+);
+
+create table simple_collections.pets (
+  id serial primary key,
+  owner_id int not null references simple_collections.people,
+  name text
+);
+
+create function simple_collections.people_odd_pets(p simple_collections.people) returns setof simple_collections.pets as $$
+  select * from simple_collections.pets where owner_id = p.id and id % 2 = 1;
+$$ language sql stable;
+
+create schema live_test;
+
+create table live_test.users (
+  id serial primary key,
+  name text not null,
+  favorite_color text
+);
+
+create table live_test.todos (
+  id serial primary key,
+  user_id int not null references live_test.users on delete cascade,
+  task text not null,
+  completed boolean not null default false
+);
+
+create table live_test.todos_log (
+  todo_id int not null references live_test.todos on delete cascade,
+  user_id int not null references live_test.users on delete cascade,
+  action text not null,
+  PRIMARY KEY ("todo_id","user_id")
+);
+
+create table live_test.todos_log_viewed (
+  id serial primary key,
+  user_id int not null,
+  todo_id int not null,
+  viewed_at timestamp not null default now(),
+  foreign key (user_id, todo_id) references live_test.todos_log(user_id, todo_id) on delete cascade
+);
+
+create table large_bigint.large_node_id (
+  id bigint primary key,
+  text text
+);
