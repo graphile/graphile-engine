@@ -6563,9 +6563,6 @@ input PostCondition {
   \\"\\"\\"Checks for equality with the object’s \`authorId\` field.\\"\\"\\"
   authorId: Int
 
-  \\"\\"\\"Checks for equality with the object’s \`computedWithRequiredArg\` field.\\"\\"\\"
-  computedWithRequiredArg: Int
-
   \\"\\"\\"Checks for equality with the object’s \`id\` field.\\"\\"\\"
   id: Int
 }
@@ -6645,8 +6642,6 @@ type PostsEdge {
 enum PostsOrderBy {
   AUTHOR_ID_ASC
   AUTHOR_ID_DESC
-  COMPUTED_WITH_REQUIRED_ARG_ASC
-  COMPUTED_WITH_REQUIRED_ARG_DESC
   ID_ASC
   ID_DESC
   NATURAL
