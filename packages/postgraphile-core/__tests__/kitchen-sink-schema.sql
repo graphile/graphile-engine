@@ -360,6 +360,8 @@ create function a.post_computed_interval_array(post a.post) returns interval[] a
 create function a.post_computed_interval_set(post a.post) returns setof interval as $$ begin return next interval '12 seconds'; return next interval '3 hours'; return next interval '34567 seconds'; end; $$ language plpgsql stable;
 create function a.post_computed_with_required_arg(post a.post, i int) returns int as $$ select 1; $$ language sql stable strict;
 comment on function a.post_computed_with_required_arg(post a.post, i int) is E'@sortable\n@filterable';
+create function a.post_computed_with_optional_arg(post a.post, i int = 1) returns int as $$ select 1; $$ language sql stable strict;
+comment on function a.post_computed_with_optional_arg(post a.post, i int) is E'@sortable\n@filterable';
 
 -- Procs -> custom mutations
 create function a.mutation_compound_type_array(object c.compound_type) returns c.compound_type[] as $$ select ARRAY[object, (null, null, null, null, null, null, null, null)::c.compound_type, (object.a + 1, object.b, object.c, object.d, object.e, object.f, object.g, object.foo_bar)::c.compound_type]; $$ language sql volatile;

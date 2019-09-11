@@ -6213,6 +6213,7 @@ type Post implements Node {
     offset: Int
   ): PostComputedIntervalSetConnection!
   computedTextArray: [String]
+  computedWithOptionalArg(i: Int): Int
   computedWithRequiredArg(i: Int!): Int
   enums: [AnEnum]
   headline: String!
@@ -6324,6 +6325,9 @@ input PostCondition {
   \\"\\"\\"Checks for equality with the object’s \`comptypes\` field.\\"\\"\\"
   comptypes: [ComptypeInput]
 
+  \\"\\"\\"Checks for equality with the object’s \`computedWithOptionalArg\` field.\\"\\"\\"
+  computedWithOptionalArg: Int
+
   \\"\\"\\"Checks for equality with the object’s \`enums\` field.\\"\\"\\"
   enums: [AnEnum]
 
@@ -6413,6 +6417,8 @@ enum PostsOrderBy {
   BODY_DESC
   COMPTYPES_ASC
   COMPTYPES_DESC
+  COMPUTED_WITH_OPTIONAL_ARG_ASC
+  COMPUTED_WITH_OPTIONAL_ARG_DESC
   ENUMS_ASC
   ENUMS_DESC
   HEADLINE_ASC
@@ -16193,6 +16199,7 @@ type Post implements Node {
     offset: Int
   ): PostComputedIntervalSetConnection!
   computedTextArray: [String]
+  computedWithOptionalArg(i: Int): Int
   computedWithRequiredArg(i: Int!): Int
   enums: [AnEnum]
   headline: String!
@@ -16304,6 +16311,9 @@ input PostCondition {
   \\"\\"\\"Checks for equality with the object’s \`comptypes\` field.\\"\\"\\"
   comptypes: [ComptypeInput]
 
+  \\"\\"\\"Checks for equality with the object’s \`computedWithOptionalArg\` field.\\"\\"\\"
+  computedWithOptionalArg: Int
+
   \\"\\"\\"Checks for equality with the object’s \`enums\` field.\\"\\"\\"
   enums: [AnEnum]
 
@@ -16393,6 +16403,8 @@ enum PostsOrderBy {
   BODY_DESC
   COMPTYPES_ASC
   COMPTYPES_DESC
+  COMPUTED_WITH_OPTIONAL_ARG_ASC
+  COMPUTED_WITH_OPTIONAL_ARG_DESC
   ENUMS_ASC
   ENUMS_DESC
   HEADLINE_ASC
