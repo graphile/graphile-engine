@@ -78,6 +78,9 @@ strings and not numbers.
 \\"\\"\\"
 scalar BigInt
 
+\\"\\"\\"An IPv4 or IPv6 CIDR address.\\"\\"\\"
+scalar CidrAddress
+
 enum Color {
   BLUE
   GREEN
@@ -1612,6 +1615,9 @@ enum LeftArmsOrderBy {
   PRIMARY_KEY_DESC
 }
 
+\\"\\"\\"A 6-byte MAC address.\\"\\"\\"
+scalar MacAddress
+
 \\"\\"\\"
 The root mutation type which contains root level fields which mutate data.
 \\"\\"\\"
@@ -2826,6 +2832,8 @@ enum PeopleOrderBy {
   ID_DESC
   LAST_LOGIN_FROM_IP_ASC
   LAST_LOGIN_FROM_IP_DESC
+  LAST_LOGIN_FROM_SUBNET_ASC
+  LAST_LOGIN_FROM_SUBNET_DESC
   NAME_ASC
   NAME_DESC
   NATURAL
@@ -2833,6 +2841,8 @@ enum PeopleOrderBy {
   PRIMARY_KEY_DESC
   SITE_ASC
   SITE_DESC
+  USER_MAC_ASC
+  USER_MAC_DESC
 }
 
 \\"\\"\\"Person test comment\\"\\"\\"
@@ -2984,6 +2994,7 @@ type Person implements Node {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int!
   lastLoginFromIp: InternetAddress
+  lastLoginFromSubnet: CidrAddress
 
   \\"\\"\\"Reads a single \`LeftArm\` that is related to this \`Person\`.\\"\\"\\"
   leftArmByPersonId: LeftArm
@@ -3089,6 +3100,7 @@ type Person implements Node {
     offset: Int
   ): [Type!]
   typeFunctionList: [Type]
+  userMac: MacAddress
 }
 
 \\"\\"\\"The return type of our \`computedComplex\` query.\\"\\"\\"
@@ -3144,11 +3156,17 @@ input PersonCondition {
   \\"\\"\\"Checks for equality with the object’s \`lastLoginFromIp\` field.\\"\\"\\"
   lastLoginFromIp: InternetAddress
 
+  \\"\\"\\"Checks for equality with the object’s \`lastLoginFromSubnet\` field.\\"\\"\\"
+  lastLoginFromSubnet: CidrAddress
+
   \\"\\"\\"Checks for equality with the object’s \`name\` field.\\"\\"\\"
   name: String
 
   \\"\\"\\"Checks for equality with the object’s \`site\` field.\\"\\"\\"
   site: WrappedUrlInput
+
+  \\"\\"\\"Checks for equality with the object’s \`userMac\` field.\\"\\"\\"
+  userMac: MacAddress
 }
 
 \\"\\"\\"An input for mutations affecting \`Person\`\\"\\"\\"
@@ -3162,10 +3180,12 @@ input PersonInput {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int
   lastLoginFromIp: InternetAddress
+  lastLoginFromSubnet: CidrAddress
 
   \\"\\"\\"The person’s name\\"\\"\\"
   name: String!
   site: WrappedUrlInput
+  userMac: MacAddress
 }
 
 \\"\\"\\"
@@ -3181,10 +3201,12 @@ input PersonPatch {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int
   lastLoginFromIp: InternetAddress
+  lastLoginFromSubnet: CidrAddress
 
   \\"\\"\\"The person’s name\\"\\"\\"
   name: String
   site: WrappedUrlInput
+  userMac: MacAddress
 }
 
 \\"\\"\\"Tracks the person's secret\\"\\"\\"
@@ -4119,6 +4141,7 @@ type Type {
   anIntRange: AnIntRange!
   bigint: BigInt!
   boolean: Boolean!
+  cidr: CidrAddress
   compoundType: CompoundType!
   date: Date!
   daterange: DateRange!
@@ -4132,6 +4155,7 @@ type Type {
   intervalArray: [Interval]!
   json: JSON!
   jsonb: JSON!
+  macaddr: MacAddress
   money: Float!
   nestedCompoundType: NestedCompoundType!
   nullableCompoundType: CompoundType
@@ -4742,6 +4766,9 @@ max value for a JavaScript number. Therefore all big integers will be output as
 strings and not numbers.
 \\"\\"\\"
 scalar BigInt
+
+\\"\\"\\"An IPv4 or IPv6 CIDR address.\\"\\"\\"
+scalar CidrAddress
 
 enum Color {
   BLUE
@@ -5922,6 +5949,9 @@ enum LeftArmsOrderBy {
   PRIMARY_KEY_DESC
 }
 
+\\"\\"\\"A 6-byte MAC address.\\"\\"\\"
+scalar MacAddress
+
 \\"\\"\\"
 The root mutation type which contains root level fields which mutate data.
 \\"\\"\\"
@@ -7037,6 +7067,8 @@ enum PeopleOrderBy {
   ID_DESC
   LAST_LOGIN_FROM_IP_ASC
   LAST_LOGIN_FROM_IP_DESC
+  LAST_LOGIN_FROM_SUBNET_ASC
+  LAST_LOGIN_FROM_SUBNET_DESC
   NAME_ASC
   NAME_DESC
   NATURAL
@@ -7044,6 +7076,8 @@ enum PeopleOrderBy {
   PRIMARY_KEY_DESC
   SITE_ASC
   SITE_DESC
+  USER_MAC_ASC
+  USER_MAC_DESC
 }
 
 \\"\\"\\"Person test comment\\"\\"\\"
@@ -7113,6 +7147,7 @@ type Person implements Node {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int!
   lastLoginFromIp: InternetAddress
+  lastLoginFromSubnet: CidrAddress
 
   \\"\\"\\"Reads a single \`LeftArm\` that is related to this \`Person\`.\\"\\"\\"
   leftArmByPersonId: LeftArm
@@ -7139,6 +7174,7 @@ type Person implements Node {
     offset: Int
   ): [Type!]
   typeFunctionList: [Type]
+  userMac: MacAddress
 }
 
 \\"\\"\\"The return type of our \`computedComplex\` query.\\"\\"\\"
@@ -7194,11 +7230,17 @@ input PersonCondition {
   \\"\\"\\"Checks for equality with the object’s \`lastLoginFromIp\` field.\\"\\"\\"
   lastLoginFromIp: InternetAddress
 
+  \\"\\"\\"Checks for equality with the object’s \`lastLoginFromSubnet\` field.\\"\\"\\"
+  lastLoginFromSubnet: CidrAddress
+
   \\"\\"\\"Checks for equality with the object’s \`name\` field.\\"\\"\\"
   name: String
 
   \\"\\"\\"Checks for equality with the object’s \`site\` field.\\"\\"\\"
   site: WrappedUrlInput
+
+  \\"\\"\\"Checks for equality with the object’s \`userMac\` field.\\"\\"\\"
+  userMac: MacAddress
 }
 
 \\"\\"\\"An input for mutations affecting \`Person\`\\"\\"\\"
@@ -7212,10 +7254,12 @@ input PersonInput {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int
   lastLoginFromIp: InternetAddress
+  lastLoginFromSubnet: CidrAddress
 
   \\"\\"\\"The person’s name\\"\\"\\"
   name: String!
   site: WrappedUrlInput
+  userMac: MacAddress
 }
 
 \\"\\"\\"
@@ -7231,10 +7275,12 @@ input PersonPatch {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int
   lastLoginFromIp: InternetAddress
+  lastLoginFromSubnet: CidrAddress
 
   \\"\\"\\"The person’s name\\"\\"\\"
   name: String
   site: WrappedUrlInput
+  userMac: MacAddress
 }
 
 \\"\\"\\"Tracks the person's secret\\"\\"\\"
@@ -7697,6 +7743,7 @@ type Type {
   anIntRange: AnIntRange!
   bigint: BigInt!
   boolean: Boolean!
+  cidr: CidrAddress
   compoundType: CompoundType!
   date: Date!
   daterange: DateRange!
@@ -7710,6 +7757,7 @@ type Type {
   intervalArray: [Interval]!
   json: JSON!
   jsonb: JSON!
+  macaddr: MacAddress
   money: Float!
   nestedCompoundType: NestedCompoundType!
   nullableCompoundType: CompoundType

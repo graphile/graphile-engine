@@ -78,6 +78,9 @@ strings and not numbers.
 \\"\\"\\"
 scalar BigInt
 
+\\"\\"\\"An IPv4 or IPv6 CIDR address.\\"\\"\\"
+scalar CidrAddress
+
 enum Color {
   BLUE
   GREEN
@@ -1604,6 +1607,9 @@ enum LeftArmsOrderBy {
   PRIMARY_KEY_DESC
 }
 
+\\"\\"\\"A 6-byte MAC address.\\"\\"\\"
+scalar MacAddress
+
 \\"\\"\\"
 The root mutation type which contains root level fields which mutate data.
 \\"\\"\\"
@@ -2821,6 +2827,8 @@ enum PeopleOrderBy {
   ID_DESC
   LAST_LOGIN_FROM_IP_ASC
   LAST_LOGIN_FROM_IP_DESC
+  LAST_LOGIN_FROM_SUBNET_ASC
+  LAST_LOGIN_FROM_SUBNET_DESC
   NATURAL
   PERSON_FULL_NAME_ASC
   PERSON_FULL_NAME_DESC
@@ -2828,6 +2836,8 @@ enum PeopleOrderBy {
   PRIMARY_KEY_DESC
   SITE_ASC
   SITE_DESC
+  USER_MAC_ASC
+  USER_MAC_DESC
 }
 
 \\"\\"\\"Person test comment\\"\\"\\"
@@ -2938,6 +2948,7 @@ type Person implements Node {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int!
   lastLoginFromIp: InternetAddress
+  lastLoginFromSubnet: CidrAddress
 
   \\"\\"\\"Reads and enables pagination through a set of \`LeftArm\`.\\"\\"\\"
   leftArmsByPersonId(
@@ -3033,6 +3044,7 @@ type Person implements Node {
     offset: Int
   ): TypesConnection!
   typeFunctionList: [Type]
+  userMac: MacAddress
 }
 
 \\"\\"\\"The return type of our \`computedComplex\` query.\\"\\"\\"
@@ -3085,11 +3097,17 @@ input PersonCondition {
   \\"\\"\\"Checks for equality with the object’s \`lastLoginFromIp\` field.\\"\\"\\"
   lastLoginFromIp: InternetAddress
 
+  \\"\\"\\"Checks for equality with the object’s \`lastLoginFromSubnet\` field.\\"\\"\\"
+  lastLoginFromSubnet: CidrAddress
+
   \\"\\"\\"Checks for equality with the object’s \`personFullName\` field.\\"\\"\\"
   personFullName: String
 
   \\"\\"\\"Checks for equality with the object’s \`site\` field.\\"\\"\\"
   site: WrappedUrlInput
+
+  \\"\\"\\"Checks for equality with the object’s \`userMac\` field.\\"\\"\\"
+  userMac: MacAddress
 }
 
 \\"\\"\\"An input for mutations affecting \`Person\`\\"\\"\\"
@@ -3103,6 +3121,7 @@ input PersonInput {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int
   lastLoginFromIp: InternetAddress
+  lastLoginFromSubnet: CidrAddress
 
   \\"\\"\\"
   @name name
@@ -3112,6 +3131,7 @@ input PersonInput {
 
   \\"\\"\\"@deprecated Don’t use me\\"\\"\\"
   site: WrappedUrlInput
+  userMac: MacAddress
 }
 
 \\"\\"\\"
@@ -3127,6 +3147,7 @@ input PersonPatch {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int
   lastLoginFromIp: InternetAddress
+  lastLoginFromSubnet: CidrAddress
 
   \\"\\"\\"
   @name name
@@ -3136,6 +3157,7 @@ input PersonPatch {
 
   \\"\\"\\"@deprecated Don’t use me\\"\\"\\"
   site: WrappedUrlInput
+  userMac: MacAddress
 }
 
 \\"\\"\\"
@@ -3853,6 +3875,7 @@ type Type {
   anIntRange: AnIntRange!
   bigint: BigInt!
   boolean: Boolean!
+  cidr: CidrAddress
   compoundType: CompoundType!
   date: Date!
   daterange: DateRange!
@@ -3866,6 +3889,7 @@ type Type {
   intervalArray: [Interval]!
   json: Json!
   jsonb: Json!
+  macaddr: MacAddress
   money: Float!
   nestedCompoundType: NestedCompoundType!
   nullableCompoundType: CompoundType

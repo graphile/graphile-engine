@@ -337,6 +337,14 @@ export default (function PgTypesPlugin(
         inflection.builtin("InternetAddress"),
         "An IPv4 or IPv6 host address, and optionally its subnet."
       );
+      const CidrType = stringType(
+        inflection.builtin("CidrAddress"),
+        "An IPv4 or IPv6 CIDR address."
+      );
+      const MacAddrType = stringType(
+        inflection.builtin("MacAddress"),
+        "A 6-byte MAC address."
+      );
 
       // pgExtendedTypes might change what types we use for things
       const JSONType = pgExtendedTypes
@@ -423,6 +431,8 @@ export default (function PgTypesPlugin(
         "600": Point, // point
 
         "869": InetType,
+        "650": CidrType,
+        "829": MacAddrType,
       };
       const oidInputLookup = {
         "1186": GQLIntervalInput, // interval

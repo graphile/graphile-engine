@@ -42,6 +42,8 @@ create table c.person (
   site b.wrapped_url default null,
   config hstore,
   last_login_from_ip inet,
+  last_login_from_subnet cidr,
+  user_mac macaddr,
   created_at timestamp default current_timestamp
 );
 
@@ -264,7 +266,9 @@ create table b.types (
   "nullable_compound_type" c.compound_type,
   "nullable_nested_compound_type" b.nested_compound_type,
   "point" point not null,
-  "nullablePoint" point
+  "nullablePoint" point,
+  "cidr" cidr,
+  "macaddr" macaddr
 );
 
 comment on table b.types is E'@foreignKey (smallint) references a.post\n@foreignKey (id) references a.post';

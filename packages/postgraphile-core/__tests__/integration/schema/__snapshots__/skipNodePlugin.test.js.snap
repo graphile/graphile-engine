@@ -374,6 +374,9 @@ strings and not numbers.
 \\"\\"\\"
 scalar BigInt
 
+\\"\\"\\"An IPv4 or IPv6 CIDR address.\\"\\"\\"
+scalar CidrAddress
+
 enum Color {
   BLUE
   GREEN
@@ -3181,6 +3184,9 @@ enum LeftArmsOrderBy {
   PRIMARY_KEY_DESC
 }
 
+\\"\\"\\"A 6-byte MAC address.\\"\\"\\"
+scalar MacAddress
+
 \\"\\"\\"All input for the \`mult1\` mutation.\\"\\"\\"
 input Mult1Input {
   arg0: Int
@@ -5127,6 +5133,8 @@ enum PeopleOrderBy {
   ID_DESC
   LAST_LOGIN_FROM_IP_ASC
   LAST_LOGIN_FROM_IP_DESC
+  LAST_LOGIN_FROM_SUBNET_ASC
+  LAST_LOGIN_FROM_SUBNET_DESC
   NAME_ASC
   NAME_DESC
   NATURAL
@@ -5134,6 +5142,8 @@ enum PeopleOrderBy {
   PRIMARY_KEY_DESC
   SITE_ASC
   SITE_DESC
+  USER_MAC_ASC
+  USER_MAC_DESC
 }
 
 \\"\\"\\"Person test comment\\"\\"\\"
@@ -5268,6 +5278,7 @@ type Person {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int!
   lastLoginFromIp: InternetAddress
+  lastLoginFromSubnet: CidrAddress
 
   \\"\\"\\"Reads a single \`LeftArm\` that is related to this \`Person\`.\\"\\"\\"
   leftArmByPersonId: LeftArm
@@ -5388,6 +5399,7 @@ type Person {
     offset: Int
   ): TypesConnection!
   typeFunctionList: [Type]
+  userMac: MacAddress
 }
 
 \\"\\"\\"The return type of our \`computedComplex\` query.\\"\\"\\"
@@ -5443,11 +5455,17 @@ input PersonCondition {
   \\"\\"\\"Checks for equality with the object’s \`lastLoginFromIp\` field.\\"\\"\\"
   lastLoginFromIp: InternetAddress
 
+  \\"\\"\\"Checks for equality with the object’s \`lastLoginFromSubnet\` field.\\"\\"\\"
+  lastLoginFromSubnet: CidrAddress
+
   \\"\\"\\"Checks for equality with the object’s \`name\` field.\\"\\"\\"
   name: String
 
   \\"\\"\\"Checks for equality with the object’s \`site\` field.\\"\\"\\"
   site: WrappedUrlInput
+
+  \\"\\"\\"Checks for equality with the object’s \`userMac\` field.\\"\\"\\"
+  userMac: MacAddress
 }
 
 \\"\\"\\"An input for mutations affecting \`Person\`\\"\\"\\"
@@ -5461,10 +5479,12 @@ input PersonInput {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int
   lastLoginFromIp: InternetAddress
+  lastLoginFromSubnet: CidrAddress
 
   \\"\\"\\"The person’s name\\"\\"\\"
   name: String!
   site: WrappedUrlInput
+  userMac: MacAddress
 }
 
 \\"\\"\\"
@@ -5480,10 +5500,12 @@ input PersonPatch {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int
   lastLoginFromIp: InternetAddress
+  lastLoginFromSubnet: CidrAddress
 
   \\"\\"\\"The person’s name\\"\\"\\"
   name: String
   site: WrappedUrlInput
+  userMac: MacAddress
 }
 
 \\"\\"\\"Tracks the person's secret\\"\\"\\"
@@ -7448,6 +7470,7 @@ type Type {
   anIntRange: AnIntRange!
   bigint: BigInt!
   boolean: Boolean!
+  cidr: CidrAddress
   compoundType: CompoundType!
   date: Date!
   daterange: DateRange!
@@ -7461,6 +7484,7 @@ type Type {
   intervalArray: [Interval]!
   json: JSON!
   jsonb: JSON!
+  macaddr: MacAddress
   money: Float!
   nestedCompoundType: NestedCompoundType!
   nullableCompoundType: CompoundType
@@ -7497,6 +7521,9 @@ input TypeCondition {
 
   \\"\\"\\"Checks for equality with the object’s \`boolean\` field.\\"\\"\\"
   boolean: Boolean
+
+  \\"\\"\\"Checks for equality with the object’s \`cidr\` field.\\"\\"\\"
+  cidr: CidrAddress
 
   \\"\\"\\"Checks for equality with the object’s \`compoundType\` field.\\"\\"\\"
   compoundType: CompoundTypeInput
@@ -7536,6 +7563,9 @@ input TypeCondition {
 
   \\"\\"\\"Checks for equality with the object’s \`jsonb\` field.\\"\\"\\"
   jsonb: JSON
+
+  \\"\\"\\"Checks for equality with the object’s \`macaddr\` field.\\"\\"\\"
+  macaddr: MacAddress
 
   \\"\\"\\"Checks for equality with the object’s \`money\` field.\\"\\"\\"
   money: Float
@@ -7678,6 +7708,7 @@ input TypeInput {
   anIntRange: AnIntRangeInput!
   bigint: BigInt!
   boolean: Boolean!
+  cidr: CidrAddress
   compoundType: CompoundTypeInput!
   date: Date!
   daterange: DateRangeInput!
@@ -7691,6 +7722,7 @@ input TypeInput {
   intervalArray: [IntervalInput]!
   json: JSON!
   jsonb: JSON!
+  macaddr: MacAddress
   money: Float!
   nestedCompoundType: NestedCompoundTypeInput!
   nullableCompoundType: CompoundTypeInput
@@ -7714,6 +7746,7 @@ input TypePatch {
   anIntRange: AnIntRangeInput
   bigint: BigInt
   boolean: Boolean
+  cidr: CidrAddress
   compoundType: CompoundTypeInput
   date: Date
   daterange: DateRangeInput
@@ -7727,6 +7760,7 @@ input TypePatch {
   intervalArray: [IntervalInput]
   json: JSON
   jsonb: JSON
+  macaddr: MacAddress
   money: Float
   nestedCompoundType: NestedCompoundTypeInput
   nullableCompoundType: CompoundTypeInput
@@ -7811,6 +7845,8 @@ enum TypesOrderBy {
   BIGINT_DESC
   BOOLEAN_ASC
   BOOLEAN_DESC
+  CIDR_ASC
+  CIDR_DESC
   COMPOUND_TYPE_ASC
   COMPOUND_TYPE_DESC
   DATE_ASC
@@ -7837,6 +7873,8 @@ enum TypesOrderBy {
   JSON_DESC
   JSONB_ASC
   JSONB_DESC
+  MACADDR_ASC
+  MACADDR_DESC
   MONEY_ASC
   MONEY_DESC
   NATURAL
