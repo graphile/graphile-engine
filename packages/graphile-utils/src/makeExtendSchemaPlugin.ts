@@ -814,7 +814,6 @@ function getFields<TSource>(
           //   e.g. `@requires(columns: ["id", "name"])`
           //
           if (directives.requires && pgIntrospection.kind === "class") {
-            // eslint-disable-next-line no-shadowed-variable
             const table: PgClass = pgIntrospection;
             if (Array.isArray(directives.requires.columns)) {
               const attrs = table.attributes.filter(

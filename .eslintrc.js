@@ -87,6 +87,9 @@ module.exports = {
       rules: {
         "prefer-const": "off",
         "@typescript-eslint/no-unused-vars": "off",
+
+        // We don't normally care about race conditions in tests
+        "require-atomic-updates": "warn",
       },
     },
   ],

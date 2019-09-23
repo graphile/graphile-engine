@@ -10,7 +10,7 @@ const hasNonNullKey = row => {
     return true;
   }
   for (const k in row) {
-    if (row.hasOwnProperty(k)) {
+    if (Object.prototype.hasOwnProperty.call(row, k)) {
       if ((k[0] !== "_" || k[1] !== "_") && row[k] !== null) {
         return true;
       }

@@ -182,7 +182,6 @@ function fieldTreeFromAST<T extends SelectionNode>(
   }
   const outerDepth = depth;
   return asts.reduce((tree, selectionVal: SelectionNode, idx) => {
-    // eslint-disable-next-line no-shadowed-variable
     const depth = DEBUG_ENABLED ? `${outerDepth}  ` : null;
     if (DEBUG_ENABLED)
       debug(

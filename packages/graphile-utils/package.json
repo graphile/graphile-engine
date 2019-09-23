@@ -37,7 +37,7 @@
     "node": ">=8.6"
   },
   "devDependencies": {
-    "eslint_d": "^7.3.0",
+    "eslint_d": "^8.0.0",
     "graphile-build": "4.4.4",
     "graphile-build-pg": "4.4.4",
     "jest": "^24.8.0",

@@ -995,6 +995,8 @@ export default (async function PgIntrospectionPlugin(
       if (listener) {
         await listener.stop();
       }
+      // We're not worried about a race condition here.
+      // eslint-disable-next-line require-atomic-updates
       listener = new Listener(triggerRebuild);
     },
     async () => {

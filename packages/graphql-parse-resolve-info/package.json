@@ -35,7 +35,7 @@
     "@types/debug": "^4.1.4",
     "@types/jest": "^24.0.12",
     "@types/node": "^12.0.0",
-    "eslint_d": "^7.3.0",
+    "eslint_d": "^8.0.0",
     "jest": "^24.8.0",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.1.0",
@@ -44,7 +44,11 @@
   "dependencies": {
     "debug": "^4.1.1"
   },
-  "files": ["node8plus", "index.js", "build-turbo"],
+  "files": [
+    "node8plus",
+    "index.js",
+    "build-turbo"
+  ],
   "engines": {
     "node": ">=8.6"
   }
