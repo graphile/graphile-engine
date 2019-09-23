@@ -189,9 +189,7 @@ export default function makeExtendSchemaPlugin(
             );
           }
           throw new Error(
-            `Unexpected '${
-              definition.kind
-            }' definition; we were expecting 'GraphQLEnumType', 'ObjectTypeExtension', 'InputObjectTypeExtension', 'ObjectTypeDefinition' or 'InputObjectTypeDefinition', i.e. something like 'extend type Foo { ... }'`
+            `Unexpected '${definition.kind}' definition; we were expecting 'GraphQLEnumType', 'ObjectTypeExtension', 'InputObjectTypeExtension', 'ObjectTypeDefinition' or 'InputObjectTypeDefinition', i.e. something like 'extend type Foo { ... }'`
           );
         }
       });
@@ -488,9 +486,7 @@ function getDescription(desc: StringValueNode | void) {
     return desc.value;
   } else {
     throw new Error(
-      `AST issue, we weren't expecting a description of kind '${
-        desc.kind
-      }' - PRs welcome!`
+      `AST issue, we weren't expecting a description of kind '${desc.kind}' - PRs welcome!`
     );
   }
 }
@@ -626,9 +622,7 @@ function getArguments(
         };
       } else {
         throw new Error(
-          `Unexpected '${
-            arg.kind
-          }', we were expecting an 'InputValueDefinition'`
+          `Unexpected '${arg.kind}', we were expecting an 'InputValueDefinition'`
         );
       }
       return memo;
@@ -960,9 +954,7 @@ function getFields<TSource>(
         }
       } else {
         throw new Error(
-          `AST issue: expected 'FieldDefinition', instead received '${
-            field.kind
-          }'`
+          `AST issue: expected 'FieldDefinition', instead received '${field.kind}'`
         );
       }
     }, {});
@@ -992,9 +984,7 @@ function getInputFields<TSource>(
         };
       } else {
         throw new Error(
-          `AST issue: expected 'FieldDefinition', instead received '${
-            field.kind
-          }'`
+          `AST issue: expected 'FieldDefinition', instead received '${field.kind}'`
         );
       }
       return memo;

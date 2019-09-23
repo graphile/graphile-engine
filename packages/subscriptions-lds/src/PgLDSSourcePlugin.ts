@@ -130,9 +130,7 @@ export class LDSLiveSource {
     }
     if (!this.url.match(/^wss?:\/\//)) {
       throw new Error(
-        `Invalid URL, must be a websocket ws:// or wss:// URL, you passed '${
-          this.url
-        }'`
+        `Invalid URL, must be a websocket ws:// or wss:// URL, you passed '${this.url}'`
       );
     }
     this.ws = new WebSocket(this.url);

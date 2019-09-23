@@ -89,7 +89,8 @@ describe("Subscriptions", () => {
     init({
       ...CLI_DEFAULTS,
       simpleSubscriptions: true,
-    }));
+    })
+  );
   afterAll(teardown);
 
   it("handles the introspection query", async () => {
