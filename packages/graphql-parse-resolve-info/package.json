@@ -7,7 +7,6 @@
   "scripts": {
     "test": "jest",
     "prepack": "mkdir -p node8plus && tsc && tsc --target esnext --lib esnext --outDir build-turbo --declarationDir build-turbo",
-    "tslint": "prettier --list-different 'src/**/*' && tslint --config ../../tslint.json --project tsconfig.json",
     "watch": "mkdir -p node8plus && tsc --watch"
   },
   "repository": {
@@ -40,18 +39,12 @@
     "jest": "^24.8.0",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.1.0",
-    "tslint": "^5.16.0",
-    "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.4.5"
   },
   "dependencies": {
     "debug": "^4.1.1"
   },
-  "files": [
-    "node8plus",
-    "index.js",
-    "build-turbo"
-  ],
+  "files": ["node8plus", "index.js", "build-turbo"],
   "engines": {
     "node": ">=8.6"
   }

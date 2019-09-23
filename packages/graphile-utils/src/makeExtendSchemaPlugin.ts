@@ -34,7 +34,6 @@ import {
   ValueNode,
 } from "graphql";
 import { GraphileEmbed } from "./gql";
-// tslint:disable-next-line
 import { InputObjectTypeExtensionNode } from "graphql/language/ast";
 
 import { GraphileHelpers, makeFieldHelpers } from "./fieldHelpers";
@@ -806,7 +805,7 @@ function getFields<TSource>(
           if (!recurseDataGeneratorsWorkaroundFieldByType.get(Self)) {
             recurseDataGeneratorsWorkaroundFieldByType.set(Self, fieldName);
           }
-          // tslint:disable-next-line no-console
+          // eslint-disable-next-line no-console
           console.warn(
             "DEPRECATION: `recurseDataGenerators` is misleading, please use `pgField` instead"
           );
@@ -821,7 +820,7 @@ function getFields<TSource>(
           //   e.g. `@requires(columns: ["id", "name"])`
           //
           if (directives.requires && pgIntrospection.kind === "class") {
-            // tslint:disable-next-line no-shadowed-variable
+            // eslint-disable-next-line no-shadowed-variable
             const table: PgClass = pgIntrospection;
             if (Array.isArray(directives.requires.columns)) {
               const attrs = table.attributes.filter(

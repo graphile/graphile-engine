@@ -7,7 +7,6 @@
     "db:init": "psql -X1v ON_ERROR_STOP=1 -v VERBOSITY=verbose -f __tests__/schema.sql \"$TEST_DATABASE_URL\"",
     "test": "npm run db:init && jest -i",
     "prepack": "tsc",
-    "tslint": "prettier --list-different 'src/**/*' && tslint --config ../../tslint.json --project tsconfig.json",
     "watch": "tsc --watch"
   },
   "repository": {
@@ -52,7 +51,5 @@
     "ts-jest": "^24.0.2",
     "typescript": "^3.4.5"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }

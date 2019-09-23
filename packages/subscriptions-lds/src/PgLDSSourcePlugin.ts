@@ -1,4 +1,4 @@
-/* tslint:disable no-console */
+/* eslint-disable no-console */
 import { Plugin } from "postgraphile-core";
 import * as WebSocket from "ws";
 import subscribeToLogicalDecoding, {

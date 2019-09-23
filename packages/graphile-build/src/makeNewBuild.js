@@ -218,7 +218,7 @@ function ensureArray<T>(val: null | T | Array<T>): void | Array<T> {
 }
 
 // eslint-disable-next-line no-unused-vars
-let ensureName = fn => {};
+let ensureName = _fn => {};
 if (["development", "test"].indexOf(process.env.NODE_ENV) >= 0) {
   ensureName = fn => {
     // $FlowFixMe: displayName

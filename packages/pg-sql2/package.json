@@ -6,7 +6,6 @@
   "types": "node8plus/index.d.ts",
   "scripts": {
     "jest": "jest",
-    "tslint": "prettier --list-different 'src/**/*' && tslint --config ../../tslint.json --project tsconfig.json",
     "test": "tsc && node node8plus/index.js && jest && markdown-doctest",
     "test:u": "tsc && node node8plus/index.js && jest -u && markdown-doctest",
     "test:docs": "markdown-doctest",
@@ -42,8 +41,6 @@
     "prettier": "1.17.0",
     "ts-jest": "24.0.2",
     "ts-node": "8.1.0",
-    "tslint": "5.16.0",
-    "tslint-config-prettier": "1.18.0",
     "typescript": "3.4.5"
   },
   "jest": {
@@ -57,9 +54,7 @@
     "@types/pg": ">=6 <8",
     "debug": ">=3 <5"
   },
-  "files": [
-    "node8plus"
-  ],
+  "files": ["node8plus"],
   "engines": {
     "node": ">=8.6"
   }
