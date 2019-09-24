@@ -1,5 +1,5 @@
 -- WARNING: this database is shared with graphile-utils, don't run the tests in parallel!
-drop schema if exists a, b, c, d, inheritence, smart_comment_relations, ranges, index_expressions, simple_collections, live_test, large_bigint cascade;
+drop schema if exists a, b, c, d, inheritence, smart_comment_relations, ranges, index_expressions, simple_collections, live_test, large_bigint, network_types cascade;
 drop extension if exists tablefunc;
 drop extension if exists intarray;
 drop extension if exists hstore;
@@ -267,6 +267,7 @@ create table b.types (
   "nullable_nested_compound_type" b.nested_compound_type,
   "point" point not null,
   "nullablePoint" point,
+  "inet" inet,
   "cidr" cidr,
   "macaddr" macaddr
 );
@@ -1061,4 +1062,12 @@ create table live_test.todos_log_viewed (
 create table large_bigint.large_node_id (
   id bigint primary key,
   text text
+);
+
+create schema network_types;
+create table network_types.network (
+  id serial primary key,
+  inet inet,
+  cidr cidr,
+  macaddr macaddr
 );

@@ -78,9 +78,6 @@ strings and not numbers.
 \\"\\"\\"
 scalar BigInt
 
-\\"\\"\\"An IPv4 or IPv6 CIDR address.\\"\\"\\"
-scalar CidrAddress
-
 enum Color {
   BLUE
   GREEN
@@ -1464,9 +1461,6 @@ enum LeftArmsOrderBy {
   PRIMARY_KEY_DESC
 }
 
-\\"\\"\\"A 6-byte MAC address.\\"\\"\\"
-scalar MacAddress
-
 \\"\\"\\"
 The root mutation type which contains root level fields which mutate data.
 \\"\\"\\"
@@ -2239,7 +2233,7 @@ type Person implements Node {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int!
   lastLoginFromIp: InternetAddress
-  lastLoginFromSubnet: CidrAddress
+  lastLoginFromSubnet: String
 
   \\"\\"\\"Reads a single \`LeftArm\` that is related to this \`Person\`.\\"\\"\\"
   leftArmByPersonId: LeftArm
@@ -2336,7 +2330,7 @@ type Person implements Node {
     offset: Int
   ): TypesConnection!
   typeFunctionList: [Type]
-  userMac: MacAddress
+  userMac: String
 }
 
 \\"\\"\\"
@@ -2365,7 +2359,7 @@ input PersonCondition {
   lastLoginFromIp: InternetAddress
 
   \\"\\"\\"Checks for equality with the object’s \`lastLoginFromSubnet\` field.\\"\\"\\"
-  lastLoginFromSubnet: CidrAddress
+  lastLoginFromSubnet: String
 
   \\"\\"\\"Checks for equality with the object’s \`name\` field.\\"\\"\\"
   name: String
@@ -2374,7 +2368,7 @@ input PersonCondition {
   site: WrappedUrlInput
 
   \\"\\"\\"Checks for equality with the object’s \`userMac\` field.\\"\\"\\"
-  userMac: MacAddress
+  userMac: String
 }
 
 \\"\\"\\"An input for mutations affecting \`Person\`\\"\\"\\"
@@ -2388,12 +2382,12 @@ input PersonInput {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int
   lastLoginFromIp: InternetAddress
-  lastLoginFromSubnet: CidrAddress
+  lastLoginFromSubnet: String
 
   \\"\\"\\"The person’s name\\"\\"\\"
   name: String!
   site: WrappedUrlInput
-  userMac: MacAddress
+  userMac: String
 }
 
 \\"\\"\\"
@@ -2409,12 +2403,12 @@ input PersonPatch {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int
   lastLoginFromIp: InternetAddress
-  lastLoginFromSubnet: CidrAddress
+  lastLoginFromSubnet: String
 
   \\"\\"\\"The person’s name\\"\\"\\"
   name: String
   site: WrappedUrlInput
-  userMac: MacAddress
+  userMac: String
 }
 
 \\"\\"\\"Tracks the person's secret\\"\\"\\"
@@ -2980,7 +2974,7 @@ type Type {
   anIntRange: AnIntRange!
   bigint: BigInt!
   boolean: Boolean!
-  cidr: CidrAddress
+  cidr: String
   compoundType: CompoundType!
   date: Date!
   daterange: DateRange!
@@ -2990,11 +2984,12 @@ type Type {
   enum: Color!
   enumArray: [Color]!
   id: Int!
+  inet: InternetAddress
   interval: Interval!
   intervalArray: [Interval]!
   json: JSON!
   jsonb: JSON!
-  macaddr: MacAddress
+  macaddr: String
   money: Float!
   nestedCompoundType: NestedCompoundType!
   nullableCompoundType: CompoundType

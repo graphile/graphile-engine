@@ -128,6 +128,7 @@ insert into b.types values (
   null,
   point(1,3),
   null,
+  '192.168.0.0',
   '192.168.0.0/24',
   'feed.dead.beef'
 );
@@ -220,3 +221,13 @@ insert into smart_comment_relations.buildings (id, property_id, name, floors, is
 
 insert into large_bigint.large_node_id (id, text) values (9007199254740990, 'Should be fine');
 insert into large_bigint.large_node_id (id, text) values (2098288669218571760, 'Graphile Engine issue #491');
+
+insert into network_types.network values
+  (1, '192.168.0.0', '192.168.0.0/16', '08:00:2b:01:02:03'),
+  (2, '192.168.0.1', '192.168', '08-00-2b-01-02-03'),
+  (3, '172.16.0.0/12', '172.16.0.0/12', '08002b:010203'),
+  (4, '172.16.0.1/12', '172.16.0', '08002b-010203'),
+  (5, '2001:4f8:3:ba::', '2001:4f8:3:ba::/64', '0800.2b01.0203'),
+  (6, '2001:4f8:3:ba:2e0:81ff:fe22:d1f1', '2001:4f8:3:ba:2e0:81ff:fe22:d1f1/128', '08002b010203');
+
+alter sequence network_types.network_id_seq restart with 7;

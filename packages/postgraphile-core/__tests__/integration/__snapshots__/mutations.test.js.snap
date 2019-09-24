@@ -1161,6 +1161,22 @@ Object {
 }
 `;
 
+exports[`network_types.createNetwork.graphql 1`] = `
+Object {
+  "data": Object {
+    "createNetwork": Object {
+      "network": Object {
+        "cidr": "10.0.0.0/8",
+        "id": 7,
+        "inet": "10.0.0.0",
+        "macaddr": "00:00:00:00:00:00",
+        "nodeId": "WyJuZXR3b3JrcyIsN10=",
+      },
+    },
+  },
+}
+`;
+
 exports[`pg10.identity.graphql 1`] = `
 Object {
   "data": Object {
@@ -1180,6 +1196,23 @@ Object {
       "byDefaultAsIdentity": Object {
         "id": 100,
         "t": "test",
+      },
+    },
+  },
+}
+`;
+
+exports[`pg10.network_types.createNetwork.graphql 1`] = `
+Object {
+  "data": Object {
+    "createNetwork": Object {
+      "network": Object {
+        "cidr": "10.0.0.0/8",
+        "id": 9,
+        "inet": "10.0.0.0",
+        "macaddr": "00:00:00:00:00:00",
+        "macaddr8": "00:00:00:00:00:00:00:00",
+        "nodeId": "WyJuZXR3b3JrcyIsOV0=",
       },
     },
   },

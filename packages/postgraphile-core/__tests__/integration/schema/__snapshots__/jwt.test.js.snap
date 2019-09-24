@@ -212,9 +212,6 @@ strings and not numbers.
 \\"\\"\\"
 scalar BigInt
 
-\\"\\"\\"An IPv4 or IPv6 CIDR address.\\"\\"\\"
-scalar CidrAddress
-
 enum Color {
   BLUE
   GREEN
@@ -530,6 +527,9 @@ type GuidFnPayload {
   query: Query
 }
 
+\\"\\"\\"An IPv4 or IPv6 host address, and optionally its subnet.\\"\\"\\"
+scalar InternetAddress
+
 \\"\\"\\"
 An interval of time that has passed where the smallest distinct unit is a second.
 \\"\\"\\"
@@ -594,9 +594,6 @@ A JSON Web Token defined by [RFC 7519](https://tools.ietf.org/html/rfc7519)
 which securely represents claims between two parties.
 \\"\\"\\"
 scalar JwtToken
-
-\\"\\"\\"A 6-byte MAC address.\\"\\"\\"
-scalar MacAddress
 
 \\"\\"\\"All input for the \`mult1\` mutation.\\"\\"\\"
 input Mult1Input {
@@ -1015,7 +1012,7 @@ type Type implements Node {
   anIntRange: AnIntRange!
   bigint: BigInt!
   boolean: Boolean!
-  cidr: CidrAddress
+  cidr: String
   compoundType: CompoundType!
   date: Date!
   daterange: DateRange!
@@ -1025,11 +1022,12 @@ type Type implements Node {
   enum: Color!
   enumArray: [Color]!
   id: Int!
+  inet: InternetAddress
   interval: Interval!
   intervalArray: [Interval]!
   json: JSON!
   jsonb: JSON!
-  macaddr: MacAddress
+  macaddr: String
   money: Float!
   nestedCompoundType: NestedCompoundType!
 
@@ -1067,7 +1065,7 @@ input TypeCondition {
   boolean: Boolean
 
   \\"\\"\\"Checks for equality with the object’s \`cidr\` field.\\"\\"\\"
-  cidr: CidrAddress
+  cidr: String
 
   \\"\\"\\"Checks for equality with the object’s \`compoundType\` field.\\"\\"\\"
   compoundType: CompoundTypeInput
@@ -1096,6 +1094,9 @@ input TypeCondition {
   \\"\\"\\"Checks for equality with the object’s \`id\` field.\\"\\"\\"
   id: Int
 
+  \\"\\"\\"Checks for equality with the object’s \`inet\` field.\\"\\"\\"
+  inet: InternetAddress
+
   \\"\\"\\"Checks for equality with the object’s \`interval\` field.\\"\\"\\"
   interval: IntervalInput
 
@@ -1109,7 +1110,7 @@ input TypeCondition {
   jsonb: JSON
 
   \\"\\"\\"Checks for equality with the object’s \`macaddr\` field.\\"\\"\\"
-  macaddr: MacAddress
+  macaddr: String
 
   \\"\\"\\"Checks for equality with the object’s \`money\` field.\\"\\"\\"
   money: Float
@@ -1246,7 +1247,7 @@ input TypeInput {
   anIntRange: AnIntRangeInput!
   bigint: BigInt!
   boolean: Boolean!
-  cidr: CidrAddress
+  cidr: String
   compoundType: CompoundTypeInput!
   date: Date!
   daterange: DateRangeInput!
@@ -1256,11 +1257,12 @@ input TypeInput {
   enum: Color!
   enumArray: [Color]!
   id: Int
+  inet: InternetAddress
   interval: IntervalInput!
   intervalArray: [IntervalInput]!
   json: JSON!
   jsonb: JSON!
-  macaddr: MacAddress
+  macaddr: String
   money: Float!
   nestedCompoundType: NestedCompoundTypeInput!
   nullableCompoundType: CompoundTypeInput
@@ -1284,7 +1286,7 @@ input TypePatch {
   anIntRange: AnIntRangeInput
   bigint: BigInt
   boolean: Boolean
-  cidr: CidrAddress
+  cidr: String
   compoundType: CompoundTypeInput
   date: Date
   daterange: DateRangeInput
@@ -1294,11 +1296,12 @@ input TypePatch {
   enum: Color
   enumArray: [Color]
   id: Int
+  inet: InternetAddress
   interval: IntervalInput
   intervalArray: [IntervalInput]
   json: JSON
   jsonb: JSON
-  macaddr: MacAddress
+  macaddr: String
   money: Float
   nestedCompoundType: NestedCompoundTypeInput
   nullableCompoundType: CompoundTypeInput
@@ -1371,6 +1374,8 @@ enum TypesOrderBy {
   ENUM_DESC
   ID_ASC
   ID_DESC
+  INET_ASC
+  INET_DESC
   INTERVAL_ARRAY_ASC
   INTERVAL_ARRAY_DESC
   INTERVAL_ASC

@@ -379,9 +379,6 @@ strings and not numbers.
 \\"\\"\\"
 scalar BigInt
 
-\\"\\"\\"An IPv4 or IPv6 CIDR address.\\"\\"\\"
-scalar CidrAddress
-
 enum Color {
   BLUE
   GREEN
@@ -4633,9 +4630,6 @@ type M {
   ): UpdateViewTablePayload
 }
 
-\\"\\"\\"A 6-byte MAC address.\\"\\"\\"
-scalar MacAddress
-
 \\"\\"\\"All input for the \`mult1\` mutation.\\"\\"\\"
 input Mult1Input {
   arg0: Int
@@ -5877,7 +5871,7 @@ type Person implements N {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int!
   lastLoginFromIp: InternetAddress
-  lastLoginFromSubnet: CidrAddress
+  lastLoginFromSubnet: String
 
   \\"\\"\\"Reads a single \`LeftArm\` that is related to this \`Person\`.\\"\\"\\"
   leftArmByPersonId: LeftArm
@@ -6003,7 +5997,7 @@ type Person implements N {
     offset: Int
   ): TypesConnection!
   typeFunctionList: [Type]
-  userMac: MacAddress
+  userMac: String
 }
 
 \\"\\"\\"The return type of our \`computedComplex\` query.\\"\\"\\"
@@ -6060,7 +6054,7 @@ input PersonCondition {
   lastLoginFromIp: InternetAddress
 
   \\"\\"\\"Checks for equality with the object’s \`lastLoginFromSubnet\` field.\\"\\"\\"
-  lastLoginFromSubnet: CidrAddress
+  lastLoginFromSubnet: String
 
   \\"\\"\\"Checks for equality with the object’s \`name\` field.\\"\\"\\"
   name: String
@@ -6069,7 +6063,7 @@ input PersonCondition {
   site: WrappedUrlInput
 
   \\"\\"\\"Checks for equality with the object’s \`userMac\` field.\\"\\"\\"
-  userMac: MacAddress
+  userMac: String
 }
 
 \\"\\"\\"An input for mutations affecting \`Person\`\\"\\"\\"
@@ -6083,12 +6077,12 @@ input PersonInput {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int
   lastLoginFromIp: InternetAddress
-  lastLoginFromSubnet: CidrAddress
+  lastLoginFromSubnet: String
 
   \\"\\"\\"The person’s name\\"\\"\\"
   name: String!
   site: WrappedUrlInput
-  userMac: MacAddress
+  userMac: String
 }
 
 \\"\\"\\"
@@ -6104,12 +6098,12 @@ input PersonPatch {
   \\"\\"\\"The primary unique identifier for the person\\"\\"\\"
   id: Int
   lastLoginFromIp: InternetAddress
-  lastLoginFromSubnet: CidrAddress
+  lastLoginFromSubnet: String
 
   \\"\\"\\"The person’s name\\"\\"\\"
   name: String
   site: WrappedUrlInput
-  userMac: MacAddress
+  userMac: String
 }
 
 \\"\\"\\"Tracks the person's secret\\"\\"\\"
@@ -8254,7 +8248,7 @@ type Type implements N {
   anIntRange: AnIntRange!
   bigint: BigInt!
   boolean: Boolean!
-  cidr: CidrAddress
+  cidr: String
   compoundType: CompoundType!
   date: Date!
   daterange: DateRange!
@@ -8264,11 +8258,12 @@ type Type implements N {
   enum: Color!
   enumArray: [Color]!
   id: Int!
+  inet: InternetAddress
   interval: I!
   intervalArray: [I]!
   json: JSON!
   jsonb: JSON!
-  macaddr: MacAddress
+  macaddr: String
   money: Float!
   nestedCompoundType: NestedCompoundType!
 
@@ -8312,7 +8307,7 @@ input TypeCondition {
   boolean: Boolean
 
   \\"\\"\\"Checks for equality with the object’s \`cidr\` field.\\"\\"\\"
-  cidr: CidrAddress
+  cidr: String
 
   \\"\\"\\"Checks for equality with the object’s \`compoundType\` field.\\"\\"\\"
   compoundType: CompoundTypeInput
@@ -8341,6 +8336,9 @@ input TypeCondition {
   \\"\\"\\"Checks for equality with the object’s \`id\` field.\\"\\"\\"
   id: Int
 
+  \\"\\"\\"Checks for equality with the object’s \`inet\` field.\\"\\"\\"
+  inet: InternetAddress
+
   \\"\\"\\"Checks for equality with the object’s \`interval\` field.\\"\\"\\"
   interval: II
 
@@ -8354,7 +8352,7 @@ input TypeCondition {
   jsonb: JSON
 
   \\"\\"\\"Checks for equality with the object’s \`macaddr\` field.\\"\\"\\"
-  macaddr: MacAddress
+  macaddr: String
 
   \\"\\"\\"Checks for equality with the object’s \`money\` field.\\"\\"\\"
   money: Float
@@ -8497,7 +8495,7 @@ input TypeInput {
   anIntRange: AnIntRangeInput!
   bigint: BigInt!
   boolean: Boolean!
-  cidr: CidrAddress
+  cidr: String
   compoundType: CompoundTypeInput!
   date: Date!
   daterange: DateRangeInput!
@@ -8507,11 +8505,12 @@ input TypeInput {
   enum: Color!
   enumArray: [Color]!
   id: Int
+  inet: InternetAddress
   interval: II!
   intervalArray: [II]!
   json: JSON!
   jsonb: JSON!
-  macaddr: MacAddress
+  macaddr: String
   money: Float!
   nestedCompoundType: NestedCompoundTypeInput!
   nullableCompoundType: CompoundTypeInput
@@ -8535,7 +8534,7 @@ input TypePatch {
   anIntRange: AnIntRangeInput
   bigint: BigInt
   boolean: Boolean
-  cidr: CidrAddress
+  cidr: String
   compoundType: CompoundTypeInput
   date: Date
   daterange: DateRangeInput
@@ -8545,11 +8544,12 @@ input TypePatch {
   enum: Color
   enumArray: [Color]
   id: Int
+  inet: InternetAddress
   interval: II
   intervalArray: [II]
   json: JSON
   jsonb: JSON
-  macaddr: MacAddress
+  macaddr: String
   money: Float
   nestedCompoundType: NestedCompoundTypeInput
   nullableCompoundType: CompoundTypeInput
@@ -8654,6 +8654,8 @@ enum TypesOrderBy {
   ENUM_DESC
   ID_ASC
   ID_DESC
+  INET_ASC
+  INET_DESC
   INTERVAL_ARRAY_ASC
   INTERVAL_ARRAY_DESC
   INTERVAL_ASC
