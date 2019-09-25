@@ -10,7 +10,7 @@ const hasNonNullKey = row => {
     return true;
   }
   for (const k in row) {
-    if (row.hasOwnProperty(k)) {
+    if (Object.prototype.hasOwnProperty.call(row, k)) {
       if ((k[0] !== "_" || k[1] !== "_") && row[k] !== null) {
         return true;
       }
@@ -98,9 +98,7 @@ export default (function PgTablesPlugin(
             if (pg2GqlMapper[tablePgType.id]) {
               // Already handled
               throw new Error(
-                `Register was called but there's already a mapper in place for '${
-                  tablePgType.id
-                }'!`
+                `Register was called but there's already a mapper in place for '${tablePgType.id}'!`
               );
             }
             TableType = newWithHooks(
@@ -177,7 +175,7 @@ export default (function PgTablesPlugin(
               {
                 __origin: `Adding table type for ${describePgEntity(
                   table
-                )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+                )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                   table,
                   {
                     name: "newNameHere",
@@ -202,7 +200,7 @@ export default (function PgTablesPlugin(
               {
                 __origin: `Adding table input type for ${describePgEntity(
                   table
-                )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+                )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                   table,
                   {
                     name: "newNameHere",
@@ -239,7 +237,7 @@ export default (function PgTablesPlugin(
                 {
                   __origin: `Adding table patch type for ${describePgEntity(
                     table
-                  )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+                  )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                     table,
                     {
                       name: "newNameHere",
@@ -275,7 +273,7 @@ export default (function PgTablesPlugin(
                 {
                   __origin: `Adding table base input type for ${describePgEntity(
                     table
-                  )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+                  )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                     table,
                     {
                       name: "newNameHere",
@@ -423,7 +421,7 @@ export default (function PgTablesPlugin(
               {
                 __origin: `Adding table edge type for ${describePgEntity(
                   table
-                )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+                )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                   table,
                   {
                     name: "newNameHere",
@@ -537,7 +535,7 @@ export default (function PgTablesPlugin(
               {
                 __origin: `Adding table connection type for ${describePgEntity(
                   table
-                )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+                )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                   table,
                   {
                     name: "newNameHere",

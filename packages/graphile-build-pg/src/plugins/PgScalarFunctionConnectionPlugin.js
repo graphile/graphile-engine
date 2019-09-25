@@ -75,9 +75,7 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
                   }
                 ),
                 node: {
-                  description: `The \`${
-                    NodeType.name
-                  }\` at the end of the edge.`,
+                  description: `The \`${NodeType.name}\` at the end of the edge.`,
                   type: NodeType,
                   resolve(data) {
                     return data.value;
@@ -89,7 +87,7 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
           {
             __origin: `Adding function result edge type for ${describePgEntity(
               proc
-            )}. You can rename the function's GraphQL field (and its dependent types) via:\n\n  ${sqlCommentByAddingTags(
+            )}. You can rename the function's GraphQL field (and its dependent types) via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
               proc,
               {
                 name: "newNameHere",
@@ -106,9 +104,7 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
           GraphQLObjectType,
           {
             name: inflection.scalarFunctionConnection(proc),
-            description: `A connection to a list of \`${
-              NodeType.name
-            }\` values.`,
+            description: `A connection to a list of \`${NodeType.name}\` values.`,
             fields: ({ fieldWithHooks }) => {
               return {
                 nodes: pgField(build, fieldWithHooks, "nodes", {
@@ -123,9 +119,7 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
                   fieldWithHooks,
                   "edges",
                   {
-                    description: `A list of edges which contains the \`${
-                      NodeType.name
-                    }\` and cursor to aid in pagination.`,
+                    description: `A list of edges which contains the \`${NodeType.name}\` and cursor to aid in pagination.`,
                     type: new GraphQLNonNull(
                       new GraphQLList(new GraphQLNonNull(EdgeType))
                     ),
@@ -145,7 +139,7 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
           {
             __origin: `Adding function connection type for ${describePgEntity(
               proc
-            )}. You can rename the function's GraphQL field (and its dependent types) via:\n\n  ${sqlCommentByAddingTags(
+            )}. You can rename the function's GraphQL field (and its dependent types) via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
               proc,
               {
                 name: "newNameHere",

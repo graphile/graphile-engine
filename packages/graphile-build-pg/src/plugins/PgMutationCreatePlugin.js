@@ -59,9 +59,7 @@ export default (function PgMutationCreatePlugin(
           const Table = pgGetGqlTypeByTypeIdAndModifier(table.type.id, null);
           if (!Table) {
             debug(
-              `There was no table type for table '${table.namespace.name}.${
-                table.name
-              }', so we're not generating a create mutation for it.`
+              `There was no table type for table '${table.namespace.name}.${table.name}', so we're not generating a create mutation for it.`
             );
             return memo;
           }
@@ -71,9 +69,7 @@ export default (function PgMutationCreatePlugin(
           );
           if (!TableInput) {
             debug(
-              `There was no input type for table '${table.namespace.name}.${
-                table.name
-              }', so we're going to omit it from the create mutation.`
+              `There was no input type for table '${table.namespace.name}.${table.name}', so we're going to omit it from the create mutation.`
             );
           }
           const tableTypeName = inflection.tableType(table);
@@ -101,7 +97,7 @@ export default (function PgMutationCreatePlugin(
             {
               __origin: `Adding table create input type for ${describePgEntity(
                 table
-              )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+              )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                 table,
                 {
                   name: "newNameHere",
@@ -144,7 +140,7 @@ export default (function PgMutationCreatePlugin(
             {
               __origin: `Adding table create payload type for ${describePgEntity(
                 table
-              )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+              )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                 table,
                 {
                   name: "newNameHere",
@@ -264,7 +260,7 @@ insert into ${sql.identifier(table.namespace.name, table.name)} ${
             },
             `Adding create mutation for ${describePgEntity(
               table
-            )}. You can omit this default mutation with:\n\n  ${sqlCommentByAddingTags(
+            )}. You can omit this default mutation with a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
               table,
               {
                 omit: "create",

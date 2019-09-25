@@ -56,9 +56,7 @@ export default (function PgBackwardRelationPlugin(
       );
       if (!gqlForeignTableType) {
         debug(
-          `Could not determine type for foreign table with id ${
-            foreignTable.type.id
-          }`
+          `Could not determine type for foreign table with id ${foreignTable.type.id}`
         );
         return fields;
       }
@@ -88,9 +86,7 @@ export default (function PgBackwardRelationPlugin(
           }
           if (!table) {
             throw new Error(
-              `Could not find the table that referenced us (constraint: ${
-                constraint.name
-              })`
+              `Could not find the table that referenced us (constraint: ${constraint.name})`
             );
           }
           const schema = table.namespace;
@@ -226,7 +222,7 @@ export default (function PgBackwardRelationPlugin(
               },
               `Backward relation (single) for ${describePgEntity(
                 constraint
-              )}. To rename this relation with smart comments:\n\n  ${sqlCommentByAddingTags(
+              )}. To rename this relation with a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                 constraint,
                 {
                   foreignSingleFieldName: "newNameHere",
@@ -439,7 +435,7 @@ export default (function PgBackwardRelationPlugin(
                   isConnection ? "connection" : "simple collection"
                 }) for ${describePgEntity(
                   constraint
-                )}. To rename this relation with smart comments:\n\n  ${sqlCommentByAddingTags(
+                )}. To rename this relation with a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                   constraint,
                   {
                     [isConnection

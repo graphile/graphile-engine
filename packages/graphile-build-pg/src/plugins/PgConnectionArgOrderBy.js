@@ -39,7 +39,7 @@ export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
           {
             __origin: `Adding connection "orderBy" argument for ${describePgEntity(
               table
-            )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+            )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
               table,
               {
                 name: "newNameHere",
@@ -111,7 +111,7 @@ export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
       );
       const cursorPrefixFromOrderBy = orderBy => {
         if (orderBy) {
-          let cursorPrefixes = [];
+          const cursorPrefixes = [];
           for (
             let itemIndex = 0, itemCount = orderBy.length;
             itemIndex < itemCount;

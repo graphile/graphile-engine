@@ -117,9 +117,7 @@ end
           const fieldName = inflection.column(attr);
           if (memo[fieldName]) {
             throw new Error(
-              `Two columns produce the same GraphQL field name '${fieldName}' on class '${
-                table.namespaceName
-              }.${table.name}'; one of them is '${attr.name}'`
+              `Two columns produce the same GraphQL field name '${fieldName}' on class '${table.namespaceName}.${table.name}'; one of them is '${attr.name}'`
             );
           }
           memo = extend(
@@ -173,7 +171,7 @@ end
             },
             `Adding field for ${describePgEntity(
               attr
-            )}. You can rename this field with:\n\n  ${sqlCommentByAddingTags(
+            )}. You can rename this field with a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
               attr,
               {
                 name: "newNameHere",
@@ -234,9 +232,7 @@ end
           const fieldName = inflection.column(attr);
           if (memo[fieldName]) {
             throw new Error(
-              `Two columns produce the same GraphQL field name '${fieldName}' on input class '${
-                table.namespaceName
-              }.${table.name}'; one of them is '${attr.name}'`
+              `Two columns produce the same GraphQL field name '${fieldName}' on input class '${table.namespaceName}.${table.name}'; one of them is '${attr.name}'`
             );
           }
           memo = extend(
@@ -273,7 +269,7 @@ end
             },
             `Adding input object field for ${describePgEntity(
               attr
-            )}. You can rename this field with:\n\n  ${sqlCommentByAddingTags(
+            )}. You can rename this field with a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
               attr,
               {
                 name: "newNameHere",

@@ -1,12 +1,11 @@
 {
   "name": "postgraphile-core",
-  "version": "4.4.4",
+  "version": "4.4.5",
   "description": "",
   "main": "node8plus/index.js",
   "scripts": {
     "test": "scripts/test",
     "prepack": "mkdir -p node8plus && tsc",
-    "tslint": "prettier --list-different 'src/**/*' && tslint --config ../../tslint.json --project tsconfig.json",
     "watch": "mkdir -p node8plus && tsc --watch"
   },
   "repository": {
@@ -20,22 +19,18 @@
     "url": "https://github.com/graphile/graphile-build/issues"
   },
   "dependencies": {
-    "graphile-build": "4.4.4",
-    "graphile-build-pg": "4.4.4"
+    "graphile-build": "4.4.5",
+    "graphile-build-pg": "4.4.5"
   },
   "devDependencies": {
     "@types/node": "^12.0.0",
     "@types/pg": "^7.4.14",
     "debug": "^4.1.1",
-    "eslint_d": "^7.3.0",
     "jest": "^24.8.0",
     "jest-silent-reporter": "^0.1.2",
     "jsonwebtoken": "^8.5.1",
-    "pg-connection-string": "^0.1.3",
-    "prettier": "^1.17.0",
+    "pg-connection-string": "^2.1.0",
     "ts-node": "^8.1.0",
-    "tslint": "^5.16.0",
-    "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.4.5"
   },
   "peerDependencies": {

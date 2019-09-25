@@ -1,12 +1,11 @@
 {
   "name": "pg-sql2",
-  "version": "4.4.3",
+  "version": "4.4.5",
   "description": "Generate safe Postgres-compliant SQL with tagged template literals",
   "main": "node8plus/index.js",
   "types": "node8plus/index.d.ts",
   "scripts": {
     "jest": "jest",
-    "tslint": "prettier --list-different 'src/**/*' && tslint --config ../../tslint.json --project tsconfig.json",
     "test": "tsc && node node8plus/index.js && jest && markdown-doctest",
     "test:u": "tsc && node node8plus/index.js && jest -u && markdown-doctest",
     "test:docs": "markdown-doctest",
@@ -35,16 +34,13 @@
   },
   "homepage": "https://github.com/graphile/graphile-build/tree/master/packages/pg-sql2",
   "devDependencies": {
-    "@types/debug": "4.1.4",
-    "@types/node": "12.0.0",
-    "jest": "24.8.0",
+    "@types/debug": "4.1.5",
+    "@types/node": "12.7.5",
+    "jest": "24.9.0",
     "markdown-doctest": "^0.9.1",
-    "prettier": "1.17.0",
-    "ts-jest": "24.0.2",
-    "ts-node": "8.1.0",
-    "tslint": "5.16.0",
-    "tslint-config-prettier": "1.18.0",
-    "typescript": "3.4.5"
+    "ts-jest": "24.1.0",
+    "ts-node": "8.4.1",
+    "typescript": "3.6.3"
   },
   "jest": {
     "testRegex": "__tests__/.*\\.test\\.js$"
@@ -53,7 +49,7 @@
     "pg": ">=6.1.0 <8"
   },
   "dependencies": {
-    "@graphile/lru": "4.4.1-alpha.2",
+    "@graphile/lru": "4.4.5",
     "@types/pg": ">=6 <8",
     "debug": ">=3 <5"
   },

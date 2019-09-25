@@ -23,7 +23,7 @@ const init = async (options: PostGraphileOptions = {}) => {
     throw new Error("CTX wasn't torn down");
   }
   const pgPool = new Pool({
-    connectionString: process.env.TEST_DATABASE_URL || "pggql_test",
+    connectionString: process.env.TEST_DATABASE_URL,
   });
 
   // Keep track of the clients, one of them is our subscriptions client which we
@@ -59,7 +59,7 @@ const teardown = async () => {
     try {
       await ctx.release();
     } catch (e) {
-      // tslint:disable-next-line no-console
+      // eslint-disable-next-line no-console
       console.error(e);
     }
   }
@@ -89,7 +89,8 @@ describe("Subscriptions", () => {
     init({
       ...CLI_DEFAULTS,
       simpleSubscriptions: true,
-    }));
+    })
+  );
   afterAll(teardown);
 
   it("handles the introspection query", async () => {
