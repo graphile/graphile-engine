@@ -7,6 +7,7 @@ import {
   PgAttribute,
   PgConstraint,
   PgExtension,
+  PgIndex,
 } from "./plugins/PgIntrospectionPlugin";
 
 export {
