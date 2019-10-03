@@ -18,6 +18,7 @@ export {
   PgAttribute,
   PgConstraint,
   PgExtension,
+  PgIndex,
 };
 
 export function formatSQLForDebugging(sql: string): string;

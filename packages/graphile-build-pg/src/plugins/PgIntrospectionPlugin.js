@@ -200,20 +200,20 @@ export type PgEntity =
   | PgIndex;
 
 export type PgIntrospectionResultsByKind = {
-  __pgVersion: number;
-  attribute: PgAttribute[];
-  attributeByClassIdAndNum: { [string]: { [string]: PgAttribute } };
-  class: PgClass[];
-  classById: { [string]: PgClass };
-  constraint: PgConstraint[];
-  extension: PgExtension[];
-  extensionById: { [string]: PgExtension };
-  index: PgIndex[];
-  namespace: PgNamespace[];
-  namespaceById: { [string]: PgNamespace };
-  procedure: PgProc[];
-  type: PgType[];
-  typeById: { [string]: PgType };
+  __pgVersion: number,
+  attribute: PgAttribute[],
+  attributeByClassIdAndNum: { [string]: { [string]: PgAttribute } },
+  class: PgClass[],
+  classById: { [string]: PgClass },
+  constraint: PgConstraint[],
+  extension: PgExtension[],
+  extensionById: { [string]: PgExtension },
+  index: PgIndex[],
+  namespace: PgNamespace[],
+  namespaceById: { [string]: PgNamespace },
+  procedure: PgProc[],
+  type: PgType[],
+  typeById: { [string]: PgType },
 };
 
 function readFile(filename, encoding) {
