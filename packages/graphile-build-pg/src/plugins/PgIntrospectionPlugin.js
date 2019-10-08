@@ -202,7 +202,7 @@ export type PgEntity =
 export type PgIntrospectionResultsByKind = {
   __pgVersion: number,
   attribute: PgAttribute[],
-  attributeByClassIdAndNum: { [string]: { [string]: PgAttribute } },
+  attributeByClassIdAndNum: { [classId: string]: { [num: string]: PgAttribute } },
   class: PgClass[],
   classById: { [string]: PgClass },
   constraint: PgConstraint[],
