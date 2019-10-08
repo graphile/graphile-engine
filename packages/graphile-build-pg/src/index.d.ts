@@ -8,6 +8,7 @@ import {
   PgConstraint,
   PgExtension,
   PgIndex,
+  PgIntrospectionResultsByKind,
 } from "./plugins/PgIntrospectionPlugin";
 
 export {
@@ -19,6 +20,7 @@ export {
   PgConstraint,
   PgExtension,
   PgIndex,
+  PgIntrospectionResultsByKind,
 };
 
 export function formatSQLForDebugging(sql: string): string;

@@ -202,18 +202,18 @@ export type PgEntity =
 export type PgIntrospectionResultsByKind = {
   __pgVersion: number,
   attribute: PgAttribute[],
-  attributeByClassIdAndNum: { [string]: { [string]: PgAttribute } },
+  attributeByClassIdAndNum: { [classId: string]: { [num: string]: PgAttribute } },
   class: PgClass[],
-  classById: { [string]: PgClass },
+  classById: { [classId: string]: PgClass },
   constraint: PgConstraint[],
   extension: PgExtension[],
-  extensionById: { [string]: PgExtension },
+  extensionById: { [extId: string]: PgExtension },
   index: PgIndex[],
   namespace: PgNamespace[],
-  namespaceById: { [string]: PgNamespace },
+  namespaceById: { [namespaceId: string]: PgNamespace },
   procedure: PgProc[],
   type: PgType[],
-  typeById: { [string]: PgType },
+  typeById: { [typeId: string]: PgType },
 };
 
 function readFile(filename, encoding) {
