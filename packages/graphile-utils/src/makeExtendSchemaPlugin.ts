@@ -923,7 +923,10 @@ function getFields<TSource>(
                     pgQuery: (queryBuilder: QueryBuilder) => {
                       queryBuilder.select(
                         typeof directives.pgQuery.fragment === "function"
-                          ? directives.pgQuery.fragment(queryBuilder)
+                          ? directives.pgQuery.fragment(
+                              queryBuilder,
+                              parsedResolveInfoFragment.args
+                            )
                           : directives.pgQuery.fragment,
                         build.getSafeAliasFromAlias(
                           parsedResolveInfoFragment.alias
