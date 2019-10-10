@@ -467,7 +467,7 @@ export default (async function PgIntrospectionPlugin(
    * @summary introspect database and get the table/view/constraints.
    * @returns {Promise<PgIntrospectionResultsByKind>}
    */
-  async function introspect():Promise<PgIntrospectionResultsByKind> {
+  async function introspect(): Promise<PgIntrospectionResultsByKind> {
     // Perform introspection
     if (!Array.isArray(schemas)) {
       throw new Error("Argument 'schemas' (array) is required");
