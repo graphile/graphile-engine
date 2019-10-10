@@ -1,3 +1,5 @@
+import { Plugin } from "../../../graphile-build/src";
+
 export interface PgNamespace {
   kind: "namespace";
   id: string;
@@ -177,6 +179,7 @@ export type PgIntrospectionResultsByKind = {
   type: PgType[];
   typeById: { [typeId: string]: PgType };
 };
+export function introspect():Promise<PgIntrospectionResultsByKind>;
 
 export type PgEntity =
   | PgNamespace
@@ -187,3 +190,5 @@ export type PgEntity =
   | PgConstraint
   | PgExtension
   | PgIndex;
+
+  export default function PgIntrospectionPlugin():Plugin;
