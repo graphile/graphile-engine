@@ -1,4 +1,4 @@
-import { Plugin } from "../../../graphile-build/src";
+import { Plugin, SchemaBuilder, Options } from "../../../graphile-build/src";
 
 export interface PgNamespace {
   kind: "namespace";
@@ -191,4 +191,7 @@ export type PgEntity =
   | PgExtension
   | PgIndex;
 
-  export default function PgIntrospectionPlugin():Plugin;
+  export default function PgIntrospectionPlugin(
+    builder: SchemaBuilder,
+    options: Options
+  ): Promise<void> | void;
