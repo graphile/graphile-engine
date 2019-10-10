@@ -463,7 +463,7 @@ export default (async function PgIntrospectionPlugin(
       fn ? fn(introspectionResults) : null
     );
   };
-  /** 
+  /**
    * @summary introspect database and get the table/view/constraints.
    * @returns {Promise<PgIntrospectionResultsByKind>}
    */
