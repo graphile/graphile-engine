@@ -179,7 +179,6 @@ export type PgIntrospectionResultsByKind = {
   type: PgType[];
   typeById: { [typeId: string]: PgType };
 };
-export function introspect(): Promise<PgIntrospectionResultsByKind>;
 
 export type PgEntity =
   | PgNamespace
