@@ -31,6 +31,9 @@ interface Node {
 
 """Information about pagination in a connection."""
 type PageInfo {
+  """When paginating forwards, the cursor to continue."""
+  endCursor: Cursor
+
   """When paginating forwards, are there more items?"""
   hasNextPage: Boolean!
 
@@ -39,20 +42,18 @@ type PageInfo {
 
   """When paginating backwards, the cursor to continue."""
   startCursor: Cursor
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: Cursor
 }
 
 type Pet implements Node {
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  userId: Int!
-  name: String!
   type: String!
+  userId: Int!
 }
 
 """
@@ -62,25 +63,25 @@ input PetCondition {
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
-  """Checks for equality with the object’s \`userId\` field."""
-  userId: Int
-
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
   """Checks for equality with the object’s \`type\` field."""
   type: String
+
+  """Checks for equality with the object’s \`userId\` field."""
+  userId: Int
 }
 
 """A connection to a list of \`Pet\` values."""
 type PetsConnection {
-  """A list of \`Pet\` objects."""
-  nodes: [Pet]!
-
   """
   A list of edges which contains the \`Pet\` and cursor to aid in pagination.
   """
   edges: [PetsEdge!]!
+
+  """A list of \`Pet\` objects."""
+  nodes: [Pet]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -100,31 +101,105 @@ type PetsEdge {
 
 """Methods to use when ordering \`Pet\`."""
 enum PetsOrderBy {
-  NATURAL
   ID_ASC
   ID_DESC
-  USER_ID_ASC
-  USER_ID_DESC
   NAME_ASC
   NAME_DESC
-  TYPE_ASC
-  TYPE_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  TYPE_ASC
+  TYPE_DESC
+  USER_ID_ASC
+  USER_ID_DESC
 }
 
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
+  """Reads and enables pagination through a set of \`Pet\`."""
+  allPets(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
 
-  """
-  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
-  """
-  nodeId: ID!
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PetCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`Pet\`."""
+    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PetsConnection
+
+  """Reads and enables pagination through a set of \`User\`."""
+  allUsers(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: UserCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`User\`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersConnection
+  myCustomConnection(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: UserCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`User\`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersConnection
 
   """Fetches an object given its globally unique \`ID\`."""
   node(
@@ -132,151 +207,78 @@ type Query implements Node {
     nodeId: ID!
   ): Node
 
-  """Reads and enables pagination through a set of \`Pet\`."""
-  allPets(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`Pet\`."""
-    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PetCondition
-  ): PetsConnection
-
-  """Reads and enables pagination through a set of \`User\`."""
-  allUsers(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`User\`."""
-    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: UserCondition
-  ): UsersConnection
-  petById(id: Int!): Pet
-  userById(id: Int!): User
+  """
+  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
+  """
+  nodeId: ID!
 
   """Reads a single \`Pet\` using its globally unique \`ID\`."""
   pet(
     """The globally unique \`ID\` to be used in selecting a single \`Pet\`."""
     nodeId: ID!
   ): Pet
+  petById(id: Int!): Pet
+
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
 
   """Reads a single \`User\` using its globally unique \`ID\`."""
   user(
     """The globally unique \`ID\` to be used in selecting a single \`User\`."""
     nodeId: ID!
   ): User
-  myCustomConnection(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`User\`."""
-    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: UserCondition
-  ): UsersConnection
+  userById(id: Int!): User
 }
 
 type User implements Node {
+  bio: String
+  createdAt: Datetime!
+  email: String!
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  name: String!
-  email: String!
-  bio: String
   renamedComplexColumn: [Complex]
-  createdAt: Datetime!
 }
 
 """
 A condition to be used against \`User\` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input UserCondition {
+  """Checks for equality with the object’s \`bio\` field."""
+  bio: String
+
+  """Checks for equality with the object’s \`createdAt\` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s \`email\` field."""
+  email: String
+
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
-  """Checks for equality with the object’s \`email\` field."""
-  email: String
-
-  """Checks for equality with the object’s \`bio\` field."""
-  bio: String
-
   """Checks for equality with the object’s \`renamedComplexColumn\` field."""
   renamedComplexColumn: [ComplexInput]
-
-  """Checks for equality with the object’s \`createdAt\` field."""
-  createdAt: Datetime
 }
 
 """A connection to a list of \`User\` values."""
 type UsersConnection {
-  """A list of \`User\` objects."""
-  nodes: [User]!
-
   """
   A list of edges which contains the \`User\` and cursor to aid in pagination.
   """
   edges: [UsersEdge!]!
+
+  """A list of \`User\` objects."""
+  nodes: [User]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -296,21 +298,21 @@ type UsersEdge {
 
 """Methods to use when ordering \`User\`."""
 enum UsersOrderBy {
-  NATURAL
+  BIO_ASC
+  BIO_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  EMAIL_ASC
+  EMAIL_DESC
   ID_ASC
   ID_DESC
   NAME_ASC
   NAME_DESC
-  EMAIL_ASC
-  EMAIL_DESC
-  BIO_ASC
-  BIO_DESC
-  RENAMED_COMPLEX_COLUMN_ASC
-  RENAMED_COMPLEX_COLUMN_DESC
-  CREATED_AT_ASC
-  CREATED_AT_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  RENAMED_COMPLEX_COLUMN_ASC
+  RENAMED_COMPLEX_COLUMN_DESC
 }
 
 `;
@@ -346,6 +348,9 @@ interface Node {
 
 """Information about pagination in a connection."""
 type PageInfo {
+  """When paginating forwards, the cursor to continue."""
+  endCursor: Cursor
+
   """When paginating forwards, are there more items?"""
   hasNextPage: Boolean!
 
@@ -354,20 +359,18 @@ type PageInfo {
 
   """When paginating backwards, the cursor to continue."""
   startCursor: Cursor
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: Cursor
 }
 
 type Pet implements Node {
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  userId: Int!
-  name: String!
   type: String!
+  userId: Int!
 }
 
 """
@@ -377,25 +380,25 @@ input PetCondition {
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
-  """Checks for equality with the object’s \`userId\` field."""
-  userId: Int
-
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
   """Checks for equality with the object’s \`type\` field."""
   type: String
+
+  """Checks for equality with the object’s \`userId\` field."""
+  userId: Int
 }
 
 """A connection to a list of \`Pet\` values."""
 type PetsConnection {
-  """A list of \`Pet\` objects."""
-  nodes: [Pet]!
-
   """
   A list of edges which contains the \`Pet\` and cursor to aid in pagination.
   """
   edges: [PetsEdge!]!
+
+  """A list of \`Pet\` objects."""
+  nodes: [Pet]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -415,31 +418,78 @@ type PetsEdge {
 
 """Methods to use when ordering \`Pet\`."""
 enum PetsOrderBy {
-  NATURAL
   ID_ASC
   ID_DESC
-  USER_ID_ASC
-  USER_ID_DESC
   NAME_ASC
   NAME_DESC
-  TYPE_ASC
-  TYPE_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  TYPE_ASC
+  TYPE_DESC
+  USER_ID_ASC
+  USER_ID_DESC
 }
 
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
+  """Reads and enables pagination through a set of \`Pet\`."""
+  allPets(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
 
-  """
-  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
-  """
-  nodeId: ID!
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PetCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`Pet\`."""
+    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PetsConnection
+
+  """Reads and enables pagination through a set of \`User\`."""
+  allUsers(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: UserCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`User\`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersConnection
 
   """Fetches an object given its globally unique \`ID\`."""
   node(
@@ -447,91 +497,55 @@ type Query implements Node {
     nodeId: ID!
   ): Node
 
-  """Reads and enables pagination through a set of \`Pet\`."""
-  allPets(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`Pet\`."""
-    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PetCondition
-  ): PetsConnection
-
-  """Reads and enables pagination through a set of \`User\`."""
-  allUsers(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`User\`."""
-    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: UserCondition
-  ): UsersConnection
-  petById(id: Int!): Pet
-  userById(id: Int!): User
+  """
+  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
+  """
+  nodeId: ID!
 
   """Reads a single \`Pet\` using its globally unique \`ID\`."""
   pet(
     """The globally unique \`ID\` to be used in selecting a single \`Pet\`."""
     nodeId: ID!
   ): Pet
+  petById(id: Int!): Pet
+
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
 
   """Reads a single \`User\` using its globally unique \`ID\`."""
   user(
     """The globally unique \`ID\` to be used in selecting a single \`User\`."""
     nodeId: ID!
   ): User
+  userById(id: Int!): User
 }
 
 type User implements Node {
+  bio: String
+  createdAt: Datetime!
+  email: String!
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  name: String!
-  email: String!
-  bio: String
-  renamedComplexColumn: [Complex]
-  createdAt: Datetime!
   pets(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PetCondition
+
     """Only read the first \`n\` values of the set."""
     first: Int
 
@@ -544,54 +558,44 @@ type User implements Node {
     """
     offset: Int
 
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
     """The method to use when ordering \`Pet\`."""
     orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PetCondition
   ): PetsConnection
+  renamedComplexColumn: [Complex]
 }
 
 """
 A condition to be used against \`User\` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input UserCondition {
+  """Checks for equality with the object’s \`bio\` field."""
+  bio: String
+
+  """Checks for equality with the object’s \`createdAt\` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s \`email\` field."""
+  email: String
+
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
-  """Checks for equality with the object’s \`email\` field."""
-  email: String
-
-  """Checks for equality with the object’s \`bio\` field."""
-  bio: String
-
   """Checks for equality with the object’s \`renamedComplexColumn\` field."""
   renamedComplexColumn: [ComplexInput]
-
-  """Checks for equality with the object’s \`createdAt\` field."""
-  createdAt: Datetime
 }
 
 """A connection to a list of \`User\` values."""
 type UsersConnection {
-  """A list of \`User\` objects."""
-  nodes: [User]!
-
   """
   A list of edges which contains the \`User\` and cursor to aid in pagination.
   """
   edges: [UsersEdge!]!
+
+  """A list of \`User\` objects."""
+  nodes: [User]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -611,21 +615,21 @@ type UsersEdge {
 
 """Methods to use when ordering \`User\`."""
 enum UsersOrderBy {
-  NATURAL
+  BIO_ASC
+  BIO_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  EMAIL_ASC
+  EMAIL_DESC
   ID_ASC
   ID_DESC
   NAME_ASC
   NAME_DESC
-  EMAIL_ASC
-  EMAIL_DESC
-  BIO_ASC
-  BIO_DESC
-  RENAMED_COMPLEX_COLUMN_ASC
-  RENAMED_COMPLEX_COLUMN_DESC
-  CREATED_AT_ASC
-  CREATED_AT_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  RENAMED_COMPLEX_COLUMN_ASC
+  RENAMED_COMPLEX_COLUMN_DESC
 }
 
 `;
@@ -793,6 +797,9 @@ interface Node {
 
 """Information about pagination in a connection."""
 type PageInfo {
+  """When paginating forwards, the cursor to continue."""
+  endCursor: Cursor
+
   """When paginating forwards, are there more items?"""
   hasNextPage: Boolean!
 
@@ -801,20 +808,18 @@ type PageInfo {
 
   """When paginating backwards, the cursor to continue."""
   startCursor: Cursor
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: Cursor
 }
 
 type Pet implements Node {
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  userId: Int!
-  name: String!
   type: String!
+  userId: Int!
 }
 
 """
@@ -824,25 +829,25 @@ input PetCondition {
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
-  """Checks for equality with the object’s \`userId\` field."""
-  userId: Int
-
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
   """Checks for equality with the object’s \`type\` field."""
   type: String
+
+  """Checks for equality with the object’s \`userId\` field."""
+  userId: Int
 }
 
 """A connection to a list of \`Pet\` values."""
 type PetsConnection {
-  """A list of \`Pet\` objects."""
-  nodes: [Pet]!
-
   """
   A list of edges which contains the \`Pet\` and cursor to aid in pagination.
   """
   edges: [PetsEdge!]!
+
+  """A list of \`Pet\` objects."""
+  nodes: [Pet]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -862,31 +867,105 @@ type PetsEdge {
 
 """Methods to use when ordering \`Pet\`."""
 enum PetsOrderBy {
-  NATURAL
   ID_ASC
   ID_DESC
-  USER_ID_ASC
-  USER_ID_DESC
   NAME_ASC
   NAME_DESC
-  TYPE_ASC
-  TYPE_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  TYPE_ASC
+  TYPE_DESC
+  USER_ID_ASC
+  USER_ID_DESC
 }
 
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
+  """Reads and enables pagination through a set of \`Pet\`."""
+  allPets(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
 
-  """
-  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
-  """
-  nodeId: ID!
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PetCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`Pet\`."""
+    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PetsConnection
+
+  """Reads and enables pagination through a set of \`User\`."""
+  allUsers(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: UserCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`User\`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersConnection
+  myCustomConnection(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: UserCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`User\`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersConnection
 
   """Fetches an object given its globally unique \`ID\`."""
   node(
@@ -894,151 +973,78 @@ type Query implements Node {
     nodeId: ID!
   ): Node
 
-  """Reads and enables pagination through a set of \`Pet\`."""
-  allPets(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`Pet\`."""
-    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PetCondition
-  ): PetsConnection
-
-  """Reads and enables pagination through a set of \`User\`."""
-  allUsers(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`User\`."""
-    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: UserCondition
-  ): UsersConnection
-  petById(id: Int!): Pet
-  userById(id: Int!): User
+  """
+  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
+  """
+  nodeId: ID!
 
   """Reads a single \`Pet\` using its globally unique \`ID\`."""
   pet(
     """The globally unique \`ID\` to be used in selecting a single \`Pet\`."""
     nodeId: ID!
   ): Pet
+  petById(id: Int!): Pet
+
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
 
   """Reads a single \`User\` using its globally unique \`ID\`."""
   user(
     """The globally unique \`ID\` to be used in selecting a single \`User\`."""
     nodeId: ID!
   ): User
-  myCustomConnection(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`User\`."""
-    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: UserCondition
-  ): UsersConnection
+  userById(id: Int!): User
 }
 
 type User implements Node {
+  bio: String
+  createdAt: Datetime!
+  email: String!
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  name: String!
-  email: String!
-  bio: String
   renamedComplexColumn: [Complex]
-  createdAt: Datetime!
 }
 
 """
 A condition to be used against \`User\` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input UserCondition {
+  """Checks for equality with the object’s \`bio\` field."""
+  bio: String
+
+  """Checks for equality with the object’s \`createdAt\` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s \`email\` field."""
+  email: String
+
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
-  """Checks for equality with the object’s \`email\` field."""
-  email: String
-
-  """Checks for equality with the object’s \`bio\` field."""
-  bio: String
-
   """Checks for equality with the object’s \`renamedComplexColumn\` field."""
   renamedComplexColumn: [ComplexInput]
-
-  """Checks for equality with the object’s \`createdAt\` field."""
-  createdAt: Datetime
 }
 
 """A connection to a list of \`User\` values."""
 type UsersConnection {
-  """A list of \`User\` objects."""
-  nodes: [User]!
-
   """
   A list of edges which contains the \`User\` and cursor to aid in pagination.
   """
   edges: [UsersEdge!]!
+
+  """A list of \`User\` objects."""
+  nodes: [User]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -1058,21 +1064,21 @@ type UsersEdge {
 
 """Methods to use when ordering \`User\`."""
 enum UsersOrderBy {
-  NATURAL
+  BIO_ASC
+  BIO_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  EMAIL_ASC
+  EMAIL_DESC
   ID_ASC
   ID_DESC
   NAME_ASC
   NAME_DESC
-  EMAIL_ASC
-  EMAIL_DESC
-  BIO_ASC
-  BIO_DESC
-  RENAMED_COMPLEX_COLUMN_ASC
-  RENAMED_COMPLEX_COLUMN_DESC
-  CREATED_AT_ASC
-  CREATED_AT_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  RENAMED_COMPLEX_COLUMN_ASC
+  RENAMED_COMPLEX_COLUMN_DESC
 }
 
 `;
@@ -1108,6 +1114,9 @@ interface Node {
 
 """Information about pagination in a connection."""
 type PageInfo {
+  """When paginating forwards, the cursor to continue."""
+  endCursor: Cursor
+
   """When paginating forwards, are there more items?"""
   hasNextPage: Boolean!
 
@@ -1116,20 +1125,18 @@ type PageInfo {
 
   """When paginating backwards, the cursor to continue."""
   startCursor: Cursor
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: Cursor
 }
 
 type Pet implements Node {
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  userId: Int!
-  name: String!
   type: String!
+  userId: Int!
 }
 
 """
@@ -1139,25 +1146,25 @@ input PetCondition {
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
-  """Checks for equality with the object’s \`userId\` field."""
-  userId: Int
-
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
   """Checks for equality with the object’s \`type\` field."""
   type: String
+
+  """Checks for equality with the object’s \`userId\` field."""
+  userId: Int
 }
 
 """A connection to a list of \`Pet\` values."""
 type PetsConnection {
-  """A list of \`Pet\` objects."""
-  nodes: [Pet]!
-
   """
   A list of edges which contains the \`Pet\` and cursor to aid in pagination.
   """
   edges: [PetsEdge!]!
+
+  """A list of \`Pet\` objects."""
+  nodes: [Pet]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -1177,31 +1184,78 @@ type PetsEdge {
 
 """Methods to use when ordering \`Pet\`."""
 enum PetsOrderBy {
-  NATURAL
   ID_ASC
   ID_DESC
-  USER_ID_ASC
-  USER_ID_DESC
   NAME_ASC
   NAME_DESC
-  TYPE_ASC
-  TYPE_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  TYPE_ASC
+  TYPE_DESC
+  USER_ID_ASC
+  USER_ID_DESC
 }
 
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
+  """Reads and enables pagination through a set of \`Pet\`."""
+  allPets(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
 
-  """
-  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
-  """
-  nodeId: ID!
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PetCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`Pet\`."""
+    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PetsConnection
+
+  """Reads and enables pagination through a set of \`User\`."""
+  allUsers(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: UserCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`User\`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersConnection
 
   """Fetches an object given its globally unique \`ID\`."""
   node(
@@ -1209,125 +1263,79 @@ type Query implements Node {
     nodeId: ID!
   ): Node
 
-  """Reads and enables pagination through a set of \`Pet\`."""
-  allPets(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`Pet\`."""
-    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PetCondition
-  ): PetsConnection
-
-  """Reads and enables pagination through a set of \`User\`."""
-  allUsers(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`User\`."""
-    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: UserCondition
-  ): UsersConnection
-  petById(id: Int!): Pet
-  userById(id: Int!): User
+  """
+  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
+  """
+  nodeId: ID!
 
   """Reads a single \`Pet\` using its globally unique \`ID\`."""
   pet(
     """The globally unique \`ID\` to be used in selecting a single \`Pet\`."""
     nodeId: ID!
   ): Pet
+  petById(id: Int!): Pet
+
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
+  randomUsers: [User!]
 
   """Reads a single \`User\` using its globally unique \`ID\`."""
   user(
     """The globally unique \`ID\` to be used in selecting a single \`User\`."""
     nodeId: ID!
   ): User
-  randomUsers: [User!]
+  userById(id: Int!): User
 }
 
 type User implements Node {
+  bio: String
+  createdAt: Datetime!
+  email: String!
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  name: String!
-  email: String!
-  bio: String
   renamedComplexColumn: [Complex]
-  createdAt: Datetime!
 }
 
 """
 A condition to be used against \`User\` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input UserCondition {
+  """Checks for equality with the object’s \`bio\` field."""
+  bio: String
+
+  """Checks for equality with the object’s \`createdAt\` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s \`email\` field."""
+  email: String
+
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
-  """Checks for equality with the object’s \`email\` field."""
-  email: String
-
-  """Checks for equality with the object’s \`bio\` field."""
-  bio: String
-
   """Checks for equality with the object’s \`renamedComplexColumn\` field."""
   renamedComplexColumn: [ComplexInput]
-
-  """Checks for equality with the object’s \`createdAt\` field."""
-  createdAt: Datetime
 }
 
 """A connection to a list of \`User\` values."""
 type UsersConnection {
-  """A list of \`User\` objects."""
-  nodes: [User]!
-
   """
   A list of edges which contains the \`User\` and cursor to aid in pagination.
   """
   edges: [UsersEdge!]!
+
+  """A list of \`User\` objects."""
+  nodes: [User]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -1347,21 +1355,21 @@ type UsersEdge {
 
 """Methods to use when ordering \`User\`."""
 enum UsersOrderBy {
-  NATURAL
+  BIO_ASC
+  BIO_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  EMAIL_ASC
+  EMAIL_DESC
   ID_ASC
   ID_DESC
   NAME_ASC
   NAME_DESC
-  EMAIL_ASC
-  EMAIL_DESC
-  BIO_ASC
-  BIO_DESC
-  RENAMED_COMPLEX_COLUMN_ASC
-  RENAMED_COMPLEX_COLUMN_DESC
-  CREATED_AT_ASC
-  CREATED_AT_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  RENAMED_COMPLEX_COLUMN_ASC
+  RENAMED_COMPLEX_COLUMN_DESC
 }
 
 `;
@@ -1397,6 +1405,9 @@ interface Node {
 
 """Information about pagination in a connection."""
 type PageInfo {
+  """When paginating forwards, the cursor to continue."""
+  endCursor: Cursor
+
   """When paginating forwards, are there more items?"""
   hasNextPage: Boolean!
 
@@ -1405,20 +1416,18 @@ type PageInfo {
 
   """When paginating backwards, the cursor to continue."""
   startCursor: Cursor
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: Cursor
 }
 
 type Pet implements Node {
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  userId: Int!
-  name: String!
   type: String!
+  userId: Int!
 }
 
 """
@@ -1428,25 +1437,25 @@ input PetCondition {
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
-  """Checks for equality with the object’s \`userId\` field."""
-  userId: Int
-
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
   """Checks for equality with the object’s \`type\` field."""
   type: String
+
+  """Checks for equality with the object’s \`userId\` field."""
+  userId: Int
 }
 
 """A connection to a list of \`Pet\` values."""
 type PetsConnection {
-  """A list of \`Pet\` objects."""
-  nodes: [Pet]!
-
   """
   A list of edges which contains the \`Pet\` and cursor to aid in pagination.
   """
   edges: [PetsEdge!]!
+
+  """A list of \`Pet\` objects."""
+  nodes: [Pet]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -1466,31 +1475,78 @@ type PetsEdge {
 
 """Methods to use when ordering \`Pet\`."""
 enum PetsOrderBy {
-  NATURAL
   ID_ASC
   ID_DESC
-  USER_ID_ASC
-  USER_ID_DESC
   NAME_ASC
   NAME_DESC
-  TYPE_ASC
-  TYPE_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  TYPE_ASC
+  TYPE_DESC
+  USER_ID_ASC
+  USER_ID_DESC
 }
 
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
+  """Reads and enables pagination through a set of \`Pet\`."""
+  allPets(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
 
-  """
-  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
-  """
-  nodeId: ID!
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PetCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`Pet\`."""
+    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PetsConnection
+
+  """Reads and enables pagination through a set of \`User\`."""
+  allUsers(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: UserCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`User\`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersConnection
 
   """Fetches an object given its globally unique \`ID\`."""
   node(
@@ -1498,125 +1554,79 @@ type Query implements Node {
     nodeId: ID!
   ): Node
 
-  """Reads and enables pagination through a set of \`Pet\`."""
-  allPets(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`Pet\`."""
-    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PetCondition
-  ): PetsConnection
-
-  """Reads and enables pagination through a set of \`User\`."""
-  allUsers(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`User\`."""
-    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: UserCondition
-  ): UsersConnection
-  petById(id: Int!): Pet
-  userById(id: Int!): User
+  """
+  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
+  """
+  nodeId: ID!
 
   """Reads a single \`Pet\` using its globally unique \`ID\`."""
   pet(
     """The globally unique \`ID\` to be used in selecting a single \`Pet\`."""
     nodeId: ID!
   ): Pet
+  petById(id: Int!): Pet
+
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
 
   """Reads a single \`User\` using its globally unique \`ID\`."""
   user(
     """The globally unique \`ID\` to be used in selecting a single \`User\`."""
     nodeId: ID!
   ): User
+  userById(id: Int!): User
 }
 
 type User implements Node {
+  bio: String
+  createdAt: Datetime!
+  email: String!
+  id: Int!
+  myCustomList(idLessThan: Int): [User]
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  name: String!
-  email: String!
-  bio: String
   renamedComplexColumn: [Complex]
-  createdAt: Datetime!
-  myCustomList(idLessThan: Int): [User]
 }
 
 """
 A condition to be used against \`User\` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input UserCondition {
+  """Checks for equality with the object’s \`bio\` field."""
+  bio: String
+
+  """Checks for equality with the object’s \`createdAt\` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s \`email\` field."""
+  email: String
+
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
-  """Checks for equality with the object’s \`email\` field."""
-  email: String
-
-  """Checks for equality with the object’s \`bio\` field."""
-  bio: String
-
   """Checks for equality with the object’s \`renamedComplexColumn\` field."""
   renamedComplexColumn: [ComplexInput]
-
-  """Checks for equality with the object’s \`createdAt\` field."""
-  createdAt: Datetime
 }
 
 """A connection to a list of \`User\` values."""
 type UsersConnection {
-  """A list of \`User\` objects."""
-  nodes: [User]!
-
   """
   A list of edges which contains the \`User\` and cursor to aid in pagination.
   """
   edges: [UsersEdge!]!
+
+  """A list of \`User\` objects."""
+  nodes: [User]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -1636,21 +1646,21 @@ type UsersEdge {
 
 """Methods to use when ordering \`User\`."""
 enum UsersOrderBy {
-  NATURAL
+  BIO_ASC
+  BIO_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  EMAIL_ASC
+  EMAIL_DESC
   ID_ASC
   ID_DESC
   NAME_ASC
   NAME_DESC
-  EMAIL_ASC
-  EMAIL_DESC
-  BIO_ASC
-  BIO_DESC
-  RENAMED_COMPLEX_COLUMN_ASC
-  RENAMED_COMPLEX_COLUMN_DESC
-  CREATED_AT_ASC
-  CREATED_AT_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  RENAMED_COMPLEX_COLUMN_ASC
+  RENAMED_COMPLEX_COLUMN_DESC
 }
 
 `;
@@ -1686,6 +1696,9 @@ interface Node {
 
 """Information about pagination in a connection."""
 type PageInfo {
+  """When paginating forwards, the cursor to continue."""
+  endCursor: Cursor
+
   """When paginating forwards, are there more items?"""
   hasNextPage: Boolean!
 
@@ -1694,20 +1707,18 @@ type PageInfo {
 
   """When paginating backwards, the cursor to continue."""
   startCursor: Cursor
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: Cursor
 }
 
 type Pet implements Node {
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  userId: Int!
-  name: String!
   type: String!
+  userId: Int!
 }
 
 """
@@ -1717,25 +1728,25 @@ input PetCondition {
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
-  """Checks for equality with the object’s \`userId\` field."""
-  userId: Int
-
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
   """Checks for equality with the object’s \`type\` field."""
   type: String
+
+  """Checks for equality with the object’s \`userId\` field."""
+  userId: Int
 }
 
 """A connection to a list of \`Pet\` values."""
 type PetsConnection {
-  """A list of \`Pet\` objects."""
-  nodes: [Pet]!
-
   """
   A list of edges which contains the \`Pet\` and cursor to aid in pagination.
   """
   edges: [PetsEdge!]!
+
+  """A list of \`Pet\` objects."""
+  nodes: [Pet]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -1755,31 +1766,78 @@ type PetsEdge {
 
 """Methods to use when ordering \`Pet\`."""
 enum PetsOrderBy {
-  NATURAL
   ID_ASC
   ID_DESC
-  USER_ID_ASC
-  USER_ID_DESC
   NAME_ASC
   NAME_DESC
-  TYPE_ASC
-  TYPE_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  TYPE_ASC
+  TYPE_DESC
+  USER_ID_ASC
+  USER_ID_DESC
 }
 
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
+  """Reads and enables pagination through a set of \`Pet\`."""
+  allPets(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
 
-  """
-  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
-  """
-  nodeId: ID!
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PetCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`Pet\`."""
+    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PetsConnection
+
+  """Reads and enables pagination through a set of \`User\`."""
+  allUsers(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: UserCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`User\`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersConnection
 
   """Fetches an object given its globally unique \`ID\`."""
   node(
@@ -1787,125 +1845,79 @@ type Query implements Node {
     nodeId: ID!
   ): Node
 
-  """Reads and enables pagination through a set of \`Pet\`."""
-  allPets(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`Pet\`."""
-    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PetCondition
-  ): PetsConnection
-
-  """Reads and enables pagination through a set of \`User\`."""
-  allUsers(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`User\`."""
-    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: UserCondition
-  ): UsersConnection
-  petById(id: Int!): Pet
-  userById(id: Int!): User
+  """
+  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
+  """
+  nodeId: ID!
 
   """Reads a single \`Pet\` using its globally unique \`ID\`."""
   pet(
     """The globally unique \`ID\` to be used in selecting a single \`Pet\`."""
     nodeId: ID!
   ): Pet
+  petById(id: Int!): Pet
+
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
+  randomUser: User
 
   """Reads a single \`User\` using its globally unique \`ID\`."""
   user(
     """The globally unique \`ID\` to be used in selecting a single \`User\`."""
     nodeId: ID!
   ): User
-  randomUser: User
+  userById(id: Int!): User
 }
 
 type User implements Node {
+  bio: String
+  createdAt: Datetime!
+  email: String!
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  name: String!
-  email: String!
-  bio: String
   renamedComplexColumn: [Complex]
-  createdAt: Datetime!
 }
 
 """
 A condition to be used against \`User\` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input UserCondition {
+  """Checks for equality with the object’s \`bio\` field."""
+  bio: String
+
+  """Checks for equality with the object’s \`createdAt\` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s \`email\` field."""
+  email: String
+
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
-  """Checks for equality with the object’s \`email\` field."""
-  email: String
-
-  """Checks for equality with the object’s \`bio\` field."""
-  bio: String
-
   """Checks for equality with the object’s \`renamedComplexColumn\` field."""
   renamedComplexColumn: [ComplexInput]
-
-  """Checks for equality with the object’s \`createdAt\` field."""
-  createdAt: Datetime
 }
 
 """A connection to a list of \`User\` values."""
 type UsersConnection {
-  """A list of \`User\` objects."""
-  nodes: [User]!
-
   """
   A list of edges which contains the \`User\` and cursor to aid in pagination.
   """
   edges: [UsersEdge!]!
+
+  """A list of \`User\` objects."""
+  nodes: [User]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -1925,21 +1937,21 @@ type UsersEdge {
 
 """Methods to use when ordering \`User\`."""
 enum UsersOrderBy {
-  NATURAL
+  BIO_ASC
+  BIO_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  EMAIL_ASC
+  EMAIL_DESC
   ID_ASC
   ID_DESC
   NAME_ASC
   NAME_DESC
-  EMAIL_ASC
-  EMAIL_DESC
-  BIO_ASC
-  BIO_DESC
-  RENAMED_COMPLEX_COLUMN_ASC
-  RENAMED_COMPLEX_COLUMN_DESC
-  CREATED_AT_ASC
-  CREATED_AT_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  RENAMED_COMPLEX_COLUMN_ASC
+  RENAMED_COMPLEX_COLUMN_DESC
 }
 
 `;
@@ -1975,6 +1987,9 @@ interface Node {
 
 """Information about pagination in a connection."""
 type PageInfo {
+  """When paginating forwards, the cursor to continue."""
+  endCursor: Cursor
+
   """When paginating forwards, are there more items?"""
   hasNextPage: Boolean!
 
@@ -1983,20 +1998,18 @@ type PageInfo {
 
   """When paginating backwards, the cursor to continue."""
   startCursor: Cursor
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: Cursor
 }
 
 type Pet implements Node {
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  userId: Int!
-  name: String!
   type: String!
+  userId: Int!
 }
 
 """
@@ -2006,25 +2019,25 @@ input PetCondition {
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
-  """Checks for equality with the object’s \`userId\` field."""
-  userId: Int
-
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
   """Checks for equality with the object’s \`type\` field."""
   type: String
+
+  """Checks for equality with the object’s \`userId\` field."""
+  userId: Int
 }
 
 """A connection to a list of \`Pet\` values."""
 type PetsConnection {
-  """A list of \`Pet\` objects."""
-  nodes: [Pet]!
-
   """
   A list of edges which contains the \`Pet\` and cursor to aid in pagination.
   """
   edges: [PetsEdge!]!
+
+  """A list of \`Pet\` objects."""
+  nodes: [Pet]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -2044,31 +2057,78 @@ type PetsEdge {
 
 """Methods to use when ordering \`Pet\`."""
 enum PetsOrderBy {
-  NATURAL
   ID_ASC
   ID_DESC
-  USER_ID_ASC
-  USER_ID_DESC
   NAME_ASC
   NAME_DESC
-  TYPE_ASC
-  TYPE_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  TYPE_ASC
+  TYPE_DESC
+  USER_ID_ASC
+  USER_ID_DESC
 }
 
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
+  """Reads and enables pagination through a set of \`Pet\`."""
+  allPets(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
 
-  """
-  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
-  """
-  nodeId: ID!
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PetCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`Pet\`."""
+    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PetsConnection
+
+  """Reads and enables pagination through a set of \`User\`."""
+  allUsers(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: UserCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`User\`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersConnection
 
   """Fetches an object given its globally unique \`ID\`."""
   node(
@@ -2076,125 +2136,79 @@ type Query implements Node {
     nodeId: ID!
   ): Node
 
-  """Reads and enables pagination through a set of \`Pet\`."""
-  allPets(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`Pet\`."""
-    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PetCondition
-  ): PetsConnection
-
-  """Reads and enables pagination through a set of \`User\`."""
-  allUsers(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`User\`."""
-    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: UserCondition
-  ): UsersConnection
-  petById(id: Int!): Pet
-  userById(id: Int!): User
+  """
+  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
+  """
+  nodeId: ID!
 
   """Reads a single \`Pet\` using its globally unique \`ID\`."""
   pet(
     """The globally unique \`ID\` to be used in selecting a single \`Pet\`."""
     nodeId: ID!
   ): Pet
+  petById(id: Int!): Pet
+
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
 
   """Reads a single \`User\` using its globally unique \`ID\`."""
   user(
     """The globally unique \`ID\` to be used in selecting a single \`User\`."""
     nodeId: ID!
   ): User
+  userById(id: Int!): User
 }
 
 type User implements Node {
+  bio: String
+  createdAt: Datetime!
+  customField: String
+  email: String!
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  name: String!
-  email: String!
-  bio: String
   renamedComplexColumn: [Complex]
-  createdAt: Datetime!
-  customField: String
 }
 
 """
 A condition to be used against \`User\` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input UserCondition {
+  """Checks for equality with the object’s \`bio\` field."""
+  bio: String
+
+  """Checks for equality with the object’s \`createdAt\` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s \`email\` field."""
+  email: String
+
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
-  """Checks for equality with the object’s \`email\` field."""
-  email: String
-
-  """Checks for equality with the object’s \`bio\` field."""
-  bio: String
-
   """Checks for equality with the object’s \`renamedComplexColumn\` field."""
   renamedComplexColumn: [ComplexInput]
-
-  """Checks for equality with the object’s \`createdAt\` field."""
-  createdAt: Datetime
 }
 
 """A connection to a list of \`User\` values."""
 type UsersConnection {
-  """A list of \`User\` objects."""
-  nodes: [User]!
-
   """
   A list of edges which contains the \`User\` and cursor to aid in pagination.
   """
   edges: [UsersEdge!]!
+
+  """A list of \`User\` objects."""
+  nodes: [User]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -2214,21 +2228,21 @@ type UsersEdge {
 
 """Methods to use when ordering \`User\`."""
 enum UsersOrderBy {
-  NATURAL
+  BIO_ASC
+  BIO_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  EMAIL_ASC
+  EMAIL_DESC
   ID_ASC
   ID_DESC
   NAME_ASC
   NAME_DESC
-  EMAIL_ASC
-  EMAIL_DESC
-  BIO_ASC
-  BIO_DESC
-  RENAMED_COMPLEX_COLUMN_ASC
-  RENAMED_COMPLEX_COLUMN_DESC
-  CREATED_AT_ASC
-  CREATED_AT_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  RENAMED_COMPLEX_COLUMN_ASC
+  RENAMED_COMPLEX_COLUMN_DESC
 }
 
 `;
@@ -2276,6 +2290,9 @@ interface Node {
 
 """Information about pagination in a connection."""
 type PageInfo {
+  """When paginating forwards, the cursor to continue."""
+  endCursor: Cursor
+
   """When paginating forwards, are there more items?"""
   hasNextPage: Boolean!
 
@@ -2284,20 +2301,18 @@ type PageInfo {
 
   """When paginating backwards, the cursor to continue."""
   startCursor: Cursor
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: Cursor
 }
 
 type Pet implements Node {
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  userId: Int!
-  name: String!
   type: String!
+  userId: Int!
 }
 
 """
@@ -2307,25 +2322,25 @@ input PetCondition {
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
-  """Checks for equality with the object’s \`userId\` field."""
-  userId: Int
-
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
   """Checks for equality with the object’s \`type\` field."""
   type: String
+
+  """Checks for equality with the object’s \`userId\` field."""
+  userId: Int
 }
 
 """A connection to a list of \`Pet\` values."""
 type PetsConnection {
-  """A list of \`Pet\` objects."""
-  nodes: [Pet]!
-
   """
   A list of edges which contains the \`Pet\` and cursor to aid in pagination.
   """
   edges: [PetsEdge!]!
+
+  """A list of \`Pet\` objects."""
+  nodes: [Pet]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -2345,31 +2360,78 @@ type PetsEdge {
 
 """Methods to use when ordering \`Pet\`."""
 enum PetsOrderBy {
-  NATURAL
   ID_ASC
   ID_DESC
-  USER_ID_ASC
-  USER_ID_DESC
   NAME_ASC
   NAME_DESC
-  TYPE_ASC
-  TYPE_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  TYPE_ASC
+  TYPE_DESC
+  USER_ID_ASC
+  USER_ID_DESC
 }
 
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
+  """Reads and enables pagination through a set of \`Pet\`."""
+  allPets(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
 
-  """
-  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
-  """
-  nodeId: ID!
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PetCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`Pet\`."""
+    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PetsConnection
+
+  """Reads and enables pagination through a set of \`User\`."""
+  allUsers(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: UserCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`User\`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersConnection
 
   """Fetches an object given its globally unique \`ID\`."""
   node(
@@ -2377,83 +2439,36 @@ type Query implements Node {
     nodeId: ID!
   ): Node
 
-  """Reads and enables pagination through a set of \`Pet\`."""
-  allPets(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`Pet\`."""
-    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PetCondition
-  ): PetsConnection
-
-  """Reads and enables pagination through a set of \`User\`."""
-  allUsers(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`User\`."""
-    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: UserCondition
-  ): UsersConnection
-  petById(id: Int!): Pet
-  userById(id: Int!): User
+  """
+  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
+  """
+  nodeId: ID!
 
   """Reads a single \`Pet\` using its globally unique \`ID\`."""
   pet(
     """The globally unique \`ID\` to be used in selecting a single \`Pet\`."""
     nodeId: ID!
   ): Pet
+  petById(id: Int!): Pet
+
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
 
   """Reads a single \`User\` using its globally unique \`ID\`."""
   user(
     """The globally unique \`ID\` to be used in selecting a single \`User\`."""
     nodeId: ID!
   ): User
+  userById(id: Int!): User
 }
 
 input RegisterUserInput {
-  name: String!
-  email: String!
   bio: String
+  email: String!
+  name: String!
 }
 
 type RegisterUserPayload {
@@ -2461,50 +2476,51 @@ type RegisterUserPayload {
 }
 
 type User implements Node {
+  bio: String
+  createdAt: Datetime!
+  email: String!
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  name: String!
-  email: String!
-  bio: String
   renamedComplexColumn: [Complex]
-  createdAt: Datetime!
 }
 
 """
 A condition to be used against \`User\` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input UserCondition {
+  """Checks for equality with the object’s \`bio\` field."""
+  bio: String
+
+  """Checks for equality with the object’s \`createdAt\` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s \`email\` field."""
+  email: String
+
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
-  """Checks for equality with the object’s \`email\` field."""
-  email: String
-
-  """Checks for equality with the object’s \`bio\` field."""
-  bio: String
-
   """Checks for equality with the object’s \`renamedComplexColumn\` field."""
   renamedComplexColumn: [ComplexInput]
-
-  """Checks for equality with the object’s \`createdAt\` field."""
-  createdAt: Datetime
 }
 
 """A connection to a list of \`User\` values."""
 type UsersConnection {
-  """A list of \`User\` objects."""
-  nodes: [User]!
-
   """
   A list of edges which contains the \`User\` and cursor to aid in pagination.
   """
   edges: [UsersEdge!]!
+
+  """A list of \`User\` objects."""
+  nodes: [User]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -2524,21 +2540,21 @@ type UsersEdge {
 
 """Methods to use when ordering \`User\`."""
 enum UsersOrderBy {
-  NATURAL
+  BIO_ASC
+  BIO_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  EMAIL_ASC
+  EMAIL_DESC
   ID_ASC
   ID_DESC
   NAME_ASC
   NAME_DESC
-  EMAIL_ASC
-  EMAIL_DESC
-  BIO_ASC
-  BIO_DESC
-  RENAMED_COMPLEX_COLUMN_ASC
-  RENAMED_COMPLEX_COLUMN_DESC
-  CREATED_AT_ASC
-  CREATED_AT_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  RENAMED_COMPLEX_COLUMN_ASC
+  RENAMED_COMPLEX_COLUMN_DESC
 }
 
 `;
@@ -2597,6 +2613,9 @@ interface Node {
 
 """Information about pagination in a connection."""
 type PageInfo {
+  """When paginating forwards, the cursor to continue."""
+  endCursor: Cursor
+
   """When paginating forwards, are there more items?"""
   hasNextPage: Boolean!
 
@@ -2605,20 +2624,18 @@ type PageInfo {
 
   """When paginating backwards, the cursor to continue."""
   startCursor: Cursor
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: Cursor
 }
 
 type Pet implements Node {
+  id: Int!
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  userId: Int!
-  name: String!
   type: String!
+  userId: Int!
 }
 
 """
@@ -2628,25 +2645,25 @@ input PetCondition {
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
-  """Checks for equality with the object’s \`userId\` field."""
-  userId: Int
-
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
   """Checks for equality with the object’s \`type\` field."""
   type: String
+
+  """Checks for equality with the object’s \`userId\` field."""
+  userId: Int
 }
 
 """A connection to a list of \`Pet\` values."""
 type PetsConnection {
-  """A list of \`Pet\` objects."""
-  nodes: [Pet]!
-
   """
   A list of edges which contains the \`Pet\` and cursor to aid in pagination.
   """
   edges: [PetsEdge!]!
+
+  """A list of \`Pet\` objects."""
+  nodes: [Pet]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -2666,31 +2683,78 @@ type PetsEdge {
 
 """Methods to use when ordering \`Pet\`."""
 enum PetsOrderBy {
-  NATURAL
   ID_ASC
   ID_DESC
-  USER_ID_ASC
-  USER_ID_DESC
   NAME_ASC
   NAME_DESC
-  TYPE_ASC
-  TYPE_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  TYPE_ASC
+  TYPE_DESC
+  USER_ID_ASC
+  USER_ID_DESC
 }
 
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
+  """Reads and enables pagination through a set of \`Pet\`."""
+  allPets(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
 
-  """
-  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
-  """
-  nodeId: ID!
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PetCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`Pet\`."""
+    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PetsConnection
+
+  """Reads and enables pagination through a set of \`User\`."""
+  allUsers(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: UserCondition
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`User\`."""
+    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
+  ): UsersConnection
 
   """Fetches an object given its globally unique \`ID\`."""
   node(
@@ -2698,125 +2762,79 @@ type Query implements Node {
     nodeId: ID!
   ): Node
 
-  """Reads and enables pagination through a set of \`Pet\`."""
-  allPets(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`Pet\`."""
-    orderBy: [PetsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PetCondition
-  ): PetsConnection
-
-  """Reads and enables pagination through a set of \`User\`."""
-  allUsers(
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering \`User\`."""
-    orderBy: [UsersOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: UserCondition
-  ): UsersConnection
-  petById(id: Int!): Pet
-  userById(id: Int!): User
+  """
+  The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
+  """
+  nodeId: ID!
 
   """Reads a single \`Pet\` using its globally unique \`ID\`."""
   pet(
     """The globally unique \`ID\` to be used in selecting a single \`Pet\`."""
     nodeId: ID!
   ): Pet
+  petById(id: Int!): Pet
+
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
 
   """Reads a single \`User\` using its globally unique \`ID\`."""
   user(
     """The globally unique \`ID\` to be used in selecting a single \`User\`."""
     nodeId: ID!
   ): User
+  userById(id: Int!): User
 }
 
 type User implements Node {
+  bio: String
+  createdAt: Datetime!
+  email: String!
+  id: Int!
+  myCustomRecord(id: Int!): User
+  name: String!
+
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  id: Int!
-  name: String!
-  email: String!
-  bio: String
   renamedComplexColumn: [Complex]
-  createdAt: Datetime!
-  myCustomRecord(id: Int!): User
 }
 
 """
 A condition to be used against \`User\` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input UserCondition {
+  """Checks for equality with the object’s \`bio\` field."""
+  bio: String
+
+  """Checks for equality with the object’s \`createdAt\` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s \`email\` field."""
+  email: String
+
   """Checks for equality with the object’s \`id\` field."""
   id: Int
 
   """Checks for equality with the object’s \`name\` field."""
   name: String
 
-  """Checks for equality with the object’s \`email\` field."""
-  email: String
-
-  """Checks for equality with the object’s \`bio\` field."""
-  bio: String
-
   """Checks for equality with the object’s \`renamedComplexColumn\` field."""
   renamedComplexColumn: [ComplexInput]
-
-  """Checks for equality with the object’s \`createdAt\` field."""
-  createdAt: Datetime
 }
 
 """A connection to a list of \`User\` values."""
 type UsersConnection {
-  """A list of \`User\` objects."""
-  nodes: [User]!
-
   """
   A list of edges which contains the \`User\` and cursor to aid in pagination.
   """
   edges: [UsersEdge!]!
+
+  """A list of \`User\` objects."""
+  nodes: [User]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -2836,21 +2854,21 @@ type UsersEdge {
 
 """Methods to use when ordering \`User\`."""
 enum UsersOrderBy {
-  NATURAL
+  BIO_ASC
+  BIO_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  EMAIL_ASC
+  EMAIL_DESC
   ID_ASC
   ID_DESC
   NAME_ASC
   NAME_DESC
-  EMAIL_ASC
-  EMAIL_DESC
-  BIO_ASC
-  BIO_DESC
-  RENAMED_COMPLEX_COLUMN_ASC
-  RENAMED_COMPLEX_COLUMN_DESC
-  CREATED_AT_ASC
-  CREATED_AT_DESC
+  NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  RENAMED_COMPLEX_COLUMN_ASC
+  RENAMED_COMPLEX_COLUMN_DESC
 }
 
 `;

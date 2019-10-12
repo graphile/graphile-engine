@@ -1841,12 +1841,6 @@ type Mutation {
     """
     input: Issue756SetMutationInput!
   ): Issue756SetMutationPayload
-  jsonIdentityMutation(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: JsonIdentityMutationInput!
-  ): JsonIdentityMutationPayload
   jsonbIdentityMutation(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -1865,6 +1859,12 @@ type Mutation {
     """
     input: JsonbIdentityMutationPlpgsqlWithDefaultInput!
   ): JsonbIdentityMutationPlpgsqlWithDefaultPayload
+  jsonIdentityMutation(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: JsonIdentityMutationInput!
+  ): JsonIdentityMutationPayload
 
   """
   @arg0variant base
@@ -3733,8 +3733,8 @@ type Query implements Node {
     nodeId: ID!
   ): Issue756
   issue756ById(id: Int!): Issue756
-  jsonIdentity(json: Json): Json
   jsonbIdentity(json: Json): Json
+  jsonIdentity(json: Json): Json
 
   """Reads a single \`LeftArm\` using its globally unique \`ID\`."""
   leftArm(

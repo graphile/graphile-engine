@@ -4572,12 +4572,6 @@ type Mutation {
     """
     input: Issue756SetMutationInput!
   ): Issue756SetMutationPayload
-  jsonIdentityMutation(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: JsonIdentityMutationInput!
-  ): JsonIdentityMutationPayload
   jsonbIdentityMutation(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -4596,6 +4590,12 @@ type Mutation {
     """
     input: JsonbIdentityMutationPlpgsqlWithDefaultInput!
   ): JsonbIdentityMutationPlpgsqlWithDefaultPayload
+  jsonIdentityMutation(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: JsonIdentityMutationInput!
+  ): JsonIdentityMutationPayload
   leftArmIdentity(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -6959,6 +6959,30 @@ type Query implements Node {
     orderBy: [MyTablesOrderBy!] = [PRIMARY_KEY_ASC]
   ): MyTablesConnection
 
+  """Reads and enables pagination through a set of \`NonUpdatableView\`."""
+  allNonUpdatableViews(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Only read the last \`n\` values of the set."""
+    last: Int
+
+    """
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
+    based pagination. May not be used with \`last\`.
+    """
+    offset: Int
+
+    """The method to use when ordering \`NonUpdatableView\`."""
+    orderBy: [NonUpdatableViewsOrderBy!] = [NATURAL]
+  ): NonUpdatableViewsConnection
+
   """Reads and enables pagination through a set of \`NoPrimaryKey\`."""
   allNoPrimaryKeys(
     """Read all values in the set after (below) this cursor."""
@@ -6987,30 +7011,6 @@ type Query implements Node {
     """The method to use when ordering \`NoPrimaryKey\`."""
     orderBy: [NoPrimaryKeysOrderBy!] = [NATURAL]
   ): NoPrimaryKeysConnection
-
-  """Reads and enables pagination through a set of \`NonUpdatableView\`."""
-  allNonUpdatableViews(
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """The method to use when ordering \`NonUpdatableView\`."""
-    orderBy: [NonUpdatableViewsOrderBy!] = [NATURAL]
-  ): NonUpdatableViewsConnection
 
   """Reads and enables pagination through a set of \`NullTestRecord\`."""
   allNullTestRecords(
@@ -7637,8 +7637,8 @@ type Query implements Node {
     nodeId: ID!
   ): Issue756
   issue756ById(id: Int!): Issue756
-  jsonIdentity(json: JSON): JSON
   jsonbIdentity(json: JSON): JSON
+  jsonIdentity(json: JSON): JSON
 
   """Reads a single \`LeftArm\` using its globally unique \`ID\`."""
   leftArm(
@@ -7655,7 +7655,6 @@ type Query implements Node {
   ): MyTable
   myTableById(id: Int!): MyTable
   noArgsQuery: Int
-  noPrimaryKeyById(id: Int!): NoPrimaryKey
 
   """Fetches an object given its globally unique \`ID\`."""
   node(
@@ -7667,6 +7666,7 @@ type Query implements Node {
   The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
   """
   nodeId: ID!
+  noPrimaryKeyById(id: Int!): NoPrimaryKey
 
   """Reads a single \`NullTestRecord\` using its globally unique \`ID\`."""
   nullTestRecord(

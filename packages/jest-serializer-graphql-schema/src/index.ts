@@ -1,4 +1,9 @@
-import { GraphQLSchema, isSchema, printSchema } from "graphql";
+import {
+  GraphQLSchema,
+  isSchema,
+  lexicographicSortSchema,
+  printSchema,
+} from "graphql";
 import { Plugin } from "pretty-format";
 
 const GraphQLSchemaSnapshotSerializer: Plugin = {
@@ -6,7 +11,7 @@ const GraphQLSchemaSnapshotSerializer: Plugin = {
     return isSchema(val);
   },
   serialize(schema: GraphQLSchema) {
-    return printSchema(schema);
+    return printSchema(lexicographicSortSchema(schema));
   },
 };
 

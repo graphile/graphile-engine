@@ -3,14 +3,14 @@
 exports[`allows adding a field with arguments 1`] = `
 """The root query type which gives access points into the data universe."""
 type Query {
+  """Gives you back what you put in"""
+  echo(input: [Int!]!): [Int!]!
+
   """
   Exposes the root query type nested one level down. This is helpful for Relay 1
   which can only query top level fields if they are in a particular form.
   """
   query: Query!
-
-  """Gives you back what you put in"""
-  echo(input: [Int!]!): [Int!]!
 }
 
 `;
@@ -18,14 +18,14 @@ type Query {
 exports[`allows adding a field with arguments named using a custom inflector 1`] = `
 """The root query type which gives access points into the data universe."""
 type Query {
+  """Gives you back what you put in"""
+  myCustomEchoFieldName(input: [Int!]!): [Int!]!
+
   """
   Exposes the root query type nested one level down. This is helpful for Relay 1
   which can only query top level fields if they are in a particular form.
   """
   query: Query!
-
-  """Gives you back what you put in"""
-  myCustomEchoFieldName(input: [Int!]!): [Int!]!
 }
 
 `;
@@ -109,14 +109,14 @@ Object {
 exports[`supports @scope directive with simple values 2`] = `
 """The root query type which gives access points into the data universe."""
 type Query {
+  """Gives you back what you put in"""
+  echo(input: [Int!]!): [Int!]!
+
   """
   Exposes the root query type nested one level down. This is helpful for Relay 1
   which can only query top level fields if they are in a particular form.
   """
   query: Query!
-
-  """Gives you back what you put in"""
-  echo(input: [Int!]!): [Int!]!
 }
 
 `;
@@ -182,31 +182,31 @@ Object {
 exports[`supports @scope directive with variable value 2`] = `
 """The root query type which gives access points into the data universe."""
 type Query {
+  """Gives you back what you put in"""
+  echo(input: [Int!]!): [Int!]!
+
   """
   Exposes the root query type nested one level down. This is helpful for Relay 1
   which can only query top level fields if they are in a particular form.
   """
   query: Query!
-
-  """Gives you back what you put in"""
-  echo(input: [Int!]!): [Int!]!
 }
 
 `;
 
 exports[`supports defining a more complex mutation 1`] = `
 input EchoInput {
-  text: String!
-  int: Int
   float: Float!
+  int: Int
   intList: [Int!]
+  text: String!
 }
 
 type EchoOutput {
-  text: String!
-  int: Int
   float: Float!
+  int: Int
   intList: [Int!]
+  text: String!
 }
 
 """
@@ -304,37 +304,37 @@ type Subscription {
 
 exports[`supports defining new types 1`] = `
 enum EchoCount {
+  FOREVER
   ONCE
   TWICE
-  FOREVER
 }
 
 input EchoInput {
-  text: String!
-  int: Int
-  float: Float!
   count: EchoCount
+  float: Float!
+  int: Int
   intList: [Int!]
+  text: String!
 }
 
 type EchoOutput {
-  text: String!
-  int: Int
-  float: Float!
   count: EchoCount!
+  float: Float!
+  int: Int
   intList: [Int!]
+  text: String!
 }
 
 """The root query type which gives access points into the data universe."""
 type Query {
+  """Gives you back what you put in"""
+  echo(input: EchoInput): EchoOutput
+
   """
   Exposes the root query type nested one level down. This is helpful for Relay 1
   which can only query top level fields if they are in a particular form.
   """
   query: Query!
-
-  """Gives you back what you put in"""
-  echo(input: EchoInput): EchoOutput
 }
 
 `;
