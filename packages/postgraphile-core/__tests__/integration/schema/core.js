@@ -1,4 +1,3 @@
-const printSchemaOrdered = require("../../printSchemaOrdered");
 const { withPgClient } = require("../../helpers");
 const { createPostGraphileSchema } = require("../../..");
 const { isSchema } = require("graphql");
