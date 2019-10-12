@@ -13,18 +13,8 @@ import {
   SubscriptionPlugin,
   MutationPayloadQueryPlugin,
 } from "graphile-build";
-import { graphql, subscribe, parse, isSchema, printSchema } from "graphql";
+import { graphql, subscribe, parse } from "graphql";
 import { $$asyncIterator } from "iterall";
-
-const GraphQLSchemaSerializer = {
-  test(val) {
-    return isSchema(val);
-  },
-  serialize(schema) {
-    return printSchema(schema);
-  },
-};
-expect.addSnapshotSerializer(GraphQLSchemaSerializer);
 
 function TestUtils_ExtractScopePlugin(
   hook,

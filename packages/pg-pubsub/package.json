@@ -53,5 +53,23 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
+    ],
+    "roots": [
+      "<rootDir>/src",
+      "<rootDir>/__tests__"
+    ],
+    "snapshotSerializers": [
+      "jest-serializer-graphql-schema"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*\\.(test|spec))\\.[tj]sx?$"
+  }
 }

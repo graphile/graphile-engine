@@ -1,0 +1,33 @@
+{
+  "name": "jest-serializer-graphql-schema",
+  "version": "1.0.0",
+  "description": "Jest serializer for GraphQLSchema objects",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prepack": "tsc",
+    "test": "true"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/graphile/graphile-engine.git"
+  },
+  "keywords": [
+    "jest",
+    "graphql",
+    "schema"
+  ],
+  "author": "David Baumgold <david@davidbaumgold.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/graphile/graphile-engine/issues"
+  },
+  "homepage": "https://github.com/graphile/graphile-engine#readme",
+  "peerDependencies": {
+    "graphql": "^14.5.8"
+  },
+  "devDependencies": {
+    "pretty-format": "^24.9.0",
+    "typescript": "^3.6.4"
+  }
+}

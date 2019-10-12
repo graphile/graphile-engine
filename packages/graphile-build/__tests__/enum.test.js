@@ -1,15 +1,5 @@
-const { GraphQLEnumType, isSchema, printSchema } = require("graphql");
+const { GraphQLEnumType } = require("graphql");
 const { buildSchema, defaultPlugins } = require("../");
-
-const GraphQLSchemaSerializer = {
-  test(val) {
-    return isSchema(val);
-  },
-  serialize(schema) {
-    return printSchema(schema);
-  },
-};
-expect.addSnapshotSerializer(GraphQLSchemaSerializer);
 
 function EnumPlugin(builder) {
   builder.hook("GraphQLObjectType:fields", (fields, build, context) => {

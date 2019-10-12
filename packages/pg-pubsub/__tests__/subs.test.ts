@@ -6,9 +6,6 @@ import {
 import {
   introspectionQuery as INTROSPECTION_QUERY,
   buildClientSchema,
-  isSchema,
-  printSchema,
-  GraphQLSchema,
 } from "graphql";
 import { Pool, PoolClient } from "pg";
 import PgPubsub from "../src";
@@ -16,22 +13,6 @@ import { runQuery, TestCtx } from "./runQuery";
 
 let ctx: TestCtx | null = null;
 const CLI_DEFAULTS = {};
-
-const GraphQLSchemaSerializer = {
-  test(val: any) {
-    return isSchema(val);
-  },
-  // It would be nice if we could name this method `serialize`,
-  // so that it conforms to the shape of `pretty-format.NewPlugin`,
-  // but the Jest types don't seem to know about that type yet,
-  // so we'll name it `print` instead to satisfy the Jest types.
-  // https://github.com/facebook/jest/blob/master/packages/jest-snapshot/src/plugins.ts
-  // https://github.com/facebook/jest/blob/master/packages/pretty-format/src/types.ts#L115
-  print(schema: GraphQLSchema) {
-    return printSchema(schema);
-  },
-};
-expect.addSnapshotSerializer(GraphQLSchemaSerializer);
 
 const init = async (options: PostGraphileOptions = {}) => {
   if (ctx) {

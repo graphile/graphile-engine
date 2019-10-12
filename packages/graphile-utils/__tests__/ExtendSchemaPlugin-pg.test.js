@@ -1,17 +1,7 @@
 import pg from "pg";
-import { graphql, isSchema, printSchema } from "graphql";
+import { graphql } from "graphql";
 import { createPostGraphileSchema } from "postgraphile-core";
 import { makeExtendSchemaPlugin, gql, embed } from "../";
-
-const GraphQLSchemaSerializer = {
-  test(val) {
-    return isSchema(val);
-  },
-  serialize(schema) {
-    return printSchema(schema);
-  },
-};
-expect.addSnapshotSerializer(GraphQLSchemaSerializer);
 
 const clean = data => {
   if (Array.isArray(data)) {

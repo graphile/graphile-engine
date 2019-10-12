@@ -3,7 +3,6 @@ const {
   GraphQLObjectType,
   GraphQLInt,
   GraphQLNonNull,
-  isSchema,
   printSchema,
 } = require("graphql");
 const {
@@ -11,16 +10,6 @@ const {
   defaultPlugins: allDefaultPlugins,
   MutationPlugin,
 } = require("../");
-
-const GraphQLSchemaSerializer = {
-  test(val) {
-    return isSchema(val);
-  },
-  serialize(schema) {
-    return printSchema(schema);
-  },
-};
-expect.addSnapshotSerializer(GraphQLSchemaSerializer);
 
 const options = {};
 
