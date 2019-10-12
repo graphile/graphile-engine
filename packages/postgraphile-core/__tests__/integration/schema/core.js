@@ -1,6 +1,5 @@
 const { withPgClient } = require("../../helpers");
 const { createPostGraphileSchema } = require("../../..");
-const { isSchema } = require("graphql");
 
 exports.test = (schemas, options, setup, finalCheck = () => {}) => () =>
   withPgClient(async client => {
