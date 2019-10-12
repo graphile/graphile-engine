@@ -126,6 +126,7 @@ class QueryBuilder {
   lockContext: {
     queryBuilder: QueryBuilder,
   };
+  children: Map<string, QueryBuilder>;
 
   constructor(
     options: QueryBuilderOptions = {},
@@ -216,6 +217,7 @@ class QueryBuilder {
       last: null,
       cursorComparator: null,
     };
+    this.children = new Map();
     this.beforeLock("select", () => {
       this.lock("selectCursor");
       if (this.compiledData.selectCursor) {
@@ -873,6 +875,26 @@ order by (row_number() over (partition by 1)) desc`;
     // We must execute select after orderBy otherwise we cannot generate a cursor
     this.lock("selectCursor");
     this.lock("select");
+  }
+  buildChild() {
+    const options = { supportsJSONB: this.supportsJSONB };
+    const child = new QueryBuilder(options, this.context, this.rootValue);
+    child.parentQueryBuilder = this;
+    return child;
+  }
+  buildNamedChildFrom(name: string, from: SQLGen, field: SQLGen) {
+    if (this.children.has(name)) {
+      throw new Error(`QueryBuilder already has a child named ${name}`);
+    }
+    const child = this.buildChild();
+    child.from(from);
+    child.select(field, "_");
+    child.lock("select");
+    this.children.set(name, child);
+    return child;
+  }
+  getNamedChild(name: string) {
+    return this.children.get(name);
   }
 }
 
