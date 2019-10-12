@@ -93,6 +93,7 @@ describe("Middleware defaults", () => {
       {},
       async (json, _req, res) => {
         expect(res.statusCode).toEqual(200);
+        expect(json.errors).toBeFalsy();
         const schema = buildClientSchema(json.data);
         expect(schema).toMatchSnapshot();
       }
