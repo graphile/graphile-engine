@@ -8,8 +8,7 @@ import {
 const GraphQLSchemaSnapshotSerializer = require("../src");
 expect.addSnapshotSerializer(GraphQLSchemaSnapshotSerializer);
 
-const getPokemonSchema = async () => {
-  const url = "https://graphql-pokemon.now.sh";
+const getSchema = async (url: string) => {
   const response = await fetch(url, {
     method: "POST",
     body: JSON.stringify({ query: getIntrospectionQuery() }),
@@ -22,6 +21,6 @@ const getPokemonSchema = async () => {
 };
 
 test("Pokemon GraphQL API has a consistent schema", async () => {
-  const schema = await getPokemonSchema();
+  const schema = await getSchema("https://graphql-pokemon.now.sh");
   expect(schema).toMatchSnapshot();
 });
