@@ -1,6 +1,6 @@
 {
   "name": "jest-serializer-graphql-schema",
-  "version": "1.0.0",
+  "version": "4.4.5",
   "description": "Jest serializer for GraphQLSchema objects",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -36,6 +36,9 @@
     "pretty-format": "^24.9.0",
     "typescript": "^3.6.4"
   },
+  "files": [
+    "dist"
+  ],
   "babel": {
     "presets": [
       [
