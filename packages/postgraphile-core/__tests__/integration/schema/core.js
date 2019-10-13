@@ -1,3 +1,4 @@
+const { lexicographicSortSchema } = require("graphql");
 const { withPgClient } = require("../../helpers");
 const { createPostGraphileSchema } = require("../../..");
 
@@ -11,6 +12,6 @@ exports.test = (schemas, options, setup, finalCheck = () => {}) => () =>
       }
     }
     const schema = await createPostGraphileSchema(client, schemas, options);
-    expect(schema).toMatchSnapshot();
+    expect(lexicographicSortSchema(schema)).toMatchSnapshot();
     await finalCheck(schema);
   });

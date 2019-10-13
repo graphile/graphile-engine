@@ -40,8 +40,8 @@ exports[`generated schema 1`] = `
 scalar Cursor
 
 type Dummy {
-  caps: String!
   id: String!
+  caps: String!
   random: Int!
 }
 
@@ -51,10 +51,10 @@ type DummyConnection {
 }
 
 enum DummyConnectionSortBy {
-  CAPS_ASC
-  CAPS_DESC
   ID_ASC
   ID_DESC
+  CAPS_ASC
+  CAPS_DESC
 }
 
 type DummyEdge {
@@ -72,7 +72,11 @@ interface Node {
 
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
-  dummyConnection(after: Cursor, first: Int, sortBy: DummyConnectionSortBy): DummyConnection
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
 
   """
   The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
@@ -84,12 +88,7 @@ type Query implements Node {
     """The globally unique \`ID\`."""
     id: ID!
   ): Node
-
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
+  dummyConnection(first: Int, after: Cursor, sortBy: DummyConnectionSortBy): DummyConnection
 }
 
 `;

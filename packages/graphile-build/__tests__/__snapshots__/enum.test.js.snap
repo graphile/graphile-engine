@@ -2,10 +2,10 @@
 
 exports[`generated schema 1`] = `
 enum MyEnum {
-  FOUR
   ONE @deprecated(reason: "We no longer support numbers smaller than PI")
-  THREE @deprecated(reason: "We no longer support numbers smaller than PI")
   TWO @deprecated(reason: "We no longer support numbers smaller than PI")
+  THREE @deprecated(reason: "We no longer support numbers smaller than PI")
+  FOUR
 }
 
 """An object with a globally unique \`ID\`."""
@@ -18,7 +18,11 @@ interface Node {
 
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
-  enum: MyEnum
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
 
   """
   The root query type must be a \`Node\` to work well with Relay 1 mutations. This just resolves to \`query\`.
@@ -30,12 +34,7 @@ type Query implements Node {
     """The globally unique \`ID\`."""
     id: ID!
   ): Node
-
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
+  enum: MyEnum
 }
 
 `;

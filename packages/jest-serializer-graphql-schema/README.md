@@ -67,64 +67,64 @@ This test will produce the following snapshot:
 ```graphql
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Pokemon Graph has a consistent schema 1`] = `
+exports[`Pokemon GraphQL API has a consistent schema 1`] = `
 """Represents a Pokémon's attack types"""
 type Attack {
-  """The damage of this Pokémon attack"""
-  damage: Int
-
   """The name of this Pokémon attack"""
   name: String
 
   """The type of this Pokémon attack"""
   type: String
+
+  """The damage of this Pokémon attack"""
+  damage: Int
 }
 
 """Represents a Pokémon"""
 type Pokemon {
-  """The attacks of this Pokémon"""
-  attacks: PokemonAttack
-
-  """The classification of this Pokémon"""
-  classification: String
-
-  """The evolution requirements of this Pokémon"""
-  evolutionRequirements: PokemonEvolutionRequirement
-
-  """The evolutions of this Pokémon"""
-  evolutions: [Pokemon]
-  fleeRate: Float
-
-  """The minimum and maximum weight of this Pokémon"""
-  height: PokemonDimension
-
   """The ID of an object"""
   id: ID!
-  image: String
-
-  """The maximum CP of this Pokémon"""
-  maxCP: Int
-
-  """The maximum HP of this Pokémon"""
-  maxHP: Int
-
-  """The name of this Pokémon"""
-  name: String
 
   """The identifier of this Pokémon"""
   number: String
 
-  """The type(s) of Pokémons that this Pokémon is resistant to"""
-  resistant: [String]
+  """The name of this Pokémon"""
+  name: String
+
+  """The minimum and maximum weight of this Pokémon"""
+  weight: PokemonDimension
+
+  """The minimum and maximum weight of this Pokémon"""
+  height: PokemonDimension
+
+  """The classification of this Pokémon"""
+  classification: String
 
   """The type(s) of this Pokémon"""
   types: [String]
 
+  """The type(s) of Pokémons that this Pokémon is resistant to"""
+  resistant: [String]
+
+  """The attacks of this Pokémon"""
+  attacks: PokemonAttack
+
   """The type(s) of Pokémons that this Pokémon weak to"""
   weaknesses: [String]
+  fleeRate: Float
 
-  """The minimum and maximum weight of this Pokémon"""
-  weight: PokemonDimension
+  """The maximum CP of this Pokémon"""
+  maxCP: Int
+
+  """The evolutions of this Pokémon"""
+  evolutions: [Pokemon]
+
+  """The evolution requirements of this Pokémon"""
+  evolutionRequirements: PokemonEvolutionRequirement
+
+  """The maximum HP of this Pokémon"""
+  maxHP: Int
+  image: String
 }
 
 """Represents a Pokémon's attack types"""
@@ -138,11 +138,11 @@ type PokemonAttack {
 
 """Represents a Pokémon's dimensions"""
 type PokemonDimension {
-  """The maximum value of this dimension"""
-  maximum: String
-
   """The minimum value of this dimension"""
   minimum: String
+
+  """The maximum value of this dimension"""
+  maximum: String
 }
 
 """Represents a Pokémon's requirement to evolve"""
@@ -156,10 +156,27 @@ type PokemonEvolutionRequirement {
 
 """Query any Pokémon by number or name"""
 type Query {
-  pokemon(id: String, name: String): Pokemon
-  pokemons(first: Int!): [Pokemon]
   query: Query
+  pokemons(first: Int!): [Pokemon]
+  pokemon(id: String, name: String): Pokemon
 }
 
 `;
+```
+
+# Sorting Schemas
+
+Note that by default, schemas are _not_ sorted before serialization.
+This means that if the content of the schema is reordered, your
+snapshot test will fail. If you don't care about the order of the
+content of your schema, sort your schema before calling
+`.toMatchSnapshot()`, like this:
+
+```ts
+import { lexicographicSortSchema } from "graphql";
+
+test("Pokemon GraphQL API has a consistent schema", async () => {
+  const schema = await getPokemonSchema();
+  expect(lexicographicSortSchema(schema)).toMatchSnapshot();
+});
 ```
