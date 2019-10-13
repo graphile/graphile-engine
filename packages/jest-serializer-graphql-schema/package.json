@@ -27,29 +27,17 @@
     "graphql": "^14.5.8"
   },
   "devDependencies": {
-    "@babel/core": "^7.6.4",
-    "@babel/preset-env": "^7.6.3",
-    "@babel/preset-typescript": "^7.6.0",
     "@types/node-fetch": "^2.5.2",
-    "babel-jest": "^24.9.0",
     "node-fetch": "^2.6.0",
     "pretty-format": "^24.9.0",
+    "ts-jest": "^24.1.0",
     "typescript": "^3.6.4"
   },
   "files": [
     "dist"
   ],
-  "babel": {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "targets": {
-            "node": "current"
-          }
-        }
-      ],
-      "@babel/preset-typescript"
-    ]
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node"
   }
 }
