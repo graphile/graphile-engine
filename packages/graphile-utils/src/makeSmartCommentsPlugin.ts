@@ -123,6 +123,12 @@ export type SmartCommentsJSON = {
     [identifier: string]: {
       tags?: SmartCommentTags;
       description?: string;
+      columns?: {
+        [columnName: string]: {
+          tags?: SmartCommentTags;
+          description?: string;
+        };
+      };
     };
   };
 };
@@ -141,10 +147,10 @@ export function makeSmartCommentsPluginFromJSON(
     const specByIdentifier = specByIdentifierByKind[kind];
     for (const identifier of Object.keys(specByIdentifier)) {
       const spec = specByIdentifier[identifier];
-      const { tags, description, ...rest } = spec;
+      const { tags, description, columns, ...rest } = spec;
       if (Object.keys(rest).length > 0) {
         console.warn(
-          `WARNING: makeSmartCommentsPluginFromJSON only supports tags and description currently, you have also set '${rest.join(
+          `WARNING: makeSmartCommentsPluginFromJSON only supports tags, description and columns currently, you have also set '${rest.join(
             "', '"
           )}'`
         );
@@ -152,9 +158,37 @@ export function makeSmartCommentsPluginFromJSON(
       rules.push({
         kind,
         match: identifier,
-        ...(tags ? { tags } : null),
-        ...(description ? { description } : null),
+        tags,
+        description,
       });
+      if (columns) {
+        if (kind !== PgEntityKind.CLASS) {
+          throw new Error(
+            `makeSmartCommentsPluginFromJSON: 'columns' is only valid on a class; you tried to set it on a '${kind}'`
+          );
+        }
+        for (const columnName of Object.keys(columns)) {
+          const columnSpec = columns[columnName];
+          const {
+            tags: columnTags,
+            description: columnDescription,
+            ...columnRest
+          } = columnSpec;
+          if (Object.keys(columnRest).length > 0) {
+            console.warn(
+              `WARNING: makeSmartCommentsPluginFromJSON columns only supports tags and description currently, you have also set '${columnRest.join(
+                "', '"
+              )}'`
+            );
+          }
+          rules.push({
+            kind: PgEntityKind.ATTRIBUTE,
+            match: `${identifier}.${columnName}`,
+            tags: columnTags,
+            description: columnDescription,
+          });
+        }
+      }
     }
   }
   return makeSmartCommentsPlugin(rules);
