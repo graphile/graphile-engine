@@ -1,5 +1,16 @@
+export enum PgEntityKind {
+  NAMESPACE = "namespace",
+  PROCEDURE = "procedure",
+  CLASS = "class",
+  TYPE = "type",
+  ATTRIBUTE = "attribute",
+  CONSTRAINT = "constraint",
+  EXTENSION = "extension",
+  INDEX = "index",
+}
+
 export interface PgNamespace {
-  kind: "namespace";
+  kind: PgEntityKind.NAMESPACE;
   id: string;
   name: string;
   comment: string | void;
@@ -8,7 +19,7 @@ export interface PgNamespace {
 }
 
 export interface PgProc {
-  kind: "procedure";
+  kind: PgEntityKind.PROCEDURE;
   id: string;
   name: string;
   comment: string | void;
@@ -32,7 +43,7 @@ export interface PgProc {
 }
 
 export interface PgClass {
-  kind: "class";
+  kind: PgEntityKind.CLASS;
   id: string;
   name: string;
   comment: string | void;
@@ -61,7 +72,7 @@ export interface PgClass {
 }
 
 export interface PgType {
-  kind: "type";
+  kind: PgEntityKind.TYPE;
   id: string;
   name: string;
   comment: string | void;
@@ -85,7 +96,7 @@ export interface PgType {
 }
 
 export interface PgAttribute {
-  kind: "attribute";
+  kind: PgEntityKind.ATTRIBUTE;
   classId: string;
   num: number;
   name: string;
@@ -109,7 +120,7 @@ export interface PgAttribute {
 }
 
 export interface PgConstraint {
-  kind: "constraint";
+  kind: PgEntityKind.CONSTRAINT;
   id: string;
   name: string;
   type: string;
@@ -129,7 +140,7 @@ export interface PgConstraint {
 }
 
 export interface PgExtension {
-  kind: "extension";
+  kind: PgEntityKind.EXTENSION;
   id: string;
   name: string;
   namespaceId: string;
@@ -143,7 +154,7 @@ export interface PgExtension {
 }
 
 export interface PgIndex {
-  kind: "index";
+  kind: PgEntityKind.INDEX;
   id: string;
   name: string;
   namespaceName: string;

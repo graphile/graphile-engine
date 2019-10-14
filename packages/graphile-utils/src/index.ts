@@ -10,6 +10,9 @@ import makeAddPgTableOrderByPlugin, {
   orderByAscDesc,
   MakeAddPgTableOrderByPluginOrders,
 } from "./makeAddPgTableOrderByPlugin";
+import makeSmartCommentsPlugin, {
+  makeSmartCommentsPluginFromJSON,
+} from "./makeSmartCommentsPlugin";
 
 export {
   AugmentedGraphQLFieldResolver,
@@ -19,6 +22,11 @@ export {
   Resolvers,
   ExtensionDefinition,
 } from "./makeExtendSchemaPlugin";
+export {
+  SmartCommentFilterFunction,
+  SmartCommentRule,
+  SmartCommentTags,
+} from "./makeSmartCommentsPlugin";
 export {
   embed,
   gql,
@@ -30,6 +38,8 @@ export {
   makeProcessSchemaPlugin,
   makeAddPgTableConditionPlugin,
   makeAddPgTableOrderByPlugin,
+  makeSmartCommentsPlugin,
+  makeSmartCommentsPluginFromJSON,
   orderByAscDesc,
   MakeAddPgTableOrderByPluginOrders,
 };
