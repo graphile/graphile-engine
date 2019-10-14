@@ -94,6 +94,7 @@ export default function makeSmartCommentsPlugin(
           if (!rule.match(entity)) {
             return;
           }
+          hits++;
           if (rule.tags) {
             // Overwrite relevant tags
             Object.assign(entity.tags, rule.tags);
