@@ -154,6 +154,7 @@ export interface PgIndex {
   indexType: string;
   isUnique: boolean;
   isPrimary: boolean;
+  isPartial: boolean;
   attributeNums: Array<number>;
   attributePropertiesAsc: Array<boolean> | void;
   attributePropertiesNullsFirst: Array<boolean> | void;
