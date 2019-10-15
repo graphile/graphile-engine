@@ -93,6 +93,13 @@ export default class QueryBuilder {
     addNotDistinctFromNullCase?: boolean;
     useAsterisk?: boolean;
   }): SQL;
+  public buildChild(): QueryBuilder;
+  public buildNamedChildFrom(
+    name: string,
+    from: SQLGen,
+    field: SQLGen
+  ): QueryBuilder;
+  public getNamedChild(name: string): QueryBuilder | undefined;
 
   // ----------------------------------------
 
