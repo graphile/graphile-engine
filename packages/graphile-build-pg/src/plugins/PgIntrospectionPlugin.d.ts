@@ -1,4 +1,4 @@
-import { SchemaBuilder, Options } from "../../../graphile-build/src";
+import { SchemaBuilder, Options } from "graphile-build";
 
 export interface PgNamespace {
   kind: "namespace";
