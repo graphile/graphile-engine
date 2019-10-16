@@ -2,14 +2,34 @@
 
 # Graphile Engine
 
+<span class="badge-patreon"><a href="https://patreon.com/benjie" title="Support Graphile development on Patreon"><img src="https://img.shields.io/badge/sponsor-via%20Patreon-orange.svg" alt="Patreon sponsor button" /></a></span>
+[![Discord chat room](https://img.shields.io/discord/489127045289476126.svg)](http://discord.gg/graphile)
+[![Package on npm](https://img.shields.io/npm/v/graphile-build.svg?style=flat)](https://www.npmjs.com/package/graphile-build)
 ![MIT license](https://img.shields.io/npm/l/graphile-build.svg)
-[![Gitter chat room](https://badges.gitter.im/graphile/postgraphile.svg)](https://gitter.im/graphile/postgraphile?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-<span class="badge-patreon"><a href="https://patreon.com/benjie" title="Support Graphile development through Patreon"><img src="https://img.shields.io/badge/patreon-donate-yellow.svg" alt="Patreon donate button" /></a></span>
-[![Follow](https://img.shields.io/badge/twitter-@benjie-blue.svg)](https://twitter.com/benjie)
+[![Follow](https://img.shields.io/badge/twitter-@GraphileHQ-blue.svg)](https://twitter.com/GraphileHQ)
 
 Graphile Engine enables you to build high-performance easily-extensible GraphQL schemas by combining plugins.
 
-**NOTE**: _You might be looking for [PostGraphile](https://github.com/graphile/postgraphile) which is the Graphile Engine applied to a PostgreSQL database._
+**NOTE**: _You might be looking for [PostGraphile](https://github.com/graphile/postgraphile) which is Graphile Engine applied to a PostgreSQL database._
+
+<!-- SPONSORS_BEGIN -->
+
+## Crowd-funded open-source software
+
+To help us develop this software sustainably under the MIT license, we ask
+all individuals and businesses that use it to help support its ongoing
+maintenance and development via sponsorship.
+
+### [Click here to find out more about sponsors and sponsorship.](https://www.graphile.org/sponsor/)
+
+And please give some love to our featured sponsors 🤩:
+
+<table><tr>
+<td align="center"><a href="http://chads.website/"><img src="https://www.graphile.org/images/sponsors/chadf.png" width="90" height="90" alt="Chad Furman" /><br />Chad Furman</a></td>
+<td align="center"><a href="https://timescale.com/"><img src="https://www.graphile.org/images/sponsors/timescale.svg" width="90" height="90" alt="Timescale" /><br />Timescale</a></td>
+</tr></table>
+
+<!-- SPONSORS_END -->
 
 ## Monorepo contents
 
@@ -28,42 +48,43 @@ graphile-build plugins easier.
 **[postgraphile-core][]**: Contains the GraphQL schema functionality of
 [PostGraphile][], does not contain the web layer.
 
-**[graphql-parse-resolve-info][]**: Parses a GraphQLResolveInfo object into a
+**[graphql-parse-resolve-info][]**: Parses a `GraphQLResolveInfo` object into a
 tree of the fields that are being requested to enable optimisations to your
-GraphQL schema (e.g. we use it in graphile-build-pg to determine which fields
+GraphQL schema (e.g. we use it in `graphile-build-pg` to determine which fields
 are required from the SQL database).
 
-## History
+## Brief History
 
-A proof of concept was built by [Benjie](https://twitter.com/benjie) over a few
-weeks back in 2017, growing out of a need for more efficient SQL queries,
-easier extensibility and greater customisation in [PostGraphQL][postgraphile].
-Over the next year thanks to the input of the community and ongoing development
-and testing it matured into the production-ready system it is today.
-
-We're extremely grateful to [Caleb Meredith][] for the stellar work he put into
-PostGraphQL, and to the community who inspired the idea.
+Proof of concept was built by [@Benjie](https://twitter.com/benjie) in 2017,
+growing out of a need for greater performance, easier extensibility and
+greater customisation in [PostGraphQL][postgraphile]. Over the next year
+thanks to the input of the community and ongoing development and testing,
+Graphile Engine has matured into the production-ready system it is today.
 
 ## Development
 
-```
+Below is a quick-start, for more detailed instructions, please [see the
+CONTRIBUTING.md documentation in PostGraphile](https://github.com/graphile/postgraphile/blob/master/CONTRIBUTING.md).
+
+```bash
 yarn
 yarn lerna bootstrap
 yarn watch
 ```
 
-Watch will keep monitoring and compiling the babel files, so open another
-terminal to run the tests:
+`yarn watch` will keep monitoring and compiling the babel files, so open
+another terminal to run the tests (Note: your PostgreSQL server must be
+[configured for logical decoding](packages/lds/README.md#postgresql-configuration)):
 
-```
-createdb pggql_test
-export TEST_DATABASE_URL="postgres:///pggql_test"
-lerna run test
+```bash
+createdb graphileengine_test
+export TEST_DATABASE_URL="postgres:///graphileengine_test"
+yarn lerna run test
 ```
 
 If the above succeeds, you're good to go! If not, please try again after
-running `yarn install --force` and failing that reach out on twitter:
-[@benjie](https://twitter.com/benjie).
+running `yarn install --force` and always feel free to reach out via [our
+discord chat](http://discord.gg/graphile) on the #core-development channel.
 
 ### Working with Docker
 
@@ -71,7 +92,6 @@ If you want to work in a Docker environment you can follow
 [the instructions on the wiki](https://github.com/graphile/graphile-build/wiki/Development-with-docker-compose).
 
 [postgraphile]: https://github.com/graphile/postgraphile
-[caleb meredith]: https://github.com/calebmer
 [lerna]: https://github.com/lerna/lerna
 [graphile-build]: packages/graphile-build/
 [graphile-build-pg]: packages/graphile-build-pg/

@@ -2,15 +2,23 @@
 import * as sql from "pg-sql2";
 import type { SQL } from "pg-sql2";
 import isSafeInteger from "lodash/isSafeInteger";
+import chunk from "lodash/chunk";
+import type { PgClass, PgType } from "./plugins/PgIntrospectionPlugin";
 
-const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
+// eslint-disable-next-line flowtype/no-weak-types
+type GraphQLContext = any;
+
+const isDev = process.env.POSTGRAPHILE_ENV === "development";
 
 type GenContext = {
   queryBuilder: QueryBuilder,
 };
 type Gen<T> = (context: GenContext) => T;
 
-function callIfNecessary<T>(o: Gen<T> | T, context: GenContext): T {
+// Importantly, this cannot include a function
+type CallResult = null | string | number | boolean | SQL;
+
+function callIfNecessary<T: CallResult>(o: Gen<T> | T, context: GenContext): T {
   if (typeof o === "function") {
     return o(context);
   } else {
@@ -18,7 +26,7 @@ function callIfNecessary<T>(o: Gen<T> | T, context: GenContext): T {
   }
 }
 
-function callIfNecessaryArray<T>(
+function callIfNecessaryArray<T: CallResult>(
   o: Array<Gen<T> | T>,
   context: GenContext
 ): Array<T> {
@@ -29,18 +37,47 @@ function callIfNecessaryArray<T>(
   }
 }
 
-type RawAlias = Symbol | string;
+export type RawAlias = Symbol | string;
 type SQLAlias = SQL;
 type SQLGen = Gen<SQL> | SQL;
 type NumberGen = Gen<number> | number;
-type CursorValue = {};
+type CursorValue = Array<mixed>;
 type CursorComparator = (val: CursorValue, isAfter: boolean) => void;
 
+export type QueryBuilderOptions = {
+  supportsJSONB?: boolean, // Defaults to true
+};
+
+function escapeLarge(sqlFragment: SQL, type: PgType) {
+  const actualType = type.domainBaseType || type;
+  if (actualType.category === "N") {
+    if (
+      [
+        "21" /* int2 */,
+        "23" /* int4 */,
+        "700" /* float4 */,
+        "701" /* float8 */,
+      ].includes(actualType.id)
+    ) {
+      // No need for special handling
+      return sqlFragment;
+    }
+    // Otherwise force the id to be a string
+    return sql.fragment`((${sqlFragment})::numeric)::text`;
+  }
+  return sqlFragment;
+}
+
 class QueryBuilder {
+  parentQueryBuilder: QueryBuilder | void;
+  context: GraphQLContext;
+  rootValue: any; // eslint-disable-line flowtype/no-weak-types
+  supportsJSONB: boolean;
   locks: {
-    [string]: true | string,
+    [string]: false | true | string,
   };
   finalized: boolean;
+  selectedIdentifiers: boolean;
   data: {
     cursorPrefix: Array<string>,
     select: Array<[SQLGen, RawAlias]>,
@@ -52,16 +89,20 @@ class QueryBuilder {
       lower: Array<SQLGen>,
       upper: Array<SQLGen>,
     },
-    orderBy: Array<[SQLGen, boolean]>,
+    orderBy: Array<[SQLGen, boolean, boolean | null]>,
     orderIsUnique: boolean,
     limit: ?NumberGen,
     offset: ?NumberGen,
     first: ?number,
     last: ?number,
     beforeLock: {
-      [string]: Array<() => void>,
+      [string]: Array<() => void> | null,
     },
     cursorComparator: ?CursorComparator,
+    liveConditions: Array<
+      // eslint-disable-next-line flowtype/no-weak-types
+      [(data: {}) => (record: any) => boolean, { [key: string]: SQL } | void]
+    >,
   };
   compiledData: {
     cursorPrefix: Array<string>,
@@ -74,7 +115,7 @@ class QueryBuilder {
       lower: Array<SQL>,
       upper: Array<SQL>,
     },
-    orderBy: Array<[SQL, boolean]>,
+    orderBy: Array<[SQL, boolean, boolean | null]>,
     orderIsUnique: boolean,
     limit: ?number,
     offset: ?number,
@@ -82,10 +123,42 @@ class QueryBuilder {
     last: ?number,
     cursorComparator: ?CursorComparator,
   };
+  lockContext: {
+    queryBuilder: QueryBuilder,
+  };
 
-  constructor() {
-    this.locks = {};
+  constructor(
+    options: QueryBuilderOptions = {},
+    context: GraphQLContext = {},
+    rootValue?: any // eslint-disable-line flowtype/no-weak-types
+  ) {
+    this.context = context || {};
+    this.rootValue = rootValue;
+    this.supportsJSONB =
+      typeof options.supportsJSONB === "undefined" ||
+      options.supportsJSONB === null
+        ? true
+        : !!options.supportsJSONB;
+
+    this.locks = {
+      // As a performance optimisation, we're going to list a number of lock
+      // types so that V8 doesn't need to mutate the object too much
+      cursorComparator: false,
+      select: false,
+      selectCursor: false,
+      from: false,
+      join: false,
+      whereBound: false,
+      where: false,
+      orderBy: false,
+      orderIsUnique: false,
+      first: false,
+      last: false,
+      limit: false,
+      offset: false,
+    };
     this.finalized = false;
+    this.selectedIdentifiers = false;
     this.data = {
       // TODO: refactor `cursorPrefix`, it shouldn't be here (or should at least have getters/setters)
       cursorPrefix: ["natural"],
@@ -104,8 +177,25 @@ class QueryBuilder {
       offset: null,
       first: null,
       last: null,
-      beforeLock: {},
+      beforeLock: {
+        // As a performance optimisation, we're going to list a number of lock
+        // types so that V8 doesn't need to mutate the object too much
+        cursorComparator: [],
+        select: [],
+        selectCursor: [],
+        from: [],
+        join: [],
+        whereBound: [],
+        where: [],
+        orderBy: [],
+        orderIsUnique: [],
+        first: [],
+        last: [],
+        limit: [],
+        offset: [],
+      },
       cursorComparator: null,
+      liveConditions: [],
     };
     this.compiledData = {
       cursorPrefix: ["natural"],
@@ -150,15 +240,115 @@ class QueryBuilder {
       this.lock("limit");
       this.lock("offset");
     });
+    this.lockContext = Object.freeze({
+      queryBuilder: this,
+    });
+  }
+
+  // ----------------------------------------
+
+  // Helper function
+  jsonbBuildObject(fields: Array<[SQL, RawAlias]>) {
+    if (this.supportsJSONB && fields.length > 50) {
+      const fieldsChunks = chunk(fields, 50);
+      const chunkToJson = fieldsChunk =>
+        sql.fragment`jsonb_build_object(${sql.join(
+          fieldsChunk.map(
+            ([expr, alias]) =>
+              sql.fragment`${sql.literal(alias)}::text, ${expr}`
+          ),
+          ", "
+        )})`;
+      return sql.fragment`(${sql.join(
+        fieldsChunks.map(chunkToJson),
+        " || "
+      )})::json`;
+    } else {
+      // PG9.4 will have issues with more than 100 parameters (50 keys)
+      return sql.fragment`json_build_object(${sql.join(
+        fields.map(
+          ([expr, alias]) => sql.fragment`${sql.literal(alias)}::text, ${expr}`
+        ),
+        ", "
+      )})`;
+    }
   }
 
   // ----------------------------------------
 
   beforeLock(field: string, fn: () => void) {
     this.checkLock(field);
-    this.data.beforeLock[field] = this.data.beforeLock[field] || [];
+    if (!this.data.beforeLock[field]) {
+      this.data.beforeLock[field] = [];
+    }
+    // $FlowFixMe: this is guaranteed to be set, due to the if statement above
     this.data.beforeLock[field].push(fn);
   }
+
+  makeLiveCollection(
+    table: PgClass,
+    // eslint-disable-next-line flowtype/no-weak-types
+    cb?: (checker: (data: any) => (record: any) => boolean) => void
+  ) {
+    /* the actual condition doesn't matter hugely, 'select' should work */
+    if (!this.rootValue || !this.rootValue.liveConditions) return;
+    const liveConditions = this.data.liveConditions;
+    const checkerGenerator = data => {
+      // Compute this once.
+      const checkers = liveConditions.map(([checkerGenerator]) =>
+        checkerGenerator(data)
+      );
+      return record => checkers.every(checker => checker(record));
+    };
+    if (this.parentQueryBuilder) {
+      const parentQueryBuilder = this.parentQueryBuilder;
+      if (cb) {
+        throw new Error(
+          "Either use parentQueryBuilder or pass callback, not both."
+        );
+      }
+      parentQueryBuilder.beforeLock("select", () => {
+        const id = this.rootValue.liveConditions.push(checkerGenerator) - 1;
+        // BEWARE: it's easy to override others' conditions, and that will cause issues. Be sensible.
+        const allRequirements = this.data.liveConditions.reduce(
+          (memo, [_checkerGenerator, requirements]) =>
+            requirements ? Object.assign(memo, requirements) : memo,
+          {}
+        );
+        parentQueryBuilder.select(
+          sql.fragment`\
+json_build_object('__id', ${sql.value(id)}::int
+${sql.join(
+  Object.keys(allRequirements).map(
+    key => sql.fragment`, ${sql.literal(key)}::text, ${allRequirements[key]}`
+  ),
+  ""
+)})`,
+          "__live"
+        );
+      });
+    } else if (cb) {
+      cb(checkerGenerator);
+    } else {
+      throw new Error(
+        "makeLiveCollection was called without parentQueryBuilder and without callback"
+      );
+    }
+  }
+
+  addLiveCondition(
+    // eslint-disable-next-line flowtype/no-weak-types
+    checkerGenerator: (data: {}) => (record: any) => boolean,
+    requirements?: { [key: string]: SQL }
+  ) {
+    if (requirements && !this.parentQueryBuilder) {
+      throw new Error(
+        "There's no parentQueryBuilder, so there cannot be requirements"
+      );
+    }
+    this.data.liveConditions.push([checkerGenerator, requirements]);
+  }
+
   setCursorComparator(fn: CursorComparator) {
     this.checkLock("cursorComparator");
     this.data.cursorComparator = fn;
@@ -186,11 +376,30 @@ class QueryBuilder {
       // https://github.com/graphql/graphql-js/blob/680685dd14bd52c6475305e150e5f295ead2aa7e/src/language/lexer.js#L551-L581
       //
       // so this should not cause any issues in practice.
-      if (/^(@+|[_A-Za-z])[_0-9A-Za-z]*$/.test(alias) !== true) {
+      if (/^(\$+|@+|[_A-Za-z])[_0-9A-Za-z]*$/.test(alias) !== true) {
         throw new Error(`Disallowed alias '${alias}'.`);
       }
     }
     this.data.select.push([exprGen, alias]);
+  }
+  selectIdentifiers(table: PgClass) {
+    if (this.selectedIdentifiers) return;
+    const primaryKey = table.primaryKeyConstraint;
+    if (!primaryKey) return;
+    const primaryKeys = primaryKey.keyAttributes;
+    this.select(
+      sql.fragment`json_build_array(${sql.join(
+        primaryKeys.map(key =>
+          escapeLarge(
+            sql.fragment`${this.getTableAlias()}.${sql.identifier(key.name)}`,
+            key.type
+          )
+        ),
+        ", "
+      )})`,
+      "__identifiers"
+    );
+    this.selectedIdentifiers = true;
   }
   selectCursor(exprGen: SQLGen) {
     this.checkLock("selectCursor");
@@ -222,9 +431,13 @@ class QueryBuilder {
   setOrderIsUnique() {
     this.data.orderIsUnique = true;
   }
-  orderBy(exprGen: SQLGen, ascending: boolean = true) {
+  orderBy(
+    exprGen: SQLGen,
+    ascending: boolean = true,
+    nullsFirst: boolean | null
+  ) {
     this.checkLock("orderBy");
-    this.data.orderBy.push([exprGen, ascending]);
+    this.data.orderBy.push([exprGen, ascending, nullsFirst]);
   }
   limit(limitGen: NumberGen) {
     this.checkLock("limit");
@@ -367,19 +580,33 @@ class QueryBuilder {
       ", "
     );
   }
-  buildSelectJson({ addNullCase }: { addNullCase?: boolean }) {
+  buildSelectJson({
+    addNullCase,
+    addNotDistinctFromNullCase,
+  }: {
+    addNullCase?: boolean,
+    addNotDistinctFromNullCase?: boolean,
+  }) {
     this.lockEverything();
     let buildObject = this.compiledData.select.length
-      ? sql.fragment`json_build_object(${sql.join(
-          this.compiledData.select.map(
-            ([sqlFragment, alias]) =>
-              sql.fragment`${sql.literal(alias)}::text, ${sqlFragment}`
-          ),
-          ", "
-        )})`
+      ? this.jsonbBuildObject(this.compiledData.select)
       : sql.fragment`to_json(${this.getTableAlias()})`;
-    if (addNullCase) {
-      buildObject = sql.fragment`(case when ${this.getTableAlias()} is not distinct from null then null else ${buildObject} end)`;
+    if (addNotDistinctFromNullCase) {
+      /*
+       * `is null` is not sufficient here because the record might exist but
+       * have null as each of its values; so we use `is not distinct from null`
+       * to assert that the record itself doesn't exist. This is typically used
+       * with column values.
+       */
+      buildObject = sql.fragment`(case when (${this.getTableAlias()} is not distinct from null) then null else ${buildObject} end)`;
+    } else if (addNullCase) {
+      /*
+       * `is null` is probably used here because it's the result of a function;
+       * functions seem to have trouble differentiating between `null::my_type`
+       * and  `(null,null,null)::my_type`, always opting for the latter which
+       * then causes issues with the `GraphQLNonNull`s in the schema.
+       */
+      buildObject = sql.fragment`(case when (${this.getTableAlias()} is null) then null else ${buildObject} end)`;
     }
     return buildObject;
   }
@@ -395,30 +622,40 @@ class QueryBuilder {
   buildWhereClause(
     includeLowerBound: boolean,
     includeUpperBound: boolean,
-    { addNullCase }: { addNullCase?: boolean }
+    {
+      addNullCase,
+      addNotDistinctFromNullCase,
+    }: { addNullCase?: boolean, addNotDistinctFromNullCase?: boolean }
   ) {
     this.lock("where");
     const clauses = [
-      ...(addNullCase
-        ? /*
-           * Okay... so this is quite interesting. When we're talking about
-           * composite types, `(foo is not null)` and `not (foo is null)` are
-           * NOT equivalent! Here's why:
-           *
-           * `(foo is null)`
-           *   true if every field of the row is null
-           *
-           * `(foo is not null)`
-           *   true if every field of the row is not null
-           *
-           * `not (foo is null)`
-           *   true if there's at least one field that is not null
-           *
-           * So don't "simplify" the line below! We're probably checking if
-           * the result of a function call returning a compound type was
-           * indeed null.
-           */
-          [sql.fragment`not (${this.getTableAlias()} is null)`]
+      /*
+       * Okay... so this is quite interesting. When we're talking about
+       * composite types, `(foo is not null)` and `not (foo is null)` are NOT
+       * equivalent! Here's why:
+       *
+       * `(foo is null)`
+       *   true if every field of the row is null
+       *
+       * `(foo is not null)`
+       *   true if every field of the row is not null
+       *
+       * `not (foo is null)`
+       *   true if there's at least one field that is not null
+       *
+       * `is [not] distinct from null` does differentiate between these cases,
+       * but when a function returns something like `select * from my_table
+       * where false`, it actually returns `(null, null, null)::my_table`,
+       * which will cause issues when we apply the `GraphQLNonNull` constraints
+       * to the results - we want to treat this as null.
+       *
+       * So don't "simplify" the line below! We're probably checking if the
+       * result of a function call returning a compound type was indeed null.
+       */
+      ...(addNotDistinctFromNullCase
+        ? [sql.fragment`(${this.getTableAlias()} is distinct from null)`]
+        : addNullCase
+        ? [sql.fragment`not (${this.getTableAlias()} is null)`]
         : []),
       ...this.compiledData.where,
       ...(includeLowerBound ? [this.buildWhereBoundClause(true)] : []),
@@ -434,6 +671,8 @@ class QueryBuilder {
       asJsonAggregate?: boolean,
       onlyJsonField?: boolean,
       addNullCase?: boolean,
+      addNotDistinctFromNullCase?: boolean,
+      useAsterisk?: boolean,
     } = {}
   ) {
     const {
@@ -441,54 +680,64 @@ class QueryBuilder {
       asJsonAggregate = false,
       onlyJsonField = false,
       addNullCase = false,
+      addNotDistinctFromNullCase = false,
+      useAsterisk = false,
     } = options;
 
     this.lockEverything();
     if (onlyJsonField) {
-      return this.buildSelectJson({ addNullCase });
+      return this.buildSelectJson({ addNullCase, addNotDistinctFromNullCase });
     }
     const { limit, offset, flip } = this.getFinalLimitAndOffset();
     const fields =
       asJson || asJsonAggregate
-        ? sql.fragment`${this.buildSelectJson({ addNullCase })} as object`
+        ? sql.fragment`${this.buildSelectJson({
+            addNullCase,
+            addNotDistinctFromNullCase,
+          })} as object`
         : this.buildSelectFields();
 
-    let fragment = sql.fragment`
-      select ${fields}
-      ${this.compiledData.from &&
-        sql.fragment`from ${
-          this.compiledData.from[0]
-        } as ${this.getTableAlias()}`}
-      ${this.compiledData.join.length && sql.join(this.compiledData.join, " ")}
-      where ${this.buildWhereClause(true, true, options)}
-      ${
-        this.compiledData.orderBy.length
-          ? sql.fragment`order by ${sql.join(
-              this.compiledData.orderBy.map(
-                ([expr, ascending]) =>
-                  sql.fragment`${expr} ${
-                    Number(ascending) ^ Number(flip)
-                      ? sql.fragment`ASC`
-                      : sql.fragment`DESC`
-                  }`
-              ),
-              ","
-            )}`
-          : ""
-      }
-      ${isSafeInteger(limit) && sql.fragment`limit ${sql.literal(limit)}`}
-      ${offset && sql.fragment`offset ${sql.literal(offset)}`}
-    `;
+    let fragment = sql.fragment`\
+select ${useAsterisk ? sql.fragment`${this.getTableAlias()}.*` : fields}
+${this.compiledData.from &&
+  sql.fragment`from ${this.compiledData.from[0]} as ${this.getTableAlias()}`}
+${this.compiledData.join.length && sql.join(this.compiledData.join, " ")}
+where ${this.buildWhereClause(true, true, options)}
+${
+  this.compiledData.orderBy.length
+    ? sql.fragment`order by ${sql.join(
+        this.compiledData.orderBy.map(
+          ([expr, ascending, nullsFirst]) =>
+            sql.fragment`${expr} ${
+              Number(ascending) ^ Number(flip)
+                ? sql.fragment`ASC`
+                : sql.fragment`DESC`
+            }${
+              nullsFirst === true
+                ? sql.fragment` NULLS FIRST`
+                : nullsFirst === false
+                ? sql.fragment` NULLS LAST`
+                : null
+            }`
+        ),
+        ","
+      )}`
+    : ""
+}
+${isSafeInteger(limit) && sql.fragment`limit ${sql.literal(limit)}`}
+${offset && sql.fragment`offset ${sql.literal(offset)}`}`;
     if (flip) {
       const flipAlias = Symbol();
-      fragment = sql.fragment`
-        with ${sql.identifier(flipAlias)} as (
-          ${fragment}
-        )
-        select *
-        from ${sql.identifier(flipAlias)}
-        order by (row_number() over (partition by 1)) desc
-        `;
+      fragment = sql.fragment`\
+with ${sql.identifier(flipAlias)} as (
+  ${fragment}
+)
+select *
+from ${sql.identifier(flipAlias)}
+order by (row_number() over (partition by 1)) desc`;
+    }
+    if (useAsterisk) {
+      fragment = sql.fragment`select ${fields} from (${fragment}) ${this.getTableAlias()}`;
     }
     if (asJsonAggregate) {
       const aggAlias = Symbol();
@@ -508,15 +757,18 @@ class QueryBuilder {
   }
   lock(type: string) {
     if (this.locks[type]) return;
-    const getContext = () => ({
-      queryBuilder: this,
-    });
-    const beforeLocks = this.data.beforeLock[type];
-    this.data.beforeLock[type] = [];
-    for (const fn of beforeLocks || []) {
-      fn();
+    const context = this.lockContext;
+    const { beforeLock } = this.data;
+    let locks = beforeLock[type];
+    if (locks) {
+      beforeLock[type] = [];
+      for (let i = 0, l = locks.length; i < l; i++) {
+        locks[i]();
+      }
     }
-    this.locks[type] = isDev ? new Error("Initally locked here").stack : true;
+    if (type !== "select") {
+      this.locks[type] = isDev ? new Error("Initally locked here").stack : true;
+    }
     if (type === "cursorComparator") {
       // It's meant to be a function
       this.compiledData[type] = this.data[type];
@@ -524,47 +776,65 @@ class QueryBuilder {
       // Handle properties separately
       this.compiledData[type].lower = callIfNecessaryArray(
         this.data[type].lower,
-        getContext()
+        context
       );
       this.compiledData[type].upper = callIfNecessaryArray(
         this.data[type].upper,
-        getContext()
+        context
       );
     } else if (type === "select") {
-      // Assume that duplicate fields must be identical, don't output the same key multiple times
-      const seenFields = [];
-      this.compiledData[type] = this.data[type].reduce((memo, [a, b]) => {
-        if (seenFields.indexOf(b) < 0) {
-          seenFields.push(b);
-          memo.push([callIfNecessary(a, getContext()), b]);
+      /*
+       * NOTICE: locking select can cause additional selects to be added, so the
+       * length of this.data[type] may increase during the operation. This is
+       * why we handle this.locks[type] separately.
+       */
+
+      // Assume that duplicate fields must be identical, don't output the same
+      // key multiple times
+      const seenFields: { [key: string | Symbol]: true } = {};
+      const data = [];
+      const selects = this.data[type];
+
+      // DELIBERATE slow loop, see NOTICE above
+      for (let i = 0; i < selects.length; i++) {
+        const [valueOrGenerator, columnName] = selects[i];
+        if (!seenFields[columnName]) {
+          seenFields[columnName] = true;
+          data.push([callIfNecessary(valueOrGenerator, context), columnName]);
+          locks = beforeLock[type];
+          if (locks) {
+            beforeLock[type] = [];
+            for (let i = 0, l = locks.length; i < l; i++) {
+              locks[i]();
+            }
+          }
         }
-        return memo;
-      }, []);
+      }
+      this.locks[type] = isDev ? new Error("Initally locked here").stack : true;
+      this.compiledData[type] = data;
     } else if (type === "orderBy") {
-      this.compiledData[type] = this.data[type].map(([a, b]) => [
-        callIfNecessary(a, getContext()),
+      this.compiledData[type] = this.data[type].map(([a, b, c]) => [
+        callIfNecessary(a, context),
         b,
+        c,
       ]);
     } else if (type === "from") {
       if (this.data.from) {
         const f = this.data.from;
-        this.compiledData.from = [callIfNecessary(f[0], getContext()), f[1]];
+        this.compiledData.from = [callIfNecessary(f[0], context), f[1]];
       }
     } else if (type === "join" || type === "where") {
-      this.compiledData[type] = callIfNecessaryArray(
-        this.data[type],
-        getContext()
-      );
+      this.compiledData[type] = callIfNecessaryArray(this.data[type], context);
     } else if (type === "selectCursor") {
-      this.compiledData[type] = callIfNecessary(this.data[type], getContext());
+      this.compiledData[type] = callIfNecessary(this.data[type], context);
     } else if (type === "cursorPrefix") {
       this.compiledData[type] = this.data[type];
     } else if (type === "orderIsUnique") {
       this.compiledData[type] = this.data[type];
     } else if (type === "limit") {
-      this.compiledData[type] = callIfNecessary(this.data[type], getContext());
+      this.compiledData[type] = callIfNecessary(this.data[type], context);
     } else if (type === "offset") {
-      this.compiledData[type] = callIfNecessary(this.data[type], getContext());
+      this.compiledData[type] = callIfNecessary(this.data[type], context);
     } else if (type === "first") {
       this.compiledData[type] = this.data[type];
     } else if (type === "last") {

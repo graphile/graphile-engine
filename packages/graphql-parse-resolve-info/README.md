@@ -1,7 +1,12 @@
-graphql-parse-resolve-info
-==========================
+# graphql-parse-resolve-info
 
-Parses a GraphQLResolveInfo object into a tree of the fields that are being
+<span class="badge-patreon"><a href="https://patreon.com/benjie" title="Support Graphile development on Patreon"><img src="https://img.shields.io/badge/sponsor-via%20Patreon-orange.svg" alt="Patreon sponsor button" /></a></span>
+[![Discord chat room](https://img.shields.io/discord/489127045289476126.svg)](http://discord.gg/graphile)
+[![Package on npm](https://img.shields.io/npm/v/graphql-parse-resolve-info.svg?style=flat)](https://www.npmjs.com/package/graphql-parse-resolve-info)
+![MIT license](https://img.shields.io/npm/l/graphql-parse-resolve-info.svg)
+[![Follow](https://img.shields.io/badge/twitter-@GraphileHQ-blue.svg)](https://twitter.com/GraphileHQ)
+
+Parses a `GraphQLResolveInfo` object into a tree of the fields that are being
 requested to enable optimisations to your GraphQL schema (e.g. to determine
 which fields are required from the SQL database).
 
@@ -11,9 +16,26 @@ complete the GraphQL request.
 
 Also provides a quick way to get the alias of the current field being resolved.
 
-API
----
+<!-- SPONSORS_BEGIN -->
 
+## Crowd-funded open-source software
+
+To help us develop this software sustainably under the MIT license, we ask
+all individuals and businesses that use it to help support its ongoing
+maintenance and development via sponsorship.
+
+### [Click here to find out more about sponsors and sponsorship.](https://www.graphile.org/sponsor/)
+
+And please give some love to our featured sponsors 🤩:
+
+<table><tr>
+<td align="center"><a href="http://chads.website/"><img src="https://www.graphile.org/images/sponsors/chadf.png" width="90" height="90" alt="Chad Furman" /><br />Chad Furman</a></td>
+<td align="center"><a href="https://timescale.com/"><img src="https://www.graphile.org/images/sponsors/timescale.svg" width="90" height="90" alt="Timescale" /><br />Timescale</a></td>
+</tr></table>
+
+<!-- SPONSORS_END -->
+
+## API
 
 ### `parseResolveInfo(resolveInfo)`
 
@@ -25,13 +47,11 @@ returning the following properties (recursively):
 - `name`: the name of the GraphQL field
 - `alias`: the alias this GraphQL field has been requested as, or if no alias was specified then the `name`
 - `args`: the arguments this field was called with; at the root level this
-  will be equivalent to the `args` that the `resolve(data, args, context,
-  resolveInfo) {}` method receives, at deeper levels this allows you to get the
+  will be equivalent to the `args` that the `resolve(data, args, context, resolveInfo) {}` method receives, at deeper levels this allows you to get the
   `args` for the nested fields without waiting for their resolvers to be called.
 - `fieldsByTypeName`: an object keyed by GraphQL object type names, where the
   values are another object keyed by the aliases of the fields requested with
-  values of the same format as the root level (i.e. `{alias, name, args,
-  fieldsByTypeName}`); see below for an example
+  values of the same format as the root level (i.e. `{alias, name, args, fieldsByTypeName}`); see below for an example
 
 Note that because GraphQL supports interfaces a resolver may return items of
 different types. For this reason, we key the fields by the GraphQL type name of
@@ -140,8 +160,7 @@ new GraphQLObjectType({
 });
 ```
 
-Example
--------
+## Example
 
 For the following GraphQL query:
 
@@ -191,27 +210,22 @@ The following resolver in the `allPosts` field:
 
 ```js
 const Query = new GraphQLObjectType({
-  name: 'Query',
+  name: "Query",
   fields: {
-
-
     allPosts: {
       type: new GraphQLNonNull(PostsConnection),
       resolve(parent, args, context, resolveInfo) {
-        const parsedResolveInfoFragment = parseResolveInfo(
-          resolveInfo
-        );
+        const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
         const simplifiedFragment = simplifyParsedResolveInfoFragmentWithType(
           parsedResolveInfoFragment,
           resolveInfo.returnType
         );
         // ...
       },
-    }
-
+    },
 
     // ...
-  }
+  },
 });
 ```
 
@@ -352,7 +366,6 @@ single-level object containing only the fields compatible with
            ...as before...
 ```
 
-Thanks
-------
+## Thanks
 
 This project was originally based on https://github.com/tjmehta/graphql-parse-fields, but has evolved a lot since then.

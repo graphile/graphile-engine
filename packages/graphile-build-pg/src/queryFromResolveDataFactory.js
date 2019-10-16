@@ -1,35 +1,56 @@
 // @flow
 import QueryBuilder from "./QueryBuilder";
+import type { QueryBuilderOptions } from "./QueryBuilder";
+import type { RawAlias } from "./QueryBuilder";
 import * as sql from "pg-sql2";
 import type { SQL } from "pg-sql2";
 import type { DataForType } from "graphile-build";
 import isSafeInteger from "lodash/isSafeInteger";
 import assert from "assert";
 
+// eslint-disable-next-line flowtype/no-weak-types
+type GraphQLContext = any;
+
 const identity = _ => _ !== null && _ !== undefined;
 
-export default (
+export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   from: SQL,
   fromAlias: ?SQL,
   resolveData: DataForType,
-  options: {
+  inOptions: {
     withPagination?: boolean,
     withPaginationAsFields?: boolean,
     asJson?: boolean,
     asJsonAggregate?: boolean,
     addNullCase?: boolean,
+    addNotDistinctFromNullCase?: boolean,
     onlyJsonField?: boolean,
+    useAsterisk?: boolean,
+    withCursor?: boolean,
   },
-  withBuilder?: (builder: QueryBuilder) => void
+  // TODO:v5: context is not optional
+  withBuilder?: ((builder: QueryBuilder) => void) | null | void,
+  context?: GraphQLContext = {},
+  rootValue?: any // eslint-disable-line flowtype/no-weak-types
 ) => {
   const {
     pgQuery,
+    pgAggregateQuery,
     pgCursorPrefix: reallyRawCursorPrefix,
-    pgCalculateTotalCount,
+    pgDontUseAsterisk,
     calculateHasNextPage,
     calculateHasPreviousPage,
     usesCursor: explicitlyUsesCursor,
   } = resolveData;
+
+  const preventAsterisk = pgDontUseAsterisk
+    ? pgDontUseAsterisk.length > 0
+    : false;
+  const options = {
+    ...inOptions,
+    // Allow pgDontUseAsterisk to override useAsterisk
+    useAsterisk: inOptions.useAsterisk && !preventAsterisk,
+  };
 
   const usesCursor: boolean =
     (explicitlyUsesCursor && explicitlyUsesCursor.length > 0) ||
@@ -39,14 +60,20 @@ export default (
   const rawCursorPrefix =
     reallyRawCursorPrefix && reallyRawCursorPrefix.filter(identity);
 
-  const queryBuilder = new QueryBuilder();
+  const queryBuilder = new QueryBuilder(
+    queryBuilderOptions,
+    context,
+    rootValue
+  );
   queryBuilder.from(from, fromAlias ? fromAlias : undefined);
 
-  for (const fn of pgQuery || []) {
-    fn(queryBuilder, resolveData);
-  }
   if (withBuilder) {
     withBuilder(queryBuilder);
+  }
+  if (pgQuery) {
+    for (let i = 0, l = pgQuery.length; i < l; i++) {
+      pgQuery[i](queryBuilder, resolveData);
+    }
   }
 
   function generateNextPrevPageSql(
@@ -125,10 +152,9 @@ export default (
      * just invert everything.
      */
 
-    const sqlCommonUnbounded = sql.fragment`
-      select 1
-      from ${queryBuilder.getTableExpression()} as ${queryBuilder.getTableAlias()}
-      `;
+    const sqlCommonUnbounded = sql.fragment`\
+select 1
+from ${queryBuilder.getTableExpression()} as ${queryBuilder.getTableAlias()}`;
     /*
      * This variable is a fragment to go into an `EXISTS(...)` call (after some tweaks).
      *
@@ -136,17 +162,17 @@ export default (
      *
      * - includeLowerBound (we want this for hasNextPage but not hasPreviousPage)
      * - includeUpperBound (we want this for hasPreviousPage but not hasNextPage)
-     * - options (specifically `{addNullCase}`) - we just pass this through.
+     * - options (specifically `{addNullCase, addNotDistinctFromNullCase}`) -
+     *   we just pass this through.
      *
      * So in hasNextPage mode (invert === false), this common SQL ends up
      * representing the collection from `(after || START)` onwards with no
      * upper bound. In hasPreviousPage mode (invert === true), it represents
      * everything from `(before || END)` backwards, with no lower bound.
      */
-    const sqlCommon = sql.fragment`
-      ${sqlCommonUnbounded}
-      where ${queryBuilder.buildWhereClause(!invert, invert, options)}
-    `;
+    const sqlCommon = sql.fragment`\
+${sqlCommonUnbounded}
+where ${queryBuilder.buildWhereClause(!invert, invert, options)}`;
 
     /*
      * Since the offset makes the diagram asymmetric, if offset === 0
@@ -177,11 +203,12 @@ export default (
          * `first` clause, otherwise there could be a next page before the
          * `before` clause.
          */
-        return sql.fragment`exists(
-          ${sqlCommonUnbounded}
-          where ${queryBuilder.buildWhereClause(false, false, options)}
-          and not (${queryBuilder.buildWhereBoundClause(invert)})
-        )`;
+        return sql.fragment`\
+exists(
+  ${sqlCommonUnbounded}
+  where ${queryBuilder.buildWhereClause(false, false, options)}
+  and not (${queryBuilder.buildWhereBoundClause(invert)})
+)`;
       } else {
         assert(queryHasFirst);
         // queryHasBefore could be true or false.
@@ -204,13 +231,12 @@ export default (
          */
         // Drop the `first` limit, see if there are any records that aren't
         // already in the list we've fetched.
-        return sql.fragment`exists(
-          ${sqlCommon}
-          and (${queryBuilder.getSelectCursor()})::text not in (select __cursor::text from ${sqlQueryAlias})
-          ${
-            offset === 0 ? sql.blank : sql.fragment`offset ${sql.value(offset)}`
-          }
-        )`;
+        return sql.fragment`\
+exists(
+  ${sqlCommon}
+  and (${queryBuilder.getSelectCursor()})::text not in (select __cursor::text from ${sqlQueryAlias})
+  ${offset === 0 ? sql.blank : sql.fragment`offset ${sql.value(offset)}`}
+)`;
       }
     } else {
       assert(!invert || offset === 0); // isForwardOrSymmetric
@@ -236,10 +262,11 @@ export default (
          *
          * We want to see if there's more than limit+offset records in sqlCommon.
          */
-        return sql.fragment`exists(
-          ${sqlCommon}
-          offset ${sql.literal(limit + offset)}
-        )`;
+        return sql.fragment`\
+exists(
+  ${sqlCommon}
+  offset ${sql.literal(limit + offset)}
+)`;
       }
     }
   }
@@ -254,7 +281,7 @@ export default (
   ) {
     // Sometimes we need a __cursor even if it's not a collection; e.g. to get the edge field on a mutation
     if (usesCursor) {
-      queryBuilder.selectCursor(() => {
+      queryBuilder.selectCursor((): SQL => {
         const orderBy = queryBuilder
           .getOrderByExpressionsAndDirections()
           .map(([expr]) => expr);
@@ -277,18 +304,28 @@ export default (
   }
   if (options.withPagination || options.withPaginationAsFields) {
     queryBuilder.setCursorComparator((cursorValue, isAfter) => {
+      function badCursor() {
+        queryBuilder.whereBound(sql.fragment`false`, isAfter);
+      }
       const orderByExpressionsAndDirections = queryBuilder.getOrderByExpressionsAndDirections();
-      if (
-        orderByExpressionsAndDirections.length > 0 &&
-        queryBuilder.isOrderUnique()
-      ) {
-        const sqlCursors = cursorValue[getPgCursorPrefix().length].map(val =>
-          sql.value(val)
-        );
-        if (!Array.isArray(sqlCursors)) {
-          queryBuilder.whereBound(sql.literal(false), isAfter);
+      if (orderByExpressionsAndDirections.length > 0) {
+        if (!queryBuilder.isOrderUnique()) {
+          throw new Error(
+            "The order supplied is not unique, so before/after cursors cannot be used. Please ensure the supplied order includes all the columns from the primary key or a unique constraint."
+          );
+        }
+        const rawPrefixes = cursorValue.slice(0, cursorValue.length - 1);
+        const rawCursors = cursorValue[cursorValue.length - 1];
+        if (rawPrefixes.length !== getPgCursorPrefix().length) {
+          badCursor();
+          return;
+        }
+        if (!Array.isArray(rawCursors)) {
+          badCursor();
+          return;
         }
         let sqlFilter = sql.fragment`false`;
+        const sqlCursors = rawCursors.map(val => sql.value(val));
         for (let i = orderByExpressionsAndDirections.length - 1; i >= 0; i--) {
           const [sqlExpression, ascending] = orderByExpressionsAndDirections[i];
           // If ascending and isAfter then >
@@ -299,38 +336,46 @@ export default (
               : sql.fragment`<`;
 
           const sqlOldFilter = sqlFilter;
-          sqlFilter = sql.fragment`
-          (
-            (
-              ${sqlExpression} ${comparison} ${sqlCursors[i] || sql.null}
-            )
-          OR
-            (
-              (
-                ${sqlExpression} = ${sqlCursors[i] || sql.null}
-              AND
-                ${sqlOldFilter}
-              )
-            )
-          )
-          `;
+          sqlFilter = sql.fragment`\
+(\
+  (${sqlExpression} ${comparison} ${sqlCursors[i] || sql.null})
+OR\
+  (\
+    ${sqlExpression} = ${sqlCursors[i] || sql.null}\
+  AND\
+    ${sqlOldFilter}\
+  )\
+)`;
         }
+
+        // Check the cursor prefixes apply
+        // TODO:v5: we should be able to do this in JS-land rather than SQL-land
+        sqlFilter = sql.fragment`(((${sql.join(
+          getPgCursorPrefix(),
+          ", "
+        )}) = (${sql.join(
+          rawPrefixes.map(val => sql.value(val)),
+          ", "
+        )})) AND (${sqlFilter}))`;
         queryBuilder.whereBound(sqlFilter, isAfter);
       } else if (
         cursorValue[0] === "natural" &&
         isSafeInteger(cursorValue[1]) &&
+        // $FlowFixMe: we know this is a number
         cursorValue[1] >= 0
       ) {
+        // $FlowFixMe: we know this is a number
+        const cursorValue1: number = cursorValue[1];
         if (isAfter) {
-          queryBuilder.offset(() => cursorValue[1]);
+          queryBuilder.offset(() => cursorValue1);
         } else {
           queryBuilder.limit(() => {
             const offset = queryBuilder.getOffset();
-            return Math.max(0, cursorValue[1] - offset - 1);
+            return Math.max(0, cursorValue1 - offset - 1);
           });
         }
       } else {
-        throw new Error("Cannot use cursors without orderBy");
+        throw new Error("Cannot use 'before'/'after' without unique 'orderBy'");
       }
     });
 
@@ -376,16 +421,11 @@ export default (
           true
         );
 
-    const totalCount = sql.fragment`(
-      select count(*)
-      from ${queryBuilder.getTableExpression()} as ${queryBuilder.getTableAlias()}
-      where ${queryBuilder.buildWhereClause(false, false, options)}
-    )`;
     const sqlWith = haveFields
       ? sql.fragment`with ${sqlQueryAlias} as (${query}), ${sqlSummaryAlias} as (select json_agg(to_json(${sqlQueryAlias})) as data from ${sqlQueryAlias})`
       : sql.fragment``;
     const sqlFrom = sql.fragment``;
-    const fields: Array<[SQL, string]> = [];
+    const fields: Array<[SQL, RawAlias]> = [];
     if (haveFields) {
       fields.push([
         sql.fragment`coalesce((select ${sqlSummaryAlias}.data from ${sqlSummaryAlias}), '[]'::json)`,
@@ -398,8 +438,30 @@ export default (
         fields.push([hasPreviousPage, "hasPreviousPage"]);
       }
     }
-    if (pgCalculateTotalCount) {
-      fields.push([totalCount, "totalCount"]);
+    if (pgAggregateQuery && pgAggregateQuery.length) {
+      const aggregateQueryBuilder = new QueryBuilder(
+        queryBuilderOptions,
+        context,
+        rootValue
+      );
+      aggregateQueryBuilder.from(
+        queryBuilder.getTableExpression(),
+        queryBuilder.getTableAlias()
+      );
+
+      for (let i = 0, l = pgAggregateQuery.length; i < l; i++) {
+        pgAggregateQuery[i](aggregateQueryBuilder);
+      }
+      const aggregateJsonBuildObject = aggregateQueryBuilder.build({
+        onlyJsonField: true,
+      });
+      const aggregatesSql = sql.fragment`\
+(
+  select ${aggregateJsonBuildObject}
+  from ${queryBuilder.getTableExpression()} as ${queryBuilder.getTableAlias()}
+  where ${queryBuilder.buildWhereClause(false, false, options)}
+)`;
+      fields.push([aggregatesSql, "aggregates"]);
     }
     if (options.withPaginationAsFields) {
       return sql.fragment`${sqlWith} select ${sql.join(
@@ -409,12 +471,9 @@ export default (
         ", "
       )} ${sqlFrom}`;
     } else {
-      return sql.fragment`${sqlWith} select json_build_object(${sql.join(
-        fields.map(
-          ([expr, alias]) => sql.fragment`${sql.literal(alias)}::text, ${expr}`
-        ),
-        ", "
-      )}) ${sqlFrom}`;
+      return sql.fragment`${sqlWith} select ${queryBuilder.jsonbBuildObject(
+        fields
+      )} ${sqlFrom}`;
     }
   } else {
     const query = queryBuilder.build(options);

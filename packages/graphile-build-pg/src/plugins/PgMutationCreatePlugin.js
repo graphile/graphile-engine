@@ -11,51 +11,55 @@ export default (function PgMutationCreatePlugin(
   if (pgDisableDefaultMutations) {
     return;
   }
-  builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
-    const {
-      extend,
-      newWithHooks,
-      parseResolveInfo,
-      pgIntrospectionResultsByKind,
-      pgGetGqlTypeByTypeIdAndModifier,
-      pgGetGqlInputTypeByTypeIdAndModifier,
-      pgSql: sql,
-      gql2pg,
-      graphql: {
-        GraphQLObjectType,
-        GraphQLInputObjectType,
-        GraphQLNonNull,
-        GraphQLString,
-      },
-      pgColumnFilter,
-      inflection,
-      pgQueryFromResolveData: queryFromResolveData,
-      pgOmit: omit,
-      pgViaTemporaryTable: viaTemporaryTable,
-      describePgEntity,
-      sqlCommentByAddingTags,
-    } = build;
-    const {
-      scope: { isRootMutation },
-      fieldWithHooks,
-    } = context;
-    if (!isRootMutation) {
-      return fields;
-    }
 
-    return extend(
-      fields,
-      pgIntrospectionResultsByKind.class
-        .filter(table => !!table.namespace)
-        .filter(table => table.isSelectable)
-        .filter(table => table.isInsertable && !omit(table, "create"))
-        .reduce((memo, table) => {
+  builder.hook(
+    "GraphQLObjectType:fields",
+    (fields, build, context) => {
+      const {
+        extend,
+        newWithHooks,
+        parseResolveInfo,
+        pgIntrospectionResultsByKind,
+        pgGetGqlTypeByTypeIdAndModifier,
+        pgGetGqlInputTypeByTypeIdAndModifier,
+        pgSql: sql,
+        gql2pg,
+        graphql: {
+          GraphQLObjectType,
+          GraphQLInputObjectType,
+          GraphQLNonNull,
+          GraphQLString,
+        },
+        pgColumnFilter,
+        inflection,
+        pgQueryFromResolveData: queryFromResolveData,
+        pgOmit: omit,
+        pgViaTemporaryTable: viaTemporaryTable,
+        describePgEntity,
+        sqlCommentByAddingTags,
+        pgField,
+      } = build;
+      const {
+        scope: { isRootMutation },
+        fieldWithHooks,
+      } = context;
+
+      if (!isRootMutation) {
+        return fields;
+      }
+
+      return extend(
+        fields,
+        pgIntrospectionResultsByKind.class.reduce((memo, table) => {
+          // PERFORMANCE: These used to be .filter(...) calls
+          if (!table.namespace) return memo;
+          if (!table.isSelectable) return memo;
+          if (!table.isInsertable || omit(table, "create")) return memo;
+
           const Table = pgGetGqlTypeByTypeIdAndModifier(table.type.id, null);
           if (!Table) {
             debug(
-              `There was no table type for table '${table.namespace.name}.${
-                table.name
-              }', so we're not generating a create mutation for it.`
+              `There was no table type for table '${table.namespace.name}.${table.name}', so we're not generating a create mutation for it.`
             );
             return memo;
           }
@@ -65,9 +69,7 @@ export default (function PgMutationCreatePlugin(
           );
           if (!TableInput) {
             debug(
-              `There was no input type for table '${table.namespace.name}.${
-                table.name
-              }', so we're going to omit it from the create mutation.`
+              `There was no input type for table '${table.namespace.name}.${table.name}', so we're going to omit it from the create mutation.`
             );
           }
           const tableTypeName = inflection.tableType(table);
@@ -95,14 +97,15 @@ export default (function PgMutationCreatePlugin(
             {
               __origin: `Adding table create input type for ${describePgEntity(
                 table
-              )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+              )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                 table,
                 {
                   name: "newNameHere",
                 }
               )}`,
               isPgCreateInputType: true,
-              pgInflection: table,
+              pgInflection: table, // TODO:v5: remove - TYPO!
+              pgIntrospection: table,
             }
           );
           const PayloadType = newWithHooks(
@@ -110,33 +113,41 @@ export default (function PgMutationCreatePlugin(
             {
               name: inflection.createPayloadType(table),
               description: `The output of our create \`${tableTypeName}\` mutation.`,
-              fields: ({ recurseDataGeneratorsForField }) => {
+              fields: ({ fieldWithHooks }) => {
                 const tableName = inflection.tableFieldName(table);
-                recurseDataGeneratorsForField(tableName);
                 return {
                   clientMutationId: {
                     description:
                       "The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.",
                     type: GraphQLString,
                   },
-                  [tableName]: {
-                    description: `The \`${tableTypeName}\` that was created by this mutation.`,
-                    type: Table,
-                    resolve(data) {
-                      return data.data;
+                  [tableName]: pgField(
+                    build,
+                    fieldWithHooks,
+                    tableName,
+                    {
+                      description: `The \`${tableTypeName}\` that was created by this mutation.`,
+                      type: Table,
                     },
-                  },
+                    {
+                      isPgCreatePayloadResultField: true,
+                      pgFieldIntrospection: table,
+                    }
+                  ),
                 };
               },
             },
             {
               __origin: `Adding table create payload type for ${describePgEntity(
                 table
-              )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+              )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                 table,
                 {
                   name: "newNameHere",
                 }
+              )}\n\nor disable the built-in create mutation via:\n\n  ${sqlCommentByAddingTags(
+                table,
+                { omit: "create" }
               )}`,
               isMutationPayload: true,
               isPgCreatePayloadType: true,
@@ -151,6 +162,11 @@ export default (function PgMutationCreatePlugin(
                 fieldName,
                 context => {
                   const { getDataFromParsedResolveInfoFragment } = context;
+                  const relevantAttributes = table.attributes.filter(
+                    attr =>
+                      pgColumnFilter(attr, build, context) &&
+                      !omit(attr, "create")
+                  );
                   return {
                     description: `Creates a single \`${tableTypeName}\`.`,
                     type: PayloadType,
@@ -159,10 +175,13 @@ export default (function PgMutationCreatePlugin(
                         type: new GraphQLNonNull(InputType),
                       },
                     },
-                    async resolve(data, { input }, { pgClient }, resolveInfo) {
+                    async resolve(data, args, resolveContext, resolveInfo) {
+                      const { input } = args;
+                      const { pgClient } = resolveContext;
                       const parsedResolveInfoFragment = parseResolveInfo(
                         resolveInfo
                       );
+                      parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
                       const resolveData = getDataFromParsedResolveInfoFragment(
                         parsedResolveInfoFragment,
                         PayloadType
@@ -172,40 +191,37 @@ export default (function PgMutationCreatePlugin(
                         insertedRowAlias,
                         insertedRowAlias,
                         resolveData,
-                        {}
+                        {},
+                        null,
+                        resolveContext,
+                        resolveInfo.rootValue
                       );
                       const sqlColumns = [];
                       const sqlValues = [];
                       const inputData = input[inflection.tableFieldName(table)];
-                      pgIntrospectionResultsByKind.attribute
-                        .filter(attr => attr.classId === table.id)
-                        .filter(attr => pgColumnFilter(attr, build, context))
-                        .filter(attr => !omit(attr, "create"))
-                        .forEach(attr => {
-                          const fieldName = inflection.column(attr);
-                          const val = inputData[fieldName];
-                          if (
-                            Object.prototype.hasOwnProperty.call(
-                              inputData,
-                              fieldName
-                            )
-                          ) {
-                            sqlColumns.push(sql.identifier(attr.name));
-                            sqlValues.push(
-                              gql2pg(val, attr.type, attr.typeModifier)
-                            );
-                          }
-                        });
+                      relevantAttributes.forEach(attr => {
+                        const fieldName = inflection.column(attr);
+                        const val = inputData[fieldName];
+                        if (
+                          Object.prototype.hasOwnProperty.call(
+                            inputData,
+                            fieldName
+                          )
+                        ) {
+                          sqlColumns.push(sql.identifier(attr.name));
+                          sqlValues.push(
+                            gql2pg(val, attr.type, attr.typeModifier)
+                          );
+                        }
+                      });
 
-                      const mutationQuery = sql.query`
-                    insert into ${sql.identifier(
-                      table.namespace.name,
-                      table.name
-                    )} ${
+                      const mutationQuery = sql.query`\
+insert into ${sql.identifier(table.namespace.name, table.name)} ${
                         sqlColumns.length
-                          ? sql.fragment`(
-                        ${sql.join(sqlColumns, ", ")}
-                      ) values(${sql.join(sqlValues, ", ")})`
+                          ? sql.fragment`(${sql.join(
+                              sqlColumns,
+                              ", "
+                            )}) values(${sql.join(sqlValues, ", ")})`
                           : sql.fragment`default values`
                       } returning *`;
 
@@ -244,7 +260,7 @@ export default (function PgMutationCreatePlugin(
             },
             `Adding create mutation for ${describePgEntity(
               table
-            )}. You can omit this default mutation with:\n\n  ${sqlCommentByAddingTags(
+            )}. You can omit this default mutation with a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
               table,
               {
                 omit: "create",
@@ -253,7 +269,11 @@ export default (function PgMutationCreatePlugin(
           );
           return memo;
         }, {}),
-      `Adding default 'create' mutation to root mutation`
-    );
-  });
+        `Adding default 'create' mutation to root mutation`
+      );
+    },
+    ["PgMutationCreate"],
+    [],
+    ["PgTables"]
+  );
 }: Plugin);

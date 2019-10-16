@@ -1,4 +1,4 @@
-const { parseTags } = require("../src/utils");
+const { parseTags } = require("../node8plus/utils");
 
 test("tags are removed correctly", () => {
   expect(
@@ -42,6 +42,13 @@ test("tags are extracted correctly", () => {
   expect(
     parseTags(
       `@jsonField date timestamp\n@jsonField name text\n@jsonField episode enum ONE=1 TWO=2\nBaz`
+    ).tags
+  ).toEqual({
+    jsonField: ["date timestamp", "name text", "episode enum ONE=1 TWO=2"],
+  });
+  expect(
+    parseTags(
+      `@jsonField date timestamp\r\n@jsonField name text\n@jsonField episode enum ONE=1 TWO=2\r\nBaz`
     ).tags
   ).toEqual({
     jsonField: ["date timestamp", "name text", "episode enum ONE=1 TWO=2"],

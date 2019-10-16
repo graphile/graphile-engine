@@ -20,6 +20,30 @@ query {
   s: allPeople(condition: { about: null }) { ...personConnection }
   t: allPosts(orderBy: [AUTHOR_ID_DESC, HEADLINE_DESC], first: 3) { ...postConnection }
   u: allPeople(condition: { lastLoginFromIp: "192.168.0.1"}) { ...personConnection }
+  v: allPosts(first: 2) {
+    e1: edges {
+      n1: node {
+        id
+        personByAuthorId {
+          name
+        }
+      }
+      n2: node {
+        headline
+        personByAuthorId {
+          id
+        }
+      }
+    }
+    e2: edges {
+      node {
+        nodeId
+      }
+    }
+  }
+  w: allPeople(condition: { lastLoginFromSubnet: "192.168.0.0/24" }) { ...personConnection }
+  x: allPeople(condition: { userMac: "0000.0000.0000" }) { ...personConnection }
+  nullTest1: allNullTestRecords { nodes { nullableText nullableInt } }
 }
 
 fragment personConnection on PeopleConnection {
@@ -38,6 +62,8 @@ fragment personConnection on PeopleConnection {
       email
       config
       lastLoginFromIp
+      lastLoginFromSubnet
+      userMac
     }
   }
 }

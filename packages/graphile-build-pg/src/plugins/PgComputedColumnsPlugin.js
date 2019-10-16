@@ -1,92 +1,95 @@
 // @flow
-import type { Plugin } from "graphile-build";
+import type { Plugin, Build } from "graphile-build";
+import type { PgClass, PgProc } from "./PgIntrospectionPlugin";
+
+// This interface is not official yet, don't rely on it.
+export const getComputedColumnDetails = (
+  build: Build,
+  table: PgClass,
+  proc: PgProc
+) => {
+  if (!proc.isStable) return null;
+  if (proc.namespaceId !== table.namespaceId) return null;
+  if (!proc.name.startsWith(`${table.name}_`)) return null;
+  if (proc.argTypeIds.length < 1) return null;
+  if (proc.argTypeIds[0] !== table.type.id) return null;
+
+  const argTypes = proc.argTypeIds.reduce((prev, typeId, idx) => {
+    if (
+      proc.argModes.length === 0 || // all args are `in`
+      proc.argModes[idx] === "i" || // this arg is `in`
+      proc.argModes[idx] === "b" // this arg is `inout`
+    ) {
+      prev.push(build.pgIntrospectionResultsByKind.typeById[typeId]);
+    }
+    return prev;
+  }, []);
+  if (
+    argTypes
+      .slice(1)
+      .some(type => type.type === "c" && type.class && type.class.isSelectable)
+  ) {
+    // Accepts two input tables? Skip.
+    return null;
+  }
+
+  const pseudoColumnName = proc.name.substr(table.name.length + 1);
+  return { argTypes, pseudoColumnName };
+};
 
 export default (function PgComputedColumnsPlugin(
   builder,
   { pgSimpleCollections }
 ) {
-  const hasConnections = pgSimpleCollections !== "only";
-  const hasSimpleCollections =
-    pgSimpleCollections === "only" || pgSimpleCollections === "both";
-  builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
-    const {
-      scope: {
-        isPgRowType,
-        isPgCompoundType,
-        isInputType,
-        pgIntrospection: table,
-      },
-      fieldWithHooks,
-      Self,
-    } = context;
-    if (
-      isInputType ||
-      !(isPgRowType || isPgCompoundType) ||
-      !table ||
-      table.kind !== "class" ||
-      !table.namespace
-    ) {
-      return fields;
-    }
-    const {
-      extend,
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
-      inflection,
-      pgOmit: omit,
-      pgMakeProcField: makeProcField,
-      swallowError,
-      describePgEntity,
-      sqlCommentByAddingTags,
-    } = build;
-    const tableType = introspectionResultsByKind.type.filter(
-      type =>
-        type.type === "c" &&
-        type.namespaceId === table.namespaceId &&
-        type.classId === table.id
-    )[0];
-    if (!tableType) {
-      throw new Error("Could not determine the type for this table");
-    }
-    return extend(
-      fields,
-      introspectionResultsByKind.procedure
-        .filter(proc => proc.isStable)
-        .filter(proc => proc.namespaceId === table.namespaceId)
-        .filter(proc => proc.name.startsWith(`${table.name}_`))
-        .filter(proc => proc.argTypeIds.length > 0)
-        .filter(proc => proc.argTypeIds[0] === tableType.id)
-        .filter(proc => !omit(proc, "execute"))
-        .reduce((memo, proc) => {
-          /*
-            proc =
-              { kind: 'procedure',
-                name: 'integration_webhook_secret',
-                description: null,
-                namespaceId: '6484381',
-                isStrict: false,
-                returnsSet: false,
-                isStable: true,
-                returnTypeId: '2950',
-                argTypeIds: [ '6484569' ],
-                argNames: [ 'integration' ],
-                argDefaultsNum: 0 }
-            */
-          const argTypes = proc.argTypeIds.map(
-            typeId => introspectionResultsByKind.typeById[typeId]
-          );
-          if (
-            argTypes
-              .slice(1)
-              .some(
-                type =>
-                  type.type === "c" && type.class && type.class.isSelectable
-              )
-          ) {
-            // Accepts two input tables? Skip.
-            return memo;
-          }
+  builder.hook(
+    "GraphQLObjectType:fields",
+    (fields, build, context) => {
+      const {
+        scope: {
+          isPgRowType,
+          isPgCompoundType,
+          isInputType,
+          pgIntrospection: table,
+        },
+        fieldWithHooks,
+        Self,
+      } = context;
 
-          const pseudoColumnName = proc.name.substr(table.name.length + 1);
+      if (
+        isInputType ||
+        !(isPgRowType || isPgCompoundType) ||
+        !table ||
+        table.kind !== "class" ||
+        !table.namespace
+      ) {
+        return fields;
+      }
+
+      const {
+        extend,
+        pgIntrospectionResultsByKind: introspectionResultsByKind,
+        inflection,
+        pgOmit: omit,
+        pgMakeProcField: makeProcField,
+        swallowError,
+        describePgEntity,
+        sqlCommentByAddingTags,
+      } = build;
+      const tableType = table.type;
+      if (!tableType) {
+        throw new Error("Could not determine the type for this table");
+      }
+      return extend(
+        fields,
+        introspectionResultsByKind.procedure.reduce((memo, proc) => {
+          if (omit(proc, "execute")) return memo;
+          const computedColumnDetails = getComputedColumnDetails(
+            build,
+            table,
+            proc
+          );
+          if (!computedColumnDetails) return memo;
+          const { pseudoColumnName } = computedColumnDetails;
           function makeField(forceList) {
             const fieldName = forceList
               ? inflection.computedColumnList(pseudoColumnName, proc, table)
@@ -103,7 +106,7 @@ export default (function PgComputedColumnsPlugin(
                 },
                 `Adding computed column for ${describePgEntity(
                   proc
-                )}. You can rename this field with:\n\n  ${sqlCommentByAddingTags(
+                )}. You can rename this field with a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                   proc,
                   {
                     fieldName: "newNameHere",
@@ -114,6 +117,11 @@ export default (function PgComputedColumnsPlugin(
               swallowError(e);
             }
           }
+          const simpleCollections =
+            proc.tags.simpleCollections || pgSimpleCollections;
+          const hasConnections = simpleCollections !== "only";
+          const hasSimpleCollections =
+            simpleCollections === "only" || simpleCollections === "both";
           if (!proc.returnsSet || hasConnections) {
             makeField(false);
           }
@@ -122,7 +130,9 @@ export default (function PgComputedColumnsPlugin(
           }
           return memo;
         }, {}),
-      `Adding computed column to '${Self.name}'`
-    );
-  });
+        `Adding computed column to '${Self.name}'`
+      );
+    },
+    ["PgComputedColumns"]
+  );
 }: Plugin);

@@ -1,8 +1,20 @@
 // @flow
-function makeIntrospectionQuery(serverVersionNum: number): string {
+/*
+ * IMPORTANT: when editing this file, ensure all operators (e.g. `@>`) are
+ * specified in the correct namespace (e.g. `operator(pg_catalog.@>)`). It looks
+ * weird, but it prevents clashes with extensions or user code that may
+ * overload operators, e.g. extension `intarray` overloads `@>`.
+ *
+ * NOTE: I'm not doing this with `=` because that way lies madness.
+ */
+function makeIntrospectionQuery(
+  serverVersionNum: number,
+  options: { pgLegacyFunctionsOnly?: boolean } = {}
+): string {
+  const { pgLegacyFunctionsOnly } = options;
   return `\
 -- @see https://www.postgresql.org/docs/9.5/static/catalogs.html
--- @see https://github.com/graphile/postgraphile/blob/master/resources/introspection-query.sql
+-- @see https://github.com/graphile/graphile-engine/blob/master/packages/graphile-build-pg/src/plugins/introspectionQuery.js
 --
 -- ## Parameters
 -- - \`$1\`: An array of strings that represent the namespaces we are introspecting.
@@ -27,7 +39,7 @@ with
       dsc.description as "description"
     from
       pg_catalog.pg_namespace as nsp
-      left join pg_catalog.pg_description as dsc on dsc.objoid = nsp.oid
+      left join pg_catalog.pg_description as dsc on dsc.objoid = nsp.oid and dsc.classoid = 'pg_catalog.pg_namespace'::regclass
     where
       nsp.nspname = any ($1)
     order by
@@ -41,6 +53,7 @@ with
   procedure as (
     select
       'procedure' as "kind",
+      pro.oid as "id",
       pro.proname as "name",
       dsc.description as "description",
       pro.pronamespace as "namespaceId",
@@ -54,12 +67,16 @@ with
       end as "isStable",
       pro.prorettype as "returnTypeId",
       coalesce(pro.proallargtypes, pro.proargtypes) as "argTypeIds",
+      coalesce(pro.proargmodes, array[]::text[]) as "argModes",
       coalesce(pro.proargnames, array[]::text[]) as "argNames",
+      pro.pronargs as "inputArgsCount",
       pro.pronargdefaults as "argDefaultsNum",
-      exists(select 1 from accessible_roles where has_function_privilege(accessible_roles.oid, pro.oid, 'EXECUTE')) as "aclExecutable"
+      pro.procost as "cost",
+      exists(select 1 from accessible_roles where has_function_privilege(accessible_roles.oid, pro.oid, 'EXECUTE')) as "aclExecutable",
+      (select lanname from pg_catalog.pg_language where pg_language.oid = pro.prolang) as "language"
     from
       pg_catalog.pg_proc as pro
-      left join pg_catalog.pg_description as dsc on dsc.objoid = pro.oid
+      left join pg_catalog.pg_description as dsc on dsc.objoid = pro.oid and dsc.classoid = 'pg_catalog.pg_proc'::regclass
       left join pg_catalog.pg_namespace as nsp on nsp.oid = pro.pronamespace
     where
       pro.pronamespace in (select "id" from namespace) and
@@ -74,21 +91,46 @@ with
           ? "pro.prokind = 'f'"
           : "pro.proisagg = false and pro.proiswindow = false"
       } and
+      ${
+        pgLegacyFunctionsOnly
+          ? `\
       -- We want to make sure the argument mode for all of our arguments is
       -- \`IN\` which means \`proargmodes\` will be null.
       pro.proargmodes is null and
+      -- Do not select procedures that return \`RECORD\` (oid 2249).
+      pro.prorettype operator(pg_catalog.<>) 2249 and`
+          : `\
+      -- We want to make sure the argument modes for all of our arguments are
+      -- \`IN\`, \`OUT\`, \`INOUT\`, or \`TABLE\` (not \`VARIADIC\`).
+      (pro.proargmodes is null or pro.proargmodes operator(pg_catalog.<@) array['i','o','b','t']::"char"[]) and
+      -- Do not select procedures that return \`RECORD\` (oid 2249) unless they
+      -- have \`OUT\`, \`INOUT\`, or \`TABLE\` arguments to define the return type.
+      (pro.prorettype operator(pg_catalog.<>) 2249 or pro.proargmodes && array['o','b','t']::"char"[]) and
+      -- Do not select procedures that have \`RECORD\` arguments.
+      (pro.proallargtypes is null or not (pro.proallargtypes operator(pg_catalog.@>) array[2249::oid])) and`
+      }
       -- Do not select procedures that create range types. These are utility
       -- functions that really don’t need to be exposed in an API.
-      pro.proname not in (select typ.typname from pg_catalog.pg_type as typ where typ.typtype = 'r' and typ.typnamespace = pro.pronamespace) and
+      pro.proname not in (
+        select typ.typname
+        from pg_catalog.pg_type as typ
+        where typ.typtype = 'r'
+        and typ.typnamespace = pro.pronamespace
+      ) and
       -- Do not expose trigger functions (type trigger has oid 2279)
-      pro.prorettype <> 2279 and
+      pro.prorettype operator(pg_catalog.<>) 2279 and
       -- We don't want functions that will clash with GraphQL (treat them as private)
       pro.proname not like E'\\\\_\\\\_%' and
       -- We also don’t want procedures that have been defined in our namespace
       -- twice. This leads to duplicate fields in the API which throws an
       -- error. In the future we may support this case. For now though, it is
       -- too complex.
-      (select count(pro2.*) from pg_catalog.pg_proc as pro2 where pro2.pronamespace = pro.pronamespace and pro2.proname = pro.proname) = 1 and
+      (
+        select count(pro2.*)
+        from pg_catalog.pg_proc as pro2
+        where pro2.pronamespace = pro.pronamespace
+        and pro2.proname = pro.proname
+      ) = 1 and
       ($2 is true or not exists(
         select 1
         from pg_catalog.pg_depend
@@ -124,16 +166,16 @@ with
       -- - https://www.postgresql.org/message-id/CAEZATCV2_qN9P3zbvADwME_TkYf2gR_X2cLQR4R+pqkwxGxqJg@mail.gmail.com
       -- - https://github.com/postgres/postgres/blob/2410a2543e77983dab1f63f48b2adcd23dba994e/src/backend/utils/adt/misc.c#L684
       -- - https://github.com/postgres/postgres/blob/3aff33aa687e47d52f453892498b30ac98a296af/src/backend/rewrite/rewriteHandler.c#L2351
-      (pg_catalog.pg_relation_is_updatable(rel.oid, true)::bit(8) & B'00010000') = B'00010000' as "isInsertable",
-      (pg_catalog.pg_relation_is_updatable(rel.oid, true)::bit(8) & B'00001000') = B'00001000' as "isUpdatable",
-      (pg_catalog.pg_relation_is_updatable(rel.oid, true)::bit(8) & B'00000100') = B'00000100' as "isDeletable",
+      (pg_catalog.pg_relation_is_updatable(rel.oid, true)::bit(8) operator(pg_catalog.&) B'00010000') = B'00010000' as "isDeletable",
+      (pg_catalog.pg_relation_is_updatable(rel.oid, true)::bit(8) operator(pg_catalog.&) B'00001000') = B'00001000' as "isInsertable",
+      (pg_catalog.pg_relation_is_updatable(rel.oid, true)::bit(8) operator(pg_catalog.&) B'00000100') = B'00000100' as "isUpdatable",
       exists(select 1 from accessible_roles where has_table_privilege(accessible_roles.oid, rel.oid, 'SELECT')) as "aclSelectable",
       exists(select 1 from accessible_roles where has_table_privilege(accessible_roles.oid, rel.oid, 'INSERT')) as "aclInsertable",
       exists(select 1 from accessible_roles where has_table_privilege(accessible_roles.oid, rel.oid, 'UPDATE')) as "aclUpdatable",
       exists(select 1 from accessible_roles where has_table_privilege(accessible_roles.oid, rel.oid, 'DELETE')) as "aclDeletable"
     from
       pg_catalog.pg_class as rel
-      left join pg_catalog.pg_description as dsc on dsc.objoid = rel.oid and dsc.objsubid = 0 and dsc.classoid = (select oid from pg_catalog.pg_class where relname = 'pg_class')
+      left join pg_catalog.pg_description as dsc on dsc.objoid = rel.oid and dsc.objsubid = 0 and dsc.classoid = 'pg_catalog.pg_class'::regclass
       left join pg_catalog.pg_namespace as nsp on nsp.oid = rel.relnamespace
     where
       rel.relpersistence in ('p') and
@@ -166,10 +208,12 @@ with
       ${serverVersionNum >= 100000 ? "att.attidentity" : "''"} as "identity",
       exists(select 1 from accessible_roles where has_column_privilege(accessible_roles.oid, att.attrelid, att.attname, 'SELECT')) as "aclSelectable",
       exists(select 1 from accessible_roles where has_column_privilege(accessible_roles.oid, att.attrelid, att.attname, 'INSERT')) as "aclInsertable",
-      exists(select 1 from accessible_roles where has_column_privilege(accessible_roles.oid, att.attrelid, att.attname, 'UPDATE')) as "aclUpdatable"
+      exists(select 1 from accessible_roles where has_column_privilege(accessible_roles.oid, att.attrelid, att.attname, 'UPDATE')) as "aclUpdatable",
+      -- https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=c62dd80cdf149e2792b13c13777a539f5abb0370
+      att.attacl is not null and exists(select 1 from aclexplode(att.attacl) aclitem where aclitem.privilege_type = 'SELECT' and grantee in (select oid from accessible_roles)) as "columnLevelSelectGrant"
     from
       pg_catalog.pg_attribute as att
-      left join pg_catalog.pg_description as dsc on dsc.objoid = att.attrelid and dsc.objsubid = att.attnum
+      left join pg_catalog.pg_description as dsc on dsc.objoid = att.attrelid and dsc.objsubid = att.attnum and dsc.classoid = 'pg_catalog.pg_class'::regclass
     where
       att.attrelid in (select "id" from class) and
       att.attnum > 0 and
@@ -204,6 +248,7 @@ with
         nullif(typ.typrelid, 0) as "classId",
         nullif(typ.typbasetype, 0) as "domainBaseTypeId",
         nullif(typ.typtypmod, -1) as "domainTypeModifier",
+        typ.typdefaultbin is not null as "domainHasDefault",
         -- If this type is an enum type, let’s select all of its enum variants.
         --
         -- @see https://www.postgresql.org/docs/9.5/static/catalog-pg-enum.html
@@ -231,7 +276,7 @@ with
         end as "rangeSubTypeId"
       from
         pg_catalog.pg_type as typ
-        left join pg_catalog.pg_description as dsc on dsc.objoid = typ.oid
+        left join pg_catalog.pg_description as dsc on dsc.objoid = typ.oid and dsc.classoid = 'pg_catalog.pg_type'::regclass
         left join pg_catalog.pg_namespace as nsp on nsp.oid = typ.typnamespace
     )
     select
@@ -239,10 +284,15 @@ with
     from
       type_all as typ
     where
-      typ.id in (select "typeId" from class) or
-      typ.id in (select "typeId" from attribute) or
-      typ.id in (select "returnTypeId" from procedure) or
-      typ.id in (select unnest("argTypeIds") from procedure) or
+      typ.id in (
+        select "typeId" from class
+      union all
+        select "typeId" from attribute
+      union all
+        select "returnTypeId" from procedure
+      union all
+        select unnest("argTypeIds") from procedure
+      union all
       -- If this type is a base type for *any* domain type, we will include it
       -- in our selection. This may mean we fetch more types than we need, but
       -- the alternative is to do some funky SQL recursion which would be hard
@@ -250,9 +300,12 @@ with
       -- 4 less type rows.
       --
       -- We also do this for range sub types and array item types.
-      typ.id in (select "domainBaseTypeId" from type_all) or
-      typ.id in (select "rangeSubTypeId" from type_all) or
-      typ.id in (select "arrayItemTypeId" from type_all)
+        select "domainBaseTypeId" from type_all
+      union all
+        select "rangeSubTypeId" from type_all
+      union all
+        select "arrayItemTypeId" from type_all
+      )
     order by
       "namespaceId", "name"
   ),
@@ -260,6 +313,7 @@ with
   "constraint" as (
     select distinct on (con.conrelid, con.conkey, con.confrelid, con.confkey)
       'constraint' as "kind",
+      con.oid as "id",
       con.conname as "name",
       con.contype as "type",
       con.conrelid as "classId",
@@ -269,7 +323,8 @@ with
       con.confkey as "foreignKeyAttributeNums"
     from
       pg_catalog.pg_constraint as con
-      left join pg_catalog.pg_description as dsc on dsc.objoid = con.oid
+      inner join class on (con.conrelid = class.id)
+      left join pg_catalog.pg_description as dsc on dsc.objoid = con.oid and dsc.classoid = 'pg_catalog.pg_constraint'::regclass
     where
       -- Only get constraints for classes we have selected.
       con.conrelid in (select "id" from class where "namespaceId" in (select "id" from namespace)) and
@@ -294,15 +349,63 @@ with
       ext.oid as "id",
       ext.extname as "name",
       ext.extnamespace as "namespaceId",
+      nsp.nspname as "namespaceName",
       ext.extrelocatable as "relocatable",
       ext.extversion as "version",
       ext.extconfig as "configurationClassIds",
       dsc.description as "description"
     from
       pg_catalog.pg_extension as ext
-      left join pg_catalog.pg_description as dsc on dsc.objoid = ext.oid
+      left join pg_catalog.pg_description as dsc on dsc.objoid = ext.oid and dsc.classoid = 'pg_catalog.pg_extension'::regclass
+      left join pg_catalog.pg_namespace as nsp on nsp.oid = ext.extnamespace
     order by
       ext.extname, ext.oid
+  ),
+  -- @see https://www.postgresql.org/docs/9.5/static/catalog-pg-index.html
+  "indexes" as (
+    select
+      'index' as "kind",
+      idx.indexrelid as "id",
+      idx_more.relname as "name",
+      nsp.nspname as "namespaceName",
+      idx.indrelid as "classId",
+      idx.indnatts as "numberOfAttributes",
+      idx.indisunique as "isUnique",
+      idx.indisprimary as "isPrimary",
+      idx.indimmediate as "isImmediate", -- enforce uniqueness immediately on insert
+      idx.indisreplident as "isReplicaIdentity",
+      idx.indisvalid as "isValid", -- if false, don't use for queries
+      idx.indpred is not null as "isPartial", -- if true, index is not on on rows.
+      idx.indkey as "attributeNums",
+      am.amname as "indexType",
+      ${
+        serverVersionNum >= 90600
+          ? `\
+      (
+        select array_agg(pg_index_column_has_property(idx.indexrelid,n::int2,'asc'))
+        from unnest(idx.indkey) with ordinality as ord(key,n)
+      ) as "attributePropertiesAsc",
+      (
+        select array_agg(pg_index_column_has_property(idx.indexrelid,n::int2,'nulls_first'))
+        from unnest(idx.indkey) with ordinality as ord(key,n)
+      ) as "attributePropertiesNullsFirst",`
+          : ""
+      }
+      dsc.description as "description"
+    from
+      pg_catalog.pg_index as idx
+      inner join pg_catalog.pg_class idx_more on (idx.indexrelid = idx_more.oid)
+      inner join class on (idx.indrelid = class.id)
+      inner join pg_catalog.pg_namespace as nsp on (nsp.oid = idx_more.relnamespace)
+      inner join pg_catalog.pg_am as am on (am.oid = idx_more.relam)
+      left join pg_catalog.pg_description as dsc on dsc.objoid = idx.indexrelid and dsc.objsubid = 0 and dsc.classoid = 'pg_catalog.pg_class'::regclass
+    where
+      idx.indislive is not false and
+      idx.indisexclusion is not true and -- exclusion index
+      idx.indcheckxmin is not true and -- always valid?
+      idx.indpred is null -- no partial index predicate
+    order by
+      idx.indrelid, idx.indexrelid
   )
 select row_to_json(x) as object from namespace as x
 union all
@@ -317,6 +420,8 @@ union all
 select row_to_json(x) as object from procedure as x
 union all
 select row_to_json(x) as object from extension as x
+union all
+select row_to_json(x) as object from indexes as x
 ;
 `;
 }

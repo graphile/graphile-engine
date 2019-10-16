@@ -1,11 +1,11 @@
 import {
   GraphQLSchema,
-  GraphQLObjectType,
+  GraphQLSchemaConfig,
+  GraphQLObjectTypeConfig,
   GraphQLInterfaceType,
-  GraphQLInputObjectType,
-  GraphQLEnumType,
-  GraphQLOutputType,
-  GraphQLFieldResolver,
+  GraphQLObjectType,
+  GraphQLInputObjectTypeConfig,
+  GraphQLEnumTypeConfig,
   GraphQLFieldConfigArgumentMap,
   GraphQLFieldConfigMap,
   GraphQLFieldConfig,
@@ -13,19 +13,20 @@ import {
   GraphQLEnumValueConfig,
   GraphQLInputFieldConfigMap,
   GraphQLInputFieldConfig,
+  GraphQLUnionTypeConfig,
 } from "graphql";
 import { EventEmitter } from "events";
 
 type mixed = {} | string | number | boolean | undefined | null;
 
 export interface Options {
-  [str: string]: mixed;
+  [str: string]: any;
 }
 
-export type Plugin = (
-  builder: SchemaBuilder,
-  options: Options
-) => Promise<void> | void;
+export interface Plugin {
+  (builder: SchemaBuilder, options: Options): Promise<void> | void;
+  displayName?: string;
+}
 
 export type TriggerChangeType = () => void;
 export type WatchUnwatch = (triggerChange: TriggerChangeType) => void;
@@ -51,54 +52,140 @@ export interface Context<Type> {
   [str: string]: any;
 }
 
-export type Hook<Type> = (
-  input: Type,
-  build: Build,
-  context: Context<Type>
-) => Type;
+export interface Hook<Type> {
+  (input: Type, build: Build, context: Context<Type>): Type;
+  displayName?: string;
+  provides?: Array<string>;
+  before?: Array<string>;
+  after?: Array<string>;
+}
 
 export default class SchemaBuilder extends EventEmitter {
-  hook(hookName: "build", fn: Hook<Build>): void;
-  hook(hookName: "inflection", fn: Hook<Inflection>): void;
-  hook(hookName: "init", fn: Hook<InitObject>): void;
-  hook(hookName: "GraphQLSchema", fn: Hook<GraphQLSchema>): void;
-  hook(hookName: "GraphQLObjectType", fn: Hook<GraphQLObjectType>): void;
+  hook(
+    hookName: "build",
+    fn: Hook<Build>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "inflection",
+    fn: Hook<Inflection>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "init",
+    fn: Hook<InitObject>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "GraphQLSchema",
+    fn: Hook<GraphQLSchemaConfig>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook<TSource, TContext>(
+    hookName: "GraphQLObjectType",
+    fn: Hook<GraphQLObjectTypeConfig<TSource, TContext>>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
   hook(
     hookName: "GraphQLObjectType:interfaces",
-    fn: Hook<Array<GraphQLInterfaceType>>
+    fn: Hook<Array<GraphQLInterfaceType>>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
   ): void;
   hook<TSource, TContext>(
     hookName: "GraphQLObjectType:fields",
-    fn: Hook<GraphQLFieldConfigMap<TSource, TContext>>
+    fn: Hook<GraphQLFieldConfigMap<TSource, TContext>>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
   ): void;
   hook<TSource, TContext>(
     hookName: "GraphQLObjectType:fields:field",
-    fn: Hook<GraphQLFieldConfig<TSource, TContext>>
+    fn: Hook<GraphQLFieldConfig<TSource, TContext>>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
   ): void;
   hook(
     hookName: "GraphQLObjectType:fields:field:args",
-    fn: Hook<GraphQLFieldConfigArgumentMap>
+    fn: Hook<GraphQLFieldConfigArgumentMap>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
   ): void;
   hook(
     hookName: "GraphQLInputObjectType",
-    fn: Hook<GraphQLInputObjectType>
+    fn: Hook<GraphQLInputObjectTypeConfig>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
   ): void;
   hook(
     hookName: "GraphQLInputObjectType:fields",
-    fn: Hook<GraphQLInputFieldConfigMap>
+    fn: Hook<GraphQLInputFieldConfigMap>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
   ): void;
   hook(
     hookName: "GraphQLInputObjectType:fields:field",
-    fn: Hook<GraphQLInputFieldConfig>
+    fn: Hook<GraphQLInputFieldConfig>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
   ): void;
-  hook(hookName: "GraphQLEnumType", fn: Hook<GraphQLEnumType>): void;
+  hook(
+    hookName: "GraphQLEnumType",
+    fn: Hook<GraphQLEnumTypeConfig>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
   hook(
     hookName: "GraphQLEnumType:values",
-    fn: Hook<GraphQLEnumValueConfigMap>
+    fn: Hook<GraphQLEnumValueConfigMap>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
   ): void;
   hook(
     hookName: "GraphQLEnumType:values:value",
-    fn: Hook<GraphQLEnumValueConfig>
+    fn: Hook<GraphQLEnumValueConfig>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook<TSource, TContext>(
+    hookName: "GraphQLUnionType",
+    fn: Hook<GraphQLUnionTypeConfig<TSource, TContext>>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "GraphQLUnionType:types",
+    fn: Hook<Array<GraphQLObjectType>>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "finalize",
+    fn: Hook<GraphQLSchema>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
   ): void;
 
   /*

@@ -3,7 +3,6 @@ import type { Plugin } from "graphile-build";
 import debugFactory from "debug";
 
 const debug = debugFactory("graphile-build-pg");
-const base64Decode = str => Buffer.from(String(str), "base64").toString("utf8");
 
 export default (async function PgMutationUpdateDeletePlugin(
   builder,
@@ -12,60 +11,68 @@ export default (async function PgMutationUpdateDeletePlugin(
   if (pgDisableDefaultMutations) {
     return;
   }
-  builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
-    const {
-      newWithHooks,
-      getNodeIdForTypeAndIdentifiers,
-      nodeIdFieldName,
-      fieldDataGeneratorsByType,
-      extend,
-      parseResolveInfo,
-      getTypeByName,
-      gql2pg,
-      pgGetGqlTypeByTypeIdAndModifier,
-      pgGetGqlInputTypeByTypeIdAndModifier,
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
-      pgSql: sql,
-      getNodeType,
-      graphql: {
-        GraphQLNonNull,
-        GraphQLInputObjectType,
-        GraphQLString,
-        GraphQLObjectType,
-        GraphQLID,
-      },
-      pgColumnFilter,
-      inflection,
-      pgQueryFromResolveData: queryFromResolveData,
-      pgOmit: omit,
-      pgViaTemporaryTable: viaTemporaryTable,
-      describePgEntity,
-      sqlCommentByAddingTags,
-    } = build;
-    const {
-      scope: { isRootMutation },
-      fieldWithHooks,
-    } = context;
-    const { pluralize, singularize, camelCase } = inflection;
-    if (!isRootMutation) {
-      return fields;
-    }
-    return extend(
-      fields,
-      ["update", "delete"].reduce(
-        (outerMemo, mode) =>
-          introspectionResultsByKind.class
-            .filter(table => !!table.namespace)
-            .filter(
-              table =>
-                (mode === "update" &&
-                  table.isUpdatable &&
-                  !omit(table, "update")) ||
-                (mode === "delete" &&
-                  table.isDeletable &&
-                  !omit(table, "delete"))
-            )
-            .reduce((memo, table) => {
+
+  builder.hook(
+    "GraphQLObjectType:fields",
+    (fields, build, context) => {
+      const {
+        newWithHooks,
+        getNodeIdForTypeAndIdentifiers,
+        getTypeAndIdentifiersFromNodeId,
+        nodeIdFieldName,
+        fieldDataGeneratorsByType,
+        extend,
+        parseResolveInfo,
+        getTypeByName,
+        gql2pg,
+        pgGetGqlTypeByTypeIdAndModifier,
+        pgGetGqlInputTypeByTypeIdAndModifier,
+        pgIntrospectionResultsByKind: introspectionResultsByKind,
+        pgSql: sql,
+        graphql: {
+          GraphQLNonNull,
+          GraphQLInputObjectType,
+          GraphQLString,
+          GraphQLObjectType,
+          GraphQLID,
+        },
+        pgColumnFilter,
+        inflection,
+        pgQueryFromResolveData: queryFromResolveData,
+        pgOmit: omit,
+        pgViaTemporaryTable: viaTemporaryTable,
+        describePgEntity,
+        sqlCommentByAddingTags,
+        pgField,
+      } = build;
+      const {
+        scope: { isRootMutation },
+        fieldWithHooks,
+      } = context;
+
+      if (!isRootMutation) {
+        return fields;
+      }
+
+      return extend(
+        fields,
+        ["update", "delete"].reduce(
+          (outerMemo, mode) =>
+            introspectionResultsByKind.class.reduce((memo, table) => {
+              // PERFORMANCE: These used to be .filter(...) calls
+              if (!table.namespace) return memo;
+              const canUpdate =
+                mode === "update" &&
+                table.isUpdatable &&
+                !omit(table, "update") &&
+                // Check at least one attribute is updatable
+                table.attributes.find(attr => !omit(attr, "update"));
+              const canDelete =
+                mode === "delete" &&
+                table.isDeletable &&
+                !omit(table, "delete");
+              if (!canUpdate && !canDelete) return memo;
+
               const TableType = pgGetGqlTypeByTypeIdAndModifier(
                 table.type.id,
                 null
@@ -78,11 +85,14 @@ export default (async function PgMutationUpdateDeletePlugin(
                 resolveInfo,
                 getDataFromParsedResolveInfoFragment,
                 PayloadType,
-                input,
+                args,
                 condition,
-                context
+                context,
+                resolveContext
               ) {
+                const { input } = args;
                 const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
+                parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
                 const resolveData = getDataFromParsedResolveInfoFragment(
                   parsedResolveInfoFragment,
                   PayloadType
@@ -101,45 +111,37 @@ export default (async function PgMutationUpdateDeletePlugin(
                     input[
                       inflection.patchField(inflection.tableFieldName(table))
                     ];
-                  introspectionResultsByKind.attribute
-                    .filter(attr => attr.classId === table.id)
-                    .filter(attr => pgColumnFilter(attr, build, context))
-                    .filter(attr => !omit(attr, "update"))
-                    .forEach(attr => {
-                      const fieldName = inflection.column(attr);
-                      if (
-                        fieldName in inputData /* Because we care about null! */
-                      ) {
-                        const val = inputData[fieldName];
-                        sqlColumns.push(sql.identifier(attr.name));
-                        sqlValues.push(
-                          gql2pg(val, attr.type, attr.typeModifier)
-                        );
-                      }
-                    });
+                  table.attributes.forEach(attr => {
+                    // PERFORMANCE: These used to be .filter(...) calls
+                    if (!pgColumnFilter(attr, build, context)) return;
+                    if (omit(attr, "update")) return;
+
+                    const fieldName = inflection.column(attr);
+                    if (
+                      fieldName in inputData /* Because we care about null! */
+                    ) {
+                      const val = inputData[fieldName];
+                      sqlColumns.push(sql.identifier(attr.name));
+                      sqlValues.push(gql2pg(val, attr.type, attr.typeModifier));
+                    }
+                  });
                   if (sqlColumns.length === 0) {
                     return null;
                   }
-                  sqlMutationQuery = sql.query`
-                      update ${sql.identifier(
-                        table.namespace.name,
-                        table.name
-                      )} set ${sql.join(
+                  sqlMutationQuery = sql.query`\
+update ${sql.identifier(table.namespace.name, table.name)} set ${sql.join(
                     sqlColumns.map(
                       (col, i) => sql.fragment`${col} = ${sqlValues[i]}`
                     ),
                     ", "
                   )}
-                      where ${condition}
-                      returning *`;
+where ${condition}
+returning *`;
                 } else {
-                  sqlMutationQuery = sql.query`
-                      delete from ${sql.identifier(
-                        table.namespace.name,
-                        table.name
-                      )}
-                      where ${condition}
-                      returning *`;
+                  sqlMutationQuery = sql.query`\
+delete from ${sql.identifier(table.namespace.name, table.name)}
+where ${condition}
+returning *`;
                 }
 
                 const modifiedRowAlias = sql.identifier(Symbol());
@@ -147,7 +149,10 @@ export default (async function PgMutationUpdateDeletePlugin(
                   modifiedRowAlias,
                   modifiedRowAlias,
                   resolveData,
-                  {}
+                  {},
+                  null,
+                  resolveContext,
+                  resolveInfo.rootValue
                 );
                 let row;
                 try {
@@ -169,9 +174,9 @@ export default (async function PgMutationUpdateDeletePlugin(
                 }
                 if (!row) {
                   throw new Error(
-                    `No values were ${mode}d in collection '${pluralize(
-                      table.name
-                    )}' because no values were found.`
+                    `No values were ${mode}d in collection '${inflection.pluralize(
+                      inflection._singularizedTableName(table)
+                    )}' because no values you can ${mode} were found matching these criteria.`
                   );
                 }
                 return {
@@ -180,12 +185,9 @@ export default (async function PgMutationUpdateDeletePlugin(
                 };
               }
               if (TableType) {
-                const uniqueConstraints = introspectionResultsByKind.constraint
-                  .filter(con => con.classId === table.id)
-                  .filter(con => con.type === "u" || con.type === "p");
-                const attributes = introspectionResultsByKind.attribute
-                  .filter(attr => attr.classId === table.id)
-                  .sort((a, b) => a.num - b.num);
+                const uniqueConstraints = table.constraints.filter(
+                  con => con.type === "u" || con.type === "p"
+                );
                 const Table = pgGetGqlTypeByTypeIdAndModifier(
                   table.type.id,
                   null
@@ -203,15 +205,11 @@ export default (async function PgMutationUpdateDeletePlugin(
                         : "updatePayloadType"
                     ](table),
                     description: `The output of our ${mode} \`${tableTypeName}\` mutation.`,
-                    fields: ({
-                      recurseDataGeneratorsForField,
-                      fieldWithHooks,
-                    }) => {
+                    fields: ({ fieldWithHooks }) => {
                       const tableName = inflection.tableFieldName(table);
-                      recurseDataGeneratorsForField(tableName);
                       // This should really be `-node-id` but for compatibility with PostGraphQL v3 we haven't made that change.
-                      const deletedNodeIdFieldName = camelCase(
-                        `deleted-${singularize(table.name)}-id`
+                      const deletedNodeIdFieldName = inflection.deletedNodeId(
+                        table
                       );
                       return Object.assign(
                         {
@@ -220,13 +218,17 @@ export default (async function PgMutationUpdateDeletePlugin(
                               "The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.",
                             type: GraphQLString,
                           },
-                          [tableName]: {
-                            description: `The \`${tableTypeName}\` that was ${mode}d by this mutation.`,
-                            type: Table,
-                            resolve(data) {
-                              return data.data;
+                          [tableName]: pgField(
+                            build,
+                            fieldWithHooks,
+                            tableName,
+                            {
+                              description: `The \`${tableTypeName}\` that was ${mode}d by this mutation.`,
+                              type: Table,
                             },
-                          },
+                            {},
+                            false
+                          ),
                         },
                         mode === "delete"
                           ? {
@@ -270,7 +272,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                   {
                     __origin: `Adding table ${mode} mutation payload type for ${describePgEntity(
                       table
-                    )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+                    )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                       table,
                       {
                         name: "newNameHere",
@@ -284,15 +286,10 @@ export default (async function PgMutationUpdateDeletePlugin(
                 );
 
                 // NodeId
-                const primaryKeyConstraint = introspectionResultsByKind.constraint
-                  .filter(con => con.classId === table.id)
-                  .filter(con => con.type === "p")[0];
+                const primaryKeyConstraint = table.primaryKeyConstraint;
                 if (nodeIdFieldName && primaryKeyConstraint) {
                   const primaryKeys =
-                    primaryKeyConstraint &&
-                    primaryKeyConstraint.keyAttributeNums.map(num =>
-                      attributes.find(attr => attr.num === num)
-                    );
+                    primaryKeyConstraint && primaryKeyConstraint.keyAttributes;
                   const fieldName = inflection[
                     mode === "update" ? "updateNode" : "deleteNode"
                   ](table);
@@ -332,7 +329,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                     {
                       __origin: `Adding table ${mode} (by node ID) mutation input type for ${describePgEntity(
                         table
-                      )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+                      )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                         table,
                         {
                           name: "newNameHere",
@@ -342,7 +339,8 @@ export default (async function PgMutationUpdateDeletePlugin(
                       isPgUpdateNodeInputType: mode === "update",
                       isPgDeleteInputType: mode === "delete",
                       isPgDeleteNodeInputType: mode === "delete",
-                      pgInflection: table,
+                      pgInflection: table, // TODO:v5: remove - TYPO!
+                      pgIntrospection: table,
                       isMutationInput: true,
                     }
                   );
@@ -369,17 +367,19 @@ export default (async function PgMutationUpdateDeletePlugin(
                             },
                             async resolve(
                               parent,
-                              { input },
-                              { pgClient },
+                              args,
+                              resolveContext,
                               resolveInfo
                             ) {
+                              const { input } = args;
+                              const { pgClient } = resolveContext;
                               const nodeId = input[nodeIdFieldName];
                               try {
-                                const [alias, ...identifiers] = JSON.parse(
-                                  base64Decode(nodeId)
-                                );
-                                const NodeTypeByAlias = getNodeType(alias);
-                                if (NodeTypeByAlias !== TableType) {
+                                const {
+                                  Type,
+                                  identifiers,
+                                } = getTypeAndIdentifiersFromNodeId(nodeId);
+                                if (Type !== TableType) {
                                   throw new Error("Mismatched type");
                                 }
                                 if (identifiers.length !== primaryKeys.length) {
@@ -391,7 +391,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                                   resolveInfo,
                                   getDataFromParsedResolveInfoFragment,
                                   PayloadType,
-                                  input,
+                                  args,
                                   sql.fragment`(${sql.join(
                                     primaryKeys.map(
                                       (key, idx) =>
@@ -405,7 +405,8 @@ export default (async function PgMutationUpdateDeletePlugin(
                                     ),
                                     ") and ("
                                   )})`,
-                                  context
+                                  context,
+                                  resolveContext
                                 );
                               } catch (e) {
                                 debug(e);
@@ -432,12 +433,12 @@ export default (async function PgMutationUpdateDeletePlugin(
                   if (omit(constraint, mode)) {
                     return;
                   }
-                  const keys = constraint.keyAttributeNums.map(num =>
-                    attributes.find(attr => attr.num === num)
-                  );
+                  const keys = constraint.keyAttributes;
                   if (!keys.every(_ => _)) {
                     throw new Error(
-                      "Consistency error: could not find an attribute!"
+                      `Consistency error: could not find an attribute in the constraint when building the ${mode} mutation for ${describePgEntity(
+                        table
+                      )}!`
                     );
                   }
                   if (keys.some(key => omit(key, "read"))) {
@@ -488,7 +489,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                     {
                       __origin: `Adding table ${mode} mutation input type for ${describePgEntity(
                         constraint
-                      )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+                      )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                         table,
                         {
                           name: "newNameHere",
@@ -498,7 +499,8 @@ export default (async function PgMutationUpdateDeletePlugin(
                       isPgUpdateByKeysInputType: mode === "update",
                       isPgDeleteInputType: mode === "delete",
                       isPgDeleteByKeysInputType: mode === "delete",
-                      pgInflection: table,
+                      pgInflection: table, // TODO:v5: remove - TYPO!
+                      pgIntrospection: table,
                       pgKeys: keys,
                       isMutationInput: true,
                     }
@@ -526,16 +528,18 @@ export default (async function PgMutationUpdateDeletePlugin(
                             },
                             async resolve(
                               parent,
-                              { input },
-                              { pgClient },
+                              args,
+                              resolveContext,
                               resolveInfo
                             ) {
+                              const { input } = args;
+                              const { pgClient } = resolveContext;
                               return commonCodeRenameMe(
                                 pgClient,
                                 resolveInfo,
                                 getDataFromParsedResolveInfoFragment,
                                 PayloadType,
-                                input,
+                                args,
                                 sql.fragment`(${sql.join(
                                   keys.map(
                                     key =>
@@ -549,7 +553,8 @@ export default (async function PgMutationUpdateDeletePlugin(
                                   ),
                                   ") and ("
                                 )})`,
-                                context
+                                context,
+                                resolveContext
                               );
                             },
                           };
@@ -557,6 +562,7 @@ export default (async function PgMutationUpdateDeletePlugin(
                         {
                           isPgNodeMutation: false,
                           pgFieldIntrospection: table,
+                          pgFieldConstraint: constraint,
                           [mode === "update"
                             ? "isPgUpdateMutationField"
                             : "isPgDeleteMutationField"]: true,
@@ -571,9 +577,11 @@ export default (async function PgMutationUpdateDeletePlugin(
               }
               return memo;
             }, outerMemo),
-        {}
-      ),
-      `Adding default update/delete mutations to root Mutation type`
-    );
-  });
+          {}
+        ),
+        `Adding default update/delete mutations to root Mutation type`
+      );
+    },
+    ["PgMutationUpdateDelete"]
+  );
 }: Plugin);

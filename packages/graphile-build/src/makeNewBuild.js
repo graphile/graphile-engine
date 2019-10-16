@@ -15,10 +15,12 @@ import {
 import debugFactory from "debug";
 import type { ResolveTree } from "graphql-parse-resolve-info";
 import pluralize from "pluralize";
-import LRUCache from "lru-cache";
+import LRU from "@graphile/lru";
+import semver from "semver";
 import { upperCamelCase, camelCase, constantCase } from "./utils";
 import swallowError from "./swallowError";
 import resolveNode from "./resolveNode";
+import { LiveCoordinator } from "./Live";
 
 import type SchemaBuilder, {
   Build,
@@ -33,6 +35,8 @@ import { createHash } from "crypto";
 
 import { version } from "../package.json";
 
+let recurseDataGeneratorsForFieldWarned = false;
+
 const isString = str => typeof str === "string";
 const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
 const debug = debugFactory("graphile-build");
@@ -45,7 +49,7 @@ const debug = debugFactory("graphile-build");
  * produce half a million hashes per second on my machine, the LRU only gives
  * us a 10x speedup!
  */
-const hashCache = LRUCache(100000);
+const hashCache = new LRU({ maxLength: 100000 });
 
 /*
  * This function must never return a string longer than 56 characters.
@@ -156,6 +160,7 @@ const {
   GraphQLObjectType,
   GraphQLInputObjectType,
   GraphQLEnumType,
+  GraphQLUnionType,
   getNamedType,
   isCompositeType,
   isAbstractType,
@@ -167,15 +172,24 @@ const mergeData = (
   ReturnType,
   arg
 ) => {
-  const results: ?Array<MetaData> = ensureArray(gen(arg, ReturnType, data));
+  const results: ?Array<MetaData> = ensureArray<MetaData>(
+    gen(arg, ReturnType, data)
+  );
   if (!results) {
     return;
   }
-  for (const result: MetaData of results) {
-    for (const k of Object.keys(result)) {
+  for (
+    let resultIndex = 0, resultCount = results.length;
+    resultIndex < resultCount;
+    resultIndex++
+  ) {
+    const result: MetaData = results[resultIndex];
+    const keys = Object.keys(result);
+    for (let i = 0, l = keys.length; i < l; i++) {
+      const k = keys[i];
       data[k] = data[k] || [];
       const value: mixed = result[k];
-      const newData: ?Array<mixed> = ensureArray(value);
+      const newData: ?Array<mixed> = ensureArray<mixed>(value);
       if (newData) {
         data[k].push(...newData);
       }
@@ -188,23 +202,26 @@ const knownTypes = [
   GraphQLObjectType,
   GraphQLInputObjectType,
   GraphQLEnumType,
+  GraphQLUnionType,
 ];
 const knownTypeNames = knownTypes.map(k => k.name);
 
-function ensureArray<T>(val: void | Array<T> | T): void | Array<T> {
+function ensureArray<T>(val: null | T | Array<T>): void | Array<T> {
   if (val == null) {
     return;
   } else if (Array.isArray(val)) {
-    return val;
+    // $FlowFixMe
+    return (val: Array<T>);
   } else {
-    return [val];
+    return ([val]: Array<T>);
   }
 }
 
 // eslint-disable-next-line no-unused-vars
-let ensureName = fn => {};
+let ensureName = _fn => {};
 if (["development", "test"].indexOf(process.env.NODE_ENV) >= 0) {
   ensureName = fn => {
+    // $FlowFixMe: displayName
     if (isDev && !fn.displayName && !fn.name && debug.enabled) {
       // eslint-disable-next-line no-console
       console.trace(
@@ -246,7 +263,21 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
   const fieldArgDataGeneratorsByFieldNameByType = new Map();
 
   return {
+    options: builder.options,
     graphileBuildVersion: version,
+    versions: {
+      graphql: require("graphql/package.json").version,
+      "graphile-build": version,
+    },
+    hasVersion(
+      packageName: string,
+      range: string,
+      options?: { includePrerelease?: boolean } = { includePrerelease: true }
+    ): boolean {
+      const packageVersion = this.versions[packageName];
+      if (!packageVersion) return false;
+      return semver.satisfies(packageVersion, range, options);
+    },
     graphql,
     parseResolveInfo,
     simplifyParsedResolveInfoFragmentWithType,
@@ -309,15 +340,13 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
       if (!inScope) {
         // eslint-disable-next-line no-console
         console.warn(
-          `No scope was provided to new ${Type.name}[name=${
-            spec.name
-          }], it's highly recommended that you add a scope so other hooks can easily reference your object - please check usage of 'newWithHooks'. To mute this message, just pass an empty object.`
+          `No scope was provided to new ${Type.name}[name=${spec.name}], it's highly recommended that you add a scope so other hooks can easily reference your object - please check usage of 'newWithHooks'. To mute this message, just pass an empty object.`
         );
       }
       if (!Type) {
         throw new Error("No type specified!");
       }
-      if (!this.newWithHooks || !Object.isFrozen(this)) {
+      if (!this.newWithHooks) {
         throw new Error(
           "Please do not generate the schema during the build building phase, use 'init' instead"
         );
@@ -330,9 +359,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
         knownTypeNames.indexOf(Type.name) >= 0
       ) {
         throw new Error(
-          `GraphQL conflict for '${
-            Type.name
-          }' detected! Multiple versions of graphql exist in your node_modules?`
+          `GraphQL conflict for '${Type.name}' detected! Multiple versions of graphql exist in your node_modules?`
         );
       }
       if (Type === GraphQLSchema) {
@@ -345,14 +372,34 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
           fieldName,
           fn: DataGeneratorFunction
         ) => {
+          // $FlowFixMe: displayName
           fn.displayName =
+            // $FlowFixMe: displayName
             fn.displayName ||
             `${getNameFromType(Self)}:${fieldName}[${fn.name || "anonymous"}]`;
           fieldDataGeneratorsByFieldName[fieldName] =
             fieldDataGeneratorsByFieldName[fieldName] || [];
           fieldDataGeneratorsByFieldName[fieldName].push(fn);
         };
-        const recurseDataGeneratorsForField = fieldName => {
+        const recurseDataGeneratorsForField = (
+          fieldName,
+          iKnowWhatIAmDoing
+        ) => {
+          /*
+           * Recursing data generators is not safe in general; however there
+           * are certain exceptions - for example when you know there are no
+           * "dynamic" data generator fields - e.g. where the GraphQL alias is
+           * not used at all. In PostGraphile the only case of this is the
+           * PageInfo object as none of the fields accept arguments, and they
+           * do not rely on the GraphQL query alias to store the result.
+           */
+          if (!iKnowWhatIAmDoing && !recurseDataGeneratorsForFieldWarned) {
+            recurseDataGeneratorsForFieldWarned = true;
+            // eslint-disable-next-line no-console
+            console.error(
+              "Use of `recurseDataGeneratorsForField` is NOT SAFE. e.g. `{n1: node { a: field1 }, n2: node { a: field2 } }` cannot resolve correctly."
+            );
+          }
           const fn = (parsedResolveInfoFragment, ReturnType, ...rest) => {
             const { args } = parsedResolveInfoFragment;
             const { fields } = this.simplifyParsedResolveInfoFragmentWithType(
@@ -370,7 +417,12 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
             if (argDataGeneratorsForSelfByFieldName) {
               const argDataGenerators =
                 argDataGeneratorsForSelfByFieldName[fieldName];
-              for (const gen of argDataGenerators) {
+              for (
+                let genIndex = 0, genCount = argDataGenerators.length;
+                genIndex < genCount;
+                genIndex++
+              ) {
+                const gen = argDataGenerators[genIndex];
                 const local = ensureArray(gen(args, ReturnType, ...rest));
                 if (local) {
                   results.push(...local);
@@ -383,12 +435,23 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
               !isAbstractType(StrippedType)
             ) {
               const typeFields = StrippedType.getFields();
-              for (const alias of Object.keys(fields)) {
+              const keys = Object.keys(fields);
+              for (
+                let keyIndex = 0, keyCount = keys.length;
+                keyIndex < keyCount;
+                keyIndex++
+              ) {
+                const alias = keys[keyIndex];
                 const field = fields[alias];
                 // Run generators with `field` as the `parsedResolveInfoFragment`, pushing results to `results`
                 const gens = fieldDataGeneratorsByFieldName[field.name];
                 if (gens) {
-                  for (const gen of gens) {
+                  for (
+                    let genIndex = 0, genCount = gens.length;
+                    genIndex < genCount;
+                    genIndex++
+                  ) {
+                    const gen = gens[genIndex];
                     const local = ensureArray(
                       gen(field, typeFields[field.name].type, ...rest)
                     );
@@ -416,20 +479,23 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
           this,
           "GraphQLObjectType",
           newSpec,
-          Object.assign({}, commonContext, {
+          {
+            ...commonContext,
             addDataGeneratorForField,
             recurseDataGeneratorsForField,
-          }),
+          },
           `|${newSpec.name}`
         );
 
         const rawSpec = newSpec;
-        newSpec = Object.assign({}, newSpec, {
+        newSpec = {
+          ...newSpec,
           interfaces: () => {
-            const interfacesContext = Object.assign({}, commonContext, {
+            const interfacesContext = {
+              ...commonContext,
               Self,
               GraphQLObjectType: rawSpec,
-            });
+            };
             let rawInterfaces = rawSpec.interfaces || [];
             if (typeof rawInterfaces === "function") {
               rawInterfaces = rawInterfaces(interfacesContext);
@@ -444,7 +510,8 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
           },
           fields: () => {
             const processedFields = [];
-            const fieldsContext = Object.assign({}, commonContext, {
+            const fieldsContext = {
+              ...commonContext,
               addDataGeneratorForField,
               recurseDataGeneratorsForField,
               Self,
@@ -467,13 +534,14 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                   );
                 }
 
-                let argDataGenerators = [];
+                const argDataGenerators = [];
                 fieldArgDataGeneratorsByFieldName[
                   fieldName
                 ] = argDataGenerators;
 
                 let newSpec = spec;
-                let context = Object.assign({}, commonContext, {
+                const context = {
+                  ...commonContext,
                   Self,
                   addDataGenerator(fn) {
                     return addDataGeneratorForField(fieldName, fn);
@@ -498,7 +566,12 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                     );
 
                     // Args -> argDataGenerators
-                    for (const gen of argDataGenerators) {
+                    for (
+                      let dgIndex = 0, dgCount = argDataGenerators.length;
+                      dgIndex < dgCount;
+                      dgIndex++
+                    ) {
+                      const gen = argDataGenerators[dgIndex];
                       try {
                         mergeData(data, gen, ReturnType, args);
                       } catch (e) {
@@ -527,13 +600,19 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                       !isAbstractType(Type)
                     ) {
                       const typeFields = Type.getFields();
-                      for (const alias of Object.keys(fields)) {
+                      const keys = Object.keys(fields);
+                      for (
+                        let keyIndex = 0, keyCount = keys.length;
+                        keyIndex < keyCount;
+                        keyIndex++
+                      ) {
+                        const alias = keys[keyIndex];
                         const field = fields[alias];
                         const gens = fieldDataGeneratorsByFieldName[field.name];
                         if (gens) {
                           const FieldReturnType = typeFields[field.name].type;
-                          for (const gen of gens) {
-                            mergeData(data, gen, FieldReturnType, field);
+                          for (let i = 0, l = gens.length; i < l; i++) {
+                            mergeData(data, gens[i], FieldReturnType, field);
                           }
                         }
                       }
@@ -542,18 +621,16 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                   },
                   scope: extend(
                     extend(
-                      scope,
+                      { ...scope },
                       {
                         fieldName,
                       },
                       `Within context for GraphQLObjectType '${rawSpec.name}'`
                     ),
                     fieldScope,
-                    `Extending scope for field '${fieldName}' within context for GraphQLObjectType '${
-                      rawSpec.name
-                    }'`
+                    `Extending scope for field '${fieldName}' within context for GraphQLObjectType '${rawSpec.name}'`
                   ),
-                });
+                };
                 if (typeof newSpec === "function") {
                   newSpec = newSpec(context);
                 }
@@ -565,23 +642,25 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                   `|${getNameFromType(Self)}.fields.${fieldName}`
                 );
                 newSpec.args = newSpec.args || {};
-                newSpec = Object.assign({}, newSpec, {
+                newSpec = {
+                  ...newSpec,
                   args: builder.applyHooks(
                     this,
                     "GraphQLObjectType:fields:field:args",
                     newSpec.args,
-                    Object.assign({}, context, {
+                    {
+                      ...context,
                       field: newSpec,
                       returnType: newSpec.type,
-                    }),
+                    },
                     `|${getNameFromType(Self)}.fields.${fieldName}`
                   ),
-                });
+                };
                 const finalSpec = newSpec;
                 processedFields.push(finalSpec);
                 return finalSpec;
               }: FieldWithHooksFunction),
-            });
+            };
             let rawFields = rawSpec.fields || {};
             if (typeof rawFields === "function") {
               rawFields = rawFields(fieldsContext);
@@ -615,7 +694,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
             }
             return fieldsSpec;
           },
-        });
+        };
       } else if (Type === GraphQLInputObjectType) {
         const commonContext = {
           type: "GraphQLInputObjectType",
@@ -631,10 +710,12 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
         newSpec.fields = newSpec.fields || {};
 
         const rawSpec = newSpec;
-        newSpec = Object.assign({}, newSpec, {
+        newSpec = {
+          ...newSpec,
           fields: () => {
             const processedFields = [];
-            const fieldsContext = Object.assign({}, commonContext, {
+            const fieldsContext = {
+              ...commonContext,
               Self,
               GraphQLInputObjectType: rawSpec,
               fieldWithHooks: ((fieldName, spec, fieldScope = {}) => {
@@ -643,24 +724,21 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                     "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
                   );
                 }
-                let context = Object.assign({}, commonContext, {
+                const context = {
+                  ...commonContext,
                   Self,
                   scope: extend(
                     extend(
-                      scope,
+                      { ...scope },
                       {
                         fieldName,
                       },
-                      `Within context for GraphQLInputObjectType '${
-                        rawSpec.name
-                      }'`
+                      `Within context for GraphQLInputObjectType '${rawSpec.name}'`
                     ),
                     fieldScope,
-                    `Extending scope for field '${fieldName}' within context for GraphQLInputObjectType '${
-                      rawSpec.name
-                    }'`
+                    `Extending scope for field '${fieldName}' within context for GraphQLInputObjectType '${rawSpec.name}'`
                   ),
-                });
+                };
                 let newSpec = spec;
                 if (typeof newSpec === "function") {
                   newSpec = newSpec(context);
@@ -676,7 +754,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                 processedFields.push(finalSpec);
                 return finalSpec;
               }: InputFieldWithHooksFunction),
-            });
+            };
             let rawFields = rawSpec.fields;
             if (typeof rawFields === "function") {
               rawFields = rawFields(fieldsContext);
@@ -710,7 +788,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
             }
             return fieldsSpec;
           },
-        });
+        };
       } else if (Type === GraphQLEnumType) {
         const commonContext = {
           type: "GraphQLEnumType",
@@ -744,7 +822,43 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
           memo[valueKey] = newValue;
           return memo;
         }, {});
+      } else if (Type === GraphQLUnionType) {
+        const commonContext = {
+          type: "GraphQLUnionType",
+          scope,
+        };
+        newSpec = builder.applyHooks(
+          this,
+          "GraphQLUnionType",
+          newSpec,
+          { ...commonContext },
+          `|${newSpec.name}`
+        );
+
+        const rawSpec = newSpec;
+        newSpec = {
+          ...newSpec,
+          types: () => {
+            const typesContext = {
+              ...commonContext,
+              Self,
+              GraphQLUnionType: rawSpec,
+            };
+            let rawTypes = rawSpec.types || [];
+            if (typeof rawTypes === "function") {
+              rawTypes = rawTypes(typesContext);
+            }
+            return builder.applyHooks(
+              this,
+              "GraphQLUnionType:types",
+              rawTypes,
+              typesContext,
+              `|${getNameFromType(Self)}`
+            );
+          },
+        };
       }
+
       const finalSpec: ConfigType = newSpec;
 
       const Self: T = new Type(finalSpec);
@@ -783,14 +897,13 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
         }
       }
 
+      this.scopeByType.set(Self, scope);
       if (finalSpec.name) {
         this.addType(
           Self,
           scope.__origin ||
             (this
-              ? `'newWithHooks' call during hook '${
-                  this.status.currentHookName
-                }'`
+              ? `'newWithHooks' call during hook '${this.status.currentHookName}'`
               : null)
         );
       }
@@ -813,6 +926,68 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
       upperCamelCase,
       camelCase,
       constantCase,
+
+      // Built-in names (allows you to override these in the output schema)
+      builtin: name => {
+        /*
+         * e.g.:
+         *
+         * graphile-build:
+         *
+         * - Query
+         * - Mutation
+         * - Subscription
+         * - Node
+         * - PageInfo
+         *
+         * graphile-build-pg:
+         *
+         * - Interval
+         * - BigInt
+         * - BigFloat
+         * - BitString
+         * - Point
+         * - Date
+         * - Datetime
+         * - Time
+         * - JSON
+         * - UUID
+         * - InternetAddress
+         *
+         * Other plugins may add their own builtins too; try and avoid conflicts!
+         */
+        return name;
+      },
+
+      // When converting a query field to a subscription (live query) field, this allows you to rename it
+      live: name => name,
+
+      // Try and make something a valid GraphQL 'Name'
+      coerceToGraphQLName: (name: string) => {
+        let resultingName = name;
+
+        /*
+         * Name is defined in GraphQL to match this regexp:
+         *
+         * /^[_A-Za-z][_0-9A-Za-z]*$/
+         *
+         * See: https://graphql.github.io/graphql-spec/June2018/#sec-Appendix-Grammar-Summary.Lexical-Tokens
+         *
+         * So if our 'name' starts with a digit, we must prefix it with
+         * something. We'll just use an underscore.
+         */
+        if (resultingName.match(/^[0-9]/)) {
+          resultingName = "_" + resultingName;
+        }
+
+        /*
+         * Fields beginning with two underscores are reserved by the GraphQL
+         * introspection systems, trim to just one.
+         */
+        resultingName = resultingName.replace(/^__+/g, "_");
+
+        return resultingName;
+      },
     },
     swallowError,
     // resolveNode: EXPERIMENTAL, API might change!
@@ -821,5 +996,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
       currentHookName: null,
       currentHookEvent: null,
     },
+    liveCoordinator: new LiveCoordinator(),
+    scopeByType: new Map(),
   };
 }

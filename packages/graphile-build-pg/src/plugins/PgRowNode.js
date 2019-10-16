@@ -1,114 +1,135 @@
 // @flow
 import type { Plugin } from "graphile-build";
-import debugFactory from "debug";
+import debugSql from "./debugSql";
 
-const base64Decode = str => Buffer.from(String(str), "base64").toString("utf8");
-const debugSql = debugFactory("graphile-build-pg:sql");
+export default (async function PgRowNode(builder, { subscriptions }) {
+  builder.hook(
+    "GraphQLObjectType",
+    (object, build, context) => {
+      const {
+        addNodeFetcherForTypeName,
+        pgSql: sql,
+        gql2pg,
+        pgQueryFromResolveData: queryFromResolveData,
+        pgOmit: omit,
+        pgPrepareAndRun,
+      } = build;
+      const {
+        scope: { isPgRowType, pgIntrospection: table },
+      } = context;
 
-export default (async function PgRowNode(builder) {
-  builder.hook("GraphQLObjectType", (object, build, context) => {
-    const {
-      addNodeFetcherForTypeName,
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
-      pgSql: sql,
-      gql2pg,
-      pgQueryFromResolveData: queryFromResolveData,
-      pgOmit: omit,
-    } = build;
-    const {
-      scope: { isPgRowType, pgIntrospection: table },
-    } = context;
-    if (!isPgRowType || !table.namespace || omit(table, "read")) {
-      return object;
-    }
-    const sqlFullTableName = sql.identifier(table.namespace.name, table.name);
-    const attributes = introspectionResultsByKind.attribute.filter(
-      attr => attr.classId === table.id
-    );
-    const primaryKeyConstraint = introspectionResultsByKind.constraint
-      .filter(con => con.classId === table.id)
-      .filter(con => con.type === "p")[0];
-    if (!primaryKeyConstraint) {
-      return object;
-    }
-    const primaryKeys =
-      primaryKeyConstraint &&
-      primaryKeyConstraint.keyAttributeNums.map(
-        num => attributes.filter(attr => attr.num === num)[0]
-      );
-    addNodeFetcherForTypeName(
-      object.name,
-      async (
-        data,
-        identifiers,
-        { pgClient },
-        parsedResolveInfoFragment,
-        ReturnType,
-        resolveData
-      ) => {
-        if (identifiers.length !== primaryKeys.length) {
-          throw new Error("Invalid ID");
-        }
-        const query = queryFromResolveData(
-          sqlFullTableName,
-          undefined,
-          resolveData,
-          {},
-          queryBuilder => {
-            primaryKeys.forEach((key, idx) => {
-              queryBuilder.where(
-                sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
-                  key.name
-                )} = ${gql2pg(
-                  identifiers[idx],
-                  primaryKeys[idx].type,
-                  primaryKeys[idx].typeModifier
-                )}`
-              );
-            });
-          }
-        );
-        const { text, values } = sql.compile(query);
-        if (debugSql.enabled) debugSql(text);
-        const {
-          rows: [row],
-        } = await pgClient.query(text, values);
-        return row;
+      if (!addNodeFetcherForTypeName) {
+        // Node plugin must be disabled.
+        return object;
       }
-    );
-    return object;
-  });
+      if (!isPgRowType || !table.namespace || omit(table, "read")) {
+        return object;
+      }
+      const sqlFullTableName = sql.identifier(table.namespace.name, table.name);
+      const primaryKeyConstraint = table.primaryKeyConstraint;
+      if (!primaryKeyConstraint) {
+        return object;
+      }
+      const primaryKeys =
+        primaryKeyConstraint && primaryKeyConstraint.keyAttributes;
 
-  builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
-    const {
-      nodeIdFieldName,
-      extend,
-      parseResolveInfo,
-      pgGetGqlTypeByTypeIdAndModifier,
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
-      pgSql: sql,
-      gql2pg,
-      getNodeType,
-      graphql: { GraphQLNonNull, GraphQLID },
-      inflection,
-      pgQueryFromResolveData: queryFromResolveData,
-      pgOmit: omit,
-      describePgEntity,
-      sqlCommentByAddingTags,
-    } = build;
-    const {
-      scope: { isRootQuery },
-      fieldWithHooks,
-    } = context;
-    if (!isRootQuery || !nodeIdFieldName) {
-      return fields;
-    }
-    return extend(
-      fields,
-      introspectionResultsByKind.class
-        .filter(table => !!table.namespace)
-        .filter(table => !omit(table, "read"))
-        .reduce((memo, table) => {
+      addNodeFetcherForTypeName(
+        object.name,
+        async (
+          data,
+          identifiers,
+          resolveContext,
+          parsedResolveInfoFragment,
+          ReturnType,
+          resolveData,
+          resolveInfo
+        ) => {
+          const { pgClient } = resolveContext;
+          const liveRecord =
+            resolveInfo &&
+            resolveInfo.rootValue &&
+            resolveInfo.rootValue.liveRecord;
+          if (identifiers.length !== primaryKeys.length) {
+            throw new Error("Invalid ID");
+          }
+          const query = queryFromResolveData(
+            sqlFullTableName,
+            undefined,
+            resolveData,
+            {
+              useAsterisk: false, // Because it's only a single relation, no need
+            },
+            queryBuilder => {
+              if (subscriptions && table.primaryKeyConstraint) {
+                queryBuilder.selectIdentifiers(table);
+              }
+              primaryKeys.forEach((key, idx) => {
+                queryBuilder.where(
+                  sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
+                    key.name
+                  )} = ${gql2pg(
+                    identifiers[idx],
+                    primaryKeys[idx].type,
+                    primaryKeys[idx].typeModifier
+                  )}`
+                );
+              });
+            },
+            resolveContext,
+            resolveInfo && resolveInfo.rootValue
+          );
+          const { text, values } = sql.compile(query);
+          if (debugSql.enabled) debugSql(text);
+          const {
+            rows: [row],
+          } = await pgPrepareAndRun(pgClient, text, values);
+          if (subscriptions && liveRecord && row) {
+            liveRecord("pg", table, row.__identifiers);
+          }
+          return row;
+        }
+      );
+      return object;
+    },
+    ["PgRowNode"]
+  );
+
+  builder.hook(
+    "GraphQLObjectType:fields",
+    (fields, build, context) => {
+      const {
+        nodeIdFieldName,
+        getTypeAndIdentifiersFromNodeId,
+        extend,
+        parseResolveInfo,
+        pgGetGqlTypeByTypeIdAndModifier,
+        pgIntrospectionResultsByKind: introspectionResultsByKind,
+        pgSql: sql,
+        gql2pg,
+        graphql: { GraphQLNonNull, GraphQLID },
+        inflection,
+        pgQueryFromResolveData: queryFromResolveData,
+        pgOmit: omit,
+        describePgEntity,
+        sqlCommentByAddingTags,
+        pgPrepareAndRun,
+      } = build;
+      const {
+        scope: { isRootQuery },
+        fieldWithHooks,
+      } = context;
+
+      if (!isRootQuery || !nodeIdFieldName) {
+        return fields;
+      }
+
+      return extend(
+        fields,
+        introspectionResultsByKind.class.reduce((memo, table) => {
+          // PERFORMANCE: These used to be .filter(...) calls
+          if (!table.namespace) return memo;
+          if (omit(table, "read")) return memo;
+
           const TableType = pgGetGqlTypeByTypeIdAndModifier(
             table.type.id,
             null
@@ -118,20 +139,12 @@ export default (async function PgRowNode(builder) {
             table.name
           );
           if (TableType) {
-            const attributes = introspectionResultsByKind.attribute.filter(
-              attr => attr.classId === table.id
-            );
-            const primaryKeyConstraint = introspectionResultsByKind.constraint
-              .filter(con => con.classId === table.id)
-              .filter(con => con.type === "p")[0];
+            const primaryKeyConstraint = table.primaryKeyConstraint;
             if (!primaryKeyConstraint) {
               return memo;
             }
             const primaryKeys =
-              primaryKeyConstraint &&
-              primaryKeyConstraint.keyAttributeNums.map(
-                num => attributes.filter(attr => attr.num === num)[0]
-              );
+              primaryKeyConstraint && primaryKeyConstraint.keyAttributes;
             const fieldName = inflection.tableNode(table);
             memo = extend(
               memo,
@@ -140,26 +153,26 @@ export default (async function PgRowNode(builder) {
                   fieldName,
                   ({ getDataFromParsedResolveInfoFragment }) => {
                     return {
-                      description: `Reads a single \`${
-                        TableType.name
-                      }\` using its globally unique \`ID\`.`,
+                      description: `Reads a single \`${TableType.name}\` using its globally unique \`ID\`.`,
                       type: TableType,
                       args: {
                         [nodeIdFieldName]: {
-                          description: `The globally unique \`ID\` to be used in selecting a single \`${
-                            TableType.name
-                          }\`.`,
+                          description: `The globally unique \`ID\` to be used in selecting a single \`${TableType.name}\`.`,
                           type: new GraphQLNonNull(GraphQLID),
                         },
                       },
-                      async resolve(parent, args, { pgClient }, resolveInfo) {
+                      async resolve(parent, args, resolveContext, resolveInfo) {
+                        const { pgClient } = resolveContext;
+                        const liveRecord =
+                          resolveInfo.rootValue &&
+                          resolveInfo.rootValue.liveRecord;
                         const nodeId = args[nodeIdFieldName];
                         try {
-                          const [alias, ...identifiers] = JSON.parse(
-                            base64Decode(nodeId)
-                          );
-                          const NodeTypeByAlias = getNodeType(alias);
-                          if (NodeTypeByAlias !== TableType) {
+                          const {
+                            Type,
+                            identifiers,
+                          } = getTypeAndIdentifiersFromNodeId(nodeId);
+                          if (Type !== TableType) {
                             throw new Error("Mismatched type");
                           }
                           if (identifiers.length !== primaryKeys.length) {
@@ -169,6 +182,7 @@ export default (async function PgRowNode(builder) {
                           const parsedResolveInfoFragment = parseResolveInfo(
                             resolveInfo
                           );
+                          parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
                           const resolveData = getDataFromParsedResolveInfoFragment(
                             parsedResolveInfoFragment,
                             TableType
@@ -177,8 +191,13 @@ export default (async function PgRowNode(builder) {
                             sqlFullTableName,
                             undefined,
                             resolveData,
-                            {},
+                            {
+                              useAsterisk: false, // Because it's only a single relation, no need
+                            },
                             queryBuilder => {
+                              if (subscriptions && table.primaryKeyConstraint) {
+                                queryBuilder.selectIdentifiers(table);
+                              }
                               primaryKeys.forEach((key, idx) => {
                                 queryBuilder.where(
                                   sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
@@ -190,13 +209,18 @@ export default (async function PgRowNode(builder) {
                                   )}`
                                 );
                               });
-                            }
+                            },
+                            resolveContext,
+                            resolveInfo.rootValue
                           );
                           const { text, values } = sql.compile(query);
                           if (debugSql.enabled) debugSql(text);
                           const {
                             rows: [row],
-                          } = await pgClient.query(text, values);
+                          } = await pgPrepareAndRun(pgClient, text, values);
+                          if (liveRecord && row) {
+                            liveRecord("pg", table, row.__identifiers);
+                          }
                           return row;
                         } catch (e) {
                           return null;
@@ -212,7 +236,7 @@ export default (async function PgRowNode(builder) {
               },
               `Adding row by globally unique identifier field for ${describePgEntity(
                 table
-              )}. You can rename this table via:\n\n  ${sqlCommentByAddingTags(
+              )}. You can rename this table via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                 table,
                 { name: "newNameHere" }
               )}`
@@ -220,7 +244,9 @@ export default (async function PgRowNode(builder) {
           }
           return memo;
         }, {}),
-      `Adding "row by node ID" fields to root Query type`
-    );
-  });
+        `Adding "row by node ID" fields to root Query type`
+      );
+    },
+    ["PgRowNode"]
+  );
 }: Plugin);

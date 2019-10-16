@@ -2,21 +2,24 @@
 import isString from "lodash/isString";
 import type { Plugin } from "graphile-build";
 
-export default (function PgConnectionArgOrderBy(builder) {
-  builder.hook("init", (_, build) => {
-    const {
-      newWithHooks,
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
-      graphql: { GraphQLEnumType },
-      inflection,
-      pgOmit: omit,
-      sqlCommentByAddingTags,
-      describePgEntity,
-    } = build;
-    introspectionResultsByKind.class
-      .filter(table => table.isSelectable && !omit(table, "order"))
-      .filter(table => !!table.namespace)
-      .forEach(table => {
+export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
+  builder.hook(
+    "init",
+    (_, build) => {
+      const {
+        newWithHooks,
+        pgIntrospectionResultsByKind: introspectionResultsByKind,
+        graphql: { GraphQLEnumType },
+        inflection,
+        pgOmit: omit,
+        sqlCommentByAddingTags,
+        describePgEntity,
+      } = build;
+      introspectionResultsByKind.class.forEach(table => {
+        // PERFORMANCE: These used to be .filter(...) calls
+        if (!table.isSelectable || omit(table, "order")) return;
+        if (!table.namespace) return;
+
         const tableTypeName = inflection.tableType(table);
         /* const TableOrderByType = */
         newWithHooks(
@@ -36,7 +39,7 @@ export default (function PgConnectionArgOrderBy(builder) {
           {
             __origin: `Adding connection "orderBy" argument for ${describePgEntity(
               table
-            )}. You can rename the table's GraphQL type via:\n\n  ${sqlCommentByAddingTags(
+            )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
               table,
               {
                 name: "newNameHere",
@@ -47,8 +50,11 @@ export default (function PgConnectionArgOrderBy(builder) {
           }
         );
       });
-    return _;
-  });
+      return _;
+    },
+    ["PgConnectionArgOrderBy"]
+  );
+
   builder.hook(
     "GraphQLObjectType:fields:field:args",
     (args, build, context) => {
@@ -63,24 +69,40 @@ export default (function PgConnectionArgOrderBy(builder) {
       } = build;
       const {
         scope: {
+          fieldName,
           isPgFieldConnection,
           isPgFieldSimpleCollection,
-          pgFieldIntrospection: table,
+          pgFieldIntrospection,
+          pgFieldIntrospectionTable,
         },
         addArgDataGenerator,
         Self,
-        field,
       } = context;
-      const shouldAddOrderBy = isPgFieldConnection || isPgFieldSimpleCollection;
+
+      if (!isPgFieldConnection && !isPgFieldSimpleCollection) {
+        return args;
+      }
+
+      const proc =
+        pgFieldIntrospection.kind === "procedure" ? pgFieldIntrospection : null;
+      const table =
+        pgFieldIntrospection.kind === "class"
+          ? pgFieldIntrospection
+          : proc
+          ? pgFieldIntrospectionTable
+          : null;
       if (
-        !shouldAddOrderBy ||
         !table ||
-        table.kind !== "class" ||
         !table.namespace ||
         !table.isSelectable ||
         omit(table, "order")
       ) {
         return args;
+      }
+      if (proc) {
+        if (!proc.tags.sortable) {
+          return args;
+        }
       }
       const TableType = pgGetGqlTypeByTypeIdAndModifier(table.type.id, null);
       const tableTypeName = TableType.name;
@@ -89,8 +111,13 @@ export default (function PgConnectionArgOrderBy(builder) {
       );
       const cursorPrefixFromOrderBy = orderBy => {
         if (orderBy) {
-          let cursorPrefixes = [];
-          for (const item of orderBy) {
+          const cursorPrefixes = [];
+          for (
+            let itemIndex = 0, itemCount = orderBy.length;
+            itemIndex < itemCount;
+            itemIndex++
+          ) {
+            const item = orderBy[itemIndex];
             if (item.alias) {
               cursorPrefixes.push(sql.literal(item.alias));
             }
@@ -118,13 +145,21 @@ export default (function PgConnectionArgOrderBy(builder) {
                   Array.isArray(specs[0]) || specs.length === 0
                     ? specs
                     : [specs];
-                orders.forEach(([col, ascending]) => {
+                orders.forEach(([col, ascending, specNullsFirst]) => {
                   const expr = isString(col)
                     ? sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
                         col
                       )}`
                     : col;
-                  queryBuilder.orderBy(expr, ascending);
+                  // If the enum specifies null ordering, use that
+                  // Otherwise, use the orderByNullsLast option if present
+                  const nullsFirst =
+                    specNullsFirst != null
+                      ? specNullsFirst
+                      : orderByNullsLast != null
+                      ? !orderByNullsLast
+                      : undefined;
+                  queryBuilder.orderBy(expr, ascending, nullsFirst);
                 });
                 if (unique) {
                   queryBuilder.setOrderIsUnique();
@@ -143,8 +178,9 @@ export default (function PgConnectionArgOrderBy(builder) {
             type: new GraphQLList(new GraphQLNonNull(TableOrderByType)),
           },
         },
-        `Adding 'orderBy' argument to field '${field.name}' of '${Self.name}'`
+        `Adding 'orderBy' argument to field '${fieldName}' of '${Self.name}'`
       );
-    }
+    },
+    ["PgConnectionArgOrderBy"]
   );
 }: Plugin);

@@ -2,8 +2,8 @@ const { graphql } = require("graphql");
 const { withPgClient } = require("../helpers");
 const { createPostGraphileSchema } = require("../..");
 const { readFile: rawReadFile } = require("fs");
-const { printSchema } = require("graphql/utilities");
-const debug = require("debug")("graphile-build:schema");
+//const { printSchema } = require("graphql/utilities");
+//const debug = require("debug")("graphile-build:schema");
 const jwt = require("jsonwebtoken");
 
 function readFile(filename, encoding) {
@@ -27,7 +27,7 @@ const tests = [
   {
     name: "jwt normal",
     query: `mutation {
-      authenticate(input: {a: 1, b: 2, c: 3}) {
+      authenticate(input: {a: 1, b: "2", c: "3"}) {
         jwtToken {
           role
           exp
@@ -42,7 +42,25 @@ const tests = [
   {
     name: "jwt pgJwtTypeIdentifier",
     query: `mutation {
-      authenticate(input: {a: 1, b: 2, c: 3}) {
+      authenticate(input: {a: 1, b: "2", c: "3"}) {
+        jwtToken
+      }
+    }`,
+    schema: "withJwt",
+    process: ({
+      data: {
+        authenticate: { jwtToken: str },
+      },
+    }) => {
+      return Object.assign(jwt.verify(str, jwtSecret), {
+        iat: "[timestamp]",
+      });
+    },
+  },
+  {
+    name: "jwt pgJwtTypeIdentifier, big numbers",
+    query: `mutation {
+      authenticate(input: {a: 1, b: "1234567890123456789.123456789", c: "987654321098765432"}) {
         jwtToken
       }
     }`,
@@ -69,26 +87,34 @@ const tests = [
   {
     name: "jwt pgJwtTypeIdentifier with payload",
     query: `mutation {
-      authenticatePayload(input: {a: 1, b: 2, c: 3}) {
+      authenticatePayload(input: {a: 1, b: "2", c: "3"}) {
         authPayload {
           jwt
           id
           admin
+          personById {
+            id
+            name
+          }
+        }
+        personById {
+          id
+          name
         }
       }
     }`,
     schema: "withJwt",
-    process: ({
-      data: {
-        authenticatePayload: { authPayload },
-      },
-    }) => {
-      const { jwt: str } = authPayload;
-      return Object.assign({}, authPayload, {
-        jwt: Object.assign(jwt.verify(str, jwtSecret), {
-          iat: "[timestamp]",
-        }),
-      });
+    process: ({ data: { authenticatePayload } }) => {
+      const { jwt: str } = authenticatePayload.authPayload;
+      return {
+        ...authenticatePayload,
+        authPayload: {
+          ...authenticatePayload.authPayload,
+          jwt: Object.assign(jwt.verify(str, jwtSecret), {
+            iat: "[timestamp]",
+          }),
+        },
+      };
     },
   },
 ];
@@ -106,7 +132,7 @@ beforeAll(() => {
         jwtSecret: jwtSecret,
       }),
     ]);
-    debug(printSchema(withJwt));
+    //debug(printSchema(withJwt));
     return {
       normal,
       withJwt,

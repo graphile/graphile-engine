@@ -1,0 +1,15 @@
+#!/bin/bash
+set -e
+echo "BOOTSTRAP"
+npx lerna bootstrap
+echo "CLEANING BUILT FILES"
+rm -Rf packages/*/node8plus packages/*/dist
+echo "PREPACKING"
+./scripts/prepack-all
+echo "TEST"
+npx lerna run --concurrency 1 test
+
+echo "Enter OTP code:"
+read otp
+export NPM_CONFIG_OTP=$otp
+npx lerna publish --exact --npm-client=npm --npm-tag=${1:-next}

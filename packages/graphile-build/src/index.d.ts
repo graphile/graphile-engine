@@ -3,9 +3,9 @@ import { ResolveTree } from "graphql-parse-resolve-info";
 
 type CaseChangeFunction = (str: string) => string;
 export const constantCaseAll: CaseChangeFunction;
-export const formatInsideUnderscores: ((
+export const formatInsideUnderscores: (
   fn: CaseChangeFunction
-) => CaseChangeFunction);
+) => CaseChangeFunction;
 export const upperFirst: CaseChangeFunction;
 export const camelCase: CaseChangeFunction;
 export const constantCase: CaseChangeFunction;
@@ -20,7 +20,22 @@ import SchemaBuilder, {
   DataForType,
 } from "./SchemaBuilder";
 
-export * from "./SchemaBuilder";
+export {
+  mixed,
+  Options,
+  Plugin,
+  TriggerChangeType,
+  WatchUnwatch,
+  SchemaListener,
+  DataForType,
+  InitObject,
+  Build,
+  Inflection,
+  Scope,
+  Context,
+  Hook,
+} from "./SchemaBuilder";
+export { LiveSource, LiveProvider, LiveMonitor, LiveCoordinator } from "./Live";
 export { SchemaBuilder };
 
 export const getBuilder: (

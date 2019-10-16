@@ -2,31 +2,31 @@
 import type { Plugin } from "graphile-build";
 
 export default (function PgOrderAllColumnsPlugin(builder) {
-  builder.hook("GraphQLEnumType:values", (values, build, context) => {
-    const {
-      extend,
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
-      pgColumnFilter,
-      inflection,
-      pgOmit: omit,
-      describePgEntity,
-      sqlCommentByAddingTags,
-    } = build;
-    const {
-      scope: { isPgRowSortEnum, pgIntrospection: table },
-    } = context;
-    if (!isPgRowSortEnum || !table || table.kind !== "class") {
-      return values;
-    }
-    return extend(
-      values,
-      introspectionResultsByKind.attribute
-        .filter(attr => attr.classId === table.id)
-        .filter(attr => pgColumnFilter(attr, build, context))
-        .reduce((memo, attr) => {
-          if (omit(attr, "order")) {
-            return memo;
-          }
+  builder.hook(
+    "GraphQLEnumType:values",
+    (values, build, context) => {
+      const {
+        extend,
+        pgColumnFilter,
+        inflection,
+        pgOmit: omit,
+        describePgEntity,
+        sqlCommentByAddingTags,
+      } = build;
+      const {
+        scope: { isPgRowSortEnum, pgIntrospection: table },
+      } = context;
+      if (!isPgRowSortEnum || !table || table.kind !== "class") {
+        return values;
+      }
+      return extend(
+        values,
+        table.attributes.reduce((memo, attr) => {
+          // PERFORMANCE: These used to be .filter(...) calls
+          if (!pgColumnFilter(attr, build, context)) return memo;
+          if (omit(attr, "order")) return memo;
+          const unique = attr.isUnique;
+
           const ascFieldName = inflection.orderByColumnEnum(attr, true);
           const descFieldName = inflection.orderByColumnEnum(attr, false);
           memo = extend(
@@ -36,12 +36,13 @@ export default (function PgOrderAllColumnsPlugin(builder) {
                 value: {
                   alias: ascFieldName.toLowerCase(),
                   specs: [[attr.name, true]],
+                  unique,
                 },
               },
             },
             `Adding ascending orderBy enum value for ${describePgEntity(
               attr
-            )}. You can rename this field with:\n\n  ${sqlCommentByAddingTags(
+            )}. You can rename this field with a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
               attr,
               {
                 name: "newNameHere",
@@ -55,12 +56,13 @@ export default (function PgOrderAllColumnsPlugin(builder) {
                 value: {
                   alias: descFieldName.toLowerCase(),
                   specs: [[attr.name, false]],
+                  unique,
                 },
               },
             },
             `Adding descending orderBy enum value for ${describePgEntity(
               attr
-            )}. You can rename this field with:\n\n  ${sqlCommentByAddingTags(
+            )}. You can rename this field with a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
               attr,
               {
                 name: "newNameHere",
@@ -69,7 +71,9 @@ export default (function PgOrderAllColumnsPlugin(builder) {
           );
           return memo;
         }, {}),
-      `Adding order values from table '${table.name}'`
-    );
-  });
+        `Adding order values from table '${table.name}'`
+      );
+    },
+    ["PgOrderAllColumns"]
+  );
 }: Plugin);

@@ -1,26 +1,9 @@
 {
   "private": true,
-  "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-eslint": "^8.2.1",
-    "babel-plugin-syntax-object-rest-spread": "^6.13.0",
-    "babel-preset-env": "^1.6.0",
-    "concurrently": "^3.5.0",
-    "eslint": "^4.0.0",
-    "eslint-config-prettier": "^2.3.0",
-    "eslint-plugin-flowtype": "^2.35.0",
-    "eslint-plugin-graphql": "^2.1.1",
-    "eslint-plugin-jest": "^20.0.3",
-    "eslint-plugin-prettier": "^2.1.2",
-    "eslint_d": "^5.3.1",
-    "flow-copy-source": "^1.2.0",
-    "jest": "^23.5.0",
-    "lerna": "^2.0.0",
-    "prettier": "^1.4.4"
-  },
   "scripts": {
     "check": "yarn clean && yarn lint && yarn prepack:all && yarn test",
-    "lint": "eslint packages && lerna run tslint",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
+    "lint:fix": "yarn run lint --fix && prettier --write '**/*.{json,md,html}'",
     "flow": "flow",
     "flow:check": "flow check",
     "test": "lerna run --concurrency 1 test",
@@ -28,15 +11,40 @@
     "watch": "for I in packages/*/; do echo \"cd $I && npm run watch\" | perl -p -e 's/\\n/\\0/;'; done | xargs -0 node_modules/.bin/concurrently --kill-others",
     "clean": "rm -Rf packages/*/node8plus/"
   },
-  "dependencies": {
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.24.1",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-flow": "^6.23.0",
-    "flow-bin": "^0.66.0",
-    "graphql": ">=0.9 <0.14",
-    "pg": ">=6.1.0 <8"
+  "devDependencies": {
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-syntax-object-rest-spread": "^7.0.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.0.0",
+    "@babel/plugin-transform-runtime": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-flow": "^7.0.0",
+    "@typescript-eslint/eslint-plugin": "^2.3.0",
+    "@typescript-eslint/parser": "^2.3.0",
+    "@typescript-eslint/typescript-estree": "^2.3.0",
+    "babel-eslint": "^10.0.1",
+    "babel-jest": "^24.9.0",
+    "concurrently": "^4.1.0",
+    "eslint": "^6.4.0",
+    "eslint-config-prettier": "^6.3.0",
+    "eslint-plugin-flowtype": "^4.3.0",
+    "eslint-plugin-graphql": "^3.0.3",
+    "eslint-plugin-jest": "^22.5.1",
+    "eslint-plugin-prettier": "^3.0.1",
+    "eslint_d": "^8.0.0",
+    "flow-bin": "^0.106.3",
+    "flow-copy-source": "^1.2.0",
+    "graphql": ">=0.9 <0.14 || ^14.0.2",
+    "jest": "^24.8.0",
+    "lerna": "^3.17.0",
+    "pg": "^7.10.0",
+    "postgraphile": "^4.4.4",
+    "prettier": "^1.18.2",
+    "typescript": "^3.6.3"
   },
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "engines": {
     "node": ">=8.6",
     "yarn": ">=1.3.2"

@@ -1,25 +1,54 @@
 # postgraphile-core
 
-This module implements a compatibility layer between PostGraphile v4 and
-`graphile-build`, loading the relevant `graphile-build-pg` plugins and
-augmenting the inflector depending on the PostGraphile options provided.
+<span class="badge-patreon"><a href="https://patreon.com/benjie" title="Support Graphile development on Patreon"><img src="https://img.shields.io/badge/sponsor-via%20Patreon-orange.svg" alt="Patreon sponsor button" /></a></span>
+[![Discord chat room](https://img.shields.io/discord/489127045289476126.svg)](http://discord.gg/graphile)
+[![Package on npm](https://img.shields.io/npm/v/postgraphile-core.svg?style=flat)](https://www.npmjs.com/package/postgraphile-core)
+![MIT license](https://img.shields.io/npm/l/postgraphile-core.svg)
+[![Follow](https://img.shields.io/badge/twitter-@GraphileHQ-blue.svg)](https://twitter.com/GraphileHQ)
+
+This module is the compatibility between the web layer of
+[PostGraphile](https://graphile.org/postgraphile/) and the GraphQL schema
+built with Graphile Engine. It loads the relevant `graphile-build-pg` plugins
+and augments the inflector depending on the PostGraphile options provided.
+
+<!-- SPONSORS_BEGIN -->
+
+## Crowd-funded open-source software
+
+To help us develop this software sustainably under the MIT license, we ask
+all individuals and businesses that use it to help support its ongoing
+maintenance and development via sponsorship.
+
+### [Click here to find out more about sponsors and sponsorship.](https://www.graphile.org/sponsor/)
+
+And please give some love to our featured sponsors 🤩:
+
+<table><tr>
+<td align="center"><a href="http://chads.website/"><img src="https://www.graphile.org/images/sponsors/chadf.png" width="90" height="90" alt="Chad Furman" /><br />Chad Furman</a></td>
+<td align="center"><a href="https://timescale.com/"><img src="https://www.graphile.org/images/sponsors/timescale.svg" width="90" height="90" alt="Timescale" /><br />Timescale</a></td>
+</tr></table>
+
+<!-- SPONSORS_END -->
+
+## Should you be here?
 
 Unless you want to use the low-level API you probably want to go to the
 PostGraphile (previously 'PostGraphQL') repository instead:
 [https://github.com/graphile/postgraphile](https://github.com/graphile/postgraphile)
 
-It's also suitable for usage in your own application, but please be aware you
+It's suitable to use this module in your own application, but please be aware you
 need to bring your own security in the form of an authenticated `pgClient` (see
 below).
 
-For more information about `postgraphile` and `graphile-build` please see the
+For more information about PostGraphile and Graphile Engine please see the
 documentation at [graphile.org](https://www.graphile.org/).
 
 ## `createPostGraphileSchema(pgConfig, schemas, options)`
 
-This is the function you're most likely to use in production, it will return a
-promise to a GraphQL schema. You are responsible in the calling code for
-implementing security by passing a pre-authenticated `pgClient` on `context`.
+This is the function you're most likely to use in production, it will return
+a promise to a GraphQL schema. You are responsible in for implementing
+security by passing a pre-authenticated `pgClient` inside the GraphQL
+`context` when you resolve a GraphQL query or mutation.
 
 Example:
 
@@ -55,7 +84,7 @@ async function runQuery(query, variables) {
   // application run, not once per query as it is here.
   const schema = await createPostGraphileSchema(
     process.env.DATABASE_URL,
-    ["users_schema", "posts_schema"],
+    ["app_public"],
     {
       dynamicJson: true,
       pgJwtSecret: process.env.JWT_SECRET,
@@ -109,8 +138,6 @@ runQuery(
     process.exit(1);
   });
 ```
-
-TODO: ensure this example works.
 
 To see how this works in a real application, check out
 [`withPostGraphileContext` in

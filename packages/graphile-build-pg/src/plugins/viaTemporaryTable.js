@@ -1,11 +1,9 @@
 // @flow
 
 import * as sql from "pg-sql2";
-import debugFactory from "debug";
 import type { Client } from "pg";
 import type { SQL, SQLQuery } from "pg-sql2";
-
-const debugSql = debugFactory("graphile-build-pg:sql");
+import debugSql from "./debugSql";
 
 /*
  * Originally we tried this with a CTE, but:
@@ -43,8 +41,16 @@ export default async function viaTemporaryTable(
   sqlMutationQuery: SQL,
   sqlResultSourceAlias: SQL,
   sqlResultQuery: SQL,
-  isPgClassLike: boolean = true
+  isPgClassLike: boolean = true,
+  pgRecordInfo: ?{
+    // eslint-disable-next-line flowtype/no-weak-types
+    outputArgTypes: Array<any>,
+    outputArgNames: Array<string>,
+  } = undefined
 ) {
+  const isPgRecord = pgRecordInfo != null;
+  const { outputArgTypes, outputArgNames } = pgRecordInfo || {};
+
   async function performQuery(pgClient: Client, sqlQuery: SQLQuery) {
     // TODO: look into rowMode = 'array'
     const { text, values } = sql.compile(sqlQuery);
@@ -56,10 +62,7 @@ export default async function viaTemporaryTable(
     // It returns void, just perform the query!
     const { rows } = await performQuery(
       pgClient,
-      sql.query`
-      with ${sqlResultSourceAlias} as (
-        ${sqlMutationQuery}
-      ) ${sqlResultQuery}`
+      sql.query`with ${sqlResultSourceAlias} as (${sqlMutationQuery}) ${sqlResultQuery}`
     );
     return rows;
   } else {
@@ -83,14 +86,23 @@ export default async function viaTemporaryTable(
          * representation to make it easier to deal with below.
          */
         sql.query`(case when ${sqlResultSourceAlias} is null then null else ${sqlResultSourceAlias} end)`
+      : isPgRecord
+      ? sql.query`array[${sql.join(
+          outputArgNames.map(
+            (outputArgName, idx) =>
+              sql.query`${sqlResultSourceAlias}.${sql.identifier(
+                // According to https://www.postgresql.org/docs/10/static/sql-createfunction.html,
+                // "If you omit the name for an output argument, the system will choose a default column name."
+                // In PG 9.x and 10, the column names appear to be assigned with a `column` prefix.
+                outputArgName !== "" ? outputArgName : `column${idx + 1}`
+              )}::text`
+          ),
+          " ,"
+        )}]`
       : sql.query`(${sqlResultSourceAlias}.${sqlResultSourceAlias})::${sqlTypeIdentifier}`;
     const result = await performQuery(
       pgClient,
-      sql.query`
-      with ${sqlResultSourceAlias} as (
-        ${sqlMutationQuery}
-      )
-      select (${selectionField})::text from ${sqlResultSourceAlias}`
+      sql.query`with ${sqlResultSourceAlias} as (${sqlMutationQuery}) select (${selectionField})::text from ${sqlResultSourceAlias}`
     );
     const { rows } = result;
     const firstNonNullRow = rows.find(row => row !== null);
@@ -100,31 +112,52 @@ export default async function viaTemporaryTable(
     const firstKey = firstNonNullRow && Object.keys(firstNonNullRow)[0];
     const rawValues = rows.map(row => row && row[firstKey]);
     const values = rawValues.filter(rawValue => rawValue !== null);
+    const sqlValuesAlias = sql.identifier(Symbol());
     const convertFieldBack = isPgClassLike
-      ? sql.query`(str::${sqlTypeIdentifier}).*`
-      : sql.query`str::${sqlTypeIdentifier} as ${sqlResultSourceAlias}`;
+      ? sql.query`\
+select (str::${sqlTypeIdentifier}).*
+from unnest((${sql.value(values)})::text[]) str`
+      : isPgRecord
+      ? sql.query`\
+select ${sql.join(
+          outputArgNames.map(
+            (outputArgName, idx) =>
+              sql.query`(${sqlValuesAlias}.output_value_list)[${sql.literal(
+                idx + 1
+              )}]::${sql.identifier(
+                outputArgTypes[idx].namespaceName,
+                outputArgTypes[idx].name
+              )} as ${sql.identifier(
+                // According to https://www.postgresql.org/docs/10/static/sql-createfunction.html,
+                // "If you omit the name for an output argument, the system will choose a default column name."
+                // In PG 9.x and 10, the column names appear to be assigned with a `column` prefix.
+                outputArgName !== "" ? outputArgName : `column${idx + 1}`
+              )}`
+          ),
+          ", "
+        )}
+from (values ${sql.join(
+          values.map(value => sql.query`(${sql.value(value)}::text[])`),
+          ", "
+        )}) as ${sqlValuesAlias}(output_value_list)`
+      : sql.query`\
+select str::${sqlTypeIdentifier} as ${sqlResultSourceAlias}
+from unnest((${sql.value(values)})::text[]) str`;
     const { rows: filteredValuesResults } =
       values.length > 0
         ? await performQuery(
             pgClient,
-            sql.query`\
-              with ${sqlResultSourceAlias} as (
-                select ${convertFieldBack}
-                from unnest((${sql.value(values)})::text[]) str
-              )
-              ${sqlResultQuery}
-              `
+            sql.query`with ${sqlResultSourceAlias} as (${convertFieldBack}) ${sqlResultQuery}`
           )
         : { rows: [] };
-    const finalRows = rawValues.map(
-      rawValue =>
-        /*
-         * We can't simply return 'null' here because this is expected to have
-         * come from PG, and that would never return 'null' for a row - only
-         * the fields within said row. Using `__isNull` here is a simple
-         * workaround to this, that's caught by `pg2gql`.
-         */
-        rawValue === null ? { __isNull: true } : filteredValuesResults.shift()
+    const finalRows = rawValues.map(rawValue =>
+      /*
+       * We can't simply return 'null' here because this is expected to have
+       * come from PG, and that would never return 'null' for a row - only
+       * the fields within said row. Using `__isNull` here is a simple
+       * workaround to this, that's caught by `pg2gql`.
+       */
+      rawValue === null ? { __isNull: true } : filteredValuesResults.shift()
     );
     return finalRows;
   }

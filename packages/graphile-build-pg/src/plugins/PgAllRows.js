@@ -1,45 +1,44 @@
 // @flow
-import debugFactory from "debug";
 
 import type { Plugin } from "graphile-build";
-
-const debugSql = debugFactory("graphile-build-pg:sql");
+import debugSql from "./debugSql";
 
 export default (async function PgAllRows(
   builder,
-  { pgViewUniqueKey, pgSimpleCollections }
+  { pgViewUniqueKey, pgSimpleCollections, subscriptions }
 ) {
-  const hasConnections = pgSimpleCollections !== "only";
-  const hasSimpleCollections =
-    pgSimpleCollections === "only" || pgSimpleCollections === "both";
-  builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
-    const {
-      parseResolveInfo,
-      extend,
-      getTypeByName,
-      pgGetGqlTypeByTypeIdAndModifier,
-      pgSql: sql,
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
-      inflection,
-      graphql: { GraphQLList, GraphQLNonNull },
-      pgQueryFromResolveData: queryFromResolveData,
-      pgAddStartEndCursor: addStartEndCursor,
-      pgOmit: omit,
-    } = build;
-    const {
-      fieldWithHooks,
-      scope: { isRootQuery },
-    } = context;
-    if (!isRootQuery) {
-      return fields;
-    }
-    return extend(
-      fields,
-      introspectionResultsByKind.class
-        .filter(table => table.isSelectable)
-        .filter(table => table.namespace)
-        .filter(table => !omit(table, "all"))
-        .reduce((memo, table) => {
+  builder.hook(
+    "GraphQLObjectType:fields",
+    (fields, build, context) => {
+      const {
+        parseResolveInfo,
+        extend,
+        getTypeByName,
+        pgGetGqlTypeByTypeIdAndModifier,
+        pgSql: sql,
+        pgIntrospectionResultsByKind: introspectionResultsByKind,
+        inflection,
+        graphql: { GraphQLList, GraphQLNonNull },
+        pgQueryFromResolveData: queryFromResolveData,
+        pgAddStartEndCursor: addStartEndCursor,
+        pgOmit: omit,
+        pgPrepareAndRun,
+      } = build;
+      const {
+        fieldWithHooks,
+        scope: { isRootQuery },
+      } = context;
+      if (!isRootQuery) {
+        return fields;
+      }
+      return extend(
+        fields,
+        introspectionResultsByKind.class.reduce((memo, table) => {
+          // PERFORMANCE: These used to be .filter(...) calls
+          if (!table.isSelectable) return memo;
+          if (!table.namespace) return memo;
+          if (omit(table, "all")) return memo;
+
           const TableType = pgGetGqlTypeByTypeIdAndModifier(
             table.type.id,
             null
@@ -56,22 +55,20 @@ export default (async function PgAllRows(
               `Could not find GraphQL type for table '${table.name}'`
             );
           }
-          const attributes = introspectionResultsByKind.attribute.filter(
-            attr => attr.classId === table.id
-          );
-          const primaryKeyConstraint = introspectionResultsByKind.constraint
-            .filter(con => con.classId === table.id)
-            .filter(con => con.type === "p")[0];
+          const attributes = table.attributes;
+          const primaryKeyConstraint = table.primaryKeyConstraint;
           const primaryKeys =
-            primaryKeyConstraint &&
-            primaryKeyConstraint.keyAttributeNums.map(
-              num => attributes.filter(attr => attr.num === num)[0]
-            );
+            primaryKeyConstraint && primaryKeyConstraint.keyAttributes;
           const isView = t => t.classKind === "v";
           const viewUniqueKey = table.tags.uniqueKey || pgViewUniqueKey;
           const uniqueIdAttribute = viewUniqueKey
             ? attributes.find(attr => attr.name === viewUniqueKey)
             : undefined;
+          if (isView && table.tags.uniqueKey && !uniqueIdAttribute) {
+            throw new Error(
+              `Could not find the named unique key '${table.tags.uniqueKey}' on view '${table.namespaceName}.${table.name}'`
+            );
+          }
           if (!ConnectionType) {
             throw new Error(
               `Could not find GraphQL connection type for table '${table.name}'`
@@ -94,23 +91,38 @@ export default (async function PgAllRows(
                     ? ConnectionType
                     : new GraphQLList(new GraphQLNonNull(TableType)),
                   args: {},
-                  async resolve(parent, args, { pgClient }, resolveInfo) {
+                  async resolve(parent, args, resolveContext, resolveInfo) {
+                    const { pgClient } = resolveContext;
                     const parsedResolveInfoFragment = parseResolveInfo(
                       resolveInfo
                     );
+                    parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
                     const resolveData = getDataFromParsedResolveInfoFragment(
                       parsedResolveInfoFragment,
                       resolveInfo.returnType
                     );
+                    let checkerGenerator;
                     const query = queryFromResolveData(
                       sqlFullTableName,
                       undefined,
                       resolveData,
                       {
+                        useAsterisk: table.canUseAsterisk,
                         withPaginationAsFields: isConnection,
                       },
                       queryBuilder => {
+                        if (subscriptions) {
+                          queryBuilder.makeLiveCollection(
+                            table,
+                            _checkerGenerator => {
+                              checkerGenerator = _checkerGenerator;
+                            }
+                          );
+                        }
                         if (primaryKeys) {
+                          if (subscriptions && !isConnection) {
+                            queryBuilder.selectIdentifiers(table);
+                          }
                           queryBuilder.beforeLock("orderBy", () => {
                             if (!queryBuilder.isOrderUnique(false)) {
                               // Order by PK if no order specified
@@ -144,17 +156,46 @@ export default (async function PgAllRows(
                             }
                           });
                         }
-                      }
+                      },
+                      resolveContext,
+                      resolveInfo.rootValue
                     );
                     const { text, values } = sql.compile(query);
                     if (debugSql.enabled) debugSql(text);
-                    const result = await pgClient.query(text, values);
+                    const result = await pgPrepareAndRun(
+                      pgClient,
+                      text,
+                      values
+                    );
+
+                    const liveCollection =
+                      resolveInfo.rootValue &&
+                      resolveInfo.rootValue.liveCollection;
+                    if (subscriptions && liveCollection && checkerGenerator) {
+                      const checker = checkerGenerator();
+                      liveCollection("pg", table, checker);
+                    }
+
                     if (isConnection) {
                       const {
                         rows: [row],
                       } = result;
                       return addStartEndCursor(row);
                     } else {
+                      const liveRecord =
+                        resolveInfo.rootValue &&
+                        resolveInfo.rootValue.liveRecord;
+                      if (
+                        subscriptions &&
+                        !isConnection &&
+                        primaryKeys &&
+                        liveRecord
+                      ) {
+                        result.rows.forEach(
+                          row =>
+                            row && liveRecord("pg", table, row.__identifiers)
+                        );
+                      }
                       return result.rows;
                     }
                   },
@@ -167,6 +208,11 @@ export default (async function PgAllRows(
               }
             );
           }
+          const simpleCollections =
+            table.tags.simpleCollections || pgSimpleCollections;
+          const hasConnections = simpleCollections !== "only";
+          const hasSimpleCollections =
+            simpleCollections === "only" || simpleCollections === "both";
           if (TableType && ConnectionType && hasConnections) {
             makeField(true);
           }
@@ -175,7 +221,11 @@ export default (async function PgAllRows(
           }
           return memo;
         }, {}),
-      `Adding 'all*' relations to root Query`
-    );
-  });
+        `Adding 'all*' relations to root Query`
+      );
+    },
+    ["PgAllRows"],
+    [],
+    ["PgTables"]
+  );
 }: Plugin);

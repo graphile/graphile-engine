@@ -17,8 +17,10 @@ import {
   inflections,
   Inflector,
   PgAttribute,
+  formatSQLForDebugging,
 } from "graphile-build-pg";
-import { Pool, Client } from "pg";
+import { Pool, PoolClient } from "pg";
+import { SignOptions } from "jsonwebtoken";
 
 export {
   Plugin,
@@ -28,6 +30,7 @@ export {
   SchemaListener,
   Inflection,
   Options,
+  formatSQLForDebugging,
 };
 
 export type mixed = {} | string | number | boolean | undefined | null;
@@ -53,23 +56,43 @@ export interface PostGraphileCoreOptions {
   classicIds?: boolean;
   disableDefaultMutations?: boolean;
   nodeIdFieldName?: string;
-  graphileBuildOptions?: Options;
-  graphqlBuildOptions?: Options; // DEPRECATED!
+  /**
+   * Additional Options to pass through into the graphile schema building
+   * system (received via the second argument of a plugin).
+   */
+  graphileBuildOptions?: Partial<Options>;
+  /**
+   * @deprecated Use graphileBuildOptions instead
+   */
+  graphqlBuildOptions?: Partial<Options>;
   replaceAllPlugins?: Array<Plugin>;
   appendPlugins?: Array<Plugin>;
+  /**
+   * @deprecated Use `appendPlugins` with dependencies instead.
+   */
   prependPlugins?: Array<Plugin>;
   skipPlugins?: Array<Plugin>;
   jwtPgTypeIdentifier?: string;
   jwtSecret?: string;
-  inflector?: Inflector; // NO LONGER SUPPORTED!
+  jwtSignOptions?: SignOptions;
+  /**
+   * @deprecated UNSUPPORTED! Use an inflector plugin instead.
+   */
+  inflector?: Inflector;
+  /**
+   * @deprecated Use smart comments/tags instead
+   */
   pgColumnFilter?: <TSource>(
     attr: mixed,
     build: Build,
     context: Context<TSource>
   ) => boolean;
+  /**
+   * @deprecated Use '@primaryKey' smart comment instead
+   */
   viewUniqueKey?: string;
   enableTags?: boolean;
-  readCache?: string;
+  readCache?: string | object;
   writeCache?: string;
   setWriteCacheCallback?: (fn: () => Promise<void>) => void;
   legacyRelations?: "only" | "deprecated" | "omit";
@@ -78,9 +101,15 @@ export interface PostGraphileCoreOptions {
   simpleCollections?: "only" | "both" | "omit";
   includeExtensionResources?: boolean;
   ignoreRBAC?: boolean;
+  legacyFunctionsOnly?: boolean;
+  ignoreIndexes?: boolean;
+  hideIndexWarnings?: boolean;
+  subscriptions?: boolean;
+  live?: boolean;
+  ownerConnectionString?: string;
 }
 
-type PgConfig = Client | Pool | string;
+type PgConfig = Pool | PoolClient | string;
 
 /*
  * BELOW HERE IS DEPRECATED!!
@@ -116,12 +145,13 @@ export const postGraphileClassicIdsInflection = inflections.newInflector({
 export const PostGraphileInflectionPlugin = function(builder: SchemaBuilder) {
   builder.hook("inflection", (inflection: Inflection) => {
     const previous = inflection.enumName;
-    return {
-      ...inflection,
+    // Overwrite directly so that we don't lose the 'extend' hints
+    Object.assign(inflection, {
       enumName(value: string) {
         return this.constantCase(previous.call(this, value));
       },
-    };
+    });
+    return inflection;
   });
 } as Plugin;
 
@@ -130,15 +160,16 @@ export const PostGraphileClassicIdsInflectionPlugin = function(
 ) {
   builder.hook("inflection", (inflection: Inflection) => {
     const previous = inflection._columnName;
-    return {
-      ...inflection,
+    // Overwrite directly so that we don't lose the 'extend' hints
+    Object.assign(inflection, {
       _columnName(attr: PgAttribute, options: { skipRowId?: boolean }) {
         const previousValue = previous.call(this, attr, options);
         return (options && options.skipRowId) || previousValue !== "id"
           ? previousValue
           : this.camelCase("rowId");
       },
-    };
+    });
+    return inflection;
   });
 } as Plugin;
 
@@ -152,11 +183,17 @@ const awaitKeys = async (obj: { [key: string]: Promise<any> }) => {
   return result;
 };
 
-const getPostGraphileBuilder = async (
+export const getPostGraphileBuilder = async (
   pgConfig: PgConfig,
   schemas: string | Array<string>,
   options: PostGraphileCoreOptions = {}
 ) => {
+  // @ts-ignore
+  if (options.inflector) {
+    throw new Error(
+      "Passing an inflector via PostGraphile options was deprecated in v4.0.0-beta.7; instead please write an inflector plugin: https://www.graphile.org/postgraphile/inflection/"
+    );
+  }
   const {
     dynamicJson,
     classicIds,
@@ -167,6 +204,7 @@ const getPostGraphileBuilder = async (
     skipPlugins = [],
     jwtPgTypeIdentifier,
     jwtSecret,
+    jwtSignOptions,
     disableDefaultMutations,
     graphileBuildOptions,
     graphqlBuildOptions, // DEPRECATED!
@@ -177,13 +215,20 @@ const getPostGraphileBuilder = async (
     readCache,
     writeCache,
     setWriteCacheCallback,
-    legacyRelations = "deprecated", // TODO: Change to 'omit' in v5
+    legacyRelations = "deprecated", // TODO:v5: Change to 'omit' in v5
     setofFunctionsContainNulls = true,
     legacyJsonUuid = false,
     simpleCollections = "omit",
     includeExtensionResources = false,
-    ignoreRBAC = true, // TODO: Change to 'false' in v5
+    ignoreRBAC = true, // TODO:v5: Change to 'false' in v5
+    legacyFunctionsOnly = false, // TODO:v5: Remove in v5
+    ignoreIndexes = true, // TODO:v5: Change to 'false' in v5
+    hideIndexWarnings = false,
+    subscriptions: inSubscriptions = false, // TODO:v5: Change to 'true' in v5
+    live = false,
+    ownerConnectionString,
   } = options;
+  const subscriptions = live || inSubscriptions;
 
   if (
     legacyRelations &&
@@ -220,18 +265,39 @@ const getPostGraphileBuilder = async (
 
   let persistentMemoizeWithKey; // NOT null, otherwise it won't default correctly.
   let memoizeCache = {};
-
   if (readCache) {
-    const cacheString: string = await new Promise<string>((resolve, reject) => {
-      fs.readFile(readCache, "utf8", (err?: Error, data?: string) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
+    if (typeof readCache === "string") {
+      const cacheString: string = await new Promise<string>(
+        (resolve, reject) => {
+          fs.readFile(
+            readCache,
+            "utf8",
+            (err?: Error | null, data?: string) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(data);
+              }
+            }
+          );
         }
-      });
-    });
-    memoizeCache = JSON.parse(cacheString);
+      );
+      try {
+        memoizeCache = JSON.parse(cacheString);
+      } catch (e) {
+        throw new Error(
+          `Failed to parse cache file '${readCache}', perhaps it is corrupted? ${e}`
+        );
+      }
+    } else if (typeof readCache === "object" && !Array.isArray(readCache)) {
+      memoizeCache = readCache;
+    } else {
+      throw new Error(
+        `'readCache' not understood; expected string or object, but received '${
+          Array.isArray(readCache) ? "array" : typeof readCache
+        }'`
+      );
+    }
   }
   if (readCache || writeCache) {
     persistentMemoizeWithKey = (key: string, fn: () => any) => {
@@ -275,62 +341,90 @@ const getPostGraphileBuilder = async (
   ensureValidPlugins("skipPlugins", skipPlugins);
   if (inflector) {
     throw new Error(
-      "Custom inflector arguments are no longer supported, please use the inflector plugin API instead"
+      "Custom inflector arguments are not supported, please use the inflector plugin API instead: https://www.graphile.org/postgraphile/inflection/"
     );
   }
   const inflectionOverridePlugins = classicIds
     ? [PostGraphileInflectionPlugin, PostGraphileClassicIdsInflectionPlugin]
     : [PostGraphileInflectionPlugin];
-  return getBuilder(
-    (replaceAllPlugins
-      ? [
-          ...prependPlugins,
-          ...replaceAllPlugins,
-          ...inflectionOverridePlugins,
-          ...appendPlugins,
-        ]
-      : [
-          ...prependPlugins,
-          ...defaultPlugins,
-          ...pgDefaultPlugins,
-          ...inflectionOverridePlugins,
-          ...appendPlugins,
-        ]
-    ).filter(p => skipPlugins.indexOf(p) === -1),
-    {
-      pgConfig,
-      pgSchemas: Array.isArray(schemas) ? schemas : [schemas],
-      pgExtendedTypes: !!dynamicJson,
-      pgColumnFilter: pgColumnFilter || (() => true),
-      pgInflection:
-        inflector ||
-        (classicIds
-          ? postGraphileClassicIdsInflection
-          : postGraphileInflection),
-      nodeIdFieldName: nodeIdFieldName || (classicIds ? "id" : "nodeId"),
-      pgJwtTypeIdentifier: jwtPgTypeIdentifier,
-      pgJwtSecret: jwtSecret,
-      pgDisableDefaultMutations: disableDefaultMutations,
-      pgViewUniqueKey: viewUniqueKey,
-      pgEnableTags: enableTags,
-      pgLegacyRelations: legacyRelations,
-      pgLegacyJsonUuid: legacyJsonUuid,
-      persistentMemoizeWithKey,
-      pgForbidSetofFunctionsToReturnNull: !setofFunctionsContainNulls,
-      pgSimpleCollections: simpleCollections,
-      pgIncludeExtensionResources: includeExtensionResources,
-      pgIgnoreRBAC: ignoreRBAC,
-      ...graphileBuildOptions,
-      ...graphqlBuildOptions, // DEPRECATED!
-    }
+  const basePluginList = replaceAllPlugins
+    ? [
+        ...prependPlugins,
+        ...replaceAllPlugins,
+        ...inflectionOverridePlugins,
+        ...appendPlugins,
+      ]
+    : [
+        ...prependPlugins,
+        ...defaultPlugins,
+        ...pgDefaultPlugins,
+        ...inflectionOverridePlugins,
+        ...appendPlugins,
+      ];
+  const invalidSkipPlugins = skipPlugins.filter(
+    pluginToSkip => basePluginList.indexOf(pluginToSkip) < 0
   );
+  if (invalidSkipPlugins.length) {
+    function getFunctionName(fn: Plugin) {
+      return fn.displayName || fn.name || String(fn);
+    }
+    throw new Error(
+      `You tried to skip plugins that would never have been loaded anyway. Perhaps you've made a mistake in your skipPlugins list, or have sourced the plugin from a duplicate plugin module - check for duplicate modules in your 'node_modules' folder. The plugins that you requested to skip were: ${invalidSkipPlugins
+        .map(getFunctionName)
+        .join(", ")}`
+    );
+  }
+  const finalPluginList = basePluginList.filter(
+    p => skipPlugins.indexOf(p) === -1
+  );
+  return getBuilder(finalPluginList, {
+    pgConfig,
+    pgSchemas: Array.isArray(schemas) ? schemas : [schemas],
+    pgExtendedTypes: !!dynamicJson,
+    pgColumnFilter: pgColumnFilter || (() => true),
+    pgInflection:
+      inflector ||
+      (classicIds ? postGraphileClassicIdsInflection : postGraphileInflection),
+    nodeIdFieldName: nodeIdFieldName || (classicIds ? "id" : "nodeId"),
+    pgJwtTypeIdentifier: jwtPgTypeIdentifier,
+    pgJwtSecret: jwtSecret,
+    pgJwtSignOptions: jwtSignOptions,
+    pgDisableDefaultMutations: disableDefaultMutations,
+    pgViewUniqueKey: viewUniqueKey,
+    pgEnableTags: enableTags,
+    pgLegacyRelations: legacyRelations,
+    pgLegacyJsonUuid: legacyJsonUuid,
+    persistentMemoizeWithKey,
+    pgForbidSetofFunctionsToReturnNull: !setofFunctionsContainNulls,
+    pgSimpleCollections: simpleCollections,
+    pgIncludeExtensionResources: includeExtensionResources,
+    pgIgnoreRBAC: ignoreRBAC,
+    pgLegacyFunctionsOnly: legacyFunctionsOnly,
+    pgIgnoreIndexes: ignoreIndexes,
+    pgHideIndexWarnings: hideIndexWarnings,
+    pgOwnerConnectionString: ownerConnectionString,
+
+    /*
+     * `subscriptions` acts as a feature flag telling us to fetch all the
+     * relevant database identifiers. We can't enable this by default in v4
+     * because it's possible that someone has used column-level select grants
+     * on a table in their DB but has not granted select access to one of their
+     * primary key columns. This flag requires that if a table is selectable
+     * then the PKs must be also.
+     */
+    subscriptions,
+    live,
+
+    ...graphileBuildOptions,
+    ...graphqlBuildOptions, // DEPRECATED!
+  });
 };
 
 function abort(e: Error) {
-  /* tslint:disable no-console */
+  // eslint-disable-next-line no-console
   console.error("Error occured whilst writing cache");
+  // eslint-disable-next-line no-console
   console.error(e);
-  /* tslint:enable no-console */
   process.exit(1);
 }
 
@@ -348,7 +442,7 @@ export const createPostGraphileSchema = async (
   });
   const schema = builder.buildSchema();
   if (writeCache) {
-    writeCache().catch(abort);
+    await writeCache().catch(abort);
   }
   return schema;
 };

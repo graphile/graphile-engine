@@ -1,58 +1,50 @@
 // @flow
 import type { Plugin } from "graphile-build";
-import debugFactory from "debug";
-import chalk from "chalk";
-
-const debugWarn = debugFactory("graphile-build-pg:warn");
 
 export default (function PgQueryProceduresPlugin(
   builder,
   { pgSimpleCollections }
 ) {
-  const hasConnections = pgSimpleCollections !== "only";
-  const hasSimpleCollections =
-    pgSimpleCollections === "only" || pgSimpleCollections === "both";
-  builder.hook("GraphQLObjectType:fields", (fields, build, context) => {
-    const {
-      extend,
-      inflection,
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
-      pgMakeProcField: makeProcField,
-      pgOmit: omit,
-      describePgEntity,
-      sqlCommentByAddingTags,
-    } = build;
-    const {
-      scope: { isRootQuery },
-      fieldWithHooks,
-    } = context;
-    if (!isRootQuery) {
-      return fields;
-    }
-    return extend(
-      fields,
-      introspectionResultsByKind.procedure
-        .filter(proc => proc.isStable)
-        .filter(proc => !!proc.namespace)
-        .filter(proc => !omit(proc, "execute"))
-        .reduce((memo, proc) => {
-          /*
-            proc =
-              { kind: 'procedure',
-                name: 'integration_webhook_secret',
-                description: null,
-                namespaceId: '6484381',
-                isStrict: false,
-                returnsSet: false,
-                isStable: true,
-                returnTypeId: '2950',
-                argTypeIds: [ '6484569' ],
-                argNames: [ 'integration' ],
-                argDefaultsNum: 0 }
-            */
-          const argTypes = proc.argTypeIds.map(
-            typeId => introspectionResultsByKind.typeById[typeId]
-          );
+  builder.hook(
+    "GraphQLObjectType:fields",
+    (fields, build, context) => {
+      const {
+        extend,
+        inflection,
+        pgIntrospectionResultsByKind: introspectionResultsByKind,
+        pgMakeProcField: makeProcField,
+        pgOmit: omit,
+        describePgEntity,
+        sqlCommentByAddingTags,
+        swallowError,
+      } = build;
+      const {
+        scope: { isRootQuery },
+        fieldWithHooks,
+      } = context;
+
+      if (!isRootQuery) {
+        return fields;
+      }
+
+      return extend(
+        fields,
+        introspectionResultsByKind.procedure.reduce((memo, proc) => {
+          // PERFORMANCE: These used to be .filter(...) calls
+          if (!proc.isStable) return memo;
+          if (!proc.namespace) return memo;
+          if (omit(proc, "execute")) return memo;
+
+          const argTypes = proc.argTypeIds.reduce((prev, typeId, idx) => {
+            if (
+              proc.argModes.length === 0 || // all args are `in`
+              proc.argModes[idx] === "i" || // this arg is `in`
+              proc.argModes[idx] === "b" // this arg is `inout`
+            ) {
+              prev.push(introspectionResultsByKind.typeById[typeId]);
+            }
+            return prev;
+          }, []);
           if (
             argTypes.some(
               type => type.type === "c" && type.class && type.class.isSelectable
@@ -88,7 +80,7 @@ export default (function PgQueryProceduresPlugin(
                 },
                 `Adding query field for ${describePgEntity(
                   proc
-                )}. You can rename this field with:\n\n  ${sqlCommentByAddingTags(
+                )}. You can rename this field with a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
                   proc,
                   {
                     name: "newNameHere",
@@ -96,21 +88,14 @@ export default (function PgQueryProceduresPlugin(
                 )}`
               );
             } catch (e) {
-              // eslint-disable-next-line no-console
-              console.warn(
-                chalk.bold.yellow(
-                  `Failed to add function '${proc.namespace.name}.${
-                    proc.name
-                  }'${
-                    debugWarn.enabled
-                      ? ""
-                      : `; run with 'DEBUG="graphile-build-pg:warn"' to view the error`
-                  }`
-                )
-              );
-              debugWarn(e);
+              swallowError(e);
             }
           }
+          const simpleCollections =
+            proc.tags.simpleCollections || pgSimpleCollections;
+          const hasConnections = simpleCollections !== "only";
+          const hasSimpleCollections =
+            simpleCollections === "only" || simpleCollections === "both";
           if (!proc.returnsSet || hasConnections) {
             makeField(false);
           }
@@ -119,7 +104,9 @@ export default (function PgQueryProceduresPlugin(
           }
           return memo;
         }, {}),
-      `Adding query procedures to root Query type`
-    );
-  });
+        `Adding query procedures to root Query type`
+      );
+    },
+    ["PgQueryProcedures"]
+  );
 }: Plugin);

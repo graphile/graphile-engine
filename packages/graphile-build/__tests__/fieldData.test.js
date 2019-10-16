@@ -7,7 +7,6 @@ const {
   GraphQLNonNull,
   GraphQLList,
 } = require("graphql");
-const { printSchema } = require("graphql/utilities");
 const { buildSchema, defaultPlugins } = require("../");
 
 const base64 = str => Buffer.from(String(str)).toString("base64");
@@ -256,6 +255,7 @@ const DummyConnectionPlugin = async builder => {
             },
             resolve(data, args, context, resolveInfo) {
               const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
+              parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
               const resolveData = getDataFromParsedResolveInfoFragment(
                 parsedResolveInfoFragment,
                 resolveInfo.returnType
@@ -290,7 +290,7 @@ const DummyConnectionPlugin = async builder => {
 
 test("generated schema", async () => {
   const schema = await buildSchema([...defaultPlugins, DummyConnectionPlugin]);
-  expect(printSchema(schema)).toMatchSnapshot();
+  expect(schema).toMatchSnapshot();
 });
 
 test("no arguments", async () => {

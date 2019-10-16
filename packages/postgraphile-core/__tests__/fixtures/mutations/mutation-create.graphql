@@ -47,6 +47,24 @@ mutation CreateMutation($config: KeyValueHash!) {
         months: 5
         years: 6
       }
+      intervalArray: [
+        {
+          seconds: 2
+          minutes: 3
+          hours: 4
+          days: 5
+          months: 6
+          years: 7
+        }
+        {
+          seconds: 3
+          minutes: 4
+          hours: 5
+          days: 6
+          months: 7
+          years: 8
+        }
+      ]
       money: 1234567.89
       compoundType: {
         a: 123,
@@ -81,7 +99,9 @@ mutation CreateMutation($config: KeyValueHash!) {
       point: {
         x: 1
         y: 3
-      }
+      },
+      cidr: "192.168.0.0/16",
+      macaddr: "0cafec0ffee0"
     }
   }) {
     clientMutationId
@@ -119,6 +139,7 @@ mutation CreateMutation($config: KeyValueHash!) {
       time
       timetz
       interval { seconds minutes hours days months years }
+      intervalArray { seconds minutes hours days months years }
       money
       compoundType { a b c d e f fooBar }
       nestedCompoundType {
@@ -139,6 +160,8 @@ mutation CreateMutation($config: KeyValueHash!) {
       about: "Son of Sara and John Smith."
       config: $config
       lastLoginFromIp: "172.16.1.2"
+      lastLoginFromSubnet: "172.16.0.0/12"
+      userMac: "00:00:00:00:00:00"
     }
   }) { ...createPersonPayload }
   c: createPerson(input: {
@@ -150,6 +173,8 @@ mutation CreateMutation($config: KeyValueHash!) {
       about: "My archnemisis is Budd Deey."
       config: null
       lastLoginFromIp: "192.168.0.42"
+      lastLoginFromSubnet: "192.168.0.0/16"
+      userMac: "0000.0000.0000"
     }
   }) { ...createPersonPayload }
   d: createCompoundKey(input: {
@@ -216,6 +241,8 @@ mutation CreateMutation($config: KeyValueHash!) {
         null_string: "null"
       }
       lastLoginFromIp: "10.0.1.42"
+      lastLoginFromSubnet: "10.0.0.0/8"
+      userMac: "aa-bb-cc-dd-ee-ff"
     }
   }) { ...createPersonPayload }
   h: createPerson(input: {
@@ -269,6 +296,59 @@ mutation CreateMutation($config: KeyValueHash!) {
       }
     }
   }
+  k: createPost(input: {
+    post: {
+      authorId: 1
+      headline: "super headline 2",
+      comptypes: [
+        {
+          schedule: "2008-10-24 10:17:54+02",
+          isOptimised: true
+        },
+        {
+          schedule: "2007-10-24 10:17:54+02",
+          isOptimised: false
+        },
+        {
+          schedule: "2006-10-24 10:17:54+02",
+          isOptimised: null
+        }
+      ]
+    }
+  }) {
+    post {
+      id
+      headline
+      comptypes {
+        schedule
+        isOptimised
+      }
+      personByAuthorId {
+        id
+      }
+    }
+    p2: post {
+      personByAuthorId {
+        email
+      }
+    }
+    postEdge {
+      node {
+        id
+        headline
+        comptypes {
+          schedule
+          isOptimised
+        }
+        personByAuthorId {
+          name
+        }
+      }
+    }
+    personByAuthorId {
+      createdAt
+    }
+  }
 }
 
 fragment createPersonPayload on CreatePersonPayload {
@@ -281,6 +361,8 @@ fragment createPersonPayload on CreatePersonPayload {
     about
     config
     lastLoginFromIp
+    lastLoginFromSubnet
+    userMac
     issue27UserExists: exists(email: "graphile-build.issue.27@example.com")
   }
   a: personEdge(orderBy: PRIMARY_KEY_ASC) { ...peopleEdge }

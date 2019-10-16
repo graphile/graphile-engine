@@ -1,17 +1,19 @@
 // @flow
 import type { Plugin } from "graphile-build";
-import withPgClient from "../withPgClient";
+import type { Client } from "pg";
+import withPgClient, {
+  getPgClientAndReleaserFromConfig,
+} from "../withPgClient";
 import { parseTags } from "../utils";
 import { readFile as rawReadFile } from "fs";
-import pg from "pg";
 import debugFactory from "debug";
 import chalk from "chalk";
 import throttle from "lodash/throttle";
 import flatMap from "lodash/flatMap";
-import { quacksLikePgPool } from "../withPgClient";
 import { makeIntrospectionQuery } from "./introspectionQuery";
 
 import { version } from "../../package.json";
+import queryFromResolveDataFactory from "../queryFromResolveDataFactory";
 
 const debug = debugFactory("graphile-build-pg");
 const WATCH_FIXTURES_PATH = `${__dirname}/../../res/watch-fixtures.sql`;
@@ -29,6 +31,7 @@ export type PgNamespace = {
 
 export type PgProc = {
   kind: "procedure",
+  id: string,
   name: string,
   comment: ?string,
   description: ?string,
@@ -40,10 +43,14 @@ export type PgProc = {
   returnTypeId: string,
   argTypeIds: Array<string>,
   argNames: Array<string>,
+  argModes: Array<"i" | "o" | "b" | "v" | "t">,
+  inputArgsCount: number,
   argDefaultsNum: number,
   namespace: PgNamespace,
   tags: { [string]: string },
+  cost: number,
   aclExecutable: boolean,
+  language: string,
 };
 
 export type PgClass = {
@@ -64,11 +71,15 @@ export type PgClass = {
   namespace: PgNamespace,
   type: PgType,
   tags: { [string]: string },
-  attributes: [PgAttribute],
+  attributes: Array<PgAttribute>,
+  constraints: Array<PgConstraint>,
+  foreignConstraints: Array<PgConstraint>,
+  primaryKeyConstraint: ?PgConstraint,
   aclSelectable: boolean,
   aclInsertable: boolean,
   aclUpdatable: boolean,
   aclDeletable: boolean,
+  canUseAsterisk: boolean,
 };
 
 export type PgType = {
@@ -83,10 +94,14 @@ export type PgType = {
   category: string,
   domainIsNotNull: boolean,
   arrayItemTypeId: ?string,
+  arrayItemType: ?PgType,
+  arrayType: ?PgType,
   typeLength: ?number,
   isPgArray: boolean,
   classId: ?string,
+  class: ?PgClass,
   domainBaseTypeId: ?string,
+  domainBaseType: ?PgType,
   domainTypeModifier: ?number,
   tags: { [string]: string },
 };
@@ -110,20 +125,28 @@ export type PgAttribute = {
   aclSelectable: boolean,
   aclInsertable: boolean,
   aclUpdatable: boolean,
+  isIndexed: ?boolean,
+  isUnique: ?boolean,
+  columnLevelSelectGrant: boolean,
 };
 
 export type PgConstraint = {
   kind: "constraint",
+  id: string,
   name: string,
   type: string,
   classId: string,
-  class: ?PgClass,
+  class: PgClass,
   foreignClassId: ?string,
+  foreignClass: ?PgClass,
   comment: ?string,
   description: ?string,
   keyAttributeNums: Array<number>,
+  keyAttributes: Array<PgAttribute>,
   foreignKeyAttributeNums: Array<number>,
+  foreignKeyAttributes: Array<PgAttribute>,
   namespace: PgNamespace,
+  isIndexed: ?boolean,
   tags: { [string]: string },
 };
 
@@ -132,6 +155,7 @@ export type PgExtension = {
   id: string,
   name: string,
   namespaceId: string,
+  namespaceName: string,
   relocatable: boolean,
   version: string,
   configurationClassIds?: Array<string>,
@@ -140,12 +164,264 @@ export type PgExtension = {
   tags: { [string]: string },
 };
 
+export type PgIndex = {
+  kind: "index",
+  id: string,
+  name: string,
+  namespaceName: string,
+  classId: string,
+  numberOfAttributes: number,
+  indexType: string,
+  isUnique: boolean,
+  isPrimary: boolean,
+  /*
+  Though these exist, we don't want to officially
+  support them yet.
+
+  isImmediate: boolean,
+  isReplicaIdentity: boolean,
+  isValid: boolean,
+  */
+  isPartial: boolean,
+  attributeNums: Array<number>,
+  attributePropertiesAsc: ?Array<boolean>,
+  attributePropertiesNullsFirst: ?Array<boolean>,
+  description: ?string,
+  tags: { [string]: string },
+};
+
+export type PgEntity =
+  | PgNamespace
+  | PgProc
+  | PgClass
+  | PgType
+  | PgAttribute
+  | PgConstraint
+  | PgExtension
+  | PgIndex;
+
 function readFile(filename, encoding) {
   return new Promise((resolve, reject) => {
     rawReadFile(filename, encoding, (err, res) => {
       if (err) reject(err);
       else resolve(res);
     });
+  });
+}
+
+const removeQuotes = str => {
+  const trimmed = str.trim();
+  if (trimmed[0] === '"') {
+    if (trimmed[trimmed.length - 1] !== '"') {
+      throw new Error(
+        `We failed to parse a quoted identifier '${str}'. Please avoid putting quotes or commas in smart comment identifiers (or file a PR to fix the parser).`
+      );
+    }
+    return trimmed.substr(1, trimmed.length - 2);
+  } else {
+    // PostgreSQL lower-cases unquoted columns, so we should too.
+    return trimmed.toLowerCase();
+  }
+};
+
+const parseSqlColumnArray = str => {
+  if (!str) {
+    throw new Error(`Cannot parse '${str}'`);
+  }
+  const parts = str.split(",");
+  return parts.map(removeQuotes);
+};
+
+const parseSqlColumnString = str => {
+  if (!str) {
+    throw new Error(`Cannot parse '${str}'`);
+  }
+  return removeQuotes(str);
+};
+
+function parseConstraintSpec(rawSpec) {
+  const [spec, ...tagComponents] = rawSpec.split(/\|/);
+  const parsed = parseTags(tagComponents.join("\n"));
+  return {
+    spec,
+    tags: parsed.tags,
+    description: parsed.text,
+  };
+}
+
+function smartCommentConstraints(introspectionResults) {
+  const attributesByNames = (tbl, cols, debugStr) => {
+    const attributes = introspectionResults.attribute
+      .filter(a => a.classId === tbl.id)
+      .sort((a, b) => a.num - b.num);
+    if (!cols) {
+      const pk = introspectionResults.constraint.find(
+        c => c.classId == tbl.id && c.type === "p"
+      );
+      if (pk) {
+        return pk.keyAttributeNums.map(n => attributes.find(a => a.num === n));
+      } else {
+        throw new Error(
+          `No columns specified for '${tbl.namespaceName}.${tbl.name}' (oid: ${tbl.id}) and no PK found (${debugStr}).`
+        );
+      }
+    }
+    return cols.map(colName => {
+      const attr = attributes.find(a => a.name === colName);
+      if (!attr) {
+        throw new Error(
+          `Could not find attribute '${colName}' in '${tbl.namespaceName}.${tbl.name}'`
+        );
+      }
+      return attr;
+    });
+  };
+
+  // First: primary keys
+  introspectionResults.class.forEach(klass => {
+    const namespace = introspectionResults.namespace.find(
+      n => n.id === klass.namespaceId
+    );
+    if (!namespace) {
+      return;
+    }
+    if (klass.tags.primaryKey) {
+      if (typeof klass.tags.primaryKey !== "string") {
+        throw new Error(
+          `@primaryKey configuration of '${klass.namespaceName}.${klass.name}' is invalid; please specify just once "@primaryKey col1,col2"`
+        );
+      }
+      const { spec: pkSpec, tags, description } = parseConstraintSpec(
+        klass.tags.primaryKey
+      );
+      const columns: string[] = parseSqlColumnArray(pkSpec);
+      const attributes = attributesByNames(
+        klass,
+        columns,
+        `@primaryKey ${klass.tags.primaryKey}`
+      );
+      attributes.forEach(attr => {
+        attr.tags.notNull = true;
+      });
+      const keyAttributeNums = attributes.map(a => a.num);
+      // Now we need to fake a constraint for this:
+      const fakeConstraint = {
+        kind: "constraint",
+        isFake: true,
+        isIndexed: true, // otherwise it gets ignored by ignoreIndexes
+        id: Math.random(),
+        name: `FAKE_${klass.namespaceName}_${klass.name}_primaryKey`,
+        type: "p", // primary key
+        classId: klass.id,
+        foreignClassId: null,
+        comment: null,
+        description,
+        keyAttributeNums,
+        foreignKeyAttributeNums: null,
+        tags,
+      };
+      introspectionResults.constraint.push(fakeConstraint);
+    }
+  });
+  // Now primary keys are in place, we can apply foreign keys
+  introspectionResults.class.forEach(klass => {
+    const namespace = introspectionResults.namespace.find(
+      n => n.id === klass.namespaceId
+    );
+    if (!namespace) {
+      return;
+    }
+    const getType = () =>
+      introspectionResults.type.find(t => t.id === klass.typeId);
+    const foreignKey = klass.tags.foreignKey || getType().tags.foreignKey;
+    if (foreignKey) {
+      const foreignKeys =
+        typeof foreignKey === "string" ? [foreignKey] : foreignKey;
+      if (!Array.isArray(foreignKeys)) {
+        throw new Error(
+          `Invalid foreign key smart comment specified on '${klass.namespaceName}.${klass.name}'`
+        );
+      }
+      foreignKeys.forEach((fkSpecRaw, index) => {
+        if (typeof fkSpecRaw !== "string") {
+          throw new Error(
+            `Invalid foreign key spec (${index}) on '${klass.namespaceName}.${klass.name}'`
+          );
+        }
+        const { spec: fkSpec, tags, description } = parseConstraintSpec(
+          fkSpecRaw
+        );
+        const matches = fkSpec.match(
+          /^\(([^()]+)\) references ([^().]+)(?:\.([^().]+))?(?:\s*\(([^()]+)\))?$/i
+        );
+        if (!matches) {
+          throw new Error(
+            `Invalid foreignKey syntax for '${klass.namespaceName}.${klass.name}'; expected something like "(col1,col2) references schema.table (c1, c2)", you passed '${fkSpecRaw}'`
+          );
+        }
+        const [
+          ,
+          rawColumns,
+          rawSchemaOrTable,
+          rawTableOnly,
+          rawForeignColumns,
+        ] = matches;
+        const rawSchema = rawTableOnly
+          ? rawSchemaOrTable
+          : `"${klass.namespaceName}"`;
+        const rawTable = rawTableOnly || rawSchemaOrTable;
+        const columns: string[] = parseSqlColumnArray(rawColumns);
+        const foreignSchema: string = parseSqlColumnString(rawSchema);
+        const foreignTable: string = parseSqlColumnString(rawTable);
+        const foreignColumns: string[] | null = rawForeignColumns
+          ? parseSqlColumnArray(rawForeignColumns)
+          : null;
+
+        const foreignKlass = introspectionResults.class.find(
+          k => k.name === foreignTable && k.namespaceName === foreignSchema
+        );
+        if (!foreignKlass) {
+          throw new Error(
+            `@foreignKey smart comment referenced non-existant table/view '${foreignSchema}'.'${foreignTable}'. Note that this reference must use *database names* (i.e. it does not respect @name). (${fkSpecRaw})`
+          );
+        }
+        const foreignNamespace = introspectionResults.namespace.find(
+          n => n.id === foreignKlass.namespaceId
+        );
+        if (!foreignNamespace) {
+          return;
+        }
+
+        const keyAttributeNums = attributesByNames(
+          klass,
+          columns,
+          `@foreignKey ${fkSpecRaw}`
+        ).map(a => a.num);
+        const foreignKeyAttributeNums = attributesByNames(
+          foreignKlass,
+          foreignColumns,
+          `@foreignKey ${fkSpecRaw}`
+        ).map(a => a.num);
+
+        // Now we need to fake a constraint for this:
+        const fakeConstraint = {
+          kind: "constraint",
+          isFake: true,
+          isIndexed: true, // otherwise it gets ignored by ignoreIndexes
+          id: Math.random(),
+          name: `FAKE_${klass.namespaceName}_${klass.name}_foreignKey_${index}`,
+          type: "f", // foreign key
+          classId: klass.id,
+          foreignClassId: foreignKlass.id,
+          comment: null,
+          description,
+          keyAttributeNums,
+          foreignKeyAttributeNums,
+          tags,
+        };
+        introspectionResults.constraint.push(fakeConstraint);
+      });
+    }
   });
 }
 
@@ -158,8 +434,17 @@ export default (async function PgIntrospectionPlugin(
     persistentMemoizeWithKey = (key, fn) => fn(),
     pgThrowOnMissingSchema = false,
     pgIncludeExtensionResources = false,
+    pgLegacyFunctionsOnly = false,
+    pgSkipInstallingWatchFixtures = false,
+    pgAugmentIntrospectionResults,
+    pgOwnerConnectionString,
   }
 ) {
+  const augment = introspectionResults => {
+    [pgAugmentIntrospectionResults, smartCommentConstraints].forEach(fn =>
+      fn ? fn(introspectionResults) : null
+    );
+  };
   async function introspect() {
     // Perform introspection
     if (!Array.isArray(schemas)) {
@@ -168,7 +453,7 @@ export default (async function PgIntrospectionPlugin(
     const cacheKey = `PgIntrospectionPlugin-introspectionResultsByKind-v${version}`;
     const cloneResults = obj => {
       const result = Object.keys(obj).reduce((memo, k) => {
-        memo[k] = obj[k].map(v => Object.assign({}, v));
+        memo[k] = Array.isArray(obj[k]) ? obj[k].map(v => ({ ...v })) : obj[k];
         return memo;
       }, {});
       return result;
@@ -183,27 +468,28 @@ export default (async function PgIntrospectionPlugin(
             versionResult.rows[0].server_version_num,
             10
           );
-          const introspectionQuery = makeIntrospectionQuery(serverVersionNum);
+          const introspectionQuery = makeIntrospectionQuery(serverVersionNum, {
+            pgLegacyFunctionsOnly,
+          });
           const { rows } = await pgClient.query(introspectionQuery, [
             schemas,
             pgIncludeExtensionResources,
           ]);
 
-          const result = rows.reduce(
-            (memo, { object }) => {
-              memo[object.kind].push(object);
-              return memo;
-            },
-            {
-              namespace: [],
-              class: [],
-              attribute: [],
-              type: [],
-              constraint: [],
-              procedure: [],
-              extension: [],
-            }
-          );
+          const result = {
+            __pgVersion: serverVersionNum,
+            namespace: [],
+            class: [],
+            attribute: [],
+            type: [],
+            constraint: [],
+            procedure: [],
+            extension: [],
+            index: [],
+          };
+          for (const { object } of rows) {
+            result[object.kind].push(object);
+          }
 
           // Parse tags from comments
           [
@@ -214,6 +500,7 @@ export default (async function PgIntrospectionPlugin(
             "constraint",
             "procedure",
             "extension",
+            "index",
           ].forEach(kind => {
             result[kind].forEach(object => {
               // Keep a copy of the raw comment
@@ -237,9 +524,19 @@ export default (async function PgIntrospectionPlugin(
               extensionConfigurationClassIds.indexOf(klass.id) >= 0;
           });
 
-          for (const k in result) {
-            result[k].map(Object.freeze);
-          }
+          [
+            "namespace",
+            "class",
+            "attribute",
+            "type",
+            "constraint",
+            "procedure",
+            "extension",
+            "index",
+          ].forEach(k => {
+            result[k].forEach(Object.freeze);
+          });
+
           return Object.freeze(result);
         })
       )
@@ -267,7 +564,7 @@ export default (async function PgIntrospectionPlugin(
       }, {});
     const xByYAndZ = (arrayOfX, attrKey, attrKey2) =>
       arrayOfX.reduce((memo, x) => {
-        memo[x[attrKey]] = memo[x[attrKey]] || {};
+        if (!memo[x[attrKey]]) memo[x[attrKey]] = {};
         memo[x[attrKey]][x[attrKey2]] = x;
         return memo;
       }, {});
@@ -329,6 +626,8 @@ export default (async function PgIntrospectionPlugin(
         }
       });
     };
+
+    augment(introspectionResultsByKind);
 
     relate(
       introspectionResultsByKind.class,
@@ -394,8 +693,15 @@ export default (async function PgIntrospectionPlugin(
       introspectionResultsByKind.constraint,
       "class",
       "classId",
+      introspectionResultsByKind.classById
+    );
+
+    relate(
+      introspectionResultsByKind.constraint,
+      "foreignClass",
+      "foreignClassId",
       introspectionResultsByKind.classById,
-      true
+      true // Because many constraints don't apply to foreign classes
     );
 
     relate(
@@ -414,10 +720,84 @@ export default (async function PgIntrospectionPlugin(
       true // Because the configuration table could be a defined in a different namespace
     );
 
+    relate(
+      introspectionResultsByKind.index,
+      "class",
+      "classId",
+      introspectionResultsByKind.classById
+    );
+
+    // Reverse arrayItemType -> arrayType
+    introspectionResultsByKind.type.forEach(type => {
+      if (type.arrayItemType) {
+        type.arrayItemType.arrayType = type;
+      }
+    });
+
+    // Table/type columns / constraints
     introspectionResultsByKind.class.forEach(klass => {
       klass.attributes = introspectionResultsByKind.attribute.filter(
         attr => attr.classId === klass.id
       );
+      klass.canUseAsterisk = !klass.attributes.some(
+        attr => attr.columnLevelSelectGrant
+      );
+      klass.constraints = introspectionResultsByKind.constraint.filter(
+        constraint => constraint.classId === klass.id
+      );
+      klass.foreignConstraints = introspectionResultsByKind.constraint.filter(
+        constraint => constraint.foreignClassId === klass.id
+      );
+      klass.primaryKeyConstraint = klass.constraints.find(
+        constraint => constraint.type === "p"
+      );
+    });
+
+    // Constraint attributes
+    introspectionResultsByKind.constraint.forEach(constraint => {
+      if (constraint.keyAttributeNums && constraint.class) {
+        constraint.keyAttributes = constraint.keyAttributeNums.map(nr =>
+          constraint.class.attributes.find(attr => attr.num === nr)
+        );
+      } else {
+        constraint.keyAttributes = [];
+      }
+      if (constraint.foreignKeyAttributeNums && constraint.foreignClass) {
+        constraint.foreignKeyAttributes = constraint.foreignKeyAttributeNums.map(
+          nr => constraint.foreignClass.attributes.find(attr => attr.num === nr)
+        );
+      } else {
+        constraint.foreignKeyAttributes = [];
+      }
+    });
+
+    // Detect which columns and constraints are indexed
+    introspectionResultsByKind.index.forEach(index => {
+      const columns = index.attributeNums.map(nr =>
+        index.class.attributes.find(attr => attr.num === nr)
+      );
+
+      // Indexed column (for orderBy / filter):
+      if (columns[0]) {
+        columns[0].isIndexed = true;
+      }
+
+      if (columns[0] && columns.length === 1 && index.isUnique) {
+        columns[0].isUnique = true;
+      }
+
+      // Indexed constraints (for reverse relations):
+      index.class.constraints
+        .filter(constraint => constraint.type === "f")
+        .forEach(constraint => {
+          if (
+            constraint.keyAttributeNums.every(
+              (nr, idx) => index.attributeNums[idx] === nr
+            )
+          ) {
+            constraint.isIndexed = true;
+          }
+        });
     });
 
     return introspectionResultsByKind;
@@ -425,98 +805,136 @@ export default (async function PgIntrospectionPlugin(
 
   let introspectionResultsByKind = await introspect();
 
-  let pgClient, releasePgClient, listener;
+  let listener;
 
-  function stopListening() {
-    if (pgClient) {
-      pgClient.query("unlisten postgraphile_watch").catch(e => {
-        debug(`Error occurred trying to unlisten watch: ${e}`);
-      });
-      pgClient.removeListener("notification", listener);
-    }
-    if (releasePgClient) {
-      releasePgClient();
-      pgClient = null;
-    }
-  }
-
-  builder.registerWatcher(async triggerRebuild => {
-    // In case we started listening before, clean up
-    await stopListening();
-
-    // Check we can get a pgClient
-    if (pgConfig instanceof pg.Pool || quacksLikePgPool(pgConfig)) {
-      pgClient = await pgConfig.connect();
-      releasePgClient = () => pgClient && pgClient.release();
-    } else if (typeof pgConfig === "string") {
-      pgClient = new pg.Client(pgConfig);
-      pgClient.on("error", e => {
-        debug("pgClient error occurred: %s", e);
-      });
-      releasePgClient = () =>
-        new Promise((resolve, reject) => {
-          if (pgClient) pgClient.end(err => (err ? reject(err) : resolve()));
-          else resolve();
-        });
-      await new Promise((resolve, reject) => {
-        if (pgClient) {
-          pgClient.connect(err => (err ? reject(err) : resolve()));
-        } else {
-          resolve();
+  class Listener {
+    _handleChange: () => void;
+    client: Client | null;
+    stopped: boolean;
+    _reallyReleaseClient: (() => Promise<void>) | null;
+    _haveDisplayedError: boolean;
+    constructor(triggerRebuild) {
+      this.stopped = false;
+      this._handleChange = throttle(
+        async () => {
+          debug(`Schema change detected: re-inspecting schema...`);
+          try {
+            introspectionResultsByKind = await introspect();
+            debug(`Schema change detected: re-inspecting schema complete`);
+            triggerRebuild();
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error(`Schema introspection failed: ${e.message}`);
+          }
+        },
+        750,
+        {
+          leading: true,
+          trailing: true,
         }
-      });
-    } else {
-      throw new Error(
-        "Cannot watch schema with this configuration - need a string or pg.Pool"
       );
-    }
-    // Install the watch fixtures.
-    const watchSqlInner = await readFile(WATCH_FIXTURES_PATH, "utf8");
-    const sql = `begin; ${watchSqlInner}; commit;`;
-    try {
-      await pgClient.query(sql);
-    } catch (error) {
-      /* eslint-disable no-console */
-      console.warn(
-        `${chalk.bold.yellow(
-          "Failed to setup watch fixtures in Postgres database"
-        )} ️️⚠️`
-      );
-      console.warn(
-        chalk.yellow(
-          "This is likely because your Postgres user is not a superuser. If the"
-        )
-      );
-      console.warn(
-        chalk.yellow(
-          "fixtures already exist, the watch functionality may still work."
-        )
-      );
-      console.warn(
-        chalk.yellow("Enable DEBUG='graphile-build-pg' to see the error")
-      );
-      debug(error);
-      /* eslint-enable no-console */
-      await pgClient.query("rollback");
+      this._listener = this._listener.bind(this);
+      this._handleClientError = this._handleClientError.bind(this);
+      this._start();
     }
 
-    await pgClient.query("listen postgraphile_watch");
-
-    const handleChange = throttle(
-      async () => {
-        debug(`Schema change detected: re-inspecting schema...`);
-        introspectionResultsByKind = await introspect();
-        debug(`Schema change detected: re-inspecting schema complete`);
-        triggerRebuild();
-      },
-      750,
-      {
-        leading: true,
-        trailing: true,
+    async _start() {
+      if (this.stopped) {
+        return;
       }
-    );
+      // Connect to DB
+      try {
+        const {
+          pgClient,
+          releasePgClient,
+        } = await getPgClientAndReleaserFromConfig(pgConfig);
+        this.client = pgClient;
+        // $FlowFixMe: hack property
+        this._reallyReleaseClient = releasePgClient;
+        pgClient.on("notification", this._listener);
+        pgClient.on("error", this._handleClientError);
+        if (this.stopped) {
+          // In case watch mode was cancelled in the interrim.
+          return this._releaseClient();
+        } else {
+          await pgClient.query("listen postgraphile_watch");
 
-    listener = async notification => {
+          // Install the watch fixtures.
+          if (!pgSkipInstallingWatchFixtures) {
+            const watchSqlInner = await readFile(WATCH_FIXTURES_PATH, "utf8");
+            const sql = `begin; ${watchSqlInner};`;
+            await withPgClient(
+              pgOwnerConnectionString || pgConfig,
+              async pgClient => {
+                try {
+                  await pgClient.query(sql);
+                } catch (error) {
+                  if (!this._haveDisplayedError) {
+                    this._haveDisplayedError = true;
+                    /* eslint-disable no-console */
+                    console.warn(
+                      `${chalk.bold.yellow(
+                        "Failed to setup watch fixtures in Postgres database"
+                      )} ️️⚠️`
+                    );
+                    console.warn(
+                      chalk.yellow(
+                        "This is likely because the PostgreSQL user in the connection string does not have sufficient privileges; you can solve this by passing the 'owner' connection string via '--owner-connection' / 'ownerConnectionString'. If the fixtures already exist, the watch functionality may still work."
+                      )
+                    );
+                    console.warn(
+                      chalk.yellow(
+                        "Enable DEBUG='graphile-build-pg' to see the error"
+                      )
+                    );
+                    /* eslint-enable no-console */
+                  }
+                  debug(error);
+                } finally {
+                  await pgClient.query("commit;");
+                }
+              }
+            );
+          }
+
+          // Trigger re-introspection on server reconnect
+          this._handleChange();
+        }
+      } catch (e) {
+        // If something goes wrong, disconnect and try again after a short delay
+        this._reconnect(e);
+      }
+    }
+
+    _handleClientError: (e: Error) => void;
+    _handleClientError(e) {
+      // Client is already cleaned up
+      this.client = null;
+      this._reallyReleaseClient = null;
+      this._reconnect(e);
+    }
+    async _reconnect(e) {
+      if (this.stopped) {
+        return;
+      }
+      // eslint-disable-next-line no-console
+      console.error(
+        "Error occurred for PG watching client; reconnecting in 2 seconds.",
+        e.message
+      );
+      await this._releaseClient();
+      setTimeout(() => {
+        if (!this.stopped) {
+          // Listen for further changes
+          this._start();
+        }
+      }, 2000);
+    }
+
+    // eslint-disable-next-line flowtype/no-weak-types
+    _listener: (notification: any) => void;
+    // eslint-disable-next-line flowtype/no-weak-types
+    async _listener(notification: any) {
       if (notification.channel !== "postgraphile_watch") {
         return;
       }
@@ -530,14 +948,14 @@ export default (async function PgIntrospectionPlugin(
             )
             .map(({ command }) => command);
           if (commands.length) {
-            handleChange();
+            this._handleChange();
           }
         } else if (payload.type === "drop") {
           const affectsOurSchemas = payload.payload.some(
             schemaName => schemas.indexOf(schemaName) >= 0
           );
           if (affectsOurSchemas) {
-            handleChange();
+            this._handleChange();
           }
         } else {
           throw new Error(`Payload type '${payload.type}' not recognised`);
@@ -545,14 +963,69 @@ export default (async function PgIntrospectionPlugin(
       } catch (e) {
         debug(`Error occurred parsing notification payload: ${e}`);
       }
-    };
-    pgClient.on("notification", listener);
-    introspectionResultsByKind = await introspect();
-  }, stopListening);
+    }
 
-  builder.hook("build", build => {
-    return build.extend(build, {
-      pgIntrospectionResultsByKind: introspectionResultsByKind,
-    });
-  });
+    async stop() {
+      this.stopped = true;
+      await this._releaseClient();
+    }
+
+    async _releaseClient() {
+      // $FlowFixMe
+      this._handleChange.cancel();
+      const pgClient = this.client;
+      const reallyReleaseClient = this._reallyReleaseClient;
+      this.client = null;
+      this._reallyReleaseClient = null;
+      if (pgClient) {
+        pgClient.query("unlisten postgraphile_watch").catch(e => {
+          debug(`Error occurred trying to unlisten watch: ${e}`);
+        });
+        pgClient.removeListener("notification", this._listener);
+        pgClient.removeListener("error", this._handleClientError);
+        if (reallyReleaseClient) {
+          await reallyReleaseClient();
+        }
+      }
+    }
+  }
+
+  builder.registerWatcher(
+    async triggerRebuild => {
+      // In case we started listening before, clean up
+      if (listener) {
+        await listener.stop();
+      }
+      // We're not worried about a race condition here.
+      // eslint-disable-next-line require-atomic-updates
+      listener = new Listener(triggerRebuild);
+    },
+    async () => {
+      const l = listener;
+      listener = null;
+      if (l) {
+        await l.stop();
+      }
+    }
+  );
+
+  builder.hook(
+    "build",
+    build => {
+      if (introspectionResultsByKind.__pgVersion < 90500) {
+        // TODO:v5: remove this workaround
+        // This is a bit of a hack, but until we have plugin priorities it's the
+        // easiest way to conditionally support PG9.4.
+        build.pgQueryFromResolveData = queryFromResolveDataFactory({
+          supportsJSONB: false,
+        });
+      }
+      return build.extend(build, {
+        pgIntrospectionResultsByKind: introspectionResultsByKind,
+      });
+    },
+    ["PgIntrospection"],
+    [],
+    ["PgBasics"]
+  );
 }: Plugin);

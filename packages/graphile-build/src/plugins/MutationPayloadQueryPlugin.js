@@ -10,7 +10,7 @@ export default (function MutationPayloadQueryPlugin(builder) {
       build: {| ...Build, ...BuildExtensionQuery |},
       context
     ): {} => {
-      const { $$isQuery, extend, getTypeByName } = build;
+      const { $$isQuery, extend, getTypeByName, inflection } = build;
       const {
         scope: { isMutationPayload },
         Self,
@@ -18,7 +18,7 @@ export default (function MutationPayloadQueryPlugin(builder) {
       if (!isMutationPayload) {
         return fields;
       }
-      const Query = getTypeByName("Query");
+      const Query = getTypeByName(inflection.builtin("Query"));
       return extend(
         fields,
         {
@@ -33,6 +33,7 @@ export default (function MutationPayloadQueryPlugin(builder) {
         },
         `Adding 'query' field to mutation payload ${Self.name}`
       );
-    }
+    },
+    ["MutationPayloadQuery"]
   );
 }: Plugin);

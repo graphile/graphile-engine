@@ -14,14 +14,15 @@ export default (function PgConnectionArgs(builder) {
       } = build;
       const {
         scope: {
+          fieldName,
           isPgFieldConnection,
           isPgFieldSimpleCollection,
           pgFieldIntrospection: source,
         },
         addArgDataGenerator,
-        field,
         Self,
       } = context;
+
       if (
         !(isPgFieldConnection || isPgFieldSimpleCollection) ||
         !source ||
@@ -69,8 +70,14 @@ export default (function PgConnectionArgs(builder) {
             }
 
             function addCursorConstraint(cursor, isAfter) {
-              const cursorValues = JSON.parse(base64Decode(cursor));
-              return queryBuilder.addCursorCondition(cursorValues, isAfter);
+              try {
+                const cursorValues = JSON.parse(base64Decode(cursor));
+                return queryBuilder.addCursorCondition(cursorValues, isAfter);
+              } catch (e) {
+                throw new Error(
+                  "Invalid cursor, please enter a cursor from a previous request, or null."
+                );
+              }
             }
           },
         };
@@ -113,13 +120,10 @@ export default (function PgConnectionArgs(builder) {
             : null),
         },
         isPgFieldConnection
-          ? `Adding connection pagination args to field '${field.name}' of '${
-              Self.name
-            }'`
-          : `Adding simple collection args to field '${field.name}' of '${
-              Self.name
-            }'`
+          ? `Adding connection pagination args to field '${fieldName}' of '${Self.name}'`
+          : `Adding simple collection args to field '${fieldName}' of '${Self.name}'`
       );
-    }
+    },
+    ["PgConnectionArgFirstLastBeforeAfter"]
   );
 }: Plugin);
