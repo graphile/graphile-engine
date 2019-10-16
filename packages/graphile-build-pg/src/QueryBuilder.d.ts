@@ -97,7 +97,8 @@ export default class QueryBuilder {
   public buildNamedChildFrom(
     name: string,
     from: SQLGen,
-    field: SQLGen
+    field: SQLGen,
+    alias: SQLAlias
   ): QueryBuilder;
   public getNamedChild(name: string): QueryBuilder | undefined;
 
