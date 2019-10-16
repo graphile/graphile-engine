@@ -73,7 +73,6 @@ class QueryBuilder {
   context: GraphQLContext;
   rootValue: any; // eslint-disable-line flowtype/no-weak-types
   supportsJSONB: boolean;
-  isSingleFieldSelector: boolean;
   locks: {
     [string]: false | true | string,
   };
@@ -127,7 +126,8 @@ class QueryBuilder {
   lockContext: {
     queryBuilder: QueryBuilder,
   };
-  _children: Map<string, QueryBuilder>;
+  _children: Map<RawAlias, QueryBuilder>;
+  _isSingleFieldSelector: boolean;
 
   constructor(
     options: QueryBuilderOptions = {},
@@ -689,19 +689,20 @@ ${sql.join(
       useAsterisk?: boolean,
     } = {}
   ) {
-    if (this.isSingleFieldSelector) {
+    let processedOptions: typeof options = options;
+    if (this._isSingleFieldSelector) {
       if (Object.keys(options).length > 0) {
         throw new Error(
-          "Can't use QueryBuilder.build(options) in isSingleFieldSelector"
+          "Do not pass options to QueryBuilder.build() when using `buildNamedChildSelecting`"
         );
       }
-      options = {
+      processedOptions = {
         asRaw: true,
       };
     } else {
       if (options.asRaw) {
         throw new Error(
-          "We don't support using asRaw except with buildNamedChildFrom"
+          "We don't support using asRaw except with buildNamedChildSelecting"
         );
       }
     }
@@ -713,7 +714,7 @@ ${sql.join(
       addNullCase = false,
       addNotDistinctFromNullCase = false,
       useAsterisk = false,
-    } = options;
+    } = processedOptions;
 
     this.lockEverything();
     if (onlyJsonField) {
@@ -913,17 +914,19 @@ order by (row_number() over (partition by 1)) desc`;
     child.parentQueryBuilder = this;
     return child;
   }
-  buildNamedChildFrom(
-    name: string,
+  buildNamedChildSelecting(
+    name: RawAlias,
     from: SQLGen,
     field: SQLGen,
-    alias: SQLAlias
+    alias?: SQLAlias
   ) {
     if (this._children.has(name)) {
-      throw new Error(`QueryBuilder already has a child named ${name}`);
+      throw new Error(
+        `QueryBuilder already has a child named ${name.toString()}`
+      );
     }
     const child = this.buildChild();
-    child.isSingleFieldSelector = true;
+    child._isSingleFieldSelector = true;
     child.from(from, alias);
     child.select(field, "value");
     child.lock("select");

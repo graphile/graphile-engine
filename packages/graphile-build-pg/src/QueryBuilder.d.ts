@@ -94,13 +94,13 @@ export default class QueryBuilder {
     useAsterisk?: boolean;
   }): SQL;
   public buildChild(): QueryBuilder;
-  public buildNamedChildFrom(
-    name: string,
+  public buildNamedChildSelecting(
+    name: RawAlias,
     from: SQLGen,
     field: SQLGen,
-    alias: SQLAlias
+    alias?: SQLAlias
   ): QueryBuilder;
-  public getNamedChild(name: string): QueryBuilder | undefined;
+  public getNamedChild(name: RawAlias): QueryBuilder | undefined;
 
   // ----------------------------------------
 
