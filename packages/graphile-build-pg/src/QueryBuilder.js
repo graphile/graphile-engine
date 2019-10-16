@@ -73,6 +73,7 @@ class QueryBuilder {
   context: GraphQLContext;
   rootValue: any; // eslint-disable-line flowtype/no-weak-types
   supportsJSONB: boolean;
+  isSingleFieldSelector: boolean;
   locks: {
     [string]: false | true | string,
   };
@@ -688,10 +689,10 @@ ${sql.join(
       useAsterisk?: boolean,
     } = {}
   ) {
-    if (this.isSingleFieldSelectorThingie) {
+    if (this.isSingleFieldSelector) {
       if (Object.keys(options).length > 0) {
         throw new Error(
-          "Can't use QueryBuilder.build(options) in isSingleFieldSelectorThingie"
+          "Can't use QueryBuilder.build(options) in isSingleFieldSelector"
         );
       }
       options = {
@@ -922,7 +923,7 @@ order by (row_number() over (partition by 1)) desc`;
       throw new Error(`QueryBuilder already has a child named ${name}`);
     }
     const child = this.buildChild();
-    child.isSingleFieldSelectorThingie = true;
+    child.isSingleFieldSelector = true;
     child.from(from, alias);
     child.select(field, "value");
     child.lock("select");
