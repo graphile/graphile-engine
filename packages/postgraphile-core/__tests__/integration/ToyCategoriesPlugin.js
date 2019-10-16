@@ -104,7 +104,7 @@ module.exports = builder => {
                 "toyCategoriesSubquery"
               );
               toyCategoriesQueryBuilder.where(
-                sql.fragment`${toyCategoriesQueryBuilder.getTableAlias()}.approved = ${sql.literal(
+                sql.fragment`${toyCategoriesQueryBuilder.getTableAlias()}.approved = ${sql.value(
                   approved
                 )}`
               );
