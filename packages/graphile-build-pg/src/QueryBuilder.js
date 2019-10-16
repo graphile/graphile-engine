@@ -572,6 +572,16 @@ ${sql.join(
     this.lockEverything();
     return this.compiledData.select.length;
   }
+  buildSelectRaw() {
+    this.lockEverything();
+    return sql.join(
+      this.compiledData.select.map(
+        ([sqlFragment, alias]) =>
+          sql.fragment`${sqlFragment} as ${sql.identifier(alias)}`
+      ),
+      ", "
+    );
+  }
   buildSelectFields() {
     this.lockEverything();
     return sql.join(
@@ -671,13 +681,31 @@ ${sql.join(
     options: {
       asJson?: boolean,
       asJsonAggregate?: boolean,
+      asRaw?: boolean,
       onlyJsonField?: boolean,
       addNullCase?: boolean,
       addNotDistinctFromNullCase?: boolean,
       useAsterisk?: boolean,
     } = {}
   ) {
+    if (this.isSingleFieldSelectorThingie) {
+      if (Object.keys(options).length > 0) {
+        throw new Error(
+          "Can't use QueryBuilder.build(options) in isSingleFieldSelectorThingie"
+        );
+      }
+      options = {
+        asRaw: true,
+      };
+    } else {
+      if (options.asRaw) {
+        throw new Error(
+          "We don't support using asRaw except with buildNamedChildFrom"
+        );
+      }
+    }
     const {
+      asRaw = false,
       asJson = false,
       asJsonAggregate = false,
       onlyJsonField = false,
@@ -697,6 +725,8 @@ ${sql.join(
             addNullCase,
             addNotDistinctFromNullCase,
           })} as object`
+        : asRaw
+        ? this.buildSelectRaw()
         : this.buildSelectFields();
 
     let fragment = sql.fragment`\
@@ -882,12 +912,18 @@ order by (row_number() over (partition by 1)) desc`;
     child.parentQueryBuilder = this;
     return child;
   }
-  buildNamedChildFrom(name: string, from: SQLGen, field: SQLGen) {
+  buildNamedChildFrom(
+    name: string,
+    from: SQLGen,
+    field: SQLGen,
+    alias: SQLAlias
+  ) {
     if (this._children.has(name)) {
       throw new Error(`QueryBuilder already has a child named ${name}`);
     }
     const child = this.buildChild();
-    child.from(from);
+    child.isSingleFieldSelectorThingie = true;
+    child.from(from, alias);
     child.select(field, "value");
     child.lock("select");
     this._children.set(name, child);

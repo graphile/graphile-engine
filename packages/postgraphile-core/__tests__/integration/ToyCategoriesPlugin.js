@@ -4,6 +4,10 @@ module.exports = builder => {
     const {
       getTypeByName,
       graphql: { GraphQLList },
+      getSafeAliasFromAlias,
+      getSafeAliasFromResolveInfo,
+      pgSql: sql,
+      pgQueryFromResolveData: queryFromResolveData,
     } = build;
     const { Self, fieldWithHooks } = context;
 
@@ -11,6 +15,7 @@ module.exports = builder => {
       return fields;
     }
 
+    const Category = getTypeByName("Category");
     return build.extend(fields, {
       categories: fieldWithHooks(
         "categories",
@@ -21,7 +26,7 @@ module.exports = builder => {
                 queryBuilder.select(() => {
                   const resolveData = getDataFromParsedResolveInfoFragment(
                     parsedResolveInfoFragment,
-                    gqlForeignTableType
+                    Category
                   );
                   const foreignTableAlias = sql.identifier(Symbol());
                   const query = queryFromResolveData(
@@ -30,15 +35,19 @@ module.exports = builder => {
                     resolveData,
                     {
                       useAsterisk: false,
-                      asJson: true,
+                      asJsonAggregate: true,
                     },
                     innerQueryBuilder => {
                       innerQueryBuilder.parentQueryBuilder = queryBuilder;
-
+                      const alias = Symbol("toyCategoriesSubquery");
                       const innerInnerQueryBuilder = innerQueryBuilder.buildNamedChildFrom(
                         "toyCategoriesSubquery",
-                        sql.fragment`named_query_builder.toy_categories`,
-                        "category_id"
+                        sql.identifier("named_query_builder", "toy_categories"),
+                        sql.identifier(alias, "category_id"),
+                        sql.identifier(alias)
+                      );
+                      innerInnerQueryBuilder.where(
+                        sql.fragment`${innerInnerQueryBuilder.getTableAlias()}.toy_id = ${queryBuilder.getTableAlias()}.id`
                       );
                       innerQueryBuilder.where(
                         () =>
@@ -53,7 +62,6 @@ module.exports = builder => {
               },
             };
           });
-          const Category = getTypeByName("Category");
           return {
             type: new GraphQLList(Category),
             resolve: (data, _args, resolveContext, resolveInfo) => {
@@ -77,6 +85,7 @@ module.exports = builder => {
     (args, build, context) => {
       const {
         graphql: { GraphQLBoolean },
+        pgSql: sql,
       } = build;
       const {
         Self,
@@ -95,7 +104,7 @@ module.exports = builder => {
                 "toyCategoriesSubquery"
               );
               toyCategoriesQueryBuilder.where(
-                sql.fragment`${toyCategoriesQueryBuilder.getTableAlias()}.approved = ${sql.value(
+                sql.fragment`${toyCategoriesQueryBuilder.getTableAlias()}.approved = ${sql.literal(
                   approved
                 )}`
               );
