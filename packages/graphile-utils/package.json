@@ -40,21 +40,13 @@
     "graphile-build": "4.4.5",
     "graphile-build-pg": "4.4.5",
     "jest": "^24.8.0",
+    "jest-serializer-graphql-schema": "4.4.5",
     "ts-node": "^8.1.0",
     "typescript": "^3.4.5"
   },
   "peerDependencies": {
     "graphile-build": "^4.4.2",
     "graphile-build-pg": "^4.4.2"
-  },
-  "jest": {
-    "snapshotSerializers": [
-      "jest-serializer-graphql-schema"
-    ],
-    "transform": {
-      "^.+\\.jsx?$": "../../.jest-wrapper.js"
-    },
-    "testRegex": "__tests__/.*\\.test\\.js$"
   },
   "files": [
     "node8plus"
