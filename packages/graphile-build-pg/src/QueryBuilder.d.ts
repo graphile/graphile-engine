@@ -97,7 +97,7 @@ export default class QueryBuilder {
   public buildNamedChildSelecting(
     name: RawAlias,
     from: SQLGen,
-    field: SQLGen,
+    selectExpression: SQLGen,
     alias?: SQLAlias
   ): QueryBuilder;
   public getNamedChild(name: RawAlias): QueryBuilder | undefined;

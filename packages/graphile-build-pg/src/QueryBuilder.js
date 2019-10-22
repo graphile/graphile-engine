@@ -80,6 +80,7 @@ class QueryBuilder {
   selectedIdentifiers: boolean;
   data: {
     cursorPrefix: Array<string>,
+    fixedSelectExpression: ?SQLGen,
     select: Array<[SQLGen, RawAlias]>,
     selectCursor: ?SQLGen,
     from: ?[SQLGen, SQLAlias],
@@ -106,6 +107,7 @@ class QueryBuilder {
   };
   compiledData: {
     cursorPrefix: Array<string>,
+    fixedSelectExpression: ?SQL,
     select: Array<[SQL, RawAlias]>,
     selectCursor: ?SQL,
     from: ?[SQL, SQLAlias],
@@ -127,7 +129,6 @@ class QueryBuilder {
     queryBuilder: QueryBuilder,
   };
   _children: Map<RawAlias, QueryBuilder>;
-  _isSingleFieldSelector: boolean;
 
   constructor(
     options: QueryBuilderOptions = {},
@@ -146,6 +147,7 @@ class QueryBuilder {
       // As a performance optimisation, we're going to list a number of lock
       // types so that V8 doesn't need to mutate the object too much
       cursorComparator: false,
+      fixedSelectExpression: false,
       select: false,
       selectCursor: false,
       from: false,
@@ -164,6 +166,7 @@ class QueryBuilder {
     this.data = {
       // TODO: refactor `cursorPrefix`, it shouldn't be here (or should at least have getters/setters)
       cursorPrefix: ["natural"],
+      fixedSelectExpression: null,
       select: [],
       selectCursor: null,
       from: null,
@@ -183,6 +186,7 @@ class QueryBuilder {
         // As a performance optimisation, we're going to list a number of lock
         // types so that V8 doesn't need to mutate the object too much
         cursorComparator: [],
+        fixedSelectExpression: [],
         select: [],
         selectCursor: [],
         from: [],
@@ -201,6 +205,7 @@ class QueryBuilder {
     };
     this.compiledData = {
       cursorPrefix: ["natural"],
+      fixedSelectExpression: null,
       select: [],
       selectCursor: null,
       from: null,
@@ -366,8 +371,24 @@ ${sql.join(
       this.compiledData.cursorComparator(cursorValue, isAfter);
     });
   }
+  /** this method is experimental */
+  fixedSelectExpression(exprGen: SQLGen) {
+    this.checkLock("fixedSelectExpression");
+    this.lock("select");
+    this.lock("selectCursor");
+    if (this.data.select.length > 0) {
+      throw new Error("Cannot use .fixedSelectExpression() with .select()");
+    }
+    if (this.data.selectCursor) {
+      throw new Error(
+        "Cannot use .fixedSelectExpression() with .selectCursor()"
+      );
+    }
+    this.data.fixedSelectExpression = exprGen;
+  }
   select(exprGen: SQLGen, alias: RawAlias) {
     this.checkLock("select");
+    this.lock("fixedSelectExpression");
     if (typeof alias === "string") {
       // To protect against vulnerabilities such as
       //
@@ -406,6 +427,7 @@ ${sql.join(
   }
   selectCursor(exprGen: SQLGen) {
     this.checkLock("selectCursor");
+    this.lock("fixedSelectExpression");
     this.data.selectCursor = exprGen;
   }
   from(expr: SQLGen, alias?: SQLAlias = sql.identifier(Symbol())) {
@@ -573,18 +595,11 @@ ${sql.join(
     this.lockEverything();
     return this.compiledData.select.length;
   }
-  buildSelectRaw() {
-    this.lockEverything();
-    return sql.join(
-      this.compiledData.select.map(
-        ([sqlFragment, alias]) =>
-          sql.fragment`${sqlFragment} as ${sql.identifier(alias)}`
-      ),
-      ", "
-    );
-  }
   buildSelectFields() {
     this.lockEverything();
+    if (this.compiledData.fixedSelectExpression) {
+      return this.compiledData.fixedSelectExpression;
+    }
     return sql.join(
       this.compiledData.select.map(
         ([sqlFragment, alias]) =>
@@ -682,41 +697,30 @@ ${sql.join(
     options: {
       asJson?: boolean,
       asJsonAggregate?: boolean,
-      asRaw?: boolean,
       onlyJsonField?: boolean,
       addNullCase?: boolean,
       addNotDistinctFromNullCase?: boolean,
       useAsterisk?: boolean,
     } = {}
   ) {
-    let processedOptions: typeof options = options;
-    if (this._isSingleFieldSelector) {
+    this.lockEverything();
+
+    if (this.compiledData.fixedSelectExpression) {
       if (Object.keys(options).length > 0) {
         throw new Error(
           "Do not pass options to QueryBuilder.build() when using `buildNamedChildSelecting`"
         );
       }
-      processedOptions = {
-        asRaw: true,
-      };
-    } else {
-      if (options.asRaw) {
-        throw new Error(
-          "We don't support using asRaw except with buildNamedChildSelecting"
-        );
-      }
     }
     const {
-      asRaw = false,
       asJson = false,
       asJsonAggregate = false,
       onlyJsonField = false,
       addNullCase = false,
       addNotDistinctFromNullCase = false,
       useAsterisk = false,
-    } = processedOptions;
+    } = options;
 
-    this.lockEverything();
     if (onlyJsonField) {
       return this.buildSelectJson({ addNullCase, addNotDistinctFromNullCase });
     }
@@ -727,8 +731,6 @@ ${sql.join(
             addNullCase,
             addNotDistinctFromNullCase,
           })} as object`
-        : asRaw
-        ? this.buildSelectRaw()
         : this.buildSelectFields();
 
     let fragment = sql.fragment`\
@@ -816,6 +818,8 @@ order by (row_number() over (partition by 1)) desc`;
         this.data[type].upper,
         context
       );
+    } else if (type === "fixedSelectExpression") {
+      this.compiledData[type] = callIfNecessary(this.data[type], context);
     } else if (type === "select") {
       /*
        * NOTICE: locking select can cause additional selects to be added, so the
@@ -905,19 +909,22 @@ order by (row_number() over (partition by 1)) desc`;
     this.lock("first");
     this.lock("last");
     // We must execute select after orderBy otherwise we cannot generate a cursor
+    this.lock("fixedSelectExpression");
     this.lock("selectCursor");
     this.lock("select");
   }
+  /** this method is experimental */
   buildChild() {
     const options = { supportsJSONB: this.supportsJSONB };
     const child = new QueryBuilder(options, this.context, this.rootValue);
     child.parentQueryBuilder = this;
     return child;
   }
+  /** this method is experimental */
   buildNamedChildSelecting(
     name: RawAlias,
     from: SQLGen,
-    field: SQLGen,
+    selectExpression: SQLGen,
     alias?: SQLAlias
   ) {
     if (this._children.has(name)) {
@@ -926,13 +933,12 @@ order by (row_number() over (partition by 1)) desc`;
       );
     }
     const child = this.buildChild();
-    child._isSingleFieldSelector = true;
     child.from(from, alias);
-    child.select(field, "value");
-    child.lock("select");
+    child.fixedSelectExpression(selectExpression);
     this._children.set(name, child);
     return child;
   }
+  /** this method is experimental */
   getNamedChild(name: string) {
     return this._children.get(name);
   }
