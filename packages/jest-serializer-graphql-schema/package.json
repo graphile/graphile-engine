@@ -6,6 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "prepack": "tsc",
+    "watch": "tsc --watch",
     "test": "jest"
   },
   "repository": {
