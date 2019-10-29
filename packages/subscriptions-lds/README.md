@@ -98,7 +98,14 @@ max_replication_slots = 10
 ### Installing wal2json
 
 You also need to ensure that `wal2json` is installed. This comes as standard
-in many managed PostgreSQL services, such as Amazon RDS, but to install it locally:
+in many managed PostgreSQL services, such as Amazon RDS.
+If you're using macOS, you can install it locally using [Homebrew](https://brew.sh/):
+
+```bash
+brew install wal2json
+```
+
+If you're using a different Unix-based OS, you can install `wal2json` locally like this:
 
 1. Ensure that `which pg_config` returns the path to the **correct**
    `pg_config` binary - the one related to your PostgreSQL install. (For

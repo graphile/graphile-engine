@@ -35,7 +35,13 @@ You need `wal2json`; this is available on:
 - Amazon RDS
 - (please send a PR adding more compatible providers)
 
-If you don't already have it, you can install it. On your Unix-based OS (assuming `pg_config` is in your path, and points to the correct PostgreSQL installation) you can add it in a few seconds with:
+If you don't already have it, you can install it. If you're using macOS, you can install it from [Homebrew](https://brew.sh/):
+
+```bash
+brew install wal2json
+```
+
+On your Unix-based OS (assuming `pg_config` is in your path, and points to the correct PostgreSQL installation) you can add it in a few seconds with:
 
 ```bash
 git clone https://github.com/eulerto/wal2json.git
