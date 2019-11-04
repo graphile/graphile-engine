@@ -32,6 +32,17 @@ import {
   StringValueNode,
   TypeNode,
   ValueNode,
+
+  // graphql object types
+  GraphQLScalarType,
+  GraphQLObjectType,
+  GraphQLInterfaceType,
+  GraphQLUnionType,
+  GraphQLEnumType,
+  GraphQLInputObjectType,
+  GraphQLList,
+  GraphQLNonNull,
+  GraphQLDirective,
 } from "graphql";
 import { GraphileEmbed } from "./gql";
 import { InputObjectTypeExtensionNode } from "graphql/language/ast";
@@ -81,8 +92,20 @@ export interface ExtensionDefinition {
   resolvers?: Resolvers;
 }
 
+type GraphQLConstructorType =
+  | typeof GraphQLScalarType
+  | typeof GraphQLObjectType
+  | typeof GraphQLInterfaceType
+  | typeof GraphQLUnionType
+  | typeof GraphQLEnumType
+  | typeof GraphQLInputObjectType
+  | typeof GraphQLList
+  | typeof GraphQLNonNull
+  | typeof GraphQLDirective
+  | Resolvers;
+
 interface NewTypeDef {
-  type: GraphQLType;
+  type: GraphQLConstructorType;
   definition: any;
 }
 
@@ -174,7 +197,7 @@ export default function makeExtendSchemaPlugin(
                 )}'`
               );
             }
-            addType(gqlScalarType);
+            addType(gqlScalarType as any /* ??? */);
           } else {
             // Create a string type
             newTypes.push({

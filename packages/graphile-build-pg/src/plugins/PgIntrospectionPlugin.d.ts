@@ -195,3 +195,10 @@ export default function PgIntrospectionPlugin(
   builder: SchemaBuilder,
   options: Options
 ): Promise<void> | void;
+
+import "graphile-build";
+declare module "graphile-build" {
+  interface BuildPropertiesIntroducedIn_build {
+    pgIntrospectionResultsByKind: PgIntrospectionResultsByKind;
+  }
+}

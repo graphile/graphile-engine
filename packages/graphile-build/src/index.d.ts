@@ -21,7 +21,6 @@ import SchemaBuilder, {
 } from "./SchemaBuilder";
 
 export {
-  mixed,
   Options,
   Plugin,
   TriggerChangeType,
@@ -29,12 +28,31 @@ export {
   SchemaListener,
   DataForType,
   InitObject,
-  Build,
-  Inflection,
   Scope,
   Context,
   Hook,
+  BuildPropertiesIntroducedIn_build,
+  BuildPropertiesIntroducedIn_inflection,
+  BuildPropertiesIntroducedIn_init,
+  BuildPropertiesIntroducedIn_GraphQLSchema,
+  BuildPropertiesIntroducedIn_GraphQLObjectType,
+  BuildPropertiesIntroducedIn_GraphQLObjectType_interfaces,
+  BuildPropertiesIntroducedIn_GraphQLObjectType_fields,
+  BuildPropertiesIntroducedIn_GraphQLObjectType_fields_field,
+  BuildPropertiesIntroducedIn_GraphQLObjectType_fields_field_args,
+  BuildPropertiesIntroducedIn_GraphQLInputObjectType,
+  BuildPropertiesIntroducedIn_GraphQLInputObjectType_fields,
+  BuildPropertiesIntroducedIn_GraphQLInputObjectType_fields_field,
+  BuildPropertiesIntroducedIn_GraphQLEnumType,
+  BuildPropertiesIntroducedIn_GraphQLEnumType_values,
+  BuildPropertiesIntroducedIn_GraphQLEnumType_values_value,
+  BuildPropertiesIntroducedIn_GraphQLUnionType,
+  BuildPropertiesIntroducedIn_GraphQLUnionType_types,
+  BuildPropertiesIntroducedIn_finalize,
 } from "./SchemaBuilder";
+
+export { Build, Inflection } from "./makeNewBuild";
+
 export { LiveSource, LiveProvider, LiveMonitor, LiveCoordinator } from "./Live";
 export { SchemaBuilder };
 
