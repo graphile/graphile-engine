@@ -3,7 +3,7 @@ import { GraphQLInputFieldConfig, GraphQLFieldConfig } from "graphql";
 
 interface ChangeNullabilityRules {
   [typeName: string]: {
-    [fieldName: string]: boolean;
+    [fieldName: string]: boolean | { namedType?: boolean; listType?: boolean };
   };
 }
 
@@ -41,9 +41,26 @@ export default function makeChangeNullabilityPlugin(
         return field;
       }
       const {
-        graphql: { getNullableType, GraphQLNonNull },
+        graphql: { getNullableType, getNamedType, GraphQLNonNull, GraphQLList },
       } = build;
       const nullableType = getNullableType(field.type);
+      if (typeof shouldBeNullable !== "boolean") {
+        const namedType = getNamedType(field.type);
+        if (namedType === nullableType) {
+          // Ignore non-list fields
+          return field;
+        }
+
+        const wrappedType = new GraphQLList(
+          shouldBeNullable.namedType ? namedType : new GraphQLNonNull(namedType)
+        );
+        return {
+          ...field,
+          type: shouldBeNullable.listType
+            ? wrappedType
+            : new GraphQLNonNull(wrappedType),
+        };
+      }
       return {
         ...field,
         type: shouldBeNullable
