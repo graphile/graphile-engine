@@ -3339,7 +3339,7 @@ type JwtToken {
   a: Int
   b: BigFloat
   c: BigInt
-  exp: Int
+  exp: BigInt
   role: String
 }
 
@@ -13398,7 +13398,7 @@ type JwtToken {
   a: Int
   b: BigFloat
   c: BigInt
-  exp: Int
+  exp: BigInt
   role: String
 }
 
