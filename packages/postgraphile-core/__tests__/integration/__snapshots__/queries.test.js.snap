@@ -2004,6 +2004,37 @@ Object {
 }
 `;
 
+exports[`named_query_builder.toys.graphql 1`] = `
+Object {
+  "data": Object {
+    "t1": Object {
+      "categories": Array [
+        Object {
+          "name": "Dinosaurs",
+        },
+        Object {
+          "name": "Military",
+        },
+      ],
+    },
+    "t2": Object {
+      "categories": Array [
+        Object {
+          "name": "Dinosaurs",
+        },
+      ],
+    },
+    "t3": Object {
+      "categories": Array [
+        Object {
+          "name": "Military",
+        },
+      ],
+    },
+  },
+}
+`;
+
 exports[`network_types.graphql 1`] = `
 Object {
   "data": Object {
@@ -5266,6 +5297,50 @@ Object {
         "hasNextPage": false,
         "hasPreviousPage": false,
         "startCursor": "WyJuYXR1cmFsIiwxXQ==",
+      },
+    },
+    "tableSetQueryPlpgsql": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwxXQ==",
+          "node": Object {
+            "name": "John Smith",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwyXQ==",
+          "node": Object {
+            "name": "Sara Smith",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiwyXQ==",
+        "hasNextPage": true,
+        "hasPreviousPage": false,
+        "startCursor": "WyJuYXR1cmFsIiwxXQ==",
+      },
+    },
+    "tableSetQueryPlpgsqlOffset2": Object {
+      "edges": Array [
+        Object {
+          "cursor": "WyJuYXR1cmFsIiwzXQ==",
+          "node": Object {
+            "name": "Budd Deey",
+          },
+        },
+        Object {
+          "cursor": "WyJuYXR1cmFsIiw0XQ==",
+          "node": Object {
+            "name": "Kathryn Ramirez",
+          },
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "WyJuYXR1cmFsIiw0XQ==",
+        "hasNextPage": true,
+        "hasPreviousPage": true,
+        "startCursor": "WyJuYXR1cmFsIiwzXQ==",
       },
     },
     "tableSetQueryWithOffset": Object {

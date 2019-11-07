@@ -182,6 +182,7 @@ export type PgIndex = {
   isReplicaIdentity: boolean,
   isValid: boolean,
   */
+  isPartial: boolean,
   attributeNums: Array<number>,
   attributePropertiesAsc: ?Array<boolean>,
   attributePropertiesNullsFirst: ?Array<boolean>,
@@ -198,6 +199,25 @@ export type PgEntity =
   | PgConstraint
   | PgExtension
   | PgIndex;
+
+export type PgIntrospectionResultsByKind = {
+  __pgVersion: number,
+  attribute: PgAttribute[],
+  attributeByClassIdAndNum: {
+    [classId: string]: { [num: string]: PgAttribute },
+  },
+  class: PgClass[],
+  classById: { [classId: string]: PgClass },
+  constraint: PgConstraint[],
+  extension: PgExtension[],
+  extensionById: { [extId: string]: PgExtension },
+  index: PgIndex[],
+  namespace: PgNamespace[],
+  namespaceById: { [namespaceId: string]: PgNamespace },
+  procedure: PgProc[],
+  type: PgType[],
+  typeById: { [typeId: string]: PgType },
+};
 
 function readFile(filename, encoding) {
   return new Promise((resolve, reject) => {
@@ -444,7 +464,11 @@ export default (async function PgIntrospectionPlugin(
       fn ? fn(introspectionResults) : null
     );
   };
-  async function introspect() {
+  /**
+   * @summary introspect database and get the table/view/constraints.
+   * @returns {Promise<PgIntrospectionResultsByKind>}
+   */
+  async function introspect(): Promise<PgIntrospectionResultsByKind> {
     // Perform introspection
     if (!Array.isArray(schemas)) {
       throw new Error("Argument 'schemas' (array) is required");
@@ -837,7 +861,7 @@ export default (async function PgIntrospectionPlugin(
       this._start();
     }
 
-    async _start() {
+    async _start(isReconnect = false) {
       if (this.stopped) {
         return;
       }
@@ -897,7 +921,9 @@ export default (async function PgIntrospectionPlugin(
           }
 
           // Trigger re-introspection on server reconnect
-          this._handleChange();
+          if (isReconnect) {
+            this._handleChange();
+          }
         }
       } catch (e) {
         // If something goes wrong, disconnect and try again after a short delay
@@ -925,7 +951,7 @@ export default (async function PgIntrospectionPlugin(
       setTimeout(() => {
         if (!this.stopped) {
           // Listen for further changes
-          this._start();
+          this._start(true);
         }
       }, 2000);
     }

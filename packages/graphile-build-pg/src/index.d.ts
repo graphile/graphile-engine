@@ -7,6 +7,8 @@ import {
   PgAttribute,
   PgConstraint,
   PgExtension,
+  PgIndex,
+  PgIntrospectionResultsByKind,
   PgEntity,
   PgEntityKind,
 } from "./plugins/PgIntrospectionPlugin";
@@ -19,6 +21,8 @@ export {
   PgAttribute,
   PgConstraint,
   PgExtension,
+  PgIndex,
+  PgIntrospectionResultsByKind,
   PgEntity,
   PgEntityKind,
 };

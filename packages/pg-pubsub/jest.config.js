@@ -1,8 +1,6 @@
 module.exports = {
-  roots: ["<rootDir>/src", "<rootDir>/__tests__"],
-  transform: {
-    "^.+\\.tsx?$": "ts-jest",
-  },
+  preset: "ts-jest",
+  testEnvironment: "node",
+  snapshotSerializers: ["jest-serializer-graphql-schema"],
   testRegex: "(/__tests__/.*\\.(test|spec))\\.[tj]sx?$",
-  moduleFileExtensions: ["ts", "js", "json"],
 };

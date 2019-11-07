@@ -78,7 +78,7 @@ export interface Resolvers<TSource = any, TContext = any> {
 
 export interface ExtensionDefinition {
   typeDefs: DocumentNode;
-  resolvers: Resolvers;
+  resolvers?: Resolvers;
 }
 
 interface NewTypeDef {
@@ -647,7 +647,10 @@ function getFields<TSource>(
     throw new Error("getFields only supports named types");
   }
   const Self: GraphQLNamedType = SelfGeneric as any;
-  const { pgSql: sql } = build;
+  const {
+    pgSql: sql,
+    graphql: { isScalarType, getNamedType },
+  } = build;
   function augmentResolver(
     resolver: AugmentedGraphQLFieldResolver<TSource, any>,
     fieldContext: Context<TSource>,
@@ -746,9 +749,14 @@ function getFields<TSource>(
           scope.pgFieldIntrospection.kind === "class"
             ? scope.pgFieldIntrospection
             : null;
+        const isScalar = isScalarType(getNamedType(type));
 
         const generateImplicitResolverIfPossible = () => {
-          if (directives.pgQuery && table) {
+          if (
+            directives.pgQuery &&
+            ((table && directives.pgQuery.source) ||
+              (isScalar && directives.pgQuery.fragment))
+          ) {
             return (
               data: any,
               _args: any,
@@ -858,53 +866,88 @@ function getFields<TSource>(
               );
             }
           }
-          if (directives.pgQuery && table) {
-            fieldContext.addDataGenerator((parsedResolveInfoFragment: any) => {
-              return {
-                pgQuery: (queryBuilder: QueryBuilder) => {
-                  queryBuilder.select(() => {
-                    const resolveData = fieldContext.getDataFromParsedResolveInfoFragment(
-                      parsedResolveInfoFragment,
-                      namedType
-                    );
-                    const tableAlias = sql.identifier(Symbol());
-                    const query = build.pgQueryFromResolveData(
-                      directives.pgQuery.source,
-                      tableAlias,
-                      resolveData,
-                      {
-                        withPagination: isConnection,
-                        withPaginationAsFields: false,
-                        asJsonAggregate: isListType && !isConnection,
-                        asJson: !isConnection,
-                        addNullCase: !isConnection,
-                      },
-                      (innerQueryBuilder: QueryBuilder) => {
-                        innerQueryBuilder.parentQueryBuilder = queryBuilder;
-                        if (
-                          build.options.subscriptions &&
-                          table.primaryKeyConstraint
-                        ) {
-                          innerQueryBuilder.selectIdentifiers(table);
-                        }
-                        if (
-                          typeof directives.pgQuery.withQueryBuilder ===
-                          "function"
-                        ) {
-                          directives.pgQuery.withQueryBuilder(
-                            innerQueryBuilder,
-                            parsedResolveInfoFragment.args
-                          );
-                        }
-                      },
-                      queryBuilder.context,
-                      queryBuilder.rootValue
-                    );
-                    return sql.fragment`(${query})`;
-                  }, build.getSafeAliasFromAlias(parsedResolveInfoFragment.alias));
-                },
-              };
-            });
+          if (directives.pgQuery) {
+            if (table && directives.pgQuery.source) {
+              fieldContext.addDataGenerator(
+                (parsedResolveInfoFragment: any) => {
+                  return {
+                    pgQuery: (queryBuilder: QueryBuilder) => {
+                      const source =
+                        typeof directives.pgQuery.source === "function"
+                          ? directives.pgQuery.source(
+                              queryBuilder,
+                              parsedResolveInfoFragment.args
+                            )
+                          : directives.pgQuery.source;
+                      queryBuilder.select(() => {
+                        const resolveData = fieldContext.getDataFromParsedResolveInfoFragment(
+                          parsedResolveInfoFragment,
+                          namedType
+                        );
+                        const tableAlias = sql.identifier(Symbol());
+                        const query = build.pgQueryFromResolveData(
+                          source,
+                          tableAlias,
+                          resolveData,
+                          {
+                            withPagination: isConnection,
+                            withPaginationAsFields: false,
+                            asJsonAggregate: isListType && !isConnection,
+                            asJson: !isConnection,
+                            addNullCase: !isConnection,
+                          },
+                          (innerQueryBuilder: QueryBuilder) => {
+                            innerQueryBuilder.parentQueryBuilder = queryBuilder;
+                            if (
+                              build.options.subscriptions &&
+                              table.primaryKeyConstraint
+                            ) {
+                              innerQueryBuilder.selectIdentifiers(table);
+                            }
+                            if (
+                              typeof directives.pgQuery.withQueryBuilder ===
+                              "function"
+                            ) {
+                              directives.pgQuery.withQueryBuilder(
+                                innerQueryBuilder,
+                                parsedResolveInfoFragment.args
+                              );
+                            }
+                          },
+                          queryBuilder.context,
+                          queryBuilder.rootValue
+                        );
+                        return sql.fragment`(${query})`;
+                      }, build.getSafeAliasFromAlias(parsedResolveInfoFragment.alias));
+                    },
+                  };
+                }
+              );
+            } else if (isScalar && directives.pgQuery.fragment) {
+              fieldContext.addDataGenerator(
+                (parsedResolveInfoFragment: any) => {
+                  return {
+                    pgQuery: (queryBuilder: QueryBuilder) => {
+                      queryBuilder.select(
+                        typeof directives.pgQuery.fragment === "function"
+                          ? directives.pgQuery.fragment(
+                              queryBuilder,
+                              parsedResolveInfoFragment.args
+                            )
+                          : directives.pgQuery.fragment,
+                        build.getSafeAliasFromAlias(
+                          parsedResolveInfoFragment.alias
+                        )
+                      );
+                    },
+                  };
+                }
+              );
+            } else {
+              throw new Error(
+                `@pgQuery(...) directive called with invalid arguments - for a table value, call it with 'source' for a scalar with 'fragment'!`
+              );
+            }
           }
 
           const resolversSpec = rawResolversSpec

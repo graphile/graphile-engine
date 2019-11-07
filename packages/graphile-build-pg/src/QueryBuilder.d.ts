@@ -42,8 +42,8 @@ export default class QueryBuilder {
   public setOrderIsUnique(): void;
   public orderBy(
     exprGen: SQLGen,
-    ascending: boolean,
-    nullsFirst: boolean | null
+    ascending?: boolean,
+    nullsFirst?: boolean | null
   ): void;
   public limit(limitGen: NumberGen): void;
   public offset(offsetGen: NumberGen): void;
@@ -93,6 +93,14 @@ export default class QueryBuilder {
     addNotDistinctFromNullCase?: boolean;
     useAsterisk?: boolean;
   }): SQL;
+  public buildChild(): QueryBuilder;
+  public buildNamedChildSelecting(
+    name: RawAlias,
+    from: SQLGen,
+    selectExpression: SQLGen,
+    alias?: SQLAlias
+  ): QueryBuilder;
+  public getNamedChild(name: RawAlias): QueryBuilder | undefined;
 
   // ----------------------------------------
 
