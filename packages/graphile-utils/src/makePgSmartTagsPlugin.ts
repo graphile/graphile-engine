@@ -3,34 +3,34 @@ import { PgEntityKind, PgEntity } from "graphile-build-pg";
 import { inspect } from "util";
 import { entityIsIdentifiedBy } from "./introspectionHelpers";
 
-export type SmartTagFilterFunction<T> = (input: T) => boolean;
+export type PgSmartTagFilterFunction<T> = (input: T) => boolean;
 
-export type SmartTagTags = {
+export type PgSmartTagTags = {
   [tagName: string]: null | true | string | string[];
 };
 
-export interface SmartTagRule<T extends PgEntity = PgEntity> {
+export interface PgSmartTagRule<T extends PgEntity = PgEntity> {
   kind: PgEntityKind;
-  match: string | SmartTagFilterFunction<T>;
-  tags?: SmartTagTags;
+  match: string | PgSmartTagFilterFunction<T>;
+  tags?: PgSmartTagTags;
   description?: string;
 }
 
-interface CompiledSmartTagRule<T extends PgEntity> {
+interface CompiledPgSmartTagRule<T extends PgEntity> {
   kind: T["kind"];
-  match: SmartTagFilterFunction<T>;
-  tags?: SmartTagTags;
+  match: PgSmartTagFilterFunction<T>;
+  tags?: PgSmartTagTags;
   description?: string;
 }
 
-type SmartTagSupportedKinds =
+export type PgSmartTagSupportedKinds =
   | PgEntityKind.CLASS
   | PgEntityKind.ATTRIBUTE
   | PgEntityKind.CONSTRAINT
   | PgEntityKind.PROCEDURE;
 
 const meaningByKind: {
-  [kind in SmartTagSupportedKinds]: string;
+  [kind in PgSmartTagSupportedKinds]: string;
 } = {
   [PgEntityKind.CLASS]:
     "for tables, composite types, views and materialized views",
@@ -44,16 +44,16 @@ const validKinds = Object.entries(meaningByKind)
   .join(", ");
 
 function compileRule<T extends PgEntity>(
-  rule: SmartTagRule<T>
-): CompiledSmartTagRule<T> {
+  rule: PgSmartTagRule<T>
+): CompiledPgSmartTagRule<T> {
   const { kind, match: incomingMatch, ...rest } = rule;
   if (!Object.prototype.hasOwnProperty.call(meaningByKind, kind)) {
     throw new Error(
-      `makeSmartTagsPlugin rule has invalid kind '${kind}'; valid kinds are: ${validKinds}`
+      `makePgPgSmartTagsPlugin rule has invalid kind '${kind}'; valid kinds are: ${validKinds}`
     );
   }
 
-  const match: SmartTagFilterFunction<T> = obj => {
+  const match: PgSmartTagFilterFunction<T> = obj => {
     if (obj.kind !== kind) {
       return false;
     }
@@ -66,7 +66,7 @@ function compileRule<T extends PgEntity>(
       return entityIsIdentifiedBy(obj, incomingMatch);
     } else {
       throw new Error(
-        "makeSmartTagsPlugin rule 'match' is neither a string nor a function"
+        "makePgPgSmartTagsPlugin rule 'match' is neither a string nor a function"
       );
     }
   };
@@ -78,21 +78,23 @@ function compileRule<T extends PgEntity>(
 }
 
 function rulesFrom(
-  ruleOrRules: SmartTagRule | SmartTagRule[]
-): [CompiledSmartTagRule<PgEntity>[], SmartTagRule[]] {
+  ruleOrRules: PgSmartTagRule | PgSmartTagRule[]
+): [CompiledPgSmartTagRule<PgEntity>[], PgSmartTagRule[]] {
   const rawRules = Array.isArray(ruleOrRules) ? ruleOrRules : [ruleOrRules];
   return [rawRules.map(compileRule), rawRules];
 }
 
-type UpdateRulesCallback = (ruleOrRules: SmartTagRule | SmartTagRule[]) => void;
+export type UpdatePgSmartTagRulesCallback = (
+  ruleOrRules: PgSmartTagRule | PgSmartTagRule[]
+) => void;
 
-type SubscribeToUpdatesCallback = (
-  cb: UpdateRulesCallback | null
+export type SubscribeToPgSmartTagUpdatesCallback = (
+  cb: UpdatePgSmartTagRulesCallback | null
 ) => void | Promise<void>;
 
-export default function makeSmartTagsPlugin(
-  ruleOrRules: SmartTagRule | SmartTagRule[],
-  subscribeToUpdatesCallback?: SubscribeToUpdatesCallback | null
+export function makePgPgSmartTagsPlugin(
+  ruleOrRules: PgSmartTagRule | PgSmartTagRule[],
+  subscribeToUpdatesCallback?: SubscribeToPgSmartTagUpdatesCallback | null
 ): Plugin {
   let [rules, rawRules] = rulesFrom(ruleOrRules);
   return (builder: SchemaBuilder, _options: Options) => {
@@ -135,7 +137,7 @@ export default function makeSmartTagsPlugin(
         // Let people know if their rules don't match; it's probably a mistake.
         if (hits === 0) {
           console.warn(
-            `WARNING: there were no matches for makeSmartTagsPlugin rule ${idx} - ${inspect(
+            `WARNING: there were no matches for makePgPgSmartTagsPlugin rule ${idx} - ${inspect(
               rawRules[idx]
             )}`
           );
@@ -146,14 +148,39 @@ export default function makeSmartTagsPlugin(
   };
 }
 
-export type SmartTagsJSON = {
-  [kind in SmartTagSupportedKinds]: {
+/**
+ * JSON (or JSON5) description of the tags to add to various entities, e.g.
+ *
+ * ```js
+ * {
+ *   class: {
+ *     my_table: {
+ *       tags: {omit: "create,update,delete"},
+ *       description: "You can overwrite the description too",
+ *       columns: {
+ *         my_private_field: {tags: {omit: true}}
+ *       }
+ *     },
+ *     "my_schema.myOtherTable": {
+ *       description: "If necessary, add your schema to the table name to prevent multiple being matched"
+ *     }
+ *   },
+ *   procedure: {
+ *     "my_schema.my_function_name": {
+ *       tags: {sortable: true, filterable: true}
+ *     }
+ *   }
+ * }
+ * ```
+ */
+export type JSONPgSmartTags = {
+  [kind in PgSmartTagSupportedKinds]: {
     [identifier: string]: {
-      tags?: SmartTagTags;
+      tags?: PgSmartTagTags;
       description?: string;
       columns?: {
         [columnName: string]: {
-          tags?: SmartTagTags;
+          tags?: PgSmartTagTags;
           description?: string;
         };
       };
@@ -161,15 +188,15 @@ export type SmartTagsJSON = {
   };
 };
 
-function smartTagRulesFromJSON(
-  specByIdentifierByKind: SmartTagsJSON
-): SmartTagRule[] {
-  const rules: SmartTagRule[] = [];
+function pgSmartTagRulesFromJSON(
+  specByIdentifierByKind: JSONPgSmartTags
+): PgSmartTagRule[] {
+  const rules: PgSmartTagRule[] = [];
   for (const rawKind of Object.keys(specByIdentifierByKind)) {
     const kind = PgEntityKind[rawKind];
     if (!kind) {
       throw new Error(
-        `makeSmartTagsPlugin JSON rule has invalid kind '${kind}'; valid kinds are: ${validKinds}`
+        `makeJSONPgSmartTagsPlugin JSON rule has invalid kind '${kind}'; valid kinds are: ${validKinds}`
       );
     }
     const specByIdentifier = specByIdentifierByKind[kind];
@@ -178,7 +205,7 @@ function smartTagRulesFromJSON(
       const { tags, description, columns, ...rest } = spec;
       if (Object.keys(rest).length > 0) {
         console.warn(
-          `WARNING: makeSmartTagsPluginFromJSON only supports tags, description and columns currently, you have also set '${rest.join(
+          `WARNING: makeJSONPgSmartTagsPlugin only supports tags, description and columns currently, you have also set '${rest.join(
             "', '"
           )}'`
         );
@@ -192,7 +219,7 @@ function smartTagRulesFromJSON(
       if (columns) {
         if (kind !== PgEntityKind.CLASS) {
           throw new Error(
-            `makeSmartTagsPluginFromJSON: 'columns' is only valid on a class; you tried to set it on a '${kind}'`
+            `makeJSONPgSmartTagsPlugin: 'columns' is only valid on a class; you tried to set it on a '${kind}'`
           );
         }
         for (const columnName of Object.keys(columns)) {
@@ -204,7 +231,7 @@ function smartTagRulesFromJSON(
           } = columnSpec;
           if (Object.keys(columnRest).length > 0) {
             console.warn(
-              `WARNING: makeSmartTagsPluginFromJSON columns only supports tags and description currently, you have also set '${columnRest.join(
+              `WARNING: makeJSONPgSmartTagsPlugin columns only supports tags and description currently, you have also set '${columnRest.join(
                 "', '"
               )}'`
             );
@@ -222,32 +249,32 @@ function smartTagRulesFromJSON(
   return rules;
 }
 
-type UpdateJSONCallback = (json: SmartTagsJSON) => void;
+export type UpdateJSONPgSmartTagsCallback = (json: JSONPgSmartTags) => void;
 
-type SubscribeToJSONUpdatesCallback = (
-  cb: UpdateJSONCallback | null
+export type SubscribeToJSONPgSmartTagsUpdatesCallback = (
+  cb: UpdateJSONPgSmartTagsCallback | null
 ) => void | Promise<void>;
 
-export function makeSmartTagsPluginFromJSON(
-  json: SmartTagsJSON,
-  subscribeToJSONUpdatesCallback?: SubscribeToJSONUpdatesCallback | null
+export function makeJSONPgSmartTagsPlugin(
+  json: JSONPgSmartTags,
+  subscribeToJSONUpdatesCallback?: SubscribeToJSONPgSmartTagsUpdatesCallback | null
 ) {
   // Get rules from JSON
-  let rules = smartTagRulesFromJSON(json);
+  let rules = pgSmartTagRulesFromJSON(json);
 
   // Wrap listener callback with JSON conversion
-  const subscribeToUpdatesCallback: SubscribeToUpdatesCallback | null = subscribeToJSONUpdatesCallback
+  const subscribeToUpdatesCallback: SubscribeToPgSmartTagUpdatesCallback | null = subscribeToJSONUpdatesCallback
     ? cb => {
         if (!cb) {
           return subscribeToJSONUpdatesCallback(cb);
         } else {
           return subscribeToJSONUpdatesCallback(json => {
-            rules = smartTagRulesFromJSON(json);
+            rules = pgSmartTagRulesFromJSON(json);
             return cb(rules);
           });
         }
       }
     : null;
 
-  return makeSmartTagsPlugin(rules, subscribeToUpdatesCallback);
+  return makePgPgSmartTagsPlugin(rules, subscribeToUpdatesCallback);
 }
