@@ -78,14 +78,18 @@ function compileRule<T extends PgEntity>(
 }
 
 function rulesFrom(
-  ruleOrRules: PgSmartTagRule | PgSmartTagRule[]
+  ruleOrRules: PgSmartTagRule | PgSmartTagRule[] | null
 ): [CompiledPgSmartTagRule<PgEntity>[], PgSmartTagRule[]] {
-  const rawRules = Array.isArray(ruleOrRules) ? ruleOrRules : [ruleOrRules];
+  const rawRules = Array.isArray(ruleOrRules)
+    ? ruleOrRules
+    : ruleOrRules
+    ? [ruleOrRules]
+    : [];
   return [rawRules.map(compileRule), rawRules];
 }
 
 export type UpdatePgSmartTagRulesCallback = (
-  ruleOrRules: PgSmartTagRule | PgSmartTagRule[]
+  ruleOrRules: PgSmartTagRule | PgSmartTagRule[] | null
 ) => void;
 
 export type SubscribeToPgSmartTagUpdatesCallback = (
@@ -93,7 +97,7 @@ export type SubscribeToPgSmartTagUpdatesCallback = (
 ) => void | Promise<void>;
 
 export function makePgPgSmartTagsPlugin(
-  ruleOrRules: PgSmartTagRule | PgSmartTagRule[],
+  ruleOrRules: PgSmartTagRule | PgSmartTagRule[] | null,
   subscribeToUpdatesCallback?: SubscribeToPgSmartTagUpdatesCallback | null
 ): Plugin {
   let [rules, rawRules] = rulesFrom(ruleOrRules);
@@ -194,7 +198,12 @@ export type JSONPgSmartTags = {
   };
 };
 
-function pgSmartTagRulesFromJSON(json: JSONPgSmartTags): PgSmartTagRule[] {
+function pgSmartTagRulesFromJSON(
+  json: JSONPgSmartTags | null
+): PgSmartTagRule[] {
+  if (!json) {
+    return [];
+  }
   if (json.version !== 1) {
     throw new Error(
       'This version of graphile-utils only supports the version 1 smart tags JSON format; e.g. `{version: 1, config: { class: { my_table: { tags: { omit: "create,update,delete" } } } } }`'
@@ -203,21 +212,21 @@ function pgSmartTagRulesFromJSON(json: JSONPgSmartTags): PgSmartTagRule[] {
   const specByIdentifierByKind = json.config;
   const rules: PgSmartTagRule[] = [];
   for (const rawKind of Object.keys(specByIdentifierByKind)) {
-    const kind = PgEntityKind[rawKind];
-    if (!kind) {
+    if (!meaningByKind.hasOwnProperty(rawKind)) {
       throw new Error(
-        `makeJSONPgSmartTagsPlugin JSON rule has invalid kind '${kind}'; valid kinds are: ${validKinds}`
+        `makeJSONPgSmartTagsPlugin JSON rule has invalid kind '${rawKind}'; valid kinds are: ${validKinds}`
       );
     }
+    const kind: PgEntityKind = rawKind as any;
     const specByIdentifier = specByIdentifierByKind[kind];
     for (const identifier of Object.keys(specByIdentifier)) {
       const spec = specByIdentifier[identifier];
       const { tags, description, columns, ...rest } = spec;
       if (Object.keys(rest).length > 0) {
         console.warn(
-          `WARNING: makeJSONPgSmartTagsPlugin only supports tags, description and columns currently, you have also set '${rest.join(
-            "', '"
-          )}'`
+          `WARNING: makeJSONPgSmartTagsPlugin only supports tags, description and columns currently, you have also set '${Object.keys(
+            rest
+          ).join("', '")}'`
         );
       }
       rules.push({
@@ -259,14 +268,16 @@ function pgSmartTagRulesFromJSON(json: JSONPgSmartTags): PgSmartTagRule[] {
   return rules;
 }
 
-export type UpdateJSONPgSmartTagsCallback = (json: JSONPgSmartTags) => void;
+export type UpdateJSONPgSmartTagsCallback = (
+  json: JSONPgSmartTags | null
+) => void;
 
 export type SubscribeToJSONPgSmartTagsUpdatesCallback = (
   cb: UpdateJSONPgSmartTagsCallback | null
 ) => void | Promise<void>;
 
 export function makeJSONPgSmartTagsPlugin(
-  json: JSONPgSmartTags,
+  json: JSONPgSmartTags | null,
   subscribeToJSONUpdatesCallback?: SubscribeToJSONPgSmartTagsUpdatesCallback | null
 ) {
   // Get rules from JSON
@@ -279,8 +290,12 @@ export function makeJSONPgSmartTagsPlugin(
           return subscribeToJSONUpdatesCallback(cb);
         } else {
           return subscribeToJSONUpdatesCallback(json => {
-            rules = pgSmartTagRulesFromJSON(json);
-            return cb(rules);
+            try {
+              rules = pgSmartTagRulesFromJSON(json);
+              return cb(rules);
+            } catch (e) {
+              console.error(e);
+            }
           });
         }
       }
