@@ -3,34 +3,34 @@ import { PgEntityKind, PgEntity } from "graphile-build-pg";
 import { inspect } from "util";
 import { entityIsIdentifiedBy } from "./introspectionHelpers";
 
-export type SmartCommentFilterFunction<T> = (input: T) => boolean;
+export type SmartTagFilterFunction<T> = (input: T) => boolean;
 
-export type SmartCommentTags = {
+export type SmartTagTags = {
   [tagName: string]: null | true | string | string[];
 };
 
-export interface SmartCommentRule<T extends PgEntity = PgEntity> {
+export interface SmartTagRule<T extends PgEntity = PgEntity> {
   kind: PgEntityKind;
-  match: string | SmartCommentFilterFunction<T>;
-  tags?: SmartCommentTags;
+  match: string | SmartTagFilterFunction<T>;
+  tags?: SmartTagTags;
   description?: string;
 }
 
-interface CompiledSmartCommentRule<T extends PgEntity> {
+interface CompiledSmartTagRule<T extends PgEntity> {
   kind: T["kind"];
-  match: SmartCommentFilterFunction<T>;
-  tags?: SmartCommentTags;
+  match: SmartTagFilterFunction<T>;
+  tags?: SmartTagTags;
   description?: string;
 }
 
-type SmartCommentSupportedKinds =
+type SmartTagSupportedKinds =
   | PgEntityKind.CLASS
   | PgEntityKind.ATTRIBUTE
   | PgEntityKind.CONSTRAINT
   | PgEntityKind.PROCEDURE;
 
 const meaningByKind: {
-  [kind in SmartCommentSupportedKinds]: string;
+  [kind in SmartTagSupportedKinds]: string;
 } = {
   [PgEntityKind.CLASS]:
     "for tables, composite types, views and materialized views",
@@ -44,16 +44,16 @@ const validKinds = Object.entries(meaningByKind)
   .join(", ");
 
 function compileRule<T extends PgEntity>(
-  rule: SmartCommentRule<T>
-): CompiledSmartCommentRule<T> {
+  rule: SmartTagRule<T>
+): CompiledSmartTagRule<T> {
   const { kind, match: incomingMatch, ...rest } = rule;
   if (!Object.prototype.hasOwnProperty.call(meaningByKind, kind)) {
     throw new Error(
-      `makeSmartCommentsPlugin rule has invalid kind '${kind}'; valid kinds are: ${validKinds}`
+      `makeSmartTagsPlugin rule has invalid kind '${kind}'; valid kinds are: ${validKinds}`
     );
   }
 
-  const match: SmartCommentFilterFunction<T> = obj => {
+  const match: SmartTagFilterFunction<T> = obj => {
     if (obj.kind !== kind) {
       return false;
     }
@@ -66,7 +66,7 @@ function compileRule<T extends PgEntity>(
       return entityIsIdentifiedBy(obj, incomingMatch);
     } else {
       throw new Error(
-        "makeSmartCommentsPlugin rule 'match' is neither a string nor a function"
+        "makeSmartTagsPlugin rule 'match' is neither a string nor a function"
       );
     }
   };
@@ -77,12 +77,39 @@ function compileRule<T extends PgEntity>(
   };
 }
 
-export default function makeSmartCommentsPlugin(
-  ruleOrRules: SmartCommentRule | SmartCommentRule[]
-): Plugin {
+function rulesFrom(
+  ruleOrRules: SmartTagRule | SmartTagRule[]
+): [CompiledSmartTagRule<PgEntity>[], SmartTagRule[]] {
   const rawRules = Array.isArray(ruleOrRules) ? ruleOrRules : [ruleOrRules];
-  const rules = rawRules.map(compileRule);
+  return [rawRules.map(compileRule), rawRules];
+}
+
+type UpdateRulesCallback = (ruleOrRules: SmartTagRule | SmartTagRule[]) => void;
+
+type SubscribeToUpdatesCallback = (
+  cb: UpdateRulesCallback | null
+) => void | Promise<void>;
+
+export default function makeSmartTagsPlugin(
+  ruleOrRules: SmartTagRule | SmartTagRule[],
+  subscribeToUpdatesCallback?: SubscribeToUpdatesCallback | null
+): Plugin {
+  let [rules, rawRules] = rulesFrom(ruleOrRules);
   return (builder: SchemaBuilder, _options: Options) => {
+    if (subscribeToUpdatesCallback) {
+      builder.registerWatcher(
+        async triggerRebuild => {
+          await subscribeToUpdatesCallback(newRuleOrRules => {
+            [rules, rawRules] = rulesFrom(newRuleOrRules);
+            triggerRebuild();
+          });
+        },
+        async () => {
+          await subscribeToUpdatesCallback(null);
+        }
+      );
+    }
+
     builder.hook("build", (build: Build) => {
       const { pgIntrospectionResultsByKind } = build;
       rules.forEach((rule, idx) => {
@@ -108,7 +135,7 @@ export default function makeSmartCommentsPlugin(
         // Let people know if their rules don't match; it's probably a mistake.
         if (hits === 0) {
           console.warn(
-            `WARNING: there were no matches for makeSmartCommentsPlugin rule ${idx} - ${inspect(
+            `WARNING: there were no matches for makeSmartTagsPlugin rule ${idx} - ${inspect(
               rawRules[idx]
             )}`
           );
@@ -119,14 +146,14 @@ export default function makeSmartCommentsPlugin(
   };
 }
 
-export type SmartCommentsJSON = {
-  [kind in SmartCommentSupportedKinds]: {
+export type SmartTagsJSON = {
+  [kind in SmartTagSupportedKinds]: {
     [identifier: string]: {
-      tags?: SmartCommentTags;
+      tags?: SmartTagTags;
       description?: string;
       columns?: {
         [columnName: string]: {
-          tags?: SmartCommentTags;
+          tags?: SmartTagTags;
           description?: string;
         };
       };
@@ -134,15 +161,15 @@ export type SmartCommentsJSON = {
   };
 };
 
-export function makeSmartCommentsPluginFromJSON(
-  specByIdentifierByKind: SmartCommentsJSON
-) {
-  const rules: SmartCommentRule[] = [];
+function smartTagRulesFromJSON(
+  specByIdentifierByKind: SmartTagsJSON
+): SmartTagRule[] {
+  const rules: SmartTagRule[] = [];
   for (const rawKind of Object.keys(specByIdentifierByKind)) {
     const kind = PgEntityKind[rawKind];
     if (!kind) {
       throw new Error(
-        `makeSmartCommentsPlugin JSON rule has invalid kind '${kind}'; valid kinds are: ${validKinds}`
+        `makeSmartTagsPlugin JSON rule has invalid kind '${kind}'; valid kinds are: ${validKinds}`
       );
     }
     const specByIdentifier = specByIdentifierByKind[kind];
@@ -151,7 +178,7 @@ export function makeSmartCommentsPluginFromJSON(
       const { tags, description, columns, ...rest } = spec;
       if (Object.keys(rest).length > 0) {
         console.warn(
-          `WARNING: makeSmartCommentsPluginFromJSON only supports tags, description and columns currently, you have also set '${rest.join(
+          `WARNING: makeSmartTagsPluginFromJSON only supports tags, description and columns currently, you have also set '${rest.join(
             "', '"
           )}'`
         );
@@ -165,7 +192,7 @@ export function makeSmartCommentsPluginFromJSON(
       if (columns) {
         if (kind !== PgEntityKind.CLASS) {
           throw new Error(
-            `makeSmartCommentsPluginFromJSON: 'columns' is only valid on a class; you tried to set it on a '${kind}'`
+            `makeSmartTagsPluginFromJSON: 'columns' is only valid on a class; you tried to set it on a '${kind}'`
           );
         }
         for (const columnName of Object.keys(columns)) {
@@ -177,7 +204,7 @@ export function makeSmartCommentsPluginFromJSON(
           } = columnSpec;
           if (Object.keys(columnRest).length > 0) {
             console.warn(
-              `WARNING: makeSmartCommentsPluginFromJSON columns only supports tags and description currently, you have also set '${columnRest.join(
+              `WARNING: makeSmartTagsPluginFromJSON columns only supports tags and description currently, you have also set '${columnRest.join(
                 "', '"
               )}'`
             );
@@ -192,5 +219,35 @@ export function makeSmartCommentsPluginFromJSON(
       }
     }
   }
-  return makeSmartCommentsPlugin(rules);
+  return rules;
+}
+
+type UpdateJSONCallback = (json: SmartTagsJSON) => void;
+
+type SubscribeToJSONUpdatesCallback = (
+  cb: UpdateJSONCallback | null
+) => void | Promise<void>;
+
+export function makeSmartTagsPluginFromJSON(
+  json: SmartTagsJSON,
+  subscribeToJSONUpdatesCallback?: SubscribeToJSONUpdatesCallback | null
+) {
+  // Get rules from JSON
+  let rules = smartTagRulesFromJSON(json);
+
+  // Wrap listener callback with JSON conversion
+  const subscribeToUpdatesCallback: SubscribeToUpdatesCallback | null = subscribeToJSONUpdatesCallback
+    ? cb => {
+        if (!cb) {
+          return subscribeToJSONUpdatesCallback(cb);
+        } else {
+          return subscribeToJSONUpdatesCallback(json => {
+            rules = smartTagRulesFromJSON(json);
+            return cb(rules);
+          });
+        }
+      }
+    : null;
+
+  return makeSmartTagsPlugin(rules, subscribeToUpdatesCallback);
 }
