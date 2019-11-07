@@ -212,7 +212,7 @@ function pgSmartTagRulesFromJSON(
   const specByIdentifierByKind = json.config;
   const rules: PgSmartTagRule[] = [];
   for (const rawKind of Object.keys(specByIdentifierByKind)) {
-    if (!meaningByKind.hasOwnProperty(rawKind)) {
+    if (!Object.prototype.hasOwnProperty.call(meaningByKind, rawKind)) {
       throw new Error(
         `makeJSONPgSmartTagsPlugin JSON rule has invalid kind '${rawKind}'; valid kinds are: ${validKinds}`
       );
