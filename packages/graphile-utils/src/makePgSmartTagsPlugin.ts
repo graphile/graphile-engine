@@ -178,7 +178,7 @@ export function makePgPgSmartTagsPlugin(
  */
 export type JSONPgSmartTags = {
   version: 1;
-  tags: {
+  config: {
     [kind in PgSmartTagSupportedKinds]: {
       [identifier: string]: {
         tags?: PgSmartTagTags;
@@ -197,10 +197,10 @@ export type JSONPgSmartTags = {
 function pgSmartTagRulesFromJSON(json: JSONPgSmartTags): PgSmartTagRule[] {
   if (json.version !== 1) {
     throw new Error(
-      "This version of graphile-utils only supports the version 1 smart tags JSON format."
+      'This version of graphile-utils only supports the version 1 smart tags JSON format; e.g. `{version: 1, config: { class: { my_table: { tags: { omit: "create,update,delete" } } } } }`'
     );
   }
-  const specByIdentifierByKind = json.tags;
+  const specByIdentifierByKind = json.config;
   const rules: PgSmartTagRule[] = [];
   for (const rawKind of Object.keys(specByIdentifierByKind)) {
     const kind = PgEntityKind[rawKind];
