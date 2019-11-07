@@ -153,44 +153,54 @@ export function makePgPgSmartTagsPlugin(
  *
  * ```js
  * {
- *   class: {
- *     my_table: {
- *       tags: {omit: "create,update,delete"},
- *       description: "You can overwrite the description too",
- *       columns: {
- *         my_private_field: {tags: {omit: true}}
+ *   version: 1,
+ *   tags: {
+ *     class: {
+ *       my_table: {
+ *         tags: {omit: "create,update,delete"},
+ *         description: "You can overwrite the description too",
+ *         columns: {
+ *           my_private_field: {tags: {omit: true}}
+ *         }
+ *       },
+ *       "my_schema.myOtherTable": {
+ *         description: "If necessary, add your schema to the table name to prevent multiple being matched"
  *       }
  *     },
- *     "my_schema.myOtherTable": {
- *       description: "If necessary, add your schema to the table name to prevent multiple being matched"
- *     }
- *   },
- *   procedure: {
- *     "my_schema.my_function_name": {
- *       tags: {sortable: true, filterable: true}
+ *     procedure: {
+ *       "my_schema.my_function_name": {
+ *         tags: {sortable: true, filterable: true}
+ *       }
  *     }
  *   }
  * }
  * ```
  */
 export type JSONPgSmartTags = {
-  [kind in PgSmartTagSupportedKinds]: {
-    [identifier: string]: {
-      tags?: PgSmartTagTags;
-      description?: string;
-      columns?: {
-        [columnName: string]: {
-          tags?: PgSmartTagTags;
-          description?: string;
+  version: 1;
+  tags: {
+    [kind in PgSmartTagSupportedKinds]: {
+      [identifier: string]: {
+        tags?: PgSmartTagTags;
+        description?: string;
+        columns?: {
+          [columnName: string]: {
+            tags?: PgSmartTagTags;
+            description?: string;
+          };
         };
       };
     };
   };
 };
 
-function pgSmartTagRulesFromJSON(
-  specByIdentifierByKind: JSONPgSmartTags
-): PgSmartTagRule[] {
+function pgSmartTagRulesFromJSON(json: JSONPgSmartTags): PgSmartTagRule[] {
+  if (json.version !== 1) {
+    throw new Error(
+      "This version of graphile-utils only supports the version 1 smart tags JSON format."
+    );
+  }
+  const specByIdentifierByKind = json.tags;
   const rules: PgSmartTagRule[] = [];
   for (const rawKind of Object.keys(specByIdentifierByKind)) {
     const kind = PgEntityKind[rawKind];
