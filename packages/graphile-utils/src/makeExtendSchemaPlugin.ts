@@ -872,9 +872,13 @@ function getFields<TSource>(
                 (parsedResolveInfoFragment: any) => {
                   return {
                     pgQuery: (queryBuilder: QueryBuilder) => {
-                      const source = typeof directives.pgQuery.source === 'function'
-                        ? directives.pgQuery.source({ parentQueryBuilder: queryBuilder })
-                        : directives.pgQuery.source;
+                      const source =
+                        typeof directives.pgQuery.source === "function"
+                          ? directives.pgQuery.source(
+                              queryBuilder,
+                              parsedResolveInfoFragment.args
+                            )
+                          : directives.pgQuery.source;
                       queryBuilder.select(() => {
                         const resolveData = fieldContext.getDataFromParsedResolveInfoFragment(
                           parsedResolveInfoFragment,
