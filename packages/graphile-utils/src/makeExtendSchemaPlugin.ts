@@ -572,11 +572,9 @@ export default function makeExtendSchemaPlugin(
     } else if (value.kind === "NullValue") {
       return null;
     } else if (value.kind === "ListValue") {
-      // This is used in directives, so we cannot assume the type is given
-      const listType: GraphQLList<GraphQLType> | null = graphql.isListType(type)
-        ? type
-        : null;
-      const childType = listType ? listType.ofType : null;
+      // This is used in directives, so we cannot assume the type is known.
+      const childType: GraphQLList<GraphQLType> | null =
+        type && graphql.isListType(type) ? type.ofType : null;
       return value.values.map(value => getValue(value, childType));
     } else if (value.kind === "GraphileEmbed") {
       // RAW!
