@@ -532,7 +532,7 @@ export default function makeExtendSchemaPlugin(
 
   function getValue(
     value: ValueNode | GraphileEmbed,
-    inType?: GraphQLType
+    inType?: GraphQLType | null
   ):
     | boolean
     | string
@@ -540,7 +540,8 @@ export default function makeExtendSchemaPlugin(
     | null
     | Array<boolean | string | number | null>
     | any {
-    const type = graphql.isNonNullType(inType) ? inType.ofType : inType;
+    const type =
+      inType && graphql.isNonNullType(inType) ? inType.ofType : inType;
     if (value.kind === "BooleanValue") {
       return !!value.value;
     } else if (value.kind === "StringValue") {
@@ -556,15 +557,26 @@ export default function makeExtendSchemaPlugin(
         );
       }
       const enumValueName = value.value;
-      const enumType: GraphQLEnumType = type;
+      const enumType: GraphQLEnumType | null = graphql.isEnumType(type)
+        ? type
+        : null;
+      if (!enumType) {
+        throw new Error(
+          `Tried to interpret an EnumValue for non-enum type ${type}`
+        );
+      }
+
       const values = enumType.getValues();
       const enumValue = values.find(v => v.name === enumValueName);
       return enumValue ? enumValue.value : undefined;
     } else if (value.kind === "NullValue") {
       return null;
     } else if (value.kind === "ListValue") {
-      const listType: GraphQLList<GraphQLType> = type as any;
-      const childType = listType.ofType;
+      // This is used in directives, so we cannot assume the type is given
+      const listType: GraphQLList<GraphQLType> | null = graphql.isListType(type)
+        ? type
+        : null;
+      const childType = listType ? listType.ofType : null;
       return value.values.map(value => getValue(value, childType));
     } else if (value.kind === "GraphileEmbed") {
       // RAW!
