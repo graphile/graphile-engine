@@ -88,7 +88,7 @@ export default (function PgBackwardRelationPlugin(
       return extend(
         fields,
         foreignKeyConstraints.reduce((memo, constraint) => {
-          if (omit(constraint, "read")) {
+          if (omit(constraint, "read") || omit(constraint, "many")) {
             return memo;
           }
           const table =
