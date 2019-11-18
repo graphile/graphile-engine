@@ -7100,6 +7100,12 @@ type Person implements Node {
   about: String
   aliases: [String]!
 
+  """Select a single \`CompoundKey\` that is related to this \`Person\`."""
+  compoundKeyByPersonId1(personId1: Int!): CompoundKey
+
+  """Select a single \`CompoundKey\` that is related to this \`Person\`."""
+  compoundKeyByPersonId2(personId2: Int!): CompoundKey
+
   """Reads and enables pagination through a set of \`CompoundKey\`."""
   compoundKeysByPersonId1(
     """Read all values in the set after (below) this cursor."""

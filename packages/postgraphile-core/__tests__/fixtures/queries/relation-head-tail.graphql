@@ -15,6 +15,16 @@ query {
           authorId
         }
       }
+      compoundKeyByPersonId1(personId1: 2) {
+        personId1
+        personId2
+        extra
+      }
+      compoundKeyByPersonId2(personId2: 3) {
+        personId1
+        personId2
+        extra
+      }
       compoundKeysByPersonId1 {
         nodes {
           personId1

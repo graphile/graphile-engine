@@ -5858,6 +5858,9 @@ type Person implements Node {
     condition: PostCondition
   ): PostsConnection!
 
+  \\"\\"\\"Select a single \`CompoundKey\` that is related to this \`Person\`.\\"\\"\\"
+  compoundKeyByPersonId1(personId1: Int!): CompoundKey
+
   \\"\\"\\"Reads and enables pagination through a set of \`CompoundKey\`.\\"\\"\\"
   compoundKeysByPersonId2(
     \\"\\"\\"Only read the first \`n\` values of the set.\\"\\"\\"
@@ -5886,6 +5889,9 @@ type Person implements Node {
     \\"\\"\\"
     condition: CompoundKeyCondition
   ): CompoundKeysConnection!
+
+  \\"\\"\\"Select a single \`CompoundKey\` that is related to this \`Person\`.\\"\\"\\"
+  compoundKeyByPersonId2(personId2: Int!): CompoundKey
 
   \\"\\"\\"Reads and enables pagination through a set of \`CompoundKey\`.\\"\\"\\"
   compoundKeysByPersonId1(

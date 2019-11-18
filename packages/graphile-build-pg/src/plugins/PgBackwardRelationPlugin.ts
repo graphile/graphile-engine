@@ -36,6 +36,7 @@ export default (function PgBackwardRelationPlugin(
         extend,
         getTypeByName,
         pgGetGqlTypeByTypeIdAndModifier,
+        gql2pg,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
         pgSql: sql,
         getSafeAliasFromResolveInfo,
@@ -131,11 +132,23 @@ export default (function PgBackwardRelationPlugin(
           const isUnique = !!table.constraints.find(
             c =>
               (c.type === "p" || c.type === "u") &&
-              c.keyAttributeNums.length === keys.length &&
+              c.keyAttributeNums.length <= keys.length &&
               c.keyAttributeNums.every((n, i) => keys[i].num === n)
           );
-
           const isDeprecated = isUnique && legacyRelationMode === DEPRECATED;
+
+          const primaryKeyConstraint = table.primaryKeyConstraint;
+          const primaryKeys =
+            primaryKeyConstraint && primaryKeyConstraint.keyAttributes;
+          const uncoveredPrimaryKeys =
+            primaryKeys && keys.every(attr => primaryKeys.includes(attr))
+              ? primaryKeys.filter(attr => !keys.includes(attr))
+              : [];
+          const parameterKeys = uncoveredPrimaryKeys.map(key => ({
+            ...key,
+            sqlIdentifier: sql.identifier(key.name),
+            paramName: inflection.column(key), // inflection.argument(key.name, i)
+          }));
 
           const singleRelationFieldName = isUnique
             ? inflection.singleRelationByKeysBackwards(
@@ -144,14 +157,23 @@ export default (function PgBackwardRelationPlugin(
                 foreignTable,
                 constraint
               )
+            : uncoveredPrimaryKeys.length
+            ? inflection.rowByRelationBackwardsAndUniqueKeys(
+                uncoveredPrimaryKeys,
+                table,
+                foreignTable,
+                constraint
+              )
             : null;
 
-          const primaryKeyConstraint = table.primaryKeyConstraint;
-          const primaryKeys =
-            primaryKeyConstraint && primaryKeyConstraint.keyAttributes;
-
           const shouldAddSingleRelation =
-            isUnique && legacyRelationMode !== ONLY;
+            (isUnique && legacyRelationMode !== ONLY) ||
+            (!isUnique &&
+              !!uncoveredPrimaryKeys.length &&
+              primaryKeyConstraint &&
+              !omit(table, "single") &&
+              !omit(primaryKeyConstraint, "single") &&
+              !omit(constraint, "single"));
 
           const shouldAddManyRelation =
             !isUnique ||
@@ -171,6 +193,7 @@ export default (function PgBackwardRelationPlugin(
                   ({
                     getDataFromParsedResolveInfoFragment,
                     addDataGenerator,
+                    addArgDataGenerator,
                   }) => {
                     const sqlFrom = sql.identifier(schema.name, table.name);
                     addDataGenerator(parsedResolveInfoFragment => {
@@ -222,12 +245,43 @@ export default (function PgBackwardRelationPlugin(
                         },
                       };
                     });
+                    if (!isUnique) {
+                      addArgDataGenerator(function idArgumentsGenerator(args) {
+                        return {
+                          pgQuery(queryBuilder): void {
+                            const sqlTableAlias = queryBuilder.getTableAlias();
+                            for (const key of parameterKeys)
+                              queryBuilder.where(
+                                sql.fragment`${sqlTableAlias}.${
+                                  key.sqlIdentifier
+                                } = ${gql2pg(
+                                  args[key.paramName],
+                                  key.type,
+                                  key.typeModifier
+                                )}`
+                              );
+                          },
+                        };
+                      });
+                    }
                     return {
                       description:
                         stringTag(constraint, "backwardDescription") ||
-                        `Reads a single \`${tableTypeName}\` that is related to this \`${foreignTableTypeName}\`.`,
+                        `${
+                          isUnique ? "Reads" : "Select"
+                        } a single \`${tableTypeName}\` that is related to this \`${foreignTableTypeName}\`.`,
                       type: gqlTableType,
-                      args: {},
+                      args: parameterKeys.reduce((memo, key) => {
+                        const ArgType = pgGetGqlTypeByTypeIdAndModifier(
+                          key.typeId,
+                          key.typeModifier
+                        );
+                        if (ArgType)
+                          memo[key.paramName] = {
+                            type: new GraphQLNonNull(ArgType),
+                          };
+                        return memo;
+                      }, {}),
                       resolve: (data, _args, resolveContext, resolveInfo) => {
                         const safeAlias = getSafeAliasFromResolveInfo(
                           resolveInfo

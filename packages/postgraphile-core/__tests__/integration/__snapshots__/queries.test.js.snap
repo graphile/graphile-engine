@@ -5972,6 +5972,12 @@ Object {
     "allPeople": Object {
       "nodes": Array [
         Object {
+          "compoundKeyByPersonId1": Object {
+            "extra": false,
+            "personId1": 2,
+            "personId2": 1,
+          },
+          "compoundKeyByPersonId2": null,
           "compoundKeysByPersonId1": Object {
             "nodes": Array [
               Object {
@@ -6012,6 +6018,12 @@ Object {
           },
         },
         Object {
+          "compoundKeyByPersonId1": null,
+          "compoundKeyByPersonId2": Object {
+            "extra": null,
+            "personId1": 2,
+            "personId2": 3,
+          },
           "compoundKeysByPersonId1": Object {
             "nodes": Array [
               Object {
@@ -6055,6 +6067,12 @@ Object {
           },
         },
         Object {
+          "compoundKeyByPersonId1": Object {
+            "extra": null,
+            "personId1": 2,
+            "personId2": 3,
+          },
+          "compoundKeyByPersonId2": null,
           "compoundKeysByPersonId1": Object {
             "nodes": Array [],
           },
@@ -6089,6 +6107,12 @@ Object {
           },
         },
         Object {
+          "compoundKeyByPersonId1": null,
+          "compoundKeyByPersonId2": Object {
+            "extra": true,
+            "personId1": 4,
+            "personId2": 3,
+          },
           "compoundKeysByPersonId1": Object {
             "nodes": Array [
               Object {
@@ -6119,6 +6143,12 @@ Object {
           },
         },
         Object {
+          "compoundKeyByPersonId1": Object {
+            "extra": true,
+            "personId1": 2,
+            "personId2": 5,
+          },
+          "compoundKeyByPersonId2": null,
           "compoundKeysByPersonId1": Object {
             "nodes": Array [],
           },
@@ -6145,6 +6175,8 @@ Object {
           },
         },
         Object {
+          "compoundKeyByPersonId1": null,
+          "compoundKeyByPersonId2": null,
           "compoundKeysByPersonId1": Object {
             "nodes": Array [],
           },

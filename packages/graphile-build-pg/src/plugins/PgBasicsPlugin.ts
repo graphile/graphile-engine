@@ -202,6 +202,12 @@ declare module "graphile-build" {
       table: PgClass,
       constraint: PgConstraint
     ): string;
+    rowByRelationBackwardsAndUniqueKeys(
+      detailedKeys: PgAttribute[],
+      table: PgClass,
+      _foreignTable: PgClass,
+      constraint: PgConstraint
+    ): string;
     updateByKeys(
       detailedKeys: PgAttribute[],
       table: PgClass,
@@ -608,6 +614,24 @@ function makePgBaseInflectors(): Partial<Inflection> {
         `${this._singularizedTableName(table)}-by-${detailedKeys
           .map(key => this.column(key))
           .join("-and-")}`
+      );
+    },
+    rowByRelationBackwardsAndUniqueKeys(
+      detailedKeys: PgAttribute[],
+      table: PgClass,
+      _foreignTable: PgClass,
+      constraint: PgConstraint
+    ) {
+      if (constraint.tags.foreignSingleFieldName) {
+        return constraint.tags.foreignSingleFieldName;
+      }
+      if (constraint.tags.foreignFieldName) {
+        return this.singularize(constraint.tags.foreignFieldName);
+      }
+      return this.rowByUniqueKeys(
+        detailedKeys,
+        table,
+        table.primaryKeyConstraint
       );
     },
     updateByKeys(
