@@ -211,6 +211,54 @@ function pgSmartTagRulesFromJSON(
   }
   const specByIdentifierByKind = json.config;
   const rules: PgSmartTagRule[] = [];
+
+  function processAttributes(
+    kind: PgEntityKind,
+    identifier: string,
+    attributes: unknown,
+    key: string,
+    deprecated = false
+  ): void {
+    if (kind !== PgEntityKind.CLASS) {
+      throw new Error(
+        `makeJSONPgSmartTagsPlugin: '${key}' is only valid on a class; you tried to set it on a '${kind}'`
+      );
+    }
+    const path = `config.${kind}.${identifier}.${key}`;
+    if (deprecated) {
+      console.warn(
+        `Tags JSON path '${path}' is deprecated, please use 'config.${kind}.${identifier}.attribute' instead`
+      );
+    }
+    if (typeof attributes !== "object" || attributes == null) {
+      throw new Error(`Invalid value for '${path}'`);
+    }
+    const columns: object = attributes;
+    for (const columnName of Object.keys(columns)) {
+      const columnSpec = columns[columnName];
+      const {
+        tags: columnTags,
+        description: columnDescription,
+        ...columnRest
+      } = columnSpec;
+      if (Object.keys(columnRest).length > 0) {
+        console.warn(
+          `WARNING: makeJSONPgSmartTagsPlugin '${key}' only supports 'tags' and 'description' currently, you have also set '${Object.keys(
+            columnRest
+          ).join(
+            "', '"
+          )}' at path '${path}.${columnName}'. Perhaps you forgot to add a "tags" entry containing these keys?`
+        );
+      }
+      rules.push({
+        kind: PgEntityKind.ATTRIBUTE,
+        match: `${identifier}.${columnName}`,
+        tags: columnTags,
+        description: columnDescription,
+      });
+    }
+  }
+
   for (const rawKind of Object.keys(specByIdentifierByKind)) {
     if (!Object.prototype.hasOwnProperty.call(meaningByKind, rawKind)) {
       throw new Error(
@@ -219,52 +267,35 @@ function pgSmartTagRulesFromJSON(
     }
     const kind: PgEntityKind = rawKind as any;
     const specByIdentifier = specByIdentifierByKind[kind];
+
     for (const identifier of Object.keys(specByIdentifier)) {
       const spec = specByIdentifier[identifier];
-      const { tags, description, columns, ...rest } = spec;
+      const { tags, description, columns, attribute, ...rest } = spec;
       if (Object.keys(rest).length > 0) {
         console.warn(
-          `WARNING: makeJSONPgSmartTagsPlugin only supports tags, description and columns currently, you have also set '${Object.keys(
+          `WARNING: makeJSONPgSmartTagsPlugin identifier spec only supports 'tags', 'description' and 'attribute' currently, you have also set '${Object.keys(
             rest
-          ).join("', '")}'`
+          ).join("', '")}' at 'config.${kind}.${identifier}'`
         );
       }
+
       rules.push({
         kind,
         match: identifier,
         tags,
         description,
       });
+
       if (columns) {
-        if (kind !== PgEntityKind.CLASS) {
-          throw new Error(
-            `makeJSONPgSmartTagsPlugin: 'columns' is only valid on a class; you tried to set it on a '${kind}'`
-          );
-        }
-        for (const columnName of Object.keys(columns)) {
-          const columnSpec = columns[columnName];
-          const {
-            tags: columnTags,
-            description: columnDescription,
-            ...columnRest
-          } = columnSpec;
-          if (Object.keys(columnRest).length > 0) {
-            console.warn(
-              `WARNING: makeJSONPgSmartTagsPlugin columns only supports tags and description currently, you have also set '${columnRest.join(
-                "', '"
-              )}'`
-            );
-          }
-          rules.push({
-            kind: PgEntityKind.ATTRIBUTE,
-            match: `${identifier}.${columnName}`,
-            tags: columnTags,
-            description: columnDescription,
-          });
-        }
+        // This was in graphile-utils 4.0.0 but was deprecated in 4.0.1 for consistency reasons.
+        processAttributes(kind, identifier, columns, "columns", true);
+      }
+      if (attribute) {
+        processAttributes(kind, identifier, attribute, "attribute");
       }
     }
   }
+
   return rules;
 }
 
