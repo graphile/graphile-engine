@@ -1058,6 +1058,8 @@ export default (async function PgIntrospectionPlugin(
           if (affectsOurSchemas) {
             this._handleChange();
           }
+        } else if (payload.type === "manual") {
+          this._handleChange();
         } else {
           throw new Error(`Payload type '${payload.type}' not recognised`);
         }
