@@ -1,5 +1,11 @@
 import { Plugin, Build } from "../SchemaBuilder";
 
+declare module "../SchemaBuilder" {
+  interface GraphileBuildOptions {
+    dontSwallowErrors?: boolean;
+  }
+}
+
 export default (function SwallowErrorsPlugin(
   builder,
   { dontSwallowErrors = false }

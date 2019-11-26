@@ -1,10 +1,5 @@
 import * as graphql from "graphql";
-import {
-  GraphQLNamedType,
-  GraphQLInputField,
-  GraphQLFieldResolver,
-  GraphQLType,
-} from "graphql";
+import { GraphQLNamedType, GraphQLInputField, GraphQLType } from "graphql";
 import {
   parseResolveInfo,
   simplifyParsedResolveInfoFragmentWithType,
@@ -12,7 +7,7 @@ import {
 } from "graphql-parse-resolve-info";
 import debugFactory from "debug";
 import { ResolveTree } from "graphql-parse-resolve-info";
-import pluralize from "pluralize";
+import pluralize = require("pluralize");
 import LRU from "@graphile/lru";
 import semver from "semver";
 import { upperCamelCase, camelCase, constantCase } from "./utils";
@@ -21,11 +16,9 @@ import resolveNode from "./resolveNode";
 import { LiveCoordinator } from "./Live";
 
 import SchemaBuilder, {
-  Build,
+  BuildBase,
   Context,
-  Scope,
   DataForType,
-  ScopeGraphQLSchema,
   ContextGraphQLSchema,
 } from "./SchemaBuilder";
 
@@ -113,7 +106,7 @@ export type InflectionBase = typeof initialInflection;
 let recurseDataGeneratorsForFieldWarned = false;
 
 const isString = str => typeof str === "string";
-const isDev = ["test", "development"].indexOf(process.env.NODE_ENV) >= 0;
+const isDev = ["test", "development"].indexOf(process.env.NODE_ENV || "") >= 0;
 const debug = debugFactory("graphile-build");
 
 /*
@@ -181,16 +174,22 @@ function getSafeAliasFromResolveInfo(resolveInfo) {
   return getSafeAliasFromAlias(alias);
 }
 
-type MetaData = {
-  [a: string]: unknown;
-};
+/**
+ * Data that user code generates (normally `{[key: string]: SOMETHING}`)
+ */
+export interface RawMetaData {}
+/**
+ * Data from combining all the RawMetaData together (i.e. `{[key: string]:
+ * Array<SOMETHING>}`).
+ */
+export interface MetaData {}
 
 interface DataGeneratorFunction {
   (
     parsedResolveInfoFragment: ResolveTree,
     ReturnType: GraphQLType,
     ...args: Array<unknown>
-  ): MetaData;
+  ): Partial<RawMetaData>;
   displayName?: string;
 }
 
@@ -247,7 +246,7 @@ const mergeData = (
   ReturnType,
   arg
 ) => {
-  const results: Array<MetaData> | null | undefined = ensureArray<MetaData>(
+  const results: Array<MetaData> | void = ensureArray<MetaData>(
     gen(arg, ReturnType, data)
   );
 
@@ -265,9 +264,7 @@ const mergeData = (
       const k = keys[i];
       data[k] = data[k] || [];
       const value: unknown = result[k];
-      const newData: Array<unknown> | null | undefined = ensureArray<mixed>(
-        value
-      );
+      const newData: Array<unknown> | void = ensureArray<unknown>(value);
       if (newData) {
         data[k].push(...newData);
       }
@@ -298,7 +295,7 @@ function ensureArray<T>(val: null | T | Array<T>): void | Array<T> {
 
 // eslint-disable-next-line no-unused-vars
 let ensureName = _fn => {};
-if (["development", "test"].indexOf(process.env.NODE_ENV) >= 0) {
+if (["development", "test"].indexOf(process.env.NODE_ENV || "") >= 0) {
   ensureName = fn => {
     // $FlowFixMe: displayName
     if (isDev && !fn.displayName && !fn.name && debug.enabled) {
@@ -310,7 +307,7 @@ if (["development", "test"].indexOf(process.env.NODE_ENV) >= 0) {
   };
 }
 
-export default function makeNewBuild(builder: SchemaBuilder): Build {
+export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
   const allTypes = {
     Int: graphql.GraphQLInt,
     Float: graphql.GraphQLFloat,
@@ -353,7 +350,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
     hasVersion(
       packageName: string,
       range: string,
-      options?: { includePrerelease?: boolean } = { includePrerelease: true }
+      options: { includePrerelease?: boolean } = { includePrerelease: true }
     ): boolean {
       const packageVersion = this.versions[packageName];
       if (!packageVersion) return false;
@@ -363,16 +360,13 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
     parseResolveInfo,
     simplifyParsedResolveInfoFragmentWithType,
     getSafeAliasFromAlias,
-    ...({getAliasFromResolveInfo: getSafeAliasFromResolveInfo} as {}), // DEPRECATED: do not use this!
+    ...({ getAliasFromResolveInfo: getSafeAliasFromResolveInfo } as {}), // DEPRECATED: do not use this!
     getSafeAliasFromResolveInfo,
     resolveAlias(data, _args, _context, resolveInfo) {
       const alias = getSafeAliasFromResolveInfo(resolveInfo);
       return data[alias];
     },
-    addType(
-      type: GraphQLNamedType,
-      origin?: string | null | undefined
-    ): void {
+    addType(type: GraphQLNamedType, origin?: string | null | undefined): void {
       if (!type.name) {
         throw new Error(
           `addType must only be called with named types, try using require('graphql').getNamedType`
@@ -423,7 +417,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
         | typeof import("graphql").GraphQLUnionType
         | typeof import("graphql").GraphQLEnumType
         | typeof import("graphql").GraphQLInputObjectType
-        | typeof import("graphql").GraphQLSchema,
+        | typeof import("graphql").GraphQLSchema
     >(
       Type: T,
       spec: any,
@@ -461,7 +455,12 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
           type: "GraphQLSchema",
           scope,
         };
-        newSpec = builder.applyHooks(this, "GraphQLSchema", (newSpec as unknown) as graphql.GraphQLSchemaConfig, context);
+        newSpec = builder.applyHooks(
+          this,
+          "GraphQLSchema",
+          (newSpec as unknown) as graphql.GraphQLSchemaConfig,
+          context
+        );
       } else if (Type === GraphQLObjectType) {
         const addDataGeneratorForField = (
           fieldName,
@@ -1055,6 +1054,8 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
     fieldDataGeneratorsByType: fieldDataGeneratorsByFieldNameByType, // @deprecated
     fieldDataGeneratorsByFieldNameByType,
     fieldArgDataGeneratorsByFieldNameByType,
+    scopeByType: new Map(),
+
     inflection: initialInflection,
 
     swallowError,
@@ -1066,6 +1067,5 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
     },
 
     liveCoordinator: new LiveCoordinator(),
-    scopeByType: new Map(),
   };
 }

@@ -32,12 +32,17 @@ import EventEmitter = require("events");
 // import { EventEmitter } from "events";
 
 import { FieldWithHooksFunction } from "./makeNewBuild";
+import { LiveCoordinator } from "./Live";
 
 const debug = debugFactory("graphile-builder");
 
 const INDENT = "  ";
 
-export interface GraphileBuildOptions {}
+export interface GraphileBuildOptions {
+  live?: boolean;
+  nodeIdFieldName?: string;
+}
+
 // Deprecated 'Options' in favour of 'GraphileBuildOptions':
 export type Options = GraphileBuildOptions;
 
@@ -125,7 +130,7 @@ export interface BuildBase {
   ): GraphQLInputObjectType | null | undefined;
   newWithHooks(
     constructor: typeof GraphQLObjectType,
-    spec: GraphileObjectTypeConfig,
+    spec: GraphileObjectTypeConfig<any, any>,
     scope: ScopeGraphQLObjectType,
     performNonEmptyFieldsCheck?: boolean
   ): GraphQLObjectType | null | undefined;
@@ -189,6 +194,8 @@ export interface BuildBase {
     currentHookName: string | null | undefined;
     currentHookEvent: string | null | undefined;
   };
+
+  liveCoordinator: LiveCoordinator;
 }
 
 export interface Build extends BuildBase {}
@@ -361,8 +368,8 @@ export interface ContextFinalize extends Context {
   type: "Finalize";
 }
 
-export interface Hook<Type, TContext extends Context> {
-  (input: Type, build: Build, context: TContext): Type;
+export interface Hook<Type, TContext extends Context, TBuild = Build> {
+  (input: Type, build: TBuild, context: TContext): Type;
   displayName?: string;
   provides?: Array<string>;
   before?: Array<string>;
@@ -486,14 +493,18 @@ class SchemaBuilder extends EventEmitter {
    */
   hook(
     hookName: "build",
-    fn: Hook<Partial<Build> & BuildBase, ContextBuild>,
+    fn: Hook<Partial<Build> & BuildBase, ContextBuild, BuildBase>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook(
     hookName: "inflection",
-    fn: Hook<Partial<Inflection> & InflectionBase, ContextInflection>,
+    fn: Hook<
+      Partial<Inflection> & InflectionBase,
+      ContextInflection,
+      BuildBase
+    >,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
@@ -746,14 +757,14 @@ class SchemaBuilder extends EventEmitter {
   }
 
   applyHooks(
-    build: Build,
+    build: BuildBase,
     hookName: "build",
-    input: Partial<Build>,
+    input: Partial<Build> & BuildBase,
     context: ContextBuild,
     debugStr?: string
   ): Build;
   applyHooks(
-    build: Build,
+    build: BuildBase,
     hookName: "inflection",
     input: Partial<Inflection> & InflectionBase,
     context: ContextInflection,
