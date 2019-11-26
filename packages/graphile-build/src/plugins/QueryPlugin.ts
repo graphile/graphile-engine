@@ -1,13 +1,15 @@
 import { Plugin, Build } from "../SchemaBuilder";
 
-export type BuildExtensionQuery = {
-  $$isQuery: Symbol;
-};
+declare module "../SchemaBuilder" {
+  interface Build {
+    $$isQuery: symbol;
+  }
+}
 
 export default (async function QueryPlugin(builder) {
   builder.hook(
     "build",
-    (build: Build): Build & BuildExtensionQuery =>
+    build =>
       build.extend(
         build,
         {

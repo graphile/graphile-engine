@@ -1,25 +1,37 @@
 import debugFactory from "debug";
 import makeNewBuild from "./makeNewBuild";
 import { bindAll } from "./utils";
-import * as graphql from "graphql";
 import {
   GraphQLType,
   GraphQLNamedType,
   GraphQLInterfaceType,
   GraphQLObjectTypeConfig,
+  GraphQLSchema,
+  GraphQLResolveInfo,
+  GraphQLSchemaConfig,
+  GraphQLObjectType,
+  GraphQLInputObjectType,
+  GraphQLInputObjectTypeConfig,
+  GraphQLScalarType,
+  GraphQLScalarTypeConfig,
+  GraphQLInterfaceTypeConfig,
+  GraphQLUnionType,
+  GraphQLUnionTypeConfig,
+  GraphQLEnumType,
+  GraphQLEnumTypeConfig,
+  GraphQLFieldConfigMap,
+  GraphQLFieldConfig,
+  GraphQLFieldConfigArgumentMap,
+  GraphQLInputFieldConfigMap,
+  GraphQLInputFieldConfig,
+  GraphQLEnumValueConfigMap,
+  GraphQLEnumValueConfig,
 } from "graphql";
-import EventEmitter from "events";
+import EventEmitter = require("events");
 // TODO: when we move to TypeScript, change this to:
 // import { EventEmitter } from "events";
-import {
-  simplifyParsedResolveInfoFragmentWithType,
-  parseResolveInfo,
-} from "graphql-parse-resolve-info";
-import { GraphQLResolveInfo } from "graphql/type/definition";
-import resolveNode from "./resolveNode";
 
 import { FieldWithHooksFunction } from "./makeNewBuild";
-const { GraphQLSchema } = graphql;
 
 const debug = debugFactory("graphile-builder");
 
@@ -29,10 +41,12 @@ export type Options = {
   [a: string]: unknown;
 };
 
-export type Plugin = (
-  builder: SchemaBuilder,
-  options: Options
-) => Promise<void> | void;
+export interface Plugin {
+  (builder: SchemaBuilder, options: Options): Promise<void> | void;
+  displayName?: string;
+}
+
+export type InitObject = never;
 
 type TriggerChangeType = () => void;
 
@@ -40,11 +54,14 @@ export type DataForType = {
   [a: string]: Array<unknown>;
 };
 
-export type Build = {
+export interface Inflection {}
+
+export interface BuildBase {
   graphileBuildVersion: string;
-  graphql: any;
-  parseResolveInfo: parseResolveInfo;
-  simplifyParsedResolveInfoFragmentWithType: simplifyParsedResolveInfoFragmentWithType;
+  graphql: typeof import("graphql");
+  parseResolveInfo: typeof import("graphql-parse-resolve-info").parseResolveInfo;
+  simplifyParsedResolveInfoFragmentWithType: typeof import("graphql-parse-resolve-info").simplifyParsedResolveInfoFragmentWithType;
+
   // DEPRECATED: getAliasFromResolveInfo: (resolveInfo: GraphQLResolveInfo) => string,
   getSafeAliasFromResolveInfo: (resolveInfo: GraphQLResolveInfo) => string;
   getSafeAliasFromAlias: (alias: string) => string;
@@ -54,59 +71,169 @@ export type Build = {
     _context: unknown,
     resolveInfo: GraphQLResolveInfo
   ) => string;
+
   addType: (type: GraphQLNamedType, origin: string | null | undefined) => void;
   getTypeByName: (typeName: string) => GraphQLType | null | undefined;
-  extend: <Obj1 extends any, Obj2 extends any>(
+
+  extend: <Obj1 extends object, Obj2 extends object>(
     base: Obj1,
     extra: Obj2,
     hint: string
   ) => Obj1 & Obj2;
-  newWithHooks: <
-    T extends GraphQLNamedType | GraphQLSchema,
-    ConfigType extends any
+
+  newWithHooks(
+    constructor: typeof GraphQLSchema,
+    spec: Partial<GraphQLSchemaConfig>,
+    scope: ScopeGraphQLSchema,
+    performNonEmptyFieldsCheck?: boolean
+  ): GraphQLSchema | null | undefined;
+  newWithHooks(
+    constructor: typeof GraphQLScalarType,
+    spec: GraphQLScalarTypeConfig<any, any>,
+    scope: ScopeGraphQLScalarType,
+    performNonEmptyFieldsCheck?: boolean
+  ): GraphQLInputObjectType | null | undefined;
+  newWithHooks(
+    constructor: typeof GraphQLObjectType,
+    spec: GraphQLSchemaConfig,
+    scope: ScopeGraphQLObjectType,
+    performNonEmptyFieldsCheck?: boolean
+  ): GraphQLObjectType | null | undefined;
+  newWithHooks(
+    constructor: typeof GraphQLInterfaceType,
+    spec: GraphQLInterfaceTypeConfig<any, any, any>,
+    scope: ScopeGraphQLInterfaceType,
+    performNonEmptyFieldsCheck?: boolean
+  ): GraphQLInterfaceType | null | undefined;
+  newWithHooks(
+    constructor: typeof GraphQLUnionType,
+    spec: GraphQLUnionTypeConfig<any, any>,
+    scope: ScopeGraphQLUnionType,
+    performNonEmptyFieldsCheck?: boolean
+  ): GraphQLUnionType | null | undefined;
+  newWithHooks(
+    constructor: typeof GraphQLEnumType,
+    spec: GraphQLEnumTypeConfig,
+    scope: ScopeGraphQLEnumType,
+    performNonEmptyFieldsCheck?: boolean
+  ): GraphQLEnumType | null | undefined;
+  newWithHooks(
+    constructor: typeof GraphQLInputObjectType,
+    spec: GraphQLInputObjectTypeConfig,
+    scope: ScopeGraphQLInputObjectType,
+    performNonEmptyFieldsCheck?: boolean
+  ): GraphQLInputObjectType | null | undefined;
+  /*
+  newWithHooks<
+    T extends
+      | typeof GraphQLScalarType
+      | typeof GraphQLObjectType
+      | typeof GraphQLInterfaceType
+      | typeof GraphQLUnionType
+      | typeof GraphQLEnumType
+      | typeof GraphQLInputObjectType
+      | typeof GraphQLSchema,
+    ConfigType extends object,
+    TScope extends Scope = Scope
   >(
-    a: Class<T>,
+    a: T,
     spec: ConfigType,
-    scope: Scope,
-    performNonEmptyFieldsCheck: boolean
-  ) => T | null | undefined;
+    scope: TScope,
+    performNonEmptyFieldsCheck?: boolean
+  ): InstanceType<T> | null | undefined;
+  */
+
   fieldDataGeneratorsByType: Map<any, any>; // @deprecated - use fieldDataGeneratorsByFieldNameByType instead
   fieldDataGeneratorsByFieldNameByType: Map<any, any>;
   fieldArgDataGeneratorsByFieldNameByType: Map<any, any>;
-  inflection: {
-    // eslint-disable-next-line flowtype/no-weak-types
-    [a: string]: (...args: Array<any>) => string;
-  };
+  scopeByType: Map<GraphQLType, Scope>;
+
+  inflection: Inflection;
 
   swallowError: (e: Error) => void;
+
   // resolveNode: EXPERIMENTAL, API might change!
-  resolveNode: resolveNode;
+  resolveNode: typeof import("./resolveNode");
+
   status: {
     currentHookName: string | null | undefined;
     currentHookEvent: string | null | undefined;
   };
+}
 
-  scopeByType: Map<GraphQLType, Scope>;
-};
+export interface Build extends BuildBase {}
 
-export type BuildExtensionQuery = {
-  $$isQuery: Symbol;
-};
-
-export type Scope = {
-  __origin: string | null | undefined;
-  [a: string]: unknown;
-};
-
-export type Context = {
-  scope: Scope;
-  type: string;
-  [a: string]: unknown;
-};
+export interface Scope {
+  __origin?: string | null | undefined;
+}
 
 type DataGeneratorFunction = () => {};
 
-export type ContextGraphQLObjectTypeFields = {
+export interface Context {
+  scope: Scope;
+  type:
+    | "Build"
+    | "Inflection"
+    | "Init"
+    | "GraphQLSchema"
+    | "GraphQLScalarType"
+    | "GraphQLObjectType"
+    | "GraphQLInterfaceType"
+    | "GraphQLUnionType"
+    | "GraphQLEnumType"
+    | "GraphQLInputObjectType"
+    | "Finalize";
+}
+
+export interface ScopeBuild extends Scope {}
+export interface ContextBuild extends Context {
+  scope: ScopeBuild;
+  type: "Build";
+}
+
+export interface ScopeInflection extends Scope {}
+export interface ContextInflection extends Context {
+  scope: ScopeInflection;
+  type: "Inflection";
+}
+
+export interface ScopeInit extends Scope {}
+export interface ContextInit extends Context {
+  scope: ScopeInit;
+  type: "Init";
+}
+
+export interface ScopeGraphQLSchema extends Scope {
+  isSchema: true;
+}
+export interface ContextGraphQLSchema extends Context {
+  scope: ScopeGraphQLSchema;
+  type: "GraphQLSchema";
+}
+
+export interface ScopeGraphQLScalarType extends Scope {}
+export interface ContextGraphQLScalarType extends Context {
+  scope: ScopeGraphQLScalarType;
+  type: "GraphQLScalarType";
+}
+
+export interface ScopeGraphQLObjectType extends Scope {}
+export interface ContextGraphQLObjectType extends Context {
+  scope: ScopeGraphQLObjectType;
+  type: "GraphQLObjectType";
+}
+
+export interface ScopeGraphQLObjectTypeInterfaces
+  extends ScopeGraphQLObjectType {}
+export interface ContextGraphQLObjectTypeInterfaces
+  extends ContextGraphQLObjectType {
+  scope: ScopeGraphQLObjectTypeInterfaces;
+}
+
+export interface ScopeGraphQLObjectTypeFields extends ScopeGraphQLObjectType {}
+export interface ContextGraphQLObjectTypeFields
+  extends ContextGraphQLObjectType {
+  scope: ScopeGraphQLObjectTypeFields;
   addDataGeneratorForField: (
     fieldName: string,
     fn: DataGeneratorFunction
@@ -115,20 +242,90 @@ export type ContextGraphQLObjectTypeFields = {
   Self: GraphQLNamedType;
   GraphQLObjectType: GraphQLObjectTypeConfig<any, any>;
   fieldWithHooks: FieldWithHooksFunction;
-};
+}
 
-type SupportedHookTypes = {} | Build | Array<GraphQLInterfaceType>;
+export interface ScopeGraphQLObjectTypeFieldsField
+  extends ScopeGraphQLObjectType {}
+export interface ContextGraphQLObjectTypeFieldsField
+  extends ContextGraphQLObjectType {
+  scope: ScopeGraphQLObjectTypeFieldsField;
+}
 
-export type Hook<
-  Type extends SupportedHookTypes,
-  BuildExtensions extends any,
-  ContextExtensions extends any
-> = {
+export interface ScopeGraphQLObjectTypeFieldsField
+  extends ScopeGraphQLObjectType {}
+export interface ContextGraphQLObjectTypeFieldsField
+  extends ContextGraphQLObjectType {
+  scope: ScopeGraphQLObjectTypeFieldsField;
+}
+export interface ScopeGraphQLObjectTypeFieldsFieldArgs
+  extends ScopeGraphQLObjectTypeFieldsField {}
+export interface ContextGraphQLObjectTypeFieldsFieldArgs
+  extends ContextGraphQLObjectTypeFieldsField {
+  scope: ScopeGraphQLObjectTypeFieldsFieldArgs;
+}
+
+export interface ScopeGraphQLInterfaceType extends Scope {}
+export interface ContextGraphQLInterfaceType extends Context {
+  scope: ScopeGraphQLInterfaceType;
+  type: "GraphQLInterfaceType";
+}
+
+export interface ScopeGraphQLUnionType extends Scope {}
+export interface ContextGraphQLUnionType extends Context {
+  scope: ScopeGraphQLUnionType;
+  type: "GraphQLUnionType";
+}
+
+export interface ScopeGraphQLInputObjectType extends Scope {}
+export interface ContextGraphQLInputObjectType extends Context {
+  scope: ScopeGraphQLInputObjectType;
+  type: "GraphQLInputObjectType";
+}
+
+export interface ScopeGraphQLInputObjectTypeFields
+  extends ScopeGraphQLInputObjectType {}
+export interface ContextGraphQLInputObjectTypeFields
+  extends ContextGraphQLInputObjectType {
+  scope: ScopeGraphQLInputObjectTypeFields;
+}
+
+export interface ScopeGraphQLInputObjectTypeFieldsField
+  extends ScopeGraphQLInputObjectType {}
+export interface ContextGraphQLInputObjectTypeFieldsField
+  extends ContextGraphQLInputObjectType {
+  scope: ScopeGraphQLInputObjectTypeFieldsField;
+}
+
+export interface ScopeGraphQLEnumType extends Scope {}
+export interface ContextGraphQLEnumType extends Context {
+  scope: ScopeGraphQLEnumType;
+  type: "GraphQLEnumType";
+}
+
+export interface ScopeGraphQLEnumTypeValues extends ScopeGraphQLEnumType {}
+export interface ContextGraphQLEnumTypeValues extends ContextGraphQLEnumType {
+  scope: ScopeGraphQLEnumTypeValues;
+}
+
+export interface ScopeGraphQLEnumTypeValuesValue extends ScopeGraphQLEnumType {}
+export interface ContextGraphQLEnumTypeValuesValue
+  extends ContextGraphQLEnumType {
+  scope: ScopeGraphQLEnumTypeValuesValue;
+}
+
+export interface ScopeFinalize extends Scope {}
+export interface ContextFinalize extends Context {
+  scope: ScopeFinalize;
+  type: "Finalize";
+}
+
+export interface Hook<Type, TContext extends Context = Context> {
+  (input: Type, build: Build, context: TContext): Type;
   displayName?: string;
   provides?: Array<string>;
   before?: Array<string>;
   after?: Array<string>;
-};
+}
 
 export type WatchUnwatch = (triggerChange: TriggerChangeType) => void;
 
@@ -141,7 +338,7 @@ class SchemaBuilder extends EventEmitter {
   triggerChange: TriggerChangeType | null | undefined;
   depth: number;
   hooks: {
-    [a: string]: Array<Hook<any, any, any>>;
+    [a: string]: Array<Hook<any>>;
   };
 
   _currentPluginName: string | null | undefined;
@@ -245,9 +442,135 @@ class SchemaBuilder extends EventEmitter {
    *
    * The function must either return a replacement object for `obj` or `obj` itself
    */
+  hook(
+    hookName: "build",
+    fn: Hook<Partial<Build> & BuildBase>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "inflection",
+    fn: Hook<Partial<Inflection>>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "init",
+    fn: Hook<InitObject>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "GraphQLSchema",
+    fn: Hook<GraphQLSchemaConfig>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook<TSource, TContext>(
+    hookName: "GraphQLObjectType",
+    fn: Hook<GraphQLObjectTypeConfig<TSource, TContext>>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "GraphQLObjectType:interfaces",
+    fn: Hook<Array<GraphQLInterfaceType>>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook<TSource, TContext>(
+    hookName: "GraphQLObjectType:fields",
+    fn: Hook<GraphQLFieldConfigMap<TSource, TContext>>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook<TSource, TContext>(
+    hookName: "GraphQLObjectType:fields:field",
+    fn: Hook<GraphQLFieldConfig<TSource, TContext>>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "GraphQLObjectType:fields:field:args",
+    fn: Hook<GraphQLFieldConfigArgumentMap>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "GraphQLInputObjectType",
+    fn: Hook<GraphQLInputObjectTypeConfig>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "GraphQLInputObjectType:fields",
+    fn: Hook<GraphQLInputFieldConfigMap>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "GraphQLInputObjectType:fields:field",
+    fn: Hook<GraphQLInputFieldConfig>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "GraphQLEnumType",
+    fn: Hook<GraphQLEnumTypeConfig>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "GraphQLEnumType:values",
+    fn: Hook<GraphQLEnumValueConfigMap>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "GraphQLEnumType:values:value",
+    fn: Hook<GraphQLEnumValueConfig>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook<TSource, TContext>(
+    hookName: "GraphQLUnionType",
+    fn: Hook<GraphQLUnionTypeConfig<TSource, TContext>>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "GraphQLUnionType:types",
+    fn: Hook<Array<GraphQLObjectType>>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
+  hook(
+    hookName: "finalize",
+    fn: Hook<GraphQLSchema>,
+    provides?: Array<string>,
+    before?: Array<string>,
+    after?: Array<string>
+  ): void;
   hook<T extends any>(
     hookName: string,
-    fn: Hook<T, any, any>,
+    fn: Hook<T>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
@@ -287,7 +610,7 @@ class SchemaBuilder extends EventEmitter {
       let maxIndex = relevantHooks.length;
       let maxReason = null;
       const { provides: newProvides, before: newBefore, after: newAfter } = fn;
-      const describe = (hook, index) => {
+      const describe = (hook: any, index?: number) => {
         if (!hook) {
           return "-";
         }
@@ -359,13 +682,146 @@ class SchemaBuilder extends EventEmitter {
     }
   }
 
-  applyHooks<T extends any, Context>(
+  applyHooks(
+    build: Build,
+    hookName: "build",
+    input: Partial<Build>,
+    context: ContextBuild,
+    debugStr?: string
+  ): Build;
+  applyHooks(
+    build: Build,
+    hookName: "inflection",
+    input: Partial<Inflection>,
+    context: ContextInflection,
+    debugStr?: string
+  ): Inflection;
+  applyHooks(
+    build: Build,
+    hookName: "init",
+    input: InitObject,
+    context: ContextInit,
+    debugStr?: string
+  ): InitObject;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLSchema",
+    input: GraphQLSchemaConfig,
+    context: ContextGraphQLSchema,
+    debugStr?: string
+  ): GraphQLSchemaConfig;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLScalarType",
+    input: GraphQLScalarTypeConfig<any, any>,
+    context: ContextGraphQLScalarType,
+    debugStr?: string
+  ): GraphQLScalarTypeConfig<any, any>;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLObjectType",
+    input: GraphQLObjectTypeConfig<any, any>,
+    context: ContextGraphQLObjectType,
+    debugStr?: string
+  ): GraphQLObjectTypeConfig<any, any>;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLObjectType:interfaces",
+    input: Array<GraphQLInterfaceTypeConfig<any, any, any>>,
+    context: ContextGraphQLObjectTypeInterfaces,
+    debugStr?: string
+  ): Array<GraphQLInterfaceTypeConfig<any, any, any>>;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLObjectType:fields",
+    input: GraphQLFieldConfigMap<any, any, any>,
+    context: ContextGraphQLObjectTypeFields,
+    debugStr?: string
+  ): GraphQLFieldConfigMap<any, any, any>;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLObjectType:fields:field",
+    input: GraphQLFieldConfig<any, any, any>,
+    context: ContextGraphQLObjectTypeFieldsField,
+    debugStr?: string
+  ): GraphQLFieldConfig<any, any, any>;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLObjectType:fields:field:args",
+    input: GraphQLFieldConfigArgumentMap,
+    context: ContextGraphQLObjectTypeFieldsFieldArgs,
+    debugStr?: string
+  ): GraphQLFieldConfigArgumentMap;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLInterfaceType",
+    input: GraphQLInterfaceTypeConfig<any, any, any>,
+    context: ContextGraphQLInterfaceType,
+    debugStr?: string
+  ): GraphQLInterfaceTypeConfig<any, any, any>;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLUnionType",
+    input: GraphQLUnionTypeConfig<any, any>,
+    context: ContextGraphQLUnionType,
+    debugStr?: string
+  ): GraphQLUnionTypeConfig<any, any>;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLEnumType",
+    input: GraphQLEnumTypeConfig,
+    context: ContextGraphQLEnumType,
+    debugStr?: string
+  ): GraphQLEnumTypeConfig;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLEnumType:values",
+    input: GraphQLEnumValueConfigMap,
+    context: ContextGraphQLEnumTypeValues,
+    debugStr?: string
+  ): GraphQLEnumValueConfigMap;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLEnumType:values:value",
+    input: GraphQLEnumValueConfig,
+    context: ContextGraphQLEnumTypeValuesValue,
+    debugStr?: string
+  ): GraphQLEnumValueConfig;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLInputObjectType",
+    input: GraphQLInputObjectTypeConfig,
+    context: ContextGraphQLInputObjectType,
+    debugStr?: string
+  ): GraphQLInputObjectTypeConfig;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLInputObjectType:fields",
+    input: GraphQLInputFieldConfigMap,
+    context: ContextGraphQLInputObjectTypeFields,
+    debugStr?: string
+  ): GraphQLInputFieldConfigMap;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLInputObjectType:fields:field",
+    input: GraphQLInputFieldConfig,
+    context: ContextGraphQLInputObjectTypeFieldsField,
+    debugStr?: string
+  ): GraphQLInputFieldConfig;
+  applyHooks(
+    build: Build,
+    hookName: "finalize",
+    input: GraphQLSchema,
+    context: ContextFinalize,
+    debugStr?: string
+  ): GraphQLSchema;
+  applyHooks<TConfig extends any, TContext extends Context>(
     build: Build,
     hookName: string,
-    input: T,
-    context: Context,
+    input: TConfig,
+    context: TContext,
     debugStr: string = ""
-  ): T {
+  ): TConfig {
     if (!input) {
       throw new Error("applyHooks was called with falsy input");
     }
@@ -373,13 +829,13 @@ class SchemaBuilder extends EventEmitter {
     try {
       debug(`${INDENT.repeat(this.depth)}[${hookName}${debugStr}]: Running...`);
 
-      const hooks: Array<Hook<T, any, any>> = this.hooks[hookName];
+      const hooks: Array<Hook<TConfig, TContext>> = this.hooks[hookName];
       if (!hooks) {
         throw new Error(`Sorry, '${hookName}' is not a registered hook`);
       }
 
       let newObj = input;
-      for (const hook: Hook<T, any, any> of hooks) {
+      for (const hook of hooks) {
         this.depth++;
         try {
           const hookDisplayName = hook.displayName || hook.name || "anonymous";
@@ -443,7 +899,7 @@ class SchemaBuilder extends EventEmitter {
     }
   }
 
-  registerWatcher(listen: WatchUnwatch, unlisten: WatchUnwatch) {
+  registerWatcher(listen: WatchUnwatch, unlisten: WatchUnwatch): void {
     if (!listen || !unlisten) {
       throw new Error("You must provide both a listener and an unlistener");
     }
@@ -454,17 +910,20 @@ class SchemaBuilder extends EventEmitter {
   createBuild(): Build {
     const initialBuild = makeNewBuild(this);
     // Inflection needs to come first, in case 'build' hooks depend on it
+    const scopeContext: ContextInflection = {
+      scope: {},
+      type: "Inflection",
+    };
     initialBuild.inflection = this.applyHooks(
       initialBuild,
       "inflection",
       initialBuild.inflection,
-      {
-        scope: {},
-      }
+      scopeContext
     );
 
     const build = this.applyHooks(initialBuild, "build", initialBuild, {
       scope: {},
+      type: "Build",
     });
 
     // Bind all functions so they can be dereferenced
@@ -474,32 +933,37 @@ class SchemaBuilder extends EventEmitter {
     );
 
     Object.freeze(build);
-    this.applyHooks(build, "init", {}, { scope: {} });
+    const initContext: ContextInit = { scope: {}, type: "Init" };
+    const initObject: InitObject = {} as never;
+    this.applyHooks(build, "init", initObject, initContext);
     return build;
   }
 
   buildSchema(): GraphQLSchema {
     if (!this._generatedSchema) {
       const build = this.createBuild();
-      const schema = build.newWithHooks(
-        GraphQLSchema,
-        {
-          directives: [...build.graphql.specifiedDirectives],
-        },
+      const schemaSpec: Partial<GraphQLSchemaConfig> = {
+        directives: [...build.graphql.specifiedDirectives],
+      };
+      const schemaScope: ScopeGraphQLSchema = {
+        __origin: `GraphQL built-in`,
+        isSchema: true,
+      };
+      const schema = build.newWithHooks(GraphQLSchema, schemaSpec, schemaScope);
 
-        {
-          __origin: `GraphQL built-in`,
-          isSchema: true,
-        }
-      );
-
-      this._generatedSchema = this.applyHooks(
-        build,
-        "finalize",
-        schema,
-        {},
-        "Finalising GraphQL schema"
-      );
+      const finalizeContext: ContextFinalize = {
+        scope: {},
+        type: "Finalize",
+      };
+      this._generatedSchema = schema
+        ? this.applyHooks(
+            build,
+            "finalize",
+            schema,
+            finalizeContext,
+            "Finalising GraphQL schema"
+          )
+        : schema;
     }
     if (!this._generatedSchema) {
       throw new Error("Schema generation failed");
@@ -507,7 +971,7 @@ class SchemaBuilder extends EventEmitter {
     return this._generatedSchema;
   }
 
-  async watchSchema(listener?: SchemaListener) {
+  async watchSchema(listener?: SchemaListener): Promise<void> {
     if (this._busy) {
       throw new Error("An operation is in progress");
     }
@@ -564,7 +1028,7 @@ class SchemaBuilder extends EventEmitter {
     }
   }
 
-  async unwatchSchema() {
+  async unwatchSchema(): Promise<void> {
     if (this._busy) {
       throw new Error("An operation is in progress");
     }

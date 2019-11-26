@@ -338,15 +338,24 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
       return allTypes[typeName];
     },
     extend,
+
     newWithHooks<
-      T extends GraphQLNamedType | GraphQLSchema,
-      ConfigType extends any
+      T extends
+        | typeof import("graphql").GraphQLScalarType
+        | typeof import("graphql").GraphQLObjectType
+        | typeof import("graphql").GraphQLInterfaceType
+        | typeof import("graphql").GraphQLUnionType
+        | typeof import("graphql").GraphQLEnumType
+        | typeof import("graphql").GraphQLInputObjectType
+        | typeof import("graphql").GraphQLSchema,
+      ConfigType extends { name: string },
+      TScope extends Scope = Scope
     >(
-      Type: Class<T>,
+      Type: T,
       spec: ConfigType,
-      inScope: Scope,
-      performNonEmptyFieldsCheck = false
-    ): T | null | undefined {
+      inScope: TScope,
+      performNonEmptyFieldsCheck: boolean
+    ): InstanceType<T> | null | undefined {
       const scope = inScope || {};
       if (!inScope) {
         // eslint-disable-next-line no-console
