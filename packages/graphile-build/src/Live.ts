@@ -346,7 +346,7 @@ export class LiveCoordinator {
   ): AsyncIterator<void> {
     const monitor = this.getMonitor({
       liveAbort: e => {
-        if (iterator) iterator.throw(e);
+        if (iterator && iterator.throw) iterator.throw(e);
       },
     });
 
