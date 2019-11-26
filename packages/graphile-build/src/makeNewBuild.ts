@@ -25,6 +25,8 @@ import SchemaBuilder, {
   Context,
   Scope,
   DataForType,
+  ScopeGraphQLSchema,
+  ContextGraphQLSchema,
 } from "./SchemaBuilder";
 
 import extend, { indent } from "./extend";
@@ -180,39 +182,36 @@ function getSafeAliasFromResolveInfo(resolveInfo) {
 }
 
 type MetaData = {
-  [a: string]: Array<unknown>;
+  [a: string]: unknown;
 };
 
-type DataGeneratorFunction = (
+interface DataGeneratorFunction {
+  (
+    parsedResolveInfoFragment: ResolveTree,
+    ReturnType: GraphQLType,
+    ...args: Array<unknown>
+  ): MetaData;
+  displayName?: string;
+}
+
+type FieldSpec = graphql.GraphQLFieldConfig<any, any>;
+
+export type GetDataFromParsedResolveInfoFragmentFunction = (
   parsedResolveInfoFragment: ResolveTree,
-  ReturnType: GraphQLType,
-  ...args: Array<unknown>
-) => Array<MetaData>;
+  Type: GraphQLType
+) => DataForType;
 
-type FieldSpecIsh = {
-  type?: GraphQLType;
-  args?: {};
-  resolve?: GraphQLFieldResolver<any, any>;
-  deprecationReason?: string;
-  description?: string | null | undefined;
+type ContextAndGenerators = Context & {
+  addDataGenerator: (a: DataGeneratorFunction) => void;
+  addArgDataGenerator: (a: DataGeneratorFunction) => void;
+  getDataFromParsedResolveInfoFragment: GetDataFromParsedResolveInfoFragmentFunction;
 };
-
-type ContextAndGenerators =
-  | Context
-  | {
-      addDataGenerator: (a: DataGeneratorFunction) => void;
-      addArgDataGenerator: (a: DataGeneratorFunction) => void;
-      getDataFromParsedResolveInfoFragment: (
-        parsedResolveInfoFragment: ResolveTree,
-        Type: GraphQLType
-      ) => DataForType;
-    };
 
 export type FieldWithHooksFunction = (
   fieldName: string,
-  spec: FieldSpecIsh | ((a: ContextAndGenerators) => FieldSpecIsh),
+  spec: FieldSpec | ((a: ContextAndGenerators) => FieldSpec),
   fieldScope: {}
-) => {};
+) => import("graphql").GraphQLFieldConfig<any, any>;
 
 export type InputFieldWithHooksFunction = (
   fieldName: string,
@@ -220,7 +219,9 @@ export type InputFieldWithHooksFunction = (
   fieldScope: {}
 ) => GraphQLInputField;
 
-function getNameFromType(Type: GraphQLNamedType | GraphQLSchema) {
+function getNameFromType(
+  Type: GraphQLNamedType | import("graphql").GraphQLSchema
+) {
   if (Type instanceof GraphQLSchema) {
     return "schema";
   } else {
@@ -362,7 +363,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
     parseResolveInfo,
     simplifyParsedResolveInfoFragmentWithType,
     getSafeAliasFromAlias,
-    getAliasFromResolveInfo: getSafeAliasFromResolveInfo, // DEPRECATED: do not use this!
+    ...({getAliasFromResolveInfo: getSafeAliasFromResolveInfo} as {}), // DEPRECATED: do not use this!
     getSafeAliasFromResolveInfo,
     resolveAlias(data, _args, _context, resolveInfo) {
       const alias = getSafeAliasFromResolveInfo(resolveInfo);
@@ -371,7 +372,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
     addType(
       type: GraphQLNamedType,
       origin?: string | null | undefined
-    ): undefined {
+    ): void {
       if (!type.name) {
         throw new Error(
           `addType must only be called with named types, try using require('graphql').getNamedType`
@@ -423,12 +424,10 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
         | typeof import("graphql").GraphQLEnumType
         | typeof import("graphql").GraphQLInputObjectType
         | typeof import("graphql").GraphQLSchema,
-      ConfigType extends { name: string },
-      TScope extends Scope = Scope
     >(
       Type: T,
-      spec: ConfigType,
-      inScope: TScope,
+      spec: any,
+      inScope: any,
       performNonEmptyFieldsCheck: boolean
     ): InstanceType<T> | null | undefined {
       const scope = inScope || {};
@@ -450,7 +449,7 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
       const fieldArgDataGeneratorsByFieldName = {};
       let newSpec = spec;
       if (
-        knownTypes.indexOf(Type) === -1 &&
+        knownTypes.indexOf(Type as any) === -1 &&
         knownTypeNames.indexOf(Type.name) >= 0
       ) {
         throw new Error(
@@ -458,10 +457,11 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
         );
       }
       if (Type === GraphQLSchema) {
-        newSpec = builder.applyHooks(this, "GraphQLSchema", newSpec, {
+        const context: ContextGraphQLSchema = {
           type: "GraphQLSchema",
           scope,
-        });
+        };
+        newSpec = builder.applyHooks(this, "GraphQLSchema", (newSpec as unknown) as graphql.GraphQLSchemaConfig, context);
       } else if (Type === GraphQLObjectType) {
         const addDataGeneratorForField = (
           fieldName,
@@ -503,7 +503,12 @@ export default function makeNewBuild(builder: SchemaBuilder): Build {
             );
 
             const results = [];
-            const StrippedType: GraphQLNamedType = getNamedType(ReturnType);
+            const StrippedType: GraphQLNamedType | undefined = getNamedType(
+              ReturnType
+            );
+            if (!StrippedType) {
+              throw new Error("Could not determine GraphQL type");
+            }
             const fieldDataGeneratorsByFieldName = fieldDataGeneratorsByFieldNameByType.get(
               StrippedType
             );

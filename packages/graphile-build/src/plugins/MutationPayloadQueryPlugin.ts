@@ -1,10 +1,9 @@
-import { Plugin, Build } from "../SchemaBuilder";
-import { BuildExtensionQuery } from "./QueryPlugin";
+import { Plugin } from "../SchemaBuilder";
 
 export default (function MutationPayloadQueryPlugin(builder) {
   builder.hook(
     "GraphQLObjectType:fields",
-    (fields: {}, build: Build & BuildExtensionQuery, context): {} => {
+    (fields, build, context) => {
       const { $$isQuery, extend, getTypeByName, inflection } = build;
       const {
         scope: { isMutationPayload },

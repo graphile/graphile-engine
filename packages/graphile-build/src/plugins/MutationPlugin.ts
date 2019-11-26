@@ -1,5 +1,11 @@
 import { Plugin } from "../SchemaBuilder";
 
+declare module "../SchemaBuilder" {
+  interface ScopeGraphQLObjectType {
+    isRootMutation?: true;
+  }
+}
+
 function isValidMutation(Mutation) {
   try {
     if (!Mutation) {
@@ -17,7 +23,7 @@ function isValidMutation(Mutation) {
 export default (async function MutationPlugin(builder) {
   builder.hook(
     "GraphQLSchema",
-    (schema: {}, build) => {
+    (schema, build) => {
       const {
         newWithHooks,
         extend,
@@ -31,12 +37,10 @@ export default (async function MutationPlugin(builder) {
           description:
             "The root mutation type which contains root level fields which mutate data.",
         },
-
         {
           __origin: `graphile-build built-in (root mutation type)`,
           isRootMutation: true,
         },
-
         true
       );
 

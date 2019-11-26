@@ -37,12 +37,12 @@ const debug = debugFactory("graphile-builder");
 
 const INDENT = "  ";
 
-export type Options = {
-  [a: string]: unknown;
-};
+export interface GraphileBuildOptions {}
+// Deprecated 'Options' in favour of 'GraphileBuildOptions':
+export type Options = GraphileBuildOptions;
 
 export interface Plugin {
-  (builder: SchemaBuilder, options: Options): Promise<void> | void;
+  (builder: SchemaBuilder, options: GraphileBuildOptions): Promise<void> | void;
   displayName?: string;
 }
 
@@ -56,8 +56,38 @@ export type DataForType = {
 
 export interface Inflection extends InflectionBase {}
 
+export interface GraphileObjectTypeConfig<
+  TSource,
+  TContext,
+  TArgs = { [key: string]: any }
+> extends Omit<GraphQLObjectTypeConfig<TSource, TContext, TArgs>, "fields"> {
+  fields?:
+    | GraphQLFieldConfigMap<TSource, TContext, TArgs>
+    | ((
+        context: ContextGraphQLObjectTypeFields
+      ) => GraphQLFieldConfigMap<TSource, TContext, TArgs>);
+}
+
+export interface GraphileInputObjectTypeConfig
+  extends Omit<GraphQLInputObjectTypeConfig, "fields"> {
+  fields?:
+    | GraphQLInputFieldConfigMap
+    | ((
+        context: ContextGraphQLInputObjectTypeFields
+      ) => GraphQLInputFieldConfigMap);
+}
+
 export interface BuildBase {
+  options: GraphileBuildOptions;
   graphileBuildVersion: string;
+  versions: {
+    [packageName: string]: string;
+  };
+  hasVersion(
+    packageName: string,
+    range: string,
+    options?: { includePrerelease?: boolean }
+  ): boolean;
   graphql: typeof import("graphql");
   parseResolveInfo: typeof import("graphql-parse-resolve-info").parseResolveInfo;
   simplifyParsedResolveInfoFragmentWithType: typeof import("graphql-parse-resolve-info").simplifyParsedResolveInfoFragmentWithType;
@@ -95,7 +125,7 @@ export interface BuildBase {
   ): GraphQLInputObjectType | null | undefined;
   newWithHooks(
     constructor: typeof GraphQLObjectType,
-    spec: GraphQLSchemaConfig,
+    spec: GraphileObjectTypeConfig,
     scope: ScopeGraphQLObjectType,
     performNonEmptyFieldsCheck?: boolean
   ): GraphQLObjectType | null | undefined;
@@ -153,7 +183,7 @@ export interface BuildBase {
   swallowError: (e: Error) => void;
 
   // resolveNode: EXPERIMENTAL, API might change!
-  resolveNode: typeof import("./resolveNode");
+  resolveNode: typeof import("./resolveNode").default;
 
   status: {
     currentHookName: string | null | undefined;
@@ -217,7 +247,9 @@ export interface ContextGraphQLScalarType extends Context {
   type: "GraphQLScalarType";
 }
 
-export interface ScopeGraphQLObjectType extends Scope {}
+export interface ScopeGraphQLObjectType extends Scope {
+  isMutationPayload?: true;
+}
 export interface ContextGraphQLObjectType extends Context {
   scope: ScopeGraphQLObjectType;
   type: "GraphQLObjectType";
@@ -239,29 +271,29 @@ export interface ContextGraphQLObjectTypeFields
     fn: DataGeneratorFunction
   ) => void;
   recurseDataGeneratorsForField: (fieldName: string) => void; // @deprecated - DO NOT USE!
-  Self: GraphQLNamedType;
+  Self: GraphQLObjectType;
   GraphQLObjectType: GraphQLObjectTypeConfig<any, any>;
   fieldWithHooks: FieldWithHooksFunction;
 }
 
 export interface ScopeGraphQLObjectTypeFieldsField
-  extends ScopeGraphQLObjectType {}
+  extends ScopeGraphQLObjectType {
+  fieldName: string;
+}
 export interface ContextGraphQLObjectTypeFieldsField
   extends ContextGraphQLObjectType {
   scope: ScopeGraphQLObjectTypeFieldsField;
+  Self: GraphQLObjectType;
 }
 
-export interface ScopeGraphQLObjectTypeFieldsField
-  extends ScopeGraphQLObjectType {}
-export interface ContextGraphQLObjectTypeFieldsField
-  extends ContextGraphQLObjectType {
-  scope: ScopeGraphQLObjectTypeFieldsField;
-}
 export interface ScopeGraphQLObjectTypeFieldsFieldArgs
-  extends ScopeGraphQLObjectTypeFieldsField {}
+  extends ScopeGraphQLObjectTypeFieldsField {
+  fieldName: string;
+}
 export interface ContextGraphQLObjectTypeFieldsFieldArgs
   extends ContextGraphQLObjectTypeFieldsField {
   scope: ScopeGraphQLObjectTypeFieldsFieldArgs;
+  Self: GraphQLObjectType;
 }
 
 export interface ScopeGraphQLInterfaceType extends Scope {}
@@ -281,7 +313,10 @@ export interface ContextGraphQLUnionTypeTypes extends ContextGraphQLUnionType {
   scope: ScopeGraphQLUnionTypeTypes;
 }
 
-export interface ScopeGraphQLInputObjectType extends Scope {}
+export interface ScopeGraphQLInputObjectType extends Scope {
+  fieldName: string;
+  isMutationInput?: true;
+}
 export interface ContextGraphQLInputObjectType extends Context {
   scope: ScopeGraphQLInputObjectType;
   type: "GraphQLInputObjectType";
@@ -292,6 +327,7 @@ export interface ScopeGraphQLInputObjectTypeFields
 export interface ContextGraphQLInputObjectTypeFields
   extends ContextGraphQLInputObjectType {
   scope: ScopeGraphQLInputObjectTypeFields;
+  Self: GraphQLInputObjectType;
 }
 
 export interface ScopeGraphQLInputObjectTypeFieldsField
@@ -299,6 +335,7 @@ export interface ScopeGraphQLInputObjectTypeFieldsField
 export interface ContextGraphQLInputObjectTypeFieldsField
   extends ContextGraphQLInputObjectType {
   scope: ScopeGraphQLInputObjectTypeFieldsField;
+  Self: GraphQLInputObjectType;
 }
 
 export interface ScopeGraphQLEnumType extends Scope {}
@@ -337,7 +374,7 @@ export type WatchUnwatch = (triggerChange: TriggerChangeType) => void;
 export type SchemaListener = (newSchema: GraphQLSchema) => void;
 
 class SchemaBuilder extends EventEmitter {
-  options: Options;
+  options: GraphileBuildOptions;
   watchers: Array<WatchUnwatch>;
   unwatchers: Array<WatchUnwatch>;
   triggerChange: TriggerChangeType | null | undefined;
@@ -352,7 +389,7 @@ class SchemaBuilder extends EventEmitter {
   _busy: boolean;
   _watching: boolean;
 
-  constructor(options: Options) {
+  constructor(options: GraphileBuildOptions) {
     super();
 
     this.options = options;
@@ -527,7 +564,7 @@ class SchemaBuilder extends EventEmitter {
   ): void;
   hook(
     hookName: "GraphQLInputObjectType",
-    fn: Hook<GraphQLInputObjectTypeConfig, ContextGraphQLInputObjectType>,
+    fn: Hook<GraphileInputObjectTypeConfig, ContextGraphQLInputObjectType>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>

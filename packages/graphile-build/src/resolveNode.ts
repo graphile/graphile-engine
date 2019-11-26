@@ -1,12 +1,21 @@
-export default async function resolveNode(
-  nodeId,
-  build,
+import { Build, Context } from "./SchemaBuilder";
+import { GetDataFromParsedResolveInfoFragmentFunction } from "./makeNewBuild";
+import { GraphQLResolveInfo } from "graphql";
+import { ResolveTree } from "graphql-parse-resolve-info";
+import { NodeFetcher } from "./plugins/NodePlugin";
 
-  { getDataFromParsedResolveInfoFragment },
-  data,
-  context,
-  resolveInfo
-) {
+export default async function resolveNode<T = unknown>(
+  nodeId: string,
+  build: Build,
+  {
+    getDataFromParsedResolveInfoFragment,
+  }: {
+    getDataFromParsedResolveInfoFragment: GetDataFromParsedResolveInfoFragmentFunction;
+  },
+  data: unknown,
+  context: Context,
+  resolveInfo: GraphQLResolveInfo
+): Promise<T | null> {
   const {
     $$isQuery,
     $$nodeType,
@@ -16,15 +25,22 @@ export default async function resolveNode(
     graphql: { getNamedType },
   } = build;
   if (nodeId === "query") {
-    return $$isQuery;
+    return ($$isQuery as unknown) as T;
   }
   try {
     const { Type, identifiers } = getTypeAndIdentifiersFromNodeId(nodeId);
     if (!Type) {
       throw new Error("Type not found");
     }
-    const resolver = nodeFetcherByTypeName[getNamedType(Type).name];
-    const parsedResolveInfoFragment = parseResolveInfo(resolveInfo, {}, Type);
+    const resolver: NodeFetcher =
+      nodeFetcherByTypeName[getNamedType(Type).name];
+    const parsedResolveInfoFragment = parseResolveInfo(
+      resolveInfo,
+      {}
+    ) as ResolveTree | null;
+    if (parsedResolveInfoFragment == null) {
+      throw new Error("Internal error during query planning");
+    }
     const resolveData = getDataFromParsedResolveInfoFragment(
       parsedResolveInfoFragment,
       getNamedType(Type)
@@ -46,7 +62,7 @@ export default async function resolveNode(
       value: Type,
     });
 
-    return node;
+    return (node as unknown) as T;
   } catch (e) {
     return null;
   }

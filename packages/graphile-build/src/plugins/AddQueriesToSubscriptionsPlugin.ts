@@ -79,7 +79,11 @@ const AddQueriesToSubscriptionsPlugin: Plugin = function(
         {}
       );
 
-      return extend(fields, subscriptionFields);
+      return extend(
+        fields,
+        subscriptionFields,
+        "Adding Query fields to Subscription type"
+      );
     },
     ["AddQueriesToSubscriptions"]
   );

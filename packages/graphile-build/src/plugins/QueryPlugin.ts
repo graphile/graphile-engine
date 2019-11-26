@@ -1,8 +1,12 @@
-import { Plugin, Build } from "../SchemaBuilder";
+import { Plugin } from "../SchemaBuilder";
 
 declare module "../SchemaBuilder" {
   interface Build {
     $$isQuery: symbol;
+  }
+
+  interface ScopeGraphQLObjectType {
+    isRootQuery?: true;
   }
 }
 
@@ -24,7 +28,7 @@ export default (async function QueryPlugin(builder) {
 
   builder.hook(
     "GraphQLSchema",
-    (schema: {}, build) => {
+    (schema, build) => {
       const {
         $$isQuery,
         newWithHooks,
