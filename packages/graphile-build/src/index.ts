@@ -44,6 +44,9 @@ export {
   Inflection,
 } from "./SchemaBuilder";
 
+import { LookAheadData } from "./SchemaBuilder";
+export { LookAheadData };
+
 export { LiveSource, LiveProvider, LiveMonitor, LiveCoordinator } from "./Live";
 
 export const getBuilder = async (

@@ -61,8 +61,28 @@ export type InitObject = never;
 
 type TriggerChangeType = () => void;
 
-export type DataForType = {
-  [a: string]: Array<unknown>;
+/**
+ * This contains all the possibilities for lookahead data when raw (submitted
+ * directly from `addDataGenerator` functions, etc). It's up to the plugins
+ * that define these entries to declare them using declaration merging.
+ *
+ * NOTE: the types of these entries are concrete (e.g. `usesCursor: boolean`)
+ * because we need the concrete types to build DataForType. We then use
+ * `Partial<LookAheadData>` in the relevant places if we need fields to be
+ * optional.
+ */
+export interface LookAheadData {}
+
+/**
+ * This contains all the possibilities for lookahead data, once "baked". It's
+ * an object that maps from key (string) to an array of entries for that type.
+ *
+ * We made this generic so that TypeScript has to look it up _after_ the
+ * declaration merging has taken place, rather than computing it as an empty
+ * object ahead of time.
+ */
+export type DataForType<T extends LookAheadData> = {
+  [P in keyof T]?: Array<T[P]>;
 };
 
 export interface Inflection extends InflectionBase {}
@@ -217,7 +237,7 @@ export interface Scope {
   __origin?: string | null | undefined;
 }
 
-type DataGeneratorFunction = () => {};
+type DataGeneratorFunction = () => Partial<LookAheadData>;
 
 export interface Context {
   scope: Scope;

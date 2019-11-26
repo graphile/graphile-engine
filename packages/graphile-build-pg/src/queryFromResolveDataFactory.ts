@@ -6,8 +6,22 @@ import { SQL } from "pg-sql2";
 import { DataForType } from "graphile-build";
 import isSafeInteger from "lodash/isSafeInteger";
 import assert from "assert";
+import { LookAheadData } from "graphile-build";
 
-// eslint-disable-next-line flowtype/no-weak-types
+type QueryBuilderCallback = (queryBuilder: QueryBuilder) => void;
+
+declare module "graphile-build" {
+  interface LookAheadData {
+    pgQuery: QueryBuilderCallback;
+    pgAggregateQuery: QueryBuilderCallback;
+    pgCursorPrefix: string;
+    pgDontUseAsterisk: boolean;
+    calculateHasNextPage: boolean;
+    calculateHasPreviousPage: boolean;
+    usesCursor: boolean;
+  }
+}
+
 type GraphQLContext = any;
 
 const identity = _ => _ !== null && _ !== undefined;
@@ -15,7 +29,7 @@ const identity = _ => _ !== null && _ !== undefined;
 export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   from: SQL,
   fromAlias: SQL | null | undefined,
-  resolveData: DataForType,
+  resolveData: DataForType<LookAheadData>,
   inOptions: {
     withPagination?: boolean;
     withPaginationAsFields?: boolean;
@@ -30,7 +44,7 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
 
   // TODO:v5: context is not optional
   withBuilder?: ((builder: QueryBuilder) => void) | null | undefined,
-  context?: GraphQLContext = {},
+  context: GraphQLContext = {},
   rootValue?: any // eslint-disable-line flowtype/no-weak-types
 ) => {
   const {

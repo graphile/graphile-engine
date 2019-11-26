@@ -40,7 +40,7 @@ function callIfNecessaryArray<T extends CallResult>(
   }
 }
 
-export type RawAlias = Symbol | string;
+export type RawAlias = symbol | string;
 type SQLAlias = SQL;
 type SQLGen = Gen<SQL> | SQL;
 type NumberGen = Gen<number> | number;
