@@ -18,7 +18,7 @@ import { LiveCoordinator } from "./Live";
 import SchemaBuilder, {
   BuildBase,
   Context,
-  DataForType,
+  ResolvedLookAhead,
   ContextGraphQLSchema,
   ContextGraphQLUnionType,
   ContextGraphQLUnionTypeTypes,
@@ -213,7 +213,7 @@ type FieldSpec = graphql.GraphQLFieldConfig<any, any>;
 export type GetDataFromParsedResolveInfoFragmentFunction = (
   parsedResolveInfoFragment: ResolveTree,
   Type: GraphQLType
-) => DataForType;
+) => ResolvedLookAhead;
 
 type ContextAndGenerators = Context & {
   addDataGenerator: (a: DataGeneratorFunction) => void;
@@ -678,7 +678,7 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
                   getDataFromParsedResolveInfoFragment: (
                     parsedResolveInfoFragment,
                     ReturnType
-                  ): DataForType => {
+                  ): ResolvedLookAhead => {
                     const Type = getNamedType(ReturnType as GraphQLType);
                     const data = {};
 

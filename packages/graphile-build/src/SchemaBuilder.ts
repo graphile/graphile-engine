@@ -67,7 +67,7 @@ type TriggerChangeType = () => void;
  * that define these entries to declare them using declaration merging.
  *
  * NOTE: the types of these entries are concrete (e.g. `usesCursor: boolean`)
- * because we need the concrete types to build DataForType. We then use
+ * because we need the concrete types to build ResolvedLookAhead. We then use
  * `Partial<LookAheadData>` in the relevant places if we need fields to be
  * optional.
  */
@@ -81,7 +81,7 @@ export interface LookAheadData {}
  * declaration merging has taken place, rather than computing it as an empty
  * object ahead of time.
  */
-export type DataForType<T extends LookAheadData> = {
+export type ResolvedLookAhead<T extends LookAheadData = LookAheadData> = {
   [P in keyof T]?: Array<T[P]>;
 };
 

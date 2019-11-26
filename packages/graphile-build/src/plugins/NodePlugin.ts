@@ -1,6 +1,6 @@
 import {
   Plugin,
-  DataForType,
+  ResolvedLookAhead,
   Hook,
   ContextGraphQLObjectTypeInterfaces,
 } from "../SchemaBuilder";
@@ -20,7 +20,7 @@ export type NodeFetcher<T = unknown> = (
   context: unknown,
   parsedResolveInfoFragment: ResolveTree,
   type: GraphQLType,
-  resolveData: DataForType,
+  resolveData: ResolvedLookAhead,
   resolveInfo: GraphQLResolveInfo
 ) => T;
 

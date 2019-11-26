@@ -39,13 +39,11 @@ export {
   Hook,
   WatchUnwatch,
   SchemaListener,
-  DataForType,
   InitObject,
   Inflection,
+  LookAheadData,
+  ResolvedLookAhead,
 } from "./SchemaBuilder";
-
-import { LookAheadData } from "./SchemaBuilder";
-export { LookAheadData };
 
 export { LiveSource, LiveProvider, LiveMonitor, LiveCoordinator } from "./Live";
 

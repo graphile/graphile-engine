@@ -3,10 +3,9 @@ import { QueryBuilderOptions } from "./QueryBuilder";
 import { RawAlias } from "./QueryBuilder";
 import * as sql from "pg-sql2";
 import { SQL } from "pg-sql2";
-import { DataForType } from "graphile-build";
 import isSafeInteger from "lodash/isSafeInteger";
-import assert from "assert";
-import { LookAheadData } from "graphile-build";
+import assert = require("assert");
+import { ResolvedLookAhead } from "graphile-build";
 
 type QueryBuilderCallback = (queryBuilder: QueryBuilder) => void;
 
@@ -29,7 +28,7 @@ const identity = _ => _ !== null && _ !== undefined;
 export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   from: SQL,
   fromAlias: SQL | null | undefined,
-  resolveData: DataForType<LookAheadData>,
+  resolveData: ResolvedLookAhead,
   inOptions: {
     withPagination?: boolean;
     withPaginationAsFields?: boolean;
