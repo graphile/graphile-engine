@@ -479,7 +479,7 @@ class SchemaBuilder extends EventEmitter {
   ): void;
   hook(
     hookName: "GraphQLObjectType:interfaces",
-    fn: Hook<Array<GraphQLInterfaceType>>,
+    fn: Hook<Array<GraphQLInterfaceTypeConfig<any, any>>>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
@@ -556,7 +556,7 @@ class SchemaBuilder extends EventEmitter {
   ): void;
   hook(
     hookName: "GraphQLUnionType:types",
-    fn: Hook<Array<GraphQLObjectType>>,
+    fn: Hook<Array<GraphQLObjectTypeConfig<any, any>>>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
