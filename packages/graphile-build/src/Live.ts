@@ -20,7 +20,7 @@ const MONITOR_THROTTLE_DURATION = Math.max(
  * Sources are long-lived (i.e. in "watch" mode you just re-use the same one
  * over and over) because there is no release for them
  */
-export class LiveSource {
+export abstract class LiveSource {
   subscribeCollection(
     _callback: SubscriptionCallback,
     _collectionIdentifier: any,
@@ -343,7 +343,7 @@ export class LiveCoordinator {
     _args: any,
     _context: any,
     _info: GraphQLResolveInfo
-  ) {
+  ): AsyncIterator<void> {
     const monitor = this.getMonitor({
       liveAbort: e => {
         if (iterator) iterator.throw(e);

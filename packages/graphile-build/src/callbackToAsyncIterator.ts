@@ -21,7 +21,7 @@ export default function callbackToAsyncIterator<
     onClose?: (arg: ReturnVal | null | undefined) => void;
     buffering?: boolean;
   } = {}
-) {
+): AsyncIterator<CallbackInput> {
   const { onError = defaultOnError, buffering = true, onClose } = options;
   let pullQueue: ((result?: {
     value: CallbackInput | undefined;
@@ -70,10 +70,10 @@ export default function callbackToAsyncIterator<
       });
 
     return {
-      next(): Promise<{ value?: CallbackInput; done: boolean }> {
+      next() {
         return listening ? pullValue() : this.return();
       },
-      return(): Promise<{ value: typeof undefined; done: boolean }> {
+      return() {
         emptyQueue();
         return Promise.resolve({ value: undefined, done: true });
       },
