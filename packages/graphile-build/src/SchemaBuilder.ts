@@ -1,5 +1,5 @@
 import debugFactory from "debug";
-import makeNewBuild from "./makeNewBuild";
+import makeNewBuild, { InflectionBase } from "./makeNewBuild";
 import { bindAll } from "./utils";
 import {
   GraphQLType,
@@ -54,7 +54,7 @@ export type DataForType = {
   [a: string]: Array<unknown>;
 };
 
-export interface Inflection {}
+export interface Inflection extends InflectionBase {}
 
 export interface BuildBase {
   graphileBuildVersion: string;
@@ -456,7 +456,7 @@ class SchemaBuilder extends EventEmitter {
   ): void;
   hook(
     hookName: "inflection",
-    fn: Hook<Partial<Inflection>, ContextInflection>,
+    fn: Hook<Partial<Inflection> & InflectionBase, ContextInflection>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
@@ -718,7 +718,7 @@ class SchemaBuilder extends EventEmitter {
   applyHooks(
     build: Build,
     hookName: "inflection",
-    input: Partial<Inflection>,
+    input: Partial<Inflection> & InflectionBase,
     context: ContextInflection,
     debugStr?: string
   ): Inflection;
