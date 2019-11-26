@@ -39,6 +39,9 @@ export {
   Hook,
   WatchUnwatch,
   SchemaListener,
+  DataForType,
+  InitObject,
+  Inflection,
 } from "./SchemaBuilder";
 
 export { LiveSource, LiveProvider, LiveMonitor, LiveCoordinator } from "./Live";
