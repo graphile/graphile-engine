@@ -1,6 +1,4 @@
-// @flow
-import type { Plugin } from "../SchemaBuilder";
-import type { GraphQLObjectType } from "graphql";
+import { Plugin } from "../SchemaBuilder";
 
 const AddQueriesToSubscriptionsPlugin: Plugin = function(
   builder,
@@ -21,9 +19,11 @@ const AddQueriesToSubscriptionsPlugin: Plugin = function(
         return fields;
       }
 
-      const Query: GraphQLObjectType = getTypeByName(
-        inflection.builtin("Query")
-      );
+      const Query = getTypeByName(inflection.builtin("Query"));
+      if (!(Query instanceof build.graphql.GraphQLObjectType)) {
+        throw new Error(`Could not retrieve 'Query' type.`);
+      }
+
       const queryFields = Query.getFields();
       const subscriptionFields = Object.keys(queryFields).reduce(
         (memo, queryFieldName) => {
@@ -41,6 +41,7 @@ const AddQueriesToSubscriptionsPlugin: Plugin = function(
                   type,
                   defaultValue,
                 };
+
                 return newArgs;
               }, {}),
               ...(oldResolve
@@ -66,16 +67,23 @@ const AddQueriesToSubscriptionsPlugin: Plugin = function(
                 ? queryField.deprecationReason
                 : undefined,
             },
+
             {
               isLiveField: true,
               originalField: queryField,
             }
           );
+
           return memo;
         },
         {}
       );
-      return extend(fields, subscriptionFields);
+
+      return extend(
+        fields,
+        subscriptionFields,
+        "Adding Query fields to Subscription type"
+      );
     },
     ["AddQueriesToSubscriptions"]
   );

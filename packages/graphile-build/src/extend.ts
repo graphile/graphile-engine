@@ -1,4 +1,3 @@
-// @flow
 import chalk from "chalk";
 
 const INDENT = "  ";
@@ -10,10 +9,10 @@ export function indent(text: string) {
   );
 }
 
-export default function extend<Obj1: *, Obj2: *>(
+export default function extend<Obj1 extends any, Obj2 extends any>(
   base: Obj1,
   extra: Obj2,
-  hint?: string
+  hint: string
 ): Obj1 & Obj2 {
   const hints = base[$$hints] || {};
 
@@ -23,7 +22,7 @@ export default function extend<Obj1: *, Obj2: *>(
     const newValue = extra[key];
     const hintB = extraHints[key] || hint;
     if (key in base && base[key] !== newValue) {
-      const hintA: ?string = hints[key];
+      const hintA: string | null | undefined = hints[key];
       const firstEntityDetails = !hintA
         ? "We don't have any information about the first entity."
         : `The first entity was:\n\n${indent(chalk.magenta(hintA))}`;

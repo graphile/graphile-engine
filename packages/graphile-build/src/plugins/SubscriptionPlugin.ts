@@ -1,5 +1,11 @@
-// @flow
-import type { Plugin } from "../SchemaBuilder";
+import { Plugin, ScopeGraphQLObjectType } from "../SchemaBuilder";
+import { GraphQLObjectTypeConfig } from "graphql";
+
+declare module "../SchemaBuilder" {
+  interface ScopeGraphQLObjectType {
+    isRootSubscription?: true;
+  }
+}
 
 function isValidSubscription(Subscription) {
   try {
@@ -38,31 +44,31 @@ This makes them a lot more efficient than Live Queries, but it is still recommen
 export default (async function SubscriptionPlugin(builder, { live }) {
   builder.hook(
     "GraphQLSchema",
-    (schema: {}, build) => {
+    (schema, build) => {
       const {
         newWithHooks,
         extend,
         graphql: { GraphQLObjectType },
         inflection,
       } = build;
-      const Subscription = newWithHooks(
-        GraphQLObjectType,
-        {
-          name: inflection.builtin("Subscription"),
-          description: live ? liveDescription : description,
-        },
-        {
-          __origin: `graphile-build built-in (root subscription type)`,
-          isRootSubscription: true,
-        },
-        true
-      );
+      const spec: GraphQLObjectTypeConfig<any, any> = {
+        name: inflection.builtin("Subscription"),
+        description: live ? liveDescription : description,
+        fields: {},
+      };
+      const scope: ScopeGraphQLObjectType = {
+        __origin: `graphile-build built-in (root subscription type)`,
+        isRootSubscription: true,
+      };
+      const Subscription = newWithHooks(GraphQLObjectType, spec, scope, true);
+
       if (isValidSubscription(Subscription)) {
         return extend(
           schema,
           {
             subscription: Subscription,
           },
+
           "Adding subscription type to schema"
         );
       } else {
@@ -73,4 +79,4 @@ export default (async function SubscriptionPlugin(builder, { live }) {
     [],
     ["Query"]
   );
-}: Plugin);
+} as Plugin);

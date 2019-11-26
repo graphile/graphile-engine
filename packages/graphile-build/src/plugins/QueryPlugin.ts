@@ -1,26 +1,34 @@
-// @flow
-import type { Plugin, Build } from "../SchemaBuilder";
+import { Plugin } from "../SchemaBuilder";
 
-export type BuildExtensionQuery = {|
-  $$isQuery: Symbol,
-|};
+declare module "../SchemaBuilder" {
+  interface Build {
+    $$isQuery: symbol;
+  }
+
+  interface ScopeGraphQLObjectType {
+    isRootQuery?: true;
+  }
+}
 
 export default (async function QueryPlugin(builder) {
   builder.hook(
     "build",
-    (build: Build): Build & BuildExtensionQuery =>
+    build =>
       build.extend(
         build,
         {
           $$isQuery: Symbol("isQuery"),
         },
+
         `Extending Build`
       ),
+
     ["Query"]
   );
+
   builder.hook(
     "GraphQLSchema",
-    (schema: {}, build) => {
+    (schema, build) => {
       const {
         $$isQuery,
         newWithHooks,
@@ -47,18 +55,22 @@ export default (async function QueryPlugin(builder) {
             },
           }),
         },
+
         {
           __origin: `graphile-build built-in (root query type)`,
           isRootQuery: true,
         },
+
         true
       );
+
       if (queryType) {
         return extend(
           schema,
           {
             query: queryType,
           },
+
           `Adding 'query' type to Schema`
         );
       } else {
@@ -67,4 +79,4 @@ export default (async function QueryPlugin(builder) {
     },
     ["Query"]
   );
-}: Plugin);
+} as Plugin);

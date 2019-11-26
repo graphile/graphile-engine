@@ -1,4 +1,3 @@
-// @flow
 /* eslint-disable flowtype/no-weak-types */
 // Turn a callback-based listener into an async iterator
 // From https://raw.githubusercontent.com/withspectrum/callback-to-async-iterator/master/src/index.js
@@ -11,25 +10,30 @@ const defaultOnError = (err: Error) => {
 };
 
 export default function callbackToAsyncIterator<
-  CallbackInput: any,
-  ReturnVal: any
+  CallbackInput extends any,
+  ReturnVal extends any
 >(
-  listener: ((arg: CallbackInput) => any) => ?ReturnVal | Promise<?ReturnVal>,
-  options?: {
-    onError?: (err: Error) => void,
-    onClose?: (arg?: ?ReturnVal) => void,
-    buffering?: boolean,
+  listener: (
+    callback: (arg?: CallbackInput) => any
+  ) => (ReturnVal | null | undefined) | Promise<ReturnVal | null | undefined>,
+  options: {
+    onError?: (err: Error) => void;
+    onClose?: (arg: ReturnVal | null | undefined) => void;
+    buffering?: boolean;
   } = {}
-) {
+): AsyncIterator<CallbackInput> {
   const { onError = defaultOnError, buffering = true, onClose } = options;
-  let pullQueue = [];
-  let pushQueue = [];
+  let pullQueue: ((result?: {
+    value: CallbackInput | undefined;
+    done: boolean;
+  }) => void)[] = [];
+  let pushQueue: (CallbackInput | undefined)[] = [];
   let listening = true;
   let listenerReturnValue;
 
-  function pushValue(value) {
+  function pushValue(value?: CallbackInput) {
     if (pullQueue.length !== 0) {
-      pullQueue.shift()({ value, done: false });
+      pullQueue.shift()!({ value, done: false });
     } else if (buffering === true) {
       pushQueue.push(value);
     }
@@ -66,10 +70,10 @@ export default function callbackToAsyncIterator<
       });
 
     return {
-      next(): Promise<{ value?: CallbackInput, done: boolean }> {
+      next() {
         return listening ? pullValue() : this.return();
       },
-      return(): Promise<{ value: typeof undefined, done: boolean }> {
+      return() {
         emptyQueue();
         return Promise.resolve({ value: undefined, done: true });
       },

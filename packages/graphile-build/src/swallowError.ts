@@ -1,4 +1,3 @@
-// @flow
 import debugFactory from "debug";
 
 const debugWarn = debugFactory("graphile-build:warn");

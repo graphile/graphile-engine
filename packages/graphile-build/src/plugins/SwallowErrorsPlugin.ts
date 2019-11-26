@@ -1,5 +1,10 @@
-// @flow
-import type { Plugin, Build } from "../SchemaBuilder";
+import { Plugin, Build } from "../SchemaBuilder";
+
+declare module "../SchemaBuilder" {
+  interface GraphileBuildOptions {
+    dontSwallowErrors?: boolean;
+  }
+}
 
 export default (function SwallowErrorsPlugin(
   builder,
@@ -25,4 +30,4 @@ export default (function SwallowErrorsPlugin(
     },
     ["SwallowErrors"]
   );
-}: Plugin);
+} as Plugin);

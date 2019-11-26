@@ -1,51 +1,51 @@
-// @flow
-import type {
+import {
   Plugin,
-  Build,
   DataForType,
-  Context,
-  ContextGraphQLObjectTypeFields,
+  Hook,
+  ContextGraphQLObjectTypeInterfaces,
 } from "../SchemaBuilder";
-import type { ResolveTree } from "graphql-parse-resolve-info";
-import type {
+import { ResolveTree } from "graphql-parse-resolve-info";
+import {
   GraphQLType,
-  GraphQLInterfaceType,
   GraphQLResolveInfo,
+  GraphQLInterfaceTypeConfig,
 } from "graphql";
-import type { BuildExtensionQuery } from "./QueryPlugin";
 
 const base64 = str => Buffer.from(String(str)).toString("base64");
 const base64Decode = str => Buffer.from(String(str), "base64").toString("utf8");
 
-export type NodeFetcher = (
-  data: mixed,
-  identifiers: Array<mixed>,
-  context: mixed,
+export type NodeFetcher<T = unknown> = (
+  data: unknown,
+  identifiers: Array<unknown>,
+  context: unknown,
   parsedResolveInfoFragment: ResolveTree,
   type: GraphQLType,
   resolveData: DataForType,
   resolveInfo: GraphQLResolveInfo
-) => {};
+) => T;
 
-export type BuildExtensionNode = {|
-  nodeIdFieldName: string,
-  $$nodeType: Symbol,
-  nodeFetcherByTypeName: { [string]: NodeFetcher },
-  getNodeIdForTypeAndIdentifiers(
-    Type: GraphQLType,
-    ...identifiers: Array<mixed>
-  ): string,
-  getTypeAndIdentifiersFromNodeId(
-    nodeId: string
-  ): {
-    Type: GraphQLType,
-    identifiers: Array<mixed>,
-  },
-  addNodeFetcherForTypeName(typeName: string, fetcher: NodeFetcher): void,
-  getNodeAlias(typeName: string): string,
-  getNodeType(alias: string): GraphQLType,
-  setNodeAlias(typeName: string, alias: string): void,
-|};
+declare module "../SchemaBuilder" {
+  interface Build {
+    nodeIdFieldName: string;
+    $$nodeType: symbol;
+    nodeFetcherByTypeName: { [a: string]: NodeFetcher };
+    getNodeIdForTypeAndIdentifiers: (
+      Type: GraphQLType,
+      ...identifiers: Array<unknown>
+    ) => string;
+    getTypeAndIdentifiersFromNodeId: (
+      nodeId: string
+    ) => {
+      Type: GraphQLType;
+      identifiers: Array<unknown>;
+    };
+
+    addNodeFetcherForTypeName: (typeName: string, fetcher: NodeFetcher) => void;
+    getNodeAlias: (typeName: string) => string;
+    getNodeType: (alias: string) => GraphQLType;
+    setNodeAlias: (typeName: string, alias: string) => void;
+  }
+}
 
 export default (function NodePlugin(
   builder,
@@ -56,7 +56,7 @@ export default (function NodePlugin(
     : "id";
   builder.hook(
     "build",
-    (build: Build): Build & BuildExtensionNode => {
+    build => {
       const nodeFetcherByTypeName = {};
       const nodeAliasByTypeName = {};
       const nodeTypeNameByAlias = {};
@@ -107,6 +107,7 @@ export default (function NodePlugin(
             nodeTypeNameByAlias[alias] = typeName;
           },
         },
+
         `Adding 'Node' interface support to the Build`
       );
     },
@@ -115,10 +116,7 @@ export default (function NodePlugin(
 
   builder.hook(
     "init",
-    function defineNodeInterfaceType(
-      _: {},
-      build: {| ...Build, ...BuildExtensionQuery, ...BuildExtensionNode |}
-    ) {
+    function defineNodeInterfaceType(_, build) {
       const {
         $$isQuery,
         $$nodeType,
@@ -130,6 +128,7 @@ export default (function NodePlugin(
           GraphQLInterfaceType,
           getNullableType,
         },
+
         inflection,
       } = build;
       let Query;
@@ -154,10 +153,12 @@ export default (function NodePlugin(
             },
           },
         },
+
         {
           __origin: `graphile-build built-in (NodePlugin); you can omit this plugin if you like, but you'll lose compatibility with Relay`,
         }
       );
+
       return _;
     },
     ["Node"]
@@ -166,7 +167,7 @@ export default (function NodePlugin(
   builder.hook(
     "GraphQLObjectType:interfaces",
     function addNodeIdToQuery(
-      interfaces: Array<GraphQLInterfaceType>,
+      interfaces: Array<GraphQLInterfaceTypeConfig<any, any>>,
       build,
       context
     ) {
@@ -178,22 +179,27 @@ export default (function NodePlugin(
         return interfaces;
       }
       const Type = getTypeByName(inflection.builtin("Node"));
+      if (!(Type instanceof build.graphql.GraphQLInterfaceType)) {
+        console.error(
+          "Expected 'Node' to be a GraphQLInterfaceType but it wasn't"
+        );
+        return interfaces;
+      }
       if (Type) {
         return [...interfaces, Type];
       } else {
         return interfaces;
       }
-    },
+    } as Hook<
+      Array<GraphQLInterfaceTypeConfig<any, any>>,
+      ContextGraphQLObjectTypeInterfaces
+    >,
     ["Node"]
   );
 
   builder.hook(
     "GraphQLObjectType:fields",
-    (
-      fields: {},
-      build: {| ...Build, ...BuildExtensionQuery, ...BuildExtensionNode |},
-      context: {| ...Context, ...ContextGraphQLObjectTypeFields |}
-    ) => {
+    (fields, build, context) => {
       const {
         scope: { isRootQuery },
         fieldWithHooks,
@@ -208,6 +214,7 @@ export default (function NodePlugin(
         inflection,
         resolveNode,
       } = build;
+
       return extend(
         fields,
         {
@@ -219,37 +226,50 @@ export default (function NodePlugin(
               return "query";
             },
           },
+
           node: fieldWithHooks(
             "node",
-            ({ getDataFromParsedResolveInfoFragment }) => ({
-              description: "Fetches an object given its globally unique `ID`.",
-              type: getTypeByName(inflection.builtin("Node")),
-              args: {
-                [nodeIdFieldName]: {
-                  description: "The globally unique `ID`.",
-                  type: new GraphQLNonNull(GraphQLID),
-                },
-              },
-              resolve(data, args, context, resolveInfo) {
-                const nodeId = args[nodeIdFieldName];
-                return resolveNode(
-                  nodeId,
-                  build,
-                  { getDataFromParsedResolveInfoFragment },
-                  data,
-                  context,
-                  resolveInfo
+            ({ getDataFromParsedResolveInfoFragment }) => {
+              const Node = getTypeByName(inflection.builtin("Node"));
+              if (!(Node instanceof build.graphql.GraphQLInterfaceType)) {
+                throw new Error(
+                  "Expected 'Node' to be a GraphQLInterfaceType but it wasn't"
                 );
-              },
-            }),
+              }
+              return {
+                description:
+                  "Fetches an object given its globally unique `ID`.",
+                type: Node,
+                args: {
+                  [nodeIdFieldName]: {
+                    description: "The globally unique `ID`.",
+                    type: new GraphQLNonNull(GraphQLID),
+                  },
+                },
+
+                resolve(data, args, context, resolveInfo) {
+                  const nodeId = args[nodeIdFieldName];
+                  return resolveNode(
+                    nodeId,
+                    build,
+                    { getDataFromParsedResolveInfoFragment },
+                    data,
+                    context,
+                    resolveInfo
+                  );
+                },
+              };
+            },
+
             {
               isRootNodeField: true,
             }
           ),
         },
+
         `Adding Relay Global Object Identification support to the root Query via 'node' and '${nodeIdFieldName}' fields`
       );
     },
     ["Node"]
   );
-}: Plugin);
+} as Plugin);

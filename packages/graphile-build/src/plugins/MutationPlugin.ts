@@ -1,5 +1,10 @@
-// @flow
-import type { Plugin } from "../SchemaBuilder";
+import { Plugin } from "../SchemaBuilder";
+
+declare module "../SchemaBuilder" {
+  interface ScopeGraphQLObjectType {
+    isRootMutation?: true;
+  }
+}
 
 function isValidMutation(Mutation) {
   try {
@@ -18,7 +23,7 @@ function isValidMutation(Mutation) {
 export default (async function MutationPlugin(builder) {
   builder.hook(
     "GraphQLSchema",
-    (schema: {}, build) => {
+    (schema, build) => {
       const {
         newWithHooks,
         extend,
@@ -38,12 +43,14 @@ export default (async function MutationPlugin(builder) {
         },
         true
       );
+
       if (isValidMutation(Mutation)) {
         return extend(
           schema,
           {
             mutation: Mutation,
           },
+
           "Adding mutation type to schema"
         );
       } else {
@@ -54,4 +61,4 @@ export default (async function MutationPlugin(builder) {
     [],
     ["Query"]
   );
-}: Plugin);
+} as Plugin);

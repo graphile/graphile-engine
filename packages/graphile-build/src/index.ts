@@ -1,6 +1,4 @@
-// @flow
-
-import util from "util";
+import util = require("util");
 import SchemaBuilder from "./SchemaBuilder";
 import {
   SwallowErrorsPlugin,
@@ -14,9 +12,9 @@ import {
   AddQueriesToSubscriptionsPlugin,
 } from "./plugins";
 import resolveNode from "./resolveNode";
-import type { GraphQLSchema } from "graphql";
+import { GraphQLSchema } from "graphql";
 
-import type { Plugin, Options } from "./SchemaBuilder";
+import { Plugin, GraphileBuildOptions } from "./SchemaBuilder";
 
 export {
   constantCaseAll,
@@ -29,25 +27,28 @@ export {
   singularize,
 } from "./utils";
 
-export type { SchemaBuilder };
+export { SchemaBuilder };
 
-export type {
+export {
   Plugin,
+  GraphileBuildOptions,
   Options,
   Build,
-  BuildExtensionQuery,
   Scope,
   Context,
   Hook,
   WatchUnwatch,
   SchemaListener,
+  DataForType,
+  InitObject,
+  Inflection,
 } from "./SchemaBuilder";
 
 export { LiveSource, LiveProvider, LiveMonitor, LiveCoordinator } from "./Live";
 
 export const getBuilder = async (
   plugins: Array<Plugin>,
-  options: Options = {}
+  options: GraphileBuildOptions = {}
 ): Promise<SchemaBuilder> => {
   const builder = new SchemaBuilder(options);
   for (let i = 0, l = plugins.length; i < l; i++) {
@@ -69,7 +70,7 @@ export const getBuilder = async (
 
 export const buildSchema = async (
   plugins: Array<Plugin>,
-  options: Options = {}
+  options: GraphileBuildOptions = {}
 ): Promise<GraphQLSchema> => {
   const builder: SchemaBuilder = await getBuilder(plugins, options);
   return builder.buildSchema();
