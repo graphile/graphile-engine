@@ -1,5 +1,9 @@
 import debugFactory from "debug";
-import makeNewBuild, { InflectionBase } from "./makeNewBuild";
+import makeNewBuild, {
+  InflectionBase,
+  InputFieldWithHooksFunction,
+  GetDataFromParsedResolveInfoFragmentFunction,
+} from "./makeNewBuild";
 import { bindAll } from "./utils";
 import {
   GraphQLType,
@@ -26,6 +30,7 @@ import {
   GraphQLInputFieldConfig,
   GraphQLEnumValueConfigMap,
   GraphQLEnumValueConfig,
+  GraphQLOutputType,
 } from "graphql";
 import EventEmitter = require("events");
 // TODO: when we move to TypeScript, change this to:
@@ -39,6 +44,7 @@ const debug = debugFactory("graphile-builder");
 const INDENT = "  ";
 
 export interface GraphileBuildOptions {
+  subscriptions?: boolean;
   live?: boolean;
   nodeIdFieldName?: string;
 }
@@ -80,6 +86,13 @@ export interface GraphileInputObjectTypeConfig
     | ((
         context: ContextGraphQLInputObjectTypeFields
       ) => GraphQLInputFieldConfigMap);
+}
+
+export interface GraphileUnionTypeConfig<TSource, TContext>
+  extends Omit<GraphQLUnionTypeConfig<TSource, TContext>, "types"> {
+  types?:
+    | GraphQLObjectType[]
+    | ((context: ContextGraphQLUnionTypeTypes) => GraphQLObjectType[]);
 }
 
 export interface BuildBase {
@@ -257,16 +270,29 @@ export interface ContextGraphQLScalarType extends Context {
 export interface ScopeGraphQLObjectType extends Scope {
   isMutationPayload?: true;
 }
-export interface ContextGraphQLObjectType extends Context {
+export interface ContextGraphQLObjectTypeBase extends Context {
   scope: ScopeGraphQLObjectType;
   type: "GraphQLObjectType";
+}
+export interface ContextGraphQLObjectType extends ContextGraphQLObjectTypeBase {
+  addDataGeneratorForField: (
+    fieldName: string,
+    fn: DataGeneratorFunction
+  ) => void;
+  /** YOU PROBABLY DON'T WANT THIS! */
+  recurseDataGeneratorsForField(
+    fieldName: string,
+    iKnowWhatIAmDoing?: boolean
+  ): void;
 }
 
 export interface ScopeGraphQLObjectTypeInterfaces
   extends ScopeGraphQLObjectType {}
 export interface ContextGraphQLObjectTypeInterfaces
-  extends ContextGraphQLObjectType {
+  extends ContextGraphQLObjectTypeBase {
   scope: ScopeGraphQLObjectTypeInterfaces;
+  Self: GraphQLObjectType;
+  GraphQLObjectType: GraphileObjectTypeConfig<any, any>;
 }
 
 export interface ScopeGraphQLObjectTypeFields extends ScopeGraphQLObjectType {}
@@ -288,9 +314,12 @@ export interface ScopeGraphQLObjectTypeFieldsField
   fieldName: string;
 }
 export interface ContextGraphQLObjectTypeFieldsField
-  extends ContextGraphQLObjectType {
+  extends ContextGraphQLObjectTypeBase {
   scope: ScopeGraphQLObjectTypeFieldsField;
   Self: GraphQLObjectType;
+  addDataGenerator: (fn: DataGeneratorFunction) => void;
+  addArgDataGenerator: (fn: DataGeneratorFunction) => void;
+  getDataFromParsedResolveInfoFragment: GetDataFromParsedResolveInfoFragmentFunction;
 }
 
 export interface ScopeGraphQLObjectTypeFieldsFieldArgs
@@ -301,6 +330,8 @@ export interface ContextGraphQLObjectTypeFieldsFieldArgs
   extends ContextGraphQLObjectTypeFieldsField {
   scope: ScopeGraphQLObjectTypeFieldsFieldArgs;
   Self: GraphQLObjectType;
+  field: GraphQLFieldConfig<any, any>;
+  returnType: GraphQLOutputType;
 }
 
 export interface ScopeGraphQLInterfaceType extends Scope {}
@@ -318,6 +349,8 @@ export interface ContextGraphQLUnionType extends Context {
 export interface ScopeGraphQLUnionTypeTypes extends ScopeGraphQLUnionType {}
 export interface ContextGraphQLUnionTypeTypes extends ContextGraphQLUnionType {
   scope: ScopeGraphQLUnionTypeTypes;
+  Self: GraphQLUnionType;
+  GraphQLUnionType: GraphileUnionTypeConfig<any, any>;
 }
 
 export interface ScopeGraphQLInputObjectType extends Scope {
@@ -335,6 +368,8 @@ export interface ContextGraphQLInputObjectTypeFields
   extends ContextGraphQLInputObjectType {
   scope: ScopeGraphQLInputObjectTypeFields;
   Self: GraphQLInputObjectType;
+  GraphQLInputObjectType: GraphileInputObjectTypeConfig;
+  fieldWithHooks: InputFieldWithHooksFunction;
 }
 
 export interface ScopeGraphQLInputObjectTypeFieldsField
@@ -628,7 +663,7 @@ class SchemaBuilder extends EventEmitter {
   hook(
     hookName: "GraphQLUnionType:types",
     fn: Hook<
-      Array<GraphQLObjectTypeConfig<any, any>>,
+      Array<GraphileObjectTypeConfig<any, any>>,
       ContextGraphQLUnionTypeTypes
     >,
     provides?: Array<string>,
@@ -794,7 +829,7 @@ class SchemaBuilder extends EventEmitter {
   applyHooks(
     build: Build,
     hookName: "GraphQLObjectType",
-    input: GraphQLObjectTypeConfig<any, any>,
+    input: GraphileObjectTypeConfig<any, any>,
     context: ContextGraphQLObjectType,
     debugStr?: string
   ): GraphQLObjectTypeConfig<any, any>;
@@ -836,10 +871,17 @@ class SchemaBuilder extends EventEmitter {
   applyHooks(
     build: Build,
     hookName: "GraphQLUnionType",
-    input: GraphQLUnionTypeConfig<any, any>,
+    input: GraphileUnionTypeConfig<any, any>,
     context: ContextGraphQLUnionType,
     debugStr?: string
-  ): GraphQLUnionTypeConfig<any, any>;
+  ): GraphileUnionTypeConfig<any, any>;
+  applyHooks(
+    build: Build,
+    hookName: "GraphQLUnionType:types",
+    input: Array<GraphQLObjectType<any, any>>,
+    context: ContextGraphQLUnionTypeTypes,
+    debugStr?: string
+  ): Array<GraphQLObjectType<any, any>>;
   applyHooks(
     build: Build,
     hookName: "GraphQLEnumType",
@@ -864,7 +906,7 @@ class SchemaBuilder extends EventEmitter {
   applyHooks(
     build: Build,
     hookName: "GraphQLInputObjectType",
-    input: GraphQLInputObjectTypeConfig,
+    input: GraphileInputObjectTypeConfig,
     context: ContextGraphQLInputObjectType,
     debugStr?: string
   ): GraphQLInputObjectTypeConfig;

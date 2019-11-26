@@ -77,7 +77,7 @@ export class LiveMonitor {
   released: boolean;
   providers: { [namespace: string]: LiveProvider };
   subscriptionReleasersByCounter: {
-    [counter: string]: () => void[];
+    [counter: string]: (() => void)[];
   };
 
   liveConditionsByCounter: { [counter: string]: Array<PredicateGenerator> };
@@ -85,8 +85,14 @@ export class LiveMonitor {
   changeCounter: number;
   extraRootValue: any;
 
-  handleChange: (() => void) | null;
-  _reallyHandleChange: (() => void) | null;
+  handleChange: {
+    (): void;
+    cancel: () => void;
+  } | null;
+  _reallyHandleChange: {
+    (): void;
+    cancel: () => void;
+  } | null;
   onChange: (callback: () => void) => () => void;
 
   constructor(
@@ -100,7 +106,7 @@ export class LiveMonitor {
     this.changeCallback = null;
     this.changeCounter = 0;
     this.liveConditionsByCounter = {};
-    this.handleChange = function() {
+    const handleChange = function() {
       /* This function is throttled to ~25ms (see constructor); it's purpose is
        * to bundle up all the changes that occur in a small window into the same
        * handle change flow, so _reallyHandleChange doesn't get called twice in
@@ -113,7 +119,12 @@ export class LiveMonitor {
       }
     };
 
-    this._reallyHandleChange = function() {
+    this.handleChange = throttle(handleChange.bind(this), DEBOUNCE_DURATION, {
+      leading: false,
+      trailing: true,
+    });
+
+    const _reallyHandleChange = function() {
       // This function is throttled to MONITOR_THROTTLE_DURATION (see constructor)
       if (this.changeCallback) {
         // Convince Flow this won't suddenly become null
@@ -167,20 +178,8 @@ export class LiveMonitor {
       };
     };
 
-    this.handleChange = throttle(
-      this.handleChange.bind(this),
-      DEBOUNCE_DURATION,
-      {
-        leading: false,
-        trailing: true,
-      }
-    );
-
-    if (!this._reallyHandleChange) {
-      throw new Error("This is just to make flow happy");
-    }
     this._reallyHandleChange = throttle(
-      this._reallyHandleChange.bind(this),
+      _reallyHandleChange.bind(this),
       MONITOR_THROTTLE_DURATION - DEBOUNCE_DURATION,
       {
         leading: true,
@@ -198,9 +197,8 @@ export class LiveMonitor {
         this.subscriptionReleasersByCounter
       ).filter(n => parseInt(n, 10) < currentCounter);
       for (const oldCounter of oldCounters) {
-        for (const releaser of this.subscriptionReleasersByCounter[
-          oldCounter
-        ]) {
+        const arry = this.subscriptionReleasersByCounter[oldCounter];
+        for (const releaser of arry) {
           releaser();
         }
         delete this.subscriptionReleasersByCounter[oldCounter];
@@ -340,13 +338,6 @@ export class LiveCoordinator {
     return new LiveMonitor(this.providers, extraRootValue);
   }
 
-  // Tell Flow that we're okay with overwriting this
-  subscribe: (
-    _parent: any,
-    _args: any,
-    context: any,
-    _info: GraphQLResolveInfo
-  ) => any;
   subscribe(
     _parent: any,
     _args: any,

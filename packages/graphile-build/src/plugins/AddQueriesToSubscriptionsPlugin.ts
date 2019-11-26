@@ -1,5 +1,4 @@
 import { Plugin } from "../SchemaBuilder";
-import { GraphQLObjectType } from "graphql";
 
 const AddQueriesToSubscriptionsPlugin: Plugin = function(
   builder,
@@ -20,9 +19,10 @@ const AddQueriesToSubscriptionsPlugin: Plugin = function(
         return fields;
       }
 
-      const Query: GraphQLObjectType = getTypeByName(
-        inflection.builtin("Query")
-      );
+      const Query = getTypeByName(inflection.builtin("Query"));
+      if (!(Query instanceof build.graphql.GraphQLObjectType)) {
+        throw new Error(`Could not retrieve 'Query' type.`);
+      }
 
       const queryFields = Query.getFields();
       const subscriptionFields = Object.keys(queryFields).reduce(

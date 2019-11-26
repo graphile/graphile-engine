@@ -14,23 +14,26 @@ export default function callbackToAsyncIterator<
   ReturnVal extends any
 >(
   listener: (
-    a: (arg: CallbackInput) => any
+    callback: (arg?: CallbackInput) => any
   ) => (ReturnVal | null | undefined) | Promise<ReturnVal | null | undefined>,
-  options?: {
+  options: {
     onError?: (err: Error) => void;
     onClose?: (arg: ReturnVal | null | undefined) => void;
     buffering?: boolean;
   } = {}
 ) {
   const { onError = defaultOnError, buffering = true, onClose } = options;
-  let pullQueue = [];
-  let pushQueue = [];
+  let pullQueue: ((result?: {
+    value: CallbackInput | undefined;
+    done: boolean;
+  }) => void)[] = [];
+  let pushQueue: (CallbackInput | undefined)[] = [];
   let listening = true;
   let listenerReturnValue;
 
-  function pushValue(value) {
+  function pushValue(value?: CallbackInput) {
     if (pullQueue.length !== 0) {
-      pullQueue.shift()({ value, done: false });
+      pullQueue.shift()!({ value, done: false });
     } else if (buffering === true) {
       pushQueue.push(value);
     }
