@@ -276,6 +276,11 @@ export interface ContextGraphQLUnionType extends Context {
   type: "GraphQLUnionType";
 }
 
+export interface ScopeGraphQLUnionTypeTypes extends ScopeGraphQLUnionType {}
+export interface ContextGraphQLUnionTypeTypes extends ContextGraphQLUnionType {
+  scope: ScopeGraphQLUnionTypeTypes;
+}
+
 export interface ScopeGraphQLInputObjectType extends Scope {}
 export interface ContextGraphQLInputObjectType extends Context {
   scope: ScopeGraphQLInputObjectType;
@@ -319,7 +324,7 @@ export interface ContextFinalize extends Context {
   type: "Finalize";
 }
 
-export interface Hook<Type, TContext extends Context = Context> {
+export interface Hook<Type, TContext extends Context> {
   (input: Type, build: Build, context: TContext): Type;
   displayName?: string;
   provides?: Array<string>;
@@ -338,7 +343,7 @@ class SchemaBuilder extends EventEmitter {
   triggerChange: TriggerChangeType | null | undefined;
   depth: number;
   hooks: {
-    [a: string]: Array<Hook<any>>;
+    [a: string]: Array<Hook<any, any>>;
   };
 
   _currentPluginName: string | null | undefined;
@@ -444,133 +449,154 @@ class SchemaBuilder extends EventEmitter {
    */
   hook(
     hookName: "build",
-    fn: Hook<Partial<Build> & BuildBase>,
+    fn: Hook<Partial<Build> & BuildBase, ContextBuild>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook(
     hookName: "inflection",
-    fn: Hook<Partial<Inflection>>,
+    fn: Hook<Partial<Inflection>, ContextInflection>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook(
     hookName: "init",
-    fn: Hook<InitObject>,
+    fn: Hook<InitObject, ContextInit>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook(
     hookName: "GraphQLSchema",
-    fn: Hook<GraphQLSchemaConfig>,
+    fn: Hook<GraphQLSchemaConfig, ContextGraphQLSchema>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook<TSource, TContext>(
     hookName: "GraphQLObjectType",
-    fn: Hook<GraphQLObjectTypeConfig<TSource, TContext>>,
+    fn: Hook<
+      GraphQLObjectTypeConfig<TSource, TContext>,
+      ContextGraphQLObjectType
+    >,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook(
     hookName: "GraphQLObjectType:interfaces",
-    fn: Hook<Array<GraphQLInterfaceTypeConfig<any, any>>>,
+    fn: Hook<
+      Array<GraphQLInterfaceTypeConfig<any, any>>,
+      ContextGraphQLObjectTypeInterfaces
+    >,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook<TSource, TContext>(
     hookName: "GraphQLObjectType:fields",
-    fn: Hook<GraphQLFieldConfigMap<TSource, TContext>>,
+    fn: Hook<
+      GraphQLFieldConfigMap<TSource, TContext>,
+      ContextGraphQLObjectTypeFields
+    >,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook<TSource, TContext>(
     hookName: "GraphQLObjectType:fields:field",
-    fn: Hook<GraphQLFieldConfig<TSource, TContext>>,
+    fn: Hook<
+      GraphQLFieldConfig<TSource, TContext>,
+      ContextGraphQLObjectTypeFieldsField
+    >,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook(
     hookName: "GraphQLObjectType:fields:field:args",
-    fn: Hook<GraphQLFieldConfigArgumentMap>,
+    fn: Hook<
+      GraphQLFieldConfigArgumentMap,
+      ContextGraphQLObjectTypeFieldsFieldArgs
+    >,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook(
     hookName: "GraphQLInputObjectType",
-    fn: Hook<GraphQLInputObjectTypeConfig>,
+    fn: Hook<GraphQLInputObjectTypeConfig, ContextGraphQLInputObjectType>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook(
     hookName: "GraphQLInputObjectType:fields",
-    fn: Hook<GraphQLInputFieldConfigMap>,
+    fn: Hook<GraphQLInputFieldConfigMap, ContextGraphQLInputObjectTypeFields>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook(
     hookName: "GraphQLInputObjectType:fields:field",
-    fn: Hook<GraphQLInputFieldConfig>,
+    fn: Hook<GraphQLInputFieldConfig, ContextGraphQLInputObjectTypeFieldsField>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook(
     hookName: "GraphQLEnumType",
-    fn: Hook<GraphQLEnumTypeConfig>,
+    fn: Hook<GraphQLEnumTypeConfig, ContextGraphQLEnumType>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook(
     hookName: "GraphQLEnumType:values",
-    fn: Hook<GraphQLEnumValueConfigMap>,
+    fn: Hook<GraphQLEnumValueConfigMap, ContextGraphQLEnumTypeValues>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook(
     hookName: "GraphQLEnumType:values:value",
-    fn: Hook<GraphQLEnumValueConfig>,
+    fn: Hook<GraphQLEnumValueConfig, ContextGraphQLEnumTypeValuesValue>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook<TSource, TContext>(
     hookName: "GraphQLUnionType",
-    fn: Hook<GraphQLUnionTypeConfig<TSource, TContext>>,
+    fn: Hook<
+      GraphQLUnionTypeConfig<TSource, TContext>,
+      ContextGraphQLUnionType
+    >,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook(
     hookName: "GraphQLUnionType:types",
-    fn: Hook<Array<GraphQLObjectTypeConfig<any, any>>>,
+    fn: Hook<
+      Array<GraphQLObjectTypeConfig<any, any>>,
+      ContextGraphQLUnionTypeTypes
+    >,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
   hook(
     hookName: "finalize",
-    fn: Hook<GraphQLSchema>,
+    fn: Hook<GraphQLSchema, ContextFinalize>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
   ): void;
-  hook<T extends any>(
+  hook<TType, TContext extends Context>(
     hookName: string,
-    fn: Hook<T>,
+    fn: Hook<TType, TContext>,
     provides?: Array<string>,
     before?: Array<string>,
     after?: Array<string>
