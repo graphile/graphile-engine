@@ -1,4 +1,4 @@
-import pg from "pg";
+import * as pg from "pg";
 import debugFactory from "debug";
 
 const debug = debugFactory("graphile-build-pg");
@@ -11,39 +11,40 @@ function constructorName(obj) {
 
 function quacksLikePgClient(pgConfig: unknown): boolean {
   // A diagnosis of exclusion
-  if (!pgConfig || typeof pgConfig !== "object") return false;
+  if (typeof pgConfig !== "object" || !pgConfig) return false;
   if (constructorName(pgConfig) !== "Client") return false;
-  if (typeof pgConfig.connect !== "function") return false;
-  if (typeof pgConfig.end !== "function") return false;
-  if (typeof pgConfig.escapeLiteral !== "function") return false;
-  if (typeof pgConfig.escapeIdentifier !== "function") return false;
+  if (typeof pgConfig["connect"] !== "function") return false;
+  if (typeof pgConfig["end"] !== "function") return false;
+  if (typeof pgConfig["escapeLiteral"] !== "function") return false;
+  if (typeof pgConfig["escapeIdentifier"] !== "function") return false;
   return true;
 }
 
 export function quacksLikePgPool(pgConfig: unknown): boolean {
   // A diagnosis of exclusion
-  if (!pgConfig || typeof pgConfig !== "object") return false;
+  if (typeof pgConfig !== "object" || !pgConfig) return false;
   if (
     constructorName(pgConfig) !== "Pool" &&
     constructorName(pgConfig) !== "BoundPool"
   ) {
     return false;
   }
-  if (!pgConfig.Client) return false;
-  if (!pgConfig.options) return false;
-  if (typeof pgConfig.connect !== "function") return false;
-  if (typeof pgConfig.end !== "function") return false;
-  if (typeof pgConfig.query !== "function") return false;
+  if (!pgConfig["Client"]) return false;
+  if (!pgConfig["options"]) return false;
+  if (typeof pgConfig["connect"] !== "function") return false;
+  if (typeof pgConfig["end"] !== "function") return false;
+  if (typeof pgConfig["query"] !== "function") return false;
   return true;
 }
 
 export const getPgClientAndReleaserFromConfig = async (
-  pgConfig: pg.Client | pg.Pool | string = process.env.DATABASE_URL
+  pgConfig: pg.PoolClient | pg.Pool | string | undefined = process.env
+    .DATABASE_URL
 ) => {
   let releasePgClient = () => {};
-  let pgClient: pg.Client;
+  let pgClient: pg.PoolClient | pg.Client;
   if (pgConfig instanceof pg.Client || quacksLikePgClient(pgConfig)) {
-    pgClient = pgConfig as pg.Client;
+    pgClient = pgConfig as pg.PoolClient;
     if (!pgClient.release) {
       throw new Error(
         "We only support PG clients from a PG pool (because otherwise the `await` call can hang indefinitely if an error occurs and there's no error handler)"
@@ -51,20 +52,22 @@ export const getPgClientAndReleaserFromConfig = async (
     }
   } else if (pgConfig instanceof pg.Pool || quacksLikePgPool(pgConfig)) {
     const pgPool = pgConfig as pg.Pool;
-    pgClient = await pgPool.connect();
-    releasePgClient = () => pgClient.release();
+    const client = await pgPool.connect();
+    pgClient = client;
+    releasePgClient = () => client.release();
   } else if (pgConfig === undefined || typeof pgConfig === "string") {
-    pgClient = new pg.Client(pgConfig);
-    pgClient.on("error", e => {
+    const client = new pg.Client(pgConfig);
+    pgClient = client;
+    client.on("error", e => {
       debug("pgClient error occurred: %s", e);
     });
     releasePgClient = () =>
       new Promise<undefined>((resolve, reject) =>
-        pgClient.end(err => (err ? reject(err) : resolve()))
+        client.end(err => (err ? reject(err) : resolve()))
       );
 
     await new Promise((resolve, reject) =>
-      pgClient.connect(err => (err ? reject(err) : resolve()))
+      client.connect(err => (err ? reject(err) : resolve()))
     );
   } else {
     throw new Error(
@@ -75,8 +78,8 @@ export const getPgClientAndReleaserFromConfig = async (
 };
 
 const withPgClient = async (
-  pgConfig: pg.Client | pg.Pool | string | undefined,
-  fn: (pgClient: pg.Client) => any
+  pgConfig: pg.PoolClient | pg.Pool | string | undefined,
+  fn: (pgClient: pg.PoolClient | pg.Client) => any
 ) => {
   if (!fn) {
     throw new Error("Nothing to do!");
