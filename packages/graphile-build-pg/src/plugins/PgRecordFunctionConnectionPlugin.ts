@@ -22,6 +22,7 @@ export default (function PgRecordFunctionConnectionPlugin(
           GraphQLObjectType,
           GraphQLNonNull,
           GraphQLList,
+          GraphQLScalarType,
           getNamedType,
         },
         inflection,
@@ -46,6 +47,7 @@ export default (function PgRecordFunctionConnectionPlugin(
           // PgTablesPlugin and PgScalarFunctionConnectionPlugin
           return;
         }
+
         // TODO: PG10 doesn't support the equivalent of pg_attribute.atttypemod
         // on function arguments and return types, however maybe a later
         // version of PG will?
@@ -60,6 +62,11 @@ export default (function PgRecordFunctionConnectionPlugin(
             )}' for '${proc.name}' so cannot create connection type`
           );
         }
+
+        if (!Cursor || !(Cursor instanceof GraphQLScalarType)) {
+          throw new Error("Cursor type not found");
+        }
+
         const edgeSpec: GraphileObjectTypeConfig<any, any> = {
           name: inflection.recordFunctionEdge(proc),
           description: `A \`${NodeType.name}\` edge in the connection.`,

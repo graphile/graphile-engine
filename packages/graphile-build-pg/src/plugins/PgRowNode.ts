@@ -3,6 +3,12 @@ import debugSql from "./debugSql";
 import { ResolveTree } from "graphql-parse-resolve-info";
 import { PgEntityKind } from "./PgIntrospectionPlugin";
 
+declare module "graphile-build" {
+  interface ScopeGraphQLObjectTypeFieldsField {
+    isPgNodeQuery?: true;
+  }
+}
+
 export default (async function PgRowNode(builder, { subscriptions }) {
   builder.hook(
     "GraphQLObjectType",

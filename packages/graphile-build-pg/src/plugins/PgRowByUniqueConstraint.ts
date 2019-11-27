@@ -2,6 +2,12 @@ import { Plugin } from "graphile-build";
 import debugSql from "./debugSql";
 import { ResolveTree } from "graphql-parse-resolve-info";
 
+declare module "graphile-build" {
+  interface ScopeGraphQLObjectTypeFieldsField {
+    isPgRowByUniqueConstraintField?: true;
+  }
+}
+
 export default (async function PgRowByUniqueConstraint(
   builder,
   { subscriptions }
