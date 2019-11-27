@@ -30,6 +30,10 @@ declare module "graphile-build" {
     ) => PgIntrospectionResultsByKind;
     pgOwnerConnectionString?: string;
   }
+
+  interface Build {
+    pgIntrospectionResultsByKind: PgIntrospectionResultsByKind;
+  }
 }
 
 // Ref: https://github.com/graphile/postgraphile/tree/master/src/postgres/introspection/object

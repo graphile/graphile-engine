@@ -1,17 +1,44 @@
-import { Plugin } from "graphile-build";
+import {
+  Plugin,
+  GraphileObjectTypeConfig,
+  ScopeGraphQLObjectType,
+} from "graphile-build";
 
 import makeGraphQLJSONType from "../GraphQLJSON";
 
 import rawParseInterval = require("postgres-interval");
 import LRU from "@graphile/lru";
+import { GraphQLType, GraphQLInputType } from "graphql";
+
+interface GqlTypeByTypeIdAndModifier {
+  [typeId: string]: {
+    [modifier: string]: GraphQLType;
+  };
+}
+interface GqlInputTypeByTypeIdAndModifier {
+  [typeId: string]: {
+    [modifier: string]: GraphQLInputType;
+  };
+}
 
 declare module "graphile-build" {
-  interface Build {}
+  interface Build {
+    pgGqlTypeByTypeIdAndModifier?: GqlTypeByTypeIdAndModifier;
+    pgGqlInputTypeByTypeIdAndModifier?: GqlInputTypeByTypeIdAndModifier;
+  }
+
   interface GraphileBuildOptions {
     pgExtendedTypes?: boolean;
     pgSkipHstore?: boolean;
     pgUseCustomNetworkScalars?: boolean;
     disableIssue390Fix?: boolean;
+  }
+
+  interface ScopeGraphQLObjectType {
+    isIntervalType?: true;
+  }
+  interface ScopeGraphQLInputObjectType {
+    isIntervalInputType?: true;
   }
 }
 
@@ -55,19 +82,25 @@ export default (function PgTypesPlugin(
         inflection,
         graphql,
       } = build;
+      if (!introspectionResultsByKind || !sql) {
+        throw new Error("Required helpers were not found on Build.");
+      }
 
       /*
        * Note these do not do `foo.bind(build)` because they want to reference
-       * the *latest* value of foo (i.e. after all the build hooks run) rather
-       * than the current value of foo in this current hook.
+       * the *latest* value of foo (i.e. after all the build hooks run, some of
+       * which might overwrite it on the build object) rather than the current
+       * value of foo in this current hook.
        *
        * Also don't use this in your own code, only construct types *after* the
        * build hook has completed (i.e. 'init' or later).
        *
        * TODO:v5: move this to the 'init' hook.
        */
-      const newWithHooks = (...args) => build.newWithHooks(...args);
-      const addType = (...args) => build.addType(...args);
+      const newWithHooks: typeof build.newWithHooks = (...args: any[]) =>
+        (build.newWithHooks as any)(...args);
+      const addType: typeof build.addType = (...args: any[]) =>
+        (build.addType as any)(...args);
 
       const {
         GraphQLNonNull,
@@ -87,17 +120,17 @@ export default (function PgTypesPlugin(
 
       const gqlTypeByTypeIdGenerator = {};
       const gqlInputTypeByTypeIdGenerator = {};
-      if (build.pgGqlTypeByTypeId || build.pgGqlInputTypeByTypeId) {
+      if (build["pgGqlTypeByTypeId"] || build["pgGqlInputTypeByTypeId"]) {
         // I don't expect anyone to receive this error, because I don't think anyone uses this interface.
         throw new Error(
           "Sorry! This interface is no longer supported because it is not granular enough. It's not hard to port it to the new system - please contact Benjie and he'll walk you through it."
         );
       }
-      const gqlTypeByTypeIdAndModifier = {
+      const gqlTypeByTypeIdAndModifier: GqlTypeByTypeIdAndModifier = {
         ...build.pgGqlTypeByTypeIdAndModifier,
       };
 
-      const gqlInputTypeByTypeIdAndModifier = {
+      const gqlInputTypeByTypeIdAndModifier: GqlInputTypeByTypeIdAndModifier = {
         ...build.pgGqlInputTypeByTypeIdAndModifier,
       };
 
@@ -202,21 +235,24 @@ export default (function PgTypesPlugin(
           },
         };
       };
+      const intervalSpec: GraphileObjectTypeConfig<any, any> = {
+        name: inflection.builtin("Interval"),
+        description:
+          "An interval of time that has passed where the smallest distinct unit is a second.",
+        fields: makeIntervalFields(),
+      };
+      const intervalScope: ScopeGraphQLObjectType = {
+        isIntervalType: true,
+      };
       const GQLInterval = newWithHooks(
         GraphQLObjectType,
-        {
-          name: inflection.builtin("Interval"),
-          description:
-            "An interval of time that has passed where the smallest distinct unit is a second.",
-          fields: makeIntervalFields(),
-        },
-
-        {
-          isIntervalType: true,
-        }
+        intervalSpec,
+        intervalScope
       );
 
-      addType(GQLInterval, "graphile-build-pg built-in");
+      if (GQLInterval) {
+        addType(GQLInterval, "graphile-build-pg built-in");
+      }
 
       const GQLIntervalInput = newWithHooks(
         GraphQLInputObjectType,
@@ -232,7 +268,9 @@ export default (function PgTypesPlugin(
         }
       );
 
-      addType(GQLIntervalInput, "graphile-build-pg built-in");
+      if (GQLIntervalInput) {
+        addType(GQLIntervalInput, "graphile-build-pg built-in");
+      }
 
       const stringType = (name, description) =>
         new GraphQLScalarType({
@@ -550,6 +588,11 @@ export default (function PgTypesPlugin(
        */
       const enforceGqlTypeByPgTypeId = (typeId, typeModifier) => {
         const type = introspectionResultsByKind.type.find(t => t.id === typeId);
+        if (!type) {
+          throw new Error(
+            `Could not find type with oid '${typeId}' in the introspection results`
+          );
+        }
         depth++;
         if (depth > 50) {
           throw new Error("Type enforcement went too deep - infinite loop?");
@@ -563,8 +606,7 @@ export default (function PgTypesPlugin(
             }.${type.name}' (type=${type.type}):\n${indent(e.message)}`
           );
 
-          // $FlowFixMe
-          error.originalError = e;
+          error["originalError"] = e;
           throw error;
         } finally {
           depth--;
