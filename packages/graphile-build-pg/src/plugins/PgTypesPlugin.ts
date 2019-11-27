@@ -2,8 +2,18 @@ import { Plugin } from "graphile-build";
 
 import makeGraphQLJSONType from "../GraphQLJSON";
 
-import rawParseInterval from "postgres-interval";
+import rawParseInterval = require("postgres-interval");
 import LRU from "@graphile/lru";
+
+declare module "graphile-build" {
+  interface Build {}
+  interface GraphileBuildOptions {
+    pgExtendedTypes?: boolean;
+    pgSkipHstore?: boolean;
+    pgUseCustomNetworkScalars?: boolean;
+    disableIssue390Fix?: boolean;
+  }
+}
 
 function indent(str) {
   return "  " + str.replace(/\n/g, "\n  ");

@@ -18,6 +18,20 @@ import queryFromResolveDataFactory from "../queryFromResolveDataFactory";
 const debug = debugFactory("graphile-build-pg");
 const WATCH_FIXTURES_PATH = `${__dirname}/../../res/watch-fixtures.sql`;
 
+declare module "graphile-build" {
+  interface GraphileBuildOptions {
+    pgEnableTags?: boolean;
+    pgThrowOnMissingSchema?: boolean;
+    pgIncludeExtensionResources?: boolean;
+    pgLegacyFunctionsOnly?: boolean;
+    pgSkipInstallingWatchFixtures?: boolean;
+    pgAugmentIntrospectionResults?: (
+      introspectionResult: PgIntrospectionResultsByKind
+    ) => PgIntrospectionResultsByKind;
+    pgOwnerConnectionString?: boolean;
+  }
+}
+
 // Ref: https://github.com/graphile/postgraphile/tree/master/src/postgres/introspection/object
 export enum PgEntityKind {
   NAMESPACE = "namespace",
@@ -497,11 +511,16 @@ export default (async function PgIntrospectionPlugin(
       throw new Error("Argument 'schemas' (array) is required");
     }
     const cacheKey = `PgIntrospectionPlugin-introspectionResultsByKind-v${version}`;
-    const cloneResults = obj => {
-      const result = Object.keys(obj).reduce((memo, k) => {
-        memo[k] = Array.isArray(obj[k]) ? obj[k].map(v => ({ ...v })) : obj[k];
-        return memo;
-      }, {});
+    const cloneResults = <T>(obj: T): T => {
+      const result = Object.keys(obj).reduce(
+        (memo, k) => {
+          memo[k] = Array.isArray(obj[k])
+            ? obj[k].map(v => ({ ...v }))
+            : obj[k];
+          return memo;
+        },
+        {} as T
+      );
       return result;
     };
     const introspectionResultsByKind = cloneResults(
@@ -525,7 +544,18 @@ export default (async function PgIntrospectionPlugin(
             pgIncludeExtensionResources,
           ]);
 
-          const result = {
+          const result: Pick<
+            PgIntrospectionResultsByKind,
+            | "__pgVersion"
+            | "namespace"
+            | "class"
+            | "attribute"
+            | "type"
+            | "constraint"
+            | "procedure"
+            | "extension"
+            | "index"
+          > = {
             __pgVersion: serverVersionNum,
             namespace: [],
             class: [],

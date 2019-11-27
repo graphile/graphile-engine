@@ -82,10 +82,10 @@ export interface PostGraphileCoreOptions {
   /**
    * @deprecated Use smart comments/tags instead
    */
-  pgColumnFilter?: <TSource>(
+  pgColumnFilter?: <TContext extends Context>(
     attr: mixed,
     build: Build,
-    context: Context<TSource>
+    context: TContext
   ) => boolean;
   /**
    * @deprecated Use '@primaryKey' smart comment instead
@@ -131,9 +131,11 @@ export const postGraphileClassicIdsOverrides = {
 };
 
 export const postGraphileInflection = inflections.newInflector(
+  // @ts-ignore
   postGraphileBaseOverrides
 );
 
+// @ts-ignore
 export const postGraphileClassicIdsInflection = inflections.newInflector({
   ...postGraphileBaseOverrides,
   ...postGraphileClassicIdsOverrides,
@@ -382,9 +384,13 @@ export const getPostGraphileBuilder = async (
     pgSchemas: Array.isArray(schemas) ? schemas : [schemas],
     pgExtendedTypes: !!dynamicJson,
     pgColumnFilter: pgColumnFilter || (() => true),
-    pgInflection:
-      inflector ||
-      (classicIds ? postGraphileClassicIdsInflection : postGraphileInflection),
+    ...({
+      pgInflection:
+        inflector ||
+        (classicIds
+          ? postGraphileClassicIdsInflection
+          : postGraphileInflection),
+    } as any),
     nodeIdFieldName: nodeIdFieldName || (classicIds ? "id" : "nodeId"),
     pgJwtTypeIdentifier: jwtPgTypeIdentifier,
     pgJwtSecret: jwtSecret,
