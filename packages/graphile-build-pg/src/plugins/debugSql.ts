@@ -77,4 +77,4 @@ function debugSql(sql) {
 }
 Object.assign(debugSql, rawDebugSql);
 
-export default debugSql;
+export default debugSql as typeof rawDebugSql;

@@ -49,7 +49,6 @@ export default async function viaTemporaryTable(
     | null
     | undefined = undefined
 ) {
-  const isPgRecord = pgRecordInfo != null;
   const { outputArgTypes, outputArgNames } = pgRecordInfo || {};
 
   async function performQuery(pgClient: Client, sqlQuery: SQLQuery) {
@@ -88,7 +87,7 @@ export default async function viaTemporaryTable(
          * representation to make it easier to deal with below.
          */
         sql.query`(case when ${sqlResultSourceAlias} is null then null else ${sqlResultSourceAlias} end)`
-      : isPgRecord
+      : outputArgNames != null // It's a record
       ? sql.query`array[${sql.join(
           outputArgNames.map(
             (outputArgName, idx) =>
@@ -121,7 +120,7 @@ export default async function viaTemporaryTable(
       ? sql.query`\
 select (str::${sqlTypeIdentifier}).*
 from unnest((${sql.value(values)})::text[]) str`
-      : isPgRecord
+      : outputArgNames != null && outputArgTypes != null // It's a record
       ? sql.query`\
 select ${sql.join(
           outputArgNames.map(

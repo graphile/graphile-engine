@@ -3,17 +3,21 @@ import { QueryBuilderOptions } from "./QueryBuilder";
 import { RawAlias } from "./QueryBuilder";
 import * as sql from "pg-sql2";
 import { SQL } from "pg-sql2";
-import isSafeInteger from "lodash/isSafeInteger";
+import isSafeInteger = require("lodash/isSafeInteger");
 import assert = require("assert");
 import { ResolvedLookAhead } from "graphile-build";
 
-type QueryBuilderCallback = (queryBuilder: QueryBuilder) => void;
+type QueryBuilderCallback = (
+  queryBuilder: QueryBuilder,
+  resolveData: ResolvedLookAhead
+) => void;
+type AggregateQueryBuilderCallback = (queryBuilder: QueryBuilder) => void;
 
 declare module "graphile-build" {
   interface LookAheadData {
     pgQuery: QueryBuilderCallback;
-    pgAggregateQuery: QueryBuilderCallback;
-    pgCursorPrefix: string;
+    pgAggregateQuery: AggregateQueryBuilderCallback;
+    pgCursorPrefix: SQL;
     pgDontUseAsterisk: boolean;
     calculateHasNextPage: boolean;
     calculateHasPreviousPage: boolean;
@@ -248,7 +252,8 @@ exists(
         return sql.fragment`\
 exists(
   ${sqlCommon}
-  and (${queryBuilder.getSelectCursor()})::text not in (select __cursor::text from ${sqlQueryAlias})
+  and (${queryBuilder.getSelectCursor() ||
+    sql.null})::text not in (select __cursor::text from ${sqlQueryAlias})
   ${offset === 0 ? sql.blank : sql.fragment`offset ${sql.value(offset)}`}
 )`;
       }
@@ -284,7 +289,7 @@ exists(
       }
     }
   }
-  const getPgCursorPrefix = () =>
+  const getPgCursorPrefix = (): SQL[] =>
     rawCursorPrefix && rawCursorPrefix.length > 0
       ? rawCursorPrefix
       : queryBuilder.data.cursorPrefix.map(val => sql.literal(val));
@@ -389,8 +394,8 @@ OR\
         queryBuilder.whereBound(sqlFilter, isAfter);
       } else if (
         cursorValue[0] === "natural" &&
+        typeof cursorValue[1] === "number" &&
         isSafeInteger(cursorValue[1]) &&
-        // $FlowFixMe: we know this is a number
         cursorValue[1] >= 0
       ) {
         // $FlowFixMe: we know this is a number
