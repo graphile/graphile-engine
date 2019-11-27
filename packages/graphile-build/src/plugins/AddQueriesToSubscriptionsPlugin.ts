@@ -1,5 +1,12 @@
 import { Plugin } from "../SchemaBuilder";
 
+declare module "../SchemaBuilder" {
+  interface ScopeGraphQLObjectTypeFieldsField {
+    isLiveField?: true;
+    originalField?: import("graphql").GraphQLField<any, any>;
+  }
+}
+
 const AddQueriesToSubscriptionsPlugin: Plugin = function(
   builder,
   { subscriptions, live }
@@ -29,8 +36,9 @@ const AddQueriesToSubscriptionsPlugin: Plugin = function(
         (memo, queryFieldName) => {
           const queryField = queryFields[queryFieldName];
           const oldResolve = queryField.resolve;
-          memo[queryFieldName] = fieldWithHooks(
-            inflection.live(queryFieldName),
+          const liveFieldName = inflection.live(queryFieldName);
+          memo[liveFieldName] = fieldWithHooks(
+            liveFieldName,
             {
               description: (queryField.description || "") + " (live)",
               type: queryField.type,
@@ -67,7 +75,6 @@ const AddQueriesToSubscriptionsPlugin: Plugin = function(
                 ? queryField.deprecationReason
                 : undefined,
             },
-
             {
               isLiveField: true,
               originalField: queryField,

@@ -1,5 +1,5 @@
 import * as graphql from "graphql";
-import { GraphQLNamedType, GraphQLInputField, GraphQLType } from "graphql";
+import { GraphQLNamedType, GraphQLType } from "graphql";
 import {
   parseResolveInfo,
   simplifyParsedResolveInfoFragmentWithType,
@@ -33,6 +33,8 @@ import SchemaBuilder, {
   ContextGraphQLObjectTypeBase,
   ContextGraphQLObjectTypeFieldsField,
   ContextGraphQLObjectTypeFieldsFieldArgs,
+  ScopeGraphQLObjectTypeFieldsField,
+  ScopeGraphQLInputObjectTypeFieldsField,
 } from "./SchemaBuilder";
 
 import extend, { indent } from "./extend";
@@ -219,7 +221,7 @@ export type FieldWithHooksFunction = (
   spec:
     | FieldSpec
     | ((context: ContextGraphQLObjectTypeFieldsField) => FieldSpec),
-  fieldScope: {}
+  fieldScope: Omit<ScopeGraphQLObjectTypeFieldsField, "fieldName">
 ) => import("graphql").GraphQLFieldConfig<any, any>;
 
 export type InputFieldWithHooksFunction = (
@@ -229,8 +231,8 @@ export type InputFieldWithHooksFunction = (
     | ((
         ContextGraphQLInputObjectTypeFieldsField
       ) => graphql.GraphQLInputFieldConfig),
-  fieldScope: {}
-) => GraphQLInputField;
+  fieldScope: Omit<ScopeGraphQLInputObjectTypeFieldsField, "fieldName">
+) => import("graphql").GraphQLInputFieldConfig;
 
 function getNameFromType(
   Type: GraphQLNamedType | import("graphql").GraphQLSchema
@@ -630,165 +632,168 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
           },
           fields: () => {
             const processedFields: graphql.GraphQLFieldConfig<any, any>[] = [];
+            const fieldWithHooks: FieldWithHooksFunction = (
+              fieldName,
+              spec,
+              fieldScope
+            ) => {
+              if (!isString(fieldName)) {
+                throw new Error(
+                  "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
+                );
+              }
+              if (!fieldScope) {
+                throw new Error(
+                  "All calls to `fieldWithHooks` must specify a `fieldScope` " +
+                    "argument that gives additional context about the field so " +
+                    "that further plugins may more easily understand the field. " +
+                    "Keys within this object should contain the phrase 'field' " +
+                    "since they will be merged into the parent objects scope and " +
+                    "are not allowed to clash. If you really have no additional " +
+                    "information to give, please just pass `{}`."
+                );
+              }
+
+              const argDataGenerators: any[] = [];
+              fieldArgDataGeneratorsByFieldName[fieldName] = argDataGenerators;
+
+              let newSpec = spec;
+              const context: ContextGraphQLObjectTypeFieldsField = {
+                ...commonContext,
+                Self: Self as graphql.GraphQLObjectType,
+                addDataGenerator(fn) {
+                  return addDataGeneratorForField(fieldName, fn);
+                },
+                addArgDataGenerator(fn) {
+                  ensureName(fn);
+                  argDataGenerators.push(fn);
+                },
+                getDataFromParsedResolveInfoFragment: (
+                  parsedResolveInfoFragment,
+                  ReturnType
+                ): ResolvedLookAhead => {
+                  const Type = getNamedType(ReturnType as GraphQLType);
+                  const data = {};
+
+                  const {
+                    fields,
+                    args,
+                  } = this.simplifyParsedResolveInfoFragmentWithType(
+                    parsedResolveInfoFragment,
+                    ReturnType
+                  );
+
+                  // Args -> argDataGenerators
+                  for (
+                    let dgIndex = 0, dgCount = argDataGenerators.length;
+                    dgIndex < dgCount;
+                    dgIndex++
+                  ) {
+                    const gen = argDataGenerators[dgIndex];
+                    try {
+                      mergeData(data, gen, ReturnType, args);
+                    } catch (e) {
+                      debug(
+                        "Failed to execute argDataGenerator '%s' on %s of %s",
+                        gen.displayName || gen.name || "anonymous",
+                        fieldName,
+                        getNameFromType(Self)
+                      );
+
+                      throw e;
+                    }
+                  }
+
+                  // finalSpec.type -> fieldData
+                  if (!finalSpec) {
+                    throw new Error(
+                      "It's too early to call this! Call from within resolve"
+                    );
+                  }
+                  const fieldDataGeneratorsByFieldName = fieldDataGeneratorsByFieldNameByType.get(
+                    Type
+                  );
+
+                  if (
+                    fieldDataGeneratorsByFieldName &&
+                    isCompositeType(Type) &&
+                    !isAbstractType(Type)
+                  ) {
+                    const typeFields = Type.getFields();
+                    const keys = Object.keys(fields);
+                    for (
+                      let keyIndex = 0, keyCount = keys.length;
+                      keyIndex < keyCount;
+                      keyIndex++
+                    ) {
+                      const alias = keys[keyIndex];
+                      const field = fields[alias];
+                      const gens = fieldDataGeneratorsByFieldName[field.name];
+                      if (gens) {
+                        const FieldReturnType = typeFields[field.name].type;
+                        for (let i = 0, l = gens.length; i < l; i++) {
+                          mergeData(data, gens[i], FieldReturnType, field);
+                        }
+                      }
+                    }
+                  }
+                  return data;
+                },
+                scope: extend(
+                  extend(
+                    { ...scope },
+                    {
+                      fieldName,
+                    },
+
+                    `Within context for GraphQLObjectType '${rawSpec.name}'`
+                  ),
+
+                  fieldScope,
+                  `Extending scope for field '${fieldName}' within context for GraphQLObjectType '${rawSpec.name}'`
+                ),
+              };
+
+              if (typeof newSpec === "function") {
+                newSpec = newSpec(context);
+              }
+              newSpec = builder.applyHooks(
+                this,
+                "GraphQLObjectType:fields:field",
+                newSpec,
+                context,
+                `|${getNameFromType(Self)}.fields.${fieldName}`
+              );
+
+              newSpec.args = newSpec.args || {};
+              const argsContext: ContextGraphQLObjectTypeFieldsFieldArgs = {
+                ...context,
+                field: newSpec,
+                returnType: newSpec.type,
+              };
+              newSpec = {
+                ...newSpec,
+                args: builder.applyHooks(
+                  this,
+                  "GraphQLObjectType:fields:field:args",
+                  newSpec.args,
+                  argsContext,
+
+                  `|${getNameFromType(Self)}.fields.${fieldName}`
+                ),
+              };
+
+              const finalSpec = newSpec;
+              processedFields.push(finalSpec);
+              return finalSpec;
+            };
             const fieldsContext: ContextGraphQLObjectTypeFields = {
               ...commonContext,
               addDataGeneratorForField,
               recurseDataGeneratorsForField,
               Self: Self as graphql.GraphQLObjectType,
               GraphQLObjectType: rawSpec,
-              fieldWithHooks: ((fieldName, spec, fieldScope) => {
-                if (!isString(fieldName)) {
-                  throw new Error(
-                    "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
-                  );
-                }
-                if (!fieldScope) {
-                  throw new Error(
-                    "All calls to `fieldWithHooks` must specify a `fieldScope` " +
-                      "argument that gives additional context about the field so " +
-                      "that further plugins may more easily understand the field. " +
-                      "Keys within this object should contain the phrase 'field' " +
-                      "since they will be merged into the parent objects scope and " +
-                      "are not allowed to clash. If you really have no additional " +
-                      "information to give, please just pass `{}`."
-                  );
-                }
-
-                const argDataGenerators: any[] = [];
-                fieldArgDataGeneratorsByFieldName[
-                  fieldName
-                ] = argDataGenerators;
-
-                let newSpec = spec;
-                const context: ContextGraphQLObjectTypeFieldsField = {
-                  ...commonContext,
-                  Self: Self as graphql.GraphQLObjectType,
-                  addDataGenerator(fn) {
-                    return addDataGeneratorForField(fieldName, fn);
-                  },
-                  addArgDataGenerator(fn) {
-                    ensureName(fn);
-                    argDataGenerators.push(fn);
-                  },
-                  getDataFromParsedResolveInfoFragment: (
-                    parsedResolveInfoFragment,
-                    ReturnType
-                  ): ResolvedLookAhead => {
-                    const Type = getNamedType(ReturnType as GraphQLType);
-                    const data = {};
-
-                    const {
-                      fields,
-                      args,
-                    } = this.simplifyParsedResolveInfoFragmentWithType(
-                      parsedResolveInfoFragment,
-                      ReturnType
-                    );
-
-                    // Args -> argDataGenerators
-                    for (
-                      let dgIndex = 0, dgCount = argDataGenerators.length;
-                      dgIndex < dgCount;
-                      dgIndex++
-                    ) {
-                      const gen = argDataGenerators[dgIndex];
-                      try {
-                        mergeData(data, gen, ReturnType, args);
-                      } catch (e) {
-                        debug(
-                          "Failed to execute argDataGenerator '%s' on %s of %s",
-                          gen.displayName || gen.name || "anonymous",
-                          fieldName,
-                          getNameFromType(Self)
-                        );
-
-                        throw e;
-                      }
-                    }
-
-                    // finalSpec.type -> fieldData
-                    if (!finalSpec) {
-                      throw new Error(
-                        "It's too early to call this! Call from within resolve"
-                      );
-                    }
-                    const fieldDataGeneratorsByFieldName = fieldDataGeneratorsByFieldNameByType.get(
-                      Type
-                    );
-
-                    if (
-                      fieldDataGeneratorsByFieldName &&
-                      isCompositeType(Type) &&
-                      !isAbstractType(Type)
-                    ) {
-                      const typeFields = Type.getFields();
-                      const keys = Object.keys(fields);
-                      for (
-                        let keyIndex = 0, keyCount = keys.length;
-                        keyIndex < keyCount;
-                        keyIndex++
-                      ) {
-                        const alias = keys[keyIndex];
-                        const field = fields[alias];
-                        const gens = fieldDataGeneratorsByFieldName[field.name];
-                        if (gens) {
-                          const FieldReturnType = typeFields[field.name].type;
-                          for (let i = 0, l = gens.length; i < l; i++) {
-                            mergeData(data, gens[i], FieldReturnType, field);
-                          }
-                        }
-                      }
-                    }
-                    return data;
-                  },
-                  scope: extend(
-                    extend(
-                      { ...scope },
-                      {
-                        fieldName,
-                      },
-
-                      `Within context for GraphQLObjectType '${rawSpec.name}'`
-                    ),
-
-                    fieldScope,
-                    `Extending scope for field '${fieldName}' within context for GraphQLObjectType '${rawSpec.name}'`
-                  ),
-                };
-
-                if (typeof newSpec === "function") {
-                  newSpec = newSpec(context);
-                }
-                newSpec = builder.applyHooks(
-                  this,
-                  "GraphQLObjectType:fields:field",
-                  newSpec,
-                  context,
-                  `|${getNameFromType(Self)}.fields.${fieldName}`
-                );
-
-                newSpec.args = newSpec.args || {};
-                const argsContext: ContextGraphQLObjectTypeFieldsFieldArgs = {
-                  ...context,
-                  field: newSpec,
-                  returnType: newSpec.type,
-                };
-                newSpec = {
-                  ...newSpec,
-                  args: builder.applyHooks(
-                    this,
-                    "GraphQLObjectType:fields:field:args",
-                    newSpec.args,
-                    argsContext,
-
-                    `|${getNameFromType(Self)}.fields.${fieldName}`
-                  ),
-                };
-
-                const finalSpec = newSpec;
-                processedFields.push(finalSpec);
-                return finalSpec;
-              }) as FieldWithHooksFunction,
+              fieldWithHooks,
             };
 
             let rawFields = rawSpec.fields || {};
@@ -848,50 +853,55 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
           ...newSpec,
           fields: () => {
             const processedFields: graphql.GraphQLInputFieldConfig[] = [];
+            const fieldWithHooks: InputFieldWithHooksFunction = (
+              fieldName,
+              spec,
+              fieldScope = {}
+            ) => {
+              if (!isString(fieldName)) {
+                throw new Error(
+                  "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
+                );
+              }
+              const context: ContextGraphQLInputObjectTypeFieldsField = {
+                ...commonContext,
+                Self: Self as graphql.GraphQLInputObjectType,
+                scope: extend(
+                  extend(
+                    { ...scope },
+                    {
+                      fieldName,
+                    },
+
+                    `Within context for GraphQLInputObjectType '${rawSpec.name}'`
+                  ),
+
+                  fieldScope,
+                  `Extending scope for field '${fieldName}' within context for GraphQLInputObjectType '${rawSpec.name}'`
+                ),
+              };
+
+              let newSpec = spec;
+              if (typeof newSpec === "function") {
+                newSpec = newSpec(context);
+              }
+              newSpec = builder.applyHooks(
+                this,
+                "GraphQLInputObjectType:fields:field",
+                newSpec,
+                context,
+                `|${getNameFromType(Self)}.fields.${fieldName}`
+              );
+
+              const finalSpec = newSpec;
+              processedFields.push(finalSpec);
+              return finalSpec;
+            };
             const fieldsContext: ContextGraphQLInputObjectTypeFields = {
               ...commonContext,
               Self: Self as graphql.GraphQLInputObjectType,
               GraphQLInputObjectType: rawSpec,
-              fieldWithHooks: ((fieldName, spec, fieldScope = {}) => {
-                if (!isString(fieldName)) {
-                  throw new Error(
-                    "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
-                  );
-                }
-                const context: ContextGraphQLInputObjectTypeFieldsField = {
-                  ...commonContext,
-                  Self: Self as graphql.GraphQLInputObjectType,
-                  scope: extend(
-                    extend(
-                      { ...scope },
-                      {
-                        fieldName,
-                      },
-
-                      `Within context for GraphQLInputObjectType '${rawSpec.name}'`
-                    ),
-
-                    fieldScope,
-                    `Extending scope for field '${fieldName}' within context for GraphQLInputObjectType '${rawSpec.name}'`
-                  ),
-                };
-
-                let newSpec = spec;
-                if (typeof newSpec === "function") {
-                  newSpec = newSpec(context);
-                }
-                newSpec = builder.applyHooks(
-                  this,
-                  "GraphQLInputObjectType:fields:field",
-                  newSpec,
-                  context,
-                  `|${getNameFromType(Self)}.fields.${fieldName}`
-                );
-
-                const finalSpec = newSpec;
-                processedFields.push(finalSpec);
-                return finalSpec;
-              }) as InputFieldWithHooksFunction,
+              fieldWithHooks,
             };
 
             let rawFields = rawSpec.fields;

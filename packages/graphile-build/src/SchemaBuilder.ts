@@ -343,6 +343,12 @@ export interface ContextGraphQLObjectTypeFields
 export interface ScopeGraphQLObjectTypeFieldsField
   extends ScopeGraphQLObjectType {
   fieldName: string;
+  autoField?: true;
+
+  // TODO: Relocate these to the relevant places
+  isRootNodeField?: true;
+  isPageInfoHasNextPageField?: true;
+  isPageInfoHasPreviousPageField?: true;
 }
 export interface ContextGraphQLObjectTypeFieldsField
   extends ContextGraphQLObjectTypeBase {
@@ -405,6 +411,7 @@ export interface ContextGraphQLInputObjectTypeFields
 export interface ScopeGraphQLInputObjectTypeFieldsField
   extends ScopeGraphQLInputObjectType {
   fieldName: string;
+  autoField?: true;
 }
 export interface ContextGraphQLInputObjectTypeFieldsField
   extends ContextGraphQLInputObjectType {
