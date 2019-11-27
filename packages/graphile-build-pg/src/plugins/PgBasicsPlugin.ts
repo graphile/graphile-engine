@@ -71,6 +71,7 @@ declare module "graphile-build" {
     pgSchemas: Array<string>;
     persistentMemoizeWithKey?: <T>(key: string, fn: () => T) => T;
 
+    pgDisableDefaultMutations?: boolean;
     pgSimpleCollections?: "only" | "both" | "omit";
     pgStrictFunctions?: boolean;
     pgColumnFilter?: PgColumnFilterFunction;
@@ -84,7 +85,7 @@ declare module "graphile-build" {
     pgSql: typeof import("pg-sql2");
     graphileBuildPgVersion: string;
     pgStrictFunctions: boolean;
-    pgColumnFilter: PgColumnFilterFunction | undefined;
+    pgColumnFilter: PgColumnFilterFunction;
     pgQueryFromResolveData: ReturnType<typeof queryFromResolveDataFactory>;
     pgAddStartEndCursor: typeof addStartEndCursor;
     pgOmit: typeof baseOmit;

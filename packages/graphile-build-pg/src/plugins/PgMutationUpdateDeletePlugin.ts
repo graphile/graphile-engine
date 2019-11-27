@@ -1,5 +1,32 @@
-import { Plugin } from "graphile-build";
+import {
+  Plugin,
+  GraphileObjectTypeConfig,
+  ScopeGraphQLObjectType,
+} from "graphile-build";
 import debugFactory from "debug";
+import { ResolveTree } from "graphql-parse-resolve-info";
+import { SQL } from "../QueryBuilder";
+import { PgAttribute } from "./PgIntrospectionPlugin";
+
+declare module "graphile-build" {
+  interface ScopeGraphQLObjectType {
+    isPgUpdatePayloadType?: boolean;
+    isPgDeletePayloadType?: boolean;
+  }
+  interface ScopeGraphQLObjectTypeFieldsField {
+    isPgNodeMutation?: boolean;
+    isPgMutationPayloadDeletedNodeIdField?: true;
+  }
+  interface ScopeGraphQLInputObjectType {
+    isPgUpdateInputType?: boolean;
+    isPgUpdateNodeInputType?: boolean;
+    isPgDeleteInputType?: boolean;
+    isPgDeleteNodeInputType?: boolean;
+    isPgUpdateByKeysInputType?: boolean;
+    isPgDeleteByKeysInputType?: boolean;
+    pgKeys?: PgAttribute[];
+  }
+}
 
 const debug = debugFactory("graphile-build-pg");
 
@@ -34,6 +61,7 @@ export default (async function PgMutationUpdateDeletePlugin(
           GraphQLString,
           GraphQLObjectType,
           GraphQLID,
+          getNamedType,
         },
 
         pgColumnFilter,
@@ -50,7 +78,7 @@ export default (async function PgMutationUpdateDeletePlugin(
         fieldWithHooks,
       } = context;
 
-      if (!isRootMutation) {
+      if (!isRootMutation || !pgColumnFilter) {
         return fields;
       }
 
@@ -92,7 +120,9 @@ export default (async function PgMutationUpdateDeletePlugin(
                 resolveContext
               ) {
                 const { input } = args;
-                const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
+                const parsedResolveInfoFragment = parseResolveInfo(
+                  resolveInfo
+                ) as ResolveTree;
                 parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
                 const resolveData = getDataFromParsedResolveInfoFragment(
                   parsedResolveInfoFragment,
@@ -106,8 +136,8 @@ export default (async function PgMutationUpdateDeletePlugin(
 
                 let sqlMutationQuery;
                 if (mode === "update") {
-                  const sqlColumns = [];
-                  const sqlValues = [];
+                  const sqlColumns: SQL[] = [];
+                  const sqlValues: SQL[] = [];
                   const inputData =
                     input[
                       inflection.patchField(inflection.tableFieldName(table))
@@ -200,104 +230,117 @@ returning *`;
                   null
                 );
 
-                const tableTypeName = Table.name;
+                if (!Table) {
+                  throw new Error(
+                    `Could not determine GraphQL type for table '${table.name}'`
+                  );
+                }
+
+                const tableTypeName = getNamedType(Table).name;
                 const TablePatch = getTypeByName(
-                  inflection.patchType(Table.name)
+                  inflection.patchType(getNamedType(Table).name)
                 );
+                if (mode === "update" && !TablePatch) {
+                  throw new Error(
+                    `Could not find TablePatch type for table '${table.name}'`
+                  );
+                }
 
-                const PayloadType = newWithHooks(
-                  GraphQLObjectType,
-                  {
-                    name: inflection[
-                      mode === "delete"
-                        ? "deletePayloadType"
-                        : "updatePayloadType"
-                    ](table),
-                    description: `The output of our ${mode} \`${tableTypeName}\` mutation.`,
-                    fields: ({ fieldWithHooks }) => {
-                      const tableName = inflection.tableFieldName(table);
-                      // This should really be `-node-id` but for compatibility with PostGraphQL v3 we haven't made that change.
-                      const deletedNodeIdFieldName = inflection.deletedNodeId(
-                        table
-                      );
+                const payloadSpec: GraphileObjectTypeConfig<any, any> = {
+                  name: inflection[
+                    mode === "delete"
+                      ? "deletePayloadType"
+                      : "updatePayloadType"
+                  ](table),
+                  description: `The output of our ${mode} \`${tableTypeName}\` mutation.`,
+                  fields: ({ fieldWithHooks }) => {
+                    const tableName = inflection.tableFieldName(table);
+                    // This should really be `-node-id` but for compatibility with PostGraphQL v3 we haven't made that change.
+                    const deletedNodeIdFieldName = inflection.deletedNodeId(
+                      table
+                    );
 
-                      return Object.assign(
-                        {
-                          clientMutationId: {
-                            description:
-                              "The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.",
-                            type: GraphQLString,
-                          },
-
-                          [tableName]: pgField(
-                            build,
-                            fieldWithHooks,
-                            tableName,
-                            {
-                              description: `The \`${tableTypeName}\` that was ${mode}d by this mutation.`,
-                              type: Table,
-                            },
-
-                            {},
-                            false
-                          ),
+                    return Object.assign(
+                      {
+                        clientMutationId: {
+                          description:
+                            "The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.",
+                          type: GraphQLString,
                         },
 
-                        mode === "delete"
-                          ? {
-                              [deletedNodeIdFieldName]: fieldWithHooks(
-                                deletedNodeIdFieldName,
-                                ({ addDataGenerator }) => {
-                                  const fieldDataGeneratorsByTableType = fieldDataGeneratorsByType.get(
-                                    TableType
-                                  );
+                        [tableName]: pgField(
+                          build,
+                          fieldWithHooks,
+                          tableName,
+                          {
+                            description: `The \`${tableTypeName}\` that was ${mode}d by this mutation.`,
+                            type: Table,
+                          },
 
-                                  const gens =
-                                    fieldDataGeneratorsByTableType &&
-                                    fieldDataGeneratorsByTableType[
-                                      nodeIdFieldName
-                                    ];
+                          {},
+                          false
+                        ),
+                      },
 
-                                  if (gens) {
-                                    gens.forEach(gen => addDataGenerator(gen));
-                                  }
-                                  return {
-                                    type: GraphQLID,
-                                    resolve(data) {
-                                      return (
-                                        data.data.__identifiers &&
-                                        getNodeIdForTypeAndIdentifiers(
-                                          Table,
-                                          ...data.data.__identifiers
-                                        )
-                                      );
-                                    },
-                                  };
-                                },
-                                {
-                                  isPgMutationPayloadDeletedNodeIdField: true,
+                      mode === "delete"
+                        ? {
+                            [deletedNodeIdFieldName]: fieldWithHooks(
+                              deletedNodeIdFieldName,
+                              ({ addDataGenerator }) => {
+                                const fieldDataGeneratorsByTableType = fieldDataGeneratorsByType.get(
+                                  TableType
+                                );
+
+                                const gens =
+                                  fieldDataGeneratorsByTableType &&
+                                  fieldDataGeneratorsByTableType[
+                                    nodeIdFieldName
+                                  ];
+
+                                if (gens) {
+                                  gens.forEach(gen => addDataGenerator(gen));
                                 }
-                              ),
-                            }
-                          : null
-                      );
-                    },
+                                return {
+                                  type: GraphQLID,
+                                  resolve(data) {
+                                    return (
+                                      data.data.__identifiers &&
+                                      getNodeIdForTypeAndIdentifiers(
+                                        Table,
+                                        ...data.data.__identifiers
+                                      )
+                                    );
+                                  },
+                                };
+                              },
+                              {
+                                isPgMutationPayloadDeletedNodeIdField: true,
+                              }
+                            ),
+                          }
+                        : null
+                    );
                   },
+                };
+                const payloadScope: ScopeGraphQLObjectType = {
+                  __origin: `Adding table ${mode} mutation payload type for ${describePgEntity(
+                    table
+                  )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
+                    table,
+                    {
+                      name: "newNameHere",
+                    }
+                  )}`,
+                  isMutationPayload: true,
+                  isPgUpdatePayloadType: mode === "update",
+                  isPgDeletePayloadType: mode === "delete",
+                  pgIntrospection: table,
+                };
+                const PayloadType = newWithHooks(
+                  GraphQLObjectType,
+                  payloadSpec,
 
-                  {
-                    __origin: `Adding table ${mode} mutation payload type for ${describePgEntity(
-                      table
-                    )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
-                      table,
-                      {
-                        name: "newNameHere",
-                      }
-                    )}`,
-                    isMutationPayload: true,
-                    isPgUpdatePayloadType: mode === "update",
-                    isPgDeletePayloadType: mode === "delete",
-                    pgIntrospection: table,
-                  }
+                  payloadScope
                 );
 
                 // NodeId
@@ -337,7 +380,7 @@ returning *`;
                                 inflection.tableFieldName(table)
                               )]: {
                                 description: `An object where the defined keys will be set on the \`${tableTypeName}\` being ${mode}d.`,
-                                type: new GraphQLNonNull(TablePatch),
+                                type: new GraphQLNonNull(TablePatch!),
                               },
                             }
                           : null
@@ -357,11 +400,24 @@ returning *`;
                       isPgUpdateNodeInputType: mode === "update",
                       isPgDeleteInputType: mode === "delete",
                       isPgDeleteNodeInputType: mode === "delete",
-                      pgInflection: table, // TODO:v5: remove - TYPO!
+                      ...({
+                        pgInflection: table, // TODO:v5: remove - TYPO!
+                      } as {}),
                       pgIntrospection: table,
                       isMutationInput: true,
                     }
                   );
+
+                  if (!InputType) {
+                    throw new Error(
+                      `Could not build input type for '${table.name}'`
+                    );
+                  }
+                  if (!PayloadType) {
+                    throw new Error(
+                      `Could not build payload type for '${table.name}'`
+                    );
+                  }
 
                   memo = extend(
                     memo,
@@ -490,19 +546,23 @@ returning *`;
                                 inflection.tableFieldName(table)
                               )]: {
                                 description: `An object where the defined keys will be set on the \`${tableTypeName}\` being ${mode}d.`,
-                                type: new GraphQLNonNull(TablePatch),
+                                type: new GraphQLNonNull(TablePatch!),
                               },
                             }
                           : null,
                         keys.reduce((memo, key) => {
+                          const KeyType = pgGetGqlInputTypeByTypeIdAndModifier(
+                            key.typeId,
+                            key.typeModifier
+                          );
+                          if (!KeyType) {
+                            throw new Error(
+                              `Failed to get input type for key '${key.name}' on '${key.class.name}'`
+                            );
+                          }
                           memo[inflection.column(key)] = {
                             description: key.description,
-                            type: new GraphQLNonNull(
-                              pgGetGqlInputTypeByTypeIdAndModifier(
-                                key.typeId,
-                                key.typeModifier
-                              )
-                            ),
+                            type: new GraphQLNonNull(KeyType),
                           };
 
                           return memo;
@@ -523,12 +583,25 @@ returning *`;
                       isPgUpdateByKeysInputType: mode === "update",
                       isPgDeleteInputType: mode === "delete",
                       isPgDeleteByKeysInputType: mode === "delete",
-                      pgInflection: table, // TODO:v5: remove - TYPO!
+                      ...({
+                        pgInflection: table, // TODO:v5: remove - TYPO!
+                      } as {}),
                       pgIntrospection: table,
                       pgKeys: keys,
                       isMutationInput: true,
                     }
                   );
+
+                  if (!PayloadType) {
+                    throw new Error(
+                      `Failed to determine payload type for '${fieldName}' mutation`
+                    );
+                  }
+                  if (!InputType) {
+                    throw new Error(
+                      `Failed to determine input type for '${fieldName}' mutation`
+                    );
+                  }
 
                   memo = extend(
                     memo,

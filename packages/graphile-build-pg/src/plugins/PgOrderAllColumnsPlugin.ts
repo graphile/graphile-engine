@@ -15,7 +15,12 @@ export default (function PgOrderAllColumnsPlugin(builder) {
       const {
         scope: { isPgRowSortEnum, pgIntrospection: table },
       } = context;
-      if (!isPgRowSortEnum || !table || table.kind !== "class") {
+      if (
+        !pgColumnFilter ||
+        !isPgRowSortEnum ||
+        !table ||
+        table.kind !== "class"
+      ) {
         return values;
       }
       return extend(

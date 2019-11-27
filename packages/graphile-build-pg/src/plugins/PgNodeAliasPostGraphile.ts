@@ -15,7 +15,7 @@ export default (async function PgNodeAliasPostGraphile(builder) {
       const {
         scope: { isPgRowType, isPgCompoundType, pgIntrospection: table },
       } = context;
-      if (isPgRowType || isPgCompoundType) {
+      if (table && (isPgRowType || isPgCompoundType)) {
         setNodeAlias(object.name, pluralize(table.name));
       }
       return object;

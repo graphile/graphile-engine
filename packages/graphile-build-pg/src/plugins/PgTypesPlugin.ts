@@ -21,6 +21,7 @@ import {
   PgEntity,
   PgClass,
   PgEntityKind,
+  PgConstraint,
 } from "./PgIntrospectionPlugin";
 import { PgTypeModifier } from "./PgBasicsPlugin";
 
@@ -102,6 +103,7 @@ declare module "graphile-build" {
   interface ScopeGraphQLObjectTypeFieldsField {
     pgFieldIntrospection?: PgEntity;
     pgFieldIntrospectionTable?: PgClass;
+    pgFieldConstraint?: PgConstraint;
     isPgFieldConnection?: true;
     isPgFieldSimpleCollection?: true;
     isCursorField?: true;
