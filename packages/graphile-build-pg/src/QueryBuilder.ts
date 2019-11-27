@@ -1,22 +1,24 @@
 import * as sql from "pg-sql2";
-import { SQL } from "pg-sql2";
-import isSafeInteger from "lodash/isSafeInteger";
-import chunk from "lodash/chunk";
+import isSafeInteger = require("lodash/isSafeInteger");
+import chunk = require("lodash/chunk");
 import { PgClass, PgType } from "./plugins/PgIntrospectionPlugin";
 
+type SQL = import("pg-sql2").SQL;
+export { sql, SQL };
+
 // eslint-disable-next-line flowtype/no-weak-types
-type GraphQLContext = any;
+export type GraphQLContext = any;
 
 const isDev = process.env.POSTGRAPHILE_ENV === "development";
 
-type GenContext = {
+export interface GenContext {
   queryBuilder: QueryBuilder;
-};
+}
 
-type Gen<T> = (context: GenContext) => T;
+export type Gen<T> = (context: GenContext) => T;
 
 // Importantly, this cannot include a function
-type CallResult = null | string | number | boolean | SQL;
+type CallResult = undefined | null | string | number | boolean | SQL;
 
 function callIfNecessary<T extends CallResult>(
   o: Gen<T> | T,
@@ -41,11 +43,11 @@ function callIfNecessaryArray<T extends CallResult>(
 }
 
 export type RawAlias = symbol | string;
-type SQLAlias = SQL;
-type SQLGen = Gen<SQL> | SQL;
-type NumberGen = Gen<number> | number;
-type CursorValue = Array<unknown>;
-type CursorComparator = (val: CursorValue, isAfter: boolean) => void;
+export type SQLAlias = SQL;
+export type SQLGen = Gen<SQL> | SQL;
+export type NumberGen = Gen<number> | number;
+export type CursorValue = Array<unknown>;
+export type CursorComparator = (val: CursorValue, isAfter: boolean) => void;
 
 export type QueryBuilderOptions = {
   supportsJSONB?: boolean; // Defaults to true
@@ -72,12 +74,12 @@ function escapeLarge(sqlFragment: SQL, type: PgType) {
 }
 
 class QueryBuilder {
-  parentQueryBuilder: QueryBuilder | undefined;
+  parentQueryBuilder: QueryBuilder | void;
   context: GraphQLContext;
   rootValue: any; // eslint-disable-line flowtype/no-weak-types
   supportsJSONB: boolean;
   locks: {
-    [a: string]: false | true | string;
+    [a: string]: false | true | string | undefined;
   };
 
   finalized: boolean;
@@ -85,7 +87,7 @@ class QueryBuilder {
   data: {
     cursorPrefix: Array<string>;
     fixedSelectExpression: SQLGen | null | undefined;
-    select: Array<[SQLGen, RawAlias]>;
+    select: Array<[SQLGen, string]>;
     selectCursor: SQLGen | null | undefined;
     from: [SQLGen, SQLAlias] | null | undefined;
     join: Array<SQLGen>;
@@ -118,7 +120,7 @@ class QueryBuilder {
   compiledData: {
     cursorPrefix: Array<string>;
     fixedSelectExpression: SQL | null | undefined;
-    select: Array<[SQL, RawAlias]>;
+    select: Array<[SQL, string]>;
     selectCursor: SQL | null | undefined;
     from: [SQL, SQLAlias] | null | undefined;
     join: Array<SQL>;
@@ -275,7 +277,7 @@ class QueryBuilder {
   // ----------------------------------------
 
   // Helper function
-  jsonbBuildObject(fields: Array<[SQL, RawAlias]>) {
+  jsonbBuildObject(fields: Array<[SQL, string /* used to be RawAlias, but cannot work with symbols! */]>) {
     if (this.supportsJSONB && fields.length > 50) {
       const fieldsChunks = chunk(fields, 50);
       const chunkToJson = fieldsChunk =>
@@ -305,13 +307,13 @@ class QueryBuilder {
 
   // ----------------------------------------
 
-  beforeLock(field: string, fn: () => void) {
+  beforeLock(field: string, fn: () => void): void {
     this.checkLock(field);
     if (!this.data.beforeLock[field]) {
       this.data.beforeLock[field] = [];
     }
     // $FlowFixMe: this is guaranteed to be set, due to the if statement above
-    this.data.beforeLock[field].push(fn);
+    this.data.beforeLock[field]!.push(fn);
   }
 
   makeLiveCollection(
@@ -410,7 +412,7 @@ ${sql.join(
     }
     this.data.fixedSelectExpression = exprGen;
   }
-  select(exprGen: SQLGen, alias: RawAlias) {
+  select(exprGen: SQLGen, alias: string) {
     this.checkLock("select");
     this.lock("fixedSelectExpression");
     if (typeof alias === "string") {
@@ -456,7 +458,7 @@ ${sql.join(
     this.lock("fixedSelectExpression");
     this.data.selectCursor = exprGen;
   }
-  from(expr: SQLGen, alias?: SQLAlias = sql.identifier(Symbol())) {
+  from(expr: SQLGen, alias: SQLAlias = sql.identifier(Symbol())) {
     this.checkLock("from");
     if (!expr) {
       throw new Error("No from table source!");
@@ -485,7 +487,7 @@ ${sql.join(
   orderBy(
     exprGen: SQLGen,
     ascending: boolean = true,
-    nullsFirst: boolean | null
+    nullsFirst: boolean | null = null
   ) {
     this.checkLock("orderBy");
     this.data.orderBy.push([exprGen, ascending, nullsFirst]);
@@ -530,7 +532,7 @@ ${sql.join(
 
   // ----------------------------------------
 
-  isOrderUnique(lock?: boolean = true) {
+  isOrderUnique(lock: boolean = true) {
     if (lock) {
       this.lock("orderBy");
       this.lock("orderIsUnique");
@@ -554,7 +556,7 @@ ${sql.join(
     }
     return this.compiledData.from[1];
   }
-  getSelectCursor() {
+  getSelectCursor(): SQL | null | undefined {
     this.lock("selectCursor");
     return this.compiledData.selectCursor;
   }
@@ -562,13 +564,17 @@ ${sql.join(
     this.lock("offset");
     return this.compiledData.offset || 0;
   }
-  getFinalLimitAndOffset() {
+  getFinalLimitAndOffset(): {
+    limit: number | null;
+    offset: number;
+    flip: boolean;
+  } {
     this.lock("offset");
     this.lock("limit");
     this.lock("first");
     this.lock("last");
-    let limit = this.compiledData.limit;
-    let offset = this.compiledData.offset || 0;
+    let limit = this.compiledData.limit ?? null;
+    let offset = this.compiledData.offset ?? 0;
     let flip = false;
     if (this.compiledData.first != null) {
       if (limit != null) {
@@ -730,7 +736,7 @@ ${sql.join(
       addNotDistinctFromNullCase?: boolean;
       useAsterisk?: boolean;
     } = {}
-  ) {
+  ): SQL {
     this.lockEverything();
 
     if (this.compiledData.fixedSelectExpression) {
@@ -764,8 +770,8 @@ ${sql.join(
     let fragment = sql.fragment`\
 select ${useAsterisk ? sql.fragment`${this.getTableAlias()}.*` : fields}
 ${this.compiledData.from &&
-  sql.fragment`from ${this.compiledData.from[0]} as ${this.getTableAlias()}`}
-${this.compiledData.join.length && sql.join(this.compiledData.join, " ")}
+  sql.fragment`from ${this.compiledData.from[0]} as ${this.getTableAlias()}` || sql.blank}
+${this.compiledData.join.length && sql.join(this.compiledData.join, " ") || sql.blank}
 where ${this.buildWhereClause(true, true, options)}
 ${
   this.compiledData.orderBy.length
@@ -781,16 +787,16 @@ ${
                 ? sql.fragment` NULLS FIRST`
                 : nullsFirst === false
                 ? sql.fragment` NULLS LAST`
-                : null
+                : sql.blank
             }`
         ),
 
         ","
       )}`
-    : ""
+    : sql.blank
 }
-${isSafeInteger(limit) && sql.fragment`limit ${sql.literal(limit)}`}
-${offset && sql.fragment`offset ${sql.literal(offset)}`}`;
+${isSafeInteger(limit) && sql.fragment`limit ${sql.literal(limit)}` || sql.blank}
+${offset && sql.fragment`offset ${sql.literal(offset)}` || sql.blank}`;
     if (flip) {
       const flipAlias = Symbol();
       fragment = sql.fragment`\
@@ -864,15 +870,15 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
 
       // Assume that duplicate fields must be identical, don't output the same
       // key multiple times
-      const seenFields: { [key: string | Symbol]: true } = {};
-      const data = [];
+      const seenFields = new Map<string | symbol, true>();
+      const data: any[] = [];
       const selects = this.data[type];
 
       // DELIBERATE slow loop, see NOTICE above
       for (let i = 0; i < selects.length; i++) {
         const [valueOrGenerator, columnName] = selects[i];
-        if (!seenFields[columnName]) {
-          seenFields[columnName] = true;
+        if (!seenFields.has(columnName)) {
+          seenFields.set(columnName, true);
           data.push([callIfNecessary(valueOrGenerator, context), columnName]);
           locks = beforeLock[type];
           if (locks) {
@@ -918,10 +924,11 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
   }
   checkLock(type: string) {
     if (this.locks[type]) {
-      if (typeof this.locks[type] === "string") {
+      const lock = this.locks[type]
+      if (typeof lock === "string") {
         throw new Error(
           `'${type}' has already been locked\n    ` +
-            this.locks[type].replace(/\n/g, "\n    ") +
+            lock.replace(/\n/g, "\n    ") +
             "\n"
         );
       }
@@ -949,7 +956,7 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
     this.lock("select");
   }
   /** this method is experimental */
-  buildChild() {
+  buildChild(): QueryBuilder {
     const options = { supportsJSONB: this.supportsJSONB };
     const child = new QueryBuilder(options, this.context, this.rootValue);
     child.parentQueryBuilder = this;
@@ -961,7 +968,7 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
     from: SQLGen,
     selectExpression: SQLGen,
     alias?: SQLAlias
-  ) {
+  ): QueryBuilder {
     if (this._children.has(name)) {
       throw new Error(
         `QueryBuilder already has a child named ${name.toString()}`
@@ -974,7 +981,7 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
     return child;
   }
   /** this method is experimental */
-  getNamedChild(name: string) {
+  getNamedChild(name: string): QueryBuilder | undefined {
     return this._children.get(name);
   }
 }
