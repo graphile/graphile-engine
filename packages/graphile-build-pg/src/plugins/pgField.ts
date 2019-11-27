@@ -1,17 +1,35 @@
-import { Build } from "graphile-build";
+import {
+  Build,
+  ContextGraphQLObjectTypeFieldsField,
+  ScopeGraphQLObjectTypeFieldsField,
+} from "graphile-build";
+import { PgType } from "./PgIntrospectionPlugin";
+import QueryBuilder, { SQL } from "../QueryBuilder";
+import { FieldWithHooksFunction } from "graphile-build/node8plus/makeNewBuild";
+import { ResolveTree } from "graphql-parse-resolve-info";
 
 interface PgFieldOptions {
-  pgType?: any;
+  pgType?: PgType;
+  pgTypeModifier?: string | null;
   hoistCursor?: boolean;
+  withQueryBuilder?: (
+    queryBuilder: QueryBuilder,
+    extra: { parsedResolveInfoFragment: ResolveTree }
+  ) => void;
 }
+
+type FieldSpec = import("graphql").GraphQLFieldConfig<any, any>;
+
 export default function pgField(
   build: Build,
-  fieldWithHooks,
-  fieldName,
-  fieldSpecGenerator,
+  fieldWithHooks: FieldWithHooksFunction,
+  fieldName: string,
+  fieldSpecGenerator:
+    | ((fieldContext: ContextGraphQLObjectTypeFieldsField) => FieldSpec)
+    | FieldSpec,
 
-  fieldScope = {},
-  whereFrom = false,
+  fieldScope: ScopeGraphQLObjectTypeFieldsField = { fieldName },
+  whereFrom: ((queryBuilder: QueryBuilder) => SQL) | false = false,
   options: PgFieldOptions = {}
 ) {
   const {
@@ -59,7 +77,7 @@ export default function pgField(
           ...(options.hoistCursor &&
           resolveData.usesCursor &&
           resolveData.usesCursor.length
-            ? { usesCursor: [true] }
+            ? { usesCursor: true }
             : null),
           pgQuery: queryBuilder => {
             queryBuilder.select(() => {
