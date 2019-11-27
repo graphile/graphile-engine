@@ -1,4 +1,5 @@
-import { Plugin } from "graphile-build";
+import { Plugin, GraphileObjectTypeConfig } from "graphile-build";
+import { GraphQLScalarType } from "graphql";
 
 const base64 = str => Buffer.from(String(str)).toString("base64");
 
@@ -16,6 +17,7 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
           GraphQLNonNull,
           GraphQLList,
           GraphQLString,
+          getNamedType,
         },
 
         inflection,
@@ -34,8 +36,9 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
 
         const returnType =
           introspectionResultsByKind.typeById[proc.returnTypeId];
-        const returnTypeTable =
-          introspectionResultsByKind.classById[returnType.classId];
+        const returnTypeTable = returnType.classId
+          ? introspectionResultsByKind.classById[returnType.classId]
+          : null;
         if (returnTypeTable) {
           // Just use the standard table connection from PgTablesPlugin
           return;
@@ -44,48 +47,64 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
           // Defer handling to PgRecordFunctionConnectionPlugin
           return;
         }
+
+        if (!Cursor || !(Cursor instanceof GraphQLScalarType)) {
+          throw new Error("Expected 'Cursor' type to exist");
+        }
+
         // TODO: PG10 doesn't support the equivalent of pg_attribute.atttypemod
         // on function arguments and return types, however maybe a later
         // version of PG will?
         const NodeType =
           pgGetGqlTypeByTypeIdAndModifier(returnType.id, null) || GraphQLString;
+        if (!NodeType || !(NodeType instanceof GraphQLObjectType)) {
+          throw new Error(
+            `Could not retrieve NodeType for type with oid '${returnType.id}'`
+          );
+        }
+
+        const edgeSpec: GraphileObjectTypeConfig<any, any> = {
+          name: inflection.scalarFunctionEdge(proc),
+          description: `A \`${
+            getNamedType(NodeType).name
+          }\` edge in the connection.`,
+          fields: ({ fieldWithHooks }) => {
+            return {
+              cursor: fieldWithHooks(
+                "cursor",
+                ({
+                  addDataGenerator,
+                }): import("graphql").GraphQLFieldConfig<any, any> => {
+                  addDataGenerator(() => ({
+                    usesCursor: true,
+                  }));
+
+                  return {
+                    description: "A cursor for use in pagination.",
+                    type: Cursor,
+                    resolve(data) {
+                      return base64(JSON.stringify(data.__cursor));
+                    },
+                  };
+                },
+                {
+                  isCursorField: true,
+                }
+              ),
+
+              node: {
+                description: `The \`${NodeType.name}\` at the end of the edge.`,
+                type: NodeType,
+                resolve(data) {
+                  return data.value;
+                },
+              },
+            };
+          },
+        };
         const EdgeType = newWithHooks(
           GraphQLObjectType,
-          {
-            name: inflection.scalarFunctionEdge(proc),
-            description: `A \`${NodeType.name}\` edge in the connection.`,
-            fields: ({ fieldWithHooks }) => {
-              return {
-                cursor: fieldWithHooks(
-                  "cursor",
-                  ({ addDataGenerator }) => {
-                    addDataGenerator(() => ({
-                      usesCursor: [true],
-                    }));
-
-                    return {
-                      description: "A cursor for use in pagination.",
-                      type: Cursor,
-                      resolve(data) {
-                        return base64(JSON.stringify(data.__cursor));
-                      },
-                    };
-                  },
-                  {
-                    isCursorField: true,
-                  }
-                ),
-
-                node: {
-                  description: `The \`${NodeType.name}\` at the end of the edge.`,
-                  type: NodeType,
-                  resolve(data) {
-                    return data.value;
-                  },
-                },
-              };
-            },
-          },
+          edgeSpec,
 
           {
             __origin: `Adding function result edge type for ${describePgEntity(
@@ -101,6 +120,12 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
             pgIntrospection: proc,
           }
         );
+
+        if (!EdgeType) {
+          throw new Error(
+            `Failed to construct EdgeType for '${edgeSpec.name}'`
+          );
+        }
 
         /*const ConnectionType = */
         newWithHooks(
@@ -123,7 +148,9 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
                   fieldWithHooks,
                   "edges",
                   {
-                    description: `A list of edges which contains the \`${NodeType.name}\` and cursor to aid in pagination.`,
+                    description: `A list of edges which contains the \`${
+                      getNamedType(NodeType).name
+                    }\` and cursor to aid in pagination.`,
                     type: new GraphQLNonNull(
                       new GraphQLList(new GraphQLNonNull(EdgeType))
                     ),
