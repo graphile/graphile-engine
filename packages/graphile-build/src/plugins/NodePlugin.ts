@@ -18,7 +18,7 @@ const base64Decode = str => Buffer.from(String(str), "base64").toString("utf8");
 export type NodeFetcher<T = GraphQLContext> = (
   data: unknown,
   identifiers: Array<unknown>,
-  context: unknown,
+  context: GraphQLContext,
   parsedResolveInfoFragment: ResolveTree,
   type: GraphQLType,
   resolveData: ResolvedLookAhead,

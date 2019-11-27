@@ -1,5 +1,6 @@
 import { Plugin } from "graphile-build";
 import debugSql from "./debugSql";
+import { ResolveTree } from "graphql-parse-resolve-info";
 
 export default (async function PgRowByUniqueConstraint(
   builder,
@@ -16,7 +17,7 @@ export default (async function PgRowByUniqueConstraint(
         gql2pg,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
         pgSql: sql,
-        graphql: { GraphQLNonNull },
+        graphql: { GraphQLNonNull, getNamedType },
         inflection,
         pgQueryFromResolveData: queryFromResolveData,
         pgOmit: omit,
@@ -114,7 +115,9 @@ export default (async function PgRowByUniqueConstraint(
 
                         if (!InputType) {
                           throw new Error(
-                            `Could not find input type for key '${name}' on type '${TableType.name}'`
+                            `Could not find input type for key '${name}' on type '${
+                              getNamedType(TableType).name
+                            }'`
                           );
                         }
                         memo[columnName] = {
@@ -133,7 +136,7 @@ export default (async function PgRowByUniqueConstraint(
                         resolveInfo.rootValue.liveRecord;
                       const parsedResolveInfoFragment = parseResolveInfo(
                         resolveInfo
-                      );
+                      ) as ResolveTree;
 
                       parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
                       const resolveData = getDataFromParsedResolveInfoFragment(

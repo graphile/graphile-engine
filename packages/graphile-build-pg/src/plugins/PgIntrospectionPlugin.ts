@@ -48,7 +48,8 @@ export enum PgEntityKind {
   INDEX = "index",
 }
 
-export type SmartTags = { [tag: string]: true | string | Array<string> };
+export type SmartTagValue = true | string | Array<string>;
+export type SmartTags = { [tag: string]: SmartTagValue };
 
 export interface PgNamespace {
   kind: PgEntityKind.NAMESPACE;
