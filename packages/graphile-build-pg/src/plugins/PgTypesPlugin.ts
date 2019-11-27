@@ -16,7 +16,12 @@ import {
   GraphQLObjectType,
   GraphQLOutputType,
 } from "graphql";
-import { PgType, PgEntity, PgClass } from "./PgIntrospectionPlugin";
+import {
+  PgType,
+  PgEntity,
+  PgClass,
+  PgEntityKind,
+} from "./PgIntrospectionPlugin";
 import { PgTypeModifier } from "./PgBasicsPlugin";
 
 interface GqlTypeByTypeIdAndModifier {
@@ -113,8 +118,9 @@ declare module "graphile-build" {
   }
 
   interface ScopeGraphQLEnumType {
-    pgIntrospection?: PgType;
+    pgIntrospection?: PgEntity;
     isPgEnumType?: true;
+    isPgRowSortEnum?: true;
   }
 
   interface Inflection {

@@ -1,5 +1,6 @@
 import { Plugin } from "graphile-build";
 import { getComputedColumnDetails } from "./PgComputedColumnsPlugin";
+import { PgProc, PgEntityKind } from "./PgIntrospectionPlugin";
 
 export default (function PgOrderComputedColumnsPlugin(builder) {
   builder.hook(
@@ -16,7 +17,7 @@ export default (function PgOrderComputedColumnsPlugin(builder) {
       const {
         scope: { isPgRowSortEnum, pgIntrospection: table },
       } = context;
-      if (!isPgRowSortEnum || !table || table.kind !== "class") {
+      if (!isPgRowSortEnum || !table || table.kind !== PgEntityKind.CLASS) {
         return values;
       }
 
@@ -51,8 +52,9 @@ export default (function PgOrderComputedColumnsPlugin(builder) {
           const returnType =
             introspectionResultsByKind.typeById[proc.returnTypeId];
           if (returnType.isPgArray) return memo;
-          const returnTypeTable =
-            introspectionResultsByKind.classById[returnType.classId];
+          const returnTypeTable = returnType.classId
+            ? introspectionResultsByKind.classById[returnType.classId]
+            : null;
           if (returnTypeTable) return memo;
           const isRecordLike = returnType.id === "2249";
           if (isRecordLike) return memo;
@@ -63,7 +65,7 @@ export default (function PgOrderComputedColumnsPlugin(builder) {
           memo.push({ proc, pseudoColumnName });
           return memo;
         },
-        []
+        [] as { proc: PgProc; pseudoColumnName: string }[]
       );
 
       return extend(
