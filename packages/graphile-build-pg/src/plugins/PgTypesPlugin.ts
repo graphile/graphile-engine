@@ -2,18 +2,28 @@ import {
   Plugin,
   GraphileObjectTypeConfig,
   ScopeGraphQLObjectType,
+  GraphileInputObjectTypeConfig,
+  Build,
+  Inflection,
 } from "graphile-build";
 
 import makeGraphQLJSONType from "../GraphQLJSON";
 
 import rawParseInterval = require("postgres-interval");
 import LRU from "@graphile/lru";
-import { GraphQLType, GraphQLInputType } from "graphql";
-import { PgType } from "./PgIntrospectionPlugin";
+import {
+  GraphQLType,
+  GraphQLInputType,
+  GraphQLObjectType,
+  GraphQLNamedType,
+  GraphQLOutputType,
+} from "graphql";
+import { PgType, PgEntity } from "./PgIntrospectionPlugin";
+import { InflectionBase } from "graphile-build/node8plus/makeNewBuild";
 
 interface GqlTypeByTypeIdAndModifier {
   [typeId: string]: {
-    [modifier: string]: GraphQLType;
+    [modifier: string]: GraphQLOutputType;
   };
 }
 interface GqlInputTypeByTypeIdAndModifier {
@@ -22,10 +32,50 @@ interface GqlInputTypeByTypeIdAndModifier {
   };
 }
 
+type TypeGen<T> = (
+  set: (type: T) => void,
+  typeModifier: string | null
+) => void | T;
+
+type Pg2GqlMapper = {
+  [id: string]: {
+    map: any;
+    unmap: any;
+  };
+};
+
 declare module "graphile-build" {
   interface Build {
     pgGqlTypeByTypeIdAndModifier?: GqlTypeByTypeIdAndModifier;
     pgGqlInputTypeByTypeIdAndModifier?: GqlInputTypeByTypeIdAndModifier;
+
+    pgRegisterGqlTypeByTypeId(
+      typeId: string,
+      gen: TypeGen<GraphQLOutputType>,
+      yieldToExisting?: boolean
+    ): void;
+    pgRegisterGqlInputTypeByTypeId(
+      typeId: string,
+      gen: TypeGen<GraphQLInputType>,
+      yieldToExisting?: boolean
+    ): void;
+    pgGetGqlTypeByTypeIdAndModifier(
+      typeId: string,
+      typeModifier: string | null,
+      useFallback?: boolean
+    ): GraphQLOutputType | null;
+    pgGetGqlInputTypeByTypeIdAndModifier(
+      typeId: string,
+      typeModifier: string | null,
+      useFallback?: boolean
+    ): GraphQLInputType | null;
+    pg2GqlMapper: Pg2GqlMapper;
+    pg2gql;
+    pg2gqlForType;
+    gql2pg;
+    pgTweakFragmentForTypeAndModifier;
+    pgTweaksByTypeId;
+    pgTweaksByTypeIdAndModifer;
   }
 
   interface GraphileBuildOptions {
@@ -36,17 +86,32 @@ declare module "graphile-build" {
   }
 
   interface ScopeGraphQLObjectType {
+    pgIntrospection?: PgEntity;
+    pgSubtypeIntrospection?: PgEntity;
+    pgTypeModifier?: string | number;
     isIntervalType?: true;
     isPointType?: true;
+    isPgRangeType?: true;
+    isPgRangeBoundType?: true;
   }
 
   interface ScopeGraphQLInputObjectType {
+    pgIntrospection?: PgEntity;
+    pgSubtypeIntrospection?: PgEntity;
+    pgTypeModifier?: string | number;
     isIntervalInputType?: true;
     isPointInputType?: true;
+    isPgRangeInputType?: true;
+    isPgRangeBoundInputType?: true;
   }
 
   interface ScopeGraphQLEnumType {
-    pgIntrospection: PgType;
+    pgIntrospection?: PgType;
+    isPgEnumType?: true;
+  }
+
+  interface Inflection {
+    hstoreType(): string;
   }
 }
 
@@ -84,15 +149,16 @@ export default (function PgTypesPlugin(
     "build",
     build => {
       const {
-        pgIntrospectionResultsByKind: introspectionResultsByKind,
+        pgIntrospectionResultsByKind: rawIntrospectionResultsByKind,
         getTypeByName,
         pgSql: sql,
         inflection,
         graphql,
       } = build;
-      if (!introspectionResultsByKind || !sql) {
+      if (!rawIntrospectionResultsByKind || !sql) {
         throw new Error("Required helpers were not found on Build.");
       }
+      const introspectionResultsByKind = rawIntrospectionResultsByKind;
 
       /*
        * Note these do not do `foo.bind(build)` because they want to reference
@@ -143,7 +209,7 @@ export default (function PgTypesPlugin(
       };
 
       const isNull = val => val == null || val.__isNull;
-      const pg2GqlMapper = {};
+      const pg2GqlMapper: Pg2GqlMapper = {};
       const pg2gqlForType = type => {
         if (pg2GqlMapper[type.id]) {
           const map = pg2GqlMapper[type.id].map;
@@ -653,7 +719,7 @@ export default (function PgTypesPlugin(
           !gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] &&
           type.type === "e"
         ) {
-          gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = newWithHooks(
+          const enumType = newWithHooks(
             GraphQLEnumType,
             {
               name: inflection.enumType(type),
@@ -672,6 +738,9 @@ export default (function PgTypesPlugin(
               isPgEnumType: true,
             }
           );
+          if (enumType) {
+            gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = enumType;
+          }
         }
         // Ranges
         if (
@@ -688,28 +757,35 @@ export default (function PgTypesPlugin(
           if (!gqlRangeSubType) {
             throw new Error("Range of unsupported");
           }
-          let Range = getTypeByName(inflection.rangeType(gqlRangeSubType.name));
+          let existingRange = getTypeByName(
+            inflection.rangeType(gqlRangeSubType.name)
+          );
+          let Range: GraphQLObjectType<any, any> | null | undefined =
+            existingRange && existingRange instanceof GraphQLObjectType
+              ? existingRange
+              : null;
           let RangeInput;
           if (!Range) {
-            const RangeBound = newWithHooks(
-              GraphQLObjectType,
-              {
-                name: inflection.rangeBoundType(gqlRangeSubType.name),
-                description:
-                  "The value at one end of a range. A range can either include this value, or not.",
-                fields: {
-                  value: {
-                    description: "The value at one end of our range.",
-                    type: new GraphQLNonNull(gqlRangeSubType),
-                  },
+            const rangeBoundSpec: GraphileObjectTypeConfig<any, any> = {
+              name: inflection.rangeBoundType(gqlRangeSubType.name),
+              description:
+                "The value at one end of a range. A range can either include this value, or not.",
+              fields: {
+                value: {
+                  description: "The value at one end of our range.",
+                  type: new GraphQLNonNull(gqlRangeSubType),
+                },
 
-                  inclusive: {
-                    description:
-                      "Whether or not the value of this bound is included in the range.",
-                    type: new GraphQLNonNull(GraphQLBoolean),
-                  },
+                inclusive: {
+                  description:
+                    "Whether or not the value of this bound is included in the range.",
+                  type: new GraphQLNonNull(GraphQLBoolean),
                 },
               },
+            };
+            const RangeBound = newWithHooks(
+              GraphQLObjectType,
+              rangeBoundSpec,
 
               {
                 isPgRangeBoundType: true,
@@ -719,25 +795,32 @@ export default (function PgTypesPlugin(
               }
             );
 
-            const RangeBoundInput = newWithHooks(
-              GraphQLInputObjectType,
-              {
-                name: inflection.inputType(RangeBound.name),
-                description:
-                  "The value at one end of a range. A range can either include this value, or not.",
-                fields: {
-                  value: {
-                    description: "The value at one end of our range.",
-                    type: new GraphQLNonNull(gqlRangeSubType),
-                  },
+            if (!RangeBound) {
+              throw new Error(
+                `Failed to construct RangeBound type '${rangeBoundSpec.name}'`
+              );
+            }
 
-                  inclusive: {
-                    description:
-                      "Whether or not the value of this bound is included in the range.",
-                    type: new GraphQLNonNull(GraphQLBoolean),
-                  },
+            const rangeBoundInputSpec: GraphileInputObjectTypeConfig = {
+              name: inflection.inputType(RangeBound.name),
+              description:
+                "The value at one end of a range. A range can either include this value, or not.",
+              fields: {
+                value: {
+                  description: "The value at one end of our range.",
+                  type: new GraphQLNonNull(gqlRangeSubType),
+                },
+
+                inclusive: {
+                  description:
+                    "Whether or not the value of this bound is included in the range.",
+                  type: new GraphQLNonNull(GraphQLBoolean),
                 },
               },
+            };
+            const RangeBoundInput = newWithHooks(
+              GraphQLInputObjectType,
+              rangeBoundInputSpec,
 
               {
                 isPgRangeBoundInputType: true,
@@ -746,50 +829,58 @@ export default (function PgTypesPlugin(
                 pgTypeModifier: typeModifier,
               }
             );
+            if (!RangeBoundInput) {
+              throw new Error(
+                `Failed to construct RangeBoundInput type '${rangeBoundInputSpec.name}'`
+              );
+            }
 
-            Range = newWithHooks(
-              GraphQLObjectType,
-              {
-                name: inflection.rangeType(gqlRangeSubType.name),
-                description: `A range of \`${gqlRangeSubType.name}\`.`,
-                fields: {
-                  start: {
-                    description: "The starting bound of our range.",
-                    type: RangeBound,
-                  },
+            const rangeSpec: GraphileObjectTypeConfig<any, any> = {
+              name: inflection.rangeType(gqlRangeSubType.name),
+              description: `A range of \`${gqlRangeSubType.name}\`.`,
+              fields: {
+                start: {
+                  description: "The starting bound of our range.",
+                  type: RangeBound,
+                },
 
-                  end: {
-                    description: "The ending bound of our range.",
-                    type: RangeBound,
-                  },
+                end: {
+                  description: "The ending bound of our range.",
+                  type: RangeBound,
                 },
               },
+            };
+            const rangeScope: ScopeGraphQLObjectType = {
+              isPgRangeType: true,
+              pgIntrospection: type,
+              pgSubtypeIntrospection: subtype,
+              pgTypeModifier: typeModifier,
+            };
+            Range = newWithHooks(GraphQLObjectType, rangeSpec, rangeScope);
+            if (!Range) {
+              throw new Error(
+                `Failed to construct range type '${rangeSpec.name}'`
+              );
+            }
 
-              {
-                isPgRangeType: true,
-                pgIntrospection: type,
-                pgSubtypeIntrospection: subtype,
-                pgTypeModifier: typeModifier,
-              }
-            );
+            const rangeInputSpec: GraphileInputObjectTypeConfig = {
+              name: inflection.inputType(Range.name),
+              description: `A range of \`${gqlRangeSubType.name}\`.`,
+              fields: {
+                start: {
+                  description: "The starting bound of our range.",
+                  type: RangeBoundInput,
+                },
 
+                end: {
+                  description: "The ending bound of our range.",
+                  type: RangeBoundInput,
+                },
+              },
+            };
             RangeInput = newWithHooks(
               GraphQLInputObjectType,
-              {
-                name: inflection.inputType(Range.name),
-                description: `A range of \`${gqlRangeSubType.name}\`.`,
-                fields: {
-                  start: {
-                    description: "The starting bound of our range.",
-                    type: RangeBoundInput,
-                  },
-
-                  end: {
-                    description: "The ending bound of our range.",
-                    type: RangeBoundInput,
-                  },
-                },
-              },
+              rangeInputSpec,
 
               {
                 isPgRangeInputType: true,
@@ -887,7 +978,9 @@ end`;
               typeModifierKey
             ] = Object.assign(Object.create(baseInputType), {
               name: inflection.inputType(
-                gqlTypeByTypeIdAndModifier[type.id][typeModifierKey]
+                getNamedType(
+                  gqlTypeByTypeIdAndModifier[type.id][typeModifierKey]
+                ).name
               ),
 
               description: type.description,
@@ -947,15 +1040,14 @@ end`;
         }
         // Now for input types, fall back to output types if possible
         if (!gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey]) {
-          if (
-            isInputType(gqlTypeByTypeIdAndModifier[type.id][typeModifierKey])
-          ) {
-            gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] =
-              gqlTypeByTypeIdAndModifier[type.id][typeModifierKey];
+          const t = gqlTypeByTypeIdAndModifier[type.id][typeModifierKey];
+          if (isInputType(t)) {
+            gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] = t;
           }
         }
         addType(
-          getNamedType(gqlTypeByTypeIdAndModifier[type.id][typeModifierKey])
+          getNamedType(gqlTypeByTypeIdAndModifier[type.id][typeModifierKey]),
+          "reallyEnforceGqlTypeByPgTypeAndModifier"
         );
 
         return gqlTypeByTypeIdAndModifier[type.id][typeModifierKey];
@@ -963,7 +1055,7 @@ end`;
 
       function getGqlTypeByTypeIdAndModifier(
         typeId,
-        typeModifier = null,
+        typeModifier: string | null = null,
         useFallback = true
       ) {
         const typeModifierKey = typeModifier != null ? typeModifier : -1;
@@ -1022,7 +1114,10 @@ end`;
         return gqlTypeByTypeIdAndModifier[typeId][typeModifierKey];
       }
 
-      function getGqlInputTypeByTypeIdAndModifier(typeId, typeModifier = null) {
+      function getGqlInputTypeByTypeIdAndModifier(
+        typeId,
+        typeModifier: string | null = null
+      ) {
         // First, load the OUTPUT type (it might register an input type)
         getGqlTypeByTypeIdAndModifier(typeId, typeModifier);
 
@@ -1061,14 +1156,15 @@ end`;
           }
         }
         // Use the same type as the output type if it's valid input
+        const t =
+          gqlTypeByTypeIdAndModifier[typeId] &&
+          gqlTypeByTypeIdAndModifier[typeId][typeModifierKey];
         if (
           !gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey] &&
-          gqlTypeByTypeIdAndModifier[typeId] &&
-          gqlTypeByTypeIdAndModifier[typeId][typeModifierKey] &&
-          isInputType(gqlTypeByTypeIdAndModifier[typeId][typeModifierKey])
+          t &&
+          isInputType(t)
         ) {
-          gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey] =
-            gqlTypeByTypeIdAndModifier[typeId][typeModifierKey];
+          gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey] = t;
         }
         if (
           !gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey] &&
@@ -1146,7 +1242,7 @@ end`;
       }
       // END OF DEPRECATIONS!
 
-      return build.extend(build, {
+      const buildExtension: Partial<Build> = {
         pgRegisterGqlTypeByTypeId: registerGqlTypeByTypeId,
         pgRegisterGqlInputTypeByTypeId: registerGqlInputTypeByTypeId,
         pgGetGqlTypeByTypeIdAndModifier: getGqlTypeByTypeIdAndModifier,
@@ -1158,12 +1254,20 @@ end`;
         pgTweakFragmentForTypeAndModifier,
         pgTweaksByTypeId,
         pgTweaksByTypeIdAndModifer,
+      };
 
-        // DEPRECATED METHODS:
+      // DEPRECATED METHODS:
+      Object.assign(buildExtension, {
         pgGetGqlTypeByTypeId: getGqlTypeByTypeId, // DEPRECATED, replaced by getGqlTypeByTypeIdAndModifier
         pgGetGqlInputTypeByTypeId: getGqlInputTypeByTypeId, // DEPRECATED, replaced by getGqlInputTypeByTypeIdAndModifier
         pgTweakFragmentForType, // DEPRECATED, replaced by pgTweakFragmentForTypeAndModifier
-      });
+      } as any);
+
+      return build.extend(
+        build,
+        buildExtension,
+        "Adding type helpers from PgTypesPlugin"
+      );
     },
     ["PgTypes"],
     [],
@@ -1176,12 +1280,13 @@ end`;
     (inflection, build) => {
       // This hook allows you to append a plugin which renames the KeyValueHash
       // (hstore) type name.
-      if (pgSkipHstore) return build;
-      return build.extend(inflection, {
+      if (pgSkipHstore) return inflection;
+      const newInflectors: Partial<Inflection> = {
         hstoreType() {
           return "KeyValueHash";
         },
-      });
+      };
+      return build.extend(inflection, newInflectors, "hstore inflector");
     },
     ["PgTypesHstore"]
   );
@@ -1193,13 +1298,25 @@ end`;
       // knows how to express it in input/output.
       if (pgSkipHstore) return build;
       const {
-        pgIntrospectionResultsByKind: introspectionResultsByKind,
+        pgIntrospectionResultsByKind: rawIntrospectionResultsByKind,
         pgRegisterGqlTypeByTypeId,
         pgRegisterGqlInputTypeByTypeId,
         pg2GqlMapper,
         pgSql: sql,
         graphql,
       } = build;
+
+      if (
+        !rawIntrospectionResultsByKind ||
+        !sql ||
+        !pgRegisterGqlTypeByTypeId ||
+        !pgRegisterGqlInputTypeByTypeId ||
+        !pg2GqlMapper
+      ) {
+        throw new Error("Required helpers were not found on Build.");
+      }
+
+      const introspectionResultsByKind = rawIntrospectionResultsByKind;
 
       // Check we have the hstore extension
       const hstoreExtension = introspectionResultsByKind.extension.find(
