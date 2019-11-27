@@ -74,8 +74,19 @@ function parse(arrOrNot, errorPrefix = "Error") {
 
 export default function omit(
   entity: PgProc | PgClass | PgAttribute | PgConstraint,
-  permission: string
-) {
+  permission:
+    | "create"
+    | "read"
+    | "update"
+    | "delete"
+    | "filter"
+    | "order"
+    | "all"
+    | "many"
+    | "execute"
+    | "base"
+    | string
+): boolean {
   const tags = entity.tags;
   const omitSpecRaw = tags.omit;
 
