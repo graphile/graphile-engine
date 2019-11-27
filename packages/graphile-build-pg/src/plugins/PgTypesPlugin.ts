@@ -9,6 +9,7 @@ import makeGraphQLJSONType from "../GraphQLJSON";
 import rawParseInterval = require("postgres-interval");
 import LRU from "@graphile/lru";
 import { GraphQLType, GraphQLInputType } from "graphql";
+import { PgType } from "./PgIntrospectionPlugin";
 
 interface GqlTypeByTypeIdAndModifier {
   [typeId: string]: {
@@ -36,9 +37,16 @@ declare module "graphile-build" {
 
   interface ScopeGraphQLObjectType {
     isIntervalType?: true;
+    isPointType?: true;
   }
+
   interface ScopeGraphQLInputObjectType {
     isIntervalInputType?: true;
+    isPointInputType?: true;
+  }
+
+  interface ScopeGraphQLEnumType {
+    pgIntrospection: PgType;
   }
 }
 
@@ -548,7 +556,7 @@ export default (function PgTypesPlugin(
             "years",
           ];
 
-          const parts = [];
+          const parts: string[] = [];
           for (const key of keys) {
             if (o[key]) {
               parts.push(`${o[key]} ${key}`);
