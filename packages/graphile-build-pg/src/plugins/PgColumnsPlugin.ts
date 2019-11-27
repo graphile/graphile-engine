@@ -1,7 +1,39 @@
-import { Plugin } from "graphile-build";
+import {
+  Plugin,
+  ScopeGraphQLObjectTypeFieldsField,
+  ContextGraphQLObjectTypeFieldsField,
+} from "graphile-build";
+import {
+  GraphQLOutputType,
+  GraphQLNonNull,
+  GraphQLNullableType,
+} from "graphql";
+import { ResolveTree } from "graphql-parse-resolve-info";
+import { PgTypeModifier } from "./PgBasicsPlugin";
+import { PgType } from "./PgIntrospectionPlugin";
+import { SQL } from "../QueryBuilder";
 
-const nullableIf = (GraphQLNonNull, condition, Type) =>
-  condition ? Type : new GraphQLNonNull(Type);
+type PgGetSelectValueForFieldAndTypeAndModifier = (
+  ReturnType: GraphQLOutputType,
+  fieldContext: ContextGraphQLObjectTypeFieldsField,
+  parsedResolveInfoFragment: ResolveTree,
+  sqlFullName: SQL,
+  type: PgType,
+  typeModifier: PgTypeModifier
+) => SQL;
+
+declare module "graphile-build" {
+  interface Build {
+    pgGetSelectValueForFieldAndTypeAndModifier: PgGetSelectValueForFieldAndTypeAndModifier;
+  }
+}
+
+const nullableIf = <T extends import("graphql").GraphQLNullableType>(
+  GraphQLNonNull: typeof import("graphql").GraphQLNonNull,
+  condition: boolean,
+  Type: T
+): T | import("graphql").GraphQLNonNull<T> =>
+  condition ? Type : (new GraphQLNonNull(Type as any) as any); // Ugh.
 
 export default (function PgColumnsPlugin(builder) {
   builder.hook(
@@ -15,16 +47,16 @@ export default (function PgColumnsPlugin(builder) {
       if (!sql || !queryFromResolveData || !pgTweakFragmentForTypeAndModifier) {
         throw new Error("Required Build properties were not present");
       }
-      const getSelectValueForFieldAndTypeAndModifier = (
+      const getSelectValueForFieldAndTypeAndModifier: PgGetSelectValueForFieldAndTypeAndModifier = (
         ReturnType,
-        fieldScope,
+        fieldContext,
         parsedResolveInfoFragment,
         sqlFullName,
         type,
         typeModifier
       ) => {
-        const { getDataFromParsedResolveInfoFragment } = fieldScope;
-        if (type.isPgArray) {
+        const { getDataFromParsedResolveInfoFragment } = fieldContext;
+        if (type.isPgArray && type.arrayItemType) {
           const ident = sql.identifier(Symbol());
           return sql.fragment`(\
 case
@@ -33,7 +65,7 @@ when coalesce(array_length(${sqlFullName}, 1), 0) = 0 then '[]'::json
 else (
   select json_agg(${getSelectValueForFieldAndTypeAndModifier(
     ReturnType,
-    fieldScope,
+    fieldContext,
     parsedResolveInfoFragment,
     ident,
     type.arrayItemType,
@@ -58,7 +90,7 @@ end
               {
                 onlyJsonField: true,
                 addNullCase: !isDefinitelyNotATable,
-                addNotDistinctFromNullCase: isDefinitelyNotATable,
+                addNotDistinctFromNullCase: !!isDefinitelyNotATable,
               }
             );
 
@@ -73,9 +105,13 @@ end
           }
         }
       };
-      return build.extend(build, {
-        pgGetSelectValueForFieldAndTypeAndModifier: getSelectValueForFieldAndTypeAndModifier,
-      });
+      return build.extend(
+        build,
+        {
+          pgGetSelectValueForFieldAndTypeAndModifier: getSelectValueForFieldAndTypeAndModifier,
+        },
+        "Adding pgGetSelectValueForFieldAndTypeAndModifier in PgColumnsPlugin"
+      );
     },
     ["PgColumns"],
     [],
@@ -104,6 +140,7 @@ end
       } = context;
 
       if (
+        !pgColumnFilter ||
         !(isPgRowType || isPgCompoundType) ||
         !table ||
         table.kind !== "class"
@@ -158,7 +195,7 @@ end
                   });
                   const convertFromPg = pg2gqlForType(type);
                   return {
-                    description: attr.description,
+                    description: attr.description || null,
                     type: nullableIf(
                       GraphQLNonNull,
                       !attr.isNotNull &&
@@ -220,6 +257,7 @@ end
         fieldWithHooks,
       } = context;
       if (
+        !pgColumnFilter ||
         !(isPgRowType || isPgCompoundType) ||
         !table ||
         table.kind !== "class"
