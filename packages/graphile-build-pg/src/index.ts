@@ -123,6 +123,7 @@ export { upperFirst, camelCase, constantCase } from "graphile-build";
 export type Inflector = never;
 
 export {
+  SmartTags,
   PgNamespace,
   PgProc,
   PgClass,

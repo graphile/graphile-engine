@@ -7,10 +7,11 @@ import { parseTags } from "../utils";
 import { readFile as rawReadFile } from "fs";
 import debugFactory from "debug";
 import chalk from "chalk";
-import throttle from "lodash/throttle";
-import flatMap from "lodash/flatMap";
+import throttle = require("lodash/throttle");
+import flatMap = require("lodash/flatMap");
 import { makeIntrospectionQuery } from "./introspectionQuery";
 
+// @ts-ignore
 import { version } from "../../package.json";
 import queryFromResolveDataFactory from "../queryFromResolveDataFactory";
 
@@ -29,13 +30,15 @@ export enum PgEntityKind {
   INDEX = "index",
 }
 
+export type SmartTags = { [tag: string]: true | string | Array<string> };
+
 export interface PgNamespace {
   kind: PgEntityKind.NAMESPACE;
   id: string;
   name: string;
   comment: string | void;
   description: string | void;
-  tags: { [tag: string]: true | string | Array<string> };
+  tags: SmartTags;
 }
 
 export interface PgProc {
@@ -56,7 +59,7 @@ export interface PgProc {
   inputArgsCount: number;
   argDefaultsNum: number;
   namespace: PgNamespace;
-  tags: { [tag: string]: true | string | Array<string> };
+  tags: SmartTags;
   cost: number;
   aclExecutable: boolean;
   language: string;
@@ -79,7 +82,7 @@ export interface PgClass {
   isExtensionConfigurationTable: boolean;
   namespace: PgNamespace;
   type: PgType;
-  tags: { [tag: string]: boolean | string | Array<string> };
+  tags: SmartTags;
   attributes: Array<PgAttribute>;
   constraints: Array<PgConstraint>;
   foreignConstraints: Array<PgConstraint>;
@@ -112,7 +115,7 @@ export interface PgType {
   domainBaseTypeId: string | void;
   domainBaseType: PgType | void;
   domainTypeModifier: number | void;
-  tags: { [tag: string]: true | string | Array<string> };
+  tags: SmartTags;
 }
 
 export interface PgAttribute {
@@ -130,7 +133,7 @@ export interface PgAttribute {
   class: PgClass;
   type: PgType;
   namespace: PgNamespace;
-  tags: { [tag: string]: true | string | Array<string> };
+  tags: SmartTags;
   aclSelectable: boolean;
   aclInsertable: boolean;
   aclUpdatable: boolean;
@@ -156,7 +159,7 @@ export interface PgConstraint {
   foreignKeyAttributes: Array<PgAttribute>;
   namespace: PgNamespace;
   isIndexed: boolean | void;
-  tags: { [tag: string]: true | string | Array<string> };
+  tags: SmartTags;
 }
 
 export interface PgExtension {
@@ -170,7 +173,7 @@ export interface PgExtension {
   configurationClassIds?: Array<string>;
   comment: string | void;
   description: string | void;
-  tags: { [tag: string]: true | string | Array<string> };
+  tags: SmartTags;
 }
 
 export interface PgIndex {
@@ -196,7 +199,7 @@ export interface PgIndex {
   attributePropertiesAsc: Array<boolean> | void;
   attributePropertiesNullsFirst: Array<boolean> | void;
   description: string | void;
-  tags: { [tag: string]: true | string | Array<string> };
+  tags: SmartTags;
 }
 
 export type PgEntity =
