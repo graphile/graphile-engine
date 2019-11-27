@@ -6,7 +6,7 @@
  *
  * NOTE: I'm not doing this with `=` because that way lies madness.
  */
-function makeIntrospectionQuery(
+export function makeIntrospectionQuery(
   serverVersionNum: number,
   options: { pgLegacyFunctionsOnly?: boolean } = {}
 ): string {
@@ -424,7 +424,3 @@ select row_to_json(x) as object from indexes as x
 ;
 `;
 }
-
-module.exports = {
-  makeIntrospectionQuery,
-};
