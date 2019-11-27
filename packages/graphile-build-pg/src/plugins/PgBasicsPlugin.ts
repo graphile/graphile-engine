@@ -71,6 +71,7 @@ declare module "graphile-build" {
     pgSchemas: Array<string>;
     persistentMemoizeWithKey?: <T>(key: string, fn: () => T) => T;
 
+    pgSimpleCollections?: "only" | "both" | "omit";
     pgStrictFunctions?: boolean;
     pgColumnFilter?: PgColumnFilterFunction;
     pgIgnoreRBAC?: boolean;

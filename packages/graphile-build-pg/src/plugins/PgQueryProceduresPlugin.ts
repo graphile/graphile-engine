@@ -1,4 +1,5 @@
 import { Plugin } from "graphile-build";
+import { PgType } from "./PgIntrospectionPlugin";
 
 export default (function PgQueryProceduresPlugin(
   builder,
@@ -34,16 +35,19 @@ export default (function PgQueryProceduresPlugin(
           if (!proc.namespace) return memo;
           if (omit(proc, "execute")) return memo;
 
-          const argTypes = proc.argTypeIds.reduce((prev, typeId, idx) => {
-            if (
-              proc.argModes.length === 0 || // all args are `in`
-              proc.argModes[idx] === "i" || // this arg is `in`
-              proc.argModes[idx] === "b" // this arg is `inout`
-            ) {
-              prev.push(introspectionResultsByKind.typeById[typeId]);
-            }
-            return prev;
-          }, []);
+          const argTypes = proc.argTypeIds.reduce(
+            (prev, typeId, idx) => {
+              if (
+                proc.argModes.length === 0 || // all args are `in`
+                proc.argModes[idx] === "i" || // this arg is `in`
+                proc.argModes[idx] === "b" // this arg is `inout`
+              ) {
+                prev.push(introspectionResultsByKind.typeById[typeId]);
+              }
+              return prev;
+            },
+            [] as PgType[]
+          );
           if (
             argTypes.some(
               type => type.type === "c" && type.class && type.class.isSelectable
