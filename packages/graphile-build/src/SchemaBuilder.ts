@@ -1,6 +1,7 @@
 import debugFactory from "debug";
 import makeNewBuild, {
   InflectionBase,
+  FieldWithHooksFunction,
   InputFieldWithHooksFunction,
   GetDataFromParsedResolveInfoFragmentFunction,
 } from "./makeNewBuild";
@@ -36,9 +37,10 @@ import EventEmitter = require("events");
 // TODO: when we move to TypeScript, change this to:
 // import { EventEmitter } from "events";
 
-import { FieldWithHooksFunction } from "./makeNewBuild";
 import { LiveCoordinator } from "./Live";
 import { ResolveTree } from "graphql-parse-resolve-info";
+
+export { FieldWithHooksFunction, InputFieldWithHooksFunction };
 
 const debug = debugFactory("graphile-builder");
 

@@ -35,6 +35,8 @@ export {
   GraphileObjectTypeConfig,
   GraphileInputObjectTypeConfig,
   GraphileUnionTypeConfig,
+  FieldWithHooksFunction,
+  InputFieldWithHooksFunction,
   Options,
   BuildBase,
   Build,

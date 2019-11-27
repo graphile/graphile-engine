@@ -5,8 +5,10 @@ import {
 } from "graphile-build";
 import { PgType } from "./PgIntrospectionPlugin";
 import QueryBuilder, { SQL } from "../QueryBuilder";
-import { FieldWithHooksFunction } from "graphile-build/node8plus/makeNewBuild";
+import { FieldWithHooksFunction } from "graphile-build";
 import { ResolveTree } from "graphql-parse-resolve-info";
+
+export { FieldWithHooksFunction };
 
 interface PgFieldOptions {
   pgType?: PgType;
