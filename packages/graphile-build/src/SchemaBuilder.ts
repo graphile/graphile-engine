@@ -187,7 +187,7 @@ export interface BuildBase {
   ): GraphQLEnumType | null | undefined;
   newWithHooks(
     constructor: typeof GraphQLInputObjectType,
-    spec: GraphQLInputObjectTypeConfig,
+    spec: GraphileInputObjectTypeConfig,
     scope: ScopeGraphQLInputObjectType,
     performNonEmptyFieldsCheck?: boolean
   ): GraphQLInputObjectType | null | undefined;
