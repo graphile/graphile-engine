@@ -374,7 +374,6 @@ export interface ContextGraphQLUnionTypeTypes extends ContextGraphQLUnionType {
 }
 
 export interface ScopeGraphQLInputObjectType extends Scope {
-  fieldName: string;
   isMutationInput?: true;
 }
 export interface ContextGraphQLInputObjectType extends Context {
@@ -393,7 +392,9 @@ export interface ContextGraphQLInputObjectTypeFields
 }
 
 export interface ScopeGraphQLInputObjectTypeFieldsField
-  extends ScopeGraphQLInputObjectType {}
+  extends ScopeGraphQLInputObjectType {
+  fieldName: string;
+}
 export interface ContextGraphQLInputObjectTypeFieldsField
   extends ContextGraphQLInputObjectType {
   scope: ScopeGraphQLInputObjectTypeFieldsField;
