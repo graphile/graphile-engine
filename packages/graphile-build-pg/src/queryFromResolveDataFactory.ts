@@ -460,7 +460,7 @@ OR\
       ? sql.fragment`with ${sqlQueryAlias} as (${query}), ${sqlSummaryAlias} as (select json_agg(to_json(${sqlQueryAlias})) as data from ${sqlQueryAlias})`
       : sql.fragment``;
     const sqlFrom = sql.fragment``;
-    const fields: Array<[SQL, RawAlias]> = [];
+    const fields: Array<[SQL, string]> = [];
     if (haveFields) {
       fields.push([
         sql.fragment`coalesce((select ${sqlSummaryAlias}.data from ${sqlSummaryAlias}), '[]'::json)`,
