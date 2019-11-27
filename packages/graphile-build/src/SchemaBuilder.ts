@@ -38,6 +38,7 @@ import EventEmitter = require("events");
 
 import { FieldWithHooksFunction } from "./makeNewBuild";
 import { LiveCoordinator } from "./Live";
+import { ResolveTree } from "graphql-parse-resolve-info";
 
 const debug = debugFactory("graphile-builder");
 
@@ -237,7 +238,9 @@ export interface Scope {
   __origin?: string | null | undefined;
 }
 
-type DataGeneratorFunction = () => Partial<LookAheadData>;
+type DataGeneratorFunction = (
+  parsedResolveInfoFragment: ResolveTree
+) => Partial<LookAheadData>;
 
 export interface Context {
   scope: Scope;
