@@ -18,22 +18,32 @@ const debug = debugFactory("graphile-build-pg");
 const WATCH_FIXTURES_PATH = `${__dirname}/../../res/watch-fixtures.sql`;
 
 // Ref: https://github.com/graphile/postgraphile/tree/master/src/postgres/introspection/object
+export enum PgEntityKind {
+  NAMESPACE = "namespace",
+  PROCEDURE = "procedure",
+  CLASS = "class",
+  TYPE = "type",
+  ATTRIBUTE = "attribute",
+  CONSTRAINT = "constraint",
+  EXTENSION = "extension",
+  INDEX = "index",
+}
 
-export type PgNamespace = {
-  kind: "namespace";
+export interface PgNamespace {
+  kind: PgEntityKind.NAMESPACE;
   id: string;
   name: string;
-  comment: string | null | undefined;
-  description: string | null | undefined;
-  tags: { [a: string]: string };
-};
+  comment: string | void;
+  description: string | void;
+  tags: { [tag: string]: true | string | Array<string> };
+}
 
-export type PgProc = {
-  kind: "procedure";
+export interface PgProc {
+  kind: PgEntityKind.PROCEDURE;
   id: string;
   name: string;
-  comment: string | null | undefined;
-  description: string | null | undefined;
+  comment: string | void;
+  description: string | void;
   namespaceId: string;
   namespaceName: string;
   isStrict: boolean;
@@ -46,18 +56,18 @@ export type PgProc = {
   inputArgsCount: number;
   argDefaultsNum: number;
   namespace: PgNamespace;
-  tags: { [a: string]: string };
+  tags: { [tag: string]: true | string | Array<string> };
   cost: number;
   aclExecutable: boolean;
   language: string;
-};
+}
 
-export type PgClass = {
-  kind: "class";
+export interface PgClass {
+  kind: PgEntityKind.CLASS;
   id: string;
   name: string;
-  comment: string | null | undefined;
-  description: string | null | undefined;
+  comment: string | void;
+  description: string | void;
   classKind: string;
   namespaceId: string;
   namespaceName: string;
@@ -69,49 +79,49 @@ export type PgClass = {
   isExtensionConfigurationTable: boolean;
   namespace: PgNamespace;
   type: PgType;
-  tags: { [a: string]: string };
+  tags: { [tag: string]: boolean | string | Array<string> };
   attributes: Array<PgAttribute>;
   constraints: Array<PgConstraint>;
   foreignConstraints: Array<PgConstraint>;
-  primaryKeyConstraint: PgConstraint | null | undefined;
+  primaryKeyConstraint: PgConstraint | void;
   aclSelectable: boolean;
   aclInsertable: boolean;
   aclUpdatable: boolean;
   aclDeletable: boolean;
   canUseAsterisk: boolean;
-};
+}
 
-export type PgType = {
-  kind: "type";
+export interface PgType {
+  kind: PgEntityKind.TYPE;
   id: string;
   name: string;
-  comment: string | null | undefined;
-  description: string | null | undefined;
+  comment: string | void;
+  description: string | void;
   namespaceId: string;
   namespaceName: string;
   type: string;
   category: string;
   domainIsNotNull: boolean;
-  arrayItemTypeId: string | null | undefined;
-  arrayItemType: PgType | null | undefined;
-  arrayType: PgType | null | undefined;
-  typeLength: number | null | undefined;
+  arrayItemTypeId: string | void;
+  arrayItemType: PgType | void;
+  arrayType: PgType | void;
+  typeLength: number | void;
   isPgArray: boolean;
-  classId: string | null | undefined;
-  class: PgClass | null | undefined;
-  domainBaseTypeId: string | null | undefined;
-  domainBaseType: PgType | null | undefined;
-  domainTypeModifier: number | null | undefined;
-  tags: { [a: string]: string };
-};
+  classId: string | void;
+  class: PgClass | void;
+  domainBaseTypeId: string | void;
+  domainBaseType: PgType | void;
+  domainTypeModifier: number | void;
+  tags: { [tag: string]: true | string | Array<string> };
+}
 
-export type PgAttribute = {
-  kind: "attribute";
+export interface PgAttribute {
+  kind: PgEntityKind.ATTRIBUTE;
   classId: string;
   num: number;
   name: string;
-  comment: string | null | undefined;
-  description: string | null | undefined;
+  comment: string | void;
+  description: string | void;
   typeId: string;
   typeModifier: number;
   isNotNull: boolean;
@@ -120,37 +130,37 @@ export type PgAttribute = {
   class: PgClass;
   type: PgType;
   namespace: PgNamespace;
-  tags: { [a: string]: string };
+  tags: { [tag: string]: true | string | Array<string> };
   aclSelectable: boolean;
   aclInsertable: boolean;
   aclUpdatable: boolean;
-  isIndexed: boolean | null | undefined;
-  isUnique: boolean | null | undefined;
+  isIndexed: boolean | void;
+  isUnique: boolean | void;
   columnLevelSelectGrant: boolean;
-};
+}
 
-export type PgConstraint = {
-  kind: "constraint";
+export interface PgConstraint {
+  kind: PgEntityKind.CONSTRAINT;
   id: string;
   name: string;
   type: string;
   classId: string;
   class: PgClass;
-  foreignClassId: string | null | undefined;
-  foreignClass: PgClass | null | undefined;
-  comment: string | null | undefined;
-  description: string | null | undefined;
+  foreignClassId: string | void;
+  foreignClass: PgClass | void;
+  comment: string | void;
+  description: string | void;
   keyAttributeNums: Array<number>;
   keyAttributes: Array<PgAttribute>;
   foreignKeyAttributeNums: Array<number>;
   foreignKeyAttributes: Array<PgAttribute>;
   namespace: PgNamespace;
-  isIndexed: boolean | null | undefined;
-  tags: { [a: string]: string };
-};
+  isIndexed: boolean | void;
+  tags: { [tag: string]: true | string | Array<string> };
+}
 
-export type PgExtension = {
-  kind: "extension";
+export interface PgExtension {
+  kind: PgEntityKind.EXTENSION;
   id: string;
   name: string;
   namespaceId: string;
@@ -158,13 +168,13 @@ export type PgExtension = {
   relocatable: boolean;
   version: string;
   configurationClassIds?: Array<string>;
-  comment: string | null | undefined;
-  description: string | null | undefined;
-  tags: { [a: string]: string };
-};
+  comment: string | void;
+  description: string | void;
+  tags: { [tag: string]: true | string | Array<string> };
+}
 
-export type PgIndex = {
-  kind: "index";
+export interface PgIndex {
+  kind: PgEntityKind.INDEX;
   id: string;
   name: string;
   namespaceName: string;
@@ -174,20 +184,20 @@ export type PgIndex = {
   isUnique: boolean;
   isPrimary: boolean;
   /*
-                      Though these exist, we don't want to officially
-                      support them yet.
-                       isImmediate: boolean,
-                      isReplicaIdentity: boolean,
-                      isValid: boolean,
-                      */
+  Though these exist, we don't want to officially
+  support them yet.
 
+    isImmediate: boolean,
+    isReplicaIdentity: boolean,
+    isValid: boolean,
+  */
   isPartial: boolean;
   attributeNums: Array<number>;
-  attributePropertiesAsc: Array<boolean> | null | undefined;
-  attributePropertiesNullsFirst: Array<boolean> | null | undefined;
-  description: string | null | undefined;
-  tags: { [a: string]: string };
-};
+  attributePropertiesAsc: Array<boolean> | void;
+  attributePropertiesNullsFirst: Array<boolean> | void;
+  description: string | void;
+  tags: { [tag: string]: true | string | Array<string> };
+}
 
 export type PgEntity =
   | PgNamespace
@@ -205,7 +215,6 @@ export type PgIntrospectionResultsByKind = {
   attributeByClassIdAndNum: {
     [classId: string]: { [num: string]: PgAttribute };
   };
-
   class: PgClass[];
   classById: { [classId: string]: PgClass };
   constraint: PgConstraint[];
@@ -1084,15 +1093,3 @@ export default (async function PgIntrospectionPlugin(
     ["PgBasics"]
   );
 } as Plugin);
-
-// TypeScript compatibility
-export const PgEntityKind = {
-  NAMESPACE: "namespace",
-  PROCEDURE: "procedure",
-  CLASS: "class",
-  TYPE: "type",
-  ATTRIBUTE: "attribute",
-  CONSTRAINT: "constraint",
-  EXTENSION: "extension",
-  INDEX: "index",
-};
