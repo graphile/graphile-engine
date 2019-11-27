@@ -1,7 +1,5 @@
 import PgBasicsPlugin from "./plugins/PgBasicsPlugin";
-import PgIntrospectionPlugin, {
-  PgEntityKind,
-} from "./plugins/PgIntrospectionPlugin";
+import PgIntrospectionPlugin from "./plugins/PgIntrospectionPlugin";
 import PgTypesPlugin from "./plugins/PgTypesPlugin";
 import PgJWTPlugin from "./plugins/PgJWTPlugin";
 import PgTablesPlugin from "./plugins/PgTablesPlugin";
@@ -83,7 +81,6 @@ export const defaultPlugins = [
 export { inflections };
 
 // TypeScript compatibility
-export { PgEntityKind };
 
 export {
   PgBasicsPlugin,
@@ -122,3 +119,35 @@ export {
 };
 
 export { upperFirst, camelCase, constantCase } from "graphile-build";
+
+export type Inflector = never;
+
+export {
+  PgNamespace,
+  PgProc,
+  PgClass,
+  PgType,
+  PgAttribute,
+  PgConstraint,
+  PgExtension,
+  PgIndex,
+  PgIntrospectionResultsByKind,
+  PgEntity,
+  PgEntityKind,
+} from "./plugins/PgIntrospectionPlugin";
+
+import QueryBuilder from "./QueryBuilder";
+export { QueryBuilder };
+export {
+  sql,
+  SQL,
+  GraphQLContext,
+  GenContext,
+  Gen,
+  RawAlias,
+  SQLAlias,
+  SQLGen,
+  NumberGen,
+  CursorValue,
+  CursorComparator,
+} from "./QueryBuilder";
