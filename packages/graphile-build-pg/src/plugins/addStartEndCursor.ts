@@ -1,4 +1,3 @@
-import { Plugin } from "graphile-build";
 const base64 = str => Buffer.from(String(str)).toString("base64");
 
 function cursorify(val) {
@@ -14,4 +13,4 @@ export default (function addStartEndCursor(value) {
     startCursor,
     endCursor,
   };
-} as Plugin);
+});

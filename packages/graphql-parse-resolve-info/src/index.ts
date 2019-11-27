@@ -20,8 +20,6 @@ import {
 import { getArgumentValues } from "graphql/execution/values";
 import * as debugFactory from "debug";
 
-type mixed = {} | string | number | boolean | undefined | null;
-
 export interface FieldsByTypeName {
   [str: string]: {
     [str: string]: ResolveTree;
@@ -32,7 +30,7 @@ export interface ResolveTree {
   name: string;
   alias: string;
   args: {
-    [str: string]: mixed;
+    [str: string]: unknown;
   };
   fieldsByTypeName: FieldsByTypeName;
 }

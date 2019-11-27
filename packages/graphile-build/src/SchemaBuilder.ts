@@ -241,7 +241,8 @@ export interface Scope {
 }
 
 type DataGeneratorFunction = (
-  parsedResolveInfoFragment: ResolveTree
+  parsedResolveInfoFragment: ResolveTree,
+  ReturnType: GraphQLOutputType
 ) => Partial<LookAheadData>;
 
 export interface Context {

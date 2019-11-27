@@ -12,14 +12,11 @@ import makeGraphQLJSONType from "../GraphQLJSON";
 import rawParseInterval = require("postgres-interval");
 import LRU from "@graphile/lru";
 import {
-  GraphQLType,
   GraphQLInputType,
   GraphQLObjectType,
-  GraphQLNamedType,
   GraphQLOutputType,
 } from "graphql";
-import { PgType, PgEntity } from "./PgIntrospectionPlugin";
-import { InflectionBase } from "graphile-build/node8plus/makeNewBuild";
+import { PgType, PgEntity, PgClass } from "./PgIntrospectionPlugin";
 
 interface GqlTypeByTypeIdAndModifier {
   [typeId: string]: {
@@ -87,12 +84,20 @@ declare module "graphile-build" {
 
   interface ScopeGraphQLObjectType {
     pgIntrospection?: PgEntity;
+    pgIntrospectionTable?: PgClass;
     pgSubtypeIntrospection?: PgEntity;
     pgTypeModifier?: string | number;
     isIntervalType?: true;
     isPointType?: true;
     isPgRangeType?: true;
     isPgRangeBoundType?: true;
+  }
+
+  interface ScopeGraphQLObjectTypeFieldsField {
+    pgFieldIntrospection?: PgEntity;
+    pgFieldIntrospectionTable?: PgClass;
+    isPgFieldConnection?: true;
+    isPgFieldSimpleCollection?: true;
   }
 
   interface ScopeGraphQLInputObjectType {

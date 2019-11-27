@@ -2,6 +2,7 @@ import {
   Build,
   ContextGraphQLObjectTypeFieldsField,
   ScopeGraphQLObjectTypeFieldsField,
+  ScopeGraphQLInputObjectTypeFieldsField,
 } from "graphile-build";
 import { PgType } from "./PgIntrospectionPlugin";
 import QueryBuilder, { SQL } from "../QueryBuilder";
@@ -30,10 +31,14 @@ export default function pgField(
     | ((fieldContext: ContextGraphQLObjectTypeFieldsField) => FieldSpec)
     | FieldSpec,
 
-  fieldScope: ScopeGraphQLObjectTypeFieldsField = { fieldName },
+  inFieldScope: Omit<ScopeGraphQLObjectTypeFieldsField, "fieldName"> = {},
   whereFrom: ((queryBuilder: QueryBuilder) => SQL) | false = false,
   options: PgFieldOptions = {}
 ) {
+  const fieldScope: ScopeGraphQLInputObjectTypeFieldsField = {
+    ...inFieldScope,
+    fieldName,
+  };
   const {
     pgSql: sql,
     pgQueryFromResolveData: queryFromResolveData,
