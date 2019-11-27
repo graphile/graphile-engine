@@ -4,6 +4,7 @@
     "rootDir": "src",
     "declarationDir": "./node8plus",
     "outDir": "./node8plus",
+    "noEmit": false,
 
     "noImplicitAny": false
   },
