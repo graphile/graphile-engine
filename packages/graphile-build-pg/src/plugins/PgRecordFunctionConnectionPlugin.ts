@@ -1,4 +1,8 @@
-import { Plugin } from "graphile-build";
+import {
+  Plugin,
+  GraphileObjectTypeConfig,
+  ScopeGraphQLObjectType,
+} from "graphile-build";
 
 const base64 = str => Buffer.from(String(str)).toString("base64");
 
@@ -14,7 +18,12 @@ export default (function PgRecordFunctionConnectionPlugin(
         getSafeAliasFromResolveInfo,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
         getTypeByName,
-        graphql: { GraphQLObjectType, GraphQLNonNull, GraphQLList },
+        graphql: {
+          GraphQLObjectType,
+          GraphQLNonNull,
+          GraphQLList,
+          getNamedType,
+        },
         inflection,
         pgOmit: omit,
         describePgEntity,
@@ -44,81 +53,82 @@ export default (function PgRecordFunctionConnectionPlugin(
           inflection.recordFunctionReturnType(proc)
         );
 
-        if (!NodeType) {
+        if (!NodeType || !(NodeType instanceof GraphQLObjectType)) {
           throw new Error(
             `Do not have a node type '${inflection.recordFunctionReturnType(
               proc
             )}' for '${proc.name}' so cannot create connection type`
           );
         }
-        const EdgeType = newWithHooks(
-          GraphQLObjectType,
-          {
-            name: inflection.recordFunctionEdge(proc),
-            description: `A \`${NodeType.name}\` edge in the connection.`,
-            fields: ({ fieldWithHooks }) => {
-              return {
-                cursor: fieldWithHooks(
-                  "cursor",
-                  ({ addDataGenerator }) => {
-                    addDataGenerator(() => ({
-                      usesCursor: [true],
-                    }));
+        const edgeSpec: GraphileObjectTypeConfig<any, any> = {
+          name: inflection.recordFunctionEdge(proc),
+          description: `A \`${NodeType.name}\` edge in the connection.`,
+          fields: ({ fieldWithHooks }) => {
+            return {
+              cursor: fieldWithHooks(
+                "cursor",
+                ({ addDataGenerator }) => {
+                  addDataGenerator(() => ({
+                    usesCursor: true,
+                  }));
 
-                    return {
-                      description: "A cursor for use in pagination.",
-                      type: Cursor,
-                      resolve(data) {
-                        return base64(JSON.stringify(data.__cursor));
-                      },
-                    };
-                  },
-                  {
-                    isCursorField: true,
-                  }
-                ),
-
-                node: pgField(
-                  build,
-                  fieldWithHooks,
-                  "node",
-                  {
-                    description: `The \`${NodeType.name}\` at the end of the edge.`,
-                    type: nullableIf(
-                      !pgForbidSetofFunctionsToReturnNull,
-                      NodeType
-                    ),
-
-                    resolve(data, _args, _context, resolveInfo) {
-                      const safeAlias = getSafeAliasFromResolveInfo(
-                        resolveInfo
-                      );
-
-                      return data[safeAlias];
+                  return {
+                    description: "A cursor for use in pagination.",
+                    type: Cursor,
+                    resolve(data) {
+                      return base64(JSON.stringify(data.__cursor));
                     },
+                  };
+                },
+                {
+                  isCursorField: true,
+                }
+              ),
+
+              node: pgField(
+                build,
+                fieldWithHooks,
+                "node",
+                {
+                  description: `The \`${NodeType.name}\` at the end of the edge.`,
+                  type: nullableIf(
+                    !pgForbidSetofFunctionsToReturnNull,
+                    NodeType
+                  ),
+
+                  resolve(data, _args, _context, resolveInfo) {
+                    const safeAlias = getSafeAliasFromResolveInfo(resolveInfo);
+
+                    return data[safeAlias];
                   },
+                },
 
-                  {},
-                  false
-                ),
-              };
-            },
+                {},
+                false
+              ),
+            };
           },
+        };
+        const edgeScope: ScopeGraphQLObjectType = {
+          __origin: `Adding function result edge type for ${describePgEntity(
+            proc
+          )}. You can rename the function's GraphQL field (and its dependent types) via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
+            proc,
+            {
+              name: "newNameHere",
+            }
+          )}`,
+          isEdgeType: true,
+          nodeType: NodeType,
+          pgIntrospection: proc,
+        };
+        const EdgeType = newWithHooks(GraphQLObjectType, edgeSpec, edgeScope);
 
-          {
-            __origin: `Adding function result edge type for ${describePgEntity(
-              proc
-            )}. You can rename the function's GraphQL field (and its dependent types) via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
-              proc,
-              {
-                name: "newNameHere",
-              }
-            )}`,
-            isEdgeType: true,
-            nodeType: NodeType,
-            pgIntrospection: proc,
-          }
-        );
+        if (!EdgeType) {
+          throw new Error(
+            `Failed to construct EdgeType type '${edgeSpec.name}'`
+          );
+        }
 
         /*const ConnectionType = */
         newWithHooks(
@@ -147,7 +157,9 @@ export default (function PgRecordFunctionConnectionPlugin(
                   fieldWithHooks,
                   "edges",
                   {
-                    description: `A list of edges which contains the \`${NodeType.name}\` and cursor to aid in pagination.`,
+                    description: `A list of edges which contains the \`${
+                      getNamedType(NodeType).name
+                    }\` and cursor to aid in pagination.`,
                     type: new GraphQLNonNull(
                       new GraphQLList(new GraphQLNonNull(EdgeType))
                     ),

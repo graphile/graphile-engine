@@ -99,6 +99,7 @@ declare module "graphile-build" {
     pgFieldIntrospectionTable?: PgClass;
     isPgFieldConnection?: true;
     isPgFieldSimpleCollection?: true;
+    isCursorField?: true;
   }
 
   interface ScopeGraphQLInputObjectType {
