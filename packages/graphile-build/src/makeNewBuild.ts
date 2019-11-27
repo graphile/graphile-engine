@@ -17,7 +17,6 @@ import { LiveCoordinator } from "./Live";
 
 import SchemaBuilder, {
   BuildBase,
-  Context,
   ResolvedLookAhead,
   ContextGraphQLSchema,
   ContextGraphQLUnionType,
@@ -215,15 +214,11 @@ export type GetDataFromParsedResolveInfoFragmentFunction = (
   Type: GraphQLType
 ) => ResolvedLookAhead;
 
-type ContextAndGenerators = Context & {
-  addDataGenerator: (a: DataGeneratorFunction) => void;
-  addArgDataGenerator: (a: DataGeneratorFunction) => void;
-  getDataFromParsedResolveInfoFragment: GetDataFromParsedResolveInfoFragmentFunction;
-};
-
 export type FieldWithHooksFunction = (
   fieldName: string,
-  spec: FieldSpec | ((context: ContextAndGenerators) => FieldSpec),
+  spec:
+    | FieldSpec
+    | ((context: ContextGraphQLObjectTypeFieldsField) => FieldSpec),
   fieldScope: {}
 ) => import("graphql").GraphQLFieldConfig<any, any>;
 
