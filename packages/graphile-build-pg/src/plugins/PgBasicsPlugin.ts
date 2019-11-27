@@ -1,5 +1,6 @@
 import * as sql from "pg-sql2";
-import { Plugin } from "graphile-build";
+import { Plugin, Context, Build } from "graphile-build";
+// @ts-ignore
 import { version } from "../../package.json";
 import {
   PgProc,
@@ -28,9 +29,43 @@ import makeProcField from "./makeProcField";
 import parseIdentifier from "../parseIdentifier";
 import viaTemporaryTable from "./viaTemporaryTable";
 import chalk from "chalk";
-import pickBy from "lodash/pickBy";
+import pickBy = require("lodash/pickBy");
 import PgLiveProvider from "../PgLiveProvider";
 import pgPrepareAndRun from "../pgPrepareAndRun";
+
+type PgColumnFilterFunction = (
+  attr: PgAttribute,
+  build: Build,
+  context: Context
+) => boolean;
+
+declare module "graphile-build" {
+  interface GraphileBuildOptions {
+    pgStrictFunctions?: boolean;
+    pgColumnFilter?: PgColumnFilterFunction;
+    pgIgnoreRBAC?: boolean;
+    pgIgnoreIndexes?: boolean;
+    pgHideIndexWarnings?: boolean;
+    pgLegacyJsonUuid?: boolean;
+  }
+
+  interface Build {
+    pgSql: typeof import("pg-sql2");
+    graphileBuildPgVersion: string;
+    pgStrictFunctions: boolean;
+    pgColumnFilter: PgColumnFilterFunction | undefined;
+    pgQueryFromResolveData: ReturnType<typeof queryFromResolveDataFactory>;
+    pgAddStartEndCursor: typeof addStartEndCursor;
+    pgOmit: typeof baseOmit;
+    pgMakeProcField: typeof makeProcField;
+    pgParseIdentifier: typeof parseIdentifier;
+    pgViaTemporaryTable: typeof viaTemporaryTable;
+    describePgEntity: typeof describePgEntity;
+    pgField: typeof pgField;
+    sqlCommentByAddingTags: typeof sqlCommentByAddingTags;
+    pgPrepareAndRun: typeof pgPrepareAndRun;
+  }
+}
 
 const defaultPgColumnFilter = (_attr, _build, _context) => true;
 type Keys = Array<{
@@ -39,11 +74,13 @@ type Keys = Array<{
   schema: string | null | undefined;
 }>;
 
-const identity = _ => _;
+function identity<T>(val: T): T {
+  return val;
+}
 
 export function preventEmptyResult<
   O extends { [key: string]: (...args: Array<any>) => string }
->(obj: O): $ObjMap<O, <V>(a: V) => V> {
+>(obj: O): O {
   return Object.keys(obj).reduce((memo, key) => {
     const fn = obj[key];
     memo[key] = function(...args) {
@@ -61,7 +98,7 @@ export function preventEmptyResult<
       return result;
     };
     return memo;
-  }, {});
+  }, {}) as O;
 }
 
 const omitWithRBACChecks = omit => (
@@ -156,11 +193,9 @@ const omitUnindexed = (omit, hideIndexWarnings) => (
     const klass = entity.class;
     if (klass) {
       const shouldOutputWarning =
-        // $FlowFixMe
-        !entity._omitUnindexedReadWarningGiven && !hideIndexWarnings;
+        !entity["_omitUnindexedReadWarningGiven"] && !hideIndexWarnings;
       if (shouldOutputWarning) {
-        // $FlowFixMe
-        entity._omitUnindexedReadWarningGiven = true;
+        entity["_omitUnindexedReadWarningGiven"] = true;
         // eslint-disable-next-line no-console
         console.log(
           "%s",
@@ -232,7 +267,7 @@ function describePgEntity(entity: PgEntity, includeAlias = true) {
     console.error(e);
   }
   return `entity of kind '${entity.kind}' with ${
-    typeof entity.id === "string" ? `oid '${entity.id}'` : ""
+    "id" in entity && typeof entity.id === "string" ? `oid '${entity.id}'` : ""
   }`;
 }
 
@@ -264,21 +299,24 @@ function sqlCommentByAddingTags(entity, tagsToAdd) {
 
   const description = entity.description;
   const tagsSql = Object.keys(tags)
-    .reduce((memo, tag) => {
-      const tagValue = tags[tag];
-      const valueArray = Array.isArray(tagValue) ? tagValue : [tagValue];
-      const highlightOrNot = tag in tagsToAdd ? chalk.bold.green : identity;
-      valueArray.forEach(value => {
-        memo.push(
-          highlightOrNot(
-            `@${escape(escape(tag))}${
-              value === true ? "" : " " + escape(escape(value))
-            }`
-          )
-        );
-      });
-      return memo;
-    }, [])
+    .reduce(
+      (memo, tag) => {
+        const tagValue = tags[tag];
+        const valueArray = Array.isArray(tagValue) ? tagValue : [tagValue];
+        const highlightOrNot = tag in tagsToAdd ? chalk.bold.green : identity;
+        valueArray.forEach(value => {
+          memo.push(
+            highlightOrNot(
+              `@${escape(escape(tag))}${
+                value === true ? "" : " " + escape(escape(value))
+              }`
+            )
+          );
+        });
+        return memo;
+      },
+      [] as Array<string>
+    )
     .join("\\n");
   const commentValue = `E'${tagsSql}${
     description ? "\\n" + escape(description) : ""
@@ -334,7 +372,7 @@ export default (function PgBasicsPlugin(
     build => {
       build.versions["graphile-build-pg"] = version;
       build.liveCoordinator.registerProvider(new PgLiveProvider());
-      return build.extend(build, {
+      const buildExtensions: Partial<Build> = {
         graphileBuildPgVersion: version,
         pgSql: sql,
         pgStrictFunctions,
@@ -353,7 +391,12 @@ export default (function PgBasicsPlugin(
         pgField,
         sqlCommentByAddingTags,
         pgPrepareAndRun,
-      });
+      };
+      return build.extend(
+        build,
+        buildExtensions,
+        "Adding the graphile-build-pg basics"
+      );
     },
     ["PgBasics"]
   );

@@ -1,12 +1,18 @@
+import { Build } from "graphile-build";
+
+interface PgFieldOptions {
+  pgType?: any;
+  hoistCursor?: boolean;
+}
 export default function pgField(
-  build,
+  build: Build,
   fieldWithHooks,
   fieldName,
   fieldSpecGenerator,
 
   fieldScope = {},
   whereFrom = false,
-  options = {}
+  options: PgFieldOptions = {}
 ) {
   const {
     pgSql: sql,
