@@ -2,12 +2,14 @@ import * as sql from "pg-sql2";
 import isSafeInteger = require("lodash/isSafeInteger");
 import chunk = require("lodash/chunk");
 import { PgClass, PgType } from "./plugins/PgIntrospectionPlugin";
+import { GraphQLContext } from "graphile-build";
+
+export { GraphQLContext };
 
 type SQL = import("pg-sql2").SQL;
 export { sql, SQL };
 
 // eslint-disable-next-line flowtype/no-weak-types
-export type GraphQLContext = any;
 
 const isDev = process.env.POSTGRAPHILE_ENV === "development";
 
@@ -277,7 +279,11 @@ class QueryBuilder {
   // ----------------------------------------
 
   // Helper function
-  jsonbBuildObject(fields: Array<[SQL, string /* used to be RawAlias, but cannot work with symbols! */]>) {
+  jsonbBuildObject(
+    fields: Array<
+      [SQL, string /* used to be RawAlias, but cannot work with symbols! */]
+    >
+  ) {
     if (this.supportsJSONB && fields.length > 50) {
       const fieldsChunks = chunk(fields, 50);
       const chunkToJson = fieldsChunk =>
@@ -573,8 +579,9 @@ ${sql.join(
     this.lock("limit");
     this.lock("first");
     this.lock("last");
-    let limit = this.compiledData.limit ?? null;
-    let offset = this.compiledData.offset ?? 0;
+    let limit =
+      this.compiledData.limit != null ? this.compiledData.limit : null;
+    let offset = this.compiledData.offset || 0;
     let flip = false;
     if (this.compiledData.first != null) {
       if (limit != null) {
@@ -769,9 +776,11 @@ ${sql.join(
 
     let fragment = sql.fragment`\
 select ${useAsterisk ? sql.fragment`${this.getTableAlias()}.*` : fields}
-${this.compiledData.from &&
-  sql.fragment`from ${this.compiledData.from[0]} as ${this.getTableAlias()}` || sql.blank}
-${this.compiledData.join.length && sql.join(this.compiledData.join, " ") || sql.blank}
+${(this.compiledData.from &&
+  sql.fragment`from ${this.compiledData.from[0]} as ${this.getTableAlias()}`) ||
+  sql.blank}
+${(this.compiledData.join.length && sql.join(this.compiledData.join, " ")) ||
+  sql.blank}
 where ${this.buildWhereClause(true, true, options)}
 ${
   this.compiledData.orderBy.length
@@ -795,8 +804,9 @@ ${
       )}`
     : sql.blank
 }
-${isSafeInteger(limit) && sql.fragment`limit ${sql.literal(limit)}` || sql.blank}
-${offset && sql.fragment`offset ${sql.literal(offset)}` || sql.blank}`;
+${(isSafeInteger(limit) && sql.fragment`limit ${sql.literal(limit)}`) ||
+  sql.blank}
+${(offset && sql.fragment`offset ${sql.literal(offset)}`) || sql.blank}`;
     if (flip) {
       const flipAlias = Symbol();
       fragment = sql.fragment`\
@@ -924,7 +934,7 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
   }
   checkLock(type: string) {
     if (this.locks[type]) {
-      const lock = this.locks[type]
+      const lock = this.locks[type];
       if (typeof lock === "string") {
         throw new Error(
           `'${type}' has already been locked\n    ` +

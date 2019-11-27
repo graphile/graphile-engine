@@ -3,6 +3,7 @@ import {
   ResolvedLookAhead,
   Hook,
   ContextGraphQLObjectTypeInterfaces,
+  GraphQLContext,
 } from "../SchemaBuilder";
 import { ResolveTree } from "graphql-parse-resolve-info";
 import {
@@ -14,7 +15,7 @@ import {
 const base64 = str => Buffer.from(String(str)).toString("base64");
 const base64Decode = str => Buffer.from(String(str), "base64").toString("utf8");
 
-export type NodeFetcher<T = unknown> = (
+export type NodeFetcher<T = GraphQLContext> = (
   data: unknown,
   identifiers: Array<unknown>,
   context: unknown,

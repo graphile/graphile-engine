@@ -30,6 +30,7 @@ export {
 export { SchemaBuilder };
 
 export {
+  GraphQLContext,
   Plugin,
   GraphileBuildOptions,
   GraphileObjectTypeConfig,

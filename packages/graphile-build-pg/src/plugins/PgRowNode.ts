@@ -1,5 +1,7 @@
 import { Plugin } from "graphile-build";
 import debugSql from "./debugSql";
+import { ResolveTree } from "graphql-parse-resolve-info";
+import { PgEntityKind } from "./PgIntrospectionPlugin";
 
 export default (async function PgRowNode(builder, { subscriptions }) {
   builder.hook(
@@ -21,7 +23,13 @@ export default (async function PgRowNode(builder, { subscriptions }) {
         // Node plugin must be disabled.
         return object;
       }
-      if (!isPgRowType || !table.namespace || omit(table, "read")) {
+      if (
+        !isPgRowType ||
+        !table ||
+        table.kind !== PgEntityKind.CLASS ||
+        !table.namespace ||
+        omit(table, "read")
+      ) {
         return object;
       }
       const sqlFullTableName = sql.identifier(table.namespace.name, table.name);
@@ -185,7 +193,7 @@ export default (async function PgRowNode(builder, { subscriptions }) {
 
                           const parsedResolveInfoFragment = parseResolveInfo(
                             resolveInfo
-                          );
+                          ) as ResolveTree;
 
                           parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
                           const resolveData = getDataFromParsedResolveInfoFragment(
