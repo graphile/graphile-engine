@@ -1,5 +1,15 @@
 import { Plugin } from "graphile-build";
-import isString from "lodash/isString";
+import isString = require("lodash/isString");
+import { GraphQLObjectType } from "graphql";
+
+declare module "graphile-build" {
+  interface GraphileBuildOptions {
+    disableIssue397Fix?: boolean;
+  }
+  interface ScopeGraphQLObjectTypeFieldsField {
+    isPgMutationPayloadEdgeField?: true;
+  }
+}
 
 export default (function PgMutationPayloadEdgePlugin(
   builder,
@@ -14,7 +24,7 @@ export default (function PgMutationPayloadEdgePlugin(
         getTypeByName,
         pgGetGqlTypeByTypeIdAndModifier,
         pgSql: sql,
-        graphql: { GraphQLList, GraphQLNonNull },
+        graphql: { GraphQLList, GraphQLNonNull, getNamedType, GraphQLEnumType },
         inflection,
         pgOmit: omit,
         describePgEntity,
@@ -29,6 +39,7 @@ export default (function PgMutationPayloadEdgePlugin(
       const table = pgIntrospectionTable || pgIntrospection;
       if (
         !isMutationPayload ||
+        !pgIntrospection ||
         !table ||
         table.kind !== "class" ||
         !table.namespace ||
@@ -52,13 +63,19 @@ export default (function PgMutationPayloadEdgePlugin(
       }
 
       const TableType = pgGetGqlTypeByTypeIdAndModifier(table.type.id, null);
-      const tableTypeName = TableType.name;
+      if (!TableType) {
+        return fields;
+      }
+      const tableTypeName = getNamedType(TableType).name;
       const TableOrderByType = getTypeByName(
         inflection.orderByType(tableTypeName)
       );
+      if (!TableOrderByType || !(TableOrderByType instanceof GraphQLEnumType)) {
+        return fields;
+      }
 
       const TableEdgeType = getTypeByName(inflection.edge(tableTypeName));
-      if (!TableEdgeType) {
+      if (!TableEdgeType || !(TableEdgeType instanceof GraphQLObjectType)) {
         return fields;
       }
 
