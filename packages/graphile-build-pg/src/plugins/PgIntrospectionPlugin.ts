@@ -1,5 +1,5 @@
 import { Plugin } from "graphile-build";
-import { Client } from "pg";
+import { Client, PoolClient } from "pg";
 import withPgClient, {
   getPgClientAndReleaserFromConfig,
 } from "../withPgClient";
@@ -28,7 +28,7 @@ declare module "graphile-build" {
     pgAugmentIntrospectionResults?: (
       introspectionResult: PgIntrospectionResultsByKind
     ) => PgIntrospectionResultsByKind;
-    pgOwnerConnectionString?: boolean;
+    pgOwnerConnectionString?: string;
   }
 }
 
@@ -897,10 +897,13 @@ export default (async function PgIntrospectionPlugin(
   let listener;
 
   class Listener {
-    _handleChange: () => void;
-    client: Client | null;
+    _handleChange: {
+      (): void;
+      cancel: () => void;
+    };
+    client: PoolClient | Client | null;
     stopped: boolean;
-    _reallyReleaseClient: (() => Promise<void>) | null;
+    _reallyReleaseClient: (() => void) | null;
     _haveDisplayedError: boolean;
     constructor(triggerRebuild) {
       this.stopped = false;
@@ -1001,8 +1004,7 @@ export default (async function PgIntrospectionPlugin(
       }
     }
 
-    _handleClientError: (e: Error) => void;
-    _handleClientError(e) {
+    _handleClientError(e: Error): void {
       // Client is already cleaned up
       this.client = null;
       this._reallyReleaseClient = null;
@@ -1027,10 +1029,7 @@ export default (async function PgIntrospectionPlugin(
       }, 2000);
     }
 
-    // eslint-disable-next-line flowtype/no-weak-types
-    _listener: (notification: any) => void;
-    // eslint-disable-next-line flowtype/no-weak-types
-    async _listener(notification: any) {
+    async _listener(notification: any): Promise<void> {
       if (notification.channel !== "postgraphile_watch") {
         return;
       }
@@ -1117,9 +1116,13 @@ export default (async function PgIntrospectionPlugin(
           supportsJSONB: false,
         });
       }
-      return build.extend(build, {
-        pgIntrospectionResultsByKind: introspectionResultsByKind,
-      });
+      return build.extend(
+        build,
+        {
+          pgIntrospectionResultsByKind: introspectionResultsByKind,
+        },
+        "Adding PG introspection results from graphile-build-pg PgIntrospectionPlugin"
+      );
     },
     ["PgIntrospection"],
     [],
