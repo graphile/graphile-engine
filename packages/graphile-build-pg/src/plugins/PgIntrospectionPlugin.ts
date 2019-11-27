@@ -133,6 +133,7 @@ export interface PgType {
   domainBaseTypeId: string | void;
   domainBaseType: PgType | void;
   domainTypeModifier: number | void;
+  domainHasDefault: boolean;
   tags: SmartTags;
 }
 

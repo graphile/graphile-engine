@@ -33,6 +33,8 @@ import pickBy = require("lodash/pickBy");
 import PgLiveProvider from "../PgLiveProvider";
 import pgPrepareAndRun from "../pgPrepareAndRun";
 
+export type PgTypeModifier = string | number | null;
+
 type PgColumnFilterFunction = (
   attr: PgAttribute,
   build: Build,

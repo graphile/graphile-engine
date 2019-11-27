@@ -17,6 +17,7 @@ import {
   GraphQLOutputType,
 } from "graphql";
 import { PgType, PgEntity, PgClass } from "./PgIntrospectionPlugin";
+import { PgTypeModifier } from "./PgBasicsPlugin";
 
 interface GqlTypeByTypeIdAndModifier {
   [typeId: string]: {
@@ -31,7 +32,7 @@ interface GqlInputTypeByTypeIdAndModifier {
 
 type TypeGen<T> = (
   set: (type: T) => void,
-  typeModifier: string | null
+  typeModifier: PgTypeModifier
 ) => void | T;
 
 type Pg2GqlMapper = {
@@ -58,12 +59,12 @@ declare module "graphile-build" {
     ): void;
     pgGetGqlTypeByTypeIdAndModifier(
       typeId: string,
-      typeModifier: string | null,
+      typeModifier: PgTypeModifier,
       useFallback?: boolean
     ): GraphQLOutputType | null;
     pgGetGqlInputTypeByTypeIdAndModifier(
       typeId: string,
-      typeModifier: string | null,
+      typeModifier: PgTypeModifier,
       useFallback?: boolean
     ): GraphQLInputType | null;
     pg2GqlMapper: Pg2GqlMapper;
@@ -1060,7 +1061,7 @@ end`;
 
       function getGqlTypeByTypeIdAndModifier(
         typeId,
-        typeModifier: string | null = null,
+        typeModifier: PgTypeModifier = null,
         useFallback = true
       ) {
         const typeModifierKey = typeModifier != null ? typeModifier : -1;
@@ -1121,7 +1122,7 @@ end`;
 
       function getGqlInputTypeByTypeIdAndModifier(
         typeId,
-        typeModifier: string | null = null
+        typeModifier: PgTypeModifier = null
       ) {
         // First, load the OUTPUT type (it might register an input type)
         getGqlTypeByTypeIdAndModifier(typeId, typeModifier);

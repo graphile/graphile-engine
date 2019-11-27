@@ -8,12 +8,13 @@ import { PgType } from "./PgIntrospectionPlugin";
 import QueryBuilder, { SQL } from "../QueryBuilder";
 import { FieldWithHooksFunction } from "graphile-build";
 import { ResolveTree } from "graphql-parse-resolve-info";
+import { PgTypeModifier } from "./PgBasicsPlugin";
 
 export { FieldWithHooksFunction };
 
 interface PgFieldOptions {
   pgType?: PgType;
-  pgTypeModifier?: string | null;
+  pgTypeModifier?: PgTypeModifier;
   hoistCursor?: boolean;
   withQueryBuilder?: (
     queryBuilder: QueryBuilder,

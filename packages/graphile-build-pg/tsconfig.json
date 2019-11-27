@@ -5,7 +5,9 @@
     "declarationDir": "./node8plus",
     "outDir": "./node8plus",
 
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
   },
   "include": ["src/**/*"]
 }

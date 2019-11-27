@@ -12,6 +12,9 @@ export default (function PgColumnsPlugin(builder) {
         pgTweakFragmentForTypeAndModifier,
         pgQueryFromResolveData: queryFromResolveData,
       } = build;
+      if (!sql || !queryFromResolveData || !pgTweakFragmentForTypeAndModifier) {
+        throw new Error("Required Build properties were not present");
+      }
       const getSelectValueForFieldAndTypeAndModifier = (
         ReturnType,
         fieldScope,
@@ -242,6 +245,9 @@ end
               `Two columns produce the same GraphQL field name '${fieldName}' on input class '${table.namespaceName}.${table.name}'; one of them is '${attr.name}'`
             );
           }
+          if (!pgAddSubfield) {
+            throw new Error("Cannot add subfield");
+          }
           memo = extend(
             memo,
             {
@@ -252,7 +258,7 @@ end
                   attr.name,
                   attr.type,
                   {
-                    description: attr.description,
+                    description: attr.description || null,
                     type: nullableIf(
                       GraphQLNonNull,
                       isPgBaseInput ||

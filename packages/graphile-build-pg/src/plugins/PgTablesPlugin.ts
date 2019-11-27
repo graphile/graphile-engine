@@ -1,4 +1,54 @@
-import { Plugin } from "graphile-build";
+import {
+  Plugin,
+  GraphileObjectTypeConfig,
+  ScopeGraphQLObjectType,
+} from "graphile-build";
+import { PgType } from "./PgIntrospectionPlugin";
+import {
+  GraphQLInputFieldConfig,
+  GraphQLObjectType,
+  GraphQLScalarType,
+  GraphQLFieldConfigMap,
+} from "graphql";
+import { PgTypeModifier } from "./PgBasicsPlugin";
+
+declare module "graphile-build" {
+  interface ScopeGraphQLObjectType {
+    isPgRowType?: boolean;
+    isPgCompoundType?: boolean;
+    isPgCompositeType?: boolean;
+
+    /* Connections */
+    isEdgeType?: true;
+    isPgRowEdgeType?: true;
+    isConnectionType?: true;
+    isPgRowConnectionType?: true;
+    nodeType?: GraphQLObjectType;
+    edgeType?: GraphQLObjectType;
+  }
+
+  interface ScopeGraphQLInputObjectType {
+    /** Mutation input type? */
+    isInputType?: true;
+
+    /** Mutation input for 'update' mutations */
+    isPgPatch?: true;
+
+    /** Mutation input for the 'base' variant */
+    isPgBaseInput?: true;
+
+    isPgRowType?: boolean;
+    isPgCompoundType?: boolean;
+    pgAddSubfield?: (
+      fieldName: string,
+      attrName: string,
+      pgType: PgType,
+      spec: GraphQLInputFieldConfig,
+      typeModifier?: PgTypeModifier
+    ) => GraphQLInputFieldConfig;
+  }
+}
+
 const base64 = str => Buffer.from(String(str)).toString("base64");
 
 const hasNonNullKey = row => {
@@ -55,6 +105,8 @@ export default (function PgTablesPlugin(
           GraphQLID,
           GraphQLList,
           GraphQLInputObjectType,
+          GraphQLInterfaceType,
+          GraphQLScalarType,
         },
 
         inflection,
@@ -66,6 +118,9 @@ export default (function PgTablesPlugin(
       const nullableIf = (condition, Type) =>
         condition ? Type : new GraphQLNonNull(Type);
       const Cursor = getTypeByName("Cursor");
+      if (!Cursor || !(Cursor instanceof GraphQLScalarType)) {
+        throw new Error("Expected 'Cursor' type to exist");
+      }
 
       introspectionResultsByKind.class.forEach(table => {
         const tablePgType = table.type;
@@ -86,7 +141,7 @@ export default (function PgTablesPlugin(
           primaryKeys.length
             ? true
             : false;
-        let TableType;
+        let TableType: GraphQLObjectType | null | undefined;
         let TablePatchType;
         let TableBaseInputType;
         pgRegisterGqlTypeByTypeId(
@@ -101,78 +156,81 @@ export default (function PgTablesPlugin(
                 `Register was called but there's already a mapper in place for '${tablePgType.id}'!`
               );
             }
-            TableType = newWithHooks(
-              GraphQLObjectType,
-              {
-                description: table.description || tablePgType.description,
-                name: tableTypeName,
-                interfaces: () => {
-                  if (shouldHaveNodeId) {
-                    return [getTypeByName(inflection.builtin("Node"))];
-                  } else {
-                    return [];
-                  }
-                },
-                fields: ({ addDataGeneratorForField, Self }) => {
-                  const fields = {};
-                  if (shouldHaveNodeId) {
-                    // Enable nodeId interface
-                    addDataGeneratorForField(nodeIdFieldName, () => {
-                      return {
-                        pgQuery: queryBuilder => {
-                          queryBuilder.selectIdentifiers(table);
-                        },
-                      };
-                    });
-                    fields[nodeIdFieldName] = {
-                      description:
-                        "A globally unique identifier. Can be used in various places throughout the system to identify this single value.",
-                      type: new GraphQLNonNull(GraphQLID),
-                      resolve(data) {
-                        const identifiers = data.__identifiers;
-                        if (!identifiers) {
-                          return null;
-                        }
-                        /*
-                         * For bigint we want NodeIDs to be the same as int up
-                         * to the limits of int, and only to be strings after
-                         * that point.
-                         */
-                        const finalIdentifiers = identifiers.map(
-                          (identifier, idx) => {
-                            const key = primaryKeys[idx];
-                            const type = key.type.domainBaseType || key.type;
-                            if (type.id === "20" /* bigint */) {
-                              /*
-                               * When migrating from 'int' to 'bigint' we want
-                               * to maintain nodeIDs in the safe range before
-                               * moving to strings for larger numbers. Since we
-                               * can represent ints up to MAX_SAFE_INTEGER
-                               * (2^53 - 1) fine, we're using that as the
-                               * boundary.
-                               */
-                              const int = parseInt(identifier, 10);
-                              if (
-                                int >= -Number.MAX_SAFE_INTEGER &&
-                                int <= Number.MAX_SAFE_INTEGER
-                              ) {
-                                return int;
-                              }
-                            }
-                            return identifier;
-                          }
-                        );
-
-                        return getNodeIdForTypeAndIdentifiers(
-                          Self,
-                          ...finalIdentifiers
-                        );
+            const tableSpec: GraphileObjectTypeConfig<any, any> = {
+              description: table.description || tablePgType.description || null,
+              name: tableTypeName,
+              interfaces: () => {
+                const NodeInterface =
+                  shouldHaveNodeId && getTypeByName(inflection.builtin("Node"));
+                if (NodeInterface instanceof GraphQLInterfaceType) {
+                  return [NodeInterface];
+                } else {
+                  return [];
+                }
+              },
+              fields: ({ addDataGeneratorForField, Self }) => {
+                const fields = {};
+                if (shouldHaveNodeId) {
+                  // Enable nodeId interface
+                  addDataGeneratorForField(nodeIdFieldName, () => {
+                    return {
+                      pgQuery: queryBuilder => {
+                        queryBuilder.selectIdentifiers(table);
                       },
                     };
-                  }
-                  return fields;
-                },
+                  });
+                  fields[nodeIdFieldName] = {
+                    description:
+                      "A globally unique identifier. Can be used in various places throughout the system to identify this single value.",
+                    type: new GraphQLNonNull(GraphQLID),
+                    resolve(data) {
+                      const identifiers = data.__identifiers;
+                      if (!identifiers) {
+                        return null;
+                      }
+                      /*
+                       * For bigint we want NodeIDs to be the same as int up
+                       * to the limits of int, and only to be strings after
+                       * that point.
+                       */
+                      const finalIdentifiers = identifiers.map(
+                        (identifier, idx) => {
+                          const key = primaryKeys[idx];
+                          const type = key.type.domainBaseType || key.type;
+                          if (type.id === "20" /* bigint */) {
+                            /*
+                             * When migrating from 'int' to 'bigint' we want
+                             * to maintain nodeIDs in the safe range before
+                             * moving to strings for larger numbers. Since we
+                             * can represent ints up to MAX_SAFE_INTEGER
+                             * (2^53 - 1) fine, we're using that as the
+                             * boundary.
+                             */
+                            const int = parseInt(identifier, 10);
+                            if (
+                              int >= -Number.MAX_SAFE_INTEGER &&
+                              int <= Number.MAX_SAFE_INTEGER
+                            ) {
+                              return int;
+                            }
+                          }
+                          return identifier;
+                        }
+                      );
+
+                      return getNodeIdForTypeAndIdentifiers(
+                        Self,
+                        ...finalIdentifiers
+                      );
+                    },
+                  };
+                }
+                return fields;
               },
+            };
+            TableType = newWithHooks(
+              GraphQLObjectType,
+              tableSpec,
 
               {
                 __origin: `Adding table type for ${describePgEntity(
@@ -189,6 +247,11 @@ export default (function PgTablesPlugin(
                 isPgCompositeType: !table.isSelectable,
               }
             );
+            if (!TableType) {
+              throw new Error(
+                `Failed to construct TableType for '${tableSpec.name}'`
+              );
+            }
 
             cb(TableType);
             const pgCreateInputFields = {};
@@ -198,7 +261,7 @@ export default (function PgTablesPlugin(
               GraphQLInputObjectType,
               {
                 description: `An input for mutations affecting \`${tableTypeName}\``,
-                name: inflection.inputType(TableType),
+                name: inflection.inputType(TableType.name),
               },
 
               {
@@ -238,7 +301,7 @@ export default (function PgTablesPlugin(
                 GraphQLInputObjectType,
                 {
                   description: `Represents an update to a \`${tableTypeName}\`. Fields that are set will be updated.`,
-                  name: inflection.patchType(TableType),
+                  name: inflection.patchType(TableType.name),
                 },
 
                 {
@@ -277,7 +340,7 @@ export default (function PgTablesPlugin(
                 GraphQLInputObjectType,
                 {
                   description: `An input representation of \`${tableTypeName}\` with nullable fields.`,
-                  name: inflection.baseInputType(TableType),
+                  name: inflection.baseInputType(TableType.name),
                 },
 
                 {
@@ -351,232 +414,238 @@ export default (function PgTablesPlugin(
               },
             };
 
-            const EdgeType = newWithHooks(
-              GraphQLObjectType,
-              {
-                description: `A \`${tableTypeName}\` edge in the connection.`,
-                name: inflection.edge(TableType.name),
-                fields: ({ fieldWithHooks }) => {
-                  return {
-                    cursor: fieldWithHooks(
-                      "cursor",
-                      ({ addDataGenerator }) => {
-                        addDataGenerator(() => ({
-                          usesCursor: [true],
-                          pgQuery: queryBuilder => {
-                            if (primaryKeys) {
-                              queryBuilder.selectIdentifiers(table);
-                            }
-                          },
-                        }));
-
-                        return {
-                          description: "A cursor for use in pagination.",
-                          type: Cursor,
-                          resolve(data) {
-                            return (
-                              data.__cursor &&
-                              base64(JSON.stringify(data.__cursor))
-                            );
-                          },
-                        };
-                      },
-                      {
-                        isCursorField: true,
-                      }
-                    ),
-
-                    node: pgField(
-                      build,
-                      fieldWithHooks,
-                      "node",
-                      {
-                        description: `The \`${tableTypeName}\` at the end of the edge.`,
-                        type: nullableIf(
-                          !pgForbidSetofFunctionsToReturnNull,
-                          TableType
-                        ),
-
-                        resolve(data, _args, resolveContext, resolveInfo) {
-                          const safeAlias = getSafeAliasFromResolveInfo(
-                            resolveInfo
-                          );
-
-                          const record = handleNullRow(
-                            data[safeAlias],
-                            data.__identifiers
-                          );
-
-                          const liveRecord =
-                            resolveInfo.rootValue &&
-                            resolveInfo.rootValue.liveRecord;
-                          if (
-                            record &&
-                            primaryKeys &&
-                            liveRecord &&
-                            data.__identifiers
-                          ) {
-                            liveRecord("pg", table, data.__identifiers);
-                          }
-                          return record;
-                        },
-                      },
-
-                      {},
-                      false,
-                      {
-                        withQueryBuilder: queryBuilder => {
-                          if (subscriptions) {
+            const edgeSpec: GraphileObjectTypeConfig<any, any> = {
+              description: `A \`${tableTypeName}\` edge in the connection.`,
+              name: inflection.edge(TableType.name),
+              fields: ({ fieldWithHooks }) => {
+                return {
+                  cursor: fieldWithHooks(
+                    "cursor",
+                    ({ addDataGenerator }) => {
+                      addDataGenerator(() => ({
+                        usesCursor: true,
+                        pgQuery: queryBuilder => {
+                          if (primaryKeys) {
                             queryBuilder.selectIdentifiers(table);
                           }
                         },
-                      }
-                    ),
-                  };
-                },
-              },
+                      }));
 
-              {
-                __origin: `Adding table edge type for ${describePgEntity(
-                  table
-                )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
-                  table,
-                  {
-                    name: "newNameHere",
-                  }
-                )}`,
-                isEdgeType: true,
-                isPgRowEdgeType: true,
-                nodeType: TableType,
-                pgIntrospection: table,
-              }
-            );
+                      return {
+                        description: "A cursor for use in pagination.",
+                        type: Cursor,
+                        resolve(data) {
+                          return (
+                            data.__cursor &&
+                            base64(JSON.stringify(data.__cursor))
+                          );
+                        },
+                      };
+                    },
+                    {
+                      isCursorField: true,
+                    }
+                  ),
+
+                  node: pgField(
+                    build,
+                    fieldWithHooks,
+                    "node",
+                    {
+                      description: `The \`${tableTypeName}\` at the end of the edge.`,
+                      type: nullableIf(
+                        !pgForbidSetofFunctionsToReturnNull,
+                        TableType
+                      ),
+
+                      resolve(data, _args, resolveContext, resolveInfo) {
+                        const safeAlias = getSafeAliasFromResolveInfo(
+                          resolveInfo
+                        );
+
+                        const record = handleNullRow(
+                          data[safeAlias],
+                          data.__identifiers
+                        );
+
+                        const liveRecord =
+                          resolveInfo.rootValue &&
+                          resolveInfo.rootValue.liveRecord;
+                        if (
+                          record &&
+                          primaryKeys &&
+                          liveRecord &&
+                          data.__identifiers
+                        ) {
+                          liveRecord("pg", table, data.__identifiers);
+                        }
+                        return record;
+                      },
+                    },
+
+                    {},
+                    false,
+                    {
+                      withQueryBuilder: queryBuilder => {
+                        if (subscriptions) {
+                          queryBuilder.selectIdentifiers(table);
+                        }
+                      },
+                    }
+                  ),
+                };
+              },
+            };
+            const EdgeType = newWithHooks(GraphQLObjectType, edgeSpec, {
+              __origin: `Adding table edge type for ${describePgEntity(
+                table
+              )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
+                table,
+                {
+                  name: "newNameHere",
+                }
+              )}`,
+              isEdgeType: true,
+              isPgRowEdgeType: true,
+              nodeType: TableType,
+              pgIntrospection: table,
+            });
+
+            if (!EdgeType) {
+              throw new Error(
+                `Failed to construct EdgeType for '${edgeSpec.name}'`
+              );
+            }
 
             const PageInfo = getTypeByName(inflection.builtin("PageInfo"));
 
             /*const ConnectionType = */
-            newWithHooks(
-              GraphQLObjectType,
-              {
-                description: `A connection to a list of \`${tableTypeName}\` values.`,
-                name: inflection.connection(TableType.name),
-                fields: ({ recurseDataGeneratorsForField, fieldWithHooks }) => {
-                  recurseDataGeneratorsForField("pageInfo", true);
-                  return {
-                    nodes: pgField(
-                      build,
-                      fieldWithHooks,
-                      "nodes",
-                      {
-                        description: `A list of \`${tableTypeName}\` objects.`,
-                        type: new GraphQLNonNull(
-                          new GraphQLList(
-                            nullableIf(
-                              !pgForbidSetofFunctionsToReturnNull,
-                              TableType
-                            )
+            const connectionSpec: GraphileObjectTypeConfig<any, any> = {
+              description: `A connection to a list of \`${tableTypeName}\` values.`,
+              name: inflection.connection(TableType.name),
+              fields: ({
+                recurseDataGeneratorsForField,
+                fieldWithHooks,
+              }): GraphQLFieldConfigMap<any, any> => {
+                recurseDataGeneratorsForField("pageInfo", true);
+                return {
+                  nodes: pgField(
+                    build,
+                    fieldWithHooks,
+                    "nodes",
+                    {
+                      description: `A list of \`${tableTypeName}\` objects.`,
+                      type: new GraphQLNonNull(
+                        new GraphQLList(
+                          nullableIf(
+                            !pgForbidSetofFunctionsToReturnNull,
+                            TableType
                           )
-                        ),
+                        )
+                      ),
 
-                        resolve(data, _args, resolveContext, resolveInfo) {
-                          const safeAlias = getSafeAliasFromResolveInfo(
-                            resolveInfo
+                      resolve(data, _args, resolveContext, resolveInfo) {
+                        const safeAlias = getSafeAliasFromResolveInfo(
+                          resolveInfo
+                        );
+
+                        const liveRecord =
+                          resolveInfo.rootValue &&
+                          resolveInfo.rootValue.liveRecord;
+                        return data.data.map(entry => {
+                          const record = handleNullRow(
+                            entry[safeAlias],
+                            entry[safeAlias].__identifiers
                           );
 
-                          const liveRecord =
-                            resolveInfo.rootValue &&
-                            resolveInfo.rootValue.liveRecord;
-                          return data.data.map(entry => {
-                            const record = handleNullRow(
-                              entry[safeAlias],
+                          if (
+                            record &&
+                            liveRecord &&
+                            primaryKeys &&
+                            entry[safeAlias].__identifiers
+                          ) {
+                            liveRecord(
+                              "pg",
+                              table,
                               entry[safeAlias].__identifiers
                             );
-
-                            if (
-                              record &&
-                              liveRecord &&
-                              primaryKeys &&
-                              entry[safeAlias].__identifiers
-                            ) {
-                              liveRecord(
-                                "pg",
-                                table,
-                                entry[safeAlias].__identifiers
-                              );
-                            }
-
-                            return record;
-                          });
-                        },
-                      },
-
-                      {},
-                      false,
-                      {
-                        withQueryBuilder: queryBuilder => {
-                          if (subscriptions) {
-                            queryBuilder.selectIdentifiers(table);
                           }
-                        },
-                      }
-                    ),
 
-                    edges: pgField(
-                      build,
-                      fieldWithHooks,
-                      "edges",
-                      {
-                        description: `A list of edges which contains the \`${tableTypeName}\` and cursor to aid in pagination.`,
-                        type: new GraphQLNonNull(
-                          new GraphQLList(new GraphQLNonNull(EdgeType))
-                        ),
-
-                        resolve(data, _args, _context, resolveInfo) {
-                          const safeAlias = getSafeAliasFromResolveInfo(
-                            resolveInfo
-                          );
-
-                          return data.data.map(entry => ({
-                            ...entry,
-                            ...entry[safeAlias],
-                          }));
-                        },
-                      },
-
-                      {},
-                      false,
-                      {
-                        hoistCursor: true,
-                      }
-                    ),
-
-                    pageInfo: PageInfo && {
-                      description: "Information to aid in pagination.",
-                      type: new GraphQLNonNull(PageInfo),
-                      resolve(data) {
-                        return data;
+                          return record;
+                        });
                       },
                     },
-                  };
-                },
-              },
 
-              {
-                __origin: `Adding table connection type for ${describePgEntity(
-                  table
-                )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
-                  table,
-                  {
-                    name: "newNameHere",
-                  }
-                )}`,
-                isConnectionType: true,
-                isPgRowConnectionType: true,
-                edgeType: EdgeType,
-                nodeType: TableType,
-                pgIntrospection: table,
-              }
-            );
+                    {},
+                    false,
+                    {
+                      withQueryBuilder: queryBuilder => {
+                        if (subscriptions) {
+                          queryBuilder.selectIdentifiers(table);
+                        }
+                      },
+                    }
+                  ),
+
+                  edges: pgField(
+                    build,
+                    fieldWithHooks,
+                    "edges",
+                    {
+                      description: `A list of edges which contains the \`${tableTypeName}\` and cursor to aid in pagination.`,
+                      type: new GraphQLNonNull(
+                        new GraphQLList(new GraphQLNonNull(EdgeType))
+                      ),
+
+                      resolve(data, _args, _context, resolveInfo) {
+                        const safeAlias = getSafeAliasFromResolveInfo(
+                          resolveInfo
+                        );
+
+                        return data.data.map(entry => ({
+                          ...entry,
+                          ...entry[safeAlias],
+                        }));
+                      },
+                    },
+
+                    {},
+                    false,
+                    {
+                      hoistCursor: true,
+                    }
+                  ),
+
+                  ...(PageInfo
+                    ? {
+                        pageInfo: {
+                          description: "Information to aid in pagination.",
+                          type: new GraphQLNonNull(PageInfo),
+                          resolve(data) {
+                            return data;
+                          },
+                        },
+                      }
+                    : {}),
+                };
+              },
+            };
+            const connectionScope: ScopeGraphQLObjectType = {
+              __origin: `Adding table connection type for ${describePgEntity(
+                table
+              )}. You can rename the table's GraphQL type via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
+                table,
+                {
+                  name: "newNameHere",
+                }
+              )}`,
+              isConnectionType: true,
+              isPgRowConnectionType: true,
+              edgeType: EdgeType,
+              nodeType: TableType,
+              pgIntrospection: table,
+            };
+            newWithHooks(GraphQLObjectType, connectionSpec, connectionScope);
           },
           true
         );
@@ -600,7 +669,9 @@ export default (function PgTablesPlugin(
               return TableBaseInputType;
             }
             if (TableType) {
-              return getTypeByName(inflection.inputType(TableType));
+              return getTypeByName(
+                inflection.inputType(build.graphql.getNamedType(TableType).name)
+              );
             }
             return null;
           },
@@ -622,6 +693,11 @@ export default (function PgTablesPlugin(
                 tablePgType.id,
                 null
               );
+              if (!TableType) {
+                throw new Error(
+                  `Failed to get table type for id '${arrayTablePgType.id}'`
+                );
+              }
 
               return new GraphQLList(TableType);
             },
