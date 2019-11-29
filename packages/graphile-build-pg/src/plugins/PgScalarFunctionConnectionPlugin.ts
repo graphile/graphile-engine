@@ -18,6 +18,7 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
           GraphQLList,
           GraphQLString,
           getNamedType,
+          isOutputType,
         },
 
         inflection,
@@ -57,7 +58,7 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
         // version of PG will?
         const NodeType =
           pgGetGqlTypeByTypeIdAndModifier(returnType.id, null) || GraphQLString;
-        if (!NodeType || !(NodeType instanceof GraphQLObjectType)) {
+        if (!NodeType || !isOutputType(NodeType)) {
           throw new Error(
             `Could not retrieve NodeType for type with oid '${returnType.id}'`
           );

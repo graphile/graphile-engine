@@ -24,6 +24,7 @@ export default (function PgRecordFunctionConnectionPlugin(
           GraphQLList,
           GraphQLScalarType,
           getNamedType,
+          isOutputType,
         },
         inflection,
         pgOmit: omit,
@@ -55,7 +56,7 @@ export default (function PgRecordFunctionConnectionPlugin(
           inflection.recordFunctionReturnType(proc)
         );
 
-        if (!NodeType || !(NodeType instanceof GraphQLObjectType)) {
+        if (!NodeType || !isOutputType(NodeType)) {
           throw new Error(
             `Do not have a node type '${inflection.recordFunctionReturnType(
               proc
