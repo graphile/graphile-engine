@@ -1,6 +1,7 @@
 import { Plugin } from "graphile-build";
 import { getComputedColumnDetails } from "./PgComputedColumnsPlugin";
-import assert from "assert";
+import assert = require("assert");
+
 function getCompatibleComputedColumns(build, table) {
   const {
     pgIntrospectionResultsByKind: introspectionResultsByKind,
@@ -103,7 +104,10 @@ export default (function PgConditionComputedColumnPlugin(builder) {
           );
 
           return memo;
-        }, {})
+        }, {}),
+        `Adding computed column condition arguments for ${describePgEntity(
+          table
+        )}`
       );
     },
     ["PgConditionComputedColumn"]
@@ -119,7 +123,7 @@ export default (function PgConditionComputedColumnPlugin(builder) {
         pgGetGqlTypeByTypeIdAndModifier,
         inflection,
         pgOmit: omit,
-        graphql: { getNullableType },
+        graphql: { getNullableType, getNamedType },
       } = build;
       const {
         scope: {
@@ -134,7 +138,7 @@ export default (function PgConditionComputedColumnPlugin(builder) {
 
       const shouldAddCondition =
         isPgFieldConnection || isPgFieldSimpleCollection;
-      if (!shouldAddCondition) return args;
+      if (!shouldAddCondition || !pgFieldIntrospection) return args;
       if (!args.condition) {
         return args;
       }
@@ -155,8 +159,11 @@ export default (function PgConditionComputedColumnPlugin(builder) {
         return args;
       }
       const TableType = pgGetGqlTypeByTypeIdAndModifier(table.type.id, null);
+      if (!TableType) {
+        throw new Error(`Failed to get TableType for table '${table.name}'`);
+      }
       const TableConditionType = getTypeByName(
-        inflection.conditionType(TableType.name)
+        inflection.conditionType(getNamedType(TableType).name)
       );
 
       if (!TableConditionType) {
@@ -189,7 +196,7 @@ export default (function PgConditionComputedColumnPlugin(builder) {
       addArgDataGenerator(function connectionCondition({ condition }) {
         return {
           pgQuery: queryBuilder => {
-            if (condition != null) {
+            if (typeof condition === "object" && condition != null) {
               compatibleComputedColumns.forEach(
                 ({ fieldName, sqlFnName, returnType }) => {
                   const val = condition[fieldName];

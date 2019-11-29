@@ -18,7 +18,7 @@ export default (function PgColumnDeprecationPlugin(builder) {
         ...field,
         deprecationReason: Array.isArray(pgFieldIntrospection.tags.deprecated)
           ? pgFieldIntrospection.tags.deprecated.join("\n")
-          : pgFieldIntrospection.tags.deprecated,
+          : String(pgFieldIntrospection.tags.deprecated),
       };
     },
     ["PgColumnDeprecation"]

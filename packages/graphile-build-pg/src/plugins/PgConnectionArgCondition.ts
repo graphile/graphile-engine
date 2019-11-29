@@ -1,5 +1,14 @@
 import { Plugin } from "graphile-build";
 
+declare module "graphile-build" {
+  interface ScopeGraphQLInputObjectType {
+    isPgCondition?: true;
+  }
+  interface ScopeGraphQLInputObjectTypeFieldsField {
+    isPgConnectionConditionInputField?: true;
+  }
+}
+
 export default (function PgConnectionArgCondition(builder) {
   builder.hook(
     "init",

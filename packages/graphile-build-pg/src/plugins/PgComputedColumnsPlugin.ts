@@ -1,5 +1,5 @@
 import { Plugin, Build } from "graphile-build";
-import { PgClass, PgProc } from "./PgIntrospectionPlugin";
+import { PgClass, PgProc, PgEntityKind, PgType } from "./PgIntrospectionPlugin";
 
 // This interface is not official yet, don't rely on it.
 export const getComputedColumnDetails = (
@@ -13,16 +13,19 @@ export const getComputedColumnDetails = (
   if (proc.argTypeIds.length < 1) return null;
   if (proc.argTypeIds[0] !== table.type.id) return null;
 
-  const argTypes = proc.argTypeIds.reduce((prev, typeId, idx) => {
-    if (
-      proc.argModes.length === 0 || // all args are `in`
-      proc.argModes[idx] === "i" || // this arg is `in`
-      proc.argModes[idx] === "b" // this arg is `inout`
-    ) {
-      prev.push(build.pgIntrospectionResultsByKind.typeById[typeId]);
-    }
-    return prev;
-  }, []);
+  const argTypes = proc.argTypeIds.reduce(
+    (prev, typeId, idx) => {
+      if (
+        proc.argModes.length === 0 || // all args are `in`
+        proc.argModes[idx] === "i" || // this arg is `in`
+        proc.argModes[idx] === "b" // this arg is `inout`
+      ) {
+        prev.push(build.pgIntrospectionResultsByKind.typeById[typeId]);
+      }
+      return prev;
+    },
+    [] as PgType[]
+  );
   if (
     argTypes
       .slice(1)
@@ -44,26 +47,21 @@ export default (function PgComputedColumnsPlugin(
     "GraphQLObjectType:fields",
     (fields, build, context) => {
       const {
-        scope: {
-          isPgRowType,
-          isPgCompoundType,
-          isInputType,
-          pgIntrospection: table,
-        },
+        scope: { isPgRowType, isPgCompoundType, pgIntrospection },
 
         fieldWithHooks,
         Self,
       } = context;
 
       if (
-        isInputType ||
         !(isPgRowType || isPgCompoundType) ||
-        !table ||
-        table.kind !== "class" ||
-        !table.namespace
+        !pgIntrospection ||
+        pgIntrospection.kind !== PgEntityKind.CLASS ||
+        !pgIntrospection.namespace
       ) {
         return fields;
       }
+      const table = pgIntrospection;
 
       const {
         extend,
