@@ -2,6 +2,7 @@ import { Plugin } from "graphile-build";
 import isString = require("lodash/isString");
 import { GraphQLObjectType } from "graphql";
 import { SQL } from "../QueryBuilder";
+import { OrderBySpec, OrderByValue } from "./PgConnectionArgOrderBy";
 
 declare module "graphile-build" {
   interface GraphileBuildOptions {
@@ -164,7 +165,7 @@ export default (function PgMutationPayloadEdgePlugin(
                 const {
                   args: { orderBy: rawOrderBy },
                 } = parsedResolveInfoFragment;
-                const orderBy: Order[] =
+                const orderBy: OrderByValue[] | null =
                   canOrderBy && rawOrderBy
                     ? Array.isArray(rawOrderBy)
                       ? rawOrderBy
@@ -176,7 +177,7 @@ export default (function PgMutationPayloadEdgePlugin(
                   let unique = false;
                   orderBy.forEach(item => {
                     const { alias, specs, unique: itemIsUnique } = item;
-                    unique = unique || itemIsUnique;
+                    unique = unique || itemIsUnique || false;
                     const orders = Array.isArray(specs[0]) ? specs : [specs];
                     orders.forEach(([col, _ascending]) => {
                       if (!col) {
