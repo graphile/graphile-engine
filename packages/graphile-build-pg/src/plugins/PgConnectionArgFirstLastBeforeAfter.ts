@@ -41,10 +41,10 @@ export default (function PgConnectionArgs(builder) {
       }) {
         return {
           pgQuery: queryBuilder => {
-            if (first != null) {
+            if (typeof first === "number") {
               queryBuilder.first(first);
             }
-            if (offset != null) {
+            if (typeof offset === "number") {
               queryBuilder.offset(offset);
             }
             if (isPgFieldConnection) {
@@ -54,7 +54,7 @@ export default (function PgConnectionArgs(builder) {
               if (before != null) {
                 addCursorConstraint(before, false);
               }
-              if (last != null) {
+              if (typeof last === "number") {
                 if (first != null) {
                   throw new Error(
                     "We don't support setting both first and last"

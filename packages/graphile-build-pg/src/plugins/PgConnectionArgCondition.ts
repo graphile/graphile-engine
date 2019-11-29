@@ -98,6 +98,7 @@ export default (function PgConnectionArgCondition(builder) {
         pgColumnFilter,
         inflection,
         pgOmit: omit,
+        graphql: { getNamedType },
       } = build;
       const {
         scope: {
@@ -114,7 +115,7 @@ export default (function PgConnectionArgCondition(builder) {
 
       const shouldAddCondition =
         isPgFieldConnection || isPgFieldSimpleCollection;
-      if (!shouldAddCondition) return args;
+      if (!shouldAddCondition || !pgFieldIntrospection) return args;
 
       const proc =
         pgFieldIntrospection.kind === "procedure" ? pgFieldIntrospection : null;
@@ -139,8 +140,13 @@ export default (function PgConnectionArgCondition(builder) {
       }
 
       const TableType = pgGetGqlTypeByTypeIdAndModifier(table.type.id, null);
+      if (!TableType) {
+        throw new Error(
+          `Could not determine TableType for table '${table.name}'`
+        );
+      }
       const TableConditionType = getTypeByName(
-        inflection.conditionType(TableType.name)
+        inflection.conditionType(getNamedType(TableType).name)
       );
 
       if (!TableConditionType) {
@@ -154,7 +160,7 @@ export default (function PgConnectionArgCondition(builder) {
       addArgDataGenerator(function connectionCondition({ condition }) {
         return {
           pgQuery: queryBuilder => {
-            if (condition != null) {
+            if (typeof condition === "object" && condition != null) {
               relevantAttributes.forEach(attr => {
                 const fieldName = inflection.column(attr);
                 const val = condition[fieldName];
