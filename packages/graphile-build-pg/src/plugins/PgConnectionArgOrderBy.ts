@@ -15,22 +15,24 @@ export interface OrderByValue {
   alias?: string;
 }
 
-export type OrderBySpec = [
-  /** column (or SQL expression) to order by */
-  string | SQL,
+export type OrderBySpec =
+  | [string | SQL, boolean]
+  | [
+      /** column (or SQL expression) to order by */
+      string | SQL,
 
-  /** ascending (true) or descending (false) */
-  boolean,
+      /** ascending (true) or descending (false) */
+      boolean,
 
-  /**
-   * specNullsFirst:
-   *
-   * - true: `NULLS FIRST`
-   * - false: `NULLS LAST`
-   * - null: ``
-   */
-  boolean | null | undefined
-];
+      /**
+       * specNullsFirst:
+       *
+       * - true: `NULLS FIRST`
+       * - false: `NULLS LAST`
+       * - null: ``
+       */
+      boolean | null | undefined
+    ];
 
 function isOrderBySpec(spec: unknown): spec is OrderBySpec {
   // We're not validating spec[1] and spec[2] since we just use them as (nullable) booleans
@@ -38,7 +40,8 @@ function isOrderBySpec(spec: unknown): spec is OrderBySpec {
     Array.isArray(spec) &&
     spec.length >= 2 &&
     spec.length <= 3 &&
-    (typeof spec[0] === "string" || (typeof spec[0] === "object" && spec[0]))
+    (typeof spec[0] === "string" ||
+      (typeof spec[0] === "object" && spec[0] && !Array.isArray(spec[0])))
   );
 }
 

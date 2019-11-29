@@ -1,4 +1,5 @@
 import { Plugin } from "graphile-build";
+import { OrderByValue } from "./PgConnectionArgOrderBy";
 
 export default (function PgOrderAllColumnsPlugin(builder) {
   builder.hook(
@@ -29,19 +30,25 @@ export default (function PgOrderAllColumnsPlugin(builder) {
           // PERFORMANCE: These used to be .filter(...) calls
           if (!pgColumnFilter(attr, build, context)) return memo;
           if (omit(attr, "order")) return memo;
-          const unique = attr.isUnique;
+          const unique = !!attr.isUnique;
 
           const ascFieldName = inflection.orderByColumnEnum(attr, true);
           const descFieldName = inflection.orderByColumnEnum(attr, false);
+          const orderAsc: OrderByValue = {
+            alias: ascFieldName.toLowerCase(),
+            specs: [[attr.name, true]],
+            unique,
+          };
+          const orderDesc: OrderByValue = {
+            alias: descFieldName.toLowerCase(),
+            specs: [[attr.name, false]],
+            unique,
+          };
           memo = extend(
             memo,
             {
               [ascFieldName]: {
-                value: {
-                  alias: ascFieldName.toLowerCase(),
-                  specs: [[attr.name, true]],
-                  unique,
-                },
+                value: orderAsc,
               },
             },
 
@@ -59,11 +66,7 @@ export default (function PgOrderAllColumnsPlugin(builder) {
             memo,
             {
               [descFieldName]: {
-                value: {
-                  alias: descFieldName.toLowerCase(),
-                  specs: [[attr.name, false]],
-                  unique,
-                },
+                value: orderDesc,
               },
             },
 
