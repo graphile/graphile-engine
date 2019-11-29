@@ -105,7 +105,7 @@ declare module "graphile-build" {
     pgFieldIntrospectionTable?: PgClass;
     pgFieldConstraint?: PgConstraint;
     isPgFieldConnection?: true;
-    isPgFieldSimpleCollection?: true;
+    isPgFieldSimpleCollection?: boolean;
     isCursorField?: true;
   }
 

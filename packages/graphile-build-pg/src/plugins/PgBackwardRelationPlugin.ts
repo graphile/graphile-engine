@@ -1,6 +1,17 @@
 import debugFactory from "debug";
 
 import { Plugin } from "graphile-build";
+import { stringTag } from "./PgBasicsPlugin";
+import { PgEntityKind } from "./PgIntrospectionPlugin";
+
+declare module "graphile-build" {
+  interface GraphileBuildOptions {
+    pgLegacyRelations?: "only" | "deprecated" | "omit";
+  }
+  interface ScopeGraphQLObjectTypeFieldsField {
+    isPgBackwardSingleRelationField?: true;
+  }
+}
 
 const debug = debugFactory("graphile-build-pg");
 
@@ -16,7 +27,7 @@ export default (function PgBackwardRelationPlugin(
     {
       only: ONLY,
       deprecated: DEPRECATED,
-    }[pgLegacyRelations] || OMIT;
+    }[pgLegacyRelations || ""] || OMIT;
   builder.hook(
     "GraphQLObjectType:fields",
     (fields, build, context) => {
@@ -28,7 +39,12 @@ export default (function PgBackwardRelationPlugin(
         pgSql: sql,
         getSafeAliasFromResolveInfo,
         getSafeAliasFromAlias,
-        graphql: { GraphQLNonNull, GraphQLList },
+        graphql: {
+          GraphQLNonNull,
+          GraphQLList,
+          getNamedType,
+          GraphQLObjectType,
+        },
         inflection,
         pgQueryFromResolveData: queryFromResolveData,
         pgAddStartEndCursor: addStartEndCursor,
@@ -37,13 +53,18 @@ export default (function PgBackwardRelationPlugin(
         describePgEntity,
       } = build;
       const {
-        scope: { isPgRowType, pgIntrospection: foreignTable },
+        scope: { isPgRowType, pgIntrospection },
         fieldWithHooks,
         Self,
       } = context;
-      if (!isPgRowType || !foreignTable || foreignTable.kind !== "class") {
+      if (
+        !isPgRowType ||
+        !pgIntrospection ||
+        pgIntrospection.kind !== PgEntityKind.CLASS
+      ) {
         return fields;
       }
+      const foreignTable = pgIntrospection;
       // This is a relation in which WE are foreign
       const foreignKeyConstraints = foreignTable.foreignConstraints.filter(
         con => con.type === "f"
@@ -202,7 +223,7 @@ export default (function PgBackwardRelationPlugin(
                     });
                     return {
                       description:
-                        constraint.tags.backwardDescription ||
+                        stringTag(constraint, "backwardDescription") ||
                         `Reads a single \`${tableTypeName}\` that is related to this \`${foreignTableTypeName}\`.`,
                       type: gqlTableType,
                       args: {},
@@ -369,18 +390,40 @@ export default (function PgBackwardRelationPlugin(
                           },
                         };
                       });
-                      const ConnectionType = getTypeByName(
-                        inflection.connection(gqlTableType.name)
-                      );
 
-                      const TableType = pgGetGqlTypeByTypeIdAndModifier(
+                      if (!gqlTableType) {
+                        throw new Error(
+                          `Could not determine getTableType for table '${table.name}'`
+                        );
+                      }
+
+                      const ConnectionTypeOrNull = getTypeByName(
+                        inflection.connection(getNamedType(gqlTableType).name)
+                      );
+                      if (
+                        !ConnectionTypeOrNull ||
+                        !(ConnectionTypeOrNull instanceof GraphQLObjectType)
+                      ) {
+                        throw new Error(
+                          `Could not determine ConnectionType for table '${table.name}'`
+                        );
+                      }
+                      const ConnectionType = ConnectionTypeOrNull;
+
+                      const TableTypeOrNull = pgGetGqlTypeByTypeIdAndModifier(
                         table.type.id,
                         null
                       );
+                      if (!TableTypeOrNull) {
+                        throw new Error(
+                          `Could not determine TableType for table '${table.name}'`
+                        );
+                      }
+                      const TableType = TableTypeOrNull;
 
                       return {
                         description:
-                          constraint.tags.backwardDescription ||
+                          stringTag(constraint, "backwardDescription") ||
                           `Reads and enables pagination through a set of \`${tableTypeName}\`.`,
                         type: isConnection
                           ? new GraphQLNonNull(ConnectionType)
