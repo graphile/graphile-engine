@@ -39,9 +39,7 @@ export function makeFieldHelpers(
     builderCallback?: (alias: SQL, sqlBuilder: QueryBuilder) => void
   ) => {
     const { pgClient } = context;
-    const parsedResolveInfoFragment = parseResolveInfo(
-      resolveInfo
-    ) as ResolveTree;
+    const parsedResolveInfoFragment = parseResolveInfo(resolveInfo, true);
     const PayloadType = resolveInfo.returnType;
 
     const resolveData = getDataFromParsedResolveInfoFragment(

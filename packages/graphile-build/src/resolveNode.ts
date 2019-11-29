@@ -34,13 +34,7 @@ export default async function resolveNode<T = unknown>(
     }
     const resolver: NodeFetcher =
       nodeFetcherByTypeName[getNamedType(Type).name];
-    const parsedResolveInfoFragment = parseResolveInfo(
-      resolveInfo,
-      {}
-    ) as ResolveTree | null;
-    if (parsedResolveInfoFragment == null) {
-      throw new Error("Internal error during query planning");
-    }
+    const parsedResolveInfoFragment = parseResolveInfo(resolveInfo, true);
     const resolveData = getDataFromParsedResolveInfoFragment(
       parsedResolveInfoFragment,
       getNamedType(Type) as GraphQLOutputType

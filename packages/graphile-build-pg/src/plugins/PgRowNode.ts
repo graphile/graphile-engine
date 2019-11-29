@@ -202,8 +202,9 @@ export default (async function PgRowNode(builder, { subscriptions }) {
                           }
 
                           const parsedResolveInfoFragment = parseResolveInfo(
-                            resolveInfo
-                          ) as ResolveTree;
+                            resolveInfo,
+                            true
+                          );
 
                           parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
                           const resolveData = getDataFromParsedResolveInfoFragment(

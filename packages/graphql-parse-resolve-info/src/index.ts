@@ -96,15 +96,29 @@ export function getAliasFromResolveInfo(
 export interface ParseOptions {
   keepRoot?: boolean;
   deep?: boolean;
+  forceParse?: boolean;
 }
 
 export function parseResolveInfo(
+  resolveInfo: GraphQLResolveInfo
+): ResolveTree | null;
+export function parseResolveInfo(
   resolveInfo: GraphQLResolveInfo,
-  options: ParseOptions = {}
+  forceParse: true
+): ResolveTree;
+export function parseResolveInfo(
+  resolveInfo: GraphQLResolveInfo,
+  options: ParseOptions
+): ResolveTree | FieldsByTypeName | null | void;
+export function parseResolveInfo(
+  resolveInfo: GraphQLResolveInfo,
+  inOptions: ParseOptions | true = {}
 ): ResolveTree | FieldsByTypeName | null | void {
   const fieldNodes: ReadonlyArray<FieldNode> =
     // @ts-ignore Property 'fieldASTs' does not exist on type 'GraphQLResolveInfo'.
     resolveInfo.fieldNodes || resolveInfo.fieldASTs;
+  const options = inOptions === true ? {} : inOptions;
+  const forceParse = inOptions === true || inOptions.forceParse;
 
   const { parentType } = resolveInfo;
   if (!fieldNodes) {
@@ -126,11 +140,21 @@ export function parseResolveInfo(
   if (!options.keepRoot) {
     const typeKey = firstKey(tree);
     if (!typeKey) {
+      if (forceParse) {
+        throw new Error(
+          `GraphQL schema issue: simplified parseResolveInfo failed (tree had no keys); perhaps you need to use the keepRoot option?`
+        );
+      }
       return null;
     }
     const fields = tree[typeKey];
     const fieldKey = firstKey(fields);
     if (!fieldKey) {
+      if (forceParse) {
+        throw new Error(
+          `GraphQL schema issue: simplified parseResolveInfo failed (could not get key from fields); perhaps you need to use the keepRoot option?`
+        );
+      }
       return null;
     }
     return fields[fieldKey];

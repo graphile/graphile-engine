@@ -121,8 +121,9 @@ export default (async function PgMutationUpdateDeletePlugin(
               ) {
                 const { input } = args;
                 const parsedResolveInfoFragment = parseResolveInfo(
-                  resolveInfo
-                ) as ResolveTree;
+                  resolveInfo,
+                  true
+                );
                 parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
                 const resolveData = getDataFromParsedResolveInfoFragment(
                   parsedResolveInfoFragment,

@@ -205,7 +205,8 @@ export default (function PgMutationCreatePlugin(
                       const { input } = args;
                       const { pgClient } = resolveContext;
                       const parsedResolveInfoFragment = parseResolveInfo(
-                        resolveInfo
+                        resolveInfo,
+                        true
                       );
 
                       parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
