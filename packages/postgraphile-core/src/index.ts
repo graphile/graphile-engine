@@ -4,7 +4,7 @@ import {
   defaultPlugins,
   getBuilder,
   Plugin,
-  Options,
+  GraphileBuildOptions,
   SchemaListener,
   Build,
   Context,
@@ -29,7 +29,8 @@ export {
   SchemaBuilder,
   SchemaListener,
   Inflection,
-  Options,
+  GraphileBuildOptions,
+  GraphileBuildOptions as Options,
   formatSQLForDebugging,
 };
 
@@ -60,11 +61,11 @@ export interface PostGraphileCoreOptions {
    * Additional Options to pass through into the graphile schema building
    * system (received via the second argument of a plugin).
    */
-  graphileBuildOptions?: Partial<Options>;
+  graphileBuildOptions?: Partial<GraphileBuildOptions>;
   /**
    * @deprecated Use graphileBuildOptions instead
    */
-  graphqlBuildOptions?: Partial<Options>;
+  graphqlBuildOptions?: Partial<GraphileBuildOptions>;
   replaceAllPlugins?: Array<Plugin>;
   appendPlugins?: Array<Plugin>;
   /**
