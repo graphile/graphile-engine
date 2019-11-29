@@ -28,7 +28,9 @@ export default function makeChangeNullabilityPlugin(
       context: ContextGraphQLObjectTypeFieldsField
     ): typeof field;
     function changeNullability<
-      Field extends import("graphql").GraphQLInputFieldConfig | import("graphql").GraphQLFieldConfig<any, any>,
+      Field extends
+        | import("graphql").GraphQLInputFieldConfig
+        | import("graphql").GraphQLFieldConfig<any, any>,
       Context extends
         | ContextGraphQLInputObjectTypeFieldsField
         | ContextGraphQLObjectTypeFieldsField
