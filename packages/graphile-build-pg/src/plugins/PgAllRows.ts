@@ -1,6 +1,12 @@
 import { Plugin } from "graphile-build";
 import debugSql from "./debugSql";
 
+declare module "graphile-build" {
+  interface GraphileBuildOptions {
+    pgViewUniqueKey?: string; // DEPRECATED; use the @primaryKey smart tag instead
+  }
+}
+
 export default (async function PgAllRows(
   builder,
   { pgViewUniqueKey, pgSimpleCollections, subscriptions }
@@ -16,7 +22,7 @@ export default (async function PgAllRows(
         pgSql: sql,
         pgIntrospectionResultsByKind: introspectionResultsByKind,
         inflection,
-        graphql: { GraphQLList, GraphQLNonNull },
+        graphql: { GraphQLList, GraphQLNonNull, GraphQLObjectType },
         pgQueryFromResolveData: queryFromResolveData,
         pgAddStartEndCursor: addStartEndCursor,
         pgOmit: omit,
@@ -37,24 +43,32 @@ export default (async function PgAllRows(
           if (!table.namespace) return memo;
           if (omit(table, "all")) return memo;
 
-          const TableType = pgGetGqlTypeByTypeIdAndModifier(
+          const TableTypeOrNull = pgGetGqlTypeByTypeIdAndModifier(
             table.type.id,
             null
           );
 
-          if (!TableType) {
+          if (
+            !TableTypeOrNull ||
+            !(TableTypeOrNull instanceof GraphQLObjectType)
+          ) {
             return memo;
           }
+          const TableType = TableTypeOrNull;
           const tableTypeName = TableType.name;
-          const ConnectionType = getTypeByName(
+          const ConnectionTypeOrNull = getTypeByName(
             inflection.connection(TableType.name)
           );
 
-          if (!TableType) {
+          if (
+            !ConnectionTypeOrNull ||
+            !(ConnectionTypeOrNull instanceof GraphQLObjectType)
+          ) {
             throw new Error(
               `Could not find GraphQL type for table '${table.name}'`
             );
           }
+          const ConnectionType = ConnectionTypeOrNull;
           const attributes = table.attributes;
           const primaryKeyConstraint = table.primaryKeyConstraint;
           const primaryKeys =
@@ -94,7 +108,8 @@ export default (async function PgAllRows(
                   async resolve(parent, args, resolveContext, resolveInfo) {
                     const { pgClient } = resolveContext;
                     const parsedResolveInfoFragment = parseResolveInfo(
-                      resolveInfo
+                      resolveInfo,
+                      true
                     );
 
                     parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin

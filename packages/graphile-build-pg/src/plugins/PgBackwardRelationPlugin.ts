@@ -10,6 +10,7 @@ declare module "graphile-build" {
   }
   interface ScopeGraphQLObjectTypeFieldsField {
     isPgBackwardSingleRelationField?: true;
+    isPgBackwardRelationField?: true;
   }
 }
 

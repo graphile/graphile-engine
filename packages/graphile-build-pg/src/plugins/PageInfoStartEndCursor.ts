@@ -1,4 +1,12 @@
 import { Plugin } from "graphile-build";
+import { GraphQLScalarType } from "graphql";
+
+declare module "graphile-build" {
+  interface ScopeGraphQLObjectTypeFieldsField {
+    isPageInfoStartCursorField?: true;
+    isPageInfoEndCursorField?: true;
+  }
+}
 
 export default (function PageInfoStartEndCursor(builder) {
   builder.hook(
@@ -10,13 +18,16 @@ export default (function PageInfoStartEndCursor(builder) {
         return fields;
       }
       const Cursor = getTypeByName("Cursor");
+      if (!Cursor || !(Cursor instanceof GraphQLScalarType)) {
+        return fields;
+      }
       return extend(
         fields,
         {
           startCursor: fieldWithHooks(
             "startCursor",
             ({ addDataGenerator }) => {
-              addDataGenerator(() => ({ usesCursor: [true] }));
+              addDataGenerator(() => ({ usesCursor: true }));
               return {
                 description:
                   "When paginating backwards, the cursor to continue.",
@@ -31,7 +42,7 @@ export default (function PageInfoStartEndCursor(builder) {
           endCursor: fieldWithHooks(
             "endCursor",
             ({ addDataGenerator }) => {
-              addDataGenerator(() => ({ usesCursor: [true] }));
+              addDataGenerator(() => ({ usesCursor: true }));
               return {
                 description:
                   "When paginating forwards, the cursor to continue.",
@@ -39,7 +50,7 @@ export default (function PageInfoStartEndCursor(builder) {
               };
             },
             {
-              isPageInfoStartCursorField: true,
+              isPageInfoEndCursorField: true,
             }
           ),
         },
