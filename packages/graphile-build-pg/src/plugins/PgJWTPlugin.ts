@@ -1,6 +1,17 @@
 import { Plugin } from "graphile-build";
 import { sign as signJwt } from "jsonwebtoken";
 
+declare module "graphile-build" {
+  interface GraphileBuildOptions {
+    pgJwtTypeIdentifier?: string;
+    pgJwtSecret?: string;
+    pgJwtSignOptions?: import("jsonwebtoken").SignOptions;
+  }
+  interface ScopeGraphQLScalarType {
+    isPgJwtType?: true;
+  }
+}
+
 export default (function PgJWTPlugin(
   builder,
   { pgJwtTypeIdentifier, pgJwtSecret, pgJwtSignOptions }
@@ -69,16 +80,19 @@ export default (function PgJWTPlugin(
             description:
               "A JSON Web Token defined by [RFC 7519](https://tools.ietf.org/html/rfc7519) which securely represents claims between two parties.",
             serialize(value) {
-              const token = attributes.reduce((memo, attr) => {
-                if (attr.name === "exp") {
-                  memo[attr.name] = value[attr.name]
-                    ? parseFloat(value[attr.name])
-                    : undefined;
-                } else {
-                  memo[attr.name] = value[attr.name];
-                }
-                return memo;
-              }, {});
+              const token = attributes.reduce(
+                (memo, attr) => {
+                  if (attr.name === "exp") {
+                    memo[attr.name] = value[attr.name]
+                      ? parseFloat(value[attr.name])
+                      : undefined;
+                  } else {
+                    memo[attr.name] = value[attr.name];
+                  }
+                  return memo;
+                },
+                {} as { [attributeName: string]: unknown }
+              );
               return signJwt(
                 token,
                 pgJwtSecret,
