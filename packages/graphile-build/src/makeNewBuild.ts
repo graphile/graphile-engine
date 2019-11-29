@@ -37,6 +37,7 @@ import SchemaBuilder, {
   ScopeGraphQLInputObjectTypeFieldsField,
   ArgDataGeneratorFunction,
   DataGeneratorFunction,
+  Build,
 } from "./SchemaBuilder";
 
 import extend, { indent } from "./extend";
@@ -363,6 +364,669 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
     { [fieldName: string]: ArgDataGeneratorFunction[] }
   >();
 
+  const newWithHooks: any = function newWithHooks<
+    T extends
+      | import("graphql").GraphQLSchema
+      | import("graphql").GraphQLScalarType
+      | import("graphql").GraphQLObjectType
+      | import("graphql").GraphQLInterfaceType
+      | import("graphql").GraphQLUnionType
+      | import("graphql").GraphQLEnumType
+      | import("graphql").GraphQLInputObjectType
+  >(
+    this: Build,
+    Type: { new (...args: any[]): T },
+    spec: any,
+    inScope: any,
+    performNonEmptyFieldsCheck: boolean
+  ): T | null | undefined {
+    const scope = inScope || {};
+    if (!inScope) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `No scope was provided to new ${Type.name}[name=${spec.name}], it's highly recommended that you add a scope so other hooks can easily reference your object - please check usage of 'newWithHooks'. To mute this message, just pass an empty object.`
+      );
+    }
+    if (!Type) {
+      throw new Error("No type specified!");
+    }
+    if (!this.newWithHooks) {
+      throw new Error(
+        "Please do not generate the schema during the build building phase, use 'init' instead"
+      );
+    }
+    const fieldDataGeneratorsByFieldName: {
+      [fieldName: string]: DataGeneratorFunction[];
+    } = {};
+    const fieldArgDataGeneratorsByFieldName: {
+      [fieldName: string]: ArgDataGeneratorFunction[];
+    } = {};
+    let newSpec = spec;
+    if (
+      knownTypes.indexOf(Type as any) === -1 &&
+      knownTypeNames.indexOf(Type.name) >= 0
+    ) {
+      throw new Error(
+        `GraphQL conflict for '${Type.name}' detected! Multiple versions of graphql exist in your node_modules?`
+      );
+    }
+    if (Type === GraphQLSchema) {
+      const context: ContextGraphQLSchema = {
+        type: "GraphQLSchema",
+        scope,
+      };
+      newSpec = builder.applyHooks(
+        this,
+        "GraphQLSchema",
+        (newSpec as unknown) as graphql.GraphQLSchemaConfig,
+        context
+      );
+    } else if (Type === GraphQLObjectType) {
+      const addDataGeneratorForField = (
+        fieldName: string,
+        fn: DataGeneratorFunction
+      ): void => {
+        // $FlowFixMe: displayName
+        fn.displayName =
+          // $FlowFixMe: displayName
+          fn.displayName ||
+          `${getNameFromType(Self)}:${fieldName}[${fn.name || "anonymous"}]`;
+        fieldDataGeneratorsByFieldName[fieldName] =
+          fieldDataGeneratorsByFieldName[fieldName] || [];
+        fieldDataGeneratorsByFieldName[fieldName].push(fn);
+      };
+      const recurseDataGeneratorsForField = (
+        fieldName: string,
+        iKnowWhatIAmDoing?: boolean
+      ): void => {
+        /*
+         * Recursing data generators is not safe in general; however there
+         * are certain exceptions - for example when you know there are no
+         * "dynamic" data generator fields - e.g. where the GraphQL alias is
+         * not used at all. In PostGraphile the only case of this is the
+         * PageInfo object as none of the fields accept arguments, and they
+         * do not rely on the GraphQL query alias to store the result.
+         */
+        if (!iKnowWhatIAmDoing && !recurseDataGeneratorsForFieldWarned) {
+          recurseDataGeneratorsForFieldWarned = true;
+          // eslint-disable-next-line no-console
+          console.error(
+            "Use of `recurseDataGeneratorsForField` is NOT SAFE. e.g. `{n1: node { a: field1 }, n2: node { a: field2 } }` cannot resolve correctly."
+          );
+        }
+        const fn: DataGeneratorFunction = (
+          parsedResolveInfoFragment,
+          ReturnType,
+          data,
+          ...rest
+        ) => {
+          const { args } = parsedResolveInfoFragment;
+          const { fields } = this.simplifyParsedResolveInfoFragmentWithType(
+            parsedResolveInfoFragment,
+            ReturnType
+          );
+
+          const results: any[] = [];
+          const StrippedType = getNamedType(ReturnType);
+          if (!StrippedType) {
+            throw new Error("Could not determine GraphQL type");
+          }
+          const fieldDataGeneratorsByFieldName = fieldDataGeneratorsByFieldNameByType.get(
+            StrippedType
+          );
+
+          const argDataGeneratorsForSelfByFieldName = fieldArgDataGeneratorsByFieldNameByType.get(
+            Self as graphql.GraphQLObjectType
+          );
+
+          if (argDataGeneratorsForSelfByFieldName) {
+            const argDataGenerators =
+              argDataGeneratorsForSelfByFieldName[fieldName];
+            for (
+              let genIndex = 0, genCount = argDataGenerators.length;
+              genIndex < genCount;
+              genIndex++
+            ) {
+              const gen = argDataGenerators[genIndex];
+              const local = ensureArray(gen(args, ReturnType, data, ...rest));
+              if (local) {
+                results.push(...local);
+              }
+            }
+          }
+          if (
+            fieldDataGeneratorsByFieldName &&
+            isCompositeType(StrippedType) &&
+            !isAbstractType(StrippedType)
+          ) {
+            const typeFields = StrippedType.getFields();
+            const keys = Object.keys(fields);
+            for (
+              let keyIndex = 0, keyCount = keys.length;
+              keyIndex < keyCount;
+              keyIndex++
+            ) {
+              const alias = keys[keyIndex];
+              const field = fields[alias];
+              // Run generators with `field` as the `parsedResolveInfoFragment`, pushing results to `results`
+              const gens = fieldDataGeneratorsByFieldName[field.name];
+              if (gens) {
+                for (
+                  let genIndex = 0, genCount = gens.length;
+                  genIndex < genCount;
+                  genIndex++
+                ) {
+                  const gen = gens[genIndex];
+                  const local = ensureArray(
+                    gen(field, typeFields[field.name].type, data, ...rest)
+                  );
+
+                  if (local) {
+                    results.push(...local);
+                  }
+                }
+              }
+            }
+          }
+          return results;
+        };
+        fn.displayName = `recurseDataGeneratorsForField(${getNameFromType(
+          Self
+        )}:${fieldName})`;
+        addDataGeneratorForField(fieldName, fn);
+        // get type from field, get
+      };
+
+      const commonContext: ContextGraphQLObjectTypeBase = {
+        type: "GraphQLObjectType",
+        scope,
+      };
+
+      const objectSpec: GraphileObjectTypeConfig<any, any> = newSpec;
+      const objectContext: ContextGraphQLObjectType = {
+        ...commonContext,
+        addDataGeneratorForField,
+        recurseDataGeneratorsForField,
+      };
+      newSpec = builder.applyHooks(
+        this,
+        "GraphQLObjectType",
+        objectSpec,
+        objectContext,
+
+        `|${newSpec.name}`
+      );
+
+      const rawSpec = newSpec;
+      newSpec = {
+        ...newSpec,
+        interfaces: () => {
+          const interfacesContext: ContextGraphQLObjectTypeInterfaces = {
+            ...commonContext,
+            Self: Self as graphql.GraphQLObjectType,
+            GraphQLObjectType: rawSpec,
+          };
+
+          let rawInterfaces = rawSpec.interfaces || [];
+          if (typeof rawInterfaces === "function") {
+            rawInterfaces = rawInterfaces(interfacesContext);
+          }
+          return builder.applyHooks(
+            this,
+            "GraphQLObjectType:interfaces",
+            rawInterfaces,
+            interfacesContext,
+            `|${getNameFromType(Self)}`
+          );
+        },
+        fields: () => {
+          const processedFields: graphql.GraphQLFieldConfig<any, any>[] = [];
+          const fieldWithHooks: FieldWithHooksFunction = (
+            fieldName,
+            spec,
+            fieldScope
+          ) => {
+            if (!isString(fieldName)) {
+              throw new Error(
+                "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
+              );
+            }
+            if (!fieldScope) {
+              throw new Error(
+                "All calls to `fieldWithHooks` must specify a `fieldScope` " +
+                  "argument that gives additional context about the field so " +
+                  "that further plugins may more easily understand the field. " +
+                  "Keys within this object should contain the phrase 'field' " +
+                  "since they will be merged into the parent objects scope and " +
+                  "are not allowed to clash. If you really have no additional " +
+                  "information to give, please just pass `{}`."
+              );
+            }
+
+            const argDataGenerators: ArgDataGeneratorFunction[] = [];
+            fieldArgDataGeneratorsByFieldName[fieldName] = argDataGenerators;
+
+            let newSpec = spec;
+            const context: ContextGraphQLObjectTypeFieldsField = {
+              ...commonContext,
+              Self: Self as graphql.GraphQLObjectType,
+              addDataGenerator(fn) {
+                return addDataGeneratorForField(fieldName, fn);
+              },
+              addArgDataGenerator(fn) {
+                ensureName(fn);
+                argDataGenerators.push(fn);
+              },
+              getDataFromParsedResolveInfoFragment: (
+                parsedResolveInfoFragment,
+                ReturnType
+              ): ResolvedLookAhead => {
+                const Type = getNamedType(ReturnType as GraphQLType);
+                const data: ResolvedLookAhead = {};
+
+                const {
+                  fields,
+                  args,
+                } = this.simplifyParsedResolveInfoFragmentWithType(
+                  parsedResolveInfoFragment,
+                  ReturnType
+                );
+
+                // Args -> argDataGenerators
+                for (
+                  let dgIndex = 0, dgCount = argDataGenerators.length;
+                  dgIndex < dgCount;
+                  dgIndex++
+                ) {
+                  const gen = argDataGenerators[dgIndex];
+                  try {
+                    mergeData(data, gen, ReturnType, args);
+                  } catch (e) {
+                    debug(
+                      "Failed to execute argDataGenerator '%s' on %s of %s",
+                      gen.displayName || gen.name || "anonymous",
+                      fieldName,
+                      getNameFromType(Self)
+                    );
+
+                    throw e;
+                  }
+                }
+
+                // finalSpec.type -> fieldData
+                if (!finalSpec) {
+                  throw new Error(
+                    "It's too early to call this! Call from within resolve"
+                  );
+                }
+                const fieldDataGeneratorsByFieldName = fieldDataGeneratorsByFieldNameByType.get(
+                  Type
+                );
+
+                if (
+                  fieldDataGeneratorsByFieldName &&
+                  isCompositeType(Type) &&
+                  !isAbstractType(Type)
+                ) {
+                  const typeFields = Type.getFields();
+                  const keys = Object.keys(fields);
+                  for (
+                    let keyIndex = 0, keyCount = keys.length;
+                    keyIndex < keyCount;
+                    keyIndex++
+                  ) {
+                    const alias = keys[keyIndex];
+                    const field = fields[alias];
+                    const gens = fieldDataGeneratorsByFieldName[field.name];
+                    if (gens) {
+                      const FieldReturnType = typeFields[field.name].type;
+                      for (let i = 0, l = gens.length; i < l; i++) {
+                        mergeData(data, gens[i], FieldReturnType, field);
+                      }
+                    }
+                  }
+                }
+                return data;
+              },
+              scope: extend(
+                extend(
+                  { ...scope },
+                  {
+                    fieldName,
+                  },
+
+                  `Within context for GraphQLObjectType '${rawSpec.name}'`
+                ),
+
+                fieldScope,
+                `Extending scope for field '${fieldName}' within context for GraphQLObjectType '${rawSpec.name}'`
+              ),
+            };
+
+            if (typeof newSpec === "function") {
+              newSpec = newSpec(context);
+            }
+            newSpec = builder.applyHooks(
+              this,
+              "GraphQLObjectType:fields:field",
+              newSpec,
+              context,
+              `|${getNameFromType(Self)}.fields.${fieldName}`
+            );
+
+            newSpec.args = newSpec.args || {};
+            const argsContext: ContextGraphQLObjectTypeFieldsFieldArgs = {
+              ...context,
+              field: newSpec,
+              returnType: newSpec.type,
+            };
+            newSpec = {
+              ...newSpec,
+              args: builder.applyHooks(
+                this,
+                "GraphQLObjectType:fields:field:args",
+                newSpec.args,
+                argsContext,
+
+                `|${getNameFromType(Self)}.fields.${fieldName}`
+              ),
+            };
+
+            const finalSpec = newSpec;
+            processedFields.push(finalSpec);
+            return finalSpec;
+          };
+          const fieldsContext: ContextGraphQLObjectTypeFields = {
+            ...commonContext,
+            addDataGeneratorForField,
+            recurseDataGeneratorsForField,
+            Self: Self as graphql.GraphQLObjectType,
+            GraphQLObjectType: rawSpec,
+            fieldWithHooks,
+          };
+
+          let rawFields = rawSpec.fields || {};
+          if (typeof rawFields === "function") {
+            rawFields = rawFields(fieldsContext);
+          }
+          const fieldsSpec = builder.applyHooks(
+            this,
+            "GraphQLObjectType:fields",
+            this.extend(
+              {},
+              rawFields,
+              `Default field included in newWithHooks call for '${
+                rawSpec.name
+              }'. ${inScope.__origin || ""}`
+            ),
+
+            fieldsContext,
+            `|${rawSpec.name}`
+          );
+
+          // Finally, check through all the fields that they've all been processed; any that have not we should do so now.
+          for (const fieldName in fieldsSpec) {
+            const fieldSpec = fieldsSpec[fieldName];
+            if (processedFields.indexOf(fieldSpec) < 0) {
+              // We've not processed this yet; process it now!
+              fieldsSpec[fieldName] = fieldsContext.fieldWithHooks(
+                fieldName,
+                fieldSpec,
+                {
+                  autoField: true, // We don't have any additional information
+                }
+              );
+            }
+          }
+          return fieldsSpec;
+        },
+      };
+    } else if (Type === GraphQLInputObjectType) {
+      const commonContext: ContextGraphQLInputObjectType = {
+        type: "GraphQLInputObjectType",
+        scope,
+      };
+
+      newSpec = builder.applyHooks(
+        this,
+        "GraphQLInputObjectType",
+        newSpec,
+        commonContext,
+        `|${newSpec.name}`
+      );
+
+      newSpec.fields = newSpec.fields || {};
+
+      const rawSpec = newSpec;
+      newSpec = {
+        ...newSpec,
+        fields: () => {
+          const processedFields: graphql.GraphQLInputFieldConfig[] = [];
+          const fieldWithHooks: InputFieldWithHooksFunction = (
+            fieldName,
+            spec,
+            fieldScope = {}
+          ) => {
+            if (!isString(fieldName)) {
+              throw new Error(
+                "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
+              );
+            }
+            const context: ContextGraphQLInputObjectTypeFieldsField = {
+              ...commonContext,
+              Self: Self as graphql.GraphQLInputObjectType,
+              scope: extend(
+                extend(
+                  { ...scope },
+                  {
+                    fieldName,
+                  },
+
+                  `Within context for GraphQLInputObjectType '${rawSpec.name}'`
+                ),
+
+                fieldScope,
+                `Extending scope for field '${fieldName}' within context for GraphQLInputObjectType '${rawSpec.name}'`
+              ),
+            };
+
+            let newSpec = spec;
+            if (typeof newSpec === "function") {
+              newSpec = newSpec(context);
+            }
+            newSpec = builder.applyHooks(
+              this,
+              "GraphQLInputObjectType:fields:field",
+              newSpec,
+              context,
+              `|${getNameFromType(Self)}.fields.${fieldName}`
+            );
+
+            const finalSpec = newSpec;
+            processedFields.push(finalSpec);
+            return finalSpec;
+          };
+          const fieldsContext: ContextGraphQLInputObjectTypeFields = {
+            ...commonContext,
+            Self: Self as graphql.GraphQLInputObjectType,
+            GraphQLInputObjectType: rawSpec,
+            fieldWithHooks,
+          };
+
+          let rawFields = rawSpec.fields;
+          if (typeof rawFields === "function") {
+            rawFields = rawFields(fieldsContext);
+          }
+          const fieldsList: typeof rawFields = this.extend(
+            {},
+            rawFields,
+            `Default field included in newWithHooks call for '${
+              rawSpec.name
+            }'. ${inScope.__origin || ""}`
+          );
+          const fieldsSpec = builder.applyHooks(
+            this,
+            "GraphQLInputObjectType:fields",
+            fieldsList,
+            fieldsContext,
+            `|${getNameFromType(Self)}`
+          );
+
+          // Finally, check through all the fields that they've all been processed; any that have not we should do so now.
+          for (const fieldName in fieldsSpec) {
+            const fieldSpec = fieldsSpec[fieldName];
+            if (processedFields.indexOf(fieldSpec) < 0) {
+              // We've not processed this yet; process it now!
+              fieldsSpec[fieldName] = fieldsContext.fieldWithHooks(
+                fieldName,
+                fieldSpec,
+                {
+                  autoField: true, // We don't have any additional information
+                }
+              );
+            }
+          }
+          return fieldsSpec;
+        },
+      };
+    } else if (Type === GraphQLEnumType) {
+      const commonContext: ContextGraphQLEnumType = {
+        type: "GraphQLEnumType",
+        scope,
+      };
+
+      newSpec = builder.applyHooks(
+        this,
+        "GraphQLEnumType",
+        newSpec,
+        commonContext,
+        `|${newSpec.name}`
+      );
+
+      newSpec.values = builder.applyHooks(
+        this,
+        "GraphQLEnumType:values",
+        newSpec.values,
+        commonContext,
+        `|${newSpec.name}`
+      );
+
+      const values = newSpec.values;
+      newSpec.values = Object.keys(values).reduce((memo, valueKey) => {
+        const value = values[valueKey];
+        const newValue = builder.applyHooks(
+          this,
+          "GraphQLEnumType:values:value",
+          value,
+          commonContext,
+          `|${newSpec.name}|${valueKey}`
+        );
+
+        memo[valueKey] = newValue;
+        return memo;
+      }, {});
+    } else if (Type === GraphQLUnionType) {
+      const commonContext: ContextGraphQLUnionType = {
+        type: "GraphQLUnionType",
+        scope,
+      };
+
+      newSpec = builder.applyHooks(
+        this,
+        "GraphQLUnionType",
+        newSpec,
+        { ...commonContext },
+        `|${newSpec.name}`
+      );
+
+      const rawSpec = newSpec as GraphileUnionTypeConfig<any, any>;
+      newSpec = {
+        ...newSpec,
+        types: () => {
+          const typesContext: ContextGraphQLUnionTypeTypes = {
+            ...commonContext,
+            Self: Self as graphql.GraphQLUnionType,
+            GraphQLUnionType: rawSpec,
+          };
+
+          let rawTypes = rawSpec.types || [];
+          if (typeof rawTypes === "function") {
+            rawTypes = rawTypes(typesContext);
+          }
+          return builder.applyHooks(
+            this,
+            "GraphQLUnionType:types",
+            rawTypes,
+            typesContext,
+            `|${getNameFromType(Self)}`
+          );
+        },
+      };
+    }
+
+    const finalSpec = newSpec;
+
+    const Self: T = new Type(finalSpec);
+    if (graphql.isNamedType(Self) && performNonEmptyFieldsCheck) {
+      try {
+        if (
+          Self instanceof GraphQLInterfaceType ||
+          Self instanceof GraphQLObjectType ||
+          Self instanceof GraphQLInputObjectType
+        ) {
+          if (typeof Self.getFields === "function") {
+            const fields = Self.getFields();
+            if (Object.keys(fields).length === 0) {
+              // We require there's at least one field on GraphQLObjectType and GraphQLInputObjectType records
+              return null;
+            }
+          }
+        }
+      } catch (e) {
+        // This is the error we're expecting to handle:
+        // https://github.com/graphql/graphql-js/blob/831598ba76f015078ecb6c5c1fbaf133302f3f8e/src/type/definition.js#L526-L531
+        if (inScope && inScope.isRootQuery) {
+          throw e;
+        }
+        const isProbablyAnEmptyObjectError = !!e.message.match(
+          /function which returns such an object/
+        );
+
+        if (!isProbablyAnEmptyObjectError) {
+          this.swallowError(e);
+        }
+        return null;
+      }
+    }
+
+    if (graphql.isNamedType(Self)) {
+      this.scopeByType.set(Self, scope);
+    }
+
+    if (graphql.isNamedType(Self)) {
+      this.addType(
+        Self,
+        scope.__origin ||
+          (this
+            ? `'newWithHooks' call during hook '${this.status.currentHookName}'`
+            : null)
+      );
+    }
+    if (Type !== GraphQLSchema) {
+      fieldDataGeneratorsByFieldNameByType.set(
+        Self as GraphQLNamedType,
+        fieldDataGeneratorsByFieldName
+      );
+
+      fieldArgDataGeneratorsByFieldNameByType.set(
+        Self as GraphQLNamedType,
+        fieldArgDataGeneratorsByFieldName
+      );
+    }
+
+    return Self;
+  };
+
   return {
     options: builder.options,
     graphileBuildVersion: version,
@@ -433,664 +1097,8 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
     },
     extend,
 
-    newWithHooks<
-      T extends
-        | import("graphql").GraphQLScalarType
-        | import("graphql").GraphQLObjectType
-        | import("graphql").GraphQLInterfaceType
-        | import("graphql").GraphQLUnionType
-        | import("graphql").GraphQLEnumType
-        | import("graphql").GraphQLInputObjectType
-        | import("graphql").GraphQLSchema
-    >(
-      Type: { new (...args: any[]): T },
-      spec: any,
-      inScope: any,
-      performNonEmptyFieldsCheck: boolean
-    ): T | null | undefined {
-      const scope = inScope || {};
-      if (!inScope) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `No scope was provided to new ${Type.name}[name=${spec.name}], it's highly recommended that you add a scope so other hooks can easily reference your object - please check usage of 'newWithHooks'. To mute this message, just pass an empty object.`
-        );
-      }
-      if (!Type) {
-        throw new Error("No type specified!");
-      }
-      if (!this.newWithHooks) {
-        throw new Error(
-          "Please do not generate the schema during the build building phase, use 'init' instead"
-        );
-      }
-      const fieldDataGeneratorsByFieldName: {
-        [fieldName: string]: DataGeneratorFunction[];
-      } = {};
-      const fieldArgDataGeneratorsByFieldName: {
-        [fieldName: string]: ArgDataGeneratorFunction[];
-      } = {};
-      let newSpec = spec;
-      if (
-        knownTypes.indexOf(Type as any) === -1 &&
-        knownTypeNames.indexOf(Type.name) >= 0
-      ) {
-        throw new Error(
-          `GraphQL conflict for '${Type.name}' detected! Multiple versions of graphql exist in your node_modules?`
-        );
-      }
-      if (Type === GraphQLSchema) {
-        const context: ContextGraphQLSchema = {
-          type: "GraphQLSchema",
-          scope,
-        };
-        newSpec = builder.applyHooks(
-          this,
-          "GraphQLSchema",
-          (newSpec as unknown) as graphql.GraphQLSchemaConfig,
-          context
-        );
-      } else if (Type === GraphQLObjectType) {
-        const addDataGeneratorForField = (
-          fieldName: string,
-          fn: DataGeneratorFunction
-        ): void => {
-          // $FlowFixMe: displayName
-          fn.displayName =
-            // $FlowFixMe: displayName
-            fn.displayName ||
-            `${getNameFromType(Self)}:${fieldName}[${fn.name || "anonymous"}]`;
-          fieldDataGeneratorsByFieldName[fieldName] =
-            fieldDataGeneratorsByFieldName[fieldName] || [];
-          fieldDataGeneratorsByFieldName[fieldName].push(fn);
-        };
-        const recurseDataGeneratorsForField = (
-          fieldName: string,
-          iKnowWhatIAmDoing?: boolean
-        ): void => {
-          /*
-           * Recursing data generators is not safe in general; however there
-           * are certain exceptions - for example when you know there are no
-           * "dynamic" data generator fields - e.g. where the GraphQL alias is
-           * not used at all. In PostGraphile the only case of this is the
-           * PageInfo object as none of the fields accept arguments, and they
-           * do not rely on the GraphQL query alias to store the result.
-           */
-          if (!iKnowWhatIAmDoing && !recurseDataGeneratorsForFieldWarned) {
-            recurseDataGeneratorsForFieldWarned = true;
-            // eslint-disable-next-line no-console
-            console.error(
-              "Use of `recurseDataGeneratorsForField` is NOT SAFE. e.g. `{n1: node { a: field1 }, n2: node { a: field2 } }` cannot resolve correctly."
-            );
-          }
-          const fn: DataGeneratorFunction = (
-            parsedResolveInfoFragment,
-            ReturnType,
-            data,
-            ...rest
-          ) => {
-            const { args } = parsedResolveInfoFragment;
-            const { fields } = this.simplifyParsedResolveInfoFragmentWithType(
-              parsedResolveInfoFragment,
-              ReturnType
-            );
+    newWithHooks,
 
-            const results: any[] = [];
-            const StrippedType = getNamedType(ReturnType);
-            if (!StrippedType) {
-              throw new Error("Could not determine GraphQL type");
-            }
-            const fieldDataGeneratorsByFieldName = fieldDataGeneratorsByFieldNameByType.get(
-              StrippedType
-            );
-
-            const argDataGeneratorsForSelfByFieldName = fieldArgDataGeneratorsByFieldNameByType.get(
-              Self as graphql.GraphQLObjectType
-            );
-
-            if (argDataGeneratorsForSelfByFieldName) {
-              const argDataGenerators =
-                argDataGeneratorsForSelfByFieldName[fieldName];
-              for (
-                let genIndex = 0, genCount = argDataGenerators.length;
-                genIndex < genCount;
-                genIndex++
-              ) {
-                const gen = argDataGenerators[genIndex];
-                const local = ensureArray(gen(args, ReturnType, data, ...rest));
-                if (local) {
-                  results.push(...local);
-                }
-              }
-            }
-            if (
-              fieldDataGeneratorsByFieldName &&
-              isCompositeType(StrippedType) &&
-              !isAbstractType(StrippedType)
-            ) {
-              const typeFields = StrippedType.getFields();
-              const keys = Object.keys(fields);
-              for (
-                let keyIndex = 0, keyCount = keys.length;
-                keyIndex < keyCount;
-                keyIndex++
-              ) {
-                const alias = keys[keyIndex];
-                const field = fields[alias];
-                // Run generators with `field` as the `parsedResolveInfoFragment`, pushing results to `results`
-                const gens = fieldDataGeneratorsByFieldName[field.name];
-                if (gens) {
-                  for (
-                    let genIndex = 0, genCount = gens.length;
-                    genIndex < genCount;
-                    genIndex++
-                  ) {
-                    const gen = gens[genIndex];
-                    const local = ensureArray(
-                      gen(field, typeFields[field.name].type, data, ...rest)
-                    );
-
-                    if (local) {
-                      results.push(...local);
-                    }
-                  }
-                }
-              }
-            }
-            return results;
-          };
-          fn.displayName = `recurseDataGeneratorsForField(${getNameFromType(
-            Self
-          )}:${fieldName})`;
-          addDataGeneratorForField(fieldName, fn);
-          // get type from field, get
-        };
-
-        const commonContext: ContextGraphQLObjectTypeBase = {
-          type: "GraphQLObjectType",
-          scope,
-        };
-
-        const objectSpec: GraphileObjectTypeConfig<any, any> = newSpec;
-        const objectContext: ContextGraphQLObjectType = {
-          ...commonContext,
-          addDataGeneratorForField,
-          recurseDataGeneratorsForField,
-        };
-        newSpec = builder.applyHooks(
-          this,
-          "GraphQLObjectType",
-          objectSpec,
-          objectContext,
-
-          `|${newSpec.name}`
-        );
-
-        const rawSpec = newSpec;
-        newSpec = {
-          ...newSpec,
-          interfaces: () => {
-            const interfacesContext: ContextGraphQLObjectTypeInterfaces = {
-              ...commonContext,
-              Self: Self as graphql.GraphQLObjectType,
-              GraphQLObjectType: rawSpec,
-            };
-
-            let rawInterfaces = rawSpec.interfaces || [];
-            if (typeof rawInterfaces === "function") {
-              rawInterfaces = rawInterfaces(interfacesContext);
-            }
-            return builder.applyHooks(
-              this,
-              "GraphQLObjectType:interfaces",
-              rawInterfaces,
-              interfacesContext,
-              `|${getNameFromType(Self)}`
-            );
-          },
-          fields: () => {
-            const processedFields: graphql.GraphQLFieldConfig<any, any>[] = [];
-            const fieldWithHooks: FieldWithHooksFunction = (
-              fieldName,
-              spec,
-              fieldScope
-            ) => {
-              if (!isString(fieldName)) {
-                throw new Error(
-                  "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
-                );
-              }
-              if (!fieldScope) {
-                throw new Error(
-                  "All calls to `fieldWithHooks` must specify a `fieldScope` " +
-                    "argument that gives additional context about the field so " +
-                    "that further plugins may more easily understand the field. " +
-                    "Keys within this object should contain the phrase 'field' " +
-                    "since they will be merged into the parent objects scope and " +
-                    "are not allowed to clash. If you really have no additional " +
-                    "information to give, please just pass `{}`."
-                );
-              }
-
-              const argDataGenerators: ArgDataGeneratorFunction[] = [];
-              fieldArgDataGeneratorsByFieldName[fieldName] = argDataGenerators;
-
-              let newSpec = spec;
-              const context: ContextGraphQLObjectTypeFieldsField = {
-                ...commonContext,
-                Self: Self as graphql.GraphQLObjectType,
-                addDataGenerator(fn) {
-                  return addDataGeneratorForField(fieldName, fn);
-                },
-                addArgDataGenerator(fn) {
-                  ensureName(fn);
-                  argDataGenerators.push(fn);
-                },
-                getDataFromParsedResolveInfoFragment: (
-                  parsedResolveInfoFragment,
-                  ReturnType
-                ): ResolvedLookAhead => {
-                  const Type = getNamedType(ReturnType as GraphQLType);
-                  const data: ResolvedLookAhead = {};
-
-                  const {
-                    fields,
-                    args,
-                  } = this.simplifyParsedResolveInfoFragmentWithType(
-                    parsedResolveInfoFragment,
-                    ReturnType
-                  );
-
-                  // Args -> argDataGenerators
-                  for (
-                    let dgIndex = 0, dgCount = argDataGenerators.length;
-                    dgIndex < dgCount;
-                    dgIndex++
-                  ) {
-                    const gen = argDataGenerators[dgIndex];
-                    try {
-                      mergeData(data, gen, ReturnType, args);
-                    } catch (e) {
-                      debug(
-                        "Failed to execute argDataGenerator '%s' on %s of %s",
-                        gen.displayName || gen.name || "anonymous",
-                        fieldName,
-                        getNameFromType(Self)
-                      );
-
-                      throw e;
-                    }
-                  }
-
-                  // finalSpec.type -> fieldData
-                  if (!finalSpec) {
-                    throw new Error(
-                      "It's too early to call this! Call from within resolve"
-                    );
-                  }
-                  const fieldDataGeneratorsByFieldName = fieldDataGeneratorsByFieldNameByType.get(
-                    Type
-                  );
-
-                  if (
-                    fieldDataGeneratorsByFieldName &&
-                    isCompositeType(Type) &&
-                    !isAbstractType(Type)
-                  ) {
-                    const typeFields = Type.getFields();
-                    const keys = Object.keys(fields);
-                    for (
-                      let keyIndex = 0, keyCount = keys.length;
-                      keyIndex < keyCount;
-                      keyIndex++
-                    ) {
-                      const alias = keys[keyIndex];
-                      const field = fields[alias];
-                      const gens = fieldDataGeneratorsByFieldName[field.name];
-                      if (gens) {
-                        const FieldReturnType = typeFields[field.name].type;
-                        for (let i = 0, l = gens.length; i < l; i++) {
-                          mergeData(data, gens[i], FieldReturnType, field);
-                        }
-                      }
-                    }
-                  }
-                  return data;
-                },
-                scope: extend(
-                  extend(
-                    { ...scope },
-                    {
-                      fieldName,
-                    },
-
-                    `Within context for GraphQLObjectType '${rawSpec.name}'`
-                  ),
-
-                  fieldScope,
-                  `Extending scope for field '${fieldName}' within context for GraphQLObjectType '${rawSpec.name}'`
-                ),
-              };
-
-              if (typeof newSpec === "function") {
-                newSpec = newSpec(context);
-              }
-              newSpec = builder.applyHooks(
-                this,
-                "GraphQLObjectType:fields:field",
-                newSpec,
-                context,
-                `|${getNameFromType(Self)}.fields.${fieldName}`
-              );
-
-              newSpec.args = newSpec.args || {};
-              const argsContext: ContextGraphQLObjectTypeFieldsFieldArgs = {
-                ...context,
-                field: newSpec,
-                returnType: newSpec.type,
-              };
-              newSpec = {
-                ...newSpec,
-                args: builder.applyHooks(
-                  this,
-                  "GraphQLObjectType:fields:field:args",
-                  newSpec.args,
-                  argsContext,
-
-                  `|${getNameFromType(Self)}.fields.${fieldName}`
-                ),
-              };
-
-              const finalSpec = newSpec;
-              processedFields.push(finalSpec);
-              return finalSpec;
-            };
-            const fieldsContext: ContextGraphQLObjectTypeFields = {
-              ...commonContext,
-              addDataGeneratorForField,
-              recurseDataGeneratorsForField,
-              Self: Self as graphql.GraphQLObjectType,
-              GraphQLObjectType: rawSpec,
-              fieldWithHooks,
-            };
-
-            let rawFields = rawSpec.fields || {};
-            if (typeof rawFields === "function") {
-              rawFields = rawFields(fieldsContext);
-            }
-            const fieldsSpec = builder.applyHooks(
-              this,
-              "GraphQLObjectType:fields",
-              this.extend(
-                {},
-                rawFields,
-                `Default field included in newWithHooks call for '${
-                  rawSpec.name
-                }'. ${inScope.__origin || ""}`
-              ),
-
-              fieldsContext,
-              `|${rawSpec.name}`
-            );
-
-            // Finally, check through all the fields that they've all been processed; any that have not we should do so now.
-            for (const fieldName in fieldsSpec) {
-              const fieldSpec = fieldsSpec[fieldName];
-              if (processedFields.indexOf(fieldSpec) < 0) {
-                // We've not processed this yet; process it now!
-                fieldsSpec[fieldName] = fieldsContext.fieldWithHooks(
-                  fieldName,
-                  fieldSpec,
-                  {
-                    autoField: true, // We don't have any additional information
-                  }
-                );
-              }
-            }
-            return fieldsSpec;
-          },
-        };
-      } else if (Type === GraphQLInputObjectType) {
-        const commonContext: ContextGraphQLInputObjectType = {
-          type: "GraphQLInputObjectType",
-          scope,
-        };
-
-        newSpec = builder.applyHooks(
-          this,
-          "GraphQLInputObjectType",
-          newSpec,
-          commonContext,
-          `|${newSpec.name}`
-        );
-
-        newSpec.fields = newSpec.fields || {};
-
-        const rawSpec = newSpec;
-        newSpec = {
-          ...newSpec,
-          fields: () => {
-            const processedFields: graphql.GraphQLInputFieldConfig[] = [];
-            const fieldWithHooks: InputFieldWithHooksFunction = (
-              fieldName,
-              spec,
-              fieldScope = {}
-            ) => {
-              if (!isString(fieldName)) {
-                throw new Error(
-                  "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
-                );
-              }
-              const context: ContextGraphQLInputObjectTypeFieldsField = {
-                ...commonContext,
-                Self: Self as graphql.GraphQLInputObjectType,
-                scope: extend(
-                  extend(
-                    { ...scope },
-                    {
-                      fieldName,
-                    },
-
-                    `Within context for GraphQLInputObjectType '${rawSpec.name}'`
-                  ),
-
-                  fieldScope,
-                  `Extending scope for field '${fieldName}' within context for GraphQLInputObjectType '${rawSpec.name}'`
-                ),
-              };
-
-              let newSpec = spec;
-              if (typeof newSpec === "function") {
-                newSpec = newSpec(context);
-              }
-              newSpec = builder.applyHooks(
-                this,
-                "GraphQLInputObjectType:fields:field",
-                newSpec,
-                context,
-                `|${getNameFromType(Self)}.fields.${fieldName}`
-              );
-
-              const finalSpec = newSpec;
-              processedFields.push(finalSpec);
-              return finalSpec;
-            };
-            const fieldsContext: ContextGraphQLInputObjectTypeFields = {
-              ...commonContext,
-              Self: Self as graphql.GraphQLInputObjectType,
-              GraphQLInputObjectType: rawSpec,
-              fieldWithHooks,
-            };
-
-            let rawFields = rawSpec.fields;
-            if (typeof rawFields === "function") {
-              rawFields = rawFields(fieldsContext);
-            }
-            const fieldsList: typeof rawFields = this.extend(
-              {},
-              rawFields,
-              `Default field included in newWithHooks call for '${
-                rawSpec.name
-              }'. ${inScope.__origin || ""}`
-            );
-            const fieldsSpec = builder.applyHooks(
-              this,
-              "GraphQLInputObjectType:fields",
-              fieldsList,
-              fieldsContext,
-              `|${getNameFromType(Self)}`
-            );
-
-            // Finally, check through all the fields that they've all been processed; any that have not we should do so now.
-            for (const fieldName in fieldsSpec) {
-              const fieldSpec = fieldsSpec[fieldName];
-              if (processedFields.indexOf(fieldSpec) < 0) {
-                // We've not processed this yet; process it now!
-                fieldsSpec[fieldName] = fieldsContext.fieldWithHooks(
-                  fieldName,
-                  fieldSpec,
-                  {
-                    autoField: true, // We don't have any additional information
-                  }
-                );
-              }
-            }
-            return fieldsSpec;
-          },
-        };
-      } else if (Type === GraphQLEnumType) {
-        const commonContext: ContextGraphQLEnumType = {
-          type: "GraphQLEnumType",
-          scope,
-        };
-
-        newSpec = builder.applyHooks(
-          this,
-          "GraphQLEnumType",
-          newSpec,
-          commonContext,
-          `|${newSpec.name}`
-        );
-
-        newSpec.values = builder.applyHooks(
-          this,
-          "GraphQLEnumType:values",
-          newSpec.values,
-          commonContext,
-          `|${newSpec.name}`
-        );
-
-        const values = newSpec.values;
-        newSpec.values = Object.keys(values).reduce((memo, valueKey) => {
-          const value = values[valueKey];
-          const newValue = builder.applyHooks(
-            this,
-            "GraphQLEnumType:values:value",
-            value,
-            commonContext,
-            `|${newSpec.name}|${valueKey}`
-          );
-
-          memo[valueKey] = newValue;
-          return memo;
-        }, {});
-      } else if (Type === GraphQLUnionType) {
-        const commonContext: ContextGraphQLUnionType = {
-          type: "GraphQLUnionType",
-          scope,
-        };
-
-        newSpec = builder.applyHooks(
-          this,
-          "GraphQLUnionType",
-          newSpec,
-          { ...commonContext },
-          `|${newSpec.name}`
-        );
-
-        const rawSpec = newSpec as GraphileUnionTypeConfig<any, any>;
-        newSpec = {
-          ...newSpec,
-          types: () => {
-            const typesContext: ContextGraphQLUnionTypeTypes = {
-              ...commonContext,
-              Self: Self as graphql.GraphQLUnionType,
-              GraphQLUnionType: rawSpec,
-            };
-
-            let rawTypes = rawSpec.types || [];
-            if (typeof rawTypes === "function") {
-              rawTypes = rawTypes(typesContext);
-            }
-            return builder.applyHooks(
-              this,
-              "GraphQLUnionType:types",
-              rawTypes,
-              typesContext,
-              `|${getNameFromType(Self)}`
-            );
-          },
-        };
-      }
-
-      const finalSpec = newSpec;
-
-      const Self: T = new Type(finalSpec);
-      if (!(Self instanceof GraphQLSchema) && performNonEmptyFieldsCheck) {
-        try {
-          if (
-            Self instanceof GraphQLInterfaceType ||
-            Self instanceof GraphQLObjectType ||
-            Self instanceof GraphQLInputObjectType
-          ) {
-            if (typeof Self.getFields === "function") {
-              const fields = Self.getFields();
-              if (Object.keys(fields).length === 0) {
-                // We require there's at least one field on GraphQLObjectType and GraphQLInputObjectType records
-                return null;
-              }
-            }
-          }
-        } catch (e) {
-          // This is the error we're expecting to handle:
-          // https://github.com/graphql/graphql-js/blob/831598ba76f015078ecb6c5c1fbaf133302f3f8e/src/type/definition.js#L526-L531
-          if (inScope && inScope.isRootQuery) {
-            throw e;
-          }
-          const isProbablyAnEmptyObjectError = !!e.message.match(
-            /function which returns such an object/
-          );
-
-          if (!isProbablyAnEmptyObjectError) {
-            this.swallowError(e);
-          }
-          return null;
-        }
-      }
-
-      this.scopeByType.set(Self, scope);
-      if (finalSpec.name) {
-        this.addType(
-          Self,
-          scope.__origin ||
-            (this
-              ? `'newWithHooks' call during hook '${this.status.currentHookName}'`
-              : null)
-        );
-      }
-      if (Type !== GraphQLSchema) {
-        fieldDataGeneratorsByFieldNameByType.set(
-          Self as GraphQLNamedType,
-          fieldDataGeneratorsByFieldName
-        );
-
-        fieldArgDataGeneratorsByFieldNameByType.set(
-          Self as GraphQLNamedType,
-          fieldArgDataGeneratorsByFieldName
-        );
-      }
-
-      return Self;
-    },
     fieldDataGeneratorsByType: fieldDataGeneratorsByFieldNameByType, // @deprecated
     fieldDataGeneratorsByFieldNameByType,
     fieldArgDataGeneratorsByFieldNameByType,
