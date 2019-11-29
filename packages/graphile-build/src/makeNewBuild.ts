@@ -293,14 +293,21 @@ const knownTypes = [
 
 const knownTypeNames = knownTypes.map(k => k.name);
 
+/**
+ * In v4 if you're not using TypeScript we allow users to return arrays of the
+ * valid LookAheadData types from data generator functions. We don't really
+ * want this; but alas it was in 4.0.0, so we must support it... At least until
+ * v5.
+ *
+ * TODO:v5: remove this!
+ */
 function ensureArray<T>(val: null | T | Array<T>): void | Array<T> {
   if (val == null) {
     return;
   } else if (Array.isArray(val)) {
-    // $FlowFixMe
-    return val as Array<T>;
+    return val;
   } else {
-    return [val] as Array<T>;
+    return [val];
   }
 }
 

@@ -1,9 +1,9 @@
 import QueryBuilder from "./QueryBuilder";
 import { QueryBuilderOptions } from "./QueryBuilder";
-import { RawAlias } from "./QueryBuilder";
 import * as sql from "pg-sql2";
 import { SQL } from "pg-sql2";
 import isSafeInteger = require("lodash/isSafeInteger");
+import flatten = require("lodash/flatten");
 import assert = require("assert");
 import { ResolvedLookAhead } from "graphile-build";
 
@@ -17,7 +17,7 @@ declare module "graphile-build" {
   interface LookAheadData {
     pgQuery: QueryBuilderCallback;
     pgAggregateQuery: AggregateQueryBuilderCallback;
-    pgCursorPrefix: SQL[] | null;
+    pgCursorPrefix: SQL | SQL[] | null;
     pgDontUseAsterisk: boolean;
     calculateHasNextPage: boolean;
     calculateHasPreviousPage: boolean;
@@ -74,8 +74,17 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
     (calculateHasNextPage && calculateHasNextPage.length > 0) ||
     (calculateHasPreviousPage && calculateHasPreviousPage.length > 0) ||
     false;
-  const rawCursorPrefix =
-    reallyRawCursorPrefix && reallyRawCursorPrefix.filter(identity);
+  const semiRawCursorPrefix: (SQL | SQL[])[] | null = reallyRawCursorPrefix
+    ? reallyRawCursorPrefix.filter((_): _ is SQL | SQL[] => !!_)
+    : null;
+  const rawCursorPrefix: SQL[] | null = semiRawCursorPrefix
+    ? /*
+       * This isn't technically required in v4 because it's done for us by
+       * `makeNewBuild`'s `ensureArray` flattening; but we need it to make the
+       * types happy, and might need it in v5.
+       */
+      flatten(semiRawCursorPrefix)
+    : null;
 
   const queryBuilder = new QueryBuilder(
     queryBuilderOptions,
