@@ -6,33 +6,20 @@ import {
   Build,
   Inflection,
 } from "graphile-build";
-
 import makeGraphQLJSONType from "../GraphQLJSON";
-
 import rawParseInterval = require("postgres-interval");
 import LRU from "@graphile/lru";
-import {
-  GraphQLInputType,
-  GraphQLObjectType,
-  GraphQLOutputType,
-} from "graphql";
-import {
-  PgType,
-  PgEntity,
-  PgClass,
-  PgEntityKind,
-  PgConstraint,
-} from "./PgIntrospectionPlugin";
+import { PgEntity, PgClass, PgConstraint } from "./PgIntrospectionPlugin";
 import { PgTypeModifier } from "./PgBasicsPlugin";
 
 interface GqlTypeByTypeIdAndModifier {
   [typeId: string]: {
-    [modifier: string]: GraphQLOutputType;
+    [modifier: string]: import("graphql").GraphQLOutputType;
   };
 }
 interface GqlInputTypeByTypeIdAndModifier {
   [typeId: string]: {
-    [modifier: string]: GraphQLInputType;
+    [modifier: string]: import("graphql").GraphQLInputType;
   };
 }
 
@@ -55,24 +42,24 @@ declare module "graphile-build" {
 
     pgRegisterGqlTypeByTypeId(
       typeId: string,
-      gen: TypeGen<GraphQLOutputType>,
+      gen: TypeGen<import("graphql").GraphQLOutputType>,
       yieldToExisting?: boolean
     ): void;
     pgRegisterGqlInputTypeByTypeId(
       typeId: string,
-      gen: TypeGen<GraphQLInputType>,
+      gen: TypeGen<import("graphql").GraphQLInputType>,
       yieldToExisting?: boolean
     ): void;
     pgGetGqlTypeByTypeIdAndModifier(
       typeId: string,
       typeModifier: PgTypeModifier,
       useFallback?: boolean
-    ): GraphQLOutputType | null;
+    ): import("graphql").GraphQLOutputType | null;
     pgGetGqlInputTypeByTypeIdAndModifier(
       typeId: string,
       typeModifier: PgTypeModifier,
       useFallback?: boolean
-    ): GraphQLInputType | null;
+    ): import("graphql").GraphQLInputType | null;
     pg2GqlMapper: Pg2GqlMapper;
     pg2gql;
     pg2gqlForType;
@@ -776,10 +763,13 @@ export default (function PgTypesPlugin(
           if (!gqlRangeSubType) {
             throw new Error("Range of unsupported");
           }
-          let existingRange = getTypeByName(
+          const existingRange = getTypeByName(
             inflection.rangeType(gqlRangeSubType.name)
           );
-          let Range: GraphQLObjectType<any, any> | null | undefined =
+          let Range:
+            | import("graphql").GraphQLObjectType<any, any>
+            | null
+            | undefined =
             existingRange && existingRange instanceof GraphQLObjectType
               ? existingRange
               : null;

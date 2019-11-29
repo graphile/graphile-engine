@@ -4,13 +4,6 @@ import {
   ScopeGraphQLObjectType,
 } from "graphile-build";
 import { PgType } from "./PgIntrospectionPlugin";
-import {
-  GraphQLInputFieldConfig,
-  GraphQLObjectType,
-  GraphQLScalarType,
-  GraphQLFieldConfigMap,
-  GraphQLType,
-} from "graphql";
 import { PgTypeModifier } from "./PgBasicsPlugin";
 
 declare module "graphile-build" {
@@ -24,8 +17,8 @@ declare module "graphile-build" {
     isPgRowEdgeType?: true;
     isConnectionType?: true;
     isPgRowConnectionType?: true;
-    nodeType?: GraphQLType /* But not a list */;
-    edgeType?: GraphQLObjectType;
+    nodeType?: import("graphql").GraphQLType /* But not a list */;
+    edgeType?: import("graphql").GraphQLObjectType;
   }
 
   interface ScopeGraphQLInputObjectType {
@@ -44,9 +37,9 @@ declare module "graphile-build" {
       fieldName: string,
       attrName: string,
       pgType: PgType,
-      spec: GraphQLInputFieldConfig,
+      spec: import("graphql").GraphQLInputFieldConfig,
       typeModifier?: PgTypeModifier
-    ) => GraphQLInputFieldConfig;
+    ) => import("graphql").GraphQLInputFieldConfig;
   }
 }
 
@@ -142,7 +135,7 @@ export default (function PgTablesPlugin(
           primaryKeys.length
             ? true
             : false;
-        let TableType: GraphQLObjectType | null | undefined;
+        let TableType: import("graphql").GraphQLObjectType | null | undefined;
         let TablePatchType;
         let TableBaseInputType;
         pgRegisterGqlTypeByTypeId(
@@ -527,7 +520,7 @@ export default (function PgTablesPlugin(
               fields: ({
                 recurseDataGeneratorsForField,
                 fieldWithHooks,
-              }): GraphQLFieldConfigMap<any, any> => {
+              }): import("graphql").GraphQLFieldConfigMap<any, any> => {
                 recurseDataGeneratorsForField("pageInfo", true);
                 return {
                   nodes: pgField(

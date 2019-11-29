@@ -1,20 +1,11 @@
-import {
-  Plugin,
-  ScopeGraphQLObjectTypeFieldsField,
-  ContextGraphQLObjectTypeFieldsField,
-} from "graphile-build";
-import {
-  GraphQLOutputType,
-  GraphQLNonNull,
-  GraphQLNullableType,
-} from "graphql";
+import { Plugin, ContextGraphQLObjectTypeFieldsField } from "graphile-build";
 import { ResolveTree } from "graphql-parse-resolve-info";
 import { PgTypeModifier } from "./PgBasicsPlugin";
 import { PgType } from "./PgIntrospectionPlugin";
 import QueryBuilder, { SQL } from "../QueryBuilder";
 
 type PgGetSelectValueForFieldAndTypeAndModifier = (
-  ReturnType: GraphQLOutputType,
+  ReturnType: import("graphql").GraphQLOutputType,
   fieldContext: ContextGraphQLObjectTypeFieldsField,
   parsedResolveInfoFragment: ResolveTree,
   sqlFullName: SQL,

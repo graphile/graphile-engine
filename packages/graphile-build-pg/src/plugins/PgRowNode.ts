@@ -1,6 +1,5 @@
 import { Plugin } from "graphile-build";
 import debugSql from "./debugSql";
-import { ResolveTree } from "graphql-parse-resolve-info";
 import { PgEntityKind } from "./PgIntrospectionPlugin";
 
 declare module "graphile-build" {

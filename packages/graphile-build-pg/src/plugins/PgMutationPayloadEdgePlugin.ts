@@ -1,8 +1,7 @@
 import { Plugin } from "graphile-build";
 import isString = require("lodash/isString");
-import { GraphQLObjectType } from "graphql";
 import { SQL } from "../QueryBuilder";
-import { OrderBySpec, OrderByValue } from "./PgConnectionArgOrderBy";
+import { OrderByValue } from "./PgConnectionArgOrderBy";
 import { PgEntityKind } from "./PgIntrospectionPlugin";
 
 declare module "graphile-build" {
@@ -27,7 +26,13 @@ export default (function PgMutationPayloadEdgePlugin(
         getTypeByName,
         pgGetGqlTypeByTypeIdAndModifier,
         pgSql: sql,
-        graphql: { GraphQLList, GraphQLNonNull, getNamedType, GraphQLEnumType },
+        graphql: {
+          GraphQLList,
+          GraphQLNonNull,
+          getNamedType,
+          GraphQLEnumType,
+          GraphQLObjectType,
+        },
         inflection,
         pgOmit: omit,
         describePgEntity,

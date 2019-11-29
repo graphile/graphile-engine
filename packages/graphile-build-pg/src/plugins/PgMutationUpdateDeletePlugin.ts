@@ -4,7 +4,6 @@ import {
   ScopeGraphQLObjectType,
 } from "graphile-build";
 import debugFactory from "debug";
-import { ResolveTree } from "graphql-parse-resolve-info";
 import { SQL } from "../QueryBuilder";
 import { PgAttribute } from "./PgIntrospectionPlugin";
 
