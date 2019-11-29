@@ -204,12 +204,12 @@ export interface BuildBase {
 
   newWithHooks(
     constructor: typeof GraphQLUnionType,
-    spec: GraphQLUnionTypeConfig<any, any>,
+    spec: GraphileUnionTypeConfig<any, any>,
     scope: ScopeGraphQLUnionType
   ): GraphQLUnionType;
   newWithHooks(
     constructor: typeof GraphQLUnionType,
-    spec: GraphQLUnionTypeConfig<any, any>,
+    spec: GraphileUnionTypeConfig<any, any>,
     scope: ScopeGraphQLUnionType,
     performNonEmptyFieldsCheck?: boolean
   ): GraphQLUnionType | null;
