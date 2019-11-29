@@ -3,6 +3,7 @@ import {
   PgClass,
   PgAttribute,
   PgConstraint,
+  SmartTagValue,
 } from "./plugins/PgIntrospectionPlugin";
 
 /*
@@ -34,30 +35,32 @@ const aliases = {
 
 const PERMISSIONS_THAT_REQUIRE_READ = [UPDATE, CREATE, DELETE, ALL, MANY];
 
-function parse(arrOrNot, errorPrefix = "Error") {
+function parse(arrOrNot: SmartTagValue | null, errorPrefix = "Error") {
   if (!arrOrNot) {
     return null;
   }
-  const arr = Array.isArray(arrOrNot) ? arrOrNot : [arrOrNot];
+  const arr: (string | true)[] = Array.isArray(arrOrNot)
+    ? arrOrNot
+    : [arrOrNot];
   let all = false;
-  const arrayNormalized = [].concat(
-    ...arr.map(str => {
+  const arrayNormalized: string[] = ([] as string[]).concat(
+    ...arr.map((str: true | string): string[] => {
       if (str === true || str === "*") {
         all = true;
         return [];
       }
       if (str[0] === ":") {
-        const perms = str
-          .substr(1)
-          .split("")
-          .map(p => aliases[p]);
-        const bad = perms.find(p => !p);
-        if (bad) {
+        const abbreviations: string[] = str.substr(1).split("");
+        const perms: (string | null)[] = abbreviations.map(
+          (p): string | null => aliases[p]
+        );
+        const badIndex = perms.findIndex(p => !p);
+        if (badIndex >= 0) {
           throw new Error(
-            `${errorPrefix} - abbreviated parameter '${bad}' not understood`
+            `${errorPrefix} - abbreviated parameter '${abbreviations[badIndex]}' in '${str}' not understood`
           );
         }
-        return perms;
+        return perms as string[];
       } else {
         const perms = str.split(",");
         // TODO: warning if not in list?
