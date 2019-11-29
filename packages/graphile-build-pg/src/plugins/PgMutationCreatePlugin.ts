@@ -1,5 +1,6 @@
 import { Plugin } from "graphile-build";
 import debugFactory from "debug";
+import { SQL } from "../QueryBuilder";
 
 const debug = debugFactory("graphile-build-pg");
 
@@ -226,8 +227,8 @@ export default (function PgMutationCreatePlugin(
                         resolveInfo.rootValue
                       );
 
-                      const sqlColumns = [];
-                      const sqlValues = [];
+                      const sqlColumns: SQL[] = [];
+                      const sqlValues: SQL[] = [];
                       const inputData = input[inflection.tableFieldName(table)];
                       relevantAttributes.forEach(attr => {
                         const fieldName = inflection.column(attr);
