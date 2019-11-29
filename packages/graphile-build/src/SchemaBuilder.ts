@@ -260,7 +260,11 @@ export interface BuildBase {
   ): InstanceType<T> | null | undefined;
   */
 
-  // fieldDataGeneratorsByType: Map<any, any>; // @deprecated - use fieldDataGeneratorsByFieldNameByType instead
+  /**
+   * @deprecated use fieldDataGeneratorsByFieldNameByType instead
+   */
+  fieldDataGeneratorsByType: Map<any, any>;
+
   fieldDataGeneratorsByFieldNameByType: Map<
     GraphQLNamedType,
     { [fieldName: string]: DataGeneratorFunction[] }

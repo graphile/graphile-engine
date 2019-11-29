@@ -1102,9 +1102,11 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
 
     newWithHooks,
 
-    ...({
-      fieldDataGeneratorsByType: fieldDataGeneratorsByFieldNameByType, // @deprecated
-    } as {}),
+    /**
+     * @deprecated
+     */
+    fieldDataGeneratorsByType: fieldDataGeneratorsByFieldNameByType,
+
     fieldDataGeneratorsByFieldNameByType,
     fieldArgDataGeneratorsByFieldNameByType,
     scopeByType: new Map(),
