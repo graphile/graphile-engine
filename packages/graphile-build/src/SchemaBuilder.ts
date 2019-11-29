@@ -131,6 +131,9 @@ export interface BuildBase {
     range: string,
     options?: { includePrerelease?: boolean }
   ): boolean;
+
+  _pluginMeta: any /*{ [key: symbol]: any }*/;
+
   graphql: typeof import("graphql");
   parseResolveInfo: typeof import("graphql-parse-resolve-info").parseResolveInfo;
   simplifyParsedResolveInfoFragmentWithType: typeof import("graphql-parse-resolve-info").simplifyParsedResolveInfoFragmentWithType;

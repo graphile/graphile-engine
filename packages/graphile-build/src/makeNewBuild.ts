@@ -1045,6 +1045,9 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
       return semver.satisfies(packageVersion, range, options);
     },
     graphql,
+
+    _pluginMeta: {},
+
     parseResolveInfo,
     simplifyParsedResolveInfoFragmentWithType,
     getSafeAliasFromAlias,
