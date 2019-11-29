@@ -3,6 +3,17 @@ import { GraphQLInputFieldConfig } from "graphql";
 import { SQL, sql as sqlType, QueryBuilder } from "graphile-build-pg";
 import { Build, Plugin } from "graphile-build";
 
+declare module "graphile-build" {
+  interface ScopeGraphQLInputObjectTypeFieldsField {
+    addPgTableCondition?: {
+      schemaName: string;
+      tableName: string;
+      conditionFieldSpec: GraphQLInputFieldConfig;
+      conditionFieldName: string;
+    };
+  }
+}
+
 export default function makeAddPgTableConditionPlugin(
   schemaName: string,
   tableName: string,
@@ -62,20 +73,24 @@ export default function makeAddPgTableConditionPlugin(
         const conditionFieldSpec = conditionFieldSpecGenerator(build);
         const meta = build._pluginMeta[instance];
         meta.seen = true;
-        return build.extend(fields, {
-          [conditionFieldName]: fieldWithHooks(
-            conditionFieldName,
-            conditionFieldSpec,
-            {
-              addPgTableCondition: {
-                schemaName,
-                tableName,
-                conditionFieldSpec,
-                conditionFieldName,
-              },
-            }
-          ),
-        });
+        return build.extend(
+          fields,
+          {
+            [conditionFieldName]: fieldWithHooks(
+              conditionFieldName,
+              conditionFieldSpec,
+              {
+                addPgTableCondition: {
+                  schemaName,
+                  tableName,
+                  conditionFieldSpec,
+                  conditionFieldName,
+                },
+              }
+            ),
+          },
+          `Adding '${conditionFieldName}' condition to '${table.name}'`
+        );
       }
     );
     builder.hook(

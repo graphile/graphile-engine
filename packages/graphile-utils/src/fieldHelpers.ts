@@ -1,7 +1,6 @@
 import { GraphQLResolveInfo } from "graphql";
 import { Build, ContextGraphQLObjectTypeFieldsField } from "graphile-build";
 import { QueryBuilder, SQL } from "graphile-build-pg";
-import { ResolveTree } from "graphql-parse-resolve-info";
 
 export type SelectGraphQLResultFromTable = (
   tableFragment: SQL,
