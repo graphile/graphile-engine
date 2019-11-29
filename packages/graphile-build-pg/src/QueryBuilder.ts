@@ -626,7 +626,7 @@ ${sql.join(
   getFinalLimit() {
     return this.getFinalLimitAndOffset().limit;
   }
-  getOrderByExpressionsAndDirections() {
+  getOrderByExpressionsAndDirections(): [SQL, boolean, boolean | null][] {
     this.lock("orderBy");
     return this.compiledData.orderBy;
   }
@@ -634,7 +634,7 @@ ${sql.join(
     this.lockEverything();
     return this.compiledData.select.length;
   }
-  buildSelectFields() {
+  buildSelectFields(): SQL {
     this.lockEverything();
     if (this.compiledData.fixedSelectExpression) {
       return this.compiledData.fixedSelectExpression;
@@ -678,7 +678,7 @@ ${sql.join(
     }
     return buildObject;
   }
-  buildWhereBoundClause(isLower: boolean) {
+  buildWhereBoundClause(isLower: boolean): SQL {
     this.lock("whereBound");
     const clauses = this.compiledData.whereBound[isLower ? "lower" : "upper"];
     if (clauses.length) {

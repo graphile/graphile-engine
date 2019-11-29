@@ -27,8 +27,6 @@ declare module "graphile-build" {
 
 type GraphQLContext = any;
 
-const identity = _ => _ !== null && _ !== undefined;
-
 export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   from: SQL,
   fromAlias: SQL | null | undefined,
@@ -49,7 +47,7 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   withBuilder?: ((builder: QueryBuilder) => void) | null | undefined,
   context: GraphQLContext = {},
   rootValue?: any // eslint-disable-line flowtype/no-weak-types
-) => {
+): SQL => {
   const {
     pgQuery,
     pgAggregateQuery,
