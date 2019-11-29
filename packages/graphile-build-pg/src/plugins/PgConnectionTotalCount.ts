@@ -13,7 +13,7 @@ export default (function PgConnectionTotalCount(builder) {
       const {
         extend,
         inflection,
-        graphql: { GraphQLInt, GraphQLNonNull },
+        graphql: { GraphQLInt, GraphQLNonNull, isNamedType },
         pgSql: sql,
       } = build;
       const {
@@ -27,7 +27,7 @@ export default (function PgConnectionTotalCount(builder) {
       }
 
       const nodeTypeName =
-        nodeType && nodeType.name
+        nodeType && isNamedType(nodeType)
           ? nodeType.name
           : table && table.kind === "class"
           ? inflection.tableType(table)

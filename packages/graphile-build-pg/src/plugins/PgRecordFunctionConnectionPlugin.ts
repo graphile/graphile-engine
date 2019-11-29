@@ -70,7 +70,9 @@ export default (function PgRecordFunctionConnectionPlugin(
 
         const edgeSpec: GraphileObjectTypeConfig<any, any> = {
           name: inflection.recordFunctionEdge(proc),
-          description: `A \`${NodeType.name}\` edge in the connection.`,
+          description: `A \`${
+            getNamedType(NodeType).name
+          }\` edge in the connection.`,
           fields: ({ fieldWithHooks }) => {
             return {
               cursor: fieldWithHooks(
@@ -98,7 +100,9 @@ export default (function PgRecordFunctionConnectionPlugin(
                 fieldWithHooks,
                 "node",
                 {
-                  description: `The \`${NodeType.name}\` at the end of the edge.`,
+                  description: `The \`${
+                    getNamedType(NodeType).name
+                  }\` at the end of the edge.`,
                   type: nullableIf(
                     !pgForbidSetofFunctionsToReturnNull,
                     NodeType
@@ -143,11 +147,15 @@ export default (function PgRecordFunctionConnectionPlugin(
           GraphQLObjectType,
           {
             name: inflection.recordFunctionConnection(proc),
-            description: `A connection to a list of \`${NodeType.name}\` values.`,
+            description: `A connection to a list of \`${
+              getNamedType(NodeType).name
+            }\` values.`,
             fields: ({ fieldWithHooks }) => {
               return {
                 nodes: pgField(build, fieldWithHooks, "nodes", {
-                  description: `A list of \`${NodeType.name}\` objects.`,
+                  description: `A list of \`${
+                    getNamedType(NodeType).name
+                  }\` objects.`,
                   type: new GraphQLNonNull(
                     new GraphQLList(
                       nullableIf(!pgForbidSetofFunctionsToReturnNull, NodeType)
