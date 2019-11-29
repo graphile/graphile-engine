@@ -1,5 +1,12 @@
 import { Plugin } from "graphile-build";
 import debugFactory from "debug";
+import { stringTag } from "./PgBasicsPlugin";
+
+declare module "graphile-build" {
+  interface ScopeGraphQLObjectTypeFieldsField {
+    isPgForwardRelationField?: true;
+  }
+}
 
 const debug = debugFactory("graphile-build-pg");
 
@@ -19,6 +26,7 @@ export default (function PgForwardRelationPlugin(builder, { subscriptions }) {
         pgOmit: omit,
         sqlCommentByAddingTags,
         describePgEntity,
+        graphql: { getNamedType },
       } = build;
       const {
         scope: {
@@ -35,6 +43,7 @@ export default (function PgForwardRelationPlugin(builder, { subscriptions }) {
 
       const table = pgIntrospectionTable || pgIntrospection;
       if (
+        !pgIntrospection ||
         !(isPgRowType || isMutationPayload || isPgCompositeType) ||
         !table ||
         table.kind !== "class" ||
@@ -67,7 +76,6 @@ export default (function PgForwardRelationPlugin(builder, { subscriptions }) {
             null
           );
 
-          const tableTypeName = gqlTableType.name;
           if (!gqlTableType) {
             debug(
               `Could not determine type for table with id ${constraint.classId}`
@@ -75,14 +83,18 @@ export default (function PgForwardRelationPlugin(builder, { subscriptions }) {
 
             return memo;
           }
-          const foreignTable =
-            introspectionResultsByKind.classById[constraint.foreignClassId];
+          const tableTypeName = getNamedType(gqlTableType).name;
+          const foreignTable = constraint.foreignClassId
+            ? introspectionResultsByKind.classById[constraint.foreignClassId]
+            : null;
+          if (!foreignTable) {
+            return memo;
+          }
           const gqlForeignTableType = pgGetGqlTypeByTypeIdAndModifier(
             foreignTable.type.id,
             null
           );
 
-          const foreignTableTypeName = gqlForeignTableType.name;
           if (!gqlForeignTableType) {
             debug(
               `Could not determine type for foreign table with id ${constraint.foreignClassId}`
@@ -90,11 +102,7 @@ export default (function PgForwardRelationPlugin(builder, { subscriptions }) {
 
             return memo;
           }
-          if (!foreignTable) {
-            throw new Error(
-              `Could not find the foreign table (constraint: ${constraint.name})`
-            );
-          }
+          const foreignTableTypeName = getNamedType(gqlForeignTableType).name;
           if (omit(foreignTable, "read")) {
             return memo;
           }
@@ -185,7 +193,7 @@ export default (function PgForwardRelationPlugin(builder, { subscriptions }) {
                   });
                   return {
                     description:
-                      constraint.tags.forwardDescription ||
+                      stringTag(constraint, "forwardDescription") ||
                       `Reads a single \`${foreignTableTypeName}\` that is related to this \`${tableTypeName}\`.`,
                     type: gqlForeignTableType, // Nullable since RLS may forbid fetching
                     resolve: (rawData, _args, resolveContext, resolveInfo) => {
