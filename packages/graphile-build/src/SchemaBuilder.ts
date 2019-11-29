@@ -257,10 +257,16 @@ export interface BuildBase {
   ): InstanceType<T> | null | undefined;
   */
 
-  fieldDataGeneratorsByType: Map<any, any>; // @deprecated - use fieldDataGeneratorsByFieldNameByType instead
-  fieldDataGeneratorsByFieldNameByType: Map<any, any>;
-  fieldArgDataGeneratorsByFieldNameByType: Map<any, any>;
-  scopeByType: Map<GraphQLType, Scope>;
+  // fieldDataGeneratorsByType: Map<any, any>; // @deprecated - use fieldDataGeneratorsByFieldNameByType instead
+  fieldDataGeneratorsByFieldNameByType: Map<
+    GraphQLNamedType,
+    { [fieldName: string]: DataGeneratorFunction[] }
+  >;
+  fieldArgDataGeneratorsByFieldNameByType: Map<
+    GraphQLNamedType,
+    { [fieldName: string]: ArgDataGeneratorFunction[] }
+  >;
+  scopeByType: Map<GraphQLType, SomeScope>;
 
   inflection: Inflection;
 
@@ -495,6 +501,29 @@ export interface ContextFinalize extends Context {
   scope: ScopeFinalize;
   type: "Finalize";
 }
+
+export type SomeScope =
+  | Scope
+  | ScopeBuild
+  | ScopeInflection
+  | ScopeInit
+  | ScopeGraphQLSchema
+  | ScopeGraphQLScalarType
+  | ScopeGraphQLObjectType
+  | ScopeGraphQLObjectTypeInterfaces
+  | ScopeGraphQLObjectTypeFields
+  | ScopeGraphQLObjectTypeFieldsField
+  | ScopeGraphQLObjectTypeFieldsFieldArgs
+  | ScopeGraphQLInterfaceType
+  | ScopeGraphQLUnionType
+  | ScopeGraphQLUnionTypeTypes
+  | ScopeGraphQLInputObjectType
+  | ScopeGraphQLInputObjectTypeFields
+  | ScopeGraphQLInputObjectTypeFieldsField
+  | ScopeGraphQLEnumType
+  | ScopeGraphQLEnumTypeValues
+  | ScopeGraphQLEnumTypeValuesValue
+  | ScopeFinalize;
 
 export interface Hook<Type, TContext extends Context, TBuild = Build> {
   (input: Type, build: TBuild, context: TContext): Type;

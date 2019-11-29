@@ -91,6 +91,7 @@ export {
   ContextGraphQLEnumTypeValuesValue,
   ScopeFinalize,
   ContextFinalize,
+  SomeScope,
 } from "./SchemaBuilder";
 
 export { LiveSource, LiveProvider, LiveMonitor, LiveCoordinator } from "./Live";
