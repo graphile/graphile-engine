@@ -170,13 +170,13 @@ export interface BuildBase {
     constructor: typeof GraphQLScalarType,
     spec: GraphQLScalarTypeConfig<any, any>,
     scope: ScopeGraphQLScalarType
-  ): GraphQLInputObjectType;
+  ): GraphQLScalarType;
   newWithHooks(
     constructor: typeof GraphQLScalarType,
     spec: GraphQLScalarTypeConfig<any, any>,
     scope: ScopeGraphQLScalarType,
     performNonEmptyFieldsCheck?: boolean
-  ): GraphQLInputObjectType | null;
+  ): GraphQLScalarType | null;
 
   newWithHooks(
     constructor: typeof GraphQLObjectType,
