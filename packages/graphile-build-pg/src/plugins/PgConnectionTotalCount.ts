@@ -1,5 +1,11 @@
 import { Plugin } from "graphile-build";
 
+declare module "graphile-build" {
+  interface ScopeGraphQLObjectTypeFieldsField {
+    isPgConnectionTotalCountField?: true;
+  }
+}
+
 export default (function PgConnectionTotalCount(builder) {
   builder.hook(
     "GraphQLObjectType:fields",
