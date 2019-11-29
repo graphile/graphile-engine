@@ -3,7 +3,8 @@ import LRU from "@graphile/lru";
 import { PoolClient } from "pg";
 
 const POSTGRAPHILE_PREPARED_STATEMENT_CACHE_SIZE =
-  parseInt(process.env.POSTGRAPHILE_PREPARED_STATEMENT_CACHE_SIZE, 10) || 100;
+  parseInt(process.env.POSTGRAPHILE_PREPARED_STATEMENT_CACHE_SIZE || "", 10) ||
+  100;
 
 let lastString: string;
 let lastHash: string;
@@ -17,30 +18,35 @@ const hash = (str: string): string => {
   return lastHash;
 };
 
+const PARSED_STATEMENTS = "parsedStatements";
+const GRAPHILE_PREPARED_STATEMENT_CACHE = "_graphilePreparedStatementCache";
+
 export default function pgPrepareAndRun(
   pgClient: PoolClient,
   text: string,
   values: any
 ) {
-  const connection = pgClient.connection;
+  const connection: unknown = pgClient["connection"];
   if (
     !values ||
     POSTGRAPHILE_PREPARED_STATEMENT_CACHE_SIZE < 1 ||
+    typeof connection !== "object" ||
     !connection ||
-    !connection.parsedStatements
+    typeof connection[PARSED_STATEMENTS] !== "object" ||
+    !connection[PARSED_STATEMENTS]
   ) {
     return pgClient.query(text, values);
   } else {
     const name = hash(text);
-    if (!connection._graphilePreparedStatementCache) {
-      connection._graphilePreparedStatementCache = new LRU({
+    if (!connection[GRAPHILE_PREPARED_STATEMENT_CACHE]) {
+      connection[GRAPHILE_PREPARED_STATEMENT_CACHE] = new LRU({
         maxLength: POSTGRAPHILE_PREPARED_STATEMENT_CACHE_SIZE,
         dispose(key) {
-          if (connection.parsedStatements[key]) {
+          if (connection[PARSED_STATEMENTS][key]) {
             pgClient
               .query(`deallocate ${pgClient.escapeIdentifier(key)}`)
               .then(() => {
-                delete connection.parsedStatements[key];
+                delete connection[PARSED_STATEMENTS][key];
               })
               .catch(e => {
                 // eslint-disable-next-line no-console
@@ -50,9 +56,9 @@ export default function pgPrepareAndRun(
         },
       });
     }
-    if (!connection._graphilePreparedStatementCache.get(name)) {
+    if (!connection[GRAPHILE_PREPARED_STATEMENT_CACHE].get(name)) {
       // We're relying on dispose to clear out the old ones.
-      connection._graphilePreparedStatementCache.set(name, true);
+      connection[GRAPHILE_PREPARED_STATEMENT_CACHE].set(name, true);
     }
     return pgClient.query({
       name,
