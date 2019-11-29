@@ -15,7 +15,7 @@ import {
 const base64 = str => Buffer.from(String(str)).toString("base64");
 const base64Decode = str => Buffer.from(String(str), "base64").toString("utf8");
 
-export type NodeFetcher<T = GraphileResolverContext> = (
+export type NodeFetcher<T = any> = (
   data: unknown,
   identifiers: Array<unknown>,
   context: GraphileResolverContext,

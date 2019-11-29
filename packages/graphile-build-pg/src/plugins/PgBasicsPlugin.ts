@@ -34,6 +34,7 @@ import chalk from "chalk";
 import pickBy = require("lodash/pickBy");
 import PgLiveProvider from "../PgLiveProvider";
 import pgPrepareAndRun from "../pgPrepareAndRun";
+import { PoolClient } from "pg";
 
 export type PgTypeModifier = string | number | null;
 
@@ -66,6 +67,10 @@ type PgColumnFilterFunction = (
 type PgConfig = import("pg").Pool | import("pg").PoolClient | string;
 
 declare module "graphile-build" {
+  interface GraphileResolverContext {
+    pgClient: PoolClient;
+  }
+
   interface GraphileBuildOptions {
     pgConfig: PgConfig;
     pgSchemas: Array<string>;

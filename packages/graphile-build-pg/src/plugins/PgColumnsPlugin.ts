@@ -11,7 +11,7 @@ import {
 import { ResolveTree } from "graphql-parse-resolve-info";
 import { PgTypeModifier } from "./PgBasicsPlugin";
 import { PgType } from "./PgIntrospectionPlugin";
-import { SQL } from "../QueryBuilder";
+import QueryBuilder, { SQL } from "../QueryBuilder";
 
 type PgGetSelectValueForFieldAndTypeAndModifier = (
   ReturnType: GraphQLOutputType,
@@ -19,7 +19,8 @@ type PgGetSelectValueForFieldAndTypeAndModifier = (
   parsedResolveInfoFragment: ResolveTree,
   sqlFullName: SQL,
   type: PgType,
-  typeModifier: PgTypeModifier
+  typeModifier: PgTypeModifier,
+  parentQueryBuilder: QueryBuilder
 ) => SQL;
 
 declare module "graphile-build" {
@@ -53,7 +54,8 @@ export default (function PgColumnsPlugin(builder) {
         parsedResolveInfoFragment,
         sqlFullName,
         type,
-        typeModifier
+        typeModifier,
+        parentQueryBuilder
       ) => {
         const { getDataFromParsedResolveInfoFragment } = fieldContext;
         if (type.isPgArray && type.arrayItemType) {
@@ -69,7 +71,8 @@ else (
     parsedResolveInfoFragment,
     ident,
     type.arrayItemType,
-    typeModifier
+    typeModifier,
+    parentQueryBuilder
   )}) from unnest(${sqlFullName}) as ${ident}
 )
 end
@@ -91,7 +94,10 @@ end
                 onlyJsonField: true,
                 addNullCase: !isDefinitelyNotATable,
                 addNotDistinctFromNullCase: !!isDefinitelyNotATable,
-              }
+              },
+              null,
+              parentQueryBuilder ? parentQueryBuilder.context : (null as any),
+              parentQueryBuilder ? parentQueryBuilder.rootValue : null
             );
 
             return jsonBuildObject;
@@ -185,7 +191,8 @@ end
                             parsedResolveInfoFragment,
                             sql.fragment`(${queryBuilder.getTableAlias()}.${sqlColumn})`, // The brackets are necessary to stop the parser getting confused, ref: https://www.postgresql.org/docs/9.6/static/rowtypes.html#ROWTYPES-ACCESSING
                             type,
-                            typeModifier
+                            typeModifier,
+                            queryBuilder
                           ),
 
                           fieldName

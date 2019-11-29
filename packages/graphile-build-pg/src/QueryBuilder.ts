@@ -149,7 +149,7 @@ class QueryBuilder {
 
   constructor(
     options: QueryBuilderOptions = {},
-    context: GraphileResolverContext = {},
+    context: GraphileResolverContext,
     rootValue?: any // eslint-disable-line flowtype/no-weak-types
   ) {
     this.context = context || {};

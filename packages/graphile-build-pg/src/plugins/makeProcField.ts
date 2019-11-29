@@ -469,7 +469,7 @@ export default function makeProcField(
               innerQueryBuilder.selectIdentifiers(returnTypeTable);
             }
           },
-          parentQueryBuilder ? parentQueryBuilder.context : resolveContext,
+          parentQueryBuilder ? parentQueryBuilder.context! : resolveContext!,
           parentQueryBuilder
             ? parentQueryBuilder.rootValue
             : resolveInfo && resolveInfo.rootValue

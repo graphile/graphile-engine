@@ -153,7 +153,8 @@ export default (function PgRecordReturnTypesPlugin(builder) {
                                 : `column${idx + 1}`
                             )})`,
                             outputArgTypes[idx],
-                            null
+                            null,
+                            queryBuilder
                           ),
 
                           safeAlias
