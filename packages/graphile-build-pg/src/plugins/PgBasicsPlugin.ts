@@ -42,7 +42,7 @@ export type PgTypeModifier = string | number | null;
  * exists, asserts that it is a string (and not a boolean, or array). If it
  * doesn't exist, returns null.
  */
-function tag(pgEntity: PgEntity, tagName: string): string | null {
+export function stringTag(pgEntity: PgEntity, tagName: string): string | null {
   const tagVal: SmartTagValue | null = pgEntity.tags[tagName] || null;
   if (typeof tagVal === "string") {
     return tagVal;
@@ -277,15 +277,15 @@ function makePgBaseInflectors(): Partial<Inflection> {
     // lost, e.g.
     // `constantCase(camelCase('foo_1')) !== constantCase('foo_1')`
     _functionName(this: Inflection, proc: PgProc) {
-      return this.coerceToGraphQLName(tag(proc, "name") || proc.name);
+      return this.coerceToGraphQLName(stringTag(proc, "name") || proc.name);
     },
     _typeName(this: Inflection, type: PgType) {
       // 'type' introspection result
-      return this.coerceToGraphQLName(tag(type, "name") || type.name);
+      return this.coerceToGraphQLName(stringTag(type, "name") || type.name);
     },
     _tableName(this: Inflection, table: PgClass) {
       return this.coerceToGraphQLName(
-        tag(table, "name") || tag(table.type, "name") || table.name
+        stringTag(table, "name") || stringTag(table.type, "name") || table.name
       );
     },
     _singularizedTableName(this: Inflection, table: PgClass): string {
@@ -299,7 +299,7 @@ function makePgBaseInflectors(): Partial<Inflection> {
       attr: PgAttribute,
       _options?: { skipRowId?: boolean }
     ) {
-      return this.coerceToGraphQLName(tag(attr, "name") || attr.name);
+      return this.coerceToGraphQLName(stringTag(attr, "name") || attr.name);
     },
 
     // From here down, functions are passed database introspection results
@@ -440,8 +440,8 @@ function makePgBaseInflectors(): Partial<Inflection> {
       plural: boolean = false,
       outputArgNames: Array<string> = []
     ) {
-      if (tag(proc, "resultFieldName")) {
-        return tag(proc, "resultFieldName");
+      if (stringTag(proc, "resultFieldName")) {
+        return stringTag(proc, "resultFieldName");
       }
       let name;
       if (outputArgNames.length === 1 && outputArgNames[0] !== "") {
@@ -494,7 +494,7 @@ function makePgBaseInflectors(): Partial<Inflection> {
       proc: PgProc,
       _table: PgClass
     ) {
-      return tag(proc, "fieldName") || this.camelCase(pseudoColumnName);
+      return stringTag(proc, "fieldName") || this.camelCase(pseudoColumnName);
     },
     computedColumnList(
       this: Inflection,
@@ -502,8 +502,8 @@ function makePgBaseInflectors(): Partial<Inflection> {
       proc: PgProc,
       _table: PgClass
     ) {
-      return tag(proc, "fieldName")
-        ? tag(proc, "fieldName") + "List"
+      return stringTag(proc, "fieldName")
+        ? stringTag(proc, "fieldName") + "List"
         : this.camelCase(`${pseudoColumnName}-list`);
     },
     singleRelationByKeys(
@@ -513,7 +513,7 @@ function makePgBaseInflectors(): Partial<Inflection> {
       _foreignTable: PgClass,
       constraint: PgConstraint
     ) {
-      const fieldName = tag(constraint, "fieldName");
+      const fieldName = stringTag(constraint, "fieldName");
       if (fieldName) {
         return fieldName;
       }
@@ -530,11 +530,14 @@ function makePgBaseInflectors(): Partial<Inflection> {
       _foreignTable: PgClass,
       constraint: PgConstraint
     ) {
-      const foreignSingleFieldName = tag(constraint, "foreignSingleFieldName");
+      const foreignSingleFieldName = stringTag(
+        constraint,
+        "foreignSingleFieldName"
+      );
       if (foreignSingleFieldName) {
         return foreignSingleFieldName;
       }
-      const foreignFieldName = tag(constraint, "foreignFieldName");
+      const foreignFieldName = stringTag(constraint, "foreignFieldName");
       if (foreignFieldName) {
         return foreignFieldName;
       }
@@ -552,7 +555,7 @@ function makePgBaseInflectors(): Partial<Inflection> {
       _foreignTable: PgClass,
       constraint: PgConstraint
     ) {
-      const foreignFieldName = tag(constraint, "foreignFieldName");
+      const foreignFieldName = stringTag(constraint, "foreignFieldName");
       if (foreignFieldName) {
         return foreignFieldName;
       }
@@ -569,11 +572,14 @@ function makePgBaseInflectors(): Partial<Inflection> {
       _foreignTable: PgClass,
       constraint: PgConstraint
     ) {
-      const foreignSimpleFieldName = tag(constraint, "foreignSimpleFieldName");
+      const foreignSimpleFieldName = stringTag(
+        constraint,
+        "foreignSimpleFieldName"
+      );
       if (foreignSimpleFieldName) {
         return foreignSimpleFieldName;
       }
-      const foreignFieldName = tag(constraint, "foreignFieldName");
+      const foreignFieldName = stringTag(constraint, "foreignFieldName");
       if (foreignFieldName) {
         return foreignFieldName;
       }
@@ -589,7 +595,7 @@ function makePgBaseInflectors(): Partial<Inflection> {
       table: PgClass,
       constraint: PgConstraint
     ) {
-      const fieldName = tag(constraint, "fieldName");
+      const fieldName = stringTag(constraint, "fieldName");
       if (fieldName) {
         return fieldName;
       }
@@ -605,7 +611,7 @@ function makePgBaseInflectors(): Partial<Inflection> {
       table: PgClass,
       constraint: PgConstraint
     ) {
-      const updateFieldName = tag(constraint, "updateFieldName");
+      const updateFieldName = stringTag(constraint, "updateFieldName");
       if (updateFieldName) {
         return updateFieldName;
       }
@@ -621,7 +627,7 @@ function makePgBaseInflectors(): Partial<Inflection> {
       table: PgClass,
       constraint: PgConstraint
     ) {
-      const deleteFieldName = tag(constraint, "deleteFieldName");
+      const deleteFieldName = stringTag(constraint, "deleteFieldName");
       if (deleteFieldName) {
         return deleteFieldName;
       }
@@ -637,7 +643,7 @@ function makePgBaseInflectors(): Partial<Inflection> {
       table: PgClass,
       constraint: PgConstraint
     ) {
-      const updateFieldName = tag(constraint, "updateFieldName");
+      const updateFieldName = stringTag(constraint, "updateFieldName");
       if (updateFieldName) {
         return this.upperCamelCase(`${updateFieldName}-input`);
       }
@@ -653,7 +659,7 @@ function makePgBaseInflectors(): Partial<Inflection> {
       table: PgClass,
       constraint: PgConstraint
     ) {
-      const deleteFieldName = tag(constraint, "deleteFieldName");
+      const deleteFieldName = stringTag(constraint, "deleteFieldName");
       if (deleteFieldName) {
         return this.upperCamelCase(`${deleteFieldName}-input`);
       }
@@ -687,7 +693,7 @@ function makePgBaseInflectors(): Partial<Inflection> {
     },
     recordFunctionReturnType(this: Inflection, proc: PgProc) {
       return (
-        tag(proc, "resultTypeName") ||
+        stringTag(proc, "resultTypeName") ||
         this.upperCamelCase(`${this._functionName(proc)}-record`)
       );
     },
