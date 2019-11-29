@@ -3,7 +3,6 @@ import {
   GraphileObjectTypeConfig,
   ScopeGraphQLObjectType,
 } from "graphile-build";
-import { GraphQLScalarType } from "graphql";
 
 const base64 = str => Buffer.from(String(str)).toString("base64");
 
@@ -21,6 +20,7 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
           GraphQLNonNull,
           GraphQLList,
           GraphQLString,
+          GraphQLScalarType,
           getNamedType,
           isOutputType,
         },

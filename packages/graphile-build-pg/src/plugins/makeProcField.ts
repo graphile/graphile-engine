@@ -9,7 +9,6 @@ import { PgProc, PgType } from "./PgIntrospectionPlugin";
 import { SQL } from "pg-sql2";
 import debugSql from "./debugSql";
 import chalk from "chalk";
-import { GraphQLOutputType, GraphQLResolveInfo } from "graphql";
 import { ResolveTree } from "graphql-parse-resolve-info";
 import QueryBuilder, { GraphileResolverContext } from "../QueryBuilder";
 
@@ -350,7 +349,7 @@ export default function makeProcField(
       }
       function makeMutationCall(
         parsedResolveInfoFragment: ResolveTree,
-        ReturnType: GraphQLOutputType,
+        ReturnType: import("graphql").GraphQLOutputType,
         { implicitArgs = [] }: { implicitArgs?: SQL[] } = {}
       ): SQL {
         const { args: rawArgs = {} } = parsedResolveInfoFragment;
@@ -395,12 +394,12 @@ export default function makeProcField(
       }
       function makeQuery(
         parsedResolveInfoFragment: ResolveTree,
-        ReturnType: GraphQLOutputType,
+        ReturnType: import("graphql").GraphQLOutputType,
         sqlMutationQuery: SQL,
         functionAlias: SQL,
         parentQueryBuilder: QueryBuilder | null,
         resolveContext?: GraphileResolverContext,
-        resolveInfo?: GraphQLResolveInfo
+        resolveInfo?: import("graphql").GraphQLResolveInfo
       ) {
         const resolveData = getDataFromParsedResolveInfoFragment(
           parsedResolveInfoFragment,

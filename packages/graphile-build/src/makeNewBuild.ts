@@ -1,5 +1,4 @@
 import * as graphql from "graphql";
-import { GraphQLNamedType, GraphQLType } from "graphql";
 import {
   parseResolveInfo,
   simplifyParsedResolveInfoFragmentWithType,
@@ -206,7 +205,7 @@ export type FieldWithHooksFunction = (
     | FieldSpec
     | ((context: ContextGraphQLObjectTypeFieldsField) => FieldSpec),
   fieldScope: Omit<ScopeGraphQLObjectTypeFieldsField, "fieldName">
-) => import("graphql").GraphQLFieldConfig<any, any>;
+) => graphql.GraphQLFieldConfig<any, any>;
 
 export type InputFieldWithHooksFunction = (
   fieldName: string,
@@ -216,10 +215,10 @@ export type InputFieldWithHooksFunction = (
         ContextGraphQLInputObjectTypeFieldsField
       ) => graphql.GraphQLInputFieldConfig),
   fieldScope: Omit<ScopeGraphQLInputObjectTypeFieldsField, "fieldName">
-) => import("graphql").GraphQLInputFieldConfig;
+) => graphql.GraphQLInputFieldConfig;
 
 function getNameFromType(
-  Type: GraphQLNamedType | import("graphql").GraphQLSchema
+  Type: graphql.GraphQLNamedType | graphql.GraphQLSchema
 ) {
   if (Type instanceof GraphQLSchema) {
     return "schema";
@@ -366,13 +365,13 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
 
   const newWithHooks: any = function newWithHooks<
     T extends
-      | import("graphql").GraphQLSchema
-      | import("graphql").GraphQLScalarType
-      | import("graphql").GraphQLObjectType
-      | import("graphql").GraphQLInterfaceType
-      | import("graphql").GraphQLUnionType
-      | import("graphql").GraphQLEnumType
-      | import("graphql").GraphQLInputObjectType
+      | graphql.GraphQLSchema
+      | graphql.GraphQLScalarType
+      | graphql.GraphQLObjectType
+      | graphql.GraphQLInterfaceType
+      | graphql.GraphQLUnionType
+      | graphql.GraphQLEnumType
+      | graphql.GraphQLInputObjectType
   >(
     this: Build,
     Type: { new (...args: any[]): T },
@@ -621,7 +620,7 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
                 parsedResolveInfoFragment,
                 ReturnType
               ): ResolvedLookAhead => {
-                const Type = getNamedType(ReturnType as GraphQLType);
+                const Type = getNamedType(ReturnType as graphql.GraphQLType);
                 const data: ResolvedLookAhead = {};
 
                 const {
@@ -1014,12 +1013,12 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
     }
     if (Type !== GraphQLSchema) {
       fieldDataGeneratorsByFieldNameByType.set(
-        Self as GraphQLNamedType,
+        Self as graphql.GraphQLNamedType,
         fieldDataGeneratorsByFieldName
       );
 
       fieldArgDataGeneratorsByFieldNameByType.set(
-        Self as GraphQLNamedType,
+        Self as graphql.GraphQLNamedType,
         fieldArgDataGeneratorsByFieldName
       );
     }
@@ -1057,7 +1056,10 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
       const alias = getSafeAliasFromResolveInfo(resolveInfo);
       return data[alias];
     },
-    addType(type: GraphQLNamedType, origin?: string | null | undefined): void {
+    addType(
+      type: graphql.GraphQLNamedType,
+      origin?: string | null | undefined
+    ): void {
       if (!type.name) {
         throw new Error(
           `addType must only be called with named types, try using require('graphql').getNamedType`

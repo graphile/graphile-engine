@@ -1,5 +1,4 @@
 import { Plugin, ScopeGraphQLObjectType } from "../SchemaBuilder";
-import { GraphQLObjectTypeConfig } from "graphql";
 
 declare module "../SchemaBuilder" {
   interface ScopeGraphQLObjectType {
@@ -51,7 +50,7 @@ export default (async function SubscriptionPlugin(builder, { live }) {
         graphql: { GraphQLObjectType },
         inflection,
       } = build;
-      const spec: GraphQLObjectTypeConfig<any, any> = {
+      const spec: import("graphql").GraphQLObjectTypeConfig<any, any> = {
         name: inflection.builtin("Subscription"),
         description: live ? liveDescription : description,
         fields: {},

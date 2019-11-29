@@ -4,7 +4,6 @@ import {
   ScopeGraphQLObjectType,
 } from "graphile-build";
 import { PgType } from "./PgIntrospectionPlugin";
-import { GraphQLFieldConfigMap } from "graphql";
 
 declare module "graphile-build" {
   interface ScopeGraphQLObjectType {
@@ -103,7 +102,9 @@ export default (function PgRecordReturnTypesPlugin(builder) {
           description: `The return type of our \`${procFieldName}\` ${
             isMutation ? "mutation" : "query"
           }.`,
-          fields: ({ fieldWithHooks }): GraphQLFieldConfigMap<any, any> => {
+          fields: ({
+            fieldWithHooks,
+          }): import("graphql").GraphQLFieldConfigMap<any, any> => {
             return outputArgNames.reduce((memo, outputArgName, idx) => {
               const fieldName = inflection.functionOutputFieldName(
                 proc,

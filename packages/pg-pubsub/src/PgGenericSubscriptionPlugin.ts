@@ -1,6 +1,5 @@
 import debugFactory from "debug";
 import { Plugin, GraphileObjectTypeConfig } from "graphile-build";
-import { GraphQLFieldConfig, GraphQLOutputType } from "graphql";
 import { PubSub } from "graphql-subscriptions";
 import "graphile-build-pg"; // For the types
 
@@ -118,8 +117,8 @@ const PgGenericSubscriptionPlugin: Plugin = function(
                   "relatedNode",
                   ({
                     getDataFromParsedResolveInfoFragment,
-                  }: any): GraphQLFieldConfig<any, any> => ({
-                    type: Node as GraphQLOutputType,
+                  }: any): import("graphql").GraphQLFieldConfig<any, any> => ({
+                    type: Node as import("graphql").GraphQLOutputType,
                     resolve: async (
                       payload,
                       _args,
@@ -164,7 +163,7 @@ const PgGenericSubscriptionPlugin: Plugin = function(
         {
           [listen]: fieldWithHooks(
             listen,
-            (): GraphQLFieldConfig<any, any> => ({
+            (): import("graphql").GraphQLFieldConfig<any, any> => ({
               type: new GraphQLNonNull(ListenPayload),
               args: {
                 topic: {

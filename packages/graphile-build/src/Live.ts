@@ -1,6 +1,5 @@
 /* eslint-disable flowtype/no-weak-types */
 import callbackToAsyncIterator from "./callbackToAsyncIterator";
-import { GraphQLResolveInfo } from "graphql";
 import { throttle } from "lodash";
 
 type SubscriptionReleaser = () => void;
@@ -342,7 +341,7 @@ export class LiveCoordinator {
     _parent: any,
     _args: any,
     _context: any,
-    _info: GraphQLResolveInfo
+    _info: import("graphql").GraphQLResolveInfo
   ): AsyncIterator<void> {
     const monitor = this.getMonitor({
       liveAbort: e => {

@@ -1,5 +1,4 @@
 import { Plugin } from "graphile-build";
-import { GraphQLScalarType } from "graphql";
 
 declare module "graphile-build" {
   interface ScopeGraphQLObjectTypeFieldsField {
@@ -12,7 +11,12 @@ export default (function PageInfoStartEndCursor(builder) {
   builder.hook(
     "GraphQLObjectType:fields",
     (fields, build, context) => {
-      const { extend, getTypeByName, inflection } = build;
+      const {
+        extend,
+        getTypeByName,
+        inflection,
+        graphql: { GraphQLScalarType },
+      } = build;
       const { Self, fieldWithHooks } = context;
       if (Self.name !== inflection.builtin("PageInfo")) {
         return fields;

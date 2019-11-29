@@ -6,11 +6,6 @@ import {
   GraphileResolverContext,
 } from "../SchemaBuilder";
 import { ResolveTree } from "graphql-parse-resolve-info";
-import {
-  GraphQLType,
-  GraphQLResolveInfo,
-  GraphQLInterfaceTypeConfig,
-} from "graphql";
 
 const base64 = str => Buffer.from(String(str)).toString("base64");
 const base64Decode = str => Buffer.from(String(str), "base64").toString("utf8");
@@ -20,9 +15,9 @@ export type NodeFetcher<T = any> = (
   identifiers: Array<unknown>,
   context: GraphileResolverContext,
   parsedResolveInfoFragment: ResolveTree,
-  type: GraphQLType,
+  type: import("graphql").GraphQLType,
   resolveData: ResolvedLookAhead,
-  resolveInfo: GraphQLResolveInfo
+  resolveInfo: import("graphql").GraphQLResolveInfo
 ) => T;
 
 declare module "../SchemaBuilder" {
@@ -31,19 +26,19 @@ declare module "../SchemaBuilder" {
     $$nodeType: symbol;
     nodeFetcherByTypeName: { [a: string]: NodeFetcher };
     getNodeIdForTypeAndIdentifiers: (
-      Type: GraphQLType,
+      Type: import("graphql").GraphQLType,
       ...identifiers: Array<unknown>
     ) => string;
     getTypeAndIdentifiersFromNodeId: (
       nodeId: string
     ) => {
-      Type: GraphQLType;
+      Type: import("graphql").GraphQLType;
       identifiers: Array<unknown>;
     };
 
     addNodeFetcherForTypeName: (typeName: string, fetcher: NodeFetcher) => void;
     getNodeAlias: (typeName: string) => string;
-    getNodeType: (alias: string) => GraphQLType;
+    getNodeType: (alias: string) => import("graphql").GraphQLType;
     setNodeAlias: (typeName: string, alias: string) => void;
   }
 }
@@ -168,7 +163,7 @@ export default (function NodePlugin(
   builder.hook(
     "GraphQLObjectType:interfaces",
     function addNodeIdToQuery(
-      interfaces: Array<GraphQLInterfaceTypeConfig<any, any>>,
+      interfaces: Array<import("graphql").GraphQLInterfaceTypeConfig<any, any>>,
       build,
       context
     ) {
@@ -192,7 +187,7 @@ export default (function NodePlugin(
         return interfaces;
       }
     } as Hook<
-      Array<GraphQLInterfaceTypeConfig<any, any>>,
+      Array<import("graphql").GraphQLInterfaceTypeConfig<any, any>>,
       ContextGraphQLObjectTypeInterfaces
     >,
     ["Node"]

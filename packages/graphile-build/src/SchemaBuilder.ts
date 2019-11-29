@@ -7,6 +7,7 @@ import makeNewBuild, {
 } from "./makeNewBuild";
 import { bindAll } from "./utils";
 import {
+  /* ONLY IMPORT TYPES HERE! */
   GraphQLType,
   GraphQLNamedType,
   GraphQLInterfaceType,

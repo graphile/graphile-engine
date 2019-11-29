@@ -1,4 +1,3 @@
-import { GraphQLResolveInfo } from "graphql";
 import { Build, ContextGraphQLObjectTypeFieldsField } from "graphile-build";
 import { QueryBuilder, SQL } from "graphile-build-pg";
 
@@ -17,7 +16,7 @@ export function makeFieldHelpers(
   build: Build,
   fieldContext: ContextGraphQLObjectTypeFieldsField,
   context: any,
-  resolveInfo: GraphQLResolveInfo
+  resolveInfo: import("graphql").GraphQLResolveInfo
 ) {
   const { parseResolveInfo, pgQueryFromResolveData, pgSql: sql } = build;
   const { getDataFromParsedResolveInfoFragment, scope } = fieldContext;

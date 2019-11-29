@@ -12,7 +12,6 @@ import {
   AddQueriesToSubscriptionsPlugin,
 } from "./plugins";
 import resolveNode from "./resolveNode";
-import { GraphQLSchema } from "graphql";
 
 import { Plugin, GraphileBuildOptions } from "./SchemaBuilder";
 
@@ -122,7 +121,7 @@ export const getBuilder = async (
 export const buildSchema = async (
   plugins: Array<Plugin>,
   options: GraphileBuildOptions = {}
-): Promise<GraphQLSchema> => {
+): Promise<import("graphql").GraphQLSchema> => {
   const builder: SchemaBuilder = await getBuilder(plugins, options);
   return builder.buildSchema();
 };

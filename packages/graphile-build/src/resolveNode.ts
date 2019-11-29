@@ -1,6 +1,5 @@
 import { Build, Context } from "./SchemaBuilder";
 import { GetDataFromParsedResolveInfoFragmentFunction } from "./makeNewBuild";
-import { GraphQLResolveInfo, GraphQLOutputType } from "graphql";
 import { NodeFetcher } from "./plugins/NodePlugin";
 
 export default async function resolveNode<T = unknown>(
@@ -13,7 +12,7 @@ export default async function resolveNode<T = unknown>(
   },
   data: unknown,
   context: Context,
-  resolveInfo: GraphQLResolveInfo
+  resolveInfo: import("graphql").GraphQLResolveInfo
 ): Promise<T | null> {
   const {
     $$isQuery,
@@ -36,7 +35,7 @@ export default async function resolveNode<T = unknown>(
     const parsedResolveInfoFragment = parseResolveInfo(resolveInfo, true);
     const resolveData = getDataFromParsedResolveInfoFragment(
       parsedResolveInfoFragment,
-      getNamedType(Type) as GraphQLOutputType
+      getNamedType(Type) as import("graphql").GraphQLOutputType
     );
 
     const node = await resolver(

@@ -1,5 +1,4 @@
 // BELOW HERE, IMPORTS ARE ONLY TYPES (not values)
-import { GraphQLInputFieldConfig } from "graphql";
 import { SQL, sql as sqlType, QueryBuilder } from "graphile-build-pg";
 import { Build, Plugin } from "graphile-build";
 
@@ -8,7 +7,7 @@ declare module "graphile-build" {
     addPgTableCondition?: {
       schemaName: string;
       tableName: string;
-      conditionFieldSpec: GraphQLInputFieldConfig;
+      conditionFieldSpec: import("graphql").GraphQLInputFieldConfig;
       conditionFieldName: string;
     };
   }
@@ -18,7 +17,9 @@ export default function makeAddPgTableConditionPlugin(
   schemaName: string,
   tableName: string,
   conditionFieldName: string,
-  conditionFieldSpecGenerator: (build: Build) => GraphQLInputFieldConfig,
+  conditionFieldSpecGenerator: (
+    build: Build
+  ) => import("graphql").GraphQLInputFieldConfig,
   conditionGenerator: (
     value: unknown,
     helpers: {

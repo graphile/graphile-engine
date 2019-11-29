@@ -11,7 +11,6 @@ import {
   SchemaBuilder,
   Inflection,
 } from "graphile-build";
-import { GraphQLSchema } from "graphql";
 import {
   defaultPlugins as pgDefaultPlugins,
   inflections,
@@ -479,7 +478,7 @@ export const watchPostGraphileSchema = async (
     },
   });
   let released = false;
-  function handleNewSchema(schema: GraphQLSchema) {
+  function handleNewSchema(schema: import("graphql").GraphQLSchema) {
     if (writeCache) {
       writeCache().catch(abort);
     }
