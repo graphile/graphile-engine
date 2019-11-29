@@ -30,6 +30,7 @@ export {
 export { SchemaBuilder };
 
 export {
+  DirectiveMap,
   GraphQLContext,
   Plugin,
   GraphileBuildOptions,

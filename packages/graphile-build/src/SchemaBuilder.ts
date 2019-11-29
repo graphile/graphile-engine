@@ -48,6 +48,12 @@ const debug = debugFactory("graphile-builder");
 
 const INDENT = "  ";
 
+export interface DirectiveMap {
+  [directiveName: string]: {
+    [directiveArgument: string]: any;
+  };
+}
+
 export interface GraphileBuildOptions {
   subscriptions?: boolean;
   live?: boolean;
@@ -294,6 +300,7 @@ export interface Build extends BuildBase {}
 
 export interface Scope {
   __origin?: string | null | undefined;
+  directives?: DirectiveMap;
 }
 
 export type DataGeneratorFunction = {
@@ -411,6 +418,7 @@ export interface ScopeGraphQLObjectTypeFieldsField
   extends ScopeGraphQLObjectType {
   fieldName: string;
   autoField?: true;
+  fieldDirectives?: DirectiveMap;
 
   // TODO: Relocate these to the relevant places
   isRootNodeField?: true;

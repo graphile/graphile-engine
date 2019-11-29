@@ -37,6 +37,7 @@
   },
   "peerDependencies": {
     "graphile-build": "4.x",
+    "graphile-build-pg": "4.x",
     "graphql": ">=0.6 <15",
     "postgraphile": "^4.4.0-beta.10"
   },

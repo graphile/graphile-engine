@@ -62,21 +62,7 @@ import { GraphileEmbed } from "./gql";
 import { InputObjectTypeExtensionNode } from "graphql/language/ast";
 
 import { GraphileHelpers, makeFieldHelpers } from "./fieldHelpers";
-
-declare module "graphile-build" {
-  interface Scope {
-    directives?: DirectiveMap;
-  }
-  interface ScopeGraphQLObjectTypeFieldsField {
-    fieldDirectives?: DirectiveMap;
-  }
-}
-
-export interface DirectiveMap {
-  [directiveName: string]: {
-    [directiveArgument: string]: any;
-  };
-}
+import { DirectiveMap } from "graphile-build/node8plus/SchemaBuilder";
 
 // TODO:v5: Remove
 const recurseDataGeneratorsWorkaroundFieldByType = new Map();
