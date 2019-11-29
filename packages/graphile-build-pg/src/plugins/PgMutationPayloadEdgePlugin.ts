@@ -1,6 +1,7 @@
 import { Plugin } from "graphile-build";
 import isString = require("lodash/isString");
 import { GraphQLObjectType } from "graphql";
+import { SQL } from "../QueryBuilder";
 
 declare module "graphile-build" {
   interface GraphileBuildOptions {
@@ -163,15 +164,15 @@ export default (function PgMutationPayloadEdgePlugin(
                 const {
                   args: { orderBy: rawOrderBy },
                 } = parsedResolveInfoFragment;
-                const orderBy =
+                const orderBy: Order[] =
                   canOrderBy && rawOrderBy
                     ? Array.isArray(rawOrderBy)
                       ? rawOrderBy
                       : [rawOrderBy]
                     : null;
                 if (orderBy != null) {
-                  const aliases = [];
-                  const expressions = [];
+                  const aliases: string[] = [];
+                  const expressions: SQL[] = [];
                   let unique = false;
                   orderBy.forEach(item => {
                     const { alias, specs, unique: itemIsUnique } = item;

@@ -17,7 +17,7 @@ declare module "graphile-build" {
   interface LookAheadData {
     pgQuery: QueryBuilderCallback;
     pgAggregateQuery: AggregateQueryBuilderCallback;
-    pgCursorPrefix: SQL;
+    pgCursorPrefix: SQL[] | null;
     pgDontUseAsterisk: boolean;
     calculateHasNextPage: boolean;
     calculateHasPreviousPage: boolean;

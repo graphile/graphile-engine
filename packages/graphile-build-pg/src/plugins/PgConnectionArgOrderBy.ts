@@ -1,5 +1,46 @@
-import isString from "lodash/isString";
+import isString = require("lodash/isString");
 import { Plugin } from "graphile-build";
+import { SQL } from "../QueryBuilder";
+import { PgEntityKind } from "./PgIntrospectionPlugin";
+
+declare module "graphile-build" {
+  interface GraphileBuildOptions {
+    orderByNullsLast?: boolean | null;
+  }
+}
+
+export interface OrderByValue {
+  specs: OrderBySpec | OrderBySpec[];
+  unique?: boolean;
+  alias?: string;
+}
+
+export type OrderBySpec = [
+  /** column (or SQL expression) to order by */
+  string | SQL,
+
+  /** ascending (true) or descending (false) */
+  boolean,
+
+  /**
+   * specNullsFirst:
+   *
+   * - true: `NULLS FIRST`
+   * - false: `NULLS LAST`
+   * - null: ``
+   */
+  boolean | null | undefined
+];
+
+function isOrderBySpec(spec: unknown): spec is OrderBySpec {
+  // We're not validating spec[1] and spec[2] since we just use them as (nullable) booleans
+  return (
+    Array.isArray(spec) &&
+    spec.length >= 2 &&
+    spec.length <= 3 &&
+    (typeof spec[0] === "string" || (typeof spec[0] === "object" && spec[0]))
+  );
+}
 
 export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
   builder.hook(
@@ -63,7 +104,7 @@ export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
         getTypeByName,
         pgGetGqlTypeByTypeIdAndModifier,
         pgSql: sql,
-        graphql: { GraphQLList, GraphQLNonNull },
+        graphql: { GraphQLList, GraphQLNonNull, getNamedType },
         inflection,
         pgOmit: omit,
       } = build;
@@ -80,12 +121,17 @@ export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
         Self,
       } = context;
 
-      if (!isPgFieldConnection && !isPgFieldSimpleCollection) {
+      if (
+        (!isPgFieldConnection && !isPgFieldSimpleCollection) ||
+        !pgFieldIntrospection
+      ) {
         return args;
       }
 
       const proc =
-        pgFieldIntrospection.kind === "procedure" ? pgFieldIntrospection : null;
+        pgFieldIntrospection.kind === PgEntityKind.PROCEDURE
+          ? pgFieldIntrospection
+          : null;
       const table =
         pgFieldIntrospection.kind === "class"
           ? pgFieldIntrospection
@@ -106,14 +152,22 @@ export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
         }
       }
       const TableType = pgGetGqlTypeByTypeIdAndModifier(table.type.id, null);
-      const tableTypeName = TableType.name;
+      if (!TableType) {
+        return args;
+      }
+      const tableTypeName = getNamedType(TableType).name;
       const TableOrderByType = getTypeByName(
         inflection.orderByType(tableTypeName)
       );
+      if (!TableOrderByType) {
+        return args;
+      }
 
-      const cursorPrefixFromOrderBy = orderBy => {
+      const cursorPrefixFromOrderBy = (
+        orderBy: OrderByValue[] | null
+      ): SQL[] | null => {
         if (orderBy) {
-          const cursorPrefixes = [];
+          const cursorPrefixes: SQL[] = [];
           for (
             let itemIndex = 0, itemCount = orderBy.length;
             itemIndex < itemCount;
@@ -132,7 +186,7 @@ export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
       };
 
       addArgDataGenerator(function connectionOrderBy({ orderBy: rawOrderBy }) {
-        const orderBy = rawOrderBy
+        const orderBy: OrderByValue[] | null = rawOrderBy
           ? Array.isArray(rawOrderBy)
             ? rawOrderBy
             : [rawOrderBy]
@@ -143,10 +197,9 @@ export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
             if (orderBy != null) {
               orderBy.forEach(item => {
                 const { specs, unique } = item;
-                const orders =
-                  Array.isArray(specs[0]) || specs.length === 0
-                    ? specs
-                    : [specs];
+                const orders: OrderBySpec[] = isOrderBySpec(specs)
+                  ? [specs]
+                  : specs;
                 orders.forEach(([col, ascending, specNullsFirst]) => {
                   const expr = isString(col)
                     ? sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
