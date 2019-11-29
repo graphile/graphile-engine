@@ -119,6 +119,10 @@ declare module "graphile-build" {
     isPgRangeBoundInputType?: true;
   }
 
+  interface ScopeGraphQLInputObjectTypeFieldsField {
+    pgFieldIntrospection?: PgEntity;
+  }
+
   interface ScopeGraphQLEnumType {
     pgIntrospection?: PgEntity;
     isPgEnumType?: true;
