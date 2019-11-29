@@ -3,6 +3,19 @@ import debugFactory from "debug";
 
 const debug = debugFactory("graphile-build-pg");
 
+declare module "graphile-build" {
+  interface ScopeGraphQLObjectType {
+    isPgCreatePayloadType?: true;
+  }
+  interface ScopeGraphQLObjectTypeFieldsField {
+    isPgCreateMutationField?: true;
+    isPgCreatePayloadResultField?: true;
+  }
+  interface ScopeGraphQLInputObjectType {
+    isPgCreateInputType?: true;
+  }
+}
+
 export default (function PgMutationCreatePlugin(
   builder,
   { pgDisableDefaultMutations }
@@ -108,7 +121,9 @@ export default (function PgMutationCreatePlugin(
                 }
               )}`,
               isPgCreateInputType: true,
-              pgInflection: table, // TODO:v5: remove - TYPO!
+              ...({
+                pgInflection: table, // TODO:v5: remove - TYPO!
+              } as {}),
               pgIntrospection: table,
             }
           );
