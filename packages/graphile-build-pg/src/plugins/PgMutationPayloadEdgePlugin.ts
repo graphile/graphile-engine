@@ -3,6 +3,7 @@ import isString = require("lodash/isString");
 import { GraphQLObjectType } from "graphql";
 import { SQL } from "../QueryBuilder";
 import { OrderBySpec, OrderByValue } from "./PgConnectionArgOrderBy";
+import { PgEntityKind } from "./PgIntrospectionPlugin";
 
 declare module "graphile-build" {
   interface GraphileBuildOptions {
@@ -43,7 +44,7 @@ export default (function PgMutationPayloadEdgePlugin(
         !isMutationPayload ||
         !pgIntrospection ||
         !table ||
-        table.kind !== "class" ||
+        table.kind !== PgEntityKind.CLASS ||
         !table.namespace ||
         !table.isSelectable ||
         (omit(table, "all") && omit(table, "many"))
@@ -72,9 +73,6 @@ export default (function PgMutationPayloadEdgePlugin(
       const TableOrderByType = getTypeByName(
         inflection.orderByType(tableTypeName)
       );
-      if (!TableOrderByType || !(TableOrderByType instanceof GraphQLEnumType)) {
-        return fields;
-      }
 
       const TableEdgeType = getTypeByName(inflection.edge(tableTypeName));
       if (!TableEdgeType || !(TableEdgeType instanceof GraphQLObjectType)) {
@@ -89,6 +87,7 @@ export default (function PgMutationPayloadEdgePlugin(
       const fieldName = inflection.edgeField(table);
       const defaultValueEnum =
         canOrderBy &&
+        TableOrderByType instanceof GraphQLEnumType &&
         (TableOrderByType.getValues().find(v => v.name === "PRIMARY_KEY_ASC") ||
           TableOrderByType.getValues()[0]);
       return extend(
@@ -101,20 +100,21 @@ export default (function PgMutationPayloadEdgePlugin(
             {
               description: `An edge for our \`${tableTypeName}\`. May be used by Relay 1.`,
               type: TableEdgeType,
-              args: canOrderBy
-                ? {
-                    orderBy: {
-                      description: `The method to use when ordering \`${tableTypeName}\`.`,
-                      type: new GraphQLList(
-                        new GraphQLNonNull(TableOrderByType)
-                      ),
+              args:
+                canOrderBy && TableOrderByType instanceof GraphQLEnumType
+                  ? {
+                      orderBy: {
+                        description: `The method to use when ordering \`${tableTypeName}\`.`,
+                        type: new GraphQLList(
+                          new GraphQLNonNull(TableOrderByType)
+                        ),
 
-                      defaultValue: defaultValueEnum
-                        ? [defaultValueEnum.value]
-                        : null,
-                    },
-                  }
-                : {},
+                        defaultValue: defaultValueEnum
+                          ? [defaultValueEnum.value]
+                          : null,
+                      },
+                    }
+                  : {},
               resolve(data, { orderBy: rawOrderBy }, _context, resolveInfo) {
                 if (!data.data) {
                   return null;
