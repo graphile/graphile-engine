@@ -47,7 +47,7 @@ import { createHash } from "crypto";
 // @ts-ignore
 import { version } from "../package.json";
 
-const initialInflection = {
+const makeInitialInflection = () => ({
   pluralize,
   singularize: pluralize.singular,
   upperCamelCase,
@@ -118,9 +118,9 @@ const initialInflection = {
 
     return resultingName;
   },
-};
+});
 
-export type InflectionBase = typeof initialInflection;
+export type InflectionBase = ReturnType<typeof makeInitialInflection>;
 
 let recurseDataGeneratorsForFieldWarned = false;
 
@@ -1111,7 +1111,7 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
     fieldArgDataGeneratorsByFieldNameByType,
     scopeByType: new Map(),
 
-    inflection: initialInflection,
+    inflection: makeInitialInflection(),
 
     swallowError,
     // resolveNode: EXPERIMENTAL, API might change!
