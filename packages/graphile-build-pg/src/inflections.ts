@@ -10,7 +10,7 @@ import {
 
 import { preventEmptyResult } from "./plugins/PgBasicsPlugin";
 
-const outputMessages = [];
+const outputMessages: string[] = [];
 
 // eslint-disable-next-line flowtype/no-weak-types
 function deprecate(fn: (...input: Array<any>) => string, message: string) {

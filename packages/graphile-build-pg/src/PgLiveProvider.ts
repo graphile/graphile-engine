@@ -2,10 +2,8 @@ import { LiveProvider } from "graphile-build";
 import { PgClass } from "./plugins/PgIntrospectionPlugin";
 
 export default class PgLiveProvider extends LiveProvider {
-  // eslint-disable-next-line flowtype/no-weak-types
-  constructor(...args: any[]) {
-    super(...args);
-    this.namespace = "pg";
+  constructor() {
+    super("pg");
   }
 
   collectionIdentifierIsValid(collectionIdentifier: PgClass) {
