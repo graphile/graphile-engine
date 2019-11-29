@@ -821,9 +821,9 @@ export default function makeExtendSchemaPlugin(
           const type = getType(field.type, build);
           const nullableType = build.graphql.getNullableType(type);
           const namedType = build.graphql.getNamedType(type);
-          const typeScope = scopeByType.get(
-            namedType
-          ) as ScopeGraphQLObjectType;
+          const typeScope = (scopeByType.get(namedType) || {}) as Partial<
+            ScopeGraphQLObjectType
+          >;
           const directives = getDirectives(field.directives);
           const scope: Omit<ScopeGraphQLObjectTypeFieldsField, "fieldName"> = {
             ...(typeScope.pgIntrospection &&
