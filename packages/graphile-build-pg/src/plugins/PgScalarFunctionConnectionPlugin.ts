@@ -1,4 +1,8 @@
-import { Plugin, GraphileObjectTypeConfig } from "graphile-build";
+import {
+  Plugin,
+  GraphileObjectTypeConfig,
+  ScopeGraphQLObjectType,
+} from "graphile-build";
 import { GraphQLScalarType } from "graphql";
 
 const base64 = str => Buffer.from(String(str)).toString("base64");
@@ -94,7 +98,9 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
               ),
 
               node: {
-                description: `The \`${NodeType.name}\` at the end of the edge.`,
+                description: `The \`${
+                  getNamedType(NodeType).name
+                }\` at the end of the edge.`,
                 type: NodeType,
                 resolve(data) {
                   return data.value;
@@ -103,23 +109,24 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
             };
           },
         };
+        const edgeScope: ScopeGraphQLObjectType = {
+          __origin: `Adding function result edge type for ${describePgEntity(
+            proc
+          )}. You can rename the function's GraphQL field (and its dependent types) via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
+            proc,
+            {
+              name: "newNameHere",
+            }
+          )}`,
+          isEdgeType: true,
+          nodeType: NodeType,
+          pgIntrospection: proc,
+        };
         const EdgeType = newWithHooks(
           GraphQLObjectType,
           edgeSpec,
 
-          {
-            __origin: `Adding function result edge type for ${describePgEntity(
-              proc
-            )}. You can rename the function's GraphQL field (and its dependent types) via a 'Smart Comment':\n\n  ${sqlCommentByAddingTags(
-              proc,
-              {
-                name: "newNameHere",
-              }
-            )}`,
-            isEdgeType: true,
-            nodeType: NodeType,
-            pgIntrospection: proc,
-          }
+          edgeScope
         );
 
         if (!EdgeType) {
@@ -133,11 +140,15 @@ export default (function PgScalarFunctionConnectionPlugin(builder) {
           GraphQLObjectType,
           {
             name: inflection.scalarFunctionConnection(proc),
-            description: `A connection to a list of \`${NodeType.name}\` values.`,
+            description: `A connection to a list of \`${
+              getNamedType(NodeType).name
+            }\` values.`,
             fields: ({ fieldWithHooks }) => {
               return {
                 nodes: pgField(build, fieldWithHooks, "nodes", {
-                  description: `A list of \`${NodeType.name}\` objects.`,
+                  description: `A list of \`${
+                    getNamedType(NodeType).name
+                  }\` objects.`,
                   type: new GraphQLNonNull(new GraphQLList(NodeType)),
                   resolve(data) {
                     return data.data.map(entry => entry.value);

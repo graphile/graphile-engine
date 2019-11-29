@@ -9,6 +9,7 @@ import {
   GraphQLObjectType,
   GraphQLScalarType,
   GraphQLFieldConfigMap,
+  GraphQLType,
 } from "graphql";
 import { PgTypeModifier } from "./PgBasicsPlugin";
 
@@ -23,7 +24,7 @@ declare module "graphile-build" {
     isPgRowEdgeType?: true;
     isConnectionType?: true;
     isPgRowConnectionType?: true;
-    nodeType?: GraphQLObjectType;
+    nodeType?: GraphQLType /* But not a list */;
     edgeType?: GraphQLObjectType;
   }
 
