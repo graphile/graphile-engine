@@ -1,6 +1,6 @@
 import { Build, Context } from "./SchemaBuilder";
 import { GetDataFromParsedResolveInfoFragmentFunction } from "./makeNewBuild";
-import { GraphQLResolveInfo } from "graphql";
+import { GraphQLResolveInfo, GraphQLOutputType } from "graphql";
 import { ResolveTree } from "graphql-parse-resolve-info";
 import { NodeFetcher } from "./plugins/NodePlugin";
 
@@ -43,7 +43,7 @@ export default async function resolveNode<T = unknown>(
     }
     const resolveData = getDataFromParsedResolveInfoFragment(
       parsedResolveInfoFragment,
-      getNamedType(Type)
+      getNamedType(Type) as GraphQLOutputType
     );
 
     const node = await resolver(

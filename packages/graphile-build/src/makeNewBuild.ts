@@ -35,6 +35,8 @@ import SchemaBuilder, {
   ContextGraphQLObjectTypeFieldsFieldArgs,
   ScopeGraphQLObjectTypeFieldsField,
   ScopeGraphQLInputObjectTypeFieldsField,
+  ArgDataGeneratorFunction,
+  DataGeneratorFunction,
 } from "./SchemaBuilder";
 
 import extend, { indent } from "./extend";
@@ -190,30 +192,11 @@ function getSafeAliasFromResolveInfo(resolveInfo) {
   return getSafeAliasFromAlias(alias);
 }
 
-/**
- * Data that user code generates (normally `{[key: string]: SOMETHING}`)
- */
-export interface RawMetaData {}
-/**
- * Data from combining all the RawMetaData together (i.e. `{[key: string]:
- * Array<SOMETHING>}`).
- */
-export interface MetaData {}
-
-interface DataGeneratorFunction {
-  (
-    parsedResolveInfoFragment: ResolveTree,
-    ReturnType: GraphQLType,
-    ...args: Array<unknown>
-  ): Partial<RawMetaData>;
-  displayName?: string;
-}
-
 type FieldSpec = graphql.GraphQLFieldConfig<any, any>;
 
 export type GetDataFromParsedResolveInfoFragmentFunction = (
   parsedResolveInfoFragment: ResolveTree,
-  Type: GraphQLType
+  Type: graphql.GraphQLOutputType
 ) => ResolvedLookAhead;
 
 export type FieldWithHooksFunction = (
@@ -256,15 +239,27 @@ const {
   isAbstractType,
 } = graphql;
 
-const mergeData = (
-  data: MetaData,
+function mergeData(
+  data: ResolvedLookAhead,
   gen: DataGeneratorFunction,
-  ReturnType,
-  arg
-) => {
-  const results: Array<MetaData> | void = ensureArray<MetaData>(
-    gen(arg, ReturnType, data)
-  );
+  ReturnType: graphql.GraphQLOutputType,
+  arg: ResolveTree
+): void;
+function mergeData(
+  data: ResolvedLookAhead,
+  gen: ArgDataGeneratorFunction,
+  ReturnType: graphql.GraphQLOutputType,
+  arg: { [fieldName: string]: unknown }
+): void;
+function mergeData(
+  data: ResolvedLookAhead,
+  gen: DataGeneratorFunction | ArgDataGeneratorFunction,
+  ReturnType: graphql.GraphQLOutputType,
+  arg: any
+): void {
+  const results: Array<ResolvedLookAhead> | void = ensureArray<
+    ResolvedLookAhead
+  >(gen(arg, ReturnType, data));
 
   if (!results) {
     return;
@@ -274,7 +269,7 @@ const mergeData = (
     resultIndex < resultCount;
     resultIndex++
   ) {
-    const result: MetaData = results[resultIndex];
+    const result: ResolvedLookAhead = results[resultIndex];
     const keys = Object.keys(result);
     for (let i = 0, l = keys.length; i < l; i++) {
       const k = keys[i];
@@ -286,7 +281,7 @@ const mergeData = (
       }
     }
   }
-};
+}
 
 const knownTypes = [
   GraphQLSchema,
@@ -352,8 +347,14 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
   // GraphQLObjectType and whose values are an object (whose keys are
   // arbitrary namespaced keys and whose values are arrays of
   // information of this kind)
-  const fieldDataGeneratorsByFieldNameByType = new Map();
-  const fieldArgDataGeneratorsByFieldNameByType = new Map();
+  const fieldDataGeneratorsByFieldNameByType = new Map<
+    graphql.GraphQLNamedType,
+    { [fieldName: string]: DataGeneratorFunction[] }
+  >();
+  const fieldArgDataGeneratorsByFieldNameByType = new Map<
+    graphql.GraphQLNamedType,
+    { [fieldName: string]: ArgDataGeneratorFunction[] }
+  >();
 
   return {
     options: builder.options,
@@ -455,8 +456,12 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
           "Please do not generate the schema during the build building phase, use 'init' instead"
         );
       }
-      const fieldDataGeneratorsByFieldName = {};
-      const fieldArgDataGeneratorsByFieldName = {};
+      const fieldDataGeneratorsByFieldName: {
+        [fieldName: string]: DataGeneratorFunction[];
+      } = {};
+      const fieldArgDataGeneratorsByFieldName: {
+        [fieldName: string]: ArgDataGeneratorFunction[];
+      } = {};
       let newSpec = spec;
       if (
         knownTypes.indexOf(Type as any) === -1 &&
@@ -510,7 +515,12 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
               "Use of `recurseDataGeneratorsForField` is NOT SAFE. e.g. `{n1: node { a: field1 }, n2: node { a: field2 } }` cannot resolve correctly."
             );
           }
-          const fn = (parsedResolveInfoFragment, ReturnType, ...rest) => {
+          const fn: DataGeneratorFunction = (
+            parsedResolveInfoFragment,
+            ReturnType,
+            data,
+            ...rest
+          ) => {
             const { args } = parsedResolveInfoFragment;
             const { fields } = this.simplifyParsedResolveInfoFragmentWithType(
               parsedResolveInfoFragment,
@@ -518,7 +528,7 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
             );
 
             const results: any[] = [];
-            const StrippedType = getNamedType(ReturnType as GraphQLType);
+            const StrippedType = getNamedType(ReturnType);
             if (!StrippedType) {
               throw new Error("Could not determine GraphQL type");
             }
@@ -527,7 +537,7 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
             );
 
             const argDataGeneratorsForSelfByFieldName = fieldArgDataGeneratorsByFieldNameByType.get(
-              Self
+              Self as graphql.GraphQLObjectType
             );
 
             if (argDataGeneratorsForSelfByFieldName) {
@@ -539,7 +549,7 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
                 genIndex++
               ) {
                 const gen = argDataGenerators[genIndex];
-                const local = ensureArray(gen(args, ReturnType, ...rest));
+                const local = ensureArray(gen(args, ReturnType, data, ...rest));
                 if (local) {
                   results.push(...local);
                 }
@@ -569,7 +579,7 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
                   ) {
                     const gen = gens[genIndex];
                     const local = ensureArray(
-                      gen(field, typeFields[field.name].type, ...rest)
+                      gen(field, typeFields[field.name].type, data, ...rest)
                     );
 
                     if (local) {
@@ -654,7 +664,7 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
                 );
               }
 
-              const argDataGenerators: any[] = [];
+              const argDataGenerators: ArgDataGeneratorFunction[] = [];
               fieldArgDataGeneratorsByFieldName[fieldName] = argDataGenerators;
 
               let newSpec = spec;
@@ -673,7 +683,7 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
                   ReturnType
                 ): ResolvedLookAhead => {
                   const Type = getNamedType(ReturnType as GraphQLType);
-                  const data = {};
+                  const data: ResolvedLookAhead = {};
 
                   const {
                     fields,
@@ -1060,15 +1070,17 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
               : null)
         );
       }
-      fieldDataGeneratorsByFieldNameByType.set(
-        Self,
-        fieldDataGeneratorsByFieldName
-      );
+      if (Type !== GraphQLSchema) {
+        fieldDataGeneratorsByFieldNameByType.set(
+          Self as GraphQLNamedType,
+          fieldDataGeneratorsByFieldName
+        );
 
-      fieldArgDataGeneratorsByFieldNameByType.set(
-        Self,
-        fieldArgDataGeneratorsByFieldName
-      );
+        fieldArgDataGeneratorsByFieldNameByType.set(
+          Self as GraphQLNamedType,
+          fieldArgDataGeneratorsByFieldName
+        );
+      }
 
       return Self;
     },

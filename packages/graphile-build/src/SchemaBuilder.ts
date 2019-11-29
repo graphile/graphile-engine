@@ -242,10 +242,23 @@ export interface Scope {
   __origin?: string | null | undefined;
 }
 
-type DataGeneratorFunction = (
-  parsedResolveInfoFragment: ResolveTree,
-  ReturnType: GraphQLOutputType
-) => Partial<LookAheadData>;
+export type DataGeneratorFunction = {
+  (
+    parsedResolveInfoFragment: ResolveTree,
+    ReturnType: GraphQLOutputType,
+    data: ResolvedLookAhead
+  ): Partial<LookAheadData>;
+  displayName?: string;
+};
+
+export type ArgDataGeneratorFunction = {
+  (
+    args: { [key: string]: unknown },
+    ReturnType: GraphQLOutputType,
+    data: ResolvedLookAhead
+  ): Partial<LookAheadData>;
+  displayName?: string;
+};
 
 export interface Context {
   scope: Scope;
@@ -355,7 +368,7 @@ export interface ContextGraphQLObjectTypeFieldsField
   scope: ScopeGraphQLObjectTypeFieldsField;
   Self: GraphQLObjectType;
   addDataGenerator: (fn: DataGeneratorFunction) => void;
-  addArgDataGenerator: (fn: DataGeneratorFunction) => void;
+  addArgDataGenerator: (fn: ArgDataGeneratorFunction) => void;
   getDataFromParsedResolveInfoFragment: GetDataFromParsedResolveInfoFragmentFunction;
 }
 
