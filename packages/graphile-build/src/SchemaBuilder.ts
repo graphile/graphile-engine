@@ -157,45 +157,86 @@ export interface BuildBase {
   newWithHooks(
     constructor: typeof GraphQLSchema,
     spec: Partial<GraphQLSchemaConfig>,
+    scope: ScopeGraphQLSchema
+  ): GraphQLSchema;
+  newWithHooks(
+    constructor: typeof GraphQLSchema,
+    spec: Partial<GraphQLSchemaConfig>,
     scope: ScopeGraphQLSchema,
     performNonEmptyFieldsCheck?: boolean
-  ): GraphQLSchema | null | undefined;
+  ): GraphQLSchema | null;
+
+  newWithHooks(
+    constructor: typeof GraphQLScalarType,
+    spec: GraphQLScalarTypeConfig<any, any>,
+    scope: ScopeGraphQLScalarType
+  ): GraphQLInputObjectType;
   newWithHooks(
     constructor: typeof GraphQLScalarType,
     spec: GraphQLScalarTypeConfig<any, any>,
     scope: ScopeGraphQLScalarType,
     performNonEmptyFieldsCheck?: boolean
-  ): GraphQLInputObjectType | null | undefined;
+  ): GraphQLInputObjectType | null;
+
+  newWithHooks(
+    constructor: typeof GraphQLObjectType,
+    spec: GraphileObjectTypeConfig<any, any>,
+    scope: ScopeGraphQLObjectType
+  ): GraphQLObjectType;
   newWithHooks(
     constructor: typeof GraphQLObjectType,
     spec: GraphileObjectTypeConfig<any, any>,
     scope: ScopeGraphQLObjectType,
     performNonEmptyFieldsCheck?: boolean
-  ): GraphQLObjectType | null | undefined;
+  ): GraphQLObjectType | null;
+
+  newWithHooks(
+    constructor: typeof GraphQLInterfaceType,
+    spec: GraphQLInterfaceTypeConfig<any, any, any>,
+    scope: ScopeGraphQLInterfaceType
+  ): GraphQLInterfaceType;
   newWithHooks(
     constructor: typeof GraphQLInterfaceType,
     spec: GraphQLInterfaceTypeConfig<any, any, any>,
     scope: ScopeGraphQLInterfaceType,
     performNonEmptyFieldsCheck?: boolean
-  ): GraphQLInterfaceType | null | undefined;
+  ): GraphQLInterfaceType | null;
+
+  newWithHooks(
+    constructor: typeof GraphQLUnionType,
+    spec: GraphQLUnionTypeConfig<any, any>,
+    scope: ScopeGraphQLUnionType
+  ): GraphQLUnionType;
   newWithHooks(
     constructor: typeof GraphQLUnionType,
     spec: GraphQLUnionTypeConfig<any, any>,
     scope: ScopeGraphQLUnionType,
     performNonEmptyFieldsCheck?: boolean
-  ): GraphQLUnionType | null | undefined;
+  ): GraphQLUnionType | null;
+
+  newWithHooks(
+    constructor: typeof GraphQLEnumType,
+    spec: GraphQLEnumTypeConfig,
+    scope: ScopeGraphQLEnumType
+  ): GraphQLEnumType;
   newWithHooks(
     constructor: typeof GraphQLEnumType,
     spec: GraphQLEnumTypeConfig,
     scope: ScopeGraphQLEnumType,
     performNonEmptyFieldsCheck?: boolean
-  ): GraphQLEnumType | null | undefined;
+  ): GraphQLEnumType | null;
+
+  newWithHooks(
+    constructor: typeof GraphQLInputObjectType,
+    spec: GraphileInputObjectTypeConfig,
+    scope: ScopeGraphQLInputObjectType
+  ): GraphQLInputObjectType;
   newWithHooks(
     constructor: typeof GraphQLInputObjectType,
     spec: GraphileInputObjectTypeConfig,
     scope: ScopeGraphQLInputObjectType,
     performNonEmptyFieldsCheck?: boolean
-  ): GraphQLInputObjectType | null | undefined;
+  ): GraphQLInputObjectType | null;
   /*
   newWithHooks<
     T extends
