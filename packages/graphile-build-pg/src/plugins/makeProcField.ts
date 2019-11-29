@@ -11,7 +11,7 @@ import debugSql from "./debugSql";
 import chalk from "chalk";
 import { GraphQLOutputType, GraphQLResolveInfo } from "graphql";
 import { ResolveTree } from "graphql-parse-resolve-info";
-import QueryBuilder, { GraphQLContext } from "../QueryBuilder";
+import QueryBuilder, { GraphileResolverContext } from "../QueryBuilder";
 
 declare module "graphile-build" {
   interface GraphileBuildOptions {
@@ -399,7 +399,7 @@ export default function makeProcField(
         sqlMutationQuery: SQL,
         functionAlias: SQL,
         parentQueryBuilder: QueryBuilder | null,
-        resolveContext?: GraphQLContext,
+        resolveContext?: GraphileResolverContext,
         resolveInfo?: GraphQLResolveInfo
       ) {
         const resolveData = getDataFromParsedResolveInfoFragment(

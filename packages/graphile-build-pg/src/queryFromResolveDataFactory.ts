@@ -5,7 +5,7 @@ import { SQL } from "pg-sql2";
 import isSafeInteger = require("lodash/isSafeInteger");
 import flatten = require("lodash/flatten");
 import assert = require("assert");
-import { ResolvedLookAhead } from "graphile-build";
+import { ResolvedLookAhead, GraphileResolverContext } from "graphile-build";
 
 type QueryBuilderCallback = (
   queryBuilder: QueryBuilder,
@@ -25,8 +25,6 @@ declare module "graphile-build" {
   }
 }
 
-type GraphQLContext = any;
-
 export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   from: SQL,
   fromAlias: SQL | null | undefined,
@@ -45,7 +43,7 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
 
   // TODO:v5: context is not optional
   withBuilder?: ((builder: QueryBuilder) => void) | null | undefined,
-  context: GraphQLContext = {},
+  context: GraphileResolverContext = {},
   rootValue?: any // eslint-disable-line flowtype/no-weak-types
 ): SQL => {
   const {

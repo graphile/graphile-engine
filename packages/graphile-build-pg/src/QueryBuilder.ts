@@ -2,9 +2,9 @@ import * as sql from "pg-sql2";
 import isSafeInteger = require("lodash/isSafeInteger");
 import chunk = require("lodash/chunk");
 import { PgClass, PgType } from "./plugins/PgIntrospectionPlugin";
-import { GraphQLContext } from "graphile-build";
+import { GraphileResolverContext } from "graphile-build";
 
-export { GraphQLContext };
+export { GraphileResolverContext };
 
 type SQL = import("pg-sql2").SQL;
 export { sql, SQL };
@@ -77,7 +77,7 @@ function escapeLarge(sqlFragment: SQL, type: PgType) {
 
 class QueryBuilder {
   parentQueryBuilder: QueryBuilder | void;
-  context: GraphQLContext;
+  context: GraphileResolverContext;
   rootValue: any; // eslint-disable-line flowtype/no-weak-types
   supportsJSONB: boolean;
   locks: {
@@ -149,7 +149,7 @@ class QueryBuilder {
 
   constructor(
     options: QueryBuilderOptions = {},
-    context: GraphQLContext = {},
+    context: GraphileResolverContext = {},
     rootValue?: any // eslint-disable-line flowtype/no-weak-types
   ) {
     this.context = context || {};

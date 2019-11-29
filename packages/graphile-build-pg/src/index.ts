@@ -142,7 +142,7 @@ export { QueryBuilder };
 export {
   sql,
   SQL,
-  GraphQLContext,
+  GraphileResolverContext,
   GenContext,
   Gen,
   RawAlias,

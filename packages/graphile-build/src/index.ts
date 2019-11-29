@@ -31,7 +31,7 @@ export { SchemaBuilder };
 
 export {
   DirectiveMap,
-  GraphQLContext,
+  GraphileResolverContext,
   Plugin,
   GraphileBuildOptions,
   GraphileObjectTypeConfig,

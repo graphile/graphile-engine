@@ -42,7 +42,7 @@ import { ResolveTree } from "graphql-parse-resolve-info";
 
 export { FieldWithHooksFunction, InputFieldWithHooksFunction };
 
-export type GraphQLContext = any; /* TODO: this should be the PostGraphileContext */
+export type GraphileResolverContext = any; /* TODO: this should be the PostGraphileContext */
 
 const debug = debugFactory("graphile-builder");
 
