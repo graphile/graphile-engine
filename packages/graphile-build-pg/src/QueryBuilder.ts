@@ -9,8 +9,6 @@ export { GraphileResolverContext };
 type SQL = import("pg-sql2").SQL;
 export { sql, SQL };
 
-// eslint-disable-next-line flowtype/no-weak-types
-
 const isDev = process.env.POSTGRAPHILE_ENV === "development";
 
 export interface GenContext {
@@ -78,7 +76,7 @@ function escapeLarge(sqlFragment: SQL, type: PgType) {
 class QueryBuilder {
   parentQueryBuilder: QueryBuilder | void;
   context: GraphileResolverContext;
-  rootValue: any; // eslint-disable-line flowtype/no-weak-types
+  rootValue: any;
   supportsJSONB: boolean;
   locks: {
     [a: string]: false | true | string | undefined;
@@ -111,7 +109,6 @@ class QueryBuilder {
 
     cursorComparator: CursorComparator | null | undefined;
     liveConditions: Array<
-      // eslint-disable-next-line flowtype/no-weak-types
       [
         (data: {}) => (record: any) => boolean,
         { [key: string]: SQL } | undefined
@@ -150,7 +147,7 @@ class QueryBuilder {
   constructor(
     options: QueryBuilderOptions = {},
     context: GraphileResolverContext,
-    rootValue?: any // eslint-disable-line flowtype/no-weak-types
+    rootValue?: any
   ) {
     this.context = context || {};
     this.rootValue = rootValue;
@@ -324,7 +321,6 @@ class QueryBuilder {
 
   makeLiveCollection(
     table: PgClass,
-    // eslint-disable-next-line flowtype/no-weak-types
     cb?: (checker: (data: any) => (record: any) => boolean) => void
   ) {
     /* the actual condition doesn't matter hugely, 'select' should work */
@@ -377,7 +373,6 @@ ${sql.join(
   }
 
   addLiveCondition(
-    // eslint-disable-next-line flowtype/no-weak-types
     checkerGenerator: (data: {}) => (record: any) => boolean,
     requirements?: { [key: string]: SQL }
   ) {

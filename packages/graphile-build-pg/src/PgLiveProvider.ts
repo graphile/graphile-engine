@@ -12,7 +12,6 @@ export default class PgLiveProvider extends LiveProvider {
 
   recordIdentifierIsValid(
     collectionIdentifier: PgClass,
-    // eslint-disable-next-line flowtype/no-weak-types
     recordIdentifier: Array<any>
   ) {
     if (!Array.isArray(recordIdentifier)) return false;

@@ -44,7 +44,7 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   // TODO:v5: context is not optional
   withBuilder: ((builder: QueryBuilder) => void) | null | undefined,
   context: GraphileResolverContext,
-  rootValue: any // eslint-disable-line flowtype/no-weak-types
+  rootValue: any
 ): SQL => {
   const {
     pgQuery,

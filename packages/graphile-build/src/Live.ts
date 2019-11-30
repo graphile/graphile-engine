@@ -1,4 +1,3 @@
-/* eslint-disable flowtype/no-weak-types */
 import callbackToAsyncIterator from "./callbackToAsyncIterator";
 import { throttle } from "lodash";
 

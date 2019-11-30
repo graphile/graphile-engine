@@ -12,7 +12,6 @@ import { preventEmptyResult } from "./plugins/PgBasicsPlugin";
 
 const outputMessages: string[] = [];
 
-// eslint-disable-next-line flowtype/no-weak-types
 function deprecate(fn: (...input: Array<any>) => string, message: string) {
   if (typeof fn !== "function") {
     return fn;
@@ -28,7 +27,6 @@ function deprecate(fn: (...input: Array<any>) => string, message: string) {
 }
 
 function deprecateEverything(obj: {
-  // eslint-disable-next-line flowtype/no-weak-types
   [a: string]: (...input: Array<any>) => string;
 }) {
   return Object.keys(obj).reduce((memo, key) => {
@@ -65,7 +63,6 @@ export const defaultUtils: InflectorUtils = {
 
 export type Inflector = {
   // TODO: tighten this up!
-  // eslint-disable-next-line flowtype/no-weak-types
   [a: string]: (...input: Array<any>) => string;
 };
 

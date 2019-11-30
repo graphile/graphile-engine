@@ -1,4 +1,3 @@
-/* eslint-disable flowtype/no-weak-types */
 // Turn a callback-based listener into an async iterator
 // From https://raw.githubusercontent.com/withspectrum/callback-to-async-iterator/master/src/index.js
 // License MIT (Copyright (c) 2017 Maximilian Stoiber)
