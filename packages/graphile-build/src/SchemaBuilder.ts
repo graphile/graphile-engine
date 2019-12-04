@@ -520,12 +520,16 @@ export interface ContextGraphQLInputObjectTypeFields
 
 export interface ScopeGraphQLInputObjectTypeFieldsField
   extends ScopeGraphQLInputObjectType {
-  fieldName: string;
+  fieldName?: string;
   autoField?: true;
+}
+export interface ScopeGraphQLInputObjectTypeFieldsFieldWithFieldName
+  extends ScopeGraphQLInputObjectTypeFieldsField {
+  fieldName: string;
 }
 export interface ContextGraphQLInputObjectTypeFieldsField
   extends ContextGraphQLInputObjectType {
-  scope: ScopeGraphQLInputObjectTypeFieldsField;
+  scope: ScopeGraphQLInputObjectTypeFieldsFieldWithFieldName;
   Self: GraphQLInputObjectType;
 }
 
@@ -563,6 +567,7 @@ export type SomeScope =
   | ScopeGraphQLObjectTypeInterfaces
   | ScopeGraphQLObjectTypeFields
   | ScopeGraphQLObjectTypeFieldsField
+  | ScopeGraphQLObjectTypeFieldsFieldWithFieldName
   | ScopeGraphQLObjectTypeFieldsFieldArgs
   | ScopeGraphQLInterfaceType
   | ScopeGraphQLUnionType
@@ -570,6 +575,7 @@ export type SomeScope =
   | ScopeGraphQLInputObjectType
   | ScopeGraphQLInputObjectTypeFields
   | ScopeGraphQLInputObjectTypeFieldsField
+  | ScopeGraphQLInputObjectTypeFieldsFieldWithFieldName
   | ScopeGraphQLEnumType
   | ScopeGraphQLEnumTypeValues
   | ScopeGraphQLEnumTypeValuesValue

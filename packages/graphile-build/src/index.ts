@@ -83,6 +83,7 @@ export {
   ScopeGraphQLInputObjectTypeFields,
   ContextGraphQLInputObjectTypeFields,
   ScopeGraphQLInputObjectTypeFieldsField,
+  ScopeGraphQLInputObjectTypeFieldsFieldWithFieldName,
   ContextGraphQLInputObjectTypeFieldsField,
   ScopeGraphQLEnumType,
   ContextGraphQLEnumType,

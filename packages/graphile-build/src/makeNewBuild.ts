@@ -38,6 +38,7 @@ import SchemaBuilder, {
   ArgDataGeneratorFunction,
   DataGeneratorFunction,
   Build,
+  ScopeGraphQLInputObjectTypeFieldsFieldWithFieldName,
 } from "./SchemaBuilder";
 
 import extend, { indent } from "./extend";
@@ -215,7 +216,7 @@ export type InputFieldWithHooksFunction = (
     | ((
         ContextGraphQLInputObjectTypeFieldsField
       ) => graphql.GraphQLInputFieldConfig),
-  fieldScope: Omit<ScopeGraphQLInputObjectTypeFieldsField, "fieldName">
+  fieldScope: ScopeGraphQLInputObjectTypeFieldsField
 ) => graphql.GraphQLInputFieldConfig;
 
 function getNameFromType(
@@ -813,22 +814,23 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
                 "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
               );
             }
+            const finalFieldScope: ScopeGraphQLInputObjectTypeFieldsFieldWithFieldName = extend(
+              extend(
+                { ...scope },
+                {
+                  fieldName,
+                },
+
+                `Within context for GraphQLInputObjectType '${rawSpec.name}'`
+              ),
+
+              fieldScope,
+              `Extending scope for field '${fieldName}' within context for GraphQLInputObjectType '${rawSpec.name}'`
+            );
             const context: ContextGraphQLInputObjectTypeFieldsField = {
               ...commonContext,
               Self: Self as graphql.GraphQLInputObjectType,
-              scope: extend(
-                extend(
-                  { ...scope },
-                  {
-                    fieldName,
-                  },
-
-                  `Within context for GraphQLInputObjectType '${rawSpec.name}'`
-                ),
-
-                fieldScope,
-                `Extending scope for field '${fieldName}' within context for GraphQLInputObjectType '${rawSpec.name}'`
-              ),
+              scope: finalFieldScope,
             };
 
             let newSpec = spec;
