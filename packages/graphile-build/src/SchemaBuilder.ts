@@ -853,9 +853,9 @@ class SchemaBuilder extends EventEmitter {
       // TODO: I think there are situations in which this algorithm may result in unnecessary conflict errors; we should take a more iterative approach or find a better algorithm
       const relevantHooks = this.hooks[hookName];
       let minIndex = 0;
-      let minReason = null;
+      let minReason: Hook<any, any> | null = null;
       let maxIndex = relevantHooks.length;
-      let maxReason = null;
+      let maxReason: Hook<any, any> | null = null;
       const { provides: newProvides, before: newBefore, after: newAfter } = fn;
       const describe = (hook: any, index?: number) => {
         if (!hook) {
@@ -882,14 +882,14 @@ class SchemaBuilder extends EventEmitter {
           );
         }
       };
-      const setMin = (newMin, reason) => {
+      const setMin = (newMin: number, reason: Hook<any, any>) => {
         if (newMin > minIndex) {
           minIndex = newMin;
           minReason = reason;
           check();
         }
       };
-      const setMax = (newMax, reason) => {
+      const setMax = (newMax: number, reason: Hook<any, any>) => {
         if (newMax < maxIndex) {
           maxIndex = newMax;
           maxReason = reason;
