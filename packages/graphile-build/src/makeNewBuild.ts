@@ -33,6 +33,7 @@ import SchemaBuilder, {
   ContextGraphQLObjectTypeFieldsField,
   ContextGraphQLObjectTypeFieldsFieldArgs,
   ScopeGraphQLObjectTypeFieldsField,
+  ScopeGraphQLObjectTypeFieldsFieldWithFieldName,
   ScopeGraphQLInputObjectTypeFieldsField,
   ArgDataGeneratorFunction,
   DataGeneratorFunction,
@@ -204,7 +205,7 @@ export type FieldWithHooksFunction = (
   spec:
     | FieldSpec
     | ((context: ContextGraphQLObjectTypeFieldsField) => FieldSpec),
-  fieldScope: Omit<ScopeGraphQLObjectTypeFieldsField, "fieldName">
+  fieldScope: ScopeGraphQLObjectTypeFieldsField
 ) => graphql.GraphQLFieldConfig<any, any>;
 
 export type InputFieldWithHooksFunction = (
@@ -606,6 +607,19 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
             fieldArgDataGeneratorsByFieldName[fieldName] = argDataGenerators;
 
             let newSpec = spec;
+            const scopeWithFieldName: ScopeGraphQLObjectTypeFieldsFieldWithFieldName = extend(
+              extend(
+                { ...scope },
+                {
+                  fieldName,
+                },
+
+                `Within context for GraphQLObjectType '${rawSpec.name}'`
+              ),
+
+              fieldScope,
+              `Extending scope for field '${fieldName}' within context for GraphQLObjectType '${rawSpec.name}'`
+            );
             const context: ContextGraphQLObjectTypeFieldsField = {
               ...commonContext,
               Self: Self as graphql.GraphQLObjectType,
@@ -687,19 +701,7 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
                 }
                 return data;
               },
-              scope: extend(
-                extend(
-                  { ...scope },
-                  {
-                    fieldName,
-                  },
-
-                  `Within context for GraphQLObjectType '${rawSpec.name}'`
-                ),
-
-                fieldScope,
-                `Extending scope for field '${fieldName}' within context for GraphQLObjectType '${rawSpec.name}'`
-              ),
+              scope: scopeWithFieldName,
             };
 
             if (typeof newSpec === "function") {

@@ -68,6 +68,7 @@ export {
   ScopeGraphQLObjectTypeFields,
   ContextGraphQLObjectTypeFields,
   ScopeGraphQLObjectTypeFieldsField,
+  ScopeGraphQLObjectTypeFieldsFieldWithFieldName,
   ContextGraphQLObjectTypeFieldsField,
   ScopeGraphQLObjectTypeFieldsFieldArgs,
   ContextGraphQLObjectTypeFieldsFieldArgs,
