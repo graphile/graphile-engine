@@ -4,7 +4,7 @@ import {
   ScopeGraphQLObjectType,
 } from "graphile-build";
 
-const base64 = str => Buffer.from(String(str)).toString("base64");
+const base64 = (str: string) => Buffer.from(String(str)).toString("base64");
 
 export default (function PgRecordFunctionConnectionPlugin(
   builder,
@@ -33,8 +33,14 @@ export default (function PgRecordFunctionConnectionPlugin(
         pgField,
       } = build;
 
-      const nullableIf = (condition, Type) =>
-        condition ? Type : new GraphQLNonNull(Type);
+      const nullableIf = <
+        TCond extends boolean,
+        TType extends import("graphql").GraphQLNullableType
+      >(
+        condition: TCond,
+        Type: TType
+      ): TCond extends true ? TType : import("graphql").GraphQLNonNull<TType> =>
+        (condition ? Type : new GraphQLNonNull(Type)) as any;
       const Cursor = getTypeByName("Cursor");
 
       introspectionResultsByKind.procedure.forEach(proc => {
@@ -164,7 +170,7 @@ export default (function PgRecordFunctionConnectionPlugin(
 
                   resolve(data, _args, _context, resolveInfo) {
                     const safeAlias = getSafeAliasFromResolveInfo(resolveInfo);
-                    return data.data.map(entry => entry[safeAlias]);
+                    return data.data.map((entry: object) => entry[safeAlias]);
                   },
                 }),
 
@@ -185,10 +191,12 @@ export default (function PgRecordFunctionConnectionPlugin(
                         resolveInfo
                       );
 
-                      return data.data.map(entry => ({
-                        __cursor: entry.__cursor,
-                        ...entry[safeAlias],
-                      }));
+                      return data.data.map(
+                        (entry: object & { __cursor?: string }) => ({
+                          __cursor: entry.__cursor,
+                          ...entry[safeAlias],
+                        })
+                      );
                     },
                   },
 
