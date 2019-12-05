@@ -8,7 +8,7 @@
 
     "noImplicitAny": false
   },
-  "include": ["src/**/*"],
+  "include": ["src"],
   "references": [
     { "path": "../lru" },
     { "path": "../graphql-parse-resolve-info" }

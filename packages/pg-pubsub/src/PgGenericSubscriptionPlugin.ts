@@ -3,6 +3,7 @@ import {
   Plugin,
   GraphileObjectTypeConfig,
   ScopeGraphQLObjectTypeFieldsField,
+  Inflection,
 } from "graphile-build";
 import { PubSub } from "graphql-subscriptions";
 import "graphile-build-pg"; // For the types
@@ -57,10 +58,10 @@ const PgGenericSubscriptionPlugin: Plugin = function(
       build.extend(
         inflection,
         {
-          listen() {
+          listen(this: Inflection) {
             return "listen";
           },
-          listenPayload() {
+          listenPayload(this: Inflection) {
             return this.upperCamelCase(`${this.listen()}-payload`);
           },
         },
