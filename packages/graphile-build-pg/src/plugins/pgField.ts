@@ -99,7 +99,7 @@ export default function pgField(
                   ? pgTweakFragmentForTypeAndModifier(
                       tableAlias,
                       options.pgType,
-                      options.pgTypeModifier,
+                      options.pgTypeModifier || null,
                       {}
                     )
                   : tableAlias,

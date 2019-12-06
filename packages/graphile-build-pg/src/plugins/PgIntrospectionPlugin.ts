@@ -135,6 +135,8 @@ export interface PgType {
   domainBaseType: PgType | void;
   domainTypeModifier: number | void;
   domainHasDefault: boolean;
+  enumVariants: Array<string> | null;
+  rangeSubTypeId: string | null;
   tags: SmartTags;
 }
 

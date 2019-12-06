@@ -40,7 +40,7 @@ type TypeGen<T> = (
 type Pg2GqlMapper = {
   [id: string]: {
     map: (valueFromDatabase: any) => any;
-    unmap: (valueFromGraphQL: any, modifier?: string | number | null) => SQL;
+    unmap: (valueFromGraphQL: any, modifier?: PgTypeModifier) => SQL;
   };
 };
 
@@ -72,15 +72,21 @@ declare module "graphile-build" {
     pg2GqlMapper: Pg2GqlMapper;
     pg2gql: (val: any, type: PgType) => any;
     pg2gqlForType: (type: PgType) => (value: any) => any;
-    gql2pg: (val: any, type: PgType, modifier?: string | number | null) => SQL;
+    gql2pg: (val: any, type: PgType, modifier?: PgTypeModifier) => SQL;
     pgTweakFragmentForTypeAndModifier: (
       fragment: SQL,
       type: PgType,
-      typeModifier: string | number | null,
+      typeModifier: PgTypeModifier,
       resolveData: ResolvedLookAhead
     ) => SQL;
-    pgTweaksByTypeId;
-    pgTweaksByTypeIdAndModifer;
+    pgTweaksByTypeId: {
+      [typeId: string]: FragmentTweaker;
+    };
+    pgTweaksByTypeIdAndModifer: {
+      [modifier: string]: {
+        [typeId: string]: FragmentTweaker;
+      };
+    };
   }
 
   interface GraphileBuildOptions {
@@ -94,7 +100,7 @@ declare module "graphile-build" {
     pgIntrospection?: PgEntity;
     pgIntrospectionTable?: PgClass;
     pgSubtypeIntrospection?: PgEntity;
-    pgTypeModifier?: string | number;
+    pgTypeModifier?: PgTypeModifier;
     isIntervalType?: boolean;
     isPointType?: boolean;
     isPgRangeType?: boolean;
@@ -113,7 +119,7 @@ declare module "graphile-build" {
   interface ScopeGraphQLInputObjectType {
     pgIntrospection?: PgEntity;
     pgSubtypeIntrospection?: PgEntity;
-    pgTypeModifier?: string | number;
+    pgTypeModifier?: PgTypeModifier;
     isIntervalInputType?: boolean;
     isPointInputType?: boolean;
     isPgRangeInputType?: boolean;
@@ -135,16 +141,16 @@ declare module "graphile-build" {
   }
 }
 
-function indent(str) {
+function indent(str: string) {
   return "  " + str.replace(/\n/g, "\n  ");
 }
 
-function identity(value) {
+function identity<T>(value: T): T {
   return value;
 }
 
 const parseCache = new LRU({ maxLength: 500 });
-function parseInterval(str) {
+function parseInterval(str: string) {
   let result = parseCache.get(str);
   if (!result) {
     result = rawParseInterval(str);
@@ -208,12 +214,17 @@ export default (function PgTypesPlugin(
         GraphQLInputObjectType,
         GraphQLScalarType,
         isInputType,
+        isNamedType,
         getNamedType,
         Kind,
       } = graphql;
 
-      const gqlTypeByTypeIdGenerator = {};
-      const gqlInputTypeByTypeIdGenerator = {};
+      const gqlTypeByTypeIdGenerator: {
+        [typeId: string]: TypeGen<import("graphql").GraphQLOutputType>;
+      } = {};
+      const gqlInputTypeByTypeIdGenerator: {
+        [typeId: string]: TypeGen<import("graphql").GraphQLInputType>;
+      } = {};
       if (build["pgGqlTypeByTypeId"] || build["pgGqlInputTypeByTypeId"]) {
         // I don't expect anyone to receive this error, because I don't think anyone uses this interface.
         throw new Error(
@@ -228,7 +239,10 @@ export default (function PgTypesPlugin(
         ...build.pgGqlInputTypeByTypeIdAndModifier,
       };
 
-      const isNull = val => val == null || val.__isNull;
+      const isNull = (val: unknown): boolean =>
+        val == null ||
+        (typeof val === "object" && val && !!val["__isNull"]) ||
+        false;
       const pg2GqlMapper: Pg2GqlMapper = {};
       const pg2gqlForType = (
         type: PgType
@@ -260,7 +274,7 @@ export default (function PgTypesPlugin(
       const gql2pg = (
         val: any,
         type: PgType,
-        modifier?: string | number | null
+        modifier?: PgTypeModifier
       ): SQL => {
         if (modifier === undefined) {
           let stack;
@@ -383,7 +397,7 @@ export default (function PgTypesPlugin(
         addType(GQLIntervalInput, "graphile-build-pg built-in");
       }
 
-      const stringType = (name, description) =>
+      const stringType = (name: string, description: string | null = null) =>
         new GraphQLScalarType({
           name,
           description,
@@ -419,9 +433,9 @@ export default (function PgTypesPlugin(
         1266, // timetz
       ];
 
-      const tweakToJson = fragment => fragment; // Since everything is to_json'd now, just pass through
-      const tweakToText = fragment => sql.fragment`(${fragment})::text`;
-      const tweakToNumericText = fragment =>
+      const tweakToJson = (fragment: SQL) => fragment; // Since everything is to_json'd now, just pass through
+      const tweakToText = (fragment: SQL) => sql.fragment`(${fragment})::text`;
+      const tweakToNumericText = (fragment: SQL) =>
         sql.fragment`(${fragment})::numeric::text`;
       const pgTweaksByTypeIdAndModifer: {
         [modifier: string]: {
@@ -452,7 +466,7 @@ export default (function PgTypesPlugin(
       const pgTweakFragmentForTypeAndModifier = (
         fragment: SQL,
         type: PgType,
-        typeModifier: string | number | null,
+        typeModifier: PgTypeModifier,
         resolveData: ResolvedLookAhead
       ): SQL => {
         const typeModifierKey = typeModifier != null ? typeModifier : -1;
@@ -638,7 +652,7 @@ export default (function PgTypesPlugin(
         "1186": GQLIntervalInput, // interval
         "600": PointInput, // point
       };
-      const jsonStringify = o => JSON.stringify(o);
+      const jsonStringify = (o: string) => JSON.stringify(o);
       if (pgExtendedTypes) {
         pg2GqlMapper[114] = {
           map: identity,
@@ -682,7 +696,7 @@ export default (function PgTypesPlugin(
 
       // point
       pg2GqlMapper[600] = {
-        map: f => {
+        map: (f: string) => {
           if (f[0] === "(" && f[f.length - 1] === ")") {
             const [x, y] = f
               .substr(1, f.length - 2)
@@ -703,7 +717,10 @@ export default (function PgTypesPlugin(
        * for a specific PG type.  Use the generators from
        * `pgRegisterGqlTypeByTypeId` first, this is a last resort.
        */
-      const enforceGqlTypeByPgTypeId = (typeId, typeModifier) => {
+      const enforceGqlTypeByPgTypeId = (
+        typeId: string,
+        typeModifier: PgTypeModifier
+      ) => {
         const type = introspectionResultsByKind.type.find(t => t.id === typeId);
         if (!type) {
           throw new Error(
@@ -729,7 +746,10 @@ export default (function PgTypesPlugin(
           depth--;
         }
       };
-      const reallyEnforceGqlTypeByPgTypeAndModifier = (type, typeModifier) => {
+      const reallyEnforceGqlTypeByPgTypeAndModifier = (
+        type: PgType,
+        typeModifier: PgTypeModifier
+      ) => {
         if (!type.id) {
           throw new Error(
             `Invalid argument to enforceGqlTypeByPgTypeId - expected a full type, received '${type}'`
@@ -762,25 +782,21 @@ export default (function PgTypesPlugin(
           !gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] &&
           type.type === "e"
         ) {
-          const enumType = newWithHooks(
-            GraphQLEnumType,
-            {
-              name: inflection.enumType(type),
-              description: type.description,
-              values: type.enumVariants.reduce((memo, value) => {
-                memo[inflection.enumName(value)] = {
-                  value: value,
-                };
+          const enumSpec: import("graphql").GraphQLEnumTypeConfig = {
+            name: inflection.enumType(type),
+            description: type.description || null,
+            values: type.enumVariants!.reduce((memo, value) => {
+              memo[inflection.enumName(value)] = {
+                value: value,
+              };
 
-                return memo;
-              }, {}),
-            },
-
-            {
-              pgIntrospection: type,
-              isPgEnumType: true,
-            }
-          );
+              return memo;
+            }, {}),
+          };
+          const enumType = newWithHooks(GraphQLEnumType, enumSpec, {
+            pgIntrospection: type,
+            isPgEnumType: true,
+          });
           if (enumType) {
             gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = enumType;
           }
@@ -791,26 +807,30 @@ export default (function PgTypesPlugin(
           type.type === "r"
         ) {
           const subtype =
-            introspectionResultsByKind.typeById[type.rangeSubTypeId];
+            type.rangeSubTypeId != null
+              ? introspectionResultsByKind.typeById[type.rangeSubTypeId]
+              : null;
+          if (!subtype) {
+            throw new Error("Could not determine subtype of range type");
+          }
           const gqlRangeSubType = getGqlTypeByTypeIdAndModifier(
             subtype.id,
             typeModifier
           );
 
-          if (!gqlRangeSubType) {
-            throw new Error("Range of unsupported");
+          if (!gqlRangeSubType || !isNamedType(gqlRangeSubType)) {
+            throw new Error("Range of unsupported type");
           }
           const existingRange = getTypeByName(
             inflection.rangeType(gqlRangeSubType.name)
           );
-          let Range:
-            | import("graphql").GraphQLObjectType<any, any>
-            | null
-            | undefined =
+          let Range: import("graphql").GraphQLObjectType<any, any> | null =
             existingRange && existingRange instanceof GraphQLObjectType
               ? existingRange
               : null;
-          let RangeInput;
+          let RangeInput:
+            | import("graphql").GraphQLInputObjectType
+            | null = null;
           if (!Range) {
             const rangeBoundSpec: GraphileObjectTypeConfig<any, any> = {
               name: inflection.rangeBoundType(gqlRangeSubType.name),
@@ -939,7 +959,15 @@ export default (function PgTypesPlugin(
             addType(Range, "graphile-build-pg built-in");
             addType(RangeInput, "graphile-build-pg built-in");
           } else {
-            RangeInput = getTypeByName(inflection.inputType(Range.name));
+            const tmpRangeInput = getTypeByName(
+              inflection.inputType(Range.name)
+            );
+            if (tmpRangeInput instanceof GraphQLInputObjectType) {
+              RangeInput = tmpRangeInput;
+            }
+          }
+          if (!RangeInput) {
+            throw new Error("Could not find or generate range input type");
           }
           gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = Range;
           gqlInputTypeByTypeIdAndModifier[type.id][
@@ -1037,12 +1065,16 @@ end`;
         // Arrays
         if (
           !gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] &&
-          type.category === "A"
+          type.category === "A" &&
+          type.arrayItemTypeId
         ) {
           const arrayEntryOutputType = getGqlTypeByTypeIdAndModifier(
             type.arrayItemTypeId,
             typeModifier
           );
+          if (!arrayEntryOutputType) {
+            throw new Error("Could not determine type for array element");
+          }
 
           gqlTypeByTypeIdAndModifier[type.id][
             typeModifierKey
@@ -1100,10 +1132,10 @@ end`;
       };
 
       function getGqlTypeByTypeIdAndModifier(
-        typeId,
+        typeId: string,
         typeModifier: PgTypeModifier = null,
         useFallback = true
-      ) {
+      ): import("graphql").GraphQLOutputType | null {
         const typeModifierKey = typeModifier != null ? typeModifier : -1;
         if (!gqlTypeByTypeIdAndModifier[typeId]) {
           gqlTypeByTypeIdAndModifier[typeId] = {};
@@ -1123,7 +1155,7 @@ end`;
           }
           const gen = gqlTypeByTypeIdGenerator[type.id];
           if (gen) {
-            const set = Type => {
+            const set = (Type: import("graphql").GraphQLOutputType) => {
               gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = Type;
             };
             const result = gen(set, typeModifier);
@@ -1161,9 +1193,9 @@ end`;
       }
 
       function getGqlInputTypeByTypeIdAndModifier(
-        typeId,
+        typeId: string,
         typeModifier: PgTypeModifier = null
-      ) {
+      ): import("graphql").GraphQLInputType | null {
         // First, load the OUTPUT type (it might register an input type)
         getGqlTypeByTypeIdAndModifier(typeId, typeModifier);
 
@@ -1181,7 +1213,7 @@ end`;
           }
           const gen = gqlInputTypeByTypeIdGenerator[type.id];
           if (gen) {
-            const set = Type => {
+            const set = (Type: import("graphql").GraphQLInputType) => {
               gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] = Type;
             };
             const result = gen(set, typeModifier);
@@ -1221,7 +1253,11 @@ end`;
         }
         return gqlInputTypeByTypeIdAndModifier[typeId][typeModifierKey];
       }
-      function registerGqlTypeByTypeId(typeId, gen, yieldToExisting = false) {
+      function registerGqlTypeByTypeId(
+        typeId: string,
+        gen: TypeGen<import("graphql").GraphQLOutputType>,
+        yieldToExisting = false
+      ) {
         if (gqlTypeByTypeIdGenerator[typeId]) {
           if (yieldToExisting) {
             return;
@@ -1233,8 +1269,8 @@ end`;
         gqlTypeByTypeIdGenerator[typeId] = gen;
       }
       function registerGqlInputTypeByTypeId(
-        typeId,
-        gen,
+        typeId: string,
+        gen: TypeGen<import("graphql").GraphQLInputType>,
         yieldToExisting = false
       ) {
         if (gqlInputTypeByTypeIdGenerator[typeId]) {
@@ -1249,7 +1285,10 @@ end`;
       }
 
       // DEPRECATIONS!
-      function getGqlTypeByTypeId(typeId, typeModifier) {
+      function getGqlTypeByTypeId(
+        typeId: string,
+        typeModifier: PgTypeModifier
+      ) {
         if (typeModifier === undefined) {
           // eslint-disable-next-line no-console
           console.warn(
@@ -1258,7 +1297,10 @@ end`;
         }
         return getGqlTypeByTypeIdAndModifier(typeId, typeModifier);
       }
-      function getGqlInputTypeByTypeId(typeId, typeModifier) {
+      function getGqlInputTypeByTypeId(
+        typeId: string,
+        typeModifier: PgTypeModifier
+      ) {
         if (typeModifier === undefined) {
           // eslint-disable-next-line no-console
           console.warn(
@@ -1268,10 +1310,10 @@ end`;
         return getGqlInputTypeByTypeIdAndModifier(typeId, typeModifier);
       }
       function pgTweakFragmentForType(
-        fragment,
-        type,
-        typeModifier,
-        resolveData
+        fragment: SQL,
+        type: PgType,
+        typeModifier: PgTypeModifier,
+        resolveData: ResolvedLookAhead
       ) {
         if (typeModifier === undefined) {
           // eslint-disable-next-line no-console
@@ -1416,14 +1458,21 @@ end`;
   /* End of hstore type */
 } as Plugin);
 
-function makeGraphQLHstoreType(graphql, hstoreTypeName) {
+interface HStoreValue {
+  [key: string]: string | null;
+}
+
+function makeGraphQLHstoreType(
+  graphql: typeof import("graphql"),
+  hstoreTypeName: string
+) {
   const { GraphQLScalarType, Kind } = graphql;
 
-  function isValidHstoreObject(obj) {
+  function isValidHstoreObject(obj: unknown): obj is HStoreValue {
     if (obj === null) {
       // Null is okay
       return true;
-    } else if (typeof obj === "object") {
+    } else if (typeof obj === "object" && obj !== null) {
       // A hash with string/null values is also okay
       const keys = Object.keys(obj);
       for (const key of keys) {
@@ -1444,7 +1493,7 @@ function makeGraphQLHstoreType(graphql, hstoreTypeName) {
     }
   }
 
-  function identityWithCheck(obj) {
+  function identityWithCheck(obj: unknown): HStoreValue {
     if (isValidHstoreObject(obj)) {
       return obj;
     }
@@ -1453,7 +1502,10 @@ function makeGraphQLHstoreType(graphql, hstoreTypeName) {
     );
   }
 
-  function parseValueLiteral(ast, variables) {
+  const parseValueLiteral: import("graphql").GraphQLScalarLiteralParser<any> = (
+    ast,
+    variables
+  ) => {
     switch (ast.kind) {
       case Kind.INT:
       case Kind.FLOAT:
@@ -1478,9 +1530,12 @@ function makeGraphQLHstoreType(graphql, hstoreTypeName) {
         // Everything else is invalid.
         return undefined;
     }
-  }
+  };
 
-  function parseLiteral(ast, variables) {
+  const parseLiteral: import("graphql").GraphQLScalarLiteralParser<any> = (
+    ast,
+    variables
+  ) => {
     switch (ast.kind) {
       case Kind.OBJECT: {
         const value = ast.fields.reduce((memo, field) => {
@@ -1510,7 +1565,7 @@ function makeGraphQLHstoreType(graphql, hstoreTypeName) {
       default:
         return undefined;
     }
-  }
+  };
 
   // TODO: use newWithHooks instead
   const GraphQLHStore = new GraphQLScalarType({
@@ -1528,19 +1583,19 @@ function makeGraphQLHstoreType(graphql, hstoreTypeName) {
 // To include a double quote or a backslash in a key or value, escape it
 // with a backslash.
 // -- https://www.postgresql.org/docs/10/static/hstore.html
-function toHstoreString(str) {
+function toHstoreString(str: string) {
   return '"' + str.replace(/(["\\])/g, "\\$1") + '"';
 }
 
-function hstoreStringify(o) {
+function hstoreStringify(o: unknown) {
   if (o === null) {
     return null;
   }
-  if (typeof o !== "object") {
+  if (typeof o !== "object" || o === null) {
     throw new TypeError("Expected an hstore object");
   }
   const keys = Object.keys(o);
-  const encodeKeyValue = key => {
+  const encodeKeyValue = (key: string) => {
     const value = o[key];
     if (value === null) {
       return `${toHstoreString(key)} => NULL`;
