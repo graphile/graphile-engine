@@ -449,7 +449,7 @@ returning *`;
                             },
 
                             async resolve(
-                              parent,
+                              _parent,
                               args,
                               resolveContext: GraphileResolverContext,
                               resolveInfo
@@ -633,7 +633,7 @@ returning *`;
                             },
 
                             async resolve(
-                              parent,
+                              _parent,
                               args,
                               resolveContext,
                               resolveInfo

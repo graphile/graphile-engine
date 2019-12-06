@@ -26,7 +26,7 @@ interface GqlInputTypeByTypeIdAndModifier {
 type TypeGen<T> = (
   set: (type: T) => void,
   typeModifier: PgTypeModifier
-) => void | T;
+) => void | null | T;
 
 type Pg2GqlMapper = {
   [id: string]: {

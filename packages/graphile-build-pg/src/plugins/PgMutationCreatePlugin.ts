@@ -202,7 +202,7 @@ export default (function PgMutationCreatePlugin(
                       },
                     },
 
-                    async resolve(data, args, resolveContext, resolveInfo) {
+                    async resolve(_data, args, resolveContext, resolveInfo) {
                       const { input } = args;
                       const { pgClient } = resolveContext;
                       const parsedResolveInfoFragment = parseResolveInfo(

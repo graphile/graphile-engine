@@ -101,6 +101,7 @@ export default (function PgTablesPlugin(
           GraphQLInputObjectType,
           GraphQLInterfaceType,
           GraphQLScalarType,
+          isInputType,
         },
 
         inflection,
@@ -135,9 +136,13 @@ export default (function PgTablesPlugin(
           primaryKeys.length
             ? true
             : false;
-        let TableType: import("graphql").GraphQLObjectType | null | undefined;
-        let TablePatchType;
-        let TableBaseInputType;
+        let TableType: import("graphql").GraphQLObjectType | null = null;
+        let TablePatchType:
+          | import("graphql").GraphQLInputObjectType
+          | null = null;
+        let TableBaseInputType:
+          | import("graphql").GraphQLInputObjectType
+          | null = null;
         pgRegisterGqlTypeByTypeId(
           tablePgType.id,
           cb => {
@@ -646,7 +651,7 @@ export default (function PgTablesPlugin(
 
         pgRegisterGqlInputTypeByTypeId(
           tablePgType.id,
-          (_set, modifier) => {
+          (_set, modifier): import("graphql").GraphQLInputType | null => {
             // This must come first, it triggers creation of all the types
             const TableType = pgGetGqlTypeByTypeIdAndModifier(
               tablePgType.id,
@@ -663,9 +668,12 @@ export default (function PgTablesPlugin(
               return TableBaseInputType;
             }
             if (TableType) {
-              return getTypeByName(
+              const type = getTypeByName(
                 inflection.inputType(build.graphql.getNamedType(TableType).name)
               );
+              if (isInputType(type)) {
+                return type;
+              }
             }
             return null;
           },
