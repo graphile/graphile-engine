@@ -1041,10 +1041,24 @@ export default (async function PgIntrospectionPlugin(
         return;
       }
       try {
-        const payload = JSON.parse(notification.payload);
-        payload.payload = payload.payload || [];
+        // See watch-fixtures.sql for types
+        const payload:
+          | {
+              type: "ddl";
+              payload:
+                | {
+                    schema: string;
+                    command: string;
+                  }[]
+                | null;
+            }
+          | {
+              type: "drop";
+              payload: string[] | null;
+            }
+          | { type: "manual" } = JSON.parse(notification.payload);
         if (payload.type === "ddl") {
-          const commands = payload.payload
+          const commands = (payload.payload || [])
             .filter(
               ({ schema }) => schema == null || schemas.indexOf(schema) >= 0
             )
@@ -1053,7 +1067,7 @@ export default (async function PgIntrospectionPlugin(
             this._handleChange();
           }
         } else if (payload.type === "drop") {
-          const affectsOurSchemas = payload.payload.some(
+          const affectsOurSchemas = (payload.payload || []).some(
             schemaName => schemas.indexOf(schemaName) >= 0
           );
 
