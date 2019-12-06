@@ -46,7 +46,7 @@ declare module "graphile-build" {
 
 const base64 = str => Buffer.from(String(str)).toString("base64");
 
-const hasNonNullKey = row => {
+const hasNonNullKey = (row: { [key: string]: unknown }) => {
   if (
     Array.isArray(row.__identifiers) &&
     row.__identifiers.every(i => i != null)
@@ -75,10 +75,18 @@ export default (function PgTablesPlugin(
   builder,
   { pgForbidSetofFunctionsToReturnNull = false, subscriptions = false }
 ) {
-  const handleNullRow = pgForbidSetofFunctionsToReturnNull
+  const handleNullRow: <T extends {}>(
+    row: T,
+    identifiers: unknown[]
+  ) => T | null = pgForbidSetofFunctionsToReturnNull
     ? (row, _identifiers) => row
     : (row, identifiers) => {
-        if ((identifiers && hasNonNullKey(identifiers)) || hasNonNullKey(row)) {
+        if (
+          (identifiers &&
+            Array.isArray(identifiers) &&
+            identifiers.some(i => i !== null)) ||
+          hasNonNullKey(row)
+        ) {
           return row;
         } else {
           return null;
@@ -143,7 +151,7 @@ export default (function PgTablesPlugin(
           primaryKeys.length
             ? true
             : false;
-        let TableType: import("graphql").GraphQLObjectType | null = null;
+        let TableType: import("graphql").GraphQLObjectType;
         let TablePatchType:
           | import("graphql").GraphQLInputObjectType
           | null = null;
@@ -235,7 +243,7 @@ export default (function PgTablesPlugin(
                 return fields;
               },
             };
-            TableType = newWithHooks(
+            const tmpTableType = newWithHooks(
               GraphQLObjectType,
               tableSpec,
 
@@ -254,11 +262,12 @@ export default (function PgTablesPlugin(
                 isPgCompositeType: !table.isSelectable,
               }
             );
-            if (!TableType) {
+            if (!tmpTableType) {
               throw new Error(
                 `Failed to construct TableType for '${tableSpec.name}'`
               );
             }
+            TableType = tmpTableType;
 
             cb(TableType);
             const pgCreateInputFields: FieldSpecMap = {};
