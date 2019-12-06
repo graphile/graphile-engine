@@ -544,7 +544,7 @@ export default (async function PgIntrospectionPlugin(
     pgConfig,
     pgSchemas: schemas,
     pgEnableTags,
-    persistentMemoizeWithKey = (key, fn) => fn(),
+    persistentMemoizeWithKey = (_key, fn) => fn(),
     pgThrowOnMissingSchema = false,
     pgIncludeExtensionResources = false,
     pgLegacyFunctionsOnly = false,
