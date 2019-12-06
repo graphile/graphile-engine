@@ -5,6 +5,7 @@ import {
   GraphileInputObjectTypeConfig,
   Build,
   Inflection,
+  ResolvedLookAhead,
 } from "graphile-build";
 import makeGraphQLJSONType from "../GraphQLJSON";
 import rawParseInterval = require("postgres-interval");
@@ -28,6 +29,8 @@ interface GqlInputTypeByTypeIdAndModifier {
     [modifier: string]: import("graphql").GraphQLInputType;
   };
 }
+
+type FragmentTweaker = (fragment: SQL, resolveData: ResolvedLookAhead) => SQL;
 
 type TypeGen<T> = (
   set: (type: T) => void,
@@ -67,10 +70,15 @@ declare module "graphile-build" {
       useFallback?: boolean
     ): import("graphql").GraphQLInputType | null;
     pg2GqlMapper: Pg2GqlMapper;
-    pg2gql;
-    pg2gqlForType;
-    gql2pg;
-    pgTweakFragmentForTypeAndModifier;
+    pg2gql: (val: any, type: PgType) => any;
+    pg2gqlForType: (type: PgType) => (value: any) => any;
+    gql2pg: (val: any, type: PgType, modifier?: string | number | null) => SQL;
+    pgTweakFragmentForTypeAndModifier: (
+      fragment: SQL,
+      type: PgType,
+      typeModifier: string | number | null,
+      resolveData: ResolvedLookAhead
+    ) => SQL;
     pgTweaksByTypeId;
     pgTweaksByTypeIdAndModifer;
   }
@@ -253,7 +261,7 @@ export default (function PgTypesPlugin(
         val: any,
         type: PgType,
         modifier?: string | number | null
-      ) => {
+      ): SQL => {
         if (modifier === undefined) {
           let stack;
           try {
@@ -415,8 +423,14 @@ export default (function PgTypesPlugin(
       const tweakToText = fragment => sql.fragment`(${fragment})::text`;
       const tweakToNumericText = fragment =>
         sql.fragment`(${fragment})::numeric::text`;
-      const pgTweaksByTypeIdAndModifer = {};
-      const pgTweaksByTypeId = {
+      const pgTweaksByTypeIdAndModifer: {
+        [modifier: string]: {
+          [typeId: string]: FragmentTweaker;
+        };
+      } = {};
+      const pgTweaksByTypeId: {
+        [typeId: string]: FragmentTweaker;
+      } = {
         // '::text' rawTypes
         ...rawTypes.reduce((memo, typeId) => {
           memo[typeId] = tweakToText;
@@ -436,13 +450,13 @@ export default (function PgTypesPlugin(
       };
 
       const pgTweakFragmentForTypeAndModifier = (
-        fragment,
-        type,
-        typeModifier = null,
-        resolveData
-      ) => {
+        fragment: SQL,
+        type: PgType,
+        typeModifier: string | number | null,
+        resolveData: ResolvedLookAhead
+      ): SQL => {
         const typeModifierKey = typeModifier != null ? typeModifier : -1;
-        const tweaker =
+        const tweaker: FragmentTweaker =
           (pgTweaksByTypeIdAndModifer[type.id] &&
             pgTweaksByTypeIdAndModifer[type.id][typeModifierKey]) ||
           pgTweaksByTypeId[type.id];
@@ -453,7 +467,7 @@ export default (function PgTypesPlugin(
           return pgTweakFragmentForTypeAndModifier(
             fragment,
             type.domainBaseType,
-            type.domainBaseTypeModifier,
+            type.domainTypeModifier || null,
             resolveData
           );
         } else if (type.isPgArray) {
