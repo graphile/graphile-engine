@@ -889,7 +889,10 @@ const omitUnindexed = (omit: typeof baseOmit, hideIndexWarnings: boolean) => (
   return omit(entity, permission);
 };
 
-function describePgEntity(entity: PgEntity, includeAlias = true): string {
+export function describePgEntity(
+  entity: PgEntity,
+  includeAlias = true
+): string {
   const getAlias = !includeAlias
     ? () => ""
     : () => {
