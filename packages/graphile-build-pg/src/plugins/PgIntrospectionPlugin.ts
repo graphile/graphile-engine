@@ -901,7 +901,7 @@ export default (async function PgIntrospectionPlugin(
 
   let introspectionResultsByKind = await introspect();
 
-  let listener;
+  let listener: Listener | null = null;
 
   class Listener {
     _handleChange: {
