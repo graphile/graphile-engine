@@ -3,7 +3,7 @@ import debugSql from "./debugSql";
 
 declare module "graphile-build" {
   interface ScopeGraphQLObjectTypeFieldsField {
-    isPgRowByUniqueConstraintField?: true;
+    isPgRowByUniqueConstraintField?: boolean;
   }
 }
 

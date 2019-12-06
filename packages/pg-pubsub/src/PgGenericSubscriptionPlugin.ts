@@ -21,12 +21,12 @@ declare module "graphile-build" {
   }
 
   interface ScopeGraphQLObjectType {
-    isPgGenericSubscriptionPayloadType?: true;
+    isPgGenericSubscriptionPayloadType?: boolean;
   }
 
   interface ScopeGraphQLObjectTypeFieldsField {
-    isPgGenericSubscriptionPayloadRelatedNodeField?: true;
-    isPgGenericSubscriptionRootField?: true;
+    isPgGenericSubscriptionPayloadRelatedNodeField?: boolean;
+    isPgGenericSubscriptionRootField?: boolean;
   }
 }
 

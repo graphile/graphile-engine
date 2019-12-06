@@ -6,14 +6,14 @@ const debug = debugFactory("graphile-build-pg");
 
 declare module "graphile-build" {
   interface ScopeGraphQLObjectType {
-    isPgCreatePayloadType?: true;
+    isPgCreatePayloadType?: boolean;
   }
   interface ScopeGraphQLObjectTypeFieldsField {
-    isPgCreateMutationField?: true;
-    isPgCreatePayloadResultField?: true;
+    isPgCreateMutationField?: boolean;
+    isPgCreatePayloadResultField?: boolean;
   }
   interface ScopeGraphQLInputObjectType {
-    isPgCreateInputType?: true;
+    isPgCreateInputType?: boolean;
   }
 }
 

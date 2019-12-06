@@ -9,7 +9,7 @@ declare module "graphile-build" {
     disableIssue397Fix?: boolean;
   }
   interface ScopeGraphQLObjectTypeFieldsField {
-    isPgMutationPayloadEdgeField?: true;
+    isPgMutationPayloadEdgeField?: boolean;
   }
 }
 

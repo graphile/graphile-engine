@@ -9,8 +9,8 @@ declare module "graphile-build" {
     pgLegacyRelations?: "only" | "deprecated" | "omit";
   }
   interface ScopeGraphQLObjectTypeFieldsField {
-    isPgBackwardSingleRelationField?: true;
-    isPgBackwardRelationField?: true;
+    isPgBackwardSingleRelationField?: boolean;
+    isPgBackwardRelationField?: boolean;
   }
 }
 

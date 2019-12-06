@@ -81,29 +81,29 @@ declare module "graphile-build" {
     pgIntrospectionTable?: PgClass;
     pgSubtypeIntrospection?: PgEntity;
     pgTypeModifier?: string | number;
-    isIntervalType?: true;
-    isPointType?: true;
-    isPgRangeType?: true;
-    isPgRangeBoundType?: true;
+    isIntervalType?: boolean;
+    isPointType?: boolean;
+    isPgRangeType?: boolean;
+    isPgRangeBoundType?: boolean;
   }
 
   interface ScopeGraphQLObjectTypeFieldsField {
     pgFieldIntrospection?: PgEntity;
     pgFieldIntrospectionTable?: PgClass;
     pgFieldConstraint?: PgConstraint;
-    isPgFieldConnection?: true;
+    isPgFieldConnection?: boolean;
     isPgFieldSimpleCollection?: boolean;
-    isCursorField?: true;
+    isCursorField?: boolean;
   }
 
   interface ScopeGraphQLInputObjectType {
     pgIntrospection?: PgEntity;
     pgSubtypeIntrospection?: PgEntity;
     pgTypeModifier?: string | number;
-    isIntervalInputType?: true;
-    isPointInputType?: true;
-    isPgRangeInputType?: true;
-    isPgRangeBoundInputType?: true;
+    isIntervalInputType?: boolean;
+    isPointInputType?: boolean;
+    isPgRangeInputType?: boolean;
+    isPgRangeBoundInputType?: boolean;
   }
 
   interface ScopeGraphQLInputObjectTypeFieldsField {
@@ -112,8 +112,8 @@ declare module "graphile-build" {
 
   interface ScopeGraphQLEnumType {
     pgIntrospection?: PgEntity;
-    isPgEnumType?: true;
-    isPgRowSortEnum?: true;
+    isPgEnumType?: boolean;
+    isPgRowSortEnum?: boolean;
   }
 
   interface Inflection {

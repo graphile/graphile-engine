@@ -4,7 +4,7 @@ import { PgEntityKind } from "./PgIntrospectionPlugin";
 
 declare module "graphile-build" {
   interface ScopeGraphQLObjectTypeFieldsField {
-    isPgNodeQuery?: true;
+    isPgNodeQuery?: boolean;
   }
 }
 

@@ -4,7 +4,7 @@ import { stringTag } from "./PgBasicsPlugin";
 
 declare module "graphile-build" {
   interface ScopeGraphQLObjectTypeFieldsField {
-    isPgForwardRelationField?: true;
+    isPgForwardRelationField?: boolean;
   }
 }
 

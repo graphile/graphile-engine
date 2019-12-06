@@ -13,23 +13,23 @@ declare module "graphile-build" {
     isPgCompositeType?: boolean;
 
     /* Connections */
-    isEdgeType?: true;
-    isPgRowEdgeType?: true;
-    isConnectionType?: true;
-    isPgRowConnectionType?: true;
+    isEdgeType?: boolean;
+    isPgRowEdgeType?: boolean;
+    isConnectionType?: boolean;
+    isPgRowConnectionType?: boolean;
     nodeType?: import("graphql").GraphQLType /* But not a list */;
     edgeType?: import("graphql").GraphQLObjectType;
   }
 
   interface ScopeGraphQLInputObjectType {
     /** Mutation input type? */
-    isInputType?: true;
+    isInputType?: boolean;
 
     /** Mutation input for 'update' mutations */
-    isPgPatch?: true;
+    isPgPatch?: boolean;
 
     /** Mutation input for the 'base' variant */
-    isPgBaseInput?: true;
+    isPgBaseInput?: boolean;
 
     isPgRowType?: boolean;
     isPgCompoundType?: boolean;

@@ -17,7 +17,7 @@ declare module "graphile-build" {
   }
   interface ScopeGraphQLObjectTypeFieldsField {
     isPgNodeMutation?: boolean;
-    isPgMutationPayloadDeletedNodeIdField?: true;
+    isPgMutationPayloadDeletedNodeIdField?: boolean;
   }
   interface ScopeGraphQLInputObjectType {
     isPgUpdateInputType?: boolean;
