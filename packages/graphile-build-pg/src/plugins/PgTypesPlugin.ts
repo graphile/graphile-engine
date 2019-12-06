@@ -11,6 +11,7 @@ import rawParseInterval = require("postgres-interval");
 import LRU from "@graphile/lru";
 import { PgEntity, PgClass, PgConstraint } from "./PgIntrospectionPlugin";
 import { PgTypeModifier } from "./PgBasicsPlugin";
+import { SQL } from "../QueryBuilder";
 
 interface GqlTypeByTypeIdAndModifier {
   [typeId: string]: {
@@ -30,8 +31,8 @@ type TypeGen<T> = (
 
 type Pg2GqlMapper = {
   [id: string]: {
-    map: any;
-    unmap: any;
+    map: (valueFromDatabase: any) => any;
+    unmap: (valueFromGraphQL: any, modifier?: string | number | null) => SQL;
   };
 };
 

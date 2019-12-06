@@ -11,15 +11,13 @@ import debugSql from "./debugSql";
 import chalk from "chalk";
 import { ResolveTree } from "graphql-parse-resolve-info";
 import QueryBuilder, { GraphileResolverContext } from "../QueryBuilder";
+import { nullableIf } from "../utils";
 
 declare module "graphile-build" {
   interface GraphileBuildOptions {
     pgForbidSetofFunctionsToReturnNull?: boolean;
   }
 }
-
-const nullableIf = (GraphQLNonNull, condition, Type) =>
-  condition ? Type : new GraphQLNonNull(Type);
 
 const firstValue = obj => {
   let firstKey;

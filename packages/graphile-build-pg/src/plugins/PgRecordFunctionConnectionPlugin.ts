@@ -3,8 +3,7 @@ import {
   GraphileObjectTypeConfig,
   ScopeGraphQLObjectType,
 } from "graphile-build";
-
-const base64 = (str: string) => Buffer.from(String(str)).toString("base64");
+import { base64, nullableIf } from "../utils";
 
 export default (function PgRecordFunctionConnectionPlugin(
   builder,
@@ -33,14 +32,6 @@ export default (function PgRecordFunctionConnectionPlugin(
         pgField,
       } = build;
 
-      const nullableIf = <
-        TCond extends boolean,
-        TType extends import("graphql").GraphQLNullableType
-      >(
-        condition: TCond,
-        Type: TType
-      ): TCond extends true ? TType : import("graphql").GraphQLNonNull<TType> =>
-        (condition ? Type : new GraphQLNonNull(Type)) as any;
       const Cursor = getTypeByName("Cursor");
 
       introspectionResultsByKind.procedure.forEach(proc => {
@@ -110,6 +101,7 @@ export default (function PgRecordFunctionConnectionPlugin(
                     getNamedType(NodeType).name
                   }\` at the end of the edge.`,
                   type: nullableIf(
+                    GraphQLNonNull,
                     !pgForbidSetofFunctionsToReturnNull,
                     NodeType
                   ),
@@ -164,7 +156,11 @@ export default (function PgRecordFunctionConnectionPlugin(
                   }\` objects.`,
                   type: new GraphQLNonNull(
                     new GraphQLList(
-                      nullableIf(!pgForbidSetofFunctionsToReturnNull, NodeType)
+                      nullableIf(
+                        GraphQLNonNull,
+                        !pgForbidSetofFunctionsToReturnNull,
+                        NodeType
+                      )
                     )
                   ),
 
