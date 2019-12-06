@@ -5,7 +5,7 @@ import {
 } from "graphile-build";
 import { PgType, PgAttribute } from "./PgIntrospectionPlugin";
 import { PgTypeModifier } from "./PgBasicsPlugin";
-import { nullableIf } from "../utils";
+import { nullableIf, base64 } from "../utils";
 
 declare module "graphile-build" {
   interface ScopeGraphQLObjectType {
@@ -43,8 +43,6 @@ declare module "graphile-build" {
     ) => import("graphql").GraphQLInputFieldConfig;
   }
 }
-
-const base64 = str => Buffer.from(String(str)).toString("base64");
 
 const hasNonNullKey = (row: { [key: string]: unknown }) => {
   if (

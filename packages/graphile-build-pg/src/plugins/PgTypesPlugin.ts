@@ -9,7 +9,12 @@ import {
 import makeGraphQLJSONType from "../GraphQLJSON";
 import rawParseInterval = require("postgres-interval");
 import LRU from "@graphile/lru";
-import { PgEntity, PgClass, PgConstraint } from "./PgIntrospectionPlugin";
+import {
+  PgEntity,
+  PgClass,
+  PgConstraint,
+  PgType,
+} from "./PgIntrospectionPlugin";
 import { PgTypeModifier } from "./PgBasicsPlugin";
 import { SQL } from "../QueryBuilder";
 
@@ -217,13 +222,18 @@ export default (function PgTypesPlugin(
 
       const isNull = val => val == null || val.__isNull;
       const pg2GqlMapper: Pg2GqlMapper = {};
-      const pg2gqlForType = type => {
+      const pg2gqlForType = (
+        type: PgType
+      ): ((valueFromPostgres: any) => any) => {
         if (pg2GqlMapper[type.id]) {
           const map = pg2GqlMapper[type.id].map;
           return val => (isNull(val) ? null : map(val));
         } else if (type.domainBaseType) {
           return pg2gqlForType(type.domainBaseType);
         } else if (type.isPgArray) {
+          if (!type.arrayItemType) {
+            throw new Error("isPgArray without arrayItemType");
+          }
           const elementHandler = pg2gqlForType(type.arrayItemType);
           return val => {
             if (isNull(val)) return null;
@@ -238,8 +248,12 @@ export default (function PgTypesPlugin(
           return identity;
         }
       };
-      const pg2gql = (val, type) => pg2gqlForType(type)(val);
-      const gql2pg = (val, type, modifier) => {
+      const pg2gql = (val: any, type: PgType) => pg2gqlForType(type)(val);
+      const gql2pg = (
+        val: any,
+        type: PgType,
+        modifier?: string | number | null
+      ) => {
         if (modifier === undefined) {
           let stack;
           try {
@@ -262,8 +276,16 @@ export default (function PgTypesPlugin(
         if (pg2GqlMapper[type.id]) {
           return pg2GqlMapper[type.id].unmap(val, modifier);
         } else if (type.domainBaseType) {
-          return gql2pg(val, type.domainBaseType, type.domainTypeModifier);
+          return gql2pg(
+            val,
+            type.domainBaseType,
+            type.domainTypeModifier || null
+          );
         } else if (type.isPgArray) {
+          const { arrayItemType } = type;
+          if (!arrayItemType) {
+            throw new Error("isPgArray without arrayItemType");
+          }
           if (!Array.isArray(val)) {
             throw new Error(
               `Expected array when converting GraphQL data into PostgreSQL data; failing type: '${
@@ -272,7 +294,7 @@ export default (function PgTypesPlugin(
             );
           }
           return sql.fragment`array[${sql.join(
-            val.map(v => gql2pg(v, type.arrayItemType, modifier)),
+            val.map(v => gql2pg(v, arrayItemType, modifier)),
             ", "
           )}]::${sql.identifier(type.namespaceName)}.${sql.identifier(
             type.name
