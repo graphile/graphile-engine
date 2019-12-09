@@ -12,8 +12,8 @@ addons:
       - postgresql-server-dev-9.4
 
 env:
-  TEST_DATABASE_URL: postgres://localhost:5432/travis
   PGVERSION: 9.4
+  TEST_DATABASE_URL: postgres://localhost:5432/travis
 
 cache: yarn
 
@@ -43,6 +43,8 @@ matrix:
       services:
         - postgresql
       env:
+        - PGVERSION=10
+        - TEST_DATABASE_URL=postgres://localhost:5432/travis
         - LDS_TEST_DATABASE_URL=postgres://travis:travis@localhost:5432/lds_test
         - PGVERSION=10
       sudo: false
@@ -58,6 +60,8 @@ matrix:
       services:
         - postgresql
       env:
+        - PGVERSION=10
+        - TEST_DATABASE_URL=postgres://localhost:5432/travis
         - LDS_TEST_DATABASE_URL=postgres://travis:travis@localhost:5432/lds_test
         - PGVERSION=10
         - GRAPHILE_TURBO=1
