@@ -13,7 +13,7 @@ addons:
 
 env:
   PGVERSION: 9.4
-  TEST_DATABASE_URL: postgres://localhost:5432/travis
+  TEST_DATABASE_URL: postgres://localhost:5432/graphileengine_test
 
 cache: yarn
 
@@ -22,6 +22,7 @@ install:
   - lerna bootstrap
 
 before_script:
+  - createdb graphileengine_test
   - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
   - sudo bash -c "echo -e 'wal_level = logical\nmax_replication_slots = 10\nmax_wal_senders = 10' >> /etc/postgresql/$PGVERSION/main/postgresql.conf"
   - sudo service postgresql restart
@@ -44,7 +45,7 @@ matrix:
         - postgresql
       env:
         - PGVERSION=10
-        - TEST_DATABASE_URL=postgres://localhost:5432/travis
+        - TEST_DATABASE_URL=postgres://localhost:5432/graphileengine_test
         - LDS_TEST_DATABASE_URL=postgres://travis:travis@localhost:5432/lds_test
         - PGVERSION=10
       sudo: false
@@ -61,7 +62,7 @@ matrix:
         - postgresql
       env:
         - PGVERSION=10
-        - TEST_DATABASE_URL=postgres://localhost:5432/travis
+        - TEST_DATABASE_URL=postgres://localhost:5432/graphileengine_test
         - LDS_TEST_DATABASE_URL=postgres://travis:travis@localhost:5432/lds_test
         - PGVERSION=10
         - GRAPHILE_TURBO=1
