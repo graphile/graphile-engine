@@ -56,6 +56,17 @@ comment on table d.films is E'@omit read,all,update,create,delete,many';
 );
 
 test(
+  "omit single on table",
+  core.test(
+    ["c"],
+    {},
+    `
+comment on table c.compound_key is E'@omit single';
+`
+  )
+);
+
+test(
   "omit and omit many on table",
   core.test(
     ["d"],

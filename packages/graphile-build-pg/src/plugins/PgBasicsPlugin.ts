@@ -203,6 +203,13 @@ declare module "graphile-build" {
       table: PgClass,
       constraint: PgConstraint
     ): string;
+    rowByRelationBackwardsAndUniqueKeys(
+      detailedKeys: PgAttribute[],
+      table: PgClass,
+      _foreignTable: PgClass,
+      constraint: PgConstraint,
+      uniqueConstraint: PgConstraint
+    ): string;
     updateByKeys(
       detailedKeys: PgAttribute[],
       table: PgClass,
@@ -610,6 +617,31 @@ function makePgBaseInflectors(): Partial<Inflection> {
         `${this._singularizedTableName(table)}-by-${detailedKeys
           .map(key => this.column(key))
           .join("-and-")}`
+      );
+    },
+    rowByRelationBackwardsAndUniqueKeys(
+      this: Inflection,
+      detailedKeys: PgAttribute[],
+      table: PgClass,
+      _foreignTable: PgClass,
+      constraint: PgConstraint,
+      uniqueConstraint: PgConstraint,
+    ) {
+      const foreignSingleFieldName = stringTag(
+        constraint,
+        "foreignSingleFieldName"
+      );
+      if (foreignSingleFieldName) {
+        return foreignSingleFieldName;
+      }
+      const foreignFieldName = stringTag(constraint, "foreignFieldName");
+      if (foreignFieldName) {
+        return this.singularize(foreignFieldName);
+      }
+      return this.rowByUniqueKeys(
+        detailedKeys,
+        table,
+        uniqueConstraint
       );
     },
     updateByKeys(
