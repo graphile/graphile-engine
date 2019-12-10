@@ -15,6 +15,8 @@ import resolveNode from "./resolveNode";
 
 import { Plugin, GraphileBuildOptions } from "./SchemaBuilder";
 
+export { GetDataFromParsedResolveInfoFragmentFunction } from "./makeNewBuild";
+
 export {
   constantCaseAll,
   formatInsideUnderscores,
@@ -68,6 +70,7 @@ export {
   ScopeGraphQLObjectTypeFields,
   ContextGraphQLObjectTypeFields,
   ScopeGraphQLObjectTypeFieldsField,
+  ScopeGraphQLObjectTypeFieldsFieldWithFieldName,
   ContextGraphQLObjectTypeFieldsField,
   ScopeGraphQLObjectTypeFieldsFieldArgs,
   ContextGraphQLObjectTypeFieldsFieldArgs,
@@ -82,6 +85,7 @@ export {
   ScopeGraphQLInputObjectTypeFields,
   ContextGraphQLInputObjectTypeFields,
   ScopeGraphQLInputObjectTypeFieldsField,
+  ScopeGraphQLInputObjectTypeFieldsFieldWithFieldName,
   ContextGraphQLInputObjectTypeFieldsField,
   ScopeGraphQLEnumType,
   ContextGraphQLEnumType,

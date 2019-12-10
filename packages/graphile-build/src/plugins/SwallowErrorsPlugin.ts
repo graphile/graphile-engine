@@ -1,11 +1,5 @@
 import { Plugin, Build } from "../SchemaBuilder";
 
-declare module "../SchemaBuilder" {
-  interface GraphileBuildOptions {
-    dontSwallowErrors?: boolean;
-  }
-}
-
 export default (function SwallowErrorsPlugin(
   builder,
   { dontSwallowErrors = false }
@@ -18,9 +12,8 @@ export default (function SwallowErrorsPlugin(
         // compatibility, `swallowError` still exists on `makeNewBuild`; and
         // thus this plugin is really `dontSwallowErrors`.
         return Object.assign(build, {
-          swallowError(e) {
-            // $FlowFixMe
-            e.recoverable = true;
+          swallowError(e: Error) {
+            e["recoverable"] = true;
             throw e;
           },
         });

@@ -1,5 +1,10 @@
 import debugFactory from "debug";
-import { Plugin, GraphileObjectTypeConfig } from "graphile-build";
+import {
+  Plugin,
+  GraphileObjectTypeConfig,
+  ScopeGraphQLObjectTypeFieldsField,
+  Inflection,
+} from "graphile-build";
 import { PubSub } from "graphql-subscriptions";
 import "graphile-build-pg"; // For the types
 
@@ -16,11 +21,12 @@ declare module "graphile-build" {
   }
 
   interface ScopeGraphQLObjectType {
-    isPgGenericSubscriptionPayloadType?: true;
+    isPgGenericSubscriptionPayloadType?: boolean;
   }
+
   interface ScopeGraphQLObjectTypeFieldsField {
-    isPgGenericSubscriptionPayloadRelatedNodeField?: true;
-    isPgGenericSubscriptionRootField?: true;
+    isPgGenericSubscriptionPayloadRelatedNodeField?: boolean;
+    isPgGenericSubscriptionRootField?: boolean;
   }
 }
 
@@ -52,10 +58,10 @@ const PgGenericSubscriptionPlugin: Plugin = function(
       build.extend(
         inflection,
         {
-          listen() {
+          listen(this: Inflection) {
             return "listen";
           },
-          listenPayload() {
+          listenPayload(this: Inflection) {
             return this.upperCamelCase(`${this.listen()}-payload`);
           },
         },
@@ -100,6 +106,9 @@ const PgGenericSubscriptionPlugin: Plugin = function(
         throw new Error("Failed to load Query type");
       }
 
+      const scope: ScopeGraphQLObjectTypeFieldsField = {
+        isPgGenericSubscriptionPayloadRelatedNodeField: true,
+      };
       const spec: GraphileObjectTypeConfig<any, any> = {
         name: inflection.listenPayload(),
         fields: () => ({
@@ -138,9 +147,7 @@ const PgGenericSubscriptionPlugin: Plugin = function(
                       );
                     },
                   }),
-                  {
-                    isPgGenericSubscriptionPayloadRelatedNodeField: true,
-                  }
+                  scope
                 ),
                 // We don't use 'nodeId' here because it's likely your cache will
                 // use 'nodeId' as the cache key.
@@ -158,6 +165,10 @@ const PgGenericSubscriptionPlugin: Plugin = function(
       });
 
       const listen = inflection.listen();
+      const listenScope: ScopeGraphQLObjectTypeFieldsField = {
+        isPgGenericSubscriptionRootField: true,
+      };
+
       return extend(
         fields,
         {
@@ -227,9 +238,7 @@ const PgGenericSubscriptionPlugin: Plugin = function(
                 return result;
               },
             }),
-            {
-              isPgGenericSubscriptionRootField: true,
-            }
+            listenScope
           ),
         },
         "Adding listen field to Subscription type"

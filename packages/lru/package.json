@@ -1,13 +1,12 @@
 {
   "name": "@graphile/lru",
-  "version": "4.5.0",
+  "version": "4.6.0-alpha.0",
   "description": "Extremely simple zero-dependencies ES6 LRU (you probably want lru-cache instead)",
   "main": "node8plus/index.js",
   "types": "node8plus/index.d.ts",
   "scripts": {
     "test": "jest",
-    "prepack": "mkdir -p node8plus && tsc",
-    "watch": "mkdir -p node8plus && tsc --watch"
+    "prepack": "tsc -b"
   },
   "repository": {
     "type": "git",
