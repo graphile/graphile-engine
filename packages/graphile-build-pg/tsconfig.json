@@ -4,11 +4,13 @@
     "rootDir": "src",
     "declarationDir": "./node8plus",
     "outDir": "./node8plus",
-    "noEmit": false,
-
-    "noImplicitAny": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noEmit": false
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../graphile-build" },
+    { "path": "../lru" },
+    { "path": "../jest-serializer-graphql-schema" },
+    { "path": "../pg-sql2" }
+  ]
 }

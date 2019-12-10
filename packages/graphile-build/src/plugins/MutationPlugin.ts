@@ -1,12 +1,6 @@
 import { Plugin } from "../SchemaBuilder";
 
-declare module "../SchemaBuilder" {
-  interface ScopeGraphQLObjectType {
-    isRootMutation?: true;
-  }
-}
-
-function isValidMutation(Mutation) {
+function isValidMutation(Mutation: import("graphql").GraphQLObjectType | null) {
   try {
     if (!Mutation) {
       return false;

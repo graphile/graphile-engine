@@ -2,15 +2,15 @@ import debugFactory from "debug";
 
 import { Plugin } from "graphile-build";
 import { stringTag } from "./PgBasicsPlugin";
-import { PgEntityKind } from "./PgIntrospectionPlugin";
+import { PgEntityKind, PgConstraint } from "./PgIntrospectionPlugin";
 
 declare module "graphile-build" {
   interface GraphileBuildOptions {
     pgLegacyRelations?: "only" | "deprecated" | "omit";
   }
   interface ScopeGraphQLObjectTypeFieldsField {
-    isPgBackwardSingleRelationField?: true;
-    isPgBackwardRelationField?: true;
+    isPgBackwardSingleRelationField?: boolean;
+    isPgBackwardRelationField?: boolean;
   }
 }
 
@@ -162,7 +162,8 @@ export default (function PgBackwardRelationPlugin(
                 uncoveredPrimaryKeys,
                 table,
                 foreignTable,
-                constraint
+                constraint,
+                primaryKeyConstraint as PgConstraint // not void
               )
             : null;
 
@@ -282,7 +283,7 @@ export default (function PgBackwardRelationPlugin(
                           };
                         return memo;
                       }, {}),
-                      resolve: (data, _args, resolveContext, resolveInfo) => {
+                      resolve: (data, _args, _resolveContext, resolveInfo) => {
                         const safeAlias = getSafeAliasFromResolveInfo(
                           resolveInfo
                         );
@@ -315,7 +316,7 @@ export default (function PgBackwardRelationPlugin(
               )}`
             );
           }
-          function makeFields(isConnection) {
+          function makeFields(isConnection: boolean) {
             if (isUnique && !isConnection) {
               // Don't need this, use the singular instead
               return;
@@ -487,7 +488,12 @@ export default (function PgBackwardRelationPlugin(
                             ),
 
                         args: {},
-                        resolve: (data, _args, resolveContext, resolveInfo) => {
+                        resolve: (
+                          data,
+                          _args,
+                          _resolveContext,
+                          resolveInfo
+                        ) => {
                           const safeAlias = getSafeAliasFromResolveInfo(
                             resolveInfo
                           );
@@ -519,7 +525,7 @@ export default (function PgBackwardRelationPlugin(
                               resolveInfo.rootValue.liveRecord;
                             if (primaryKeys && subscriptions && liveRecord) {
                               records.forEach(
-                                r =>
+                                (r: any) =>
                                   r &&
                                   r.__identifiers &&
                                   liveRecord("pg", table, r.__identifiers)

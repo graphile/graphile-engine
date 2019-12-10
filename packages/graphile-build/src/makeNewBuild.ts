@@ -33,10 +33,12 @@ import SchemaBuilder, {
   ContextGraphQLObjectTypeFieldsField,
   ContextGraphQLObjectTypeFieldsFieldArgs,
   ScopeGraphQLObjectTypeFieldsField,
+  ScopeGraphQLObjectTypeFieldsFieldWithFieldName,
   ScopeGraphQLInputObjectTypeFieldsField,
   ArgDataGeneratorFunction,
   DataGeneratorFunction,
   Build,
+  ScopeGraphQLInputObjectTypeFieldsFieldWithFieldName,
 } from "./SchemaBuilder";
 
 import extend, { indent } from "./extend";
@@ -87,7 +89,7 @@ const makeInitialInflection = () => ({
   /**
    *  When converting a query field to a subscription (live query) field, this allows you to rename it
    */
-  live: name => name,
+  live: (name: string) => name,
 
   /**
    * Try and make something a valid GraphQL 'Name'.
@@ -123,7 +125,7 @@ export type InflectionBase = ReturnType<typeof makeInitialInflection>;
 
 let recurseDataGeneratorsForFieldWarned = false;
 
-const isString = str => typeof str === "string";
+const isString = (str: unknown): str is string => typeof str === "string";
 const isDev = ["test", "development"].indexOf(process.env.NODE_ENV || "") >= 0;
 const debug = debugFactory("graphile-build");
 
@@ -146,7 +148,7 @@ const hashCache = new LRU({ maxLength: 100000 });
  * for the user deliberately causing them, but that's their own fault!), so
  * we'll happily take the performance boost over SHA256.
  */
-function hashFieldAlias(str) {
+function hashFieldAlias(str: string) {
   const precomputed = hashCache.get(str);
   if (precomputed) return precomputed;
   const hash = createHash("sha1")
@@ -169,7 +171,7 @@ function hashFieldAlias(str) {
  *
  * It does not guarantee that this alias will be human readable!
  */
-function getSafeAliasFromAlias(alias) {
+function getSafeAliasFromAlias(alias: string) {
   if (alias.length <= 60 && !alias.startsWith("@")) {
     // Use the `@` to prevent conflicting with normal GraphQL field names, but otherwise let it through verbatim.
     return `@${alias}`;
@@ -187,7 +189,9 @@ function getSafeAliasFromAlias(alias) {
  * never be longer than 60 characters. This makes it suitable as a PostgreSQL
  * identifier.
  */
-function getSafeAliasFromResolveInfo(resolveInfo) {
+function getSafeAliasFromResolveInfo(
+  resolveInfo: import("graphql").GraphQLResolveInfo
+) {
   const alias = rawGetAliasFromResolveInfo(resolveInfo);
   return getSafeAliasFromAlias(alias);
 }
@@ -204,7 +208,7 @@ export type FieldWithHooksFunction = (
   spec:
     | FieldSpec
     | ((context: ContextGraphQLObjectTypeFieldsField) => FieldSpec),
-  fieldScope: Omit<ScopeGraphQLObjectTypeFieldsField, "fieldName">
+  fieldScope: ScopeGraphQLObjectTypeFieldsField
 ) => graphql.GraphQLFieldConfig<any, any>;
 
 export type InputFieldWithHooksFunction = (
@@ -212,9 +216,9 @@ export type InputFieldWithHooksFunction = (
   spec:
     | graphql.GraphQLInputFieldConfig
     | ((
-        ContextGraphQLInputObjectTypeFieldsField
+        context: ContextGraphQLInputObjectTypeFieldsField
       ) => graphql.GraphQLInputFieldConfig),
-  fieldScope: Omit<ScopeGraphQLInputObjectTypeFieldsField, "fieldName">
+  fieldScope: ScopeGraphQLInputObjectTypeFieldsField
 ) => graphql.GraphQLInputFieldConfig;
 
 function getNameFromType(
@@ -312,7 +316,10 @@ function ensureArray<T>(val: null | T | Array<T>): void | Array<T> {
 }
 
 // eslint-disable-next-line no-unused-vars
-let ensureName = _fn => {};
+let ensureName: (fn: {
+  (...args: any[]): any;
+  displayName?: string;
+}) => void = _fn => {};
 if (["development", "test"].indexOf(process.env.NODE_ENV || "") >= 0) {
   ensureName = fn => {
     // $FlowFixMe: displayName
@@ -606,6 +613,19 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
             fieldArgDataGeneratorsByFieldName[fieldName] = argDataGenerators;
 
             let newSpec = spec;
+            const scopeWithFieldName: ScopeGraphQLObjectTypeFieldsFieldWithFieldName = extend(
+              extend(
+                { ...scope },
+                {
+                  fieldName,
+                },
+
+                `Within context for GraphQLObjectType '${rawSpec.name}'`
+              ),
+
+              fieldScope,
+              `Extending scope for field '${fieldName}' within context for GraphQLObjectType '${rawSpec.name}'`
+            );
             const context: ContextGraphQLObjectTypeFieldsField = {
               ...commonContext,
               Self: Self as graphql.GraphQLObjectType,
@@ -687,19 +707,7 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
                 }
                 return data;
               },
-              scope: extend(
-                extend(
-                  { ...scope },
-                  {
-                    fieldName,
-                  },
-
-                  `Within context for GraphQLObjectType '${rawSpec.name}'`
-                ),
-
-                fieldScope,
-                `Extending scope for field '${fieldName}' within context for GraphQLObjectType '${rawSpec.name}'`
-              ),
+              scope: scopeWithFieldName,
             };
 
             if (typeof newSpec === "function") {
@@ -811,22 +819,23 @@ export default function makeNewBuild(builder: SchemaBuilder): BuildBase {
                 "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
               );
             }
+            const finalFieldScope: ScopeGraphQLInputObjectTypeFieldsFieldWithFieldName = extend(
+              extend(
+                { ...scope },
+                {
+                  fieldName,
+                },
+
+                `Within context for GraphQLInputObjectType '${rawSpec.name}'`
+              ),
+
+              fieldScope,
+              `Extending scope for field '${fieldName}' within context for GraphQLInputObjectType '${rawSpec.name}'`
+            );
             const context: ContextGraphQLInputObjectTypeFieldsField = {
               ...commonContext,
               Self: Self as graphql.GraphQLInputObjectType,
-              scope: extend(
-                extend(
-                  { ...scope },
-                  {
-                    fieldName,
-                  },
-
-                  `Within context for GraphQLInputObjectType '${rawSpec.name}'`
-                ),
-
-                fieldScope,
-                `Extending scope for field '${fieldName}' within context for GraphQLInputObjectType '${rawSpec.name}'`
-              ),
+              scope: finalFieldScope,
             };
 
             let newSpec = spec;

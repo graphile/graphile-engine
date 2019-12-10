@@ -6,18 +6,12 @@ import {
 } from "../SchemaBuilder";
 import { Kind } from "graphql/language";
 
-declare module "../SchemaBuilder" {
-  interface ScopeGraphQLObjectType {
-    isPageInfo?: true;
-  }
-}
-
 export default (function StandardTypesPlugin(builder) {
   // XXX: this should be in an "init" plugin, but PgTypesPlugin requires it in build - fix that, then fix this
   builder.hook(
     "build",
     (build: Build): Build => {
-      const stringType = (name, description) =>
+      const stringType = (name: string, description: string | null) =>
         new build.graphql.GraphQLScalarType({
           name,
           description,
