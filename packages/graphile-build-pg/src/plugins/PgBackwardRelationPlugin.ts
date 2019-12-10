@@ -9,8 +9,8 @@ declare module "graphile-build" {
     pgLegacyRelations?: "only" | "deprecated" | "omit";
   }
   interface ScopeGraphQLObjectTypeFieldsField {
-    isPgBackwardSingleRelationField?: true;
-    isPgBackwardRelationField?: true;
+    isPgBackwardSingleRelationField?: boolean;
+    isPgBackwardRelationField?: boolean;
   }
 }
 
@@ -228,7 +228,7 @@ export default (function PgBackwardRelationPlugin(
                         `Reads a single \`${tableTypeName}\` that is related to this \`${foreignTableTypeName}\`.`,
                       type: gqlTableType,
                       args: {},
-                      resolve: (data, _args, resolveContext, resolveInfo) => {
+                      resolve: (data, _args, _resolveContext, resolveInfo) => {
                         const safeAlias = getSafeAliasFromResolveInfo(
                           resolveInfo
                         );
@@ -261,7 +261,7 @@ export default (function PgBackwardRelationPlugin(
               )}`
             );
           }
-          function makeFields(isConnection) {
+          function makeFields(isConnection: boolean) {
             const manyRelationFieldName = isConnection
               ? inflection.manyRelationByKeys(
                   keys,
@@ -423,7 +423,7 @@ export default (function PgBackwardRelationPlugin(
                             new GraphQLList(new GraphQLNonNull(TableType))
                           ),
                       args: {},
-                      resolve: (data, _args, resolveContext, resolveInfo) => {
+                      resolve: (data, _args, _resolveContext, resolveInfo) => {
                         const safeAlias = getSafeAliasFromResolveInfo(
                           resolveInfo
                         );
@@ -454,7 +454,7 @@ export default (function PgBackwardRelationPlugin(
                             resolveInfo.rootValue.liveRecord;
                           if (primaryKeys && subscriptions && liveRecord) {
                             records.forEach(
-                              r =>
+                              (r: any) =>
                                 r &&
                                 r.__identifiers &&
                                 liveRecord("pg", table, r.__identifiers)

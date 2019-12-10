@@ -1,16 +1,15 @@
 {
   "name": "pg-sql2",
-  "version": "4.5.0",
+  "version": "4.6.0-alpha.0",
   "description": "Generate safe Postgres-compliant SQL with tagged template literals",
   "main": "node8plus/index.js",
   "types": "node8plus/index.d.ts",
   "scripts": {
     "jest": "jest",
-    "test": "tsc && node node8plus/index.js && jest && markdown-doctest",
-    "test:u": "tsc && node node8plus/index.js && jest -u && markdown-doctest",
+    "test": "tsc -b && node node8plus/index.js && jest && markdown-doctest",
+    "test:u": "tsc -b && node node8plus/index.js && jest -u && markdown-doctest",
     "test:docs": "markdown-doctest",
-    "watch": "tsc --watch",
-    "prepack": "tsc"
+    "prepack": "tsc -b"
   },
   "repository": {
     "type": "git",
@@ -46,7 +45,7 @@
     "pg": ">=6.1.0 <8"
   },
   "dependencies": {
-    "@graphile/lru": "4.5.0",
+    "@graphile/lru": "4.6.0-alpha.0",
     "@types/pg": ">=6 <8",
     "debug": ">=3 <5"
   },
