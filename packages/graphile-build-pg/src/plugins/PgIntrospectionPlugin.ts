@@ -1145,7 +1145,7 @@ export default (async function PgIntrospectionPlugin(
         } else if (payload.type === "manual") {
           this._handleChange();
         } else {
-          throw new Error(`Payload type '${payload.type}' not recognised`);
+          throw new Error(`Payload type '${(payload as any).type}' not recognised`);
         }
       } catch (e) {
         debug(`Error occurred parsing notification payload: ${e}`);
