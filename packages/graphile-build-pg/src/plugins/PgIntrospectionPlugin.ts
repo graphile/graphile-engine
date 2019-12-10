@@ -19,8 +19,6 @@ import queryFromResolveDataFactory from "../queryFromResolveDataFactory";
 const debug = debugFactory("graphile-build-pg");
 const WATCH_FIXTURES_PATH = `${__dirname}/../../res/watch-fixtures.sql`;
 
-// TODO: rename RawishIntrospectionResults
-
 declare module "graphile-build" {
   interface GraphileBuildOptions {
     pgEnableTags?: boolean;
@@ -28,9 +26,6 @@ declare module "graphile-build" {
     pgIncludeExtensionResources?: boolean;
     pgLegacyFunctionsOnly?: boolean;
     pgSkipInstallingWatchFixtures?: boolean;
-    pgAugmentIntrospectionResults?: (
-      introspectionResult: RawishIntrospectionResults
-    ) => RawishIntrospectionResults;
     pgOwnerConnectionString?: string;
   }
 
@@ -311,7 +306,7 @@ function parseConstraintSpec(rawSpec: string) {
 }
 
 function smartCommentConstraints(
-  introspectionResults: RawishIntrospectionResults
+  introspectionResults: RawIntrospectionResults
 ) {
   const attributesByNames = (
     tbl: PgClass,
@@ -525,7 +520,7 @@ function smartCommentConstraints(
   });
 }
 
-type RawishIntrospectionResults = Pick<
+export type RawIntrospectionResults = Pick<
   PgIntrospectionResultsByKind,
   | "__pgVersion"
   | "namespace"
@@ -549,11 +544,11 @@ export default (async function PgIntrospectionPlugin(
     pgIncludeExtensionResources = false,
     pgLegacyFunctionsOnly = false,
     pgSkipInstallingWatchFixtures = false,
-    pgAugmentIntrospectionResults,
     pgOwnerConnectionString,
+    pgAugmentIntrospectionResults,
   }
 ) {
-  const augment = (introspectionResults: RawishIntrospectionResults) => {
+  const augment = (introspectionResults: RawIntrospectionResults) => {
     [pgAugmentIntrospectionResults, smartCommentConstraints].forEach(fn =>
       fn ? fn(introspectionResults) : null
     );
@@ -582,10 +577,10 @@ export default (async function PgIntrospectionPlugin(
     const rawishIntrospectionResultsByKind = cloneResults(
       await persistentMemoizeWithKey(
         cacheKey,
-        (): Promise<RawishIntrospectionResults> =>
+        (): Promise<RawIntrospectionResults> =>
           withPgClient(
             pgConfig,
-            async (pgClient): Promise<RawishIntrospectionResults> => {
+            async (pgClient): Promise<RawIntrospectionResults> => {
               const versionResult = await pgClient.query(
                 "show server_version_num;"
               );
@@ -607,7 +602,7 @@ export default (async function PgIntrospectionPlugin(
                 pgIncludeExtensionResources,
               ]);
 
-              const result: RawishIntrospectionResults = {
+              const result: RawIntrospectionResults = {
                 __pgVersion: serverVersionNum,
                 namespace: [],
                 class: [],

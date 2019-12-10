@@ -12,6 +12,7 @@ import {
   PgEntity,
   SmartTagValue,
   SmartTags,
+  RawIntrospectionResults,
 } from "./PgIntrospectionPlugin";
 import pgField from "./pgField";
 
@@ -85,6 +86,10 @@ declare module "graphile-build" {
     pgIgnoreIndexes?: boolean;
     pgHideIndexWarnings?: boolean;
     pgLegacyJsonUuid?: boolean;
+
+    pgAugmentIntrospectionResults?: (
+      introspectionResult: RawIntrospectionResults
+    ) => RawIntrospectionResults;
   }
 
   interface Build {
@@ -102,6 +107,9 @@ declare module "graphile-build" {
     pgField: typeof pgField;
     sqlCommentByAddingTags: typeof sqlCommentByAddingTags;
     pgPrepareAndRun: typeof pgPrepareAndRun;
+    pgAugmentIntrospectionResults?: (
+      introspectionResult: RawIntrospectionResults
+    ) => RawIntrospectionResults;
   }
 
   interface Inflection {
@@ -1038,6 +1046,7 @@ export default (function PgBasicsPlugin(
     pgIgnoreIndexes = true, // TODO:v5: change this to false
     pgHideIndexWarnings = false,
     pgLegacyJsonUuid = false, // TODO:v5: remove this
+    pgAugmentIntrospectionResults,
   }
 ) {
   let pgOmit = baseOmit;
@@ -1071,6 +1080,7 @@ export default (function PgBasicsPlugin(
         pgField,
         sqlCommentByAddingTags,
         pgPrepareAndRun,
+        pgAugmentIntrospectionResults,
       };
       return build.extend(
         build,

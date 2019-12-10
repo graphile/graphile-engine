@@ -132,6 +132,7 @@ export {
   PgConstraint,
   PgExtension,
   PgIndex,
+  RawIntrospectionResults,
   PgIntrospectionResultsByKind,
   PgEntity,
   PgEntityKind,
