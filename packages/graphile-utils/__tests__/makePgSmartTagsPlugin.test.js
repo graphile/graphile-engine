@@ -18,6 +18,47 @@ afterAll(() => {
   }
 });
 
+const inlineSnapshot = `
+  Object {
+    "allUsers": Object {
+      "nodes": Array [
+        Object {
+          "email": "alice@example.com",
+          "testSmartTagByEmail": null,
+        },
+        Object {
+          "email": "bob@example.com",
+          "testSmartTagByEmail": Object {
+            "email": "bob@example.com",
+            "val": 42,
+          },
+        },
+        Object {
+          "email": "caroline@example.com",
+          "testSmartTagByEmail": Object {
+            "email": "caroline@example.com",
+            "val": 9999,
+          },
+        },
+      ],
+    },
+  }
+`;
+
+const testQuery = `
+  query {
+    allUsers {
+      nodes {
+        email
+        testSmartTagByEmail {
+          email
+          val
+        }
+      }
+    }
+  }
+`;
+
 it("allows adding a custom single field to PG schema", async () => {
   const schema = await createPostGraphileSchema(pgPool, ["graphile_utils"], {
     disableDefaultMutations: true,
@@ -50,51 +91,59 @@ it("allows adding a custom single field to PG schema", async () => {
   try {
     const { data, errors } = await graphql(
       schema,
-      `
-        query {
-          allUsers {
-            nodes {
-              email
-              testSmartTagByEmail {
-                email
-                val
-              }
-            }
-          }
-        }
-      `,
+      testQuery,
       null,
       { pgClient },
       {}
     );
     expect(errors).toBeFalsy();
     expect(data).toBeTruthy();
-    expect(data).toMatchInlineSnapshot(`
-      Object {
-        "allUsers": Object {
-          "nodes": Array [
-            Object {
-              "email": "alice@example.com",
-              "testSmartTagByEmail": null,
-            },
-            Object {
-              "email": "bob@example.com",
-              "testSmartTagByEmail": Object {
-                "email": "bob@example.com",
-                "val": 42,
+    expect(data).toMatchInlineSnapshot(inlineSnapshot);
+  } finally {
+    await pgClient.release();
+  }
+});
+
+it("allows adding a custom single field to PG schema without specifying schema for table", async () => {
+  const schema = await createPostGraphileSchema(pgPool, ["graphile_utils"], {
+    disableDefaultMutations: true,
+    appendPlugins: [
+      makeJSONPgSmartTagsPlugin({
+        version: 1,
+        config: {
+          class: {
+            test_smart_tags: {
+              tags: {
+                omit: "",
+                primaryKey: "email",
+                foreignKey: "(email) references graphile_utils.users (email)",
+              },
+              attribute: {
+                value: {
+                  tags: {
+                    name: "val",
+                  },
+                },
               },
             },
-            Object {
-              "email": "caroline@example.com",
-              "testSmartTagByEmail": Object {
-                "email": "caroline@example.com",
-                "val": 9999,
-              },
-            },
-          ],
+          },
         },
-      }
-    `);
+      }),
+    ],
+  });
+  expect(schema).toMatchSnapshot();
+  const pgClient = await pgPool.connect();
+  try {
+    const { data, errors } = await graphql(
+      schema,
+      testQuery,
+      null,
+      { pgClient },
+      {}
+    );
+    expect(errors).toBeFalsy();
+    expect(data).toBeTruthy();
+    expect(data).toMatchInlineSnapshot(inlineSnapshot);
   } finally {
     await pgClient.release();
   }
