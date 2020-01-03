@@ -176,7 +176,7 @@ type AnIntRangeBound {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: AnInt!
+  value: AnInt
 }
 
 """
@@ -187,7 +187,7 @@ input AnIntRangeBoundInput {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: AnInt!
+  value: AnInt
 }
 
 """A range of \`AnInt\`."""
@@ -344,7 +344,7 @@ type BigFloatRangeBound {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: BigFloat!
+  value: BigFloat
 }
 
 """
@@ -355,7 +355,7 @@ input BigFloatRangeBoundInput {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: BigFloat!
+  value: BigFloat
 }
 
 """A range of \`BigFloat\`."""
@@ -1514,7 +1514,7 @@ type DateRangeBound {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: Date!
+  value: Date
 }
 
 """
@@ -1525,7 +1525,7 @@ input DateRangeBoundInput {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: Date!
+  value: Date
 }
 
 """A range of \`Date\`."""
@@ -2647,7 +2647,7 @@ input FloatRangeBoundInput {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: Float!
+  value: Float
 }
 
 """A range of \`Float\`."""
@@ -10256,7 +10256,7 @@ type AnIntRangeBound {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: AnInt!
+  value: AnInt
 }
 
 """
@@ -10267,7 +10267,7 @@ input AnIntRangeBoundInput {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: AnInt!
+  value: AnInt
 }
 
 """A range of \`AnInt\`."""
@@ -10424,7 +10424,7 @@ type BigFloatRangeBound {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: BigFloat!
+  value: BigFloat
 }
 
 """
@@ -10435,7 +10435,7 @@ input BigFloatRangeBoundInput {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: BigFloat!
+  value: BigFloat
 }
 
 """A range of \`BigFloat\`."""
@@ -11594,7 +11594,7 @@ type DateRangeBound {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: Date!
+  value: Date
 }
 
 """
@@ -11605,7 +11605,7 @@ input DateRangeBoundInput {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: Date!
+  value: Date
 }
 
 """A range of \`Date\`."""
@@ -12727,7 +12727,7 @@ input FloatRangeBoundInput {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: Float!
+  value: Float
 }
 
 """A range of \`Float\`."""

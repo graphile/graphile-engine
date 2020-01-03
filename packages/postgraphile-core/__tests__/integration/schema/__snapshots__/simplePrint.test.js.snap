@@ -168,7 +168,7 @@ The value at one end of a range. A range can either include this value, or not.
 \\"\\"\\"
 type AnIntRangeBound {
   \\"\\"\\"The value at one end of our range.\\"\\"\\"
-  value: AnInt!
+  value: AnInt
 
   \\"\\"\\"Whether or not the value of this bound is included in the range.\\"\\"\\"
   inclusive: Boolean!
@@ -179,7 +179,7 @@ The value at one end of a range. A range can either include this value, or not.
 \\"\\"\\"
 input AnIntRangeBoundInput {
   \\"\\"\\"The value at one end of our range.\\"\\"\\"
-  value: AnInt!
+  value: AnInt
 
   \\"\\"\\"Whether or not the value of this bound is included in the range.\\"\\"\\"
   inclusive: Boolean!
@@ -332,7 +332,7 @@ The value at one end of a range. A range can either include this value, or not.
 \\"\\"\\"
 type BigFloatRangeBound {
   \\"\\"\\"The value at one end of our range.\\"\\"\\"
-  value: BigFloat!
+  value: BigFloat
 
   \\"\\"\\"Whether or not the value of this bound is included in the range.\\"\\"\\"
   inclusive: Boolean!
@@ -343,7 +343,7 @@ The value at one end of a range. A range can either include this value, or not.
 \\"\\"\\"
 input BigFloatRangeBoundInput {
   \\"\\"\\"The value at one end of our range.\\"\\"\\"
-  value: BigFloat!
+  value: BigFloat
 
   \\"\\"\\"Whether or not the value of this bound is included in the range.\\"\\"\\"
   inclusive: Boolean!
@@ -1501,7 +1501,7 @@ The value at one end of a range. A range can either include this value, or not.
 \\"\\"\\"
 type DateRangeBound {
   \\"\\"\\"The value at one end of our range.\\"\\"\\"
-  value: Date!
+  value: Date
 
   \\"\\"\\"Whether or not the value of this bound is included in the range.\\"\\"\\"
   inclusive: Boolean!
@@ -1512,7 +1512,7 @@ The value at one end of a range. A range can either include this value, or not.
 \\"\\"\\"
 input DateRangeBoundInput {
   \\"\\"\\"The value at one end of our range.\\"\\"\\"
-  value: Date!
+  value: Date
 
   \\"\\"\\"Whether or not the value of this bound is included in the range.\\"\\"\\"
   inclusive: Boolean!
@@ -2633,7 +2633,7 @@ The value at one end of a range. A range can either include this value, or not.
 \\"\\"\\"
 input FloatRangeBoundInput {
   \\"\\"\\"The value at one end of our range.\\"\\"\\"
-  value: Float!
+  value: Float
 
   \\"\\"\\"Whether or not the value of this bound is included in the range.\\"\\"\\"
   inclusive: Boolean!

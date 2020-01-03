@@ -41,7 +41,7 @@ type AnIntRangeBound {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: AnInt!
+  value: AnInt
 }
 
 scalar AnotherInt
@@ -68,7 +68,7 @@ type BigFloatRangeBound {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: BigFloat!
+  value: BigFloat
 }
 
 """
@@ -222,7 +222,7 @@ type DateRangeBound {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: Date!
+  value: Date
 }
 
 """
@@ -313,7 +313,7 @@ input FloatRangeBoundInput {
   inclusive: Boolean!
 
   """The value at one end of our range."""
-  value: Float!
+  value: Float
 }
 
 """A range of \`Float\`."""
