@@ -10,7 +10,6 @@ import {
   Context,
   SchemaBuilder,
   Inflection,
-  GraphileResolverContext,
 } from "graphile-build";
 import { GraphQLSchema } from "graphql";
 import {
@@ -32,7 +31,6 @@ export {
   Inflection,
   Options,
   formatSQLForDebugging,
-  GraphileResolverContext,
 };
 
 export type mixed = {} | string | number | boolean | undefined | null;
