@@ -37,6 +37,7 @@ declare module "graphile-build" {
 
   interface Build {
     pgIntrospectionResultsByKind: PgIntrospectionResultsByKind;
+    pgAugmentIntrospectionResults: PgAugmentIntrospectionResultsFn;
   }
 }
 
