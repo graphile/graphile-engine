@@ -755,7 +755,7 @@ export default function makeExtendSchemaPlugin(
           const type = getType(field.type, build);
           const nullableType = build.graphql.getNullableType(type);
           const namedType = build.graphql.getNamedType(type);
-          const typeScope = scopeByType.get(namedType) || {};
+          const typeScope = scopeByType.get(namedType.name) || {};
           const directives = getDirectives(field.directives);
           const scope: any = {
             ...(typeScope.pgIntrospection &&

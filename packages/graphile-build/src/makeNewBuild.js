@@ -409,10 +409,10 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
             const results = [];
             const StrippedType: GraphQLNamedType = getNamedType(ReturnType);
             const fieldDataGeneratorsByFieldName = fieldDataGeneratorsByFieldNameByType.get(
-              StrippedType
+              StrippedType.name
             );
             const argDataGeneratorsForSelfByFieldName = fieldArgDataGeneratorsByFieldNameByType.get(
-              Self
+              Self.name
             );
             if (argDataGeneratorsForSelfByFieldName) {
               const argDataGenerators =
@@ -592,7 +592,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                       );
                     }
                     const fieldDataGeneratorsByFieldName = fieldDataGeneratorsByFieldNameByType.get(
-                      Type
+                      Type.name
                     );
                     if (
                       fieldDataGeneratorsByFieldName &&
@@ -897,7 +897,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
         }
       }
 
-      this.scopeByType.set(Self, scope);
+      this.scopeByType.set(Self.name, scope);
       if (finalSpec.name) {
         this.addType(
           Self,
@@ -908,11 +908,11 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
         );
       }
       fieldDataGeneratorsByFieldNameByType.set(
-        Self,
+        Self.name,
         fieldDataGeneratorsByFieldName
       );
       fieldArgDataGeneratorsByFieldNameByType.set(
-        Self,
+        Self.name,
         fieldArgDataGeneratorsByFieldName
       );
       return Self;
