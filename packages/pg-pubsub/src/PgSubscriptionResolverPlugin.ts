@@ -123,7 +123,7 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
                 resolveContext,
                 resolveInfo
               );
-              if (event !== null && typeof event !== "object") {
+              if (event === null || typeof event !== "object") {
                 throw new Error(
                   "initialEvent returning event must be an object"
                 );
