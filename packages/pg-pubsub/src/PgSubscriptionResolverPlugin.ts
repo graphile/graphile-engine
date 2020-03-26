@@ -39,6 +39,7 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
         topic: topicGen,
         unsubscribeTopic: unsubscribeTopicGen,
         filter,
+        initialEvent,
       } = pgSubscription;
       if (!topicGen) {
         return field;
@@ -64,7 +65,7 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
             typeof unsubscribeTopicGen === "function"
               ? await unsubscribeTopicGen(args, resolveContext, resolveInfo)
               : unsubscribeTopicGen;
-          const asyncIterator = pubsub.asyncIterator(topic);
+          let asyncIterator = pubsub.asyncIterator(topic);
           if (unsubscribeTopic) {
             // Subscribe to event revoking subscription
             const unsubscribeTopics: Array<string> = Array.isArray(
@@ -101,13 +102,41 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
                 "filter provided to pgSubscription must be a function"
               );
             }
-            return withFilter(() => asyncIterator, filter)(
+            asyncIterator = withFilter(() => asyncIterator, filter)(
               parent,
               args,
               resolveContext,
               resolveInfo
             );
           }
+
+          if (initialEvent) {
+            if (typeof initialEvent !== "function") {
+              throw new Error(
+                "initialEvent provided to pgSubscription must be a function"
+              );
+            }
+
+            return (async function* subscribeWithInitialEvent() {
+              const event = await initialEvent(
+                args,
+                resolveContext,
+                resolveInfo
+              );
+              if (event !== null && typeof event !== "object") {
+                throw new Error(
+                  "initialEvent returning event must be an object"
+                );
+              }
+              yield { ...event, topic };
+              for await (const val of {
+                [Symbol.asyncIterator]: () => asyncIterator,
+              }) {
+                yield val;
+              }
+            })();
+          }
+
           return asyncIterator;
         },
         ...(field.resolve
