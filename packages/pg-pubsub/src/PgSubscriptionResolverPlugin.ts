@@ -125,14 +125,16 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
             })();
           }
 
+          // filter should always be the last adjustment
+          // since we want to feed all current and future
+          // custom emissions to the filter
           if (filter) {
             if (typeof filter !== "function") {
               throw new Error(
                 "filter provided to pgSubscription must be a function"
               );
             }
-            const oldIterator = asyncIterator;
-            asyncIterator = withFilter(() => oldIterator, filter)(
+            return withFilter(() => asyncIterator, filter)(
               parent,
               args,
               resolveContext,
