@@ -123,12 +123,14 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
                 resolveContext,
                 resolveInfo
               );
-              if (event === null || typeof event !== "object") {
-                throw new Error(
-                  "initialEvent returning event must be an object"
-                );
+              if (event != null) {
+                if (typeof event !== "object") {
+                  throw new Error(
+                    "initialEvent returning event must be an object"
+                  );
+                }
+                yield { ...event, topic };
               }
-              yield { ...event, topic };
               for await (const val of {
                 [Symbol.asyncIterator]: () => asyncIterator,
               }) {
