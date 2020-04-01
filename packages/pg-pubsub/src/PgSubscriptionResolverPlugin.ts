@@ -96,21 +96,6 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
             });
           }
 
-          if (filter) {
-            if (typeof filter !== "function") {
-              throw new Error(
-                "filter provided to pgSubscription must be a function"
-              );
-            }
-            const oldIterator = asyncIterator;
-            asyncIterator = withFilter(() => oldIterator, filter)(
-              parent,
-              args,
-              resolveContext,
-              resolveInfo
-            );
-          }
-
           if (initialEvent) {
             if (typeof initialEvent !== "function") {
               throw new Error(
@@ -138,6 +123,21 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
                 yield val;
               }
             })();
+          }
+
+          if (filter) {
+            if (typeof filter !== "function") {
+              throw new Error(
+                "filter provided to pgSubscription must be a function"
+              );
+            }
+            const oldIterator = asyncIterator;
+            asyncIterator = withFilter(() => oldIterator, filter)(
+              parent,
+              args,
+              resolveContext,
+              resolveInfo
+            );
           }
 
           return asyncIterator;
