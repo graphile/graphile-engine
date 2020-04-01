@@ -102,7 +102,8 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
                 "filter provided to pgSubscription must be a function"
               );
             }
-            asyncIterator = withFilter(() => asyncIterator, filter)(
+            const oldIterator = asyncIterator;
+            asyncIterator = withFilter(() => oldIterator, filter)(
               parent,
               args,
               resolveContext,
@@ -116,8 +117,8 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
                 "initialEvent provided to pgSubscription must be a function"
               );
             }
-
-            return (async function* subscribeWithInitialEvent() {
+            const oldIterator = asyncIterator;
+            asyncIterator = (async function* subscribeWithInitialEvent() {
               const event = await initialEvent(
                 args,
                 resolveContext,
@@ -132,7 +133,7 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
                 yield { ...event, topic };
               }
               for await (const val of {
-                [Symbol.asyncIterator]: () => asyncIterator,
+                [Symbol.asyncIterator]: () => oldIterator,
               }) {
                 yield val;
               }
