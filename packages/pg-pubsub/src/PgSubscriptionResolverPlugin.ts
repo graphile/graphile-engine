@@ -4,8 +4,40 @@ import { PubSub, withFilter } from "graphql-subscriptions";
 
 const debug = debugFactory("pg-pubsub");
 
-function isPubSub(pubsub: any): pubsub is PubSub {
+function isPubSub(pubsub: unknown): pubsub is PubSub {
   return !!pubsub;
+}
+
+function withInitialEvent(
+  topic: string,
+  initialEvent: (
+    args: { [key: string]: unknown },
+    resolveContext: unknown,
+    resolveInfo: unknown
+  ) => unknown
+) {
+  return async function* subscribeWithInitialEvent(
+    asyncIterator: AsyncIterator<unknown>,
+    _parent: unknown,
+    args: { [key: string]: unknown },
+    resolveContext: unknown,
+    resolveInfo: unknown
+  ) {
+    const event = await initialEvent(args, resolveContext, resolveInfo);
+    if (event != null) {
+      if (typeof event !== "object") {
+        throw new Error(
+          "event returned from pgSubscription initialEvent must be an object"
+        );
+      }
+      yield { ...event, topic };
+    }
+
+    // @ts-ignore code is actually fine, but async iterators are currently an ES.next feature
+    for await (const val of asyncIterator) {
+      yield val;
+    }
+  };
 }
 
 /*
@@ -46,10 +78,10 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
       }
       return extend(field, {
         subscribe: async (
-          parent: any,
-          args: any,
-          resolveContext: any,
-          resolveInfo: any
+          parent: unknown,
+          args: { [key: string]: unknown },
+          resolveContext: unknown,
+          resolveInfo: unknown
         ) => {
           const topic =
             typeof topicGen === "function"
@@ -65,7 +97,7 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
             typeof unsubscribeTopicGen === "function"
               ? await unsubscribeTopicGen(args, resolveContext, resolveInfo)
               : unsubscribeTopicGen;
-          let asyncIterator = pubsub.asyncIterator(topic);
+          let asyncIterator = await pubsub.asyncIterator(topic);
           if (unsubscribeTopic) {
             // Subscribe to event revoking subscription
             const unsubscribeTopics: Array<string> = Array.isArray(
@@ -102,27 +134,14 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
                 "initialEvent provided to pgSubscription must be a function"
               );
             }
-            const oldIterator = asyncIterator;
-            asyncIterator = (async function* subscribeWithInitialEvent() {
-              const event = await initialEvent(
-                args,
-                resolveContext,
-                resolveInfo
-              );
-              if (event != null) {
-                if (typeof event !== "object") {
-                  throw new Error(
-                    "initialEvent returning event must be an object"
-                  );
-                }
-                yield { ...event, topic };
-              }
-              for await (const val of {
-                [Symbol.asyncIterator]: () => oldIterator,
-              }) {
-                yield val;
-              }
-            })();
+            const oldAsyncIterator = asyncIterator;
+            asyncIterator = withInitialEvent(topic, initialEvent)(
+              oldAsyncIterator,
+              parent,
+              args,
+              resolveContext,
+              resolveInfo
+            );
           }
 
           // filter should always be the last adjustment
@@ -134,7 +153,8 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
                 "filter provided to pgSubscription must be a function"
               );
             }
-            return withFilter(() => asyncIterator, filter)(
+            const oldAsyncIterator = asyncIterator;
+            asyncIterator = withFilter(() => oldAsyncIterator, filter)(
               parent,
               args,
               resolveContext,
