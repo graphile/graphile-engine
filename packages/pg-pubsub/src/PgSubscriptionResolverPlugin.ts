@@ -97,7 +97,7 @@ const PgSubscriptionResolverPlugin: Plugin = function(builder, { pubsub }) {
             typeof unsubscribeTopicGen === "function"
               ? await unsubscribeTopicGen(args, resolveContext, resolveInfo)
               : unsubscribeTopicGen;
-          let asyncIterator = await pubsub.asyncIterator(topic);
+          let asyncIterator = pubsub.asyncIterator(topic);
           if (unsubscribeTopic) {
             // Subscribe to event revoking subscription
             const unsubscribeTopics: Array<string> = Array.isArray(
