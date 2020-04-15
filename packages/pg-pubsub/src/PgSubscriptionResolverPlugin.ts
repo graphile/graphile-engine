@@ -38,9 +38,25 @@ function withInitialEvent(
       yield { ...event, topic };
     }
 
-    // @ts-ignore code is actually fine, but async iterators are currently an ES.next feature
+    /* TODO: when we can upgrade to Node 10.3+ we can replace the below with simply:
     for await (const val of asyncIterator) {
       yield val;
+    }
+    */
+    try {
+      while (true) {
+        const next = await asyncIterator.next();
+        if (next.done) {
+          return next.value;
+        } else {
+          yield next.value;
+        }
+      }
+    } finally {
+      // Terminate the previous iterator
+      if (typeof asyncIterator.return === "function") {
+        asyncIterator.return();
+      }
     }
   };
 }
