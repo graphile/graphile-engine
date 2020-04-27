@@ -8467,6 +8467,7 @@ Object {
             },
             "domain": 5,
             "domain2": 6,
+            "domainConstrainedCompoundType": null,
             "enum": "GREEN",
             "enumArray": Array [
               "GREEN",
@@ -8557,6 +8558,7 @@ Object {
             },
             "domain": 5,
             "domain2": 6,
+            "domainConstrainedCompoundType": null,
             "enum": "GREEN",
             "enumArray": Array [
               "GREEN",
@@ -8642,6 +8644,7 @@ Object {
           },
           "domain": 5,
           "domain2": 6,
+          "domainConstrainedCompoundType": null,
           "enum": "GREEN",
           "enumArray": Array [
             "GREEN",
@@ -8730,6 +8733,7 @@ Object {
           },
           "domain": 5,
           "domain2": 6,
+          "domainConstrainedCompoundType": null,
           "enum": "GREEN",
           "enumArray": Array [
             "GREEN",
@@ -8822,6 +8826,7 @@ Object {
         },
         "domain": 5,
         "domain2": 6,
+        "domainConstrainedCompoundType": null,
         "enum": "GREEN",
         "enumArray": Array [
           "GREEN",
@@ -8910,6 +8915,7 @@ Object {
         },
         "domain": 5,
         "domain2": 6,
+        "domainConstrainedCompoundType": null,
         "enum": "GREEN",
         "enumArray": Array [
           "GREEN",
@@ -8993,6 +8999,7 @@ Object {
       },
       "domain": 5,
       "domain2": 6,
+      "domainConstrainedCompoundType": null,
       "enum": "GREEN",
       "enumArray": Array [
         "GREEN",
@@ -9082,6 +9089,7 @@ Object {
         },
         "domain": 5,
         "domain2": 6,
+        "domainConstrainedCompoundType": null,
         "enum": "GREEN",
         "enumArray": Array [
           "GREEN",
@@ -9173,6 +9181,7 @@ Object {
               },
               "domain": 5,
               "domain2": 6,
+              "domainConstrainedCompoundType": null,
               "enum": "GREEN",
               "enumArray": Array [
                 "GREEN",
@@ -9263,6 +9272,7 @@ Object {
               },
               "domain": 5,
               "domain2": 6,
+              "domainConstrainedCompoundType": null,
               "enum": "GREEN",
               "enumArray": Array [
                 "GREEN",
@@ -9348,6 +9358,7 @@ Object {
             },
             "domain": 5,
             "domain2": 6,
+            "domainConstrainedCompoundType": null,
             "enum": "GREEN",
             "enumArray": Array [
               "GREEN",
@@ -9436,6 +9447,7 @@ Object {
             },
             "domain": 5,
             "domain2": 6,
+            "domainConstrainedCompoundType": null,
             "enum": "GREEN",
             "enumArray": Array [
               "GREEN",
@@ -9528,6 +9540,7 @@ Object {
           },
           "domain": 5,
           "domain2": 6,
+          "domainConstrainedCompoundType": null,
           "enum": "GREEN",
           "enumArray": Array [
             "GREEN",
@@ -9616,6 +9629,7 @@ Object {
           },
           "domain": 5,
           "domain2": 6,
+          "domainConstrainedCompoundType": null,
           "enum": "GREEN",
           "enumArray": Array [
             "GREEN",
@@ -9703,6 +9717,7 @@ Object {
         },
         "domain": 5,
         "domain2": 6,
+        "domainConstrainedCompoundType": null,
         "enum": "GREEN",
         "enumArray": Array [
           "GREEN",
@@ -9803,6 +9818,7 @@ Object {
       },
       "domain": 5,
       "domain2": 6,
+      "domainConstrainedCompoundType": null,
       "enum": "GREEN",
       "enumArray": Array [
         "GREEN",
@@ -9891,6 +9907,7 @@ Object {
       },
       "domain": 5,
       "domain2": 6,
+      "domainConstrainedCompoundType": null,
       "enum": "GREEN",
       "enumArray": Array [
         "GREEN",
@@ -9979,6 +9996,7 @@ Object {
       },
       "domain": 5,
       "domain2": 6,
+      "domainConstrainedCompoundType": null,
       "enum": "GREEN",
       "enumArray": Array [
         "GREEN",
@@ -10070,6 +10088,7 @@ Object {
             },
             "domain": 5,
             "domain2": 6,
+            "domainConstrainedCompoundType": null,
             "enum": "GREEN",
             "enumArray": Array [
               "GREEN",
@@ -10160,6 +10179,7 @@ Object {
             },
             "domain": 5,
             "domain2": 6,
+            "domainConstrainedCompoundType": null,
             "enum": "GREEN",
             "enumArray": Array [
               "GREEN",
@@ -10245,6 +10265,7 @@ Object {
           },
           "domain": 5,
           "domain2": 6,
+          "domainConstrainedCompoundType": null,
           "enum": "GREEN",
           "enumArray": Array [
             "GREEN",
@@ -10333,6 +10354,7 @@ Object {
           },
           "domain": 5,
           "domain2": 6,
+          "domainConstrainedCompoundType": null,
           "enum": "GREEN",
           "enumArray": Array [
             "GREEN",
@@ -10425,6 +10447,7 @@ Object {
         },
         "domain": 5,
         "domain2": 6,
+        "domainConstrainedCompoundType": null,
         "enum": "GREEN",
         "enumArray": Array [
           "GREEN",
@@ -10513,6 +10536,7 @@ Object {
         },
         "domain": 5,
         "domain2": 6,
+        "domainConstrainedCompoundType": null,
         "enum": "GREEN",
         "enumArray": Array [
           "GREEN",

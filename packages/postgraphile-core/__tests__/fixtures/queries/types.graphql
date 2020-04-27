@@ -130,6 +130,15 @@ fragment type on Type {
     x
     y
   }
+  domainConstrainedCompoundType {
+    a
+    b
+    c
+    d
+    e
+    f
+    fooBar
+  }
   postBySmallint {
     id
     headline

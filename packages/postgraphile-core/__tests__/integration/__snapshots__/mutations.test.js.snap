@@ -1714,6 +1714,15 @@ Object {
         },
         "domain": 1,
         "domain2": 1,
+        "domainConstrainedCompoundType": Object {
+          "a": 1,
+          "b": null,
+          "c": null,
+          "d": null,
+          "e": null,
+          "f": null,
+          "fooBar": null,
+        },
         "enum": "RED",
         "enumArray": Array [
           "RED",
@@ -1786,6 +1795,7 @@ Object {
           },
           "domain": 5,
           "domain2": 6,
+          "domainConstrainedCompoundType": null,
           "enum": "GREEN",
           "enumArray": Array [
             "GREEN",
@@ -1866,6 +1876,7 @@ Object {
           },
           "domain": 5,
           "domain2": 6,
+          "domainConstrainedCompoundType": null,
           "enum": "GREEN",
           "enumArray": Array [
             "GREEN",
@@ -1950,6 +1961,7 @@ Object {
           },
           "domain": 5,
           "domain2": 6,
+          "domainConstrainedCompoundType": null,
           "enum": "GREEN",
           "enumArray": Array [
             "GREEN",
@@ -2030,6 +2042,7 @@ Object {
           },
           "domain": 5,
           "domain2": 6,
+          "domainConstrainedCompoundType": null,
           "enum": "GREEN",
           "enumArray": Array [
             "GREEN",
@@ -2113,6 +2126,7 @@ Object {
         },
         "domain": 5,
         "domain2": 6,
+        "domainConstrainedCompoundType": null,
         "enum": "GREEN",
         "enumArray": Array [
           "GREEN",
@@ -2195,6 +2209,15 @@ Object {
         },
         "domain": 1,
         "domain2": 1,
+        "domainConstrainedCompoundType": Object {
+          "a": 1,
+          "b": null,
+          "c": null,
+          "d": null,
+          "e": null,
+          "f": null,
+          "fooBar": null,
+        },
         "enum": "RED",
         "enumArray": Array [
           "RED",

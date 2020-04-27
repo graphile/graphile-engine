@@ -55,6 +55,7 @@ mutation {
         money: 27
         compoundType: { a: 1 }
         nestedCompoundType: { a: { a: 1 } }
+        domainConstrainedCompoundType: { a: 1 }
       }
     }
   ) {
@@ -102,6 +103,7 @@ mutation {
         money: 27
         compoundType: { a: 1 }
         nestedCompoundType: { a: { a: 1 } }
+        domainConstrainedCompoundType: { a: 1 }
       }
     }
   ) {
@@ -194,5 +196,14 @@ fragment type on Type {
   nullablePoint {
     x
     y
+  }
+  domainConstrainedCompoundType {
+    a
+    b
+    c
+    d
+    e
+    f
+    fooBar
   }
 }
