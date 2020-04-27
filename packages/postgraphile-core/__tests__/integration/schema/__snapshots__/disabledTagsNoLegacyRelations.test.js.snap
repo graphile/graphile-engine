@@ -910,6 +910,18 @@ type DeletePersonSecretPayload {
   query: Query
 }
 
+type DomainConstrainedCompoundType {
+  a: Int
+  b: String
+  c: Color
+  computedField: Int
+  d: UUID
+  e: EnumCaps
+  f: EnumWithEmptyString
+  fooBar: Int
+  g: Interval
+}
+
 type EdgeCase {
   computed: String
   notNullHasDefault: Boolean!
@@ -3869,6 +3881,7 @@ type Type {
   decimal: BigFloat!
   domain: AnInt!
   domain2: AnotherInt!
+  domainConstrainedCompoundType: DomainConstrainedCompoundType
   enum: Color!
   enumArray: [Color]!
   id: Int!

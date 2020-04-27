@@ -910,6 +910,18 @@ type DeletePersonSecretPayload {
   query: Query
 }
 
+type DomainConstrainedCompoundType {
+  a: Int
+  b: String
+  c: Color
+  computedField: Int
+  d: UUID
+  e: EnumCaps
+  f: EnumWithEmptyString
+  fooBar: Int
+  g: Interval
+}
+
 type EdgeCase {
   computed: String
   notNullHasDefault: Boolean!
@@ -4196,6 +4208,7 @@ type Type {
   decimal: BigFloat!
   domain: AnInt!
   domain2: AnotherInt!
+  domainConstrainedCompoundType: DomainConstrainedCompoundType
   enum: Color!
   enumArray: [Color]!
   id: Int!
@@ -5504,6 +5517,18 @@ type DeletePersonSecretPayload {
   Our root query field type. Allows us to run any query from our mutation payload.
   """
   query: Query
+}
+
+type DomainConstrainedCompoundType {
+  a: Int
+  b: String
+  c: Color
+  computedField: Int
+  d: UUID
+  e: EnumCaps
+  f: EnumWithEmptyString
+  fooBar: Int
+  g: Interval
 }
 
 type EdgeCase {
@@ -7805,6 +7830,7 @@ type Type {
   decimal: BigFloat!
   domain: AnInt!
   domain2: AnotherInt!
+  domainConstrainedCompoundType: DomainConstrainedCompoundType
   enum: Color!
   enumArray: [Color]!
   id: Int!

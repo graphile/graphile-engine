@@ -234,6 +234,9 @@ create type a.an_int_range as range (
   subtype = a.an_int
 );
 
+create domain b.domain_constrained_compound_type as
+    c.compound_type check (value is null or (value).a is not null);
+
 create table b.types (
   id serial primary key,
   "smallint" smallint not null,
@@ -269,7 +272,8 @@ create table b.types (
   "nullablePoint" point,
   "inet" inet,
   "cidr" cidr,
-  "macaddr" macaddr
+  "macaddr" macaddr,
+  "domain_constrained_compound_type" b.domain_constrained_compound_type
 );
 
 comment on table b.types is E'@foreignKey (smallint) references a.post\n@foreignKey (id) references a.post';
