@@ -1,8 +1,10 @@
 // BELOW HERE, IMPORTS ARE ONLY TYPES (not values)
-import { SQL } from "graphile-build-pg";
+import { SQL, QueryBuilder } from "graphile-build-pg";
 import { Build, Plugin } from "graphile-build";
 
-type OrderSpec = [string | SQL, boolean] | [string | SQL, boolean, boolean];
+type orderBySpecIdentity = string | SQL | ((p: {queryBuilder: QueryBuilder}) => SQL);
+
+type OrderSpec = [orderBySpecIdentity, boolean] | [orderBySpecIdentity, boolean, boolean];
 export interface MakeAddPgTableOrderByPluginOrders {
   [orderByEnumValue: string]: {
     value: {
@@ -47,7 +49,7 @@ export default function makeAddPgTableOrderByPlugin(
 
 export function orderByAscDesc(
   baseName: string,
-  columnOrSqlFragment: string | SQL,
+  columnOrSqlFragment: orderBySpecIdentity,
   unique = false
 ): MakeAddPgTableOrderByPluginOrders {
   return {
