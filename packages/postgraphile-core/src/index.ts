@@ -1,17 +1,16 @@
-// @flow
 import * as fs from "fs";
 import {
   defaultPlugins,
   getBuilder,
   Plugin,
-  Options,
+  GraphileBuildOptions,
   SchemaListener,
   Build,
   Context,
   SchemaBuilder,
   Inflection,
+  GraphileResolverContext,
 } from "graphile-build";
-import { GraphQLSchema } from "graphql";
 import {
   defaultPlugins as pgDefaultPlugins,
   inflections,
@@ -20,7 +19,7 @@ import {
   formatSQLForDebugging,
 } from "graphile-build-pg";
 import { Pool, PoolClient } from "pg";
-import { SignOptions } from "jsonwebtoken";
+import { SignOptions, Secret } from "jsonwebtoken";
 
 export {
   Plugin,
@@ -29,8 +28,10 @@ export {
   SchemaBuilder,
   SchemaListener,
   Inflection,
-  Options,
+  GraphileBuildOptions,
+  GraphileBuildOptions as Options,
   formatSQLForDebugging,
+  GraphileResolverContext,
 };
 
 export type mixed = {} | string | number | boolean | undefined | null;
@@ -60,11 +61,11 @@ export interface PostGraphileCoreOptions {
    * Additional Options to pass through into the graphile schema building
    * system (received via the second argument of a plugin).
    */
-  graphileBuildOptions?: Partial<Options>;
+  graphileBuildOptions?: Partial<GraphileBuildOptions>;
   /**
    * @deprecated Use graphileBuildOptions instead
    */
-  graphqlBuildOptions?: Partial<Options>;
+  graphqlBuildOptions?: Partial<GraphileBuildOptions>;
   replaceAllPlugins?: Array<Plugin>;
   appendPlugins?: Array<Plugin>;
   /**
@@ -73,7 +74,7 @@ export interface PostGraphileCoreOptions {
   prependPlugins?: Array<Plugin>;
   skipPlugins?: Array<Plugin>;
   jwtPgTypeIdentifier?: string;
-  jwtSecret?: string;
+  jwtSecret?: Secret;
   jwtSignOptions?: SignOptions;
   /**
    * @deprecated UNSUPPORTED! Use an inflector plugin instead.
@@ -82,13 +83,14 @@ export interface PostGraphileCoreOptions {
   /**
    * @deprecated Use smart comments/tags instead
    */
-  pgColumnFilter?: <TSource>(
+  pgColumnFilter?: <TContext extends Context>(
     attr: mixed,
     build: Build,
-    context: Context<TSource>
+    context: TContext
   ) => boolean;
+
   /**
-   * @deprecated Use '@primaryKey' smart comment instead
+   * @deprecated Use '\@primaryKey' smart comment instead
    */
   viewUniqueKey?: string;
   enableTags?: boolean;
@@ -131,9 +133,11 @@ export const postGraphileClassicIdsOverrides = {
 };
 
 export const postGraphileInflection = inflections.newInflector(
+  // @ts-ignore
   postGraphileBaseOverrides
 );
 
+// @ts-ignore
 export const postGraphileClassicIdsInflection = inflections.newInflector({
   ...postGraphileBaseOverrides,
   ...postGraphileClassicIdsOverrides,
@@ -382,9 +386,13 @@ export const getPostGraphileBuilder = async (
     pgSchemas: Array.isArray(schemas) ? schemas : [schemas],
     pgExtendedTypes: !!dynamicJson,
     pgColumnFilter: pgColumnFilter || (() => true),
-    pgInflection:
-      inflector ||
-      (classicIds ? postGraphileClassicIdsInflection : postGraphileInflection),
+    ...({
+      pgInflection:
+        inflector ||
+        (classicIds
+          ? postGraphileClassicIdsInflection
+          : postGraphileInflection),
+    } as any),
     nodeIdFieldName: nodeIdFieldName || (classicIds ? "id" : "nodeId"),
     pgJwtTypeIdentifier: jwtPgTypeIdentifier,
     pgJwtSecret: jwtSecret,
@@ -472,7 +480,7 @@ export const watchPostGraphileSchema = async (
     },
   });
   let released = false;
-  function handleNewSchema(schema: GraphQLSchema) {
+  function handleNewSchema(schema: import("graphql").GraphQLSchema) {
     if (writeCache) {
       writeCache().catch(abort);
     }

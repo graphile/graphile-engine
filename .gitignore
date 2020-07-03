@@ -5,3 +5,7 @@ node_modules
 /operation-hooks/
 /.vscode
 *.tgz
+yarn-error.log
+tsconfig.tsbuildinfo
+.env
+_LOCAL

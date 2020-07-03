@@ -36,4 +36,15 @@ insert into graphile_utils.pets (user_id, type, name) values
   (2, 'cat', 'Felix'),
   (2, 'dog', 'Fido'),
   (3, 'goldfish', 'Goldie'),
-  (3, 'goldfish', 'Spot');
+  (3, 'goldfish', 'Spot'),
+  (3, 'goldfish', 'Albert');
+
+create table graphile_utils.test_smart_tags (
+  email text not null unique,
+  value int
+);
+comment on table graphile_utils.test_smart_tags is E'@omit';
+
+insert into graphile_utils.test_smart_tags (email, value)  values
+  ('bob@example.com', 42),
+  ('caroline@example.com', 9999);

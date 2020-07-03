@@ -1,13 +1,12 @@
 {
   "name": "graphile-utils",
-  "version": "4.4.5",
+  "version": "4.6.0",
   "description": "Utilities to help with building graphile-build plugins",
   "main": "node8plus/index.js",
   "types": "node8plus/index.d.ts",
   "scripts": {
     "test": "scripts/test",
-    "prepack": "mkdir -p node8plus && tsc",
-    "watch": "mkdir -p node8plus && tsc --watch"
+    "prepack": "tsc -b"
   },
   "repository": {
     "type": "git",
@@ -37,21 +36,16 @@
     "node": ">=8.6"
   },
   "devDependencies": {
-    "graphile-build": "4.4.5",
-    "graphile-build-pg": "4.4.5",
+    "graphile-build": "4.6.0",
+    "graphile-build-pg": "4.6.0",
     "jest": "^24.8.0",
+    "jest-serializer-graphql-schema": "4.6.0",
     "ts-node": "^8.1.0",
-    "typescript": "^3.4.5"
+    "typescript": "^3.7.2"
   },
   "peerDependencies": {
-    "graphile-build": "^4.4.2",
-    "graphile-build-pg": "^4.4.2"
-  },
-  "jest": {
-    "transform": {
-      "^.+\\.jsx?$": "../../.jest-wrapper.js"
-    },
-    "testRegex": "__tests__/.*\\.test\\.js$"
+    "graphile-build": "^4.5.0",
+    "graphile-build-pg": "^4.5.0"
   },
   "files": [
     "node8plus"

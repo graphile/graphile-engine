@@ -1,13 +1,25 @@
 // BELOW HERE, IMPORTS ARE ONLY TYPES (not values)
-import { GraphQLInputFieldConfig } from "graphql";
 import { SQL, sql as sqlType, QueryBuilder } from "graphile-build-pg";
 import { Build, Plugin } from "graphile-build";
+
+declare module "graphile-build" {
+  interface ScopeGraphQLInputObjectTypeFieldsField {
+    addPgTableCondition?: {
+      schemaName: string;
+      tableName: string;
+      conditionFieldSpec: import("graphql").GraphQLInputFieldConfig;
+      conditionFieldName: string;
+    };
+  }
+}
 
 export default function makeAddPgTableConditionPlugin(
   schemaName: string,
   tableName: string,
   conditionFieldName: string,
-  conditionFieldSpecGenerator: (build: Build) => GraphQLInputFieldConfig,
+  conditionFieldSpecGenerator: (
+    build: Build
+  ) => import("graphql").GraphQLInputFieldConfig,
   conditionGenerator: (
     value: unknown,
     helpers: {
@@ -62,20 +74,24 @@ export default function makeAddPgTableConditionPlugin(
         const conditionFieldSpec = conditionFieldSpecGenerator(build);
         const meta = build._pluginMeta[instance];
         meta.seen = true;
-        return build.extend(fields, {
-          [conditionFieldName]: fieldWithHooks(
-            conditionFieldName,
-            conditionFieldSpec,
-            {
-              addPgTableCondition: {
-                schemaName,
-                tableName,
-                conditionFieldSpec,
-                conditionFieldName,
-              },
-            }
-          ),
-        });
+        return build.extend(
+          fields,
+          {
+            [conditionFieldName]: fieldWithHooks(
+              conditionFieldName,
+              conditionFieldSpec,
+              {
+                addPgTableCondition: {
+                  schemaName,
+                  tableName,
+                  conditionFieldSpec,
+                  conditionFieldName,
+                },
+              }
+            ),
+          },
+          `Adding '${conditionFieldName}' condition to '${table.name}'`
+        );
       }
     );
     builder.hook(
@@ -85,6 +101,7 @@ export default function makeAddPgTableConditionPlugin(
         const {
           scope: {
             isPgFieldConnection,
+            isPgFieldSimpleCollection,
             pgFieldIntrospection: procOrTable,
             pgFieldIntrospectionTable: tableIfProc,
           },
@@ -92,7 +109,7 @@ export default function makeAddPgTableConditionPlugin(
         } = context;
         const table = tableIfProc || procOrTable;
         if (
-          !isPgFieldConnection ||
+          (!isPgFieldConnection && !isPgFieldSimpleCollection) ||
           !table ||
           table.kind !== "class" ||
           table.namespaceName !== schemaName ||
@@ -106,7 +123,7 @@ export default function makeAddPgTableConditionPlugin(
         }: {
           condition: { [key: string]: any } | null;
         }) {
-          if (!condition) {
+          if (!condition || !(conditionFieldName in condition)) {
             return {};
           }
           const { [conditionFieldName]: conditionValue } = condition;

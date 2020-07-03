@@ -1,13 +1,12 @@
 {
   "name": "@graphile/lru",
-  "version": "4.4.5",
+  "version": "4.6.0-alpha.0",
   "description": "Extremely simple zero-dependencies ES6 LRU (you probably want lru-cache instead)",
   "main": "node8plus/index.js",
   "types": "node8plus/index.d.ts",
   "scripts": {
     "test": "jest",
-    "prepack": "mkdir -p node8plus && tsc",
-    "watch": "mkdir -p node8plus && tsc --watch"
+    "prepack": "tsc -b"
   },
   "repository": {
     "type": "git",
@@ -28,13 +27,7 @@
   "devDependencies": {
     "jest": "^24.8.0",
     "ts-node": "^8.1.0",
-    "typescript": "^3.4.5"
-  },
-  "jest": {
-    "transform": {
-      "^.+\\.jsx?$": "../../.jest-wrapper.js"
-    },
-    "testRegex": "__tests__/.*\\.test\\.js$"
+    "typescript": "^3.7.2"
   },
   "files": [
     "node8plus"
