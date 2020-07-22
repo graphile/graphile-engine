@@ -2,14 +2,14 @@
 import { SQL, QueryBuilder } from "graphile-build-pg";
 import { Build, Plugin } from "graphile-build";
 
-type orderBySpecIdentity =
+type OrderBySpecIdentity =
   | string
   | SQL
-  | ((p: { queryBuilder: QueryBuilder }) => SQL);
+  | ((options: { queryBuilder: QueryBuilder }) => SQL);
 
 type OrderSpec =
-  | [orderBySpecIdentity, boolean]
-  | [orderBySpecIdentity, boolean, boolean];
+  | [OrderBySpecIdentity, boolean]
+  | [OrderBySpecIdentity, boolean, boolean];
 export interface MakeAddPgTableOrderByPluginOrders {
   [orderByEnumValue: string]: {
     value: {
@@ -54,7 +54,7 @@ export default function makeAddPgTableOrderByPlugin(
 
 export function orderByAscDesc(
   baseName: string,
-  columnOrSqlFragment: orderBySpecIdentity,
+  columnOrSqlFragment: OrderBySpecIdentity,
   unique = false
 ): MakeAddPgTableOrderByPluginOrders {
   return {
