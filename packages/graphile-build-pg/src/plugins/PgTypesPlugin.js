@@ -1157,7 +1157,6 @@ end`;
       // knows how to express it in input/output.
       if (!pgGeometricTypes) return build;
       const {
-        pgIntrospectionResultsByKind: introspectionResultsByKind,
         pgRegisterGqlTypeByTypeId,
         pgRegisterGqlInputTypeByTypeId,
         pgGetGqlTypeByTypeIdAndModifier,
