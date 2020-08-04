@@ -2,9 +2,16 @@
 
 exports[`prints a schema for enum_tables 1`] = `
 enum Abcd {
+  """The letter A"""
   A
+
+  """The letter B"""
   B
+
+  """The letter C"""
   C
+
+  """The letter D"""
   D
 }
 

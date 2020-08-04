@@ -106,6 +106,7 @@ export type PgType = {
   domainTypeModifier: ?number,
   domainHasDefault: boolean,
   enumVariants: ?(string[]),
+  enumDescriptions: ?(string[]),
   rangeSubTypeId: ?string,
   tags: { [string]: string },
 };
@@ -568,11 +569,20 @@ export default (async function PgIntrospectionPlugin(
                   return;
                 }
 
+                // Get all the columns
+                const enumTableColumns = result.attribute
+                  .filter(attr => attr.classId === klass.id)
+                  .sort((a, b) => a.num - b.num);
+
+                // Get description column
+                const descriptionColumn = enumTableColumns.find(
+                  attr =>
+                    attr.name === "description" || attr.tags.enumDescription
+                );
+
                 // Assert primary key is exactly one column
                 const pkColumns = pk.keyAttributeNums.map(nr =>
-                  result.attribute.find(
-                    attr => attr.classId === klass.id && attr.num === nr
-                  )
+                  enumTableColumns.find(attr => attr.num === nr)
                 );
                 if (pkColumns.length !== 1) {
                   throw new Error(
@@ -598,10 +608,13 @@ export default (async function PgIntrospectionPlugin(
 
                 // Load data from the table.
                 const query = pgSql.compile(
-                  pgSql.fragment`select * from ${pgSql.identifier(
-                    klass.namespaceName,
-                    klass.name
-                  )};`
+                  pgSql.fragment`select ${pgSql.identifier(pkColumn.name)}${
+                    descriptionColumn
+                      ? pgSql.fragment`, ${pgSql.identifier(
+                          descriptionColumn.name
+                        )}`
+                      : pgSql.blank
+                  } from ${pgSql.identifier(klass.namespaceName, klass.name)};`
                 );
                 const data = await pgClient.query(query);
 
@@ -632,6 +645,7 @@ export default (async function PgIntrospectionPlugin(
                   domainTypeModifier: null,
                   domainHasDefault: false,
                   enumVariants: null,
+                  enumDescriptions: null,
                   rangeSubTypeId: null,
                 };
                 const enumType = {
@@ -653,6 +667,9 @@ export default (async function PgIntrospectionPlugin(
                   domainTypeModifier: null,
                   domainHasDefault: false,
                   enumVariants: data.rows.map(r => r[pkColumn.name]),
+                  enumDescriptions: descriptionColumn
+                    ? data.rows.map(r => r[descriptionColumn.name])
+                    : null,
                   // TODO: enumDescriptions
                   rangeSubTypeId: null,
                 };

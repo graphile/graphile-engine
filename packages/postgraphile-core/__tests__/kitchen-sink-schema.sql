@@ -1111,11 +1111,15 @@ create table named_query_builder.toy_categories (
 --------------------------------------------------------------------------------
 
 create schema enum_tables;
-create table enum_tables.abcd (letter text primary key);
+create table enum_tables.abcd (letter text primary key, description text);
+comment on column enum_tables.abcd.description is E'@enumDescription';
 -- Enum table needs values added as part of the migration, not as part of the
 -- data.
-insert into enum_tables.abcd (letter)
-  values ('A'), ('B'), ('C'), ('D');
+insert into enum_tables.abcd (letter, description) values
+  ('A', 'The letter A'),
+  ('B', 'The letter B'),
+  ('C', 'The letter C'),
+  ('D', 'The letter D');
 comment on table enum_tables.abcd is E'@enum';
 
 create table enum_tables.letter_descriptions(
