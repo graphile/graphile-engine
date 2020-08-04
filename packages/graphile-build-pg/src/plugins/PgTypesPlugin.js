@@ -1161,6 +1161,7 @@ end`;
         pgRegisterGqlTypeByTypeId,
         pgRegisterGqlInputTypeByTypeId,
         pgGetGqlTypeByTypeIdAndModifier,
+        pgGetGqlInputTypeByTypeIdAndModifier,
         pg2GqlMapper,
         pgSql: sql,
         graphql: {
