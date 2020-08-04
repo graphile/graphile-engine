@@ -93,6 +93,9 @@ export interface PgType {
   domainBaseTypeId: string | void;
   domainBaseType: PgType | void;
   domainTypeModifier: number | void;
+  domainHasDefault: boolean;
+  enumVariants: string[] | void;
+  rangeSubTypeId: string | void;
   tags: { [tag: string]: true | string | Array<string> };
 }
 

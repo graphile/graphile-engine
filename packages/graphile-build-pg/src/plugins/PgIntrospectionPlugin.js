@@ -11,6 +11,7 @@ import chalk from "chalk";
 import throttle from "lodash/throttle";
 import flatMap from "lodash/flatMap";
 import { makeIntrospectionQuery } from "./introspectionQuery";
+import * as pgSql from "pg-sql2";
 
 import { version } from "../../package.json";
 import queryFromResolveDataFactory from "../queryFromResolveDataFactory";
@@ -103,6 +104,9 @@ export type PgType = {
   domainBaseTypeId: ?string,
   domainBaseType: ?PgType,
   domainTypeModifier: ?number,
+  domainHasDefault: boolean,
+  enumVariants: ?(string[]),
+  rangeSubTypeId: ?string,
   tags: { [string]: string },
 };
 
@@ -548,6 +552,139 @@ export default (async function PgIntrospectionPlugin(
             klass.isExtensionConfigurationTable =
               extensionConfigurationClassIds.indexOf(klass.id) >= 0;
           });
+
+          await Promise.all(
+            result.class.map(async klass => {
+              if (
+                klass.tags.enum === true ||
+                typeof klass.tags.enum === "string"
+              ) {
+                // Assert it has a primary key
+                const pk = result.constraint.find(
+                  c => c.classId === klass.id && c.type === "p"
+                );
+                if (!pk) {
+                  throw new Error(
+                    `Enum table "${klass.namespaceName}"."${klass.name}" has no primary key`
+                  );
+                }
+
+                // Assert primary key is exactly one column
+                const pkColumns = pk.keyAttributeNums.map(nr =>
+                  result.attribute.find(
+                    attr => attr.classId === klass.id && attr.num === nr
+                  )
+                );
+                if (pkColumns.length !== 1) {
+                  throw new Error(
+                    `Enum table "${klass.namespaceName}"."${klass.name}" has composite primary key`
+                  );
+                }
+
+                // Assert the primary key is text
+                const pkColumn = pkColumns[0];
+                const VARCHAR_ID = "1043";
+                const TEXT_ID = "25";
+                const CHAR_ID = "18";
+                if (
+                  !pkColumn ||
+                  (pkColumn.typeId !== VARCHAR_ID &&
+                    pkColumn.typeId !== TEXT_ID &&
+                    pkColumn.typeId !== CHAR_ID)
+                ) {
+                  throw new Error(
+                    `Enum table "${klass.namespaceName}"."${klass.name}" primary key must be 'text', 'char' or 'varchar'`
+                  );
+                }
+
+                // Load data from the table.
+                const query = pgSql.compile(
+                  pgSql.fragment`select * from ${pgSql.identifier(
+                    klass.namespaceName,
+                    klass.name
+                  )};`
+                );
+                const data = await pgClient.query(query);
+
+                // Assert there's at least one value
+                if (data.rows.length < 1) {
+                  throw new Error(
+                    `Enum table "${klass.namespaceName}"."${klass.name}" contains no entries.`
+                  );
+                }
+
+                // Create fake enum type
+                const enumTypeArray = {
+                  kind: "type",
+                  id: `FAKE_ENUM_${klass.namespaceName}_${klass.name}_list`,
+                  name: `_${klass.name}`,
+                  description: null,
+                  tags: {},
+                  namespaceId: klass.namespaceId,
+                  namespaceName: klass.namespaceName,
+                  type: "b",
+                  category: "A",
+                  domainIsNotNull: null,
+                  arrayItemTypeId: null,
+                  typeLength: -1,
+                  isPgArray: true,
+                  classId: null,
+                  domainBaseTypeId: null,
+                  domainTypeModifier: null,
+                  domainHasDefault: false,
+                  enumVariants: null,
+                  rangeSubTypeId: null,
+                };
+                const enumType = {
+                  kind: "type",
+                  id: `FAKE_ENUM_${klass.namespaceName}_${klass.name}`,
+                  name: klass.name,
+                  description: klass.description,
+                  tags: klass.tags,
+                  namespaceId: klass.namespaceId,
+                  namespaceName: klass.namespaceName,
+                  type: "e",
+                  category: "E",
+                  domainIsNotNull: null,
+                  arrayItemTypeId: enumTypeArray.id,
+                  typeLength: 4, // ???
+                  isPgArray: false,
+                  classId: null,
+                  domainBaseTypeId: null,
+                  domainTypeModifier: null,
+                  domainHasDefault: false,
+                  enumVariants: data.rows.map(r => r[pkColumn.name]),
+                  // TODO: enumDescriptions
+                  rangeSubTypeId: null,
+                };
+                result.type.push(enumType, enumTypeArray);
+
+                // Change type of all attributes that reference this table to
+                // reference this enum type
+                result.constraint.forEach(c => {
+                  if (c.type === "f" && c.foreignClassId === klass.id) {
+                    // Get the attribute
+                    const fkattr = result.attribute.find(
+                      attr =>
+                        attr.classId === c.classId &&
+                        attr.num === c.keyAttributeNums[0]
+                    );
+                    if (fkattr) {
+                      // Override the detected type to pretend to be our enum
+                      fkattr.typeId = enumType.id;
+                    }
+                  }
+                });
+
+                // Prevent the table being recognised as a table
+                klass.tags.omit = true;
+                klass.isSelectable = false;
+                klass.isInsertable = false;
+                klass.isUpdatable = false;
+                klass.isDeletable = false;
+              }
+            })
+          );
 
           [
             "namespace",
