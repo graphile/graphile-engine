@@ -564,9 +564,8 @@ export default (async function PgIntrospectionPlugin(
                   c => c.classId === klass.id && c.type === "p"
                 );
                 if (!pk) {
-                  throw new Error(
-                    `Enum table "${klass.namespaceName}"."${klass.name}" has no primary key`
-                  );
+                  // Must be from another schema
+                  return;
                 }
 
                 // Assert primary key is exactly one column
