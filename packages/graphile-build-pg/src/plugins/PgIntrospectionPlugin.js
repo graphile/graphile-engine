@@ -693,10 +693,15 @@ export default (async function PgIntrospectionPlugin(
                 });
 
                 // Prevent the table being recognised as a table
+                // eslint-disable-next-line require-atomic-updates
                 klass.tags.omit = true;
+                // eslint-disable-next-line require-atomic-updates
                 klass.isSelectable = false;
+                // eslint-disable-next-line require-atomic-updates
                 klass.isInsertable = false;
+                // eslint-disable-next-line require-atomic-updates
                 klass.isUpdatable = false;
+                // eslint-disable-next-line require-atomic-updates
                 klass.isDeletable = false;
               }
             })
