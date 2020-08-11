@@ -1123,6 +1123,7 @@ create table enum_tables.letter_descriptions(
 );
 
 create table enum_tables.lots_of_enums (
+  id serial primary key,
   enum_1 text,
   enum_2 varchar(3),
   enum_3 char(2),
