@@ -1121,7 +1121,7 @@ insert into enum_tables.abcd (letter, description) values
   ('B', 'The letter B'),
   ('C', 'The letter C'),
   ('D', 'The letter D');
-comment on table enum_tables.abcd is E'@enum';
+comment on table enum_tables.abcd is E'@enum\n@enumName LetterAToD';
 
 create table enum_tables.letter_descriptions(
   id serial primary key,

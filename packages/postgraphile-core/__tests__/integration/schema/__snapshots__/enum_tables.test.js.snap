@@ -1,20 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`prints a schema for enum_tables 1`] = `
-enum Abcd {
-  """The letter A"""
-  A
-
-  """The letter B"""
-  B
-
-  """The letter C"""
-  C
-
-  """The letter D"""
-  D
-}
-
 """All input for the create \`LetterDescription\` mutation."""
 input CreateLetterDescriptionInput {
   """
@@ -70,7 +56,7 @@ input DeleteLetterDescriptionByLetterInput {
   payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
-  letter: Abcd!
+  letter: LetterAToD!
 }
 
 """All input for the \`deleteLetterDescription\` mutation."""
@@ -111,10 +97,24 @@ type DeleteLetterDescriptionPayload {
   query: Query
 }
 
+enum LetterAToD {
+  """The letter A"""
+  A
+
+  """The letter B"""
+  B
+
+  """The letter C"""
+  C
+
+  """The letter D"""
+  D
+}
+
 type LetterDescription implements Node {
   description: String
   id: Int!
-  letter: Abcd!
+  letter: LetterAToD!
 
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
@@ -134,14 +134,14 @@ input LetterDescriptionCondition {
   id: Int
 
   """Checks for equality with the object’s \`letter\` field."""
-  letter: Abcd
+  letter: LetterAToD
 }
 
 """An input for mutations affecting \`LetterDescription\`"""
 input LetterDescriptionInput {
   description: String
   id: Int
-  letter: Abcd!
+  letter: LetterAToD!
 }
 
 """
@@ -150,7 +150,7 @@ Represents an update to a \`LetterDescription\`. Fields that are set will be upd
 input LetterDescriptionPatch {
   description: String
   id: Int
-  letter: Abcd
+  letter: LetterAToD
 }
 
 """A connection to a list of \`LetterDescription\` values."""
@@ -319,7 +319,7 @@ type Query implements Node {
     nodeId: ID!
   ): LetterDescription
   letterDescriptionById(id: Int!): LetterDescription
-  letterDescriptionByLetter(letter: Abcd!): LetterDescription
+  letterDescriptionByLetter(letter: LetterAToD!): LetterDescription
 
   """Fetches an object given its globally unique \`ID\`."""
   node(
@@ -361,7 +361,7 @@ input UpdateLetterDescriptionByLetterInput {
   payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
-  letter: Abcd!
+  letter: LetterAToD!
 
   """
   An object where the defined keys will be set on the \`LetterDescription\` being updated.
