@@ -1148,25 +1148,25 @@ insert into enum_tables.abcd (letter, description) values
   ('C', 'The letter C'),
   ('D', 'The letter D');
 insert into enum_tables.lots_of_enums (enum_1, description) values
-  ('A1', 'Desc A1'),
-  ('A2', 'Desc A2'),
-  ('A3', 'Desc A3'),
-  ('A4', 'Desc A4');
+  ('a1', 'Desc A1'),
+  ('a2', 'Desc A2'),
+  ('a3', 'Desc A3'),
+  ('a4', 'Desc A4');
 insert into enum_tables.lots_of_enums (enum_2, description) values
-  ('B1', 'Desc B1'),
-  ('B2', 'Desc B2'),
-  ('B3', 'Desc B3'),
-  ('B4', 'Desc B4');
+  ('b1', 'Desc B1'),
+  ('b2', 'Desc B2'),
+  ('b3', 'Desc B3'),
+  ('b4', 'Desc B4');
 insert into enum_tables.lots_of_enums (enum_3, description) values
-  ('C1', 'Desc C1'),
-  ('C2', 'Desc C2'),
-  ('C3', 'Desc C3'),
-  ('C4', 'Desc C4');
+  ('c1', 'Desc C1'),
+  ('c2', 'Desc C2'),
+  ('c3', 'Desc C3'),
+  ('c4', 'Desc C4');
 insert into enum_tables.lots_of_enums (enum_4, description) values
-  ('D1', 'Desc D1'),
-  ('D2', 'Desc D2'),
-  ('D3', 'Desc D3'),
-  ('D4', 'Desc D4');
+  ('d1', 'Desc D1'),
+  ('d2', 'Desc D2'),
+  ('d3', 'Desc D3'),
+  ('d4', 'Desc D4');
 
 create table enum_tables.referencing_table(
   id serial primary key,
