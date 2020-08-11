@@ -618,24 +618,30 @@ export default (async function PgIntrospectionPlugin(
                 const VARCHAR_ID = "1043";
                 const TEXT_ID = "25";
                 const CHAR_ID = "18";
+                const BPCHAR_ID = "1042";
 
                 // Get the list of columns enums are defined for
                 const enumColumns = enumConstraints.map(con => {
                   const attr = enumTableColumns.find(
                     attr => attr.num === con.keyAttributeNums[0]
                   );
-                  if (
-                    !attr ||
-                    (attr.typeId !== VARCHAR_ID &&
-                      attr.typeId !== TEXT_ID &&
-                      attr.typeId !== CHAR_ID)
-                  ) {
+                  if (!attr) {
                     throw new Error(
                       `Enum table "${klass.namespaceName}"."${
                         klass.name
                       }" enum column '${
-                        attr ? attr.name : con.keyAttributeNums[0]
-                      }' must be 'text', 'char' or 'varchar'`
+                        con.keyAttributeNums[0]
+                      }' couldn't be found`
+                    );
+                  }
+                  if (
+                    attr.typeId !== VARCHAR_ID &&
+                    attr.typeId !== TEXT_ID &&
+                    attr.typeId !== CHAR_ID &&
+                    attr.typeId !== BPCHAR_ID
+                  ) {
+                    throw new Error(
+                      `Enum table "${klass.namespaceName}"."${klass.name}" enum column '${attr.name}' must be 'text', 'char' or 'varchar' (actual type OID: ${attr.typeId})`
                     );
                   }
                   return attr;

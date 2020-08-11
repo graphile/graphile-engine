@@ -1114,13 +1114,6 @@ create table named_query_builder.toy_categories (
 create schema enum_tables;
 create table enum_tables.abcd (letter text primary key, description text);
 comment on column enum_tables.abcd.description is E'@enumDescription';
--- Enum table needs values added as part of the migration, not as part of the
--- data.
-insert into enum_tables.abcd (letter, description) values
-  ('A', 'The letter A'),
-  ('B', 'The letter B'),
-  ('C', 'The letter C'),
-  ('D', 'The letter D');
 comment on table enum_tables.abcd is E'@enum\n@enumName LetterAToD';
 
 create table enum_tables.letter_descriptions(
@@ -1128,6 +1121,60 @@ create table enum_tables.letter_descriptions(
   letter text not null references enum_tables.abcd unique,
   description text
 );
+
+create table enum_tables.lots_of_enums (
+  enum_1 text,
+  enum_2 varchar(3),
+  enum_3 char(2),
+  enum_4 text,
+  description text,
+  constraint enum_1 unique(enum_1),
+  constraint enum_2 unique(enum_2),
+  constraint enum_3 unique(enum_3),
+  constraint enum_4 unique(enum_4)
+);
+
+comment on table enum_tables.lots_of_enums is E'@omit';
+comment on constraint enum_1 on enum_tables.lots_of_enums is E'@enum\n@enumName EnumTheFirst';
+comment on constraint enum_2 on enum_tables.lots_of_enums is E'@enum\n@enumName EnumTheSecond';
+comment on constraint enum_3 on enum_tables.lots_of_enums is E'@enum\n@enumName EnumTheThird';
+comment on constraint enum_4 on enum_tables.lots_of_enums is E'@enum\n@enumName EnumTheFourth';
+
+-- Enum table needs values added as part of the migration, not as part of the
+-- data.
+insert into enum_tables.abcd (letter, description) values
+  ('A', 'The letter A'),
+  ('B', 'The letter B'),
+  ('C', 'The letter C'),
+  ('D', 'The letter D');
+insert into enum_tables.lots_of_enums (enum_1, description) values
+  ('A1', 'Desc A1'),
+  ('A2', 'Desc A2'),
+  ('A3', 'Desc A3'),
+  ('A4', 'Desc A4');
+insert into enum_tables.lots_of_enums (enum_2, description) values
+  ('B1', 'Desc B1'),
+  ('B2', 'Desc B2'),
+  ('B3', 'Desc B3'),
+  ('B4', 'Desc B4');
+insert into enum_tables.lots_of_enums (enum_3, description) values
+  ('C1', 'Desc C1'),
+  ('C2', 'Desc C2'),
+  ('C3', 'Desc C3'),
+  ('C4', 'Desc C4');
+insert into enum_tables.lots_of_enums (enum_4, description) values
+  ('D1', 'Desc D1'),
+  ('D2', 'Desc D2'),
+  ('D3', 'Desc D3'),
+  ('D4', 'Desc D4');
+
+create table enum_tables.referencing_table(
+  id serial primary key,
+  enum_1 text references enum_tables.lots_of_enums(enum_1),
+  enum_2 varchar(3) references enum_tables.lots_of_enums(enum_2),
+  enum_3 char(2) references enum_tables.lots_of_enums(enum_3)
+);
+
 
 --------------------------------------------------------------------------------
 
