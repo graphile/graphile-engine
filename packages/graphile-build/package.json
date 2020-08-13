@@ -1,13 +1,12 @@
 {
   "name": "graphile-build",
-  "version": "4.4.5",
+  "version": "4.6.0",
   "description": "Build a GraphQL schema from plugins",
   "main": "node8plus/index.js",
   "types": "node8plus/index.d.ts",
   "scripts": {
     "test": "jest",
-    "prepack": "mkdir -p node8plus && babel --root-mode upward --copy-files -s true --out-dir node8plus src && flow-copy-source src node8plus",
-    "watch": "mkdir -p node8plus && babel --root-mode upward --copy-files -s true --watch --out-dir node8plus src"
+    "prepack": "tsc -b"
   },
   "repository": {
     "type": "git",
@@ -30,13 +29,14 @@
   },
   "homepage": "https://graphile.org/graphile-build/",
   "dependencies": {
-    "@graphile/lru": "4.4.5",
+    "@graphile/lru": "4.6.0-alpha.0",
+    "@types/pluralize": "^0.0.29",
+    "@types/semver": "^6.2.0",
     "chalk": "^2.4.2",
     "debug": "^4.1.1",
-    "graphql-parse-resolve-info": "4.4.5",
+    "graphql-parse-resolve-info": "4.6.0-alpha.0",
     "iterall": "^1.2.2",
     "lodash": ">=4 <5",
-    "lru-cache": "^5.0.0",
     "pluralize": "^7.0.0",
     "semver": "^6.0.0"
   },
@@ -46,8 +46,8 @@
   "devDependencies": {
     "@babel/cli": "^7.0.0",
     "eslint_d": "^8.0.0",
-    "flow-copy-source": "^1.2.0",
-    "jest": "^24.8.0"
+    "jest": "^24.8.0",
+    "jest-serializer-graphql-schema": "4.6.0"
   },
   "peerDependencies": {
     "graphql": ">=0.9 <0.14 || ^14.0.2"

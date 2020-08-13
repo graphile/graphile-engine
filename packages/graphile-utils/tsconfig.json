@@ -3,7 +3,13 @@
   "compilerOptions": {
     "rootDir": "src",
     "declarationDir": "./node8plus",
-    "outDir": "./node8plus"
+    "outDir": "./node8plus",
+    "noEmit": false
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../graphile-build" },
+    { "path": "../graphile-build-pg" },
+    { "path": "../jest-serializer-graphql-schema" }
+  ]
 }
