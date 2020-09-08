@@ -18,8 +18,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        postgres-version: [9.4, 10, 11, 12]
-        node-version: [8.x, 10.x, 12.x, 14.x]
+        postgres-version: 
+          - 9.4
+          #- 10
+          #- 11
+          - 12
+        node-version:
+          - 8.x
+          #- 10.x
+          #- 12.x
+          - 14.x
 
     services:
       postgres:
@@ -65,5 +73,8 @@ jobs:
       - name: "Lint Code"
         run: yarn eslint .
 
+      - name: "Flow"
+        run: npm run flow:check
+
       - name: "Test Project"
-        run: yarn run pretest && yarn test --ci && yarn run posttest
+        run: yarn run pretest && ./scripts/ci && yarn run posttest
