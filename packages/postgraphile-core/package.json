@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@types/node": "^12.0.0",
+    "@types/pg": "^7.4.14",
     "debug": "^4.1.1",
     "jest": "^24.8.0",
     "jest-serializer-graphql-schema": "4.8.0",
