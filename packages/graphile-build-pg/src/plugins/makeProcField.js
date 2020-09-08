@@ -26,11 +26,13 @@ export default function makeProcField(
     fieldWithHooks,
     computed = false,
     isMutation = false,
+    isRootQuery = false,
     forceList = false,
   }: {
     fieldWithHooks: FieldWithHooksFunction,
     computed?: boolean,
     isMutation?: boolean,
+    isRootQuery?: boolean,
     forceList?: boolean,
   }
 ) {
@@ -209,7 +211,9 @@ export default function makeProcField(
             )}' for '${TableType.name}' so cannot create procedure field`
           );
         }
-        type = new GraphQLNonNull(ConnectionType);
+        type = isRootQuery
+          ? ConnectionType
+          : new GraphQLNonNull(ConnectionType);
         fieldScope.isPgFieldConnection = true;
       }
       fieldScope.pgFieldIntrospectionTable = returnTypeTable;
