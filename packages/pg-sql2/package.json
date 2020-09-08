@@ -6,9 +6,11 @@
   "types": "node8plus/index.d.ts",
   "scripts": {
     "jest": "jest",
+    "pretest": "node dist/index.js",
     "test": "tsc && node node8plus/index.js && jest && markdown-doctest",
     "test:u": "tsc && node node8plus/index.js && jest -u && markdown-doctest",
     "test:docs": "markdown-doctest",
+    "posttest": "yarn test:docs",
     "watch": "tsc --watch",
     "prepack": "tsc"
   },
