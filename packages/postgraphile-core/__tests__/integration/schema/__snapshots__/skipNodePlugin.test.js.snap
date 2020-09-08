@@ -6670,7 +6670,7 @@ type Query {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): FuncOutComplexSetofConnection!
+  ): FuncOutComplexSetofConnection
   funcOutOut: FuncOutOutRecord
   funcOutOutCompoundType(i1: Int): FuncOutOutCompoundTypeRecord
   funcOutOutSetof(
@@ -6691,7 +6691,7 @@ type Query {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): FuncOutOutSetofConnection!
+  ): FuncOutOutSetofConnection
   funcOutOutUnnamed: FuncOutOutUnnamedRecord
   funcOutSetof(
     """Read all values in the set after (below) this cursor."""
@@ -6711,7 +6711,7 @@ type Query {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): FuncOutSetofConnection!
+  ): FuncOutSetofConnection
   funcOutTable: Person
 
   """Reads and enables pagination through a set of \`Person\`."""
@@ -6755,7 +6755,7 @@ type Query {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): FuncReturnsTableMultiColConnection!
+  ): FuncReturnsTableMultiColConnection
   funcReturnsTableOneCol(
     """Read all values in the set after (below) this cursor."""
     after: Cursor
@@ -6775,7 +6775,7 @@ type Query {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): FuncReturnsTableOneColConnection!
+  ): FuncReturnsTableOneColConnection
   inputById(id: Int!): Input
   intSetQuery(
     """Read all values in the set after (below) this cursor."""
@@ -6798,7 +6798,7 @@ type Query {
     x: Int
     y: Int
     z: Int
-  ): IntSetQueryConnection!
+  ): IntSetQueryConnection
   issue756ById(id: Int!): Issue756
   jsonbIdentity(json: JSON): JSON
   jsonIdentity(json: JSON): JSON
@@ -6844,7 +6844,7 @@ type Query {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): QueryIntervalSetConnection!
+  ): QueryIntervalSetConnection
   queryOutputTwoRows(leftArmId: Int, postId: Int, txt: String): QueryOutputTwoRowsRecord
   queryTextArray: [String]
   reservedById(id: Int!): Reserved
@@ -6871,7 +6871,7 @@ type Query {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): StaticBigIntegerConnection!
+  ): StaticBigIntegerConnection
   tableQuery(id: Int): Post
 
   """Reads and enables pagination through a set of \`Person\`."""
