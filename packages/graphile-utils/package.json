@@ -40,7 +40,7 @@
   "devDependencies": {
     "graphile-build": "4.8.0",
     "graphile-build-pg": "4.8.0",
-    "jest": "^26.4.2",
+    "jest": "25.x",
     "jest-serializer-graphql-schema": "4.8.0",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.2"
@@ -49,7 +49,5 @@
     "graphile-build": "^4.5.0",
     "graphile-build-pg": "^4.5.0"
   },
-  "files": [
-    "node8plus"
-  ]
+  "files": ["node8plus"]
 }

@@ -13,11 +13,7 @@
     "type": "git",
     "url": "git+https://github.com/graphile/graphile-engine.git"
   },
-  "keywords": [
-    "jest",
-    "graphql",
-    "schema"
-  ],
+  "keywords": ["jest", "graphql", "schema"],
   "author": "David Baumgold <david@davidbaumgold.com>",
   "license": "MIT",
   "bugs": {
@@ -31,12 +27,10 @@
     "@types/node-fetch": "^2.5.2",
     "node-fetch": "^2.6.0",
     "pretty-format": "^26.4.2",
-    "ts-jest": "^26.3.0",
+    "ts-jest": "25.x",
     "typescript": "^4.0.2"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "dependencies": {
     "tslib": "^2.0.1"
   }
