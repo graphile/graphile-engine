@@ -20,13 +20,7 @@ import {
 import { getArgumentValues } from "graphql/execution/values";
 import * as debugFactory from "debug";
 
-type mixed =
-  | Record<string, mixed>
-  | string
-  | number
-  | boolean
-  | undefined
-  | null;
+type mixed = Record<string, any> | string | number | boolean | undefined | null;
 
 export interface FieldsByTypeName {
   [str: string]: {

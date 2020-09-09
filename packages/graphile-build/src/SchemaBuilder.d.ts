@@ -17,13 +17,7 @@ import {
 } from "graphql";
 import { EventEmitter } from "events";
 
-type mixed =
-  | Record<string, mixed>
-  | string
-  | number
-  | boolean
-  | undefined
-  | null;
+type mixed = Record<string, any> | string | number | boolean | undefined | null;
 
 export interface Options {
   [str: string]: any;

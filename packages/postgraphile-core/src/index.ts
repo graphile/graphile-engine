@@ -34,7 +34,7 @@ export {
 };
 
 export type mixed =
-  | Record<string, mixed>
+  | Record<string, any>
   | string
   | number
   | boolean
