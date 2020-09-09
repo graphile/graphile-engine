@@ -33,7 +33,13 @@ export {
   formatSQLForDebugging,
 };
 
-export type mixed = {} | string | number | boolean | undefined | null;
+export type mixed =
+  | Record<string, mixed>
+  | string
+  | number
+  | boolean
+  | undefined
+  | null;
 
 const ensureValidPlugins = (name: string, arr: Array<Plugin>) => {
   if (!Array.isArray(arr)) {
@@ -93,7 +99,7 @@ export interface PostGraphileCoreOptions {
    */
   viewUniqueKey?: string;
   enableTags?: boolean;
-  readCache?: string | object;
+  readCache?: string | Record<string, any>;
   writeCache?: string;
   setWriteCacheCallback?: (fn: () => Promise<void>) => void;
   legacyRelations?: "only" | "deprecated" | "omit";
@@ -189,7 +195,7 @@ export const getPostGraphileBuilder = async (
   schemas: string | Array<string>,
   options: PostGraphileCoreOptions = {}
 ) => {
-  // @ts-ignore
+  // @ts-ignore Deprecated, doesn't exist on types, checking in JS only
   if (options.inflector) {
     throw new Error(
       "Passing an inflector via PostGraphile options was deprecated in v4.0.0-beta.7; instead please write an inflector plugin: https://www.graphile.org/postgraphile/inflection/"

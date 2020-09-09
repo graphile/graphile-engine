@@ -97,7 +97,6 @@ type PokemonEvolutionRequirement {
 }
 `;
 
-// @ts-ignore
 expect.addSnapshotSerializer(GraphQLSchemaSnapshotSerializer);
 
 test("Pokemon GraphQL API has a consistent schema", async () => {
