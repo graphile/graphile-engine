@@ -1,4 +1,5 @@
 import { buildASTSchema, parse } from "graphql";
+import { NewPlugin } from "pretty-format";
 import GraphQLSchemaSnapshotSerializer = require("../src");
 
 const pokemonSchemaDefinition = /*GraphQL*/ `
@@ -97,7 +98,7 @@ type PokemonEvolutionRequirement {
 }
 `;
 
-expect.addSnapshotSerializer(GraphQLSchemaSnapshotSerializer);
+expect.addSnapshotSerializer(GraphQLSchemaSnapshotSerializer as NewPlugin);
 
 test("Pokemon GraphQL API has a consistent schema", async () => {
   const schema = buildASTSchema(parse(pokemonSchemaDefinition));
