@@ -309,7 +309,7 @@ function getSafeNumber(str: string | undefined): number | undefined {
   return undefined;
 }
 
-const PgLDSSourcePlugin: Plugin = async function(
+const PgLDSSourcePlugin: Plugin = async function (
   builder,
   {
     pgLDSUrl = process.env.LDS_URL,

@@ -143,7 +143,7 @@ export const postGraphileClassicIdsInflection = inflections.newInflector({
  * ABOVE HERE IS DEPRECATED.
  */
 
-export const PostGraphileInflectionPlugin = function(builder: SchemaBuilder) {
+export const PostGraphileInflectionPlugin = function (builder: SchemaBuilder) {
   builder.hook("inflection", (inflection: Inflection) => {
     const previous = inflection.enumName;
     // Overwrite directly so that we don't lose the 'extend' hints
@@ -156,7 +156,7 @@ export const PostGraphileInflectionPlugin = function(builder: SchemaBuilder) {
   });
 } as Plugin;
 
-export const PostGraphileClassicIdsInflectionPlugin = function(
+export const PostGraphileClassicIdsInflectionPlugin = function (
   builder: SchemaBuilder
 ) {
   builder.hook("inflection", (inflection: Inflection) => {
