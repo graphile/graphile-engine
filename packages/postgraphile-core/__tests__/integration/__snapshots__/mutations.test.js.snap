@@ -1369,6 +1369,25 @@ Object {
 }
 `;
 
+exports[`pg10.types.graphql 1`] = `
+Object {
+  "data": Object {
+    "createType": Object {
+      "type": Object {
+        "regnamespace": "c",
+        "regrole": "postgraphile_test_visitor",
+      },
+    },
+    "updateTypeById": Object {
+      "type": Object {
+        "regnamespace": "pg10",
+        "regrole": "postgraphile_test_authenticator",
+      },
+    },
+  },
+}
+`;
+
 exports[`procedure-mutation.graphql 1`] = `
 Object {
   "data": Object {

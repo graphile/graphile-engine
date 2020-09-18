@@ -4140,9 +4140,6 @@ scalar RegConfig
 """A builtin object identifier type for a text search dictionary"""
 scalar RegDictionary
 
-"""A builtin object identifier type for a namespace name"""
-scalar RegNamespace
-
 """A builtin object identifier type for an operator"""
 scalar RegOper
 
@@ -4154,9 +4151,6 @@ scalar RegProc
 
 """A builtin object identifier type for a function with argument types"""
 scalar RegProcedure
-
-"""A builtin object identifier type for a role name"""
-scalar RegRole
 
 """A builtin object identifier type for a data type name"""
 scalar RegType
@@ -4247,12 +4241,10 @@ type Type {
   regclass: RegClass
   regconfig: RegConfig
   regdictionary: RegDictionary
-  regnamespace: RegNamespace
   regoper: RegOper
   regoperator: RegOperator
   regproc: RegProc
   regprocedure: RegProcedure
-  regrole: RegRole
   regtype: RegType
   smallint: Int!
   textArray: [String]!
@@ -7789,9 +7781,6 @@ scalar RegConfig
 """A builtin object identifier type for a text search dictionary"""
 scalar RegDictionary
 
-"""A builtin object identifier type for a namespace name"""
-scalar RegNamespace
-
 """A builtin object identifier type for an operator"""
 scalar RegOper
 
@@ -7803,9 +7792,6 @@ scalar RegProc
 
 """A builtin object identifier type for a function with argument types"""
 scalar RegProcedure
-
-"""A builtin object identifier type for a role name"""
-scalar RegRole
 
 """A builtin object identifier type for a data type name"""
 scalar RegType
@@ -7896,12 +7882,10 @@ type Type {
   regclass: RegClass
   regconfig: RegConfig
   regdictionary: RegDictionary
-  regnamespace: RegNamespace
   regoper: RegOper
   regoperator: RegOperator
   regproc: RegProc
   regprocedure: RegProcedure
-  regrole: RegRole
   regtype: RegType
   smallint: Int!
   textArray: [String]!

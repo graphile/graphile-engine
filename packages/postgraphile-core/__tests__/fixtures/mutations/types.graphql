@@ -61,8 +61,6 @@ mutation {
         regoperator: "+(integer, integer)"
         regclass: "c.person" 
         regtype: "numeric" 
-        regrole: "postgraphile_test_visitor" 
-        regnamespace: "c" 
         regconfig: "dutch"
         regdictionary: "dutch_stem"
       }
@@ -118,8 +116,6 @@ mutation {
         regoperator: "+(integer, integer)"
         regclass: "c.person" 
         regtype: "numeric" 
-        regrole: "postgraphile_test_visitor" 
-        regnamespace: "c" 
         regconfig: "dutch"
         regdictionary: "dutch_stem"
       }

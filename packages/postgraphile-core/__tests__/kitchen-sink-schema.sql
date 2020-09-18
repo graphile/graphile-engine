@@ -296,18 +296,6 @@ create table b.types (
   "regdictionary" regdictionary 
 );
 
-do $_$
-begin
-if current_setting('server_version_num')::int >= 90500 then
-  -- regrole supported
-  -- regnamespace supported
-  ALTER TABLE b.types
-    ADD COLUMN "regrole" regrole,
-    ADD COLUMN "regnamespace" regnamespace; 
-end if;
-end;
-$_$ language plpgsql;
-
 comment on table b.types is E'@foreignKey (smallint) references a.post\n@foreignKey (id) references a.post';
 
 create function b.throw_error() returns trigger as $$

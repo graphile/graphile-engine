@@ -7745,9 +7745,6 @@ scalar RegConfig
 """A builtin object identifier type for a text search dictionary"""
 scalar RegDictionary
 
-"""A builtin object identifier type for a namespace name"""
-scalar RegNamespace
-
 """A builtin object identifier type for an operator"""
 scalar RegOper
 
@@ -7759,9 +7756,6 @@ scalar RegProc
 
 """A builtin object identifier type for a function with argument types"""
 scalar RegProcedure
-
-"""A builtin object identifier type for a role name"""
-scalar RegRole
 
 """A builtin object identifier type for a data type name"""
 scalar RegType
@@ -8366,12 +8360,10 @@ type Type implements Node {
   regclass: RegClass
   regconfig: RegConfig
   regdictionary: RegDictionary
-  regnamespace: RegNamespace
   regoper: RegOper
   regoperator: RegOperator
   regproc: RegProc
   regprocedure: RegProcedure
-  regrole: RegRole
   regtype: RegType
   smallint: Int!
   textArray: [String]!
@@ -8481,9 +8473,6 @@ input TypeCondition {
   """Checks for equality with the object’s \`regdictionary\` field."""
   regdictionary: RegDictionary
 
-  """Checks for equality with the object’s \`regnamespace\` field."""
-  regnamespace: RegNamespace
-
   """Checks for equality with the object’s \`regoper\` field."""
   regoper: RegOper
 
@@ -8495,9 +8484,6 @@ input TypeCondition {
 
   """Checks for equality with the object’s \`regprocedure\` field."""
   regprocedure: RegProcedure
-
-  """Checks for equality with the object’s \`regrole\` field."""
-  regrole: RegRole
 
   """Checks for equality with the object’s \`regtype\` field."""
   regtype: RegType
@@ -8642,12 +8628,10 @@ input TypeInput {
   regclass: RegClass
   regconfig: RegConfig
   regdictionary: RegDictionary
-  regnamespace: RegNamespace
   regoper: RegOper
   regoperator: RegOperator
   regproc: RegProc
   regprocedure: RegProcedure
-  regrole: RegRole
   regtype: RegType
   smallint: Int!
   textArray: [String]!
@@ -8691,12 +8675,10 @@ input TypePatch {
   regclass: RegClass
   regconfig: RegConfig
   regdictionary: RegDictionary
-  regnamespace: RegNamespace
   regoper: RegOper
   regoperator: RegOperator
   regproc: RegProc
   regprocedure: RegProcedure
-  regrole: RegRole
   regtype: RegType
   smallint: Int
   textArray: [String]
@@ -8832,8 +8814,6 @@ enum TypesOrderBy {
   REGCONFIG_DESC
   REGDICTIONARY_ASC
   REGDICTIONARY_DESC
-  REGNAMESPACE_ASC
-  REGNAMESPACE_DESC
   REGOPER_ASC
   REGOPER_DESC
   REGOPERATOR_ASC
@@ -8842,8 +8822,6 @@ enum TypesOrderBy {
   REGPROC_DESC
   REGPROCEDURE_ASC
   REGPROCEDURE_DESC
-  REGROLE_ASC
-  REGROLE_DESC
   REGTYPE_ASC
   REGTYPE_DESC
   SMALLINT_ASC

@@ -73,8 +73,6 @@ fragment type on Type {
   regoperator 
   regclass 
   regtype 
-  regrole 
-  regnamespace 
   regconfig
   regdictionary
   nullableRange {
