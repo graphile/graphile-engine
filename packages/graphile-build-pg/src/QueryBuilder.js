@@ -51,12 +51,23 @@ export type QueryBuilderOptions = {
 function escapeLarge(sqlFragment: SQL, type: PgType) {
   const actualType = type.domainBaseType || type;
   if (actualType.category === "N") {
+      console.log(actualType);
     if (
       [
         "21" /* int2 */,
         "23" /* int4 */,
         "700" /* float4 */,
         "701" /* float8 */,
+        "24" /* regproc */,
+        "2202" /* regprocedure */,
+        "2203" /* regoper */,
+        "2204" /* regoperator */,
+        "2205" /* regclass */,
+        "2206" /* regtype */,
+        "4096" /* regrole */,
+        "4089" /* regnamespace */,
+        "3734" /* regconfig */,
+        "3769" /* regdictionary */,
       ].includes(actualType.id)
     ) {
       // No need for special handling

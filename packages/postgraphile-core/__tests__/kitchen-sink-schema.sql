@@ -285,7 +285,17 @@ create table b.types (
   "nullablePoint" point,
   "inet" inet,
   "cidr" cidr,
-  "macaddr" macaddr
+  "macaddr" macaddr,
+  "regproc" regproc, 
+  "regprocedure" regprocedure, 
+  "regoper" regoper, 
+  "regoperator" regoperator, 
+  "regclass" regclass, 
+  "regtype" regtype, 
+  "regrole" regrole, 
+  "regnamespace" regnamespace, 
+  "regconfig" regconfig, 
+  "regdictionary" regdictionary 
 );
 
 comment on table b.types is E'@foreignKey (smallint) references a.post\n@foreignKey (id) references a.post';

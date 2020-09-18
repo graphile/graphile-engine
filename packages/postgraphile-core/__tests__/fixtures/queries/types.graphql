@@ -67,6 +67,16 @@ fragment type on Type {
   textArray
   json
   jsonb
+  regproc 
+  regprocedure 
+  regoper
+  regoperator 
+  regclass 
+  regtype 
+  regrole 
+  regnamespace 
+  regconfig
+  regdictionary
   nullableRange {
     start {
       value
