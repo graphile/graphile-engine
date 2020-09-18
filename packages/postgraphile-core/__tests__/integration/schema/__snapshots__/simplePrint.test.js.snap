@@ -7710,6 +7710,36 @@ type QueryOutputTwoRowsRecord {
   post: Post
 }
 
+"""A builtin object identifier type for a relation name"""
+scalar RegClass
+
+"""A builtin object identifier type for a text search configuration"""
+scalar RegConfig
+
+"""A builtin object identifier type for a text search dictionary"""
+scalar RegDictionary
+
+"""A builtin object identifier type for a namespace name"""
+scalar RegNamespace
+
+"""A builtin object identifier type for an operator"""
+scalar RegOper
+
+"""A builtin object identifier type for an operator with argument types"""
+scalar RegOperator
+
+"""A builtin object identifier type for a function name"""
+scalar RegProc
+
+"""A builtin object identifier type for a function with argument types"""
+scalar RegProcedure
+
+"""A builtin object identifier type for a role name"""
+scalar RegRole
+
+"""A builtin object identifier type for a data type name"""
+scalar RegType
+
 type Reserved implements Node {
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
@@ -8302,6 +8332,16 @@ type Type implements Node {
   inet: InternetAddress
   cidr: String
   macaddr: String
+  regproc: RegProc
+  regprocedure: RegProcedure
+  regoper: RegOper
+  regoperator: RegOperator
+  regclass: RegClass
+  regtype: RegType
+  regconfig: RegConfig
+  regdictionary: RegDictionary
+  regrole: RegRole
+  regnamespace: RegNamespace
 
   """Reads a single \`Post\` that is related to this \`Type\`."""
   postBySmallint: Post
@@ -8420,6 +8460,36 @@ input TypeCondition {
 
   """Checks for equality with the object’s \`macaddr\` field."""
   macaddr: String
+
+  """Checks for equality with the object’s \`regproc\` field."""
+  regproc: RegProc
+
+  """Checks for equality with the object’s \`regprocedure\` field."""
+  regprocedure: RegProcedure
+
+  """Checks for equality with the object’s \`regoper\` field."""
+  regoper: RegOper
+
+  """Checks for equality with the object’s \`regoperator\` field."""
+  regoperator: RegOperator
+
+  """Checks for equality with the object’s \`regclass\` field."""
+  regclass: RegClass
+
+  """Checks for equality with the object’s \`regtype\` field."""
+  regtype: RegType
+
+  """Checks for equality with the object’s \`regconfig\` field."""
+  regconfig: RegConfig
+
+  """Checks for equality with the object’s \`regdictionary\` field."""
+  regdictionary: RegDictionary
+
+  """Checks for equality with the object’s \`regrole\` field."""
+  regrole: RegRole
+
+  """Checks for equality with the object’s \`regnamespace\` field."""
+  regnamespace: RegNamespace
 }
 
 """All input for the \`typeFunctionConnectionMutation\` mutation."""
@@ -8544,6 +8614,16 @@ input TypeInput {
   inet: InternetAddress
   cidr: String
   macaddr: String
+  regproc: RegProc
+  regprocedure: RegProcedure
+  regoper: RegOper
+  regoperator: RegOperator
+  regclass: RegClass
+  regtype: RegType
+  regconfig: RegConfig
+  regdictionary: RegDictionary
+  regrole: RegRole
+  regnamespace: RegNamespace
 }
 
 """Represents an update to a \`Type\`. Fields that are set will be updated."""
@@ -8583,6 +8663,16 @@ input TypePatch {
   inet: InternetAddress
   cidr: String
   macaddr: String
+  regproc: RegProc
+  regprocedure: RegProcedure
+  regoper: RegOper
+  regoperator: RegOperator
+  regclass: RegClass
+  regtype: RegType
+  regconfig: RegConfig
+  regdictionary: RegDictionary
+  regrole: RegRole
+  regnamespace: RegNamespace
 }
 
 """A connection to a list of \`Type\` values."""
@@ -8714,6 +8804,26 @@ enum TypesOrderBy {
   CIDR_DESC
   MACADDR_ASC
   MACADDR_DESC
+  REGPROC_ASC
+  REGPROC_DESC
+  REGPROCEDURE_ASC
+  REGPROCEDURE_DESC
+  REGOPER_ASC
+  REGOPER_DESC
+  REGOPERATOR_ASC
+  REGOPERATOR_DESC
+  REGCLASS_ASC
+  REGCLASS_DESC
+  REGTYPE_ASC
+  REGTYPE_DESC
+  REGCONFIG_ASC
+  REGCONFIG_DESC
+  REGDICTIONARY_ASC
+  REGDICTIONARY_DESC
+  REGROLE_ASC
+  REGROLE_DESC
+  REGNAMESPACE_ASC
+  REGNAMESPACE_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
