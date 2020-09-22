@@ -57,7 +57,7 @@ mutation {
         nestedCompoundType: { a: { a: 1 } }
         regproc: "b.type_function" 
         regprocedure: "b.type_function(int)" 
-        regoper: "#-"
+        regoper: "*<>"
         regoperator: "+(integer, integer)"
         regclass: "c.person" 
         regtype: "numeric" 
@@ -112,7 +112,7 @@ mutation {
         nestedCompoundType: { a: { a: 1 } }
         regproc: "b.type_function" 
         regprocedure: "b.type_function(int)" 
-        regoper: "#-"
+        regoper: "*<>"
         regoperator: "+(integer, integer)"
         regclass: "c.person" 
         regtype: "numeric" 
