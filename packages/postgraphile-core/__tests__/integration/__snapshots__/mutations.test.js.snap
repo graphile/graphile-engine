@@ -1358,11 +1358,11 @@ Object {
     "createNetwork": Object {
       "network": Object {
         "cidr": "10.0.0.0/8",
-        "id": 9,
+        "id": 13,
         "inet": "10.0.0.0",
         "macaddr": "00:00:00:00:00:00",
         "macaddr8": "00:00:00:00:00:00:00:00",
-        "nodeId": "WyJuZXR3b3JrcyIsOV0=",
+        "nodeId": "WyJuZXR3b3JrcyIsMTNd",
       },
     },
   },
