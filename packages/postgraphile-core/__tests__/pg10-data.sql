@@ -8,7 +8,7 @@ insert into pg10.network values
   (7, '::ffff:1.2.3.0/120', '::ffff:1.2.3.0/120', '0800-2b01-0203', '08002b01:02030405'),
   (8, '::ffff:1.2.3.0/128', '::ffff:1.2.3.0/128', 'AABBCCDDEEFF', '08002b0102030405');
 
-alter sequence pg10.network_id_seq restart with 9;
+alter sequence pg10.network_id_seq restart with 13;
 
 insert into pg10.types values (
   12,
