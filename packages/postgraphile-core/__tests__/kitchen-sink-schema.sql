@@ -775,7 +775,7 @@ CREATE FUNCTION c.search_test_summaries() RETURNS TABLE (
 	) SELECT * FROM foo;
     $$
 LANGUAGE SQL STABLE;
-COMMENT ON FUNCTION c.search_test_summaries IS E'@simpleCollections only';
+COMMENT ON FUNCTION c.search_test_summaries() IS E'@simpleCollections only';
 
 -- Begin tests for smart comments
 
