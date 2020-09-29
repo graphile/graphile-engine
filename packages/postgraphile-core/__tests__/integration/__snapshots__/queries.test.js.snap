@@ -2747,7 +2747,7 @@ Object {
 }
 `;
 
-exports[`pg10.network_types.graphql 1`] = `
+exports[`pg11.network_types.graphql 1`] = `
 Object {
   "data": Object {
     "cidrTest": Object {
@@ -2968,7 +2968,7 @@ Object {
 }
 `;
 
-exports[`pg10.types.graphql 1`] = `
+exports[`pg11.types.graphql 1`] = `
 Object {
   "data": Object {
     "allTypes": Object {

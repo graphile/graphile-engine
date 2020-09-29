@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`prints a schema to test PG10-specific features with custom network scalars 1`] = `
+exports[`prints a schema to test PG11-specific features with custom network scalars 1`] = `
 """A connection to a list of \`AlwaysAsIdentity\` values."""
 type AlwaysAsIdentitiesConnection {
   """
@@ -1276,7 +1276,7 @@ type UpdateTypePayload {
 
 `;
 
-exports[`prints a schema to test PG10-specific features with default options 1`] = `
+exports[`prints a schema to test PG11-specific features with default options 1`] = `
 """A connection to a list of \`AlwaysAsIdentity\` values."""
 type AlwaysAsIdentitiesConnection {
   """

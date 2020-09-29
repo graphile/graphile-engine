@@ -1340,7 +1340,7 @@ Object {
 }
 `;
 
-exports[`pg10.identity.graphql 1`] = `
+exports[`pg11.identity.graphql 1`] = `
 Object {
   "data": Object {
     "a": Object {
@@ -1365,7 +1365,7 @@ Object {
 }
 `;
 
-exports[`pg10.network_types.createNetwork.graphql 1`] = `
+exports[`pg11.network_types.createNetwork.graphql 1`] = `
 Object {
   "data": Object {
     "createNetwork": Object {
@@ -1382,7 +1382,7 @@ Object {
 }
 `;
 
-exports[`pg10.types.graphql 1`] = `
+exports[`pg11.types.graphql 1`] = `
 Object {
   "data": Object {
     "createType": Object {
@@ -1405,7 +1405,7 @@ Object {
           "2098288669218571761",
         ],
         "id": 12,
-        "regnamespace": "pg10",
+        "regnamespace": "pg11",
         "regrole": "postgraphile_test_authenticator",
       },
     },

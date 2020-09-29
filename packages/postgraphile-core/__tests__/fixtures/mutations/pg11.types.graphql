@@ -5,7 +5,7 @@ mutation {
       id: 12
       typePatch: {
         regrole: "postgraphile_test_authenticator"
-        regnamespace: "pg10"
+        regnamespace: "pg11"
         bigintDomainArrayDomain: [
           "2098288669218571759"
           "2098288669218571760"
