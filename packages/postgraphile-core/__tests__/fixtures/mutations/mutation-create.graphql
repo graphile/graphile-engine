@@ -112,11 +112,6 @@ mutation CreateMutation($config: KeyValueHash!) {
         "2098288669218571760"
         "2098288669218571761"
       ]
-      bigintDomainArrayDomain: [
-        "2098288669218571759"
-        "2098288669218571760"
-        "2098288669218571761"
-      ]
     }
   }) {
     clientMutationId
@@ -169,7 +164,6 @@ mutation CreateMutation($config: KeyValueHash!) {
       macaddr
       textArrayDomain
       int8ArrayDomain
-      bigintDomainArrayDomain
     }
     query { nodeId }
   }

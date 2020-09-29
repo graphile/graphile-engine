@@ -251,11 +251,6 @@ Object {
           "start": null,
         },
         "bigint": "467131188225",
-        "bigintDomainArrayDomain": Array [
-          "2098288669218571759",
-          "2098288669218571760",
-          "2098288669218571761",
-        ],
         "boolean": false,
         "cidr": "192.168.0.0/16",
         "compoundType": Object {
@@ -1392,13 +1387,23 @@ Object {
   "data": Object {
     "createType": Object {
       "type": Object {
-        "id": 11,
+        "bigintDomainArrayDomain": Array [
+          "2098288669218571759",
+          "2098288669218571760",
+          "2098288669218571761",
+        ],
+        "id": 15,
         "regnamespace": "c",
         "regrole": "postgraphile_test_visitor",
       },
     },
     "updateTypeById": Object {
       "type": Object {
+        "bigintDomainArrayDomain": Array [
+          "2098288669218571759",
+          "2098288669218571760",
+          "2098288669218571761",
+        ],
         "id": 12,
         "regnamespace": "pg10",
         "regrole": "postgraphile_test_authenticator",
@@ -1891,7 +1896,6 @@ Object {
           },
         },
         "bigint": "1",
-        "bigintDomainArrayDomain": null,
         "boolean": true,
         "cidr": null,
         "compoundType": Object {
@@ -1978,7 +1982,6 @@ Object {
             },
           },
           "bigint": "467131188225",
-          "bigintDomainArrayDomain": null,
           "boolean": true,
           "cidr": null,
           "compoundType": Object {
@@ -2073,11 +2076,6 @@ Object {
             },
           },
           "bigint": "467131188225",
-          "bigintDomainArrayDomain": Array [
-            "1",
-            "2",
-            "2098288669218571760",
-          ],
           "boolean": true,
           "cidr": "192.168.0.0/24",
           "compoundType": Object {
@@ -2184,7 +2182,6 @@ Object {
             },
           },
           "bigint": "467131188225",
-          "bigintDomainArrayDomain": null,
           "boolean": true,
           "cidr": null,
           "compoundType": Object {
@@ -2279,11 +2276,6 @@ Object {
             },
           },
           "bigint": "467131188225",
-          "bigintDomainArrayDomain": Array [
-            "1",
-            "2",
-            "2098288669218571760",
-          ],
           "boolean": true,
           "cidr": "192.168.0.0/24",
           "compoundType": Object {
@@ -2389,7 +2381,6 @@ Object {
           },
         },
         "bigint": "467131188225",
-        "bigintDomainArrayDomain": null,
         "boolean": true,
         "cidr": null,
         "compoundType": Object {
@@ -2486,11 +2477,6 @@ Object {
           },
         },
         "bigint": "1",
-        "bigintDomainArrayDomain": Array [
-          "2098288669218571759",
-          "2098288669218571760",
-          "2098288669218571761",
-        ],
         "boolean": true,
         "cidr": "192.168.0.0/16",
         "compoundType": Object {

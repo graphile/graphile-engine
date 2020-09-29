@@ -10,10 +10,18 @@ insert into pg10.network values
 
 alter sequence pg10.network_id_seq restart with 9;
 
-insert into pg10.types values (
-  12,
-  'postgraphile_test_authenticator', 
-  'b'
-);
+insert into pg10.types values
+  (
+    11,
+    null,
+    null,
+    null
+  ),
+  (
+    12,
+    'postgraphile_test_authenticator',
+    'b',
+    ARRAY[1, 2, 2098288669218571760]
+  );
 
-alter sequence pg10.types_id_seq restart with 11;
+alter sequence pg10.types_id_seq restart with 15;

@@ -374,8 +374,6 @@ strings and not numbers.
 """
 scalar BigInt
 
-scalar BigintDomain
-
 enum Color {
   BLUE
   GREEN
@@ -8335,7 +8333,6 @@ scalar Time
 type Type implements Node {
   anIntRange: AnIntRange!
   bigint: BigInt!
-  bigintDomainArrayDomain: [BigintDomain]
   boolean: Boolean!
   cidr: String
   compoundType: CompoundType!
@@ -8401,9 +8398,6 @@ input TypeCondition {
 
   """Checks for equality with the object’s \`bigint\` field."""
   bigint: BigInt
-
-  """Checks for equality with the object’s \`bigintDomainArrayDomain\` field."""
-  bigintDomainArrayDomain: [BigintDomain]
 
   """Checks for equality with the object’s \`boolean\` field."""
   boolean: Boolean
@@ -8626,7 +8620,6 @@ type TypeFunctionMutationPayload {
 input TypeInput {
   anIntRange: AnIntRangeInput!
   bigint: BigInt!
-  bigintDomainArrayDomain: [BigintDomain]
   boolean: Boolean!
   cidr: String
   compoundType: CompoundTypeInput!
@@ -8676,7 +8669,6 @@ input TypeInput {
 input TypePatch {
   anIntRange: AnIntRangeInput
   bigint: BigInt
-  bigintDomainArrayDomain: [BigintDomain]
   boolean: Boolean
   cidr: String
   compoundType: CompoundTypeInput
@@ -8786,8 +8778,6 @@ enum TypesOrderBy {
   AN_INT_RANGE_DESC
   BIGINT_ASC
   BIGINT_DESC
-  BIGINT_DOMAIN_ARRAY_DOMAIN_ASC
-  BIGINT_DOMAIN_ARRAY_DOMAIN_DESC
   BOOLEAN_ASC
   BOOLEAN_DESC
   CIDR_ASC
@@ -10581,8 +10571,6 @@ strings and not numbers.
 """
 scalar BigInt
 
-scalar BigintDomain
-
 enum Color {
   BLUE
   GREEN
@@ -18542,7 +18530,6 @@ scalar Time
 type Type implements Node {
   anIntRange: AnIntRange!
   bigint: BigInt!
-  bigintDomainArrayDomain: [BigintDomain]
   boolean: Boolean!
   cidr: String
   compoundType: CompoundType!
@@ -18608,9 +18595,6 @@ input TypeCondition {
 
   """Checks for equality with the object’s \`bigint\` field."""
   bigint: BigInt
-
-  """Checks for equality with the object’s \`bigintDomainArrayDomain\` field."""
-  bigintDomainArrayDomain: [BigintDomain]
 
   """Checks for equality with the object’s \`boolean\` field."""
   boolean: Boolean
@@ -18833,7 +18817,6 @@ type TypeFunctionMutationPayload {
 input TypeInput {
   anIntRange: AnIntRangeInput!
   bigint: BigInt!
-  bigintDomainArrayDomain: [BigintDomain]
   boolean: Boolean!
   cidr: String
   compoundType: CompoundTypeInput!
@@ -18883,7 +18866,6 @@ input TypeInput {
 input TypePatch {
   anIntRange: AnIntRangeInput
   bigint: BigInt
-  bigintDomainArrayDomain: [BigintDomain]
   boolean: Boolean
   cidr: String
   compoundType: CompoundTypeInput
@@ -18993,8 +18975,6 @@ enum TypesOrderBy {
   AN_INT_RANGE_DESC
   BIGINT_ASC
   BIGINT_DESC
-  BIGINT_DOMAIN_ARRAY_DOMAIN_ASC
-  BIGINT_DOMAIN_ARRAY_DOMAIN_DESC
   BOOLEAN_ASC
   BOOLEAN_DESC
   CIDR_ASC

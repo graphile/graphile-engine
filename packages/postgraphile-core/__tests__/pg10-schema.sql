@@ -19,8 +19,13 @@ create table pg10.network (
   macaddr8 macaddr8
 );
 
+create domain c.bigint_domain as int8;
+-- PG9.6 doesn't support array of domain scalars
+create domain c.bigint_domain_array_domain as c.bigint_domain[];
+
 create table pg10.types (
   id serial primary key,
   "regrole" regrole, 
-  "regnamespace" regnamespace
+  "regnamespace" regnamespace,
+  "bigint_domain_array_domain" c.bigint_domain_array_domain
 )

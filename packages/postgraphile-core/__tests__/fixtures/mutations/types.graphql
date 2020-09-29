@@ -73,11 +73,6 @@ mutation {
           "2098288669218571760"
           "2098288669218571761"
         ]
-        bigintDomainArrayDomain: [
-          "2098288669218571759"
-          "2098288669218571760"
-          "2098288669218571761"
-        ]
       }
     }
   ) {
@@ -240,5 +235,4 @@ fragment type on Type {
   regdictionary
   textArrayDomain
   int8ArrayDomain
-  bigintDomainArrayDomain
 }

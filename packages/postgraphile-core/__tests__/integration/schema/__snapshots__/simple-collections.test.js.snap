@@ -78,8 +78,6 @@ strings and not numbers.
 """
 scalar BigInt
 
-scalar BigintDomain
-
 enum Color {
   BLUE
   GREEN
@@ -4227,7 +4225,6 @@ scalar Time
 type Type {
   anIntRange: AnIntRange!
   bigint: BigInt!
-  bigintDomainArrayDomain: [BigintDomain]
   boolean: Boolean!
   cidr: String
   compoundType: CompoundType!
@@ -4868,8 +4865,6 @@ max value for a JavaScript number. Therefore all big integers will be output as
 strings and not numbers.
 """
 scalar BigInt
-
-scalar BigintDomain
 
 enum Color {
   BLUE
@@ -7886,7 +7881,6 @@ scalar Time
 type Type {
   anIntRange: AnIntRange!
   bigint: BigInt!
-  bigintDomainArrayDomain: [BigintDomain]
   boolean: Boolean!
   cidr: String
   compoundType: CompoundType!
