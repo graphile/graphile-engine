@@ -8460,6 +8460,7 @@ type Type implements Node {
   enumArray: [Color]!
   id: Int!
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: Interval!
   intervalArray: [Interval]!
   json: JSON!
@@ -8604,6 +8605,7 @@ input TypeInput {
   enumArray: [Color]!
   id: Int
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: IntervalInput!
   intervalArray: [IntervalInput]!
   json: JSON!
@@ -8644,6 +8646,7 @@ input TypePatch {
   enumArray: [Color]
   id: Int
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: IntervalInput
   intervalArray: [IntervalInput]
   json: JSON

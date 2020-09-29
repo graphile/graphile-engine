@@ -312,7 +312,7 @@ export default (function PgTypesPlugin(
             } else {
               // Tweaking was necessary, process each item in the array in this
               // way, and then return the resulting array.
-              return sql.fragment`ARRAY(SELECT ${innerFragment} FROM unnest(${fragment}) AS unnest(${sqlVal}))`;
+              return sql.fragment`(case when ${fragment} is null then null else array(select ${innerFragment} from unnest(${fragment}) as unnest(${sqlVal})) end)`;
             }
           } else {
             // TODO: check that domains don't support atttypemod

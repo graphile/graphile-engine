@@ -251,6 +251,7 @@ create type a.an_int_range as range (
 );
 
 create domain c.text_array_domain as text[];
+create domain c.int8_array_domain as int8[];
 
 create table b.types (
   id serial primary key,
@@ -288,7 +289,8 @@ create table b.types (
   "inet" inet,
   "cidr" cidr,
   "macaddr" macaddr,
-  "text_array_domain" c.text_array_domain
+  "text_array_domain" c.text_array_domain,
+  "int8_array_domain" c.int8_array_domain
 );
 
 comment on table b.types is E'@foreignKey (smallint) references a.post\n@foreignKey (id) references a.post';

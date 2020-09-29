@@ -3925,6 +3925,7 @@ type Type {
   enumArray: [Color]!
   id: Int!
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: Interval!
   intervalArray: [Interval]!
   json: JSON!

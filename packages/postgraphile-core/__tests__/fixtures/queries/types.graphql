@@ -134,6 +134,7 @@ fragment type on Type {
   cidr
   macaddr
   textArrayDomain
+  int8ArrayDomain
   postBySmallint {
     id
     headline

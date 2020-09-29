@@ -93,6 +93,7 @@ insert into b.types values (
   null,
   point(1,3),
   null,
+  null,
   null
 );
 
@@ -132,7 +133,8 @@ insert into b.types values (
   '192.168.0.0',
   '192.168.0.0/24',
   'feed.dead.beef',
-  ARRAY['1 year', '2 months', '3 days']::text[]
+  ARRAY['1 year', '2 months', '3 days']::text[],
+  ARRAY[1, 2, 2098288669218571760]
 );
 
 insert into c.edge_case values

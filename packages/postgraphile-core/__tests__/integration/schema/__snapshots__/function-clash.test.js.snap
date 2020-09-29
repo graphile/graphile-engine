@@ -8321,6 +8321,7 @@ type Type implements Node {
   enumArray: [Color]!
   id: Int!
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: Interval!
   intervalArray: [Interval]!
   json: JSON!
@@ -8401,6 +8402,9 @@ input TypeCondition {
 
   """Checks for equality with the object’s \`inet\` field."""
   inet: InternetAddress
+
+  """Checks for equality with the object’s \`int8ArrayDomain\` field."""
+  int8ArrayDomain: [BigInt]
 
   """Checks for equality with the object’s \`interval\` field."""
   interval: IntervalInput
@@ -8572,6 +8576,7 @@ input TypeInput {
   enumArray: [Color]!
   id: Int
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: IntervalInput!
   intervalArray: [IntervalInput]!
   json: JSON!
@@ -8612,6 +8617,7 @@ input TypePatch {
   enumArray: [Color]
   id: Int
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: IntervalInput
   intervalArray: [IntervalInput]
   json: JSON
@@ -8724,6 +8730,8 @@ enum TypesOrderBy {
   ID_DESC
   INET_ASC
   INET_DESC
+  INT8_ARRAY_DOMAIN_ASC
+  INT8_ARRAY_DOMAIN_DESC
   INTERVAL_ARRAY_ASC
   INTERVAL_ARRAY_DESC
   INTERVAL_ASC

@@ -60,6 +60,11 @@ mutation {
         cidr: "192.168.0.0/16"
         macaddr: "08:00:2b:01:02:03"
         textArrayDomain: ["T1", "T2", "T3"]
+        int8ArrayDomain: [
+          "2098288669218571759"
+          "2098288669218571760"
+          "2098288669218571761"
+        ]
       }
     }
   ) {
@@ -200,4 +205,9 @@ fragment type on Type {
     x
     y
   }
+  inet
+  cidr
+  macaddr
+  textArrayDomain
+  int8ArrayDomain
 }
