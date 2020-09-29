@@ -8348,6 +8348,7 @@ type Type implements Node {
   postBySmallint: Post
   smallint: Int!
   textArray: [String]!
+  textArrayDomain: [String]
   time: Time!
   timestamp: Datetime!
   timestamptz: Datetime!
@@ -8450,6 +8451,9 @@ input TypeCondition {
 
   """Checks for equality with the object’s \`textArray\` field."""
   textArray: [String]
+
+  """Checks for equality with the object’s \`textArrayDomain\` field."""
+  textArrayDomain: [String]
 
   """Checks for equality with the object’s \`time\` field."""
   time: Time
@@ -8584,6 +8588,7 @@ input TypeInput {
   point: PointInput!
   smallint: Int!
   textArray: [String]!
+  textArrayDomain: [String]
   time: Time!
   timestamp: Datetime!
   timestamptz: Datetime!
@@ -8623,6 +8628,7 @@ input TypePatch {
   point: PointInput
   smallint: Int
   textArray: [String]
+  textArrayDomain: [String]
   time: Time
   timestamp: Datetime
   timestamptz: Datetime
@@ -8753,6 +8759,8 @@ enum TypesOrderBy {
   SMALLINT_DESC
   TEXT_ARRAY_ASC
   TEXT_ARRAY_DESC
+  TEXT_ARRAY_DOMAIN_ASC
+  TEXT_ARRAY_DOMAIN_DESC
   TIME_ASC
   TIME_DESC
   TIMESTAMP_ASC

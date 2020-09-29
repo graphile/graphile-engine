@@ -3025,6 +3025,7 @@ type Type {
   point: Point!
   smallint: Int!
   textArray: [String]!
+  textArrayDomain: [String]
   time: Time!
   timestamp: Datetime!
   timestamptz: Datetime!

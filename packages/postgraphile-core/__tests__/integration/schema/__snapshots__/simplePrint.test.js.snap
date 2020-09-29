@@ -8315,6 +8315,7 @@ type Type implements Node {
   inet: InternetAddress
   cidr: String
   macaddr: String
+  textArrayDomain: [String]
 
   """Reads a single \`Post\` that is related to this \`Type\`."""
   postBySmallint: Post
@@ -8433,6 +8434,9 @@ input TypeCondition {
 
   """Checks for equality with the object’s \`macaddr\` field."""
   macaddr: String
+
+  """Checks for equality with the object’s \`textArrayDomain\` field."""
+  textArrayDomain: [String]
 }
 
 """All input for the \`typeFunctionConnectionMutation\` mutation."""
@@ -8557,6 +8561,7 @@ input TypeInput {
   inet: InternetAddress
   cidr: String
   macaddr: String
+  textArrayDomain: [String]
 }
 
 """Represents an update to a \`Type\`. Fields that are set will be updated."""
@@ -8596,6 +8601,7 @@ input TypePatch {
   inet: InternetAddress
   cidr: String
   macaddr: String
+  textArrayDomain: [String]
 }
 
 """A connection to a list of \`Type\` values."""
@@ -8727,6 +8733,8 @@ enum TypesOrderBy {
   CIDR_DESC
   MACADDR_ASC
   MACADDR_DESC
+  TEXT_ARRAY_DOMAIN_ASC
+  TEXT_ARRAY_DOMAIN_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }

@@ -250,6 +250,8 @@ create type a.an_int_range as range (
   subtype = a.an_int
 );
 
+create domain c.text_array_domain as text[];
+
 create table b.types (
   id serial primary key,
   "smallint" smallint not null,
@@ -285,7 +287,8 @@ create table b.types (
   "nullablePoint" point,
   "inet" inet,
   "cidr" cidr,
-  "macaddr" macaddr
+  "macaddr" macaddr,
+  "text_array_domain" c.text_array_domain
 );
 
 comment on table b.types is E'@foreignKey (smallint) references a.post\n@foreignKey (id) references a.post';

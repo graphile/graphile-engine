@@ -130,6 +130,10 @@ fragment type on Type {
     x
     y
   }
+  inet
+  cidr
+  macaddr
+  textArrayDomain
   postBySmallint {
     id
     headline

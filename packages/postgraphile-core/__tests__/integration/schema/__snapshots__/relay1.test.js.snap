@@ -3931,6 +3931,7 @@ type Type {
   rowId: Int!
   smallint: Int!
   textArray: [String]!
+  textArrayDomain: [String]
   time: Time!
   timestamp: Datetime!
   timestamptz: Datetime!
