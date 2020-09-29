@@ -59,6 +59,14 @@ mutation {
         inet: "192.168.0.0"
         cidr: "192.168.0.0/16"
         macaddr: "08:00:2b:01:02:03"
+        regproc: "b.type_function"
+        regprocedure: "b.type_function(int)"
+        regoper: "*<>"
+        regoperator: "+(integer, integer)"
+        regclass: "c.person"
+        regtype: "numeric"
+        regconfig: "dutch"
+        regdictionary: "dutch_stem"
         textArrayDomain: ["T1", "T2", "T3"]
         int8ArrayDomain: [
           "2098288669218571759"
@@ -117,6 +125,14 @@ mutation {
         money: 27
         compoundType: { a: 1 }
         nestedCompoundType: { a: { a: 1 } }
+        regproc: "b.type_function"
+        regprocedure: "b.type_function(int)"
+        regoper: "*<>"
+        regoperator: "+(integer, integer)"
+        regclass: "c.person"
+        regtype: "numeric"
+        regconfig: "dutch"
+        regdictionary: "dutch_stem"
       }
     }
   ) {
@@ -137,6 +153,7 @@ fragment compoundType on CompoundType {
 }
 
 fragment type on Type {
+  id
   smallint
   bigint
   boolean
@@ -213,6 +230,14 @@ fragment type on Type {
   inet
   cidr
   macaddr
+  regproc
+  regprocedure
+  regoper
+  regoperator
+  regclass
+  regtype
+  regconfig
+  regdictionary
   textArrayDomain
   int8ArrayDomain
   bigintDomainArrayDomain
