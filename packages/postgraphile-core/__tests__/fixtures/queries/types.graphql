@@ -57,6 +57,7 @@ fragment compoundType on CompoundType {
 }
 
 fragment type on Type {
+  id
   smallint
   bigint
   boolean
@@ -67,14 +68,6 @@ fragment type on Type {
   textArray
   json
   jsonb
-  regproc 
-  regprocedure 
-  regoper
-  regoperator 
-  regclass 
-  regtype 
-  regconfig
-  regdictionary
   nullableRange {
     start {
       value
@@ -146,6 +139,14 @@ fragment type on Type {
     id
     headline
   }
+  regproc
+  regprocedure
+  regoper
+  regoperator
+  regclass
+  regtype
+  regconfig
+  regdictionary
 }
 
 fragment typesConnection on TypesConnection {

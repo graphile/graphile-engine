@@ -5,8 +5,9 @@ query {
 }
 
 fragment type on Type {
-regrole
-regnamespace
+  id
+  regrole
+  regnamespace
 }
 
 fragment typesConnection on TypesConnection {

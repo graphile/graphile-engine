@@ -29,6 +29,7 @@ mutation {
 }
 
 fragment type on Type {
+  id
   regrole
   regnamespace
 }
