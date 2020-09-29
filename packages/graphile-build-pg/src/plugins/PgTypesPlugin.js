@@ -292,13 +292,37 @@ export default (function PgTypesPlugin(
         if (tweaker) {
           return tweaker(fragment, resolveData);
         } else if (type.domainBaseType) {
-          // TODO: check that domains don't support atttypemod
-          return pgTweakFragmentForTypeAndModifier(
-            fragment,
-            type.domainBaseType,
-            type.domainBaseTypeModifier,
-            resolveData
-          );
+          if (type.domainBaseType.isPgArray) {
+            // If we have a domain that's for example an `int8[]`, we must
+            // process it into a `text[]` otherwise we risk loss of accuracy
+            // when taking PostgreSQL's JSON into Node.js.
+            const arrayItemType = type.domainBaseType.arrayItemType;
+            const sqlVal = sql.fragment`val`;
+            // See what the result of tweaking the array item would be.
+            const innerFragment = pgTweakFragmentForTypeAndModifier(
+              sqlVal,
+              arrayItemType,
+              type.domainBaseTypeModifier,
+              resolveData
+            );
+            if (innerFragment === sqlVal) {
+              // There was no tweak applied to the fragment, so pass it through
+              // verbatim.
+              return fragment;
+            } else {
+              // Tweaking was necessary, process each item in the array in this
+              // way, and then return the resulting array.
+              return sql.fragment`ARRAY(SELECT ${innerFragment} FROM unnest(${fragment}) AS unnest(${sqlVal}))`;
+            }
+          } else {
+            // TODO: check that domains don't support atttypemod
+            return pgTweakFragmentForTypeAndModifier(
+              fragment,
+              type.domainBaseType,
+              type.domainBaseTypeModifier,
+              resolveData
+            );
+          }
         } else if (type.isPgArray) {
           const error = new Error(
             `Internal graphile-build-pg error: should not attempt to tweak an array, please process array before tweaking (type: "${type.namespaceName}.${type.name}")`

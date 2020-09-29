@@ -8675,6 +8675,7 @@ Object {
             },
             "bigint": "467131188225",
             "boolean": true,
+            "cidr": null,
             "compoundType": Object {
               "a": 1,
               "b": "2",
@@ -8691,8 +8692,10 @@ Object {
               "GREEN",
               "RED",
             ],
+            "inet": null,
             "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
             "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+            "macaddr": null,
             "money": 9876543.21,
             "nestedCompoundType": Object {
               "a": Object {
@@ -8749,6 +8752,7 @@ Object {
               "met",
               "you",
             ],
+            "textArrayDomain": null,
           },
         },
         Object {
@@ -8765,6 +8769,7 @@ Object {
             },
             "bigint": "467131188225",
             "boolean": true,
+            "cidr": "192.168.0.0/24",
             "compoundType": Object {
               "a": null,
               "b": null,
@@ -8781,8 +8786,10 @@ Object {
               "GREEN",
               "RED",
             ],
+            "inet": "192.168.0.0",
             "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
             "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+            "macaddr": "fe:ed:de:ad:be:ef",
             "money": 9876543.21,
             "nestedCompoundType": Object {
               "a": Object {
@@ -8833,6 +8840,11 @@ Object {
               "met",
               "you",
             ],
+            "textArrayDomain": Array [
+              "1 year",
+              "2 months",
+              "3 days",
+            ],
           },
         },
       ],
@@ -8850,6 +8862,7 @@ Object {
           },
           "bigint": "467131188225",
           "boolean": true,
+          "cidr": null,
           "compoundType": Object {
             "a": 1,
             "b": "2",
@@ -8866,8 +8879,10 @@ Object {
             "GREEN",
             "RED",
           ],
+          "inet": null,
           "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
           "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+          "macaddr": null,
           "money": 9876543.21,
           "nestedCompoundType": Object {
             "a": Object {
@@ -8924,6 +8939,7 @@ Object {
             "met",
             "you",
           ],
+          "textArrayDomain": null,
         },
         Object {
           "anIntRange": Object {
@@ -8938,6 +8954,7 @@ Object {
           },
           "bigint": "467131188225",
           "boolean": true,
+          "cidr": "192.168.0.0/24",
           "compoundType": Object {
             "a": null,
             "b": null,
@@ -8954,8 +8971,10 @@ Object {
             "GREEN",
             "RED",
           ],
+          "inet": "192.168.0.0",
           "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
           "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+          "macaddr": "fe:ed:de:ad:be:ef",
           "money": 9876543.21,
           "nestedCompoundType": Object {
             "a": Object {
@@ -9006,6 +9025,11 @@ Object {
             "met",
             "you",
           ],
+          "textArrayDomain": Array [
+            "1 year",
+            "2 months",
+            "3 days",
+          ],
         },
       ],
       "pageInfo": Object {
@@ -9030,6 +9054,7 @@ Object {
         },
         "bigint": "467131188225",
         "boolean": true,
+        "cidr": null,
         "compoundType": Object {
           "a": 1,
           "b": "2",
@@ -9046,8 +9071,10 @@ Object {
           "GREEN",
           "RED",
         ],
+        "inet": null,
         "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
         "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+        "macaddr": null,
         "money": 9876543.21,
         "nestedCompoundType": Object {
           "a": Object {
@@ -9104,6 +9131,7 @@ Object {
           "met",
           "you",
         ],
+        "textArrayDomain": null,
       },
       Object {
         "anIntRange": Object {
@@ -9118,6 +9146,7 @@ Object {
         },
         "bigint": "467131188225",
         "boolean": true,
+        "cidr": "192.168.0.0/24",
         "compoundType": Object {
           "a": null,
           "b": null,
@@ -9134,8 +9163,10 @@ Object {
           "GREEN",
           "RED",
         ],
+        "inet": "192.168.0.0",
         "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
         "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+        "macaddr": "fe:ed:de:ad:be:ef",
         "money": 9876543.21,
         "nestedCompoundType": Object {
           "a": Object {
@@ -9186,6 +9217,11 @@ Object {
           "met",
           "you",
         ],
+        "textArrayDomain": Array [
+          "1 year",
+          "2 months",
+          "3 days",
+        ],
       },
     ],
     "node": Object {
@@ -9201,6 +9237,7 @@ Object {
       },
       "bigint": "467131188225",
       "boolean": true,
+      "cidr": null,
       "compoundType": Object {
         "a": 1,
         "b": "2",
@@ -9217,8 +9254,10 @@ Object {
         "GREEN",
         "RED",
       ],
+      "inet": null,
       "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
       "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+      "macaddr": null,
       "money": 9876543.21,
       "nestedCompoundType": Object {
         "a": Object {
@@ -9275,6 +9314,7 @@ Object {
         "met",
         "you",
       ],
+      "textArrayDomain": null,
     },
     "personById": Object {
       "typeFunction": Object {
@@ -9290,6 +9330,7 @@ Object {
         },
         "bigint": "467131188225",
         "boolean": true,
+        "cidr": null,
         "compoundType": Object {
           "a": 1,
           "b": "2",
@@ -9306,8 +9347,10 @@ Object {
           "GREEN",
           "RED",
         ],
+        "inet": null,
         "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
         "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+        "macaddr": null,
         "money": 9876543.21,
         "nestedCompoundType": Object {
           "a": Object {
@@ -9364,6 +9407,7 @@ Object {
           "met",
           "you",
         ],
+        "textArrayDomain": null,
       },
       "typeFunctionConnection": Object {
         "edges": Array [
@@ -9381,6 +9425,7 @@ Object {
               },
               "bigint": "467131188225",
               "boolean": true,
+              "cidr": null,
               "compoundType": Object {
                 "a": 1,
                 "b": "2",
@@ -9397,8 +9442,10 @@ Object {
                 "GREEN",
                 "RED",
               ],
+              "inet": null,
               "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
               "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+              "macaddr": null,
               "money": 9876543.21,
               "nestedCompoundType": Object {
                 "a": Object {
@@ -9455,6 +9502,7 @@ Object {
                 "met",
                 "you",
               ],
+              "textArrayDomain": null,
             },
           },
           Object {
@@ -9471,6 +9519,7 @@ Object {
               },
               "bigint": "467131188225",
               "boolean": true,
+              "cidr": "192.168.0.0/24",
               "compoundType": Object {
                 "a": null,
                 "b": null,
@@ -9487,8 +9536,10 @@ Object {
                 "GREEN",
                 "RED",
               ],
+              "inet": "192.168.0.0",
               "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
               "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+              "macaddr": "fe:ed:de:ad:be:ef",
               "money": 9876543.21,
               "nestedCompoundType": Object {
                 "a": Object {
@@ -9539,6 +9590,11 @@ Object {
                 "met",
                 "you",
               ],
+              "textArrayDomain": Array [
+                "1 year",
+                "2 months",
+                "3 days",
+              ],
             },
           },
         ],
@@ -9556,6 +9612,7 @@ Object {
             },
             "bigint": "467131188225",
             "boolean": true,
+            "cidr": null,
             "compoundType": Object {
               "a": 1,
               "b": "2",
@@ -9572,8 +9629,10 @@ Object {
               "GREEN",
               "RED",
             ],
+            "inet": null,
             "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
             "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+            "macaddr": null,
             "money": 9876543.21,
             "nestedCompoundType": Object {
               "a": Object {
@@ -9630,6 +9689,7 @@ Object {
               "met",
               "you",
             ],
+            "textArrayDomain": null,
           },
           Object {
             "anIntRange": Object {
@@ -9644,6 +9704,7 @@ Object {
             },
             "bigint": "467131188225",
             "boolean": true,
+            "cidr": "192.168.0.0/24",
             "compoundType": Object {
               "a": null,
               "b": null,
@@ -9660,8 +9721,10 @@ Object {
               "GREEN",
               "RED",
             ],
+            "inet": "192.168.0.0",
             "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
             "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+            "macaddr": "fe:ed:de:ad:be:ef",
             "money": 9876543.21,
             "nestedCompoundType": Object {
               "a": Object {
@@ -9712,6 +9775,11 @@ Object {
               "met",
               "you",
             ],
+            "textArrayDomain": Array [
+              "1 year",
+              "2 months",
+              "3 days",
+            ],
           },
         ],
         "pageInfo": Object {
@@ -9736,6 +9804,7 @@ Object {
           },
           "bigint": "467131188225",
           "boolean": true,
+          "cidr": null,
           "compoundType": Object {
             "a": 1,
             "b": "2",
@@ -9752,8 +9821,10 @@ Object {
             "GREEN",
             "RED",
           ],
+          "inet": null,
           "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
           "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+          "macaddr": null,
           "money": 9876543.21,
           "nestedCompoundType": Object {
             "a": Object {
@@ -9810,6 +9881,7 @@ Object {
             "met",
             "you",
           ],
+          "textArrayDomain": null,
         },
         Object {
           "anIntRange": Object {
@@ -9824,6 +9896,7 @@ Object {
           },
           "bigint": "467131188225",
           "boolean": true,
+          "cidr": "192.168.0.0/24",
           "compoundType": Object {
             "a": null,
             "b": null,
@@ -9840,8 +9913,10 @@ Object {
             "GREEN",
             "RED",
           ],
+          "inet": "192.168.0.0",
           "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
           "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+          "macaddr": "fe:ed:de:ad:be:ef",
           "money": 9876543.21,
           "nestedCompoundType": Object {
             "a": Object {
@@ -9892,6 +9967,11 @@ Object {
             "met",
             "you",
           ],
+          "textArrayDomain": Array [
+            "1 year",
+            "2 months",
+            "3 days",
+          ],
         },
       ],
     },
@@ -9911,6 +9991,7 @@ Object {
         },
         "bigint": "467131188225",
         "boolean": true,
+        "cidr": null,
         "compoundType": Object {
           "a": 1,
           "b": "2",
@@ -9927,8 +10008,10 @@ Object {
           "GREEN",
           "RED",
         ],
+        "inet": null,
         "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
         "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+        "macaddr": null,
         "money": 9876543.21,
         "nestedCompoundType": Object {
           "a": Object {
@@ -9985,6 +10068,7 @@ Object {
           "met",
           "you",
         ],
+        "textArrayDomain": null,
       },
       "typesBySmallint": Object {
         "edges": Array [],
@@ -10011,6 +10095,7 @@ Object {
       },
       "bigint": "467131188225",
       "boolean": true,
+      "cidr": null,
       "compoundType": Object {
         "a": 1,
         "b": "2",
@@ -10027,8 +10112,10 @@ Object {
         "GREEN",
         "RED",
       ],
+      "inet": null,
       "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
       "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+      "macaddr": null,
       "money": 9876543.21,
       "nestedCompoundType": Object {
         "a": Object {
@@ -10085,6 +10172,7 @@ Object {
         "met",
         "you",
       ],
+      "textArrayDomain": null,
     },
     "typeById": Object {
       "anIntRange": Object {
@@ -10099,6 +10187,7 @@ Object {
       },
       "bigint": "467131188225",
       "boolean": true,
+      "cidr": null,
       "compoundType": Object {
         "a": 1,
         "b": "2",
@@ -10115,8 +10204,10 @@ Object {
         "GREEN",
         "RED",
       ],
+      "inet": null,
       "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
       "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+      "macaddr": null,
       "money": 9876543.21,
       "nestedCompoundType": Object {
         "a": Object {
@@ -10173,6 +10264,7 @@ Object {
         "met",
         "you",
       ],
+      "textArrayDomain": null,
     },
     "typeFunction": Object {
       "anIntRange": Object {
@@ -10187,6 +10279,7 @@ Object {
       },
       "bigint": "467131188225",
       "boolean": true,
+      "cidr": null,
       "compoundType": Object {
         "a": 1,
         "b": "2",
@@ -10203,8 +10296,10 @@ Object {
         "GREEN",
         "RED",
       ],
+      "inet": null,
       "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
       "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+      "macaddr": null,
       "money": 9876543.21,
       "nestedCompoundType": Object {
         "a": Object {
@@ -10261,6 +10356,7 @@ Object {
         "met",
         "you",
       ],
+      "textArrayDomain": null,
     },
     "typeFunctionConnection": Object {
       "edges": Array [
@@ -10278,6 +10374,7 @@ Object {
             },
             "bigint": "467131188225",
             "boolean": true,
+            "cidr": null,
             "compoundType": Object {
               "a": 1,
               "b": "2",
@@ -10294,8 +10391,10 @@ Object {
               "GREEN",
               "RED",
             ],
+            "inet": null,
             "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
             "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+            "macaddr": null,
             "money": 9876543.21,
             "nestedCompoundType": Object {
               "a": Object {
@@ -10352,6 +10451,7 @@ Object {
               "met",
               "you",
             ],
+            "textArrayDomain": null,
           },
         },
         Object {
@@ -10368,6 +10468,7 @@ Object {
             },
             "bigint": "467131188225",
             "boolean": true,
+            "cidr": "192.168.0.0/24",
             "compoundType": Object {
               "a": null,
               "b": null,
@@ -10384,8 +10485,10 @@ Object {
               "GREEN",
               "RED",
             ],
+            "inet": "192.168.0.0",
             "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
             "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+            "macaddr": "fe:ed:de:ad:be:ef",
             "money": 9876543.21,
             "nestedCompoundType": Object {
               "a": Object {
@@ -10436,6 +10539,11 @@ Object {
               "met",
               "you",
             ],
+            "textArrayDomain": Array [
+              "1 year",
+              "2 months",
+              "3 days",
+            ],
           },
         },
       ],
@@ -10453,6 +10561,7 @@ Object {
           },
           "bigint": "467131188225",
           "boolean": true,
+          "cidr": null,
           "compoundType": Object {
             "a": 1,
             "b": "2",
@@ -10469,8 +10578,10 @@ Object {
             "GREEN",
             "RED",
           ],
+          "inet": null,
           "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
           "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+          "macaddr": null,
           "money": 9876543.21,
           "nestedCompoundType": Object {
             "a": Object {
@@ -10527,6 +10638,7 @@ Object {
             "met",
             "you",
           ],
+          "textArrayDomain": null,
         },
         Object {
           "anIntRange": Object {
@@ -10541,6 +10653,7 @@ Object {
           },
           "bigint": "467131188225",
           "boolean": true,
+          "cidr": "192.168.0.0/24",
           "compoundType": Object {
             "a": null,
             "b": null,
@@ -10557,8 +10670,10 @@ Object {
             "GREEN",
             "RED",
           ],
+          "inet": "192.168.0.0",
           "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
           "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+          "macaddr": "fe:ed:de:ad:be:ef",
           "money": 9876543.21,
           "nestedCompoundType": Object {
             "a": Object {
@@ -10609,6 +10724,11 @@ Object {
             "met",
             "you",
           ],
+          "textArrayDomain": Array [
+            "1 year",
+            "2 months",
+            "3 days",
+          ],
         },
       ],
       "pageInfo": Object {
@@ -10633,6 +10753,7 @@ Object {
         },
         "bigint": "467131188225",
         "boolean": true,
+        "cidr": null,
         "compoundType": Object {
           "a": 1,
           "b": "2",
@@ -10649,8 +10770,10 @@ Object {
           "GREEN",
           "RED",
         ],
+        "inet": null,
         "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
         "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+        "macaddr": null,
         "money": 9876543.21,
         "nestedCompoundType": Object {
           "a": Object {
@@ -10707,6 +10830,7 @@ Object {
           "met",
           "you",
         ],
+        "textArrayDomain": null,
       },
       Object {
         "anIntRange": Object {
@@ -10721,6 +10845,7 @@ Object {
         },
         "bigint": "467131188225",
         "boolean": true,
+        "cidr": "192.168.0.0/24",
         "compoundType": Object {
           "a": null,
           "b": null,
@@ -10737,8 +10862,10 @@ Object {
           "GREEN",
           "RED",
         ],
+        "inet": "192.168.0.0",
         "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
         "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+        "macaddr": "fe:ed:de:ad:be:ef",
         "money": 9876543.21,
         "nestedCompoundType": Object {
           "a": Object {
@@ -10788,6 +10915,11 @@ Object {
           "just",
           "met",
           "you",
+        ],
+        "textArrayDomain": Array [
+          "1 year",
+          "2 months",
+          "3 days",
         ],
       },
     ],
