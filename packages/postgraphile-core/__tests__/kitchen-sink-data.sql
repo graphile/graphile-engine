@@ -94,6 +94,7 @@ insert into b.types values (
   point(1,3),
   null,
   null,
+  null,
   null
 );
 
@@ -134,6 +135,7 @@ insert into b.types values (
   '192.168.0.0/24',
   'feed.dead.beef',
   ARRAY['1 year', '2 months', '3 days']::text[],
+  ARRAY[1, 2, 2098288669218571760],
   ARRAY[1, 2, 2098288669218571760]
 );
 

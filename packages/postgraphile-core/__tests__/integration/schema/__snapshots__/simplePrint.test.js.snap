@@ -365,6 +365,8 @@ strings and not numbers.
 """
 scalar BigInt
 
+scalar BigintDomain
+
 enum Color {
   RED
   GREEN
@@ -8317,6 +8319,7 @@ type Type implements Node {
   macaddr: String
   textArrayDomain: [String]
   int8ArrayDomain: [BigInt]
+  bigintDomainArrayDomain: [BigintDomain]
 
   """Reads a single \`Post\` that is related to this \`Type\`."""
   postBySmallint: Post
@@ -8441,6 +8444,9 @@ input TypeCondition {
 
   """Checks for equality with the object’s \`int8ArrayDomain\` field."""
   int8ArrayDomain: [BigInt]
+
+  """Checks for equality with the object’s \`bigintDomainArrayDomain\` field."""
+  bigintDomainArrayDomain: [BigintDomain]
 }
 
 """All input for the \`typeFunctionConnectionMutation\` mutation."""
@@ -8567,6 +8573,7 @@ input TypeInput {
   macaddr: String
   textArrayDomain: [String]
   int8ArrayDomain: [BigInt]
+  bigintDomainArrayDomain: [BigintDomain]
 }
 
 """Represents an update to a \`Type\`. Fields that are set will be updated."""
@@ -8608,6 +8615,7 @@ input TypePatch {
   macaddr: String
   textArrayDomain: [String]
   int8ArrayDomain: [BigInt]
+  bigintDomainArrayDomain: [BigintDomain]
 }
 
 """A connection to a list of \`Type\` values."""
@@ -8743,6 +8751,8 @@ enum TypesOrderBy {
   TEXT_ARRAY_DOMAIN_DESC
   INT8_ARRAY_DOMAIN_ASC
   INT8_ARRAY_DOMAIN_DESC
+  BIGINT_DOMAIN_ARRAY_DOMAIN_ASC
+  BIGINT_DOMAIN_ARRAY_DOMAIN_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }

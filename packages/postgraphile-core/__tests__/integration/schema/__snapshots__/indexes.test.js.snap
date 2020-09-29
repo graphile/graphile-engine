@@ -875,6 +875,8 @@ strings and not numbers.
 """
 scalar BigInt
 
+scalar BigintDomain
+
 enum Color {
   BLUE
   GREEN
@@ -8448,6 +8450,7 @@ scalar Time
 type Type implements Node {
   anIntRange: AnIntRange!
   bigint: BigInt!
+  bigintDomainArrayDomain: [BigintDomain]
   boolean: Boolean!
   cidr: String
   compoundType: CompoundType!
@@ -8593,6 +8596,7 @@ type TypeFunctionMutationPayload {
 input TypeInput {
   anIntRange: AnIntRangeInput!
   bigint: BigInt!
+  bigintDomainArrayDomain: [BigintDomain]
   boolean: Boolean!
   cidr: String
   compoundType: CompoundTypeInput!
@@ -8634,6 +8638,7 @@ input TypeInput {
 input TypePatch {
   anIntRange: AnIntRangeInput
   bigint: BigInt
+  bigintDomainArrayDomain: [BigintDomain]
   boolean: Boolean
   cidr: String
   compoundType: CompoundTypeInput

@@ -78,6 +78,8 @@ strings and not numbers.
 """
 scalar BigInt
 
+scalar BigintDomain
+
 enum Color {
   BLUE
   GREEN
@@ -3965,6 +3967,7 @@ scalar Time
 type Type {
   anIntRange: AnIntRange!
   bigint: BigInt!
+  bigintDomainArrayDomain: [BigintDomain]
   boolean: Boolean!
   cidr: String
   compoundType: CompoundType!
