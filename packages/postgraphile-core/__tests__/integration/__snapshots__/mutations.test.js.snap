@@ -251,6 +251,11 @@ Object {
           "start": null,
         },
         "bigint": "467131188225",
+        "bigintDomainArrayDomain": Array [
+          "2098288669218571759",
+          "2098288669218571760",
+          "2098288669218571761",
+        ],
         "boolean": false,
         "cidr": "192.168.0.0/16",
         "compoundType": Object {
@@ -1865,6 +1870,7 @@ Object {
           },
         },
         "bigint": "1",
+        "bigintDomainArrayDomain": null,
         "boolean": true,
         "cidr": null,
         "compoundType": Object {
@@ -1942,6 +1948,7 @@ Object {
             },
           },
           "bigint": "467131188225",
+          "bigintDomainArrayDomain": null,
           "boolean": true,
           "cidr": null,
           "compoundType": Object {
@@ -2027,6 +2034,11 @@ Object {
             },
           },
           "bigint": "467131188225",
+          "bigintDomainArrayDomain": Array [
+            "1",
+            "2",
+            "2098288669218571760",
+          ],
           "boolean": true,
           "cidr": "192.168.0.0/24",
           "compoundType": Object {
@@ -2124,6 +2136,7 @@ Object {
             },
           },
           "bigint": "467131188225",
+          "bigintDomainArrayDomain": null,
           "boolean": true,
           "cidr": null,
           "compoundType": Object {
@@ -2209,6 +2222,11 @@ Object {
             },
           },
           "bigint": "467131188225",
+          "bigintDomainArrayDomain": Array [
+            "1",
+            "2",
+            "2098288669218571760",
+          ],
           "boolean": true,
           "cidr": "192.168.0.0/24",
           "compoundType": Object {
@@ -2305,6 +2323,7 @@ Object {
           },
         },
         "bigint": "467131188225",
+        "bigintDomainArrayDomain": null,
         "boolean": true,
         "cidr": null,
         "compoundType": Object {
@@ -2392,6 +2411,11 @@ Object {
           },
         },
         "bigint": "1",
+        "bigintDomainArrayDomain": Array [
+          "2098288669218571759",
+          "2098288669218571760",
+          "2098288669218571761",
+        ],
         "boolean": true,
         "cidr": "192.168.0.0/16",
         "compoundType": Object {
