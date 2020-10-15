@@ -159,6 +159,7 @@ fragment type on Type {
     hours
     minutes
     seconds
+    milliseconds
   }
   intervalArray {
     years
@@ -167,6 +168,7 @@ fragment type on Type {
     hours
     minutes
     seconds
+    milliseconds
   }
 }
 
