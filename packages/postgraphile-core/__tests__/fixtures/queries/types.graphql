@@ -152,6 +152,22 @@ fragment type on Type {
   regtype
   regconfig
   regdictionary
+  interval {
+    years
+    months
+    days
+    hours
+    minutes
+    seconds
+  }
+  intervalArray {
+    years
+    months
+    days
+    hours
+    minutes
+    seconds
+  }
 }
 
 fragment typesConnection on TypesConnection {
