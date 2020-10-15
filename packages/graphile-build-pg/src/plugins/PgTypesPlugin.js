@@ -157,32 +157,36 @@ export default (function PgTypesPlugin(
         }
       };
 
-      const makeIntervalFields = () => {
+      const makeIntervalFields = (input = false) => {
         return {
-          seconds: {
+          milliseconds: {
             description:
-              "A quantity of seconds. This is the only non-integer field, as all the other fields will dump their overflow into a smaller unit of time. Intervals don’t have a smaller unit than seconds.",
-            type: GraphQLFloat,
+              "A quantity of milliseconds. This is the only non-integer field, as all the other fields will dump their overflow into a smaller unit of time. Intervals don’t have a smaller unit than milliseconds.",
+            type: input ? GraphQLFloat : new GraphQLNonNull(GraphQLFloat),
+          },
+          seconds: {
+            description: "A quantity of seconds.",
+            type: input ? GraphQLInt : new GraphQLNonNull(GraphQLInt),
           },
           minutes: {
             description: "A quantity of minutes.",
-            type: GraphQLInt,
+            type: input ? GraphQLInt : new GraphQLNonNull(GraphQLInt),
           },
           hours: {
             description: "A quantity of hours.",
-            type: GraphQLInt,
+            type: input ? GraphQLInt : new GraphQLNonNull(GraphQLInt),
           },
           days: {
             description: "A quantity of days.",
-            type: GraphQLInt,
+            type: input ? GraphQLInt : new GraphQLNonNull(GraphQLInt),
           },
           months: {
             description: "A quantity of months.",
-            type: GraphQLInt,
+            type: input ? GraphQLInt : new GraphQLNonNull(GraphQLInt),
           },
           years: {
             description: "A quantity of years.",
-            type: GraphQLInt,
+            type: input ? GraphQLInt : new GraphQLNonNull(GraphQLInt),
           },
         };
       };
@@ -206,7 +210,7 @@ export default (function PgTypesPlugin(
           name: inflection.inputType(inflection.builtin("Interval")),
           description:
             "An interval of time that has passed where the smallest distinct unit is a second.",
-          fields: makeIntervalFields(),
+          fields: makeIntervalFields(true),
         },
         {
           isIntervalInputType: true,
@@ -601,6 +605,7 @@ export default (function PgTypesPlugin(
         map: str => parseInterval(str),
         unmap: o => {
           const keys = [
+            "milliseconds",
             "seconds",
             "minutes",
             "hours",
