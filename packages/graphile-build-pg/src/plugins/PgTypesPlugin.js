@@ -619,7 +619,9 @@ export default (function PgTypesPlugin(
               parts.push(`${o[key]} ${key}`);
             }
           }
-          return sql.value(parts.join(" ") || "0 seconds");
+          return sql.fragment`pg_catalog.justify_interval(${sql.value(
+            parts.join(" ") || "0"
+          )})`;
         },
       };
 

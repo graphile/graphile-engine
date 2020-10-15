@@ -67,6 +67,9 @@ mutation CreateMutation($config: KeyValueHash!) {
           months: 7
           years: 8
         }
+        {
+          hours: 80
+        }
       ]
       money: 1234567.89
       compoundType: {
