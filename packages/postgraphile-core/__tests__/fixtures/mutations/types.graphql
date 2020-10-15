@@ -115,8 +115,8 @@ mutation {
         date: "2010-01-01"
         time: "19:00:00"
         timetz: "19:00:00"
-        interval: { minutes: 27 }
-        intervalArray: [{ minutes: 27 }]
+        interval: { minutes: 27, milliseconds: 28 }
+        intervalArray: [{ minutes: 2, milliseconds: 28  }]
         money: 27
         compoundType: { a: 1 }
         nestedCompoundType: { a: { a: 1 } }

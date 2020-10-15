@@ -11,6 +11,7 @@
       hours
       minutes
       seconds
+      milliseconds
     }
   }
   tableSetQueryList {
@@ -22,6 +23,7 @@
   intSetQueryList(x: 5, z: 6)
   staticBigIntegerList
   queryIntervalSetList {
+    milliseconds
     seconds
     minutes
     hours
@@ -32,6 +34,7 @@
   allPostsList(first: 1) {
     id
     computedIntervalSetList {
+      milliseconds
       seconds
       minutes
     }

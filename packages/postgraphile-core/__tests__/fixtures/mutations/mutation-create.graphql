@@ -40,6 +40,7 @@ mutation CreateMutation($config: KeyValueHash!) {
       time: "19:13:18.625699"
       timetz: "13:13:29.585176"
       interval: {
+        milliseconds: 7
         seconds: 1
         minutes: 2
         hours: 3
@@ -49,6 +50,7 @@ mutation CreateMutation($config: KeyValueHash!) {
       }
       intervalArray: [
         {
+          milliseconds: 1
           seconds: 2
           minutes: 3
           hours: 4
@@ -57,6 +59,7 @@ mutation CreateMutation($config: KeyValueHash!) {
           years: 7
         }
         {
+          milliseconds: 2
           seconds: 3
           minutes: 4
           hours: 5
@@ -148,8 +151,8 @@ mutation CreateMutation($config: KeyValueHash!) {
       date
       time
       timetz
-      interval { seconds minutes hours days months years }
-      intervalArray { seconds minutes hours days months years }
+      interval { milliseconds seconds minutes hours days months years }
+      intervalArray { milliseconds seconds minutes hours days months years }
       money
       compoundType { a b c d e f fooBar }
       nestedCompoundType {

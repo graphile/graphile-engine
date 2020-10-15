@@ -162,6 +162,7 @@
     totalDuration {
       hours
       minutes
+      milliseconds
     }
   }
 }

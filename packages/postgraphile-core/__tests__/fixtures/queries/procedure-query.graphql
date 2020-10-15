@@ -15,9 +15,9 @@ query {
   optionalMissingMiddle5(a: 1, arg2: 7) # expect null because we can't specify $3 without specifying $2 (= null)
   typesQuery(a: "50", b: false, c: "xyz", d: [1, 2, 3], e: "{\"a\":1,\"b\":2,\"c\":3}", f: { start: { value: 1, inclusive: false }, end: { value: 5, inclusive: false } })
   empty: typesQuery(a: "50", b: false, c: "", d: [], e: "{}", f: {})
-  compoundTypeQuery(object: { a: 419, b: "easy cheesy baked potatoes", c: RED, e: BAR_FOO, f: _EMPTY_, g: {seconds: 12, minutes: 3, hours: 2}, fooBar: 8 }) { a b c d e f g { hours minutes seconds } fooBar }
+  compoundTypeQuery(object: { a: 419, b: "easy cheesy baked potatoes", c: RED, e: BAR_FOO, f: _EMPTY_, g: {milliseconds: 123.456, seconds: 12, minutes: 3, hours: 2}, fooBar: 8 }) { a b c d e f g { hours minutes seconds milliseconds } fooBar }
   compoundTypeSetQuery(first: 5) { edges { cursor node { a b c d e f f g { hours minutes seconds } fooBar } } pageInfo { startCursor endCursor hasNextPage hasPreviousPage } }
-  compoundTypeArrayQuery(object: { a: 419, b: "easy cheesy baked potatoes", c: RED, e: BAR_FOO, f: _EMPTY_, g: {seconds: 12, minutes: 3, hours: 2}, fooBar: 8 }) { a b c d e f f g { hours minutes seconds } fooBar }
+  compoundTypeArrayQuery(object: { a: 419, b: "easy cheesy baked potatoes", c: RED, e: BAR_FOO, f: _EMPTY_, g: {milliseconds: 654.321, seconds: 12, minutes: 3, hours: 2}, fooBar: 8 }) { a b c d e f f g { hours minutes seconds milliseconds } fooBar }
   tableQuery(id: 5) { nodeId id headline authorId }
   tableSetQuery { edges { cursor node { name } } pageInfo { startCursor endCursor hasNextPage hasPreviousPage } }
   tableSetQuery_sorted: tableSetQuery(orderBy: NAME_ASC) { edges { cursor node { name } } pageInfo { startCursor endCursor hasNextPage hasPreviousPage } }
@@ -46,6 +46,6 @@ query {
 
   queryCompoundTypeArray(object: { a: 419, b: "easy cheesy baked potatoes", c: RED, e: BAR_FOO, f: _EMPTY_, g: {hours: 5 }, fooBar: 8 }) { a b c d e f g { seconds minutes hours } fooBar }
   queryTextArray
-  queryIntervalArray { seconds minutes hours days months years }
-  queryIntervalSet { nodes { seconds minutes hours days months years } edges { node { seconds minutes hours } cursor } totalCount }
+  queryIntervalArray { milliseconds seconds minutes hours days months years }
+  queryIntervalSet { nodes { milliseconds seconds minutes hours days months years } edges { node { milliseconds seconds minutes hours } cursor } totalCount }
 }
