@@ -1191,26 +1191,29 @@ An interval of time that has passed where the smallest distinct unit is a second
 """
 type Interval {
   """A quantity of days."""
-  days: Int
+  days: Int!
 
   """A quantity of hours."""
-  hours: Int
+  hours: Int!
+
+  """
+  A quantity of milliseconds. This is the only non-integer field, as all the
+  other fields will dump their overflow into a smaller unit of time. Intervals
+  don’t have a smaller unit than milliseconds.
+  """
+  milliseconds: Float!
 
   """A quantity of minutes."""
-  minutes: Int
+  minutes: Int!
 
   """A quantity of months."""
-  months: Int
+  months: Int!
 
-  """
-  A quantity of seconds. This is the only non-integer field, as all the other
-  fields will dump their overflow into a smaller unit of time. Intervals don’t
-  have a smaller unit than seconds.
-  """
-  seconds: Float
+  """A quantity of seconds."""
+  seconds: Int!
 
   """A quantity of years."""
-  years: Int
+  years: Int!
 }
 
 """All input for the \`intSetMutation\` mutation."""
@@ -5687,26 +5690,29 @@ An interval of time that has passed where the smallest distinct unit is a second
 """
 type Interval {
   """A quantity of days."""
-  days: Int
+  days: Int!
 
   """A quantity of hours."""
-  hours: Int
+  hours: Int!
+
+  """
+  A quantity of milliseconds. This is the only non-integer field, as all the
+  other fields will dump their overflow into a smaller unit of time. Intervals
+  don’t have a smaller unit than milliseconds.
+  """
+  milliseconds: Float!
 
   """A quantity of minutes."""
-  minutes: Int
+  minutes: Int!
 
   """A quantity of months."""
-  months: Int
+  months: Int!
 
-  """
-  A quantity of seconds. This is the only non-integer field, as all the other
-  fields will dump their overflow into a smaller unit of time. Intervals don’t
-  have a smaller unit than seconds.
-  """
-  seconds: Float
+  """A quantity of seconds."""
+  seconds: Int!
 
   """A quantity of years."""
-  years: Int
+  years: Int!
 }
 
 """All input for the \`intSetMutation\` mutation."""
