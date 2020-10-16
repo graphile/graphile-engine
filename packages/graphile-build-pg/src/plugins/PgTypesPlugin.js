@@ -604,23 +604,9 @@ export default (function PgTypesPlugin(
       pg2GqlMapper[1186] = {
         map: str => parseInterval(str),
         unmap: o => {
-          const keys = [
-            "milliseconds",
-            "seconds",
-            "minutes",
-            "hours",
-            "days",
-            "months",
-            "years",
-          ];
-          const parts = [];
-          for (const key of keys) {
-            if (o[key]) {
-              parts.push(`${o[key]} ${key}`);
-            }
-          }
+          const interval = Object.assign(rawParseInterval(), o);
           return sql.fragment`pg_catalog.justify_interval(${sql.value(
-            parts.join(" ") || "0"
+            interval.toPostgres()
           )})`;
         },
       };
