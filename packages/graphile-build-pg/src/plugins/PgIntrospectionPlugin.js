@@ -109,6 +109,7 @@ export type PgType = {
   enumDescriptions: ?(string[]),
   rangeSubTypeId: ?string,
   tags: { [string]: string },
+  isFake: ?boolean,
 };
 
 export type PgAttribute = {
@@ -736,6 +737,7 @@ Original error: ${e.message}
                     enumVariants: null,
                     enumDescriptions: null,
                     rangeSubTypeId: null,
+                    isFake: true,
                   };
                   const enumType = {
                     kind: "type",
@@ -761,6 +763,7 @@ Original error: ${e.message}
                       : null,
                     // TODO: enumDescriptions
                     rangeSubTypeId: null,
+                    isFake: true,
                   };
                   result.type.push(enumType, enumTypeArray);
 
