@@ -98,3 +98,11 @@ create event trigger postgraphile_watch_ddl
 create event trigger postgraphile_watch_drop
   on sql_drop
   execute procedure postgraphile_watch.notify_watchers_drop();
+
+select pg_notify(
+  'postgraphile_watch',
+  json_build_object(
+    'type',
+    'manual'
+  )::text
+);
