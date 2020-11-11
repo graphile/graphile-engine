@@ -57,7 +57,7 @@ const plugin: PostGraphilePlugin = {
 
   ["postgraphile:options"](incomingOptions, { pgPool }) {
     const eventEmitter = new EventEmitter();
-    if (incomingOptions.subscriptionEventEmitterMaxListeners) {
+    if (incomingOptions.subscriptionEventEmitterMaxListeners != null) {
       eventEmitter.setMaxListeners(
         incomingOptions.subscriptionEventEmitterMaxListeners
       );
