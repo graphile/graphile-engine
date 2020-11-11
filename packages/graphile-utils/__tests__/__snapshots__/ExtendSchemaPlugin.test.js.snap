@@ -4,8 +4,7 @@ exports[`accepts an array of typedefs 1`] = `
 """The root query type which gives access points into the data universe."""
 type Query {
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
   """
   query: Query!
 
@@ -22,8 +21,7 @@ exports[`allows adding a field with arguments 1`] = `
 """The root query type which gives access points into the data universe."""
 type Query {
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
   """
   query: Query!
 
@@ -37,8 +35,7 @@ exports[`allows adding a field with arguments named using a custom inflector 1`]
 """The root query type which gives access points into the data universe."""
 type Query {
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
   """
   query: Query!
 
@@ -52,8 +49,7 @@ exports[`allows adding a non-null list of non-null type 1`] = `
 """The root query type which gives access points into the data universe."""
 type Query {
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
   """
   query: Query!
 
@@ -67,8 +63,7 @@ exports[`allows adding a non-null type 1`] = `
 """The root query type which gives access points into the data universe."""
 type Query {
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
   """
   query: Query!
 
@@ -82,8 +77,7 @@ exports[`allows adding a simple type 1`] = `
 """The root query type which gives access points into the data universe."""
 type Query {
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
   """
   query: Query!
 
@@ -128,8 +122,7 @@ exports[`supports @scope directive with simple values 2`] = `
 """The root query type which gives access points into the data universe."""
 type Query {
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
   """
   query: Query!
 
@@ -201,8 +194,7 @@ exports[`supports @scope directive with variable value 2`] = `
 """The root query type which gives access points into the data universe."""
 type Query {
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
   """
   query: Query!
 
@@ -213,18 +205,12 @@ type Query {
 `;
 
 exports[`supports defining a more complex mutation 1`] = `
-input EchoInput {
-  text: String!
-  int: Int
-  float: Float!
-  intList: [Int!]
-}
-
-type EchoOutput {
-  text: String!
-  int: Int
-  float: Float!
-  intList: [Int!]
+"""The root query type which gives access points into the data universe."""
+type Query {
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
 }
 
 """
@@ -235,13 +221,18 @@ type Mutation {
   echo(input: EchoInput): EchoOutput
 }
 
-"""The root query type which gives access points into the data universe."""
-type Query {
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
+type EchoOutput {
+  text: String!
+  int: Int
+  float: Float!
+  intList: [Int!]
+}
+
+input EchoInput {
+  text: String!
+  int: Int
+  float: Float!
+  intList: [Int!]
 }
 
 `;
@@ -274,20 +265,19 @@ Object {
 `;
 
 exports[`supports defining a simple mutation 1`] = `
+"""The root query type which gives access points into the data universe."""
+type Query {
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
+}
+
 """
 The root mutation type which contains root level fields which mutate data.
 """
 type Mutation {
   add(a: Int, b: Int): Int
-}
-
-"""The root query type which gives access points into the data universe."""
-type Query {
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
 }
 
 `;
@@ -302,8 +292,7 @@ exports[`supports defining a simple subscription 1`] = `
 """The root query type which gives access points into the data universe."""
 type Query {
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
   """
   query: Query!
 }
@@ -321,6 +310,25 @@ type Subscription {
 `;
 
 exports[`supports defining new types 1`] = `
+"""The root query type which gives access points into the data universe."""
+type Query {
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
+
+  """Gives you back what you put in"""
+  echo(input: EchoInput, enum: EchoCount = FOREVER): EchoOutput
+}
+
+type EchoOutput {
+  text: String!
+  int: Int
+  float: Float!
+  count: EchoCount!
+  intList: [Int!]
+}
+
 enum EchoCount {
   ONCE
   TWICE
@@ -333,26 +341,6 @@ input EchoInput {
   float: Float!
   count: EchoCount = FOREVER
   intList: [Int!]
-}
-
-type EchoOutput {
-  text: String!
-  int: Int
-  float: Float!
-  count: EchoCount!
-  intList: [Int!]
-}
-
-"""The root query type which gives access points into the data universe."""
-type Query {
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
-
-  """Gives you back what you put in"""
-  echo(input: EchoInput, enum: EchoCount = FOREVER): EchoOutput
 }
 
 `;

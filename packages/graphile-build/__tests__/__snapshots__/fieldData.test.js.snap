@@ -36,45 +36,10 @@ Object {
 `;
 
 exports[`generated schema 1`] = `
-"""A location in a connection that can be used for resuming pagination."""
-scalar Cursor
-
-type Dummy {
-  id: String!
-  caps: String!
-  random: Int!
-}
-
-type DummyConnection {
-  edges: [DummyEdge!]
-  nodes: [Dummy!]
-}
-
-enum DummyConnectionSortBy {
-  ID_ASC
-  ID_DESC
-  CAPS_ASC
-  CAPS_DESC
-}
-
-type DummyEdge {
-  cursor: Cursor
-  node: Dummy
-}
-
-"""An object with a globally unique \`ID\`."""
-interface Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  id: ID!
-}
-
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
   """
   query: Query!
 
@@ -89,6 +54,40 @@ type Query implements Node {
     id: ID!
   ): Node
   dummyConnection(first: Int, after: Cursor, sortBy: DummyConnectionSortBy): DummyConnection
+}
+
+"""An object with a globally unique \`ID\`."""
+interface Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  id: ID!
+}
+
+type DummyConnection {
+  edges: [DummyEdge!]
+  nodes: [Dummy!]
+}
+
+type DummyEdge {
+  cursor: Cursor
+  node: Dummy
+}
+
+"""A location in a connection that can be used for resuming pagination."""
+scalar Cursor
+
+type Dummy {
+  id: String!
+  caps: String!
+  random: Int!
+}
+
+enum DummyConnectionSortBy {
+  ID_ASC
+  ID_DESC
+  CAPS_ASC
+  CAPS_DESC
 }
 
 `;
