@@ -72,9 +72,7 @@ type BigFloatRangeBound {
 }
 
 """
-A signed eight-byte integer. The upper big integer values are greater than the
-max value for a JavaScript number. Therefore all big integers will be output as
-strings and not numbers.
+A signed eight-byte integer. The upper big integer values are greater than the max value for a JavaScript number. Therefore all big integers will be output as strings and not numbers.
 """
 scalar BigInt
 
@@ -102,8 +100,7 @@ type CompoundKey implements Node {
 }
 
 """
-A condition to be used against \`CompoundKey\` object types. All fields are tested
-for equality and combined with a logical ‘and.’
+A condition to be used against \`CompoundKey\` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input CompoundKeyCondition {
   """Checks for equality with the object’s \`extra\` field."""
@@ -218,8 +215,7 @@ type Comptype {
 """All input for the create \`CompoundKey\` mutation."""
 input CreateCompoundKeyInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -230,8 +226,7 @@ input CreateCompoundKeyInput {
 """The output of our create \`CompoundKey\` mutation."""
 type CreateCompoundKeyPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -259,8 +254,7 @@ type CreateCompoundKeyPayload {
 """All input for the create \`EdgeCase\` mutation."""
 input CreateEdgeCaseInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -271,8 +265,7 @@ input CreateEdgeCaseInput {
 """The output of our create \`EdgeCase\` mutation."""
 type CreateEdgeCasePayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -294,8 +287,7 @@ type CreateEdgeCasePayload {
 """All input for the create \`Issue756\` mutation."""
 input CreateIssue756Input {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -306,8 +298,7 @@ input CreateIssue756Input {
 """The output of our create \`Issue756\` mutation."""
 type CreateIssue756Payload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -329,8 +320,7 @@ type CreateIssue756Payload {
 """All input for the create \`LeftArm\` mutation."""
 input CreateLeftArmInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -341,8 +331,7 @@ input CreateLeftArmInput {
 """The output of our create \`LeftArm\` mutation."""
 type CreateLeftArmPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -367,8 +356,7 @@ type CreateLeftArmPayload {
 """All input for the create \`MyTable\` mutation."""
 input CreateMyTableInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -379,8 +367,7 @@ input CreateMyTableInput {
 """The output of our create \`MyTable\` mutation."""
 type CreateMyTablePayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -402,8 +389,7 @@ type CreateMyTablePayload {
 """All input for the create \`NullTestRecord\` mutation."""
 input CreateNullTestRecordInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -414,8 +400,7 @@ input CreateNullTestRecordInput {
 """The output of our create \`NullTestRecord\` mutation."""
 type CreateNullTestRecordPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -437,8 +422,7 @@ type CreateNullTestRecordPayload {
 """All input for the create \`Person\` mutation."""
 input CreatePersonInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -449,8 +433,7 @@ input CreatePersonInput {
 """The output of our create \`Person\` mutation."""
 type CreatePersonPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -472,8 +455,7 @@ type CreatePersonPayload {
 """All input for the create \`PersonSecret\` mutation."""
 input CreatePersonSecretInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -484,8 +466,7 @@ input CreatePersonSecretInput {
 """The output of our create \`PersonSecret\` mutation."""
 type CreatePersonSecretPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -534,16 +515,14 @@ type DateRangeBound {
 }
 
 """
-A point in time as described by the [ISO
-8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone.
+A point in time as described by the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone.
 """
 scalar Datetime
 
 """All input for the \`deleteCompoundKeyByPersonId1AndPersonId2\` mutation."""
 input DeleteCompoundKeyByPersonId1AndPersonId2Input {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   personId1: Int!
@@ -553,8 +532,7 @@ input DeleteCompoundKeyByPersonId1AndPersonId2Input {
 """All input for the \`deleteCompoundKey\` mutation."""
 input DeleteCompoundKeyInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -567,8 +545,7 @@ input DeleteCompoundKeyInput {
 """The output of our delete \`CompoundKey\` mutation."""
 type DeleteCompoundKeyPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -597,8 +574,7 @@ type DeleteCompoundKeyPayload {
 """All input for the \`deleteIssue756ById\` mutation."""
 input DeleteIssue756ByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -607,8 +583,7 @@ input DeleteIssue756ByIdInput {
 """All input for the \`deleteIssue756\` mutation."""
 input DeleteIssue756Input {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -621,8 +596,7 @@ input DeleteIssue756Input {
 """The output of our delete \`Issue756\` mutation."""
 type DeleteIssue756Payload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   deletedIssue756Id: ID
@@ -645,8 +619,7 @@ type DeleteIssue756Payload {
 """All input for the \`deleteLeftArmById\` mutation."""
 input DeleteLeftArmByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -655,8 +628,7 @@ input DeleteLeftArmByIdInput {
 """All input for the \`deleteLeftArmByPersonId\` mutation."""
 input DeleteLeftArmByPersonIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   personId: Int!
@@ -665,8 +637,7 @@ input DeleteLeftArmByPersonIdInput {
 """All input for the \`deleteLeftArm\` mutation."""
 input DeleteLeftArmInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -679,8 +650,7 @@ input DeleteLeftArmInput {
 """The output of our delete \`LeftArm\` mutation."""
 type DeleteLeftArmPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   deletedLeftArmId: ID
@@ -706,8 +676,7 @@ type DeleteLeftArmPayload {
 """All input for the \`deleteMyTableById\` mutation."""
 input DeleteMyTableByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -716,8 +685,7 @@ input DeleteMyTableByIdInput {
 """All input for the \`deleteMyTable\` mutation."""
 input DeleteMyTableInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -730,8 +698,7 @@ input DeleteMyTableInput {
 """The output of our delete \`MyTable\` mutation."""
 type DeleteMyTablePayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   deletedMyTableId: ID
@@ -754,8 +721,7 @@ type DeleteMyTablePayload {
 """All input for the \`deleteNullTestRecordById\` mutation."""
 input DeleteNullTestRecordByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -764,8 +730,7 @@ input DeleteNullTestRecordByIdInput {
 """All input for the \`deleteNullTestRecord\` mutation."""
 input DeleteNullTestRecordInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -778,8 +743,7 @@ input DeleteNullTestRecordInput {
 """The output of our delete \`NullTestRecord\` mutation."""
 type DeleteNullTestRecordPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   deletedNullTestRecordId: ID
@@ -802,8 +766,7 @@ type DeleteNullTestRecordPayload {
 """All input for the \`deletePersonByEmail\` mutation."""
 input DeletePersonByEmailInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   email: Email!
@@ -812,8 +775,7 @@ input DeletePersonByEmailInput {
 """All input for the \`deletePersonById\` mutation."""
 input DeletePersonByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -824,8 +786,7 @@ input DeletePersonByIdInput {
 """All input for the \`deletePerson\` mutation."""
 input DeletePersonInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -838,8 +799,7 @@ input DeletePersonInput {
 """The output of our delete \`Person\` mutation."""
 type DeletePersonPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   deletedPersonId: ID
@@ -862,8 +822,7 @@ type DeletePersonPayload {
 """All input for the \`deletePersonSecretByPersonId\` mutation."""
 input DeletePersonSecretByPersonIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   personId: Int!
@@ -872,8 +831,7 @@ input DeletePersonSecretByPersonIdInput {
 """All input for the \`deletePersonSecret\` mutation."""
 input DeletePersonSecretInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -886,8 +844,7 @@ input DeletePersonSecretInput {
 """The output of our delete \`PersonSecret\` mutation."""
 type DeletePersonSecretPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   deletedPersonSecretId: ID
@@ -918,8 +875,7 @@ type EdgeCase {
 }
 
 """
-A condition to be used against \`EdgeCase\` object types. All fields are tested
-for equality and combined with a logical ‘and.’
+A condition to be used against \`EdgeCase\` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input EdgeCaseCondition {
   """Checks for equality with the object’s \`notNullHasDefault\` field."""
@@ -1031,9 +987,7 @@ type Interval {
   months: Int
 
   """
-  A quantity of seconds. This is the only non-integer field, as all the other
-  fields will dump their overflow into a smaller unit of time. Intervals don’t
-  have a smaller unit than seconds.
+  A quantity of seconds. This is the only non-integer field, as all the other fields will dump their overflow into a smaller unit of time. Intervals don’t have a smaller unit than seconds.
   """
   seconds: Float
 
@@ -1044,8 +998,7 @@ type Interval {
 """All input for the \`intSetMutation\` mutation."""
 input IntSetMutationInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   x: Int
@@ -1056,8 +1009,7 @@ input IntSetMutationInput {
 """The output of our \`intSetMutation\` mutation."""
 type IntSetMutationPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   integers: [Int]
@@ -1102,8 +1054,7 @@ type Issue756 implements Node {
 }
 
 """
-A condition to be used against \`Issue756\` object types. All fields are tested
-for equality and combined with a logical ‘and.’
+A condition to be used against \`Issue756\` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input Issue756Condition {
   """Checks for equality with the object’s \`id\` field."""
@@ -1122,8 +1073,7 @@ input Issue756Input {
 """All input for the \`issue756Mutation\` mutation."""
 input Issue756MutationInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 }
@@ -1131,8 +1081,7 @@ input Issue756MutationInput {
 """The output of our \`issue756Mutation\` mutation."""
 type Issue756MutationPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   issue756: Issue756
@@ -1186,8 +1135,7 @@ type Issue756SEdge {
 """All input for the \`issue756SetMutation\` mutation."""
 input Issue756SetMutationInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 }
@@ -1195,8 +1143,7 @@ input Issue756SetMutationInput {
 """The output of our \`issue756SetMutation\` mutation."""
 type Issue756SetMutationPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   issue756S: [Issue756]
@@ -1226,8 +1173,7 @@ scalar JSON
 """All input for the \`jsonbIdentityMutation\` mutation."""
 input JsonbIdentityMutationInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   json: JSON
@@ -1236,8 +1182,7 @@ input JsonbIdentityMutationInput {
 """The output of our \`jsonbIdentityMutation\` mutation."""
 type JsonbIdentityMutationPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   json: JSON
@@ -1253,8 +1198,7 @@ input JsonbIdentityMutationPlpgsqlInput {
   _theJson: JSON!
 
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 }
@@ -1262,8 +1206,7 @@ input JsonbIdentityMutationPlpgsqlInput {
 """The output of our \`jsonbIdentityMutationPlpgsql\` mutation."""
 type JsonbIdentityMutationPlpgsqlPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   json: JSON
@@ -1279,8 +1222,7 @@ input JsonbIdentityMutationPlpgsqlWithDefaultInput {
   _theJson: JSON
 
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 }
@@ -1288,8 +1230,7 @@ input JsonbIdentityMutationPlpgsqlWithDefaultInput {
 """The output of our \`jsonbIdentityMutationPlpgsqlWithDefault\` mutation."""
 type JsonbIdentityMutationPlpgsqlWithDefaultPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   json: JSON
@@ -1303,8 +1244,7 @@ type JsonbIdentityMutationPlpgsqlWithDefaultPayload {
 """All input for the \`jsonIdentityMutation\` mutation."""
 input JsonIdentityMutationInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   json: JSON
@@ -1313,8 +1253,7 @@ input JsonIdentityMutationInput {
 """The output of our \`jsonIdentityMutation\` mutation."""
 type JsonIdentityMutationPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   json: JSON
@@ -1374,8 +1313,7 @@ input LeftArmCondition {
 """All input for the \`leftArmIdentity\` mutation."""
 input LeftArmIdentityInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   leftArm: LeftArmBaseInput
@@ -1384,8 +1322,7 @@ input LeftArmIdentityInput {
 """The output of our \`leftArmIdentity\` mutation."""
 type LeftArmIdentityPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   leftArm: LeftArm
@@ -1948,8 +1885,7 @@ type NestedCompoundType {
 """All input for the \`noArgsMutation\` mutation."""
 input NoArgsMutationInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 }
@@ -1957,8 +1893,7 @@ input NoArgsMutationInput {
 """The output of our \`noArgsMutation\` mutation."""
 type NoArgsMutationPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   integer: Int
@@ -1994,8 +1929,7 @@ type NullTestRecord implements Node {
 }
 
 """
-A condition to be used against \`NullTestRecord\` object types. All fields are
-tested for equality and combined with a logical ‘and.’
+A condition to be used against \`NullTestRecord\` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input NullTestRecordCondition {
   """Checks for equality with the object’s \`id\` field."""
@@ -2165,8 +2099,7 @@ type Person implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
 
@@ -2194,8 +2127,7 @@ type Person implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
 
@@ -2224,8 +2156,7 @@ type Person implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
 
@@ -2261,8 +2192,7 @@ type Person implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
 
@@ -2301,14 +2231,15 @@ type Person implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
 
     """The method to use when ordering \`PersonSecret\`."""
     orderBy: [PersonSecretsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PersonSecretsConnection! @deprecated(reason: "This is deprecated (comment on table c.person_secret).")
+
+  """"""
   site: WrappedUrl @deprecated(reason: "Don’t use me")
   typeFunction(id: Int): Type
 
@@ -2327,8 +2258,7 @@ type Person implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
   ): TypesConnection!
@@ -2389,6 +2319,8 @@ input PersonInput {
 
   """The person’s name"""
   name: String!
+
+  """"""
   site: WrappedUrlInput
   userMac: String
 }
@@ -2410,6 +2342,8 @@ input PersonPatch {
 
   """The person’s name"""
   name: String
+
+  """"""
   site: WrappedUrlInput
   userMac: String
 }
@@ -2430,8 +2364,7 @@ type PersonSecret implements Node {
 }
 
 """
-A condition to be used against \`PersonSecret\` object types. All fields are
-tested for equality and combined with a logical ‘and.’
+A condition to be used against \`PersonSecret\` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input PersonSecretCondition {
   """Checks for equality with the object’s \`personId\` field."""
@@ -2532,8 +2465,7 @@ type Query implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
 
@@ -2561,8 +2493,7 @@ type Query implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
 
@@ -2590,8 +2521,7 @@ type Query implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
 
@@ -2619,8 +2549,7 @@ type Query implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
 
@@ -2648,8 +2577,7 @@ type Query implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
 
@@ -2677,8 +2605,7 @@ type Query implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
 
@@ -2706,8 +2633,7 @@ type Query implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
 
@@ -2735,8 +2661,7 @@ type Query implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
 
@@ -2759,8 +2684,7 @@ type Query implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
   ): PeopleConnection @deprecated(reason: "This is deprecated (comment on function c.badly_behaved_function).")
@@ -2789,8 +2713,7 @@ type Query implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
   ): CompoundTypesConnection
@@ -2809,8 +2732,7 @@ type Query implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
     x: Int
@@ -2881,8 +2803,7 @@ type Query implements Node {
   personSecretByPersonId(personId: Int!): PersonSecret
 
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
   """
   query: Query!
   returnTableWithoutGrants: CompoundKey
@@ -2908,8 +2829,7 @@ type Query implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
 
@@ -2932,8 +2852,7 @@ type Query implements Node {
     last: Int
 
     """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
+    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor based pagination. May not be used with \`last\`.
     """
     offset: Int
   ): PeopleConnection
@@ -2967,8 +2886,7 @@ scalar RegType
 """All input for the \`tableMutation\` mutation."""
 input TableMutationInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int
@@ -2977,8 +2895,7 @@ input TableMutationInput {
 """The output of our \`tableMutation\` mutation."""
 type TableMutationPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   post: Post
@@ -2992,8 +2909,7 @@ type TableMutationPayload {
 """All input for the \`tableSetMutation\` mutation."""
 input TableSetMutationInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 }
@@ -3001,8 +2917,7 @@ input TableSetMutationInput {
 """The output of our \`tableSetMutation\` mutation."""
 type TableSetMutationPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   people: [Person]
@@ -3099,8 +3014,7 @@ input TypesMutationInput {
   c: String!
 
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   d: [Int]!
@@ -3113,8 +3027,7 @@ type TypesMutationPayload {
   boolean: Boolean
 
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -3127,8 +3040,7 @@ type TypesMutationPayload {
 """All input for the \`updateCompoundKeyByPersonId1AndPersonId2\` mutation."""
 input UpdateCompoundKeyByPersonId1AndPersonId2Input {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -3143,8 +3055,7 @@ input UpdateCompoundKeyByPersonId1AndPersonId2Input {
 """All input for the \`updateCompoundKey\` mutation."""
 input UpdateCompoundKeyInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -3162,8 +3073,7 @@ input UpdateCompoundKeyInput {
 """The output of our update \`CompoundKey\` mutation."""
 type UpdateCompoundKeyPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -3191,8 +3101,7 @@ type UpdateCompoundKeyPayload {
 """All input for the \`updateIssue756ById\` mutation."""
 input UpdateIssue756ByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -3206,8 +3115,7 @@ input UpdateIssue756ByIdInput {
 """All input for the \`updateIssue756\` mutation."""
 input UpdateIssue756Input {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -3225,8 +3133,7 @@ input UpdateIssue756Input {
 """The output of our update \`Issue756\` mutation."""
 type UpdateIssue756Payload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -3248,8 +3155,7 @@ type UpdateIssue756Payload {
 """All input for the \`updateLeftArmById\` mutation."""
 input UpdateLeftArmByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -3263,8 +3169,7 @@ input UpdateLeftArmByIdInput {
 """All input for the \`updateLeftArmByPersonId\` mutation."""
 input UpdateLeftArmByPersonIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -3278,8 +3183,7 @@ input UpdateLeftArmByPersonIdInput {
 """All input for the \`updateLeftArm\` mutation."""
 input UpdateLeftArmInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -3297,8 +3201,7 @@ input UpdateLeftArmInput {
 """The output of our update \`LeftArm\` mutation."""
 type UpdateLeftArmPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -3323,8 +3226,7 @@ type UpdateLeftArmPayload {
 """All input for the \`updateMyTableById\` mutation."""
 input UpdateMyTableByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -3338,8 +3240,7 @@ input UpdateMyTableByIdInput {
 """All input for the \`updateMyTable\` mutation."""
 input UpdateMyTableInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -3357,8 +3258,7 @@ input UpdateMyTableInput {
 """The output of our update \`MyTable\` mutation."""
 type UpdateMyTablePayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -3380,8 +3280,7 @@ type UpdateMyTablePayload {
 """All input for the \`updateNullTestRecordById\` mutation."""
 input UpdateNullTestRecordByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -3395,8 +3294,7 @@ input UpdateNullTestRecordByIdInput {
 """All input for the \`updateNullTestRecord\` mutation."""
 input UpdateNullTestRecordInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -3414,8 +3312,7 @@ input UpdateNullTestRecordInput {
 """The output of our update \`NullTestRecord\` mutation."""
 type UpdateNullTestRecordPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -3437,8 +3334,7 @@ type UpdateNullTestRecordPayload {
 """All input for the \`updatePersonByEmail\` mutation."""
 input UpdatePersonByEmailInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   email: Email!
@@ -3452,8 +3348,7 @@ input UpdatePersonByEmailInput {
 """All input for the \`updatePersonById\` mutation."""
 input UpdatePersonByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -3469,8 +3364,7 @@ input UpdatePersonByIdInput {
 """All input for the \`updatePerson\` mutation."""
 input UpdatePersonInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -3488,8 +3382,7 @@ input UpdatePersonInput {
 """The output of our update \`Person\` mutation."""
 type UpdatePersonPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -3511,8 +3404,7 @@ type UpdatePersonPayload {
 """All input for the \`updatePersonSecretByPersonId\` mutation."""
 input UpdatePersonSecretByPersonIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   personId: Int!
@@ -3526,8 +3418,7 @@ input UpdatePersonSecretByPersonIdInput {
 """All input for the \`updatePersonSecret\` mutation."""
 input UpdatePersonSecretInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -3545,8 +3436,7 @@ input UpdatePersonSecretInput {
 """The output of our update \`PersonSecret\` mutation."""
 type UpdatePersonSecretPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
