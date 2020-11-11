@@ -238,7 +238,7 @@ export default (function NodePlugin(
                 [nodeIdFieldName]: {
                   description: build.wrapDescription(
                     "The globally unique `ID`.",
-                    "field"
+                    "arg"
                   ),
                   type: new GraphQLNonNull(GraphQLID),
                 },
