@@ -4,7 +4,8 @@ exports[`Middleware defaults handles the introspection query 1`] = `
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
   """
   query: Query!
 
@@ -545,7 +546,8 @@ input BarPatch {
 """All input for the \`updateBarById\` mutation."""
 input UpdateBarByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -607,7 +609,8 @@ input FooPatch {
 """All input for the \`updateFooById\` mutation."""
 input UpdateFooByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -660,7 +663,8 @@ input DeleteBarInput {
 """All input for the \`deleteBarById\` mutation."""
 input DeleteBarByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -705,7 +709,8 @@ input DeleteFooInput {
 """All input for the \`deleteFooById\` mutation."""
 input DeleteFooByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -717,7 +722,8 @@ exports[`Subscriptions handles the introspection query 1`] = `
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
   """
   query: Query!
 
@@ -1258,7 +1264,8 @@ input BarPatch {
 """All input for the \`updateBarById\` mutation."""
 input UpdateBarByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -1320,7 +1327,8 @@ input FooPatch {
 """All input for the \`updateFooById\` mutation."""
 input UpdateFooByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -1373,7 +1381,8 @@ input DeleteBarInput {
 """All input for the \`deleteBarById\` mutation."""
 input DeleteBarByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -1418,7 +1427,8 @@ input DeleteFooInput {
 """All input for the \`deleteFooById\` mutation."""
 input DeleteFooByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!

@@ -4,7 +4,8 @@ exports[`generated schema n = 0, n = 3 1`] = `
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
   """
   query: Query!
 
@@ -39,7 +40,8 @@ exports[`generated schema n = 0, n = 3 2`] = `
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
   """
   query: Query!
 

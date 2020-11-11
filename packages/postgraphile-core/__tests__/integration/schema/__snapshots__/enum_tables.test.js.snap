@@ -4,7 +4,8 @@ exports[`prints a schema for enum_tables 1`] = `
 """All input for the create \`LetterDescription\` mutation."""
 input CreateLetterDescriptionInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -15,7 +16,8 @@ input CreateLetterDescriptionInput {
 """The output of our create \`LetterDescription\` mutation."""
 type CreateLetterDescriptionPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -37,7 +39,8 @@ type CreateLetterDescriptionPayload {
 """All input for the create \`ReferencingTable\` mutation."""
 input CreateReferencingTableInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -48,7 +51,8 @@ input CreateReferencingTableInput {
 """The output of our create \`ReferencingTable\` mutation."""
 type CreateReferencingTablePayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -73,7 +77,8 @@ scalar Cursor
 """All input for the \`deleteLetterDescriptionById\` mutation."""
 input DeleteLetterDescriptionByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -82,7 +87,8 @@ input DeleteLetterDescriptionByIdInput {
 """All input for the \`deleteLetterDescriptionByLetter\` mutation."""
 input DeleteLetterDescriptionByLetterInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   letter: LetterAToD!
@@ -91,7 +97,8 @@ input DeleteLetterDescriptionByLetterInput {
 """All input for the \`deleteLetterDescription\` mutation."""
 input DeleteLetterDescriptionInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -104,7 +111,8 @@ input DeleteLetterDescriptionInput {
 """The output of our delete \`LetterDescription\` mutation."""
 type DeleteLetterDescriptionPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   deletedLetterDescriptionId: ID
@@ -127,7 +135,8 @@ type DeleteLetterDescriptionPayload {
 """All input for the \`deleteReferencingTableById\` mutation."""
 input DeleteReferencingTableByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -136,7 +145,8 @@ input DeleteReferencingTableByIdInput {
 """All input for the \`deleteReferencingTable\` mutation."""
 input DeleteReferencingTableInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -149,7 +159,8 @@ input DeleteReferencingTableInput {
 """The output of our delete \`ReferencingTable\` mutation."""
 type DeleteReferencingTablePayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   deletedReferencingTableId: ID
@@ -226,7 +237,8 @@ type LetterDescription implements Node {
 }
 
 """
-A condition to be used against \`LetterDescription\` object types. All fields are tested for equality and combined with a logical ‘and.’
+A condition to be used against \`LetterDescription\` object types. All fields are
+tested for equality and combined with a logical ‘and.’
 """
 input LetterDescriptionCondition {
   """Checks for equality with the object’s \`description\` field."""
@@ -525,7 +537,8 @@ type Query implements Node {
   nodeId: ID!
 
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
   """
   query: Query!
 
@@ -552,7 +565,8 @@ type ReferencingTable implements Node {
 }
 
 """
-A condition to be used against \`ReferencingTable\` object types. All fields are tested for equality and combined with a logical ‘and.’
+A condition to be used against \`ReferencingTable\` object types. All fields are
+tested for equality and combined with a logical ‘and.’
 """
 input ReferencingTableCondition {
   """Checks for equality with the object’s \`enum1\` field."""
@@ -579,7 +593,8 @@ input ReferencingTableInput {
 """All input for the \`referencingTableMutation\` mutation."""
 input ReferencingTableMutationInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   t: ReferencingTableInput
@@ -588,7 +603,8 @@ input ReferencingTableMutationInput {
 """The output of our \`referencingTableMutation\` mutation."""
 type ReferencingTableMutationPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   integer: Int
@@ -655,7 +671,8 @@ enum ReferencingTablesOrderBy {
 """All input for the \`updateLetterDescriptionById\` mutation."""
 input UpdateLetterDescriptionByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -669,7 +686,8 @@ input UpdateLetterDescriptionByIdInput {
 """All input for the \`updateLetterDescriptionByLetter\` mutation."""
 input UpdateLetterDescriptionByLetterInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   letter: LetterAToD!
@@ -683,7 +701,8 @@ input UpdateLetterDescriptionByLetterInput {
 """All input for the \`updateLetterDescription\` mutation."""
 input UpdateLetterDescriptionInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -701,7 +720,8 @@ input UpdateLetterDescriptionInput {
 """The output of our update \`LetterDescription\` mutation."""
 type UpdateLetterDescriptionPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -723,7 +743,8 @@ type UpdateLetterDescriptionPayload {
 """All input for the \`updateReferencingTableById\` mutation."""
 input UpdateReferencingTableByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -737,7 +758,8 @@ input UpdateReferencingTableByIdInput {
 """All input for the \`updateReferencingTable\` mutation."""
 input UpdateReferencingTableInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -755,7 +777,8 @@ input UpdateReferencingTableInput {
 """The output of our update \`ReferencingTable\` mutation."""
 type UpdateReferencingTablePayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 

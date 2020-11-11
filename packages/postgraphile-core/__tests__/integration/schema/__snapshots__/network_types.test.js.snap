@@ -7,7 +7,8 @@ scalar CidrAddress
 """All input for the create \`Network\` mutation."""
 input CreateNetworkInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -18,7 +19,8 @@ input CreateNetworkInput {
 """The output of our create \`Network\` mutation."""
 type CreateNetworkPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -43,7 +45,8 @@ scalar Cursor
 """All input for the \`deleteNetworkById\` mutation."""
 input DeleteNetworkByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -52,7 +55,8 @@ input DeleteNetworkByIdInput {
 """All input for the \`deleteNetwork\` mutation."""
 input DeleteNetworkInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -65,7 +69,8 @@ input DeleteNetworkInput {
 """The output of our delete \`Network\` mutation."""
 type DeleteNetworkPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   deletedNetworkId: ID
@@ -296,7 +301,8 @@ type Query implements Node {
   nodeId: ID!
 
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
   """
   query: Query!
 }
@@ -304,7 +310,8 @@ type Query implements Node {
 """All input for the \`updateNetworkById\` mutation."""
 input UpdateNetworkByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -318,7 +325,8 @@ input UpdateNetworkByIdInput {
 """All input for the \`updateNetwork\` mutation."""
 input UpdateNetworkInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -336,7 +344,8 @@ input UpdateNetworkInput {
 """The output of our update \`Network\` mutation."""
 type UpdateNetworkPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -361,7 +370,8 @@ exports[`prints a schema to test network scalars without using custom network sc
 """All input for the create \`Network\` mutation."""
 input CreateNetworkInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -372,7 +382,8 @@ input CreateNetworkInput {
 """The output of our create \`Network\` mutation."""
 type CreateNetworkPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
@@ -397,7 +408,8 @@ scalar Cursor
 """All input for the \`deleteNetworkById\` mutation."""
 input DeleteNetworkByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -406,7 +418,8 @@ input DeleteNetworkByIdInput {
 """All input for the \`deleteNetwork\` mutation."""
 input DeleteNetworkInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -419,7 +432,8 @@ input DeleteNetworkInput {
 """The output of our delete \`Network\` mutation."""
 type DeleteNetworkPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
   deletedNetworkId: ID
@@ -647,7 +661,8 @@ type Query implements Node {
   nodeId: ID!
 
   """
-  Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
   """
   query: Query!
 }
@@ -655,7 +670,8 @@ type Query implements Node {
 """All input for the \`updateNetworkById\` mutation."""
 input UpdateNetworkByIdInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
   id: Int!
@@ -669,7 +685,8 @@ input UpdateNetworkByIdInput {
 """All input for the \`updateNetwork\` mutation."""
 input UpdateNetworkInput {
   """
-  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
@@ -687,7 +704,8 @@ input UpdateNetworkInput {
 """The output of our update \`Network\` mutation."""
 type UpdateNetworkPayload {
   """
-  The exact same \`clientMutationId\` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 

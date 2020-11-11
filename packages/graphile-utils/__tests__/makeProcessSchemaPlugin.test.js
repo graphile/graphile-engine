@@ -76,7 +76,8 @@ it("Can tweak the schema", async () => {
     """MODIFIED DESCRIPTION"""
     type Query {
       """
-      Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form.
+      Exposes the root query type nested one level down. This is helpful for Relay 1
+      which can only query top level fields if they are in a particular form.
       """
       query: Query!
     }
