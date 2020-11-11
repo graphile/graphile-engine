@@ -3085,8 +3085,6 @@ type Person implements Node {
     """The method to use when ordering \`PersonSecret\`."""
     orderBy: [PersonSecretsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PersonSecretsConnection! @deprecated(reason: "This is deprecated (comment on table c.person_secret).")
-
-  """"""
   site: WrappedUrl @deprecated(reason: "Don’t use me")
   typeFunction(id: Int): Type
 
@@ -3204,8 +3202,6 @@ input PersonInput {
 
   """The person’s name"""
   name: String!
-
-  """"""
   site: WrappedUrlInput
   userMac: String
 }
@@ -3227,8 +3223,6 @@ input PersonPatch {
 
   """The person’s name"""
   name: String
-
-  """"""
   site: WrappedUrlInput
   userMac: String
 }
@@ -7261,8 +7255,6 @@ type Person implements Node {
 
   """This \`Person\`'s \`PersonSecret\`."""
   personSecretByPersonId: PersonSecret @deprecated(reason: "This is deprecated (comment on table c.person_secret).")
-
-  """"""
   site: WrappedUrl @deprecated(reason: "Don’t use me")
   typeFunction(id: Int): Type
 
@@ -7359,8 +7351,6 @@ input PersonInput {
 
   """The person’s name"""
   name: String!
-
-  """"""
   site: WrappedUrlInput
   userMac: String
 }
@@ -7382,8 +7372,6 @@ input PersonPatch {
 
   """The person’s name"""
   name: String
-
-  """"""
   site: WrappedUrlInput
   userMac: String
 }

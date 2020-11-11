@@ -3035,8 +3035,6 @@ type Person implements Node {
 
   """The primary unique identifier for the person"""
   rowId: Int!
-
-  """"""
   site: WrappedUrl @deprecated(reason: "Don’t use me")
   typeFunction(id: Int): Type
 
@@ -3145,8 +3143,6 @@ input PersonInput {
 
   """The primary unique identifier for the person"""
   rowId: Int
-
-  """"""
   site: WrappedUrlInput
   userMac: String
 }
@@ -3168,8 +3164,6 @@ input PersonPatch {
 
   """The primary unique identifier for the person"""
   rowId: Int
-
-  """"""
   site: WrappedUrlInput
   userMac: String
 }

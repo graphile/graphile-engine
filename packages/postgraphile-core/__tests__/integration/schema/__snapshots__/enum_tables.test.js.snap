@@ -180,7 +180,6 @@ type DeleteReferencingTablePayload {
   ): ReferencingTablesEdge
 }
 
-""""""
 enum EnumTheFirst {
   """Desc A1"""
   A1
@@ -195,7 +194,6 @@ enum EnumTheFirst {
   A4
 }
 
-""""""
 enum EnumTheSecond {
   """Desc B1"""
   B1
@@ -210,7 +208,6 @@ enum EnumTheSecond {
   B4
 }
 
-""""""
 enum LetterAToD {
   """The letter A"""
   A
@@ -308,7 +305,6 @@ enum LetterDescriptionsOrderBy {
   PRIMARY_KEY_DESC
 }
 
-""""""
 enum LotsOfEnumsEnum3 {
   """Desc C1"""
   C1

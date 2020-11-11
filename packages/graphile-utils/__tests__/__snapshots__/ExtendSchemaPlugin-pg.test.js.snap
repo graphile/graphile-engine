@@ -241,8 +241,6 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
-
-  """"""
   renamedComplexColumn: [Complex]
   createdAt: Datetime!
 }
@@ -531,8 +529,6 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
-
-  """"""
   renamedComplexColumn: [Complex]
   createdAt: Datetime!
   pets(
@@ -1007,8 +1003,6 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
-
-  """"""
   renamedComplexColumn: [Complex]
   createdAt: Datetime!
 }
@@ -1298,8 +1292,6 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
-
-  """"""
   renamedComplexColumn: [Complex]
   createdAt: Datetime!
 }
@@ -1588,8 +1580,6 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
-
-  """"""
   renamedComplexColumn: [Complex]
   createdAt: Datetime!
   myCustomList(idLessThan: Int): [User]
@@ -1880,8 +1870,6 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
-
-  """"""
   renamedComplexColumn: [Complex]
   createdAt: Datetime!
 }
@@ -2170,8 +2158,6 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
-
-  """"""
   renamedComplexColumn: [Complex]
   createdAt: Datetime!
   customField: String
@@ -2461,8 +2447,6 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
-
-  """"""
   renamedComplexColumn: [Complex]
   createdAt: Datetime!
 }
@@ -2796,8 +2780,6 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
-
-  """"""
   renamedComplexColumn: [Complex]
   createdAt: Datetime!
   myCustomRecord(id: Int!): User
@@ -3087,8 +3069,6 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
-
-  """"""
   renamedComplexColumn: [Complex]
   createdAt: Datetime!
   myCustomScalar: Int!
@@ -3380,8 +3360,6 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
-
-  """"""
   renamedComplexColumn: [Complex]
   createdAt: Datetime!
   myCustomArrayOfScalars: [String!]!

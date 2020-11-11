@@ -154,7 +154,6 @@ type AuthenticatePayloadPayload {
   query: Query
 }
 
-""""""
 type AuthPayload {
   admin: Boolean
   id: Int

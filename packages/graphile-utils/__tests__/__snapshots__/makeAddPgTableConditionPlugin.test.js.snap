@@ -214,8 +214,6 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
-
-  """"""
   renamedComplexColumn: [Complex]
   createdAt: Datetime!
 }
@@ -541,8 +539,6 @@ type User implements Node {
   name: String!
   email: String!
   bio: String
-
-  """"""
   renamedComplexColumn: [Complex]
   createdAt: Datetime!
 }

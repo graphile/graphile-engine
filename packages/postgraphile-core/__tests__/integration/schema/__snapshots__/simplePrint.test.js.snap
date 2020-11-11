@@ -1337,8 +1337,6 @@ type Person implements Node {
   aliases: [String]!
   about: String
   email: Email!
-
-  """"""
   site: WrappedUrl @deprecated(reason: "Don’t use me")
   config: KeyValueHash
   lastLoginFromIp: InternetAddress
@@ -6324,8 +6322,6 @@ input PersonInput {
   aliases: [String]
   about: String
   email: Email!
-
-  """"""
   site: WrappedUrlInput
   config: KeyValueHash
   lastLoginFromIp: InternetAddress
@@ -7602,8 +7598,6 @@ input PersonPatch {
   aliases: [String]
   about: String
   email: Email
-
-  """"""
   site: WrappedUrlInput
   config: KeyValueHash
   lastLoginFromIp: InternetAddress
@@ -9070,7 +9064,6 @@ type AuthenticatePayloadPayload {
   personById: Person
 }
 
-""""""
 type AuthPayload {
   jwt: JwtToken
   id: Int

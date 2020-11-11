@@ -313,7 +313,6 @@ type AuthenticatePayloadPayload {
   query: Query
 }
 
-""""""
 type AuthPayload {
   admin: Boolean
   id: Int
@@ -6003,8 +6002,6 @@ type Person implements Node {
     """The method to use when ordering \`Post\`."""
     orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
   ): PostsConnection!
-
-  """"""
   site: WrappedUrl @deprecated(reason: "Don’t use me")
   typeFunction(id: Int): Type
 
@@ -6113,8 +6110,6 @@ input PersonInput {
 
   """The person’s name"""
   name: String!
-
-  """"""
   site: WrappedUrlInput
   userMac: String
 }
@@ -6136,8 +6131,6 @@ input PersonPatch {
 
   """The person’s name"""
   name: String
-
-  """"""
   site: WrappedUrlInput
   userMac: String
 }

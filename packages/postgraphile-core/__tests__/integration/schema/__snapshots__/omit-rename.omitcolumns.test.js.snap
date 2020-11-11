@@ -625,7 +625,6 @@ enum FilmsOrderBy {
   TITLE_DESC
 }
 
-""""""
 type Flamble {
   f: String
 }
@@ -1022,22 +1021,11 @@ enum PeopleOrderBy {
 }
 
 type Person implements Node {
-  """"""
   colNoCreate: String
-
-  """"""
   colNoCreateUpdate: String
-
-  """"""
   colNoCreateUpdateOrderFilter: String
-
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
-
-  """"""
   colNoUpdate: String
   firstName: String
   id: Int!
@@ -1107,13 +1095,8 @@ input PersonCondition {
 
 """An input for mutations affecting \`Person\`"""
 input PersonInput {
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
-
-  """"""
   colNoUpdate: String
   firstName: String
   id: Int
@@ -1124,13 +1107,8 @@ input PersonInput {
 Represents an update to a \`Person\`. Fields that are set will be updated.
 """
 input PersonPatch {
-  """"""
   colNoCreate: String
-
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
   firstName: String
   id: Int
@@ -1506,7 +1484,6 @@ type Query implements Node {
 }
 
 type RenamedTable {
-  """"""
   colA: Int
 }
 
@@ -1521,7 +1498,6 @@ input RenamedTableCondition {
 
 """An input for mutations affecting \`RenamedTable\`"""
 input RenamedTableInput {
-  """"""
   colA: Int
 }
 
@@ -1754,8 +1730,6 @@ type TvShow implements Node {
   """Reads a single \`Studio\` that is related to this \`TvShow\`."""
   studioByStudioId: Studio
   studioId: Int
-
-  """"""
   title: String
 
   """Reads and enables pagination through a set of \`TvEpisode\`."""
@@ -1814,8 +1788,6 @@ Represents an update to a \`TvShow\`. Fields that are set will be updated.
 input TvShowPatch {
   code: Int
   studioId: Int
-
-  """"""
   title: String
 }
 
@@ -2836,7 +2808,6 @@ enum FilmsOrderBy {
   TITLE_DESC
 }
 
-""""""
 type Flamble {
   f: String
 }
@@ -3233,22 +3204,11 @@ enum PeopleOrderBy {
 }
 
 type Person implements Node {
-  """"""
   colNoCreate: String
-
-  """"""
   colNoCreateUpdate: String
-
-  """"""
   colNoCreateUpdateOrderFilter: String
-
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
-
-  """"""
   colNoUpdate: String
   firstName: String
   id: Int!
@@ -3317,13 +3277,8 @@ input PersonCondition {
 
 """An input for mutations affecting \`Person\`"""
 input PersonInput {
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
-
-  """"""
   colNoUpdate: String
   firstName: String
   id: Int
@@ -3334,13 +3289,8 @@ input PersonInput {
 Represents an update to a \`Person\`. Fields that are set will be updated.
 """
 input PersonPatch {
-  """"""
   colNoCreate: String
-
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
   firstName: String
   id: Int
@@ -3716,7 +3666,6 @@ type Query implements Node {
 }
 
 type RenamedTable {
-  """"""
   colA: Int
 }
 
@@ -3731,7 +3680,6 @@ input RenamedTableCondition {
 
 """An input for mutations affecting \`RenamedTable\`"""
 input RenamedTableInput {
-  """"""
   colA: Int
 }
 
@@ -5043,7 +4991,6 @@ enum FilmsOrderBy {
   TITLE_DESC
 }
 
-""""""
 type Flamble {
   f: String
 }
@@ -5440,22 +5387,11 @@ enum PeopleOrderBy {
 }
 
 type Person implements Node {
-  """"""
   colNoCreate: String
-
-  """"""
   colNoCreateUpdate: String
-
-  """"""
   colNoCreateUpdateOrderFilter: String
-
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
-
-  """"""
   colNoUpdate: String
   firstName: String
   id: Int!
@@ -5525,13 +5461,8 @@ input PersonCondition {
 
 """An input for mutations affecting \`Person\`"""
 input PersonInput {
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
-
-  """"""
   colNoUpdate: String
   firstName: String
   id: Int
@@ -5542,13 +5473,8 @@ input PersonInput {
 Represents an update to a \`Person\`. Fields that are set will be updated.
 """
 input PersonPatch {
-  """"""
   colNoCreate: String
-
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
   firstName: String
   id: Int
@@ -5924,7 +5850,6 @@ type Query implements Node {
 }
 
 type RenamedTable {
-  """"""
   colA: Int
 }
 
@@ -5939,7 +5864,6 @@ input RenamedTableCondition {
 
 """An input for mutations affecting \`RenamedTable\`"""
 input RenamedTableInput {
-  """"""
   colA: Int
 }
 
@@ -7235,7 +7159,6 @@ enum FilmsOrderBy {
   TITLE_DESC
 }
 
-""""""
 type Flamble {
   f: String
 }
@@ -7632,22 +7555,11 @@ enum PeopleOrderBy {
 }
 
 type Person implements Node {
-  """"""
   colNoCreate: String
-
-  """"""
   colNoCreateUpdate: String
-
-  """"""
   colNoCreateUpdateOrderFilter: String
-
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
-
-  """"""
   colNoUpdate: String
   firstName: String
   id: Int!
@@ -7717,13 +7629,8 @@ input PersonCondition {
 
 """An input for mutations affecting \`Person\`"""
 input PersonInput {
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
-
-  """"""
   colNoUpdate: String
   firstName: String
   id: Int
@@ -7734,13 +7641,8 @@ input PersonInput {
 Represents an update to a \`Person\`. Fields that are set will be updated.
 """
 input PersonPatch {
-  """"""
   colNoCreate: String
-
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
   firstName: String
   id: Int
@@ -8116,7 +8018,6 @@ type Query implements Node {
 }
 
 type RenamedTable {
-  """"""
   colA: Int
 }
 
@@ -8131,7 +8032,6 @@ input RenamedTableCondition {
 
 """An input for mutations affecting \`RenamedTable\`"""
 input RenamedTableInput {
-  """"""
   colA: Int
 }
 
@@ -8277,8 +8177,6 @@ type TvEpisode implements Node {
   """
   nodeId: ID!
   showId: Int
-
-  """"""
   title: String
 
   """Reads a single \`TvShow\` that is related to this \`TvEpisode\`."""
@@ -8304,8 +8202,6 @@ input TvEpisodeCondition {
 input TvEpisodeInput {
   code: Int!
   showId: Int
-
-  """"""
   title: String
 }
 
@@ -8315,8 +8211,6 @@ Represents an update to a \`TvEpisode\`. Fields that are set will be updated.
 input TvEpisodePatch {
   code: Int
   showId: Int
-
-  """"""
   title: String
 }
 
@@ -9447,7 +9341,6 @@ enum FilmsOrderBy {
   TITLE_DESC
 }
 
-""""""
 type Flamble {
   f: String
 }
@@ -9844,22 +9737,11 @@ enum PeopleOrderBy {
 }
 
 type Person implements Node {
-  """"""
   colNoCreate: String
-
-  """"""
   colNoCreateUpdate: String
-
-  """"""
   colNoCreateUpdateOrderFilter: String
-
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
-
-  """"""
   colNoUpdate: String
   firstName: String
   id: Int!
@@ -9929,13 +9811,8 @@ input PersonCondition {
 
 """An input for mutations affecting \`Person\`"""
 input PersonInput {
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
-
-  """"""
   colNoUpdate: String
   firstName: String
   id: Int
@@ -9946,13 +9823,8 @@ input PersonInput {
 Represents an update to a \`Person\`. Fields that are set will be updated.
 """
 input PersonPatch {
-  """"""
   colNoCreate: String
-
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
   firstName: String
   id: Int
@@ -10328,7 +10200,6 @@ type Query implements Node {
 }
 
 type RenamedTable {
-  """"""
   colA: Int
 }
 
@@ -10343,7 +10214,6 @@ input RenamedTableCondition {
 
 """An input for mutations affecting \`RenamedTable\`"""
 input RenamedTableInput {
-  """"""
   colA: Int
 }
 
@@ -11652,7 +11522,6 @@ enum FilmsOrderBy {
   TITLE_DESC
 }
 
-""""""
 type Flamble {
   f: String
 }
@@ -12049,22 +11918,11 @@ enum PeopleOrderBy {
 }
 
 type Person implements Node {
-  """"""
   colNoCreate: String
-
-  """"""
   colNoCreateUpdate: String
-
-  """"""
   colNoCreateUpdateOrderFilter: String
-
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
-
-  """"""
   colNoUpdate: String
   firstName: String
   id: Int!
@@ -12134,13 +11992,8 @@ input PersonCondition {
 
 """An input for mutations affecting \`Person\`"""
 input PersonInput {
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
-
-  """"""
   colNoUpdate: String
   firstName: String
   id: Int
@@ -12151,13 +12004,8 @@ input PersonInput {
 Represents an update to a \`Person\`. Fields that are set will be updated.
 """
 input PersonPatch {
-  """"""
   colNoCreate: String
-
-  """"""
   colNoFilter: String
-
-  """"""
   colNoOrder: String
   firstName: String
   id: Int
@@ -12533,7 +12381,6 @@ type Query implements Node {
 }
 
 type RenamedTable {
-  """"""
   colA: Int
 }
 
@@ -12548,7 +12395,6 @@ input RenamedTableCondition {
 
 """An input for mutations affecting \`RenamedTable\`"""
 input RenamedTableInput {
-  """"""
   colA: Int
 }
 
@@ -12781,8 +12627,6 @@ type TvShow implements Node {
   """Reads a single \`Studio\` that is related to this \`TvShow\`."""
   studioByStudioId: Studio
   studioId: Int
-
-  """"""
   title: String
 
   """Reads and enables pagination through a set of \`TvEpisode\`."""
@@ -12833,8 +12677,6 @@ input TvShowCondition {
 input TvShowInput {
   code: Int!
   studioId: Int
-
-  """"""
   title: String
 }
 

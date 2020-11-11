@@ -686,15 +686,11 @@ type House implements Node {
   """Reads a single \`Property\` that is related to this \`House\`."""
   propertyByPropertyId: Property
   propertyId: Int!
-
-  """"""
   propertyNameOrNumber: String!
 
   """Reads a single \`Street\` that is related to this \`House\`."""
   streetByStreetId: Street
   streetId: Int!
-
-  """"""
   streetName: String!
 
   """Reads a single \`StreetProperty\` that is related to this \`House\`."""
@@ -3003,15 +2999,11 @@ type House implements Node {
   """Reads a single \`Property\` that is related to this \`House\`."""
   propertyByPropertyId: Property
   propertyId: Int!
-
-  """"""
   propertyNameOrNumber: String!
 
   """Reads a single \`Street\` that is related to this \`House\`."""
   streetByStreetId: Street
   streetId: Int!
-
-  """"""
   streetName: String!
 
   """Reads a single \`StreetProperty\` that is related to this \`House\`."""
@@ -5291,15 +5283,11 @@ type House implements Node {
   """Reads a single \`Property\` that is related to this \`House\`."""
   propertyByPropertyId: Property
   propertyId: Int!
-
-  """"""
   propertyNameOrNumber: String!
 
   """Reads a single \`Street\` that is related to this \`House\`."""
   streetByStreetId: Street
   streetId: Int!
-
-  """"""
   streetName: String!
 
   """Reads a single \`StreetProperty\` that is related to this \`House\`."""
@@ -7566,15 +7554,11 @@ type House implements Node {
   """Reads a single \`Property\` that is related to this \`House\`."""
   propertyByPropertyId: Property
   propertyId: Int!
-
-  """"""
   propertyNameOrNumber: String!
 
   """Reads a single \`Street\` that is related to this \`House\`."""
   streetByStreetId: Street
   streetId: Int!
-
-  """"""
   streetName: String!
 
   """Reads a single \`StreetProperty\` that is related to this \`House\`."""
@@ -9767,15 +9751,11 @@ type House implements Node {
   """Reads a single \`Property\` that is related to this \`House\`."""
   propertyByPropertyId: Property
   propertyId: Int!
-
-  """"""
   propertyNameOrNumber: String!
 
   """Reads a single \`Street\` that is related to this \`House\`."""
   streetByStreetId: Street
   streetId: Int!
-
-  """"""
   streetName: String!
 
   """Reads a single \`StreetProperty\` that is related to this \`House\`."""
@@ -12008,12 +11988,8 @@ type House implements Node {
   """
   nodeId: ID!
   propertyId: Int!
-
-  """"""
   propertyNameOrNumber: String!
   streetId: Int!
-
-  """"""
   streetName: String!
 }
 
