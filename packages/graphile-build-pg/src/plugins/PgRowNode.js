@@ -162,7 +162,7 @@ export default (async function PgRowNode(builder, { subscriptions }) {
                         [nodeIdFieldName]: {
                           description: build.wrapDescription(
                             `The globally unique \`ID\` to be used in selecting a single \`${TableType.name}\`.`,
-                            "field"
+                            "arg"
                           ),
                           type: new GraphQLNonNull(GraphQLID),
                         },
