@@ -61,7 +61,7 @@ function breakLine(line: string, maxLen: number): Array<string> {
  */
 export const wrapDescription = (
   description: string,
-  position: "root" | "type" | "field" | "argument"
+  position: "root" | "type" | "field" | "arg"
 ): string => {
   const indentationLength =
     position === "root"
@@ -70,7 +70,7 @@ export const wrapDescription = (
       ? 0
       : position === "field"
       ? 2
-      : position === "argument"
+      : position === "arg"
       ? 4
       : 0;
   // This follows the implementation from GraphQL v14 to make our GraphQL v15
@@ -83,6 +83,8 @@ export const wrapDescription = (
       if (line.length < maxLen + 5) {
         return line;
       }
+      // For > 120 character long lines, cut at space boundaries into sublines
+      // of ~80 chars.
       return breakLine(line, maxLen);
     })
     .join("\n");

@@ -73,7 +73,7 @@ export type Build = {|
   },
   wrapDescription: (
     description: string,
-    position: "root" | "type" | "field" | "argument"
+    position: "root" | "type" | "field" | "arg"
   ) => string,
   swallowError: (e: Error) => void,
   // resolveNode: EXPERIMENTAL, API might change!
