@@ -14,7 +14,7 @@ const INTROSPECTION_QUERY: string =
     ? graphql.getIntrospectionQuery()
     : (graphql as any).introspectionQuery;
 
-const { buildClientSchema } = graphql;
+const { buildClientSchema, lexicographicSortSchema } = graphql;
 
 let ctx: TestCtx | null = null;
 const CLI_DEFAULTS = {};
@@ -81,7 +81,7 @@ describe("Middleware defaults", () => {
         expect(res.statusCode).toEqual(200);
         expect(json.errors).toBeFalsy();
         const schema = buildClientSchema(json.data);
-        expect(schema).toMatchSnapshot();
+        expect(lexicographicSortSchema(schema)).toMatchSnapshot();
       }
     );
   });
@@ -105,7 +105,7 @@ describe("Subscriptions", () => {
       async (json, _req, res) => {
         expect(res.statusCode).toEqual(200);
         const schema = buildClientSchema(json.data);
-        expect(schema).toMatchSnapshot();
+        expect(lexicographicSortSchema(schema)).toMatchSnapshot();
       }
     );
   });
