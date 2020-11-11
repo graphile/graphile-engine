@@ -1323,7 +1323,6 @@ end`;
         pgRegisterGqlInputTypeByTypeId,
         pg2GqlMapper,
         pgSql: sql,
-        graphql,
       } = build;
 
       // Check we have the hstore extension
