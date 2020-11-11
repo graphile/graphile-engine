@@ -79,13 +79,13 @@ export const wrapDescription = (
   const maxLen = 120 - indentationLength;
   return description
     .split("\n")
-    .flatMap(line => {
+    .map(line => {
       if (line.length < maxLen + 5) {
         return line;
       }
       // For > 120 character long lines, cut at space boundaries into sublines
       // of ~80 chars.
-      return breakLine(line, maxLen);
+      return breakLine(line, maxLen).join("\n");
     })
     .join("\n");
 };
