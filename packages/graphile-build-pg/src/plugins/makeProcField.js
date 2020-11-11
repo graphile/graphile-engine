@@ -592,7 +592,6 @@ export default function makeProcField(
           : isTableLike && proc.returnsSet
           ? build.wrapDescription(
               `Reads and enables pagination through a set of \`${TableType.name}\`.`,
-
               "field"
             )
           : null,
