@@ -3885,29 +3885,6 @@ type DeleteViewTablePayload {
   ): ViewTablesEdge
 }
 
-type DomainConstrainedCompoundType {
-  a: Int
-  b: String
-  c: Color
-  computedField: Int
-  d: UUID
-  e: EnumCaps
-  f: EnumWithEmptyString
-  fooBar: Int
-  g: Interval
-}
-
-input DomainConstrainedCompoundTypeInput {
-  a: Int
-  b: String
-  c: Color
-  d: UUID
-  e: EnumCaps
-  f: EnumWithEmptyString
-  fooBar: Int
-  g: IntervalInput
-}
-
 type EdgeCase {
   computed: String
   notNullHasDefault: Boolean!
@@ -9691,7 +9668,6 @@ type Type implements Node {
   decimal: BigFloat!
   domain: AnInt!
   domain2: AnotherInt!
-  domainConstrainedCompoundType: DomainConstrainedCompoundType
   enum: Color!
   enumArray: [Color]!
   id: Int!
@@ -9773,11 +9749,6 @@ input TypeCondition {
 
   """Checks for equality with the object’s \`domain2\` field."""
   domain2: AnotherInt
-
-  """
-  Checks for equality with the object’s \`domainConstrainedCompoundType\` field.
-  """
-  domainConstrainedCompoundType: DomainConstrainedCompoundTypeInput
 
   """Checks for equality with the object’s \`enum\` field."""
   enum: Color
@@ -9984,7 +9955,6 @@ input TypeInput {
   decimal: BigFloat!
   domain: AnInt!
   domain2: AnotherInt!
-  domainConstrainedCompoundType: DomainConstrainedCompoundTypeInput
   enum: Color!
   enumArray: [Color]!
   id: Int
@@ -10034,7 +10004,6 @@ input TypePatch {
   decimal: BigFloat
   domain: AnInt
   domain2: AnotherInt
-  domainConstrainedCompoundType: DomainConstrainedCompoundTypeInput
   enum: Color
   enumArray: [Color]
   id: Int
@@ -10149,8 +10118,6 @@ enum TypesOrderBy {
   DECIMAL_ASC
   DECIMAL_DESC
   DOMAIN_ASC
-  DOMAIN_CONSTRAINED_COMPOUND_TYPE_ASC
-  DOMAIN_CONSTRAINED_COMPOUND_TYPE_DESC
   DOMAIN_DESC
   DOMAIN2_ASC
   DOMAIN2_DESC

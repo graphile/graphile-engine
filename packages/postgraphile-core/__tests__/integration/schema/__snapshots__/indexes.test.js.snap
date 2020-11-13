@@ -3000,29 +3000,6 @@ type DeleteViewTablePayload {
   ): ViewTablesEdge
 }
 
-type DomainConstrainedCompoundType {
-  a: Int
-  b: String
-  c: Color
-  computedField: Int
-  d: UUID
-  e: EnumCaps
-  f: EnumWithEmptyString
-  fooBar: Int
-  g: Interval
-}
-
-input DomainConstrainedCompoundTypeInput {
-  a: Int
-  b: String
-  c: Color
-  d: UUID
-  e: EnumCaps
-  f: EnumWithEmptyString
-  fooBar: Int
-  g: IntervalInput
-}
-
 type EdgeCase {
   computed: String
   notNullHasDefault: Boolean!
@@ -8503,7 +8480,6 @@ type Type implements Node {
   decimal: BigFloat!
   domain: AnInt!
   domain2: AnotherInt!
-  domainConstrainedCompoundType: DomainConstrainedCompoundType
   enum: Color!
   enumArray: [Color]!
   id: Int!
@@ -8657,7 +8633,6 @@ input TypeInput {
   decimal: BigFloat!
   domain: AnInt!
   domain2: AnotherInt!
-  domainConstrainedCompoundType: DomainConstrainedCompoundTypeInput
   enum: Color!
   enumArray: [Color]!
   id: Int
@@ -8707,7 +8682,6 @@ input TypePatch {
   decimal: BigFloat
   domain: AnInt
   domain2: AnotherInt
-  domainConstrainedCompoundType: DomainConstrainedCompoundTypeInput
   enum: Color
   enumArray: [Color]
   id: Int
