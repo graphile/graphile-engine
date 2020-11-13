@@ -26,11 +26,13 @@ export default function makeProcField(
     fieldWithHooks,
     computed = false,
     isMutation = false,
+    isRootQuery = false,
     forceList = false,
   }: {
     fieldWithHooks: FieldWithHooksFunction,
     computed?: boolean,
     isMutation?: boolean,
+    isRootQuery?: boolean,
     forceList?: boolean,
   }
 ) {
@@ -79,7 +81,7 @@ export default function makeProcField(
     if (
       idx >= sliceAmount && // Was a .slice() call
       (proc.argModes.length === 0 || // all args are `in`
-      proc.argModes[idx] === "i" || // this arg is `in`
+        proc.argModes[idx] === "i" || // this arg is `in`
         proc.argModes[idx] === "b") // this arg is `inout`
     ) {
       prev.push(proc.argNames[idx] || "");
@@ -90,7 +92,7 @@ export default function makeProcField(
     if (
       idx >= sliceAmount && // Was a .slice() call
       (proc.argModes.length === 0 || // all args are `in`
-      proc.argModes[idx] === "i" || // this arg is `in`
+        proc.argModes[idx] === "i" || // this arg is `in`
         proc.argModes[idx] === "b") // this arg is `inout`
     ) {
       prev.push(introspectionResultsByKind.typeById[typeId]);
@@ -209,7 +211,7 @@ export default function makeProcField(
             )}' for '${TableType.name}' so cannot create procedure field`
           );
         }
-        type = new GraphQLNonNull(ConnectionType);
+        type = ConnectionType;
         fieldScope.isPgFieldConnection = true;
       }
       fieldScope.pgFieldIntrospectionTable = returnTypeTable;
@@ -249,7 +251,7 @@ export default function makeProcField(
             )}' for '${RecordType.name}' so cannot create procedure field`
           );
         }
-        type = new GraphQLNonNull(ConnectionType);
+        type = ConnectionType;
         fieldScope.isPgFieldConnection = true;
       }
     } else {
@@ -275,7 +277,7 @@ export default function makeProcField(
         returnFirstValueAsValue = true;
         fieldScope.isPgFieldSimpleCollection = true;
       } else {
-        type = new GraphQLNonNull(ConnectionType);
+        type = ConnectionType;
         fieldScope.isPgFieldConnection = true;
         // We don't return the first value as the value here because it gets
         // sent down into PgScalarFunctionConnectionPlugin so the relevant
@@ -479,9 +481,12 @@ export default function makeProcField(
           GraphQLObjectType,
           {
             name: inflection.functionPayloadType(proc),
-            description: `The output of our \`${inflection.functionMutationName(
-              proc
-            )}\` mutation.`,
+            description: build.wrapDescription(
+              `The output of our \`${inflection.functionMutationName(
+                proc
+              )}\` mutation.`,
+              "type"
+            ),
             fields: ({ fieldWithHooks }) => {
               return Object.assign(
                 {},
@@ -536,9 +541,12 @@ export default function makeProcField(
           GraphQLInputObjectType,
           {
             name: inflection.functionInputType(proc),
-            description: `All input for the \`${inflection.functionMutationName(
-              proc
-            )}\` mutation.`,
+            description: build.wrapDescription(
+              `All input for the \`${inflection.functionMutationName(
+                proc
+              )}\` mutation.`,
+              "type"
+            ),
             fields: {
               clientMutationId: {
                 type: GraphQLString,
@@ -582,9 +590,17 @@ export default function makeProcField(
           : isMutation
           ? null
           : isTableLike && proc.returnsSet
-          ? `Reads and enables pagination through a set of \`${TableType.name}\`.`
+          ? build.wrapDescription(
+              `Reads and enables pagination through a set of \`${TableType.name}\`.`,
+              "field"
+            )
           : null,
-        type: nullableIf(GraphQLNonNull, !proc.tags.notNull, ReturnType),
+        type: nullableIf(
+          GraphQLNonNull,
+          !proc.tags.notNull &&
+            (!fieldScope.isPgFieldConnection || isMutation || isRootQuery),
+          ReturnType
+        ),
         args: args,
         resolve: computed
           ? (data, _args, resolveContext, resolveInfo) => {

@@ -220,7 +220,7 @@ export function makePgSmartTagsPlugin(
 export type JSONPgSmartTags = {
   version: 1;
   config: {
-    [kind in PgSmartTagSupportedKinds]: {
+    [kind in PgSmartTagSupportedKinds]?: {
       [identifier: string]: {
         tags?: PgSmartTagTags;
         description?: string;
@@ -277,7 +277,7 @@ function pgSmartTagRulesFromJSON(
     if (typeof obj !== "object" || obj == null) {
       throw new Error(`Invalid value for '${path}'`);
     }
-    const entities: object = obj;
+    const entities: Record<string, any> = obj;
     for (const entityName of Object.keys(entities)) {
       if (entityName.includes(".")) {
         throw new Error(

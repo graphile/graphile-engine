@@ -48,7 +48,7 @@ export function preventEmptyResult<
 >(obj: O): $ObjMap<O, <V>(V) => V> {
   return Object.keys(obj).reduce((memo, key) => {
     const fn = obj[key];
-    memo[key] = function(...args) {
+    memo[key] = function (...args) {
       const result = fn.apply(this, args);
       if (typeof result !== "string" || result.length === 0) {
         const stringifiedArgs = require("util").inspect(args);
@@ -87,20 +87,20 @@ const omitWithRBACChecks = omit => (
     const tableEntity: PgClass = entity;
     if (
       (permission === READ || permission === ALL || permission === MANY) &&
-      (!tableEntity.aclSelectable &&
-        !tableEntity.attributes.some(attr => attr.aclSelectable))
+      !tableEntity.aclSelectable &&
+      !tableEntity.attributes.some(attr => attr.aclSelectable)
     ) {
       return true;
     } else if (
       permission === CREATE &&
-      (!tableEntity.aclInsertable &&
-        !tableEntity.attributes.some(attr => attr.aclInsertable))
+      !tableEntity.aclInsertable &&
+      !tableEntity.attributes.some(attr => attr.aclInsertable)
     ) {
       return true;
     } else if (
       permission === UPDATE &&
-      (!tableEntity.aclUpdatable &&
-        !tableEntity.attributes.some(attr => attr.aclUpdatable))
+      !tableEntity.aclUpdatable &&
+      !tableEntity.attributes.some(attr => attr.aclUpdatable)
     ) {
       return true;
     } else if (permission === DELETE && !tableEntity.aclDeletable) {
@@ -366,7 +366,7 @@ export default (function PgBasicsPlugin(
     (inflection, build) => {
       // TODO:v5: move this to postgraphile-core
       const oldBuiltin = inflection.builtin;
-      inflection.builtin = function(name) {
+      inflection.builtin = function (name) {
         if (pgLegacyJsonUuid && name === "JSON") return "Json";
         if (pgLegacyJsonUuid && name === "UUID") return "Uuid";
         return oldBuiltin.call(this, name);
@@ -439,6 +439,9 @@ export default (function PgBasicsPlugin(
 
           // From here down, functions are passed database introspection results
           enumType(type: PgType) {
+            if (type.tags.enumName) {
+              return type.tags.enumName;
+            }
             return this.upperCamelCase(this._typeName(type));
           },
           argument(name: ?string, index: number) {
@@ -653,9 +656,9 @@ export default (function PgBasicsPlugin(
               return constraint.tags.fieldName;
             }
             return this.camelCase(
-              `${this._singularizedTableName(table)}-by-${detailedKeys
-                .map(key => this.column(key))
-                .join("-and-")}`
+              `${this._singularizedTableName(
+                table
+              )}-by-${detailedKeys.map(key => this.column(key)).join("-and-")}`
             );
           },
           singleRelationByKeysBackwards(
@@ -721,9 +724,9 @@ export default (function PgBasicsPlugin(
               return constraint.tags.fieldName;
             }
             return this.camelCase(
-              `${this._singularizedTableName(table)}-by-${detailedKeys
-                .map(key => this.column(key))
-                .join("-and-")}`
+              `${this._singularizedTableName(
+                table
+              )}-by-${detailedKeys.map(key => this.column(key)).join("-and-")}`
             );
           },
           updateByKeys(

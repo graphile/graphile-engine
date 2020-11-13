@@ -397,13 +397,13 @@ it("supports @scope directive with simple values", async () => {
           Gives you back what you put in
           """
           echo(input: [Int!]!): [Int!]!
-            @scope(
-              isEchoField: true
-              stringTest: "THIS_IS_A_STRING"
-              intTest: 42
-              floatTest: 3.141592
-              nullTest: null
-            )
+          @scope(
+            isEchoField: true
+            stringTest: "THIS_IS_A_STRING"
+            intTest: 42
+            floatTest: 3.141592
+            nullTest: null
+          )
         }
       `,
       resolvers,
@@ -461,7 +461,10 @@ it("supports @scope directive with variable value", async () => {
               nullTest: null
               embedTest: ${embed({
                 [secret]: "Fred",
-                sub: [[11, 22], [33, 44]],
+                sub: [
+                  [11, 22],
+                  [33, 44],
+                ],
               })}
             )
         }

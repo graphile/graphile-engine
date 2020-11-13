@@ -18,6 +18,7 @@ export default (function PgRecordReturnTypesPlugin(builder) {
         pgGetSelectValueForFieldAndTypeAndModifier: getSelectValueForFieldAndTypeAndModifier,
         getSafeAliasFromResolveInfo,
         getSafeAliasFromAlias,
+        pg2gqlForType,
       } = build;
 
       introspectionResultsByKind.procedure.forEach(proc => {
@@ -77,9 +78,12 @@ export default (function PgRecordReturnTypesPlugin(builder) {
           GraphQLObjectType,
           {
             name: inflection.recordFunctionReturnType(proc),
-            description: `The return type of our \`${procFieldName}\` ${
-              isMutation ? "mutation" : "query"
-            }.`,
+            description: build.wrapDescription(
+              `The return type of our \`${procFieldName}\` ${
+                isMutation ? "mutation" : "query"
+              }.`,
+              "type"
+            ),
             fields: ({ fieldWithHooks }) => {
               return outputArgNames.reduce((memo, outputArgName, idx) => {
                 const fieldName = inflection.functionOutputFieldName(
@@ -129,13 +133,14 @@ export default (function PgRecordReturnTypesPlugin(builder) {
                         },
                       };
                     });
+                    const convertFromPg = pg2gqlForType(outputArgTypes[idx]);
                     return {
                       type: fieldType,
                       resolve(data, _args, _context, resolveInfo) {
                         const safeAlias = getSafeAliasFromResolveInfo(
                           resolveInfo
                         );
-                        return data[safeAlias];
+                        return convertFromPg(data[safeAlias]);
                       },
                     };
                   },

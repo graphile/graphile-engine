@@ -3724,7 +3724,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): PeopleConnection! @deprecated(reason: "This is deprecated (comment on function c.badly_behaved_function).")
+  ): PeopleConnection @deprecated(reason: "This is deprecated (comment on function c.badly_behaved_function).")
 
   """Reads and enables pagination through a set of \`Person\`."""
   badlyBehavedFunctionList(
@@ -3763,7 +3763,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): CompoundTypesConnection!
+  ): CompoundTypesConnection
 
   """Reads and enables pagination through a set of \`CompoundType\`."""
   compoundTypeSetQueryList(
@@ -3799,7 +3799,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): FuncOutComplexSetofConnection!
+  ): FuncOutComplexSetofConnection
   funcOutComplexSetofList(
     a: Int
     b: String
@@ -3830,7 +3830,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): FuncOutOutSetofConnection!
+  ): FuncOutOutSetofConnection
   funcOutOutSetofList(
     """Only read the first \`n\` values of the set."""
     first: Int
@@ -3857,7 +3857,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): FuncOutSetofConnection!
+  ): FuncOutSetofConnection
   funcOutSetofList(
     """Only read the first \`n\` values of the set."""
     first: Int
@@ -3886,7 +3886,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): PeopleConnection!
+  ): PeopleConnection
 
   """Reads and enables pagination through a set of \`Person\`."""
   funcOutTableSetofList(
@@ -3917,7 +3917,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): FuncReturnsTableMultiColConnection!
+  ): FuncReturnsTableMultiColConnection
   funcReturnsTableMultiColList(
     """Only read the first \`n\` values of the set."""
     first: Int
@@ -3945,7 +3945,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): FuncReturnsTableOneColConnection!
+  ): FuncReturnsTableOneColConnection
   funcReturnsTableOneColList(
     """Only read the first \`n\` values of the set."""
     first: Int
@@ -3975,7 +3975,7 @@ type Query implements Node {
     x: Int
     y: Int
     z: Int
-  ): IntSetQueryConnection!
+  ): IntSetQueryConnection
   intSetQueryList(
     """Only read the first \`n\` values of the set."""
     first: Int
@@ -4056,6 +4056,13 @@ type Query implements Node {
   query: Query!
   queryOutputTwoRows(leftArmId: Int, postId: Int, txt: String): QueryOutputTwoRowsRecord
   returnTableWithoutGrants: CompoundKey
+  searchTestSummariesList(
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Skip the first \`n\` values."""
+    offset: Int
+  ): [SearchTestSummariesRecord]
   tableQuery(id: Int): Post
 
   """Reads and enables pagination through a set of \`Person\`."""
@@ -4085,7 +4092,7 @@ type Query implements Node {
 
     """The method to use when ordering \`Person\`."""
     orderBy: [PeopleOrderBy!]
-  ): PeopleConnection!
+  ): PeopleConnection
 
   """Reads and enables pagination through a set of \`Person\`."""
   tableSetQueryList(
@@ -4123,7 +4130,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): PeopleConnection!
+  ): PeopleConnection
 
   """Reads and enables pagination through a set of \`Person\`."""
   tableSetQueryPlpgsqlList(
@@ -4141,6 +4148,36 @@ type QueryOutputTwoRowsRecord {
   leftArm: LeftArm
   post: Post
   txt: String
+}
+
+"""A builtin object identifier type for a relation name"""
+scalar RegClass
+
+"""A builtin object identifier type for a text search configuration"""
+scalar RegConfig
+
+"""A builtin object identifier type for a text search dictionary"""
+scalar RegDictionary
+
+"""A builtin object identifier type for an operator"""
+scalar RegOper
+
+"""A builtin object identifier type for an operator with argument types"""
+scalar RegOperator
+
+"""A builtin object identifier type for a function name"""
+scalar RegProc
+
+"""A builtin object identifier type for a function with argument types"""
+scalar RegProcedure
+
+"""A builtin object identifier type for a data type name"""
+scalar RegType
+
+"""The return type of our \`searchTestSummaries\` query."""
+type SearchTestSummariesRecord {
+  id: Int
+  totalDuration: Interval
 }
 
 """All input for the \`tableMutation\` mutation."""
@@ -4213,6 +4250,7 @@ type Type {
   enumArray: [Color]!
   id: Int!
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: Interval!
   intervalArray: [Interval]!
   json: JSON!
@@ -4227,8 +4265,17 @@ type Type {
   numeric: BigFloat!
   numrange: BigFloatRange!
   point: Point!
+  regclass: RegClass
+  regconfig: RegConfig
+  regdictionary: RegDictionary
+  regoper: RegOper
+  regoperator: RegOperator
+  regproc: RegProc
+  regprocedure: RegProcedure
+  regtype: RegType
   smallint: Int!
   textArray: [String]!
+  textArrayDomain: [String]
   time: Time!
   timestamp: Datetime!
   timestamptz: Datetime!
@@ -7728,6 +7775,13 @@ type Query implements Node {
   query: Query!
   queryOutputTwoRows(leftArmId: Int, postId: Int, txt: String): QueryOutputTwoRowsRecord
   returnTableWithoutGrants: CompoundKey
+  searchTestSummariesList(
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Skip the first \`n\` values."""
+    offset: Int
+  ): [SearchTestSummariesRecord]
   tableQuery(id: Int): Post
 
   """Reads and enables pagination through a set of \`Person\`."""
@@ -7763,6 +7817,36 @@ type QueryOutputTwoRowsRecord {
   leftArm: LeftArm
   post: Post
   txt: String
+}
+
+"""A builtin object identifier type for a relation name"""
+scalar RegClass
+
+"""A builtin object identifier type for a text search configuration"""
+scalar RegConfig
+
+"""A builtin object identifier type for a text search dictionary"""
+scalar RegDictionary
+
+"""A builtin object identifier type for an operator"""
+scalar RegOper
+
+"""A builtin object identifier type for an operator with argument types"""
+scalar RegOperator
+
+"""A builtin object identifier type for a function name"""
+scalar RegProc
+
+"""A builtin object identifier type for a function with argument types"""
+scalar RegProcedure
+
+"""A builtin object identifier type for a data type name"""
+scalar RegType
+
+"""The return type of our \`searchTestSummaries\` query."""
+type SearchTestSummariesRecord {
+  id: Int
+  totalDuration: Interval
 }
 
 """All input for the \`tableMutation\` mutation."""
@@ -7835,6 +7919,7 @@ type Type {
   enumArray: [Color]!
   id: Int!
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: Interval!
   intervalArray: [Interval]!
   json: JSON!
@@ -7849,8 +7934,17 @@ type Type {
   numeric: BigFloat!
   numrange: BigFloatRange!
   point: Point!
+  regclass: RegClass
+  regconfig: RegConfig
+  regdictionary: RegDictionary
+  regoper: RegOper
+  regoperator: RegOperator
+  regproc: RegProc
+  regprocedure: RegProcedure
+  regtype: RegType
   smallint: Int!
   textArray: [String]!
+  textArrayDomain: [String]
   time: Time!
   timestamp: Datetime!
   timestamptz: Datetime!

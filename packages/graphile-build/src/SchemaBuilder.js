@@ -71,6 +71,10 @@ export type Build = {|
     // eslint-disable-next-line flowtype/no-weak-types
     [string]: (...args: Array<any>) => string,
   },
+  wrapDescription: (
+    description: string,
+    position: "root" | "type" | "field" | "arg"
+  ) => string,
   swallowError: (e: Error) => void,
   // resolveNode: EXPERIMENTAL, API might change!
   resolveNode: resolveNode,
@@ -253,12 +257,12 @@ class SchemaBuilder extends EventEmitter {
       throw new Error(`Sorry, '${hookName}' is not a supported hook`);
     }
     if (this._currentPluginName) {
-      fn.displayName = `${this._currentPluginName}/${hookName}/${(provides &&
-        provides.length &&
-        provides.join("+")) ||
+      fn.displayName = `${this._currentPluginName}/${hookName}/${
+        (provides && provides.length && provides.join("+")) ||
         fn.displayName ||
         fn.name ||
-        "unnamed"}`;
+        "unnamed"
+      }`;
     }
     if (provides) {
       if (!fn.displayName && provides.length) {
@@ -416,9 +420,9 @@ class SchemaBuilder extends EventEmitter {
 
           if (!newObj) {
             throw new Error(
-              `Hook '${hook.displayName ||
-                hook.name ||
-                "anonymous"}' for '${hookName}' returned falsy value '${newObj}'`
+              `Hook '${
+                hook.displayName || hook.name || "anonymous"
+              }' for '${hookName}' returned falsy value '${newObj}'`
             );
           }
           debug(
@@ -535,20 +539,32 @@ class SchemaBuilder extends EventEmitter {
           console.error(e);
         }
       };
-      for (const fn of this.watchers) {
-        await fn(this.triggerChange);
+      try {
+        this._watching = true;
+        for (const fn of this.watchers) {
+          await fn(this.triggerChange);
+        }
+
+        // Now we're about to build the first schema, any further
+        // `triggerChange` calls should be honoured.
+        ignoreChangeTriggers = false;
+
+        if (listener) {
+          this.on("schema", listener);
+        }
+        this.emit("schema", this.buildSchema());
+      } catch (e) {
+        try {
+          this._busy = false;
+          // Abort abort!
+          await this.unwatchSchema();
+        } catch (e2) {
+          console.error(
+            `Error when unwatching schema after error during schema build: ${e}`
+          );
+        }
+        throw e;
       }
-
-      // Now we're about to build the first schema, any further `triggerChange`
-      // calls should be honoured.
-      ignoreChangeTriggers = false;
-
-      if (listener) {
-        this.on("schema", listener);
-      }
-      this.emit("schema", this.buildSchema());
-
-      this._watching = true;
     } finally {
       this._busy = false;
     }

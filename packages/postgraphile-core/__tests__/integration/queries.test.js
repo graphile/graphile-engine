@@ -25,7 +25,7 @@ let queryResults = [];
 const kitchenSinkData = () =>
   readFile(`${__dirname}/../kitchen-sink-data.sql`, "utf8");
 
-const pg10Data = () => readFile(`${__dirname}/../pg10-data.sql`, "utf8");
+const pg11Data = () => readFile(`${__dirname}/../pg11-data.sql`, "utf8");
 
 const dSchemaComments = () =>
   readFile(`${__dirname}/../kitchen-sink-d-schema-comments.sql`, "utf8");
@@ -57,8 +57,10 @@ beforeAll(() => {
       smartCommentRelations,
       largeBigint,
       useCustomNetworkScalars,
-      pg10UseCustomNetworkScalars,
+      pg11UseCustomNetworkScalars,
       namedQueryBuilder,
+      enumTables,
+      geometry,
     ] = await Promise.all([
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
@@ -114,8 +116,8 @@ beforeAll(() => {
           pgUseCustomNetworkScalars: true,
         },
       }),
-      serverVersionNum >= 100000
-        ? createPostGraphileSchema(pgClient, ["pg10"], {
+      serverVersionNum >= 110000
+        ? createPostGraphileSchema(pgClient, ["pg11"], {
             graphileBuildOptions: {
               pgUseCustomNetworkScalars: true,
             },
@@ -124,6 +126,15 @@ beforeAll(() => {
       createPostGraphileSchema(pgClient, ["named_query_builder"], {
         subscriptions: true,
         appendPlugins: [ToyCategoriesPlugin],
+      }),
+      createPostGraphileSchema(pgClient, ["enum_tables"], {
+        subscriptions: true,
+      }),
+      createPostGraphileSchema(pgClient, ["geometry"], {
+        subscriptions: true,
+        graphileBuildOptions: {
+          pgGeometricTypes: true,
+        },
       }),
     ]);
     // Now for RBAC-enabled tests
@@ -147,8 +158,10 @@ beforeAll(() => {
       smartCommentRelations,
       largeBigint,
       useCustomNetworkScalars,
-      pg10UseCustomNetworkScalars,
+      pg11UseCustomNetworkScalars,
       namedQueryBuilder,
+      enumTables,
+      geometry,
     };
   });
 
@@ -165,8 +178,8 @@ beforeAll(() => {
       // Add data to the client instance we are using.
       await pgClient.query(await kitchenSinkData());
       const serverVersionNum = await getServerVersionNum(pgClient);
-      if (serverVersionNum >= 100000) {
-        await pgClient.query(await pg10Data());
+      if (serverVersionNum >= 110000) {
+        await pgClient.query(await pg11Data());
       }
       // Run all of our queries in parallel.
       const results = [];
@@ -176,9 +189,9 @@ beforeAll(() => {
           continue;
         }
         const process = async fileName => {
-          if (fileName.startsWith("pg10.")) {
-            if (serverVersionNum < 100000) {
-              console.log("Skipping test as PG version is less than 10");
+          if (fileName.startsWith("pg11.")) {
+            if (serverVersionNum < 110000) {
+              console.log("Skipping test as PG version is less than 11");
               return;
             }
           }
@@ -206,8 +219,9 @@ beforeAll(() => {
             "types.graphql": gqlSchemas.simpleCollections,
             "orderByNullsLast.graphql": gqlSchemas.orderByNullsLast,
             "network_types.graphql": gqlSchemas.useCustomNetworkScalars,
-            "pg10.network_types.graphql":
-              gqlSchemas.pg10UseCustomNetworkScalars,
+            "pg11.network_types.graphql":
+              gqlSchemas.pg11UseCustomNetworkScalars,
+            "pg11.types.graphql": gqlSchemas.pg11UseCustomNetworkScalars,
           };
           let gqlSchema = schemas[fileName];
           if (!gqlSchema) {
@@ -221,6 +235,10 @@ beforeAll(() => {
               gqlSchema = gqlSchemas.largeBigint;
             } else if (fileName.startsWith("named_query_builder")) {
               gqlSchema = gqlSchemas.namedQueryBuilder;
+            } else if (fileName.startsWith("enum_tables.")) {
+              gqlSchema = gqlSchemas.enumTables;
+            } else if (fileName.startsWith("geometry.")) {
+              gqlSchema = gqlSchemas.geometry;
             } else {
               gqlSchema = gqlSchemas.normal;
             }

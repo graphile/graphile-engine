@@ -60,6 +60,159 @@ Object {
 }
 `;
 
+exports[`enum_tables.mutations.graphql 1`] = `
+Object {
+  "data": Object {
+    "createLetterDescription": Object {
+      "letterDescription": Object {
+        "description": "One does like to see the letter C",
+        "id": 105,
+        "letter": "C",
+      },
+    },
+    "deleteLetterDescriptionByLetter": Object {
+      "letterDescription": Object {
+        "id": 103,
+        "letter": "C",
+      },
+    },
+    "referencingTableMutation": Object {
+      "integer": 435,
+    },
+  },
+}
+`;
+
+exports[`enum_tables.mutations2.graphql 1`] = `
+Object {
+  "data": Object {
+    "createReferencingTable": Object {
+      "referencingTable": Object {
+        "enum1": "A3",
+        "enum2": "B4",
+        "enum3": null,
+        "id": 435,
+      },
+    },
+  },
+}
+`;
+
+exports[`geometry.mutations.graphql 1`] = `
+Object {
+  "data": Object {
+    "createGeom": Object {
+      "geom": Object {
+        "box": Object {
+          "a": Object {
+            "x": 2342,
+            "y": 52635,
+          },
+          "b": Object {
+            "x": 123,
+            "y": 12445,
+          },
+        },
+        "circle": Object {
+          "center": Object {
+            "x": 7,
+            "y": 11,
+          },
+          "radius": 3,
+        },
+        "closedPath": Object {
+          "isOpen": false,
+          "points": Array [
+            Object {
+              "x": 0,
+              "y": 0,
+            },
+            Object {
+              "x": 0,
+              "y": 10,
+            },
+            Object {
+              "x": 10,
+              "y": 10,
+            },
+            Object {
+              "x": 10,
+              "y": 0,
+            },
+          ],
+        },
+        "id": 102,
+        "line": Object {
+          "a": Object {
+            "x": -25,
+            "y": 0,
+          },
+          "b": Object {
+            "x": 0,
+            "y": 100,
+          },
+        },
+        "lseg": Object {
+          "a": Object {
+            "x": 99,
+            "y": 111,
+          },
+          "b": Object {
+            "x": 2935,
+            "y": 3548,
+          },
+        },
+        "openPath": Object {
+          "isOpen": true,
+          "points": Array [
+            Object {
+              "x": 0,
+              "y": 0,
+            },
+            Object {
+              "x": 0,
+              "y": 10,
+            },
+            Object {
+              "x": 10,
+              "y": 10,
+            },
+            Object {
+              "x": 10,
+              "y": 0,
+            },
+          ],
+        },
+        "point": Object {
+          "x": 99,
+          "y": 1234,
+        },
+        "polygon": Object {
+          "points": Array [
+            Object {
+              "x": 0,
+              "y": 0,
+            },
+            Object {
+              "x": 0,
+              "y": 10,
+            },
+            Object {
+              "x": 10,
+              "y": 10,
+            },
+            Object {
+              "x": 10,
+              "y": 0,
+            },
+          ],
+        },
+      },
+    },
+  },
+}
+`;
+
 exports[`inheritence.createUserFile.graphql 1`] = `
 Object {
   "data": Object {
@@ -102,6 +255,7 @@ Object {
         },
         "bigint": "467131188225",
         "boolean": false,
+        "cidr": "192.168.0.0/16",
         "compoundType": Object {
           "a": 123,
           "b": "abc",
@@ -131,6 +285,12 @@ Object {
           "GREEN",
         ],
         "id": 201,
+        "inet": null,
+        "int8ArrayDomain": Array [
+          "2098288669218571759",
+          "2098288669218571760",
+          "2098288669218571761",
+        ],
         "interval": Object {
           "days": 4,
           "hours": 3,
@@ -159,6 +319,7 @@ Object {
         ],
         "json": "{\\"x\\":1,\\"y\\":2,\\"z\\":3}",
         "jsonb": "{\\"a\\":1,\\"b\\":2,\\"c\\":3}",
+        "macaddr": "0c:af:ec:0f:fe:e0",
         "money": 1234567.89,
         "nestedCompoundType": Object {
           "a": Object {
@@ -206,6 +367,11 @@ Object {
           "water",
           "spout",
           "?",
+        ],
+        "textArrayDomain": Array [
+          "TEXT 2098288669218571759",
+          "TEXT 2098288669218571760",
+          "TEXT 2098288669218571761",
         ],
         "time": "19:13:18.625699",
         "timestamp": "2016-10-07T16:12:21.747269",
@@ -1177,7 +1343,7 @@ Object {
 }
 `;
 
-exports[`pg10.identity.graphql 1`] = `
+exports[`pg11.identity.graphql 1`] = `
 Object {
   "data": Object {
     "a": Object {
@@ -1202,7 +1368,7 @@ Object {
 }
 `;
 
-exports[`pg10.network_types.createNetwork.graphql 1`] = `
+exports[`pg11.network_types.createNetwork.graphql 1`] = `
 Object {
   "data": Object {
     "createNetwork": Object {
@@ -1213,6 +1379,37 @@ Object {
         "macaddr": "00:00:00:00:00:00",
         "macaddr8": "00:00:00:00:00:00:00:00",
         "nodeId": "WyJuZXR3b3JrcyIsOV0=",
+      },
+    },
+  },
+}
+`;
+
+exports[`pg11.types.graphql 1`] = `
+Object {
+  "data": Object {
+    "createType": Object {
+      "type": Object {
+        "bigintDomainArrayDomain": Array [
+          "2098288669218571759",
+          "2098288669218571760",
+          "2098288669218571761",
+        ],
+        "id": 15,
+        "regnamespace": "c",
+        "regrole": "postgraphile_test_visitor",
+      },
+    },
+    "updateTypeById": Object {
+      "type": Object {
+        "bigintDomainArrayDomain": Array [
+          "2098288669218571759",
+          "2098288669218571760",
+          "2098288669218571761",
+        ],
+        "id": 12,
+        "regnamespace": "pg11",
+        "regrole": "postgraphile_test_authenticator",
       },
     },
   },
@@ -1250,8 +1447,8 @@ Object {
           "fooBar": 8,
           "g": Object {
             "hours": 5,
-            "minutes": null,
-            "seconds": null,
+            "minutes": 0,
+            "seconds": 0,
           },
         },
         null,
@@ -1265,8 +1462,8 @@ Object {
           "fooBar": 8,
           "g": Object {
             "hours": 5,
-            "minutes": null,
-            "seconds": null,
+            "minutes": 0,
+            "seconds": 0,
           },
         },
       ],
@@ -1282,8 +1479,8 @@ Object {
         "fooBar": 8,
         "g": Object {
           "hours": 5,
-          "minutes": null,
-          "seconds": null,
+          "minutes": 0,
+          "seconds": 0,
         },
       },
     },
@@ -1299,8 +1496,8 @@ Object {
           "fooBar": 8,
           "g": Object {
             "hours": 5,
-            "minutes": null,
-            "seconds": null,
+            "minutes": 0,
+            "seconds": 0,
           },
         },
         Object {
@@ -1313,8 +1510,8 @@ Object {
           "fooBar": 8,
           "g": Object {
             "hours": 5,
-            "minutes": null,
-            "seconds": null,
+            "minutes": 0,
+            "seconds": 0,
           },
         },
       ],
@@ -1397,8 +1594,8 @@ Object {
           "fooBar": 8,
           "g": Object {
             "hours": 5,
-            "minutes": null,
-            "seconds": null,
+            "minutes": 0,
+            "seconds": 0,
           },
         },
         null,
@@ -1412,8 +1609,8 @@ Object {
           "fooBar": 8,
           "g": Object {
             "hours": 5,
-            "minutes": null,
-            "seconds": null,
+            "minutes": 0,
+            "seconds": 0,
           },
         },
       ],
@@ -1421,56 +1618,56 @@ Object {
     "mutationIntervalArray": Object {
       "intervals": Array [
         Object {
-          "days": null,
-          "hours": null,
-          "minutes": null,
-          "months": null,
+          "days": 0,
+          "hours": 0,
+          "minutes": 0,
+          "months": 0,
           "seconds": 12,
-          "years": null,
+          "years": 0,
         },
         Object {
-          "days": null,
+          "days": 0,
           "hours": 3,
-          "minutes": null,
-          "months": null,
-          "seconds": null,
-          "years": null,
+          "minutes": 0,
+          "months": 0,
+          "seconds": 0,
+          "years": 0,
         },
         Object {
-          "days": null,
+          "days": 0,
           "hours": 9,
           "minutes": 36,
-          "months": null,
+          "months": 0,
           "seconds": 7,
-          "years": null,
+          "years": 0,
         },
       ],
     },
     "mutationIntervalSet": Object {
       "intervals": Array [
         Object {
-          "days": null,
-          "hours": null,
-          "minutes": null,
-          "months": null,
+          "days": 0,
+          "hours": 0,
+          "minutes": 0,
+          "months": 0,
           "seconds": 12,
-          "years": null,
+          "years": 0,
         },
         Object {
-          "days": null,
+          "days": 0,
           "hours": 3,
-          "minutes": null,
-          "months": null,
-          "seconds": null,
-          "years": null,
+          "minutes": 0,
+          "months": 0,
+          "seconds": 0,
+          "years": 0,
         },
         Object {
-          "days": null,
+          "days": 0,
           "hours": 9,
           "minutes": 36,
-          "months": null,
+          "months": 0,
           "seconds": 7,
-          "years": null,
+          "years": 0,
         },
       ],
     },
@@ -1703,6 +1900,7 @@ Object {
         },
         "bigint": "1",
         "boolean": true,
+        "cidr": null,
         "compoundType": Object {
           "a": 1,
           "b": null,
@@ -1712,6 +1910,18 @@ Object {
           "f": null,
           "fooBar": null,
         },
+        "date": "2010-01-01",
+        "daterange": Object {
+          "end": Object {
+            "inclusive": false,
+            "value": "2020-01-02",
+          },
+          "start": Object {
+            "inclusive": true,
+            "value": "1985-01-01",
+          },
+        },
+        "decimal": "1",
         "domain": 1,
         "domain2": 1,
         "domainConstrainedCompoundType": Object {
@@ -1729,8 +1939,30 @@ Object {
           "GREEN",
           "BLUE",
         ],
+        "id": 1,
+        "inet": null,
+        "int8ArrayDomain": null,
+        "interval": Object {
+          "days": 0,
+          "hours": 0,
+          "minutes": 27,
+          "months": 0,
+          "seconds": 0,
+          "years": 0,
+        },
+        "intervalArray": Array [
+          Object {
+            "days": 0,
+            "hours": 0,
+            "minutes": 27,
+            "months": 0,
+            "seconds": 0,
+            "years": 0,
+          },
+        ],
         "json": "{\\"json\\":true}",
         "jsonb": "{\\"jsonb\\":true}",
+        "macaddr": null,
         "money": 27,
         "nestedCompoundType": Object {
           "a": Object {
@@ -1749,6 +1981,7 @@ Object {
         "nullableNestedCompoundType": null,
         "nullablePoint": null,
         "nullableRange": null,
+        "numeric": "1",
         "numrange": Object {
           "end": Object {
             "inclusive": true,
@@ -1763,10 +1996,32 @@ Object {
           "x": 99,
           "y": 77,
         },
+        "postById": Object {
+          "headline": "No… It’s a thing; it’s like a plan, but with more greatness.",
+          "id": 1,
+        },
+        "postBySmallint": Object {
+          "headline": "No… It’s a thing; it’s like a plan, but with more greatness.",
+          "id": 1,
+        },
+        "regclass": "c.person",
+        "regconfig": "dutch",
+        "regdictionary": "dutch_stem",
+        "regoper": "*<>",
+        "regoperator": "+(integer,integer)",
+        "regproc": "b.type_function",
+        "regprocedure": "b.type_function(integer)",
+        "regtype": "numeric",
         "smallint": 1,
         "textArray": Array [
           "Hi",
         ],
+        "textArrayDomain": null,
+        "time": "19:00:00",
+        "timestamp": "2012-01-11T00:00:00",
+        "timestamptz": "2012-01-01T00:00:00-04:00",
+        "timetz": "19:00:00-04",
+        "varchar": "1",
       },
     },
     "typeFunctionConnectionMutation": Object {
@@ -1784,6 +2039,7 @@ Object {
           },
           "bigint": "467131188225",
           "boolean": true,
+          "cidr": null,
           "compoundType": Object {
             "a": 1,
             "b": "2",
@@ -1793,6 +2049,18 @@ Object {
             "f": "_EMPTY_",
             "fooBar": 8,
           },
+          "date": "2016-10-07",
+          "daterange": Object {
+            "end": Object {
+              "inclusive": false,
+              "value": "2016-10-07",
+            },
+            "start": Object {
+              "inclusive": true,
+              "value": "1998-07-12",
+            },
+          },
+          "decimal": "15.2",
           "domain": 5,
           "domain2": 6,
           "domainConstrainedCompoundType": null,
@@ -1801,8 +2069,38 @@ Object {
             "GREEN",
             "RED",
           ],
+          "id": 11,
+          "inet": null,
+          "int8ArrayDomain": null,
+          "interval": Object {
+            "days": 3,
+            "hours": 4,
+            "minutes": 5,
+            "months": 2,
+            "seconds": 6.789123,
+            "years": 1,
+          },
+          "intervalArray": Array [
+            Object {
+              "days": 3,
+              "hours": 4,
+              "minutes": 5,
+              "months": 2,
+              "seconds": 6.789123,
+              "years": 1,
+            },
+            Object {
+              "days": 1,
+              "hours": 1,
+              "minutes": 1,
+              "months": 1,
+              "seconds": 1,
+              "years": 1,
+            },
+          ],
           "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
           "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+          "macaddr": null,
           "money": 9876543.21,
           "nestedCompoundType": Object {
             "a": Object {
@@ -1829,6 +2127,7 @@ Object {
           "nullableNestedCompoundType": null,
           "nullablePoint": null,
           "nullableRange": null,
+          "numeric": "15.2",
           "numrange": Object {
             "end": Object {
               "inclusive": false,
@@ -1843,6 +2142,22 @@ Object {
             "x": 1,
             "y": 3,
           },
+          "postById": Object {
+            "headline": "They’re not aliens, they’re Earth…liens!",
+            "id": 11,
+          },
+          "postBySmallint": Object {
+            "headline": "What’s with you kids? Every other day it’s food, food, food.",
+            "id": 10,
+          },
+          "regclass": null,
+          "regconfig": null,
+          "regdictionary": null,
+          "regoper": null,
+          "regoperator": null,
+          "regproc": null,
+          "regprocedure": null,
+          "regtype": null,
           "smallint": 10,
           "textArray": Array [
             "hey",
@@ -1851,6 +2166,12 @@ Object {
             "met",
             "you",
           ],
+          "textArrayDomain": null,
+          "time": "04:05:06",
+          "timestamp": "1999-01-08T04:05:06",
+          "timestamptz": "1999-01-08T08:05:06-04:00",
+          "timetz": "04:05:06-08",
+          "varchar": "xyz",
         },
         Object {
           "anIntRange": Object {
@@ -1865,6 +2186,7 @@ Object {
           },
           "bigint": "467131188225",
           "boolean": true,
+          "cidr": "192.168.0.0/24",
           "compoundType": Object {
             "a": null,
             "b": null,
@@ -1874,6 +2196,18 @@ Object {
             "f": null,
             "fooBar": null,
           },
+          "date": "2016-10-07",
+          "daterange": Object {
+            "end": Object {
+              "inclusive": false,
+              "value": "2016-10-07",
+            },
+            "start": Object {
+              "inclusive": true,
+              "value": "1998-07-12",
+            },
+          },
+          "decimal": "15.2",
           "domain": 5,
           "domain2": 6,
           "domainConstrainedCompoundType": null,
@@ -1882,8 +2216,58 @@ Object {
             "GREEN",
             "RED",
           ],
+          "id": 12,
+          "inet": "192.168.0.0",
+          "int8ArrayDomain": Array [
+            "1",
+            "2",
+            "2098288669218571760",
+          ],
+          "interval": Object {
+            "days": 3,
+            "hours": 4,
+            "minutes": 5,
+            "months": 2,
+            "seconds": 6.789123,
+            "years": 1,
+          },
+          "intervalArray": Array [
+            Object {
+              "days": 3,
+              "hours": 4,
+              "minutes": 5,
+              "months": 2,
+              "seconds": 6.789123,
+              "years": 1,
+            },
+            Object {
+              "days": 1,
+              "hours": 1,
+              "minutes": 1,
+              "months": 1,
+              "seconds": 1,
+              "years": 1,
+            },
+            Object {
+              "days": 0,
+              "hours": 0,
+              "minutes": 0,
+              "months": 0,
+              "seconds": 0,
+              "years": 200,
+            },
+            Object {
+              "days": 0,
+              "hours": 0,
+              "minutes": 3,
+              "months": 0,
+              "seconds": 20.2,
+              "years": 0,
+            },
+          ],
           "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
           "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+          "macaddr": "fe:ed:de:ad:be:ef",
           "money": 9876543.21,
           "nestedCompoundType": Object {
             "a": Object {
@@ -1910,6 +2294,7 @@ Object {
           "nullableNestedCompoundType": null,
           "nullablePoint": null,
           "nullableRange": null,
+          "numeric": "15.2",
           "numrange": Object {
             "end": Object {
               "inclusive": false,
@@ -1924,6 +2309,16 @@ Object {
             "x": 1,
             "y": 3,
           },
+          "postById": null,
+          "postBySmallint": null,
+          "regclass": "b.types",
+          "regconfig": "english",
+          "regdictionary": "simple",
+          "regoper": "!",
+          "regoperator": "*(integer,integer)",
+          "regproc": "b.guid_fn",
+          "regprocedure": "b.guid_fn(b.guid)",
+          "regtype": "integer",
           "smallint": 9999,
           "textArray": Array [
             "hey",
@@ -1932,6 +2327,16 @@ Object {
             "met",
             "you",
           ],
+          "textArrayDomain": Array [
+            "1 year",
+            "2 months",
+            "3 days",
+          ],
+          "time": "04:05:06",
+          "timestamp": "1999-01-08T04:05:06",
+          "timestamptz": "1999-01-08T08:05:06-04:00",
+          "timetz": "04:05:06-08",
+          "varchar": "xyz",
         },
       ],
     },
@@ -1950,6 +2355,7 @@ Object {
           },
           "bigint": "467131188225",
           "boolean": true,
+          "cidr": null,
           "compoundType": Object {
             "a": 1,
             "b": "2",
@@ -1959,6 +2365,18 @@ Object {
             "f": "_EMPTY_",
             "fooBar": 8,
           },
+          "date": "2016-10-07",
+          "daterange": Object {
+            "end": Object {
+              "inclusive": false,
+              "value": "2016-10-07",
+            },
+            "start": Object {
+              "inclusive": true,
+              "value": "1998-07-12",
+            },
+          },
+          "decimal": "15.2",
           "domain": 5,
           "domain2": 6,
           "domainConstrainedCompoundType": null,
@@ -1967,8 +2385,38 @@ Object {
             "GREEN",
             "RED",
           ],
+          "id": 11,
+          "inet": null,
+          "int8ArrayDomain": null,
+          "interval": Object {
+            "days": 3,
+            "hours": 4,
+            "minutes": 5,
+            "months": 2,
+            "seconds": 6.789123,
+            "years": 1,
+          },
+          "intervalArray": Array [
+            Object {
+              "days": 3,
+              "hours": 4,
+              "minutes": 5,
+              "months": 2,
+              "seconds": 6.789123,
+              "years": 1,
+            },
+            Object {
+              "days": 1,
+              "hours": 1,
+              "minutes": 1,
+              "months": 1,
+              "seconds": 1,
+              "years": 1,
+            },
+          ],
           "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
           "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+          "macaddr": null,
           "money": 9876543.21,
           "nestedCompoundType": Object {
             "a": Object {
@@ -1995,6 +2443,7 @@ Object {
           "nullableNestedCompoundType": null,
           "nullablePoint": null,
           "nullableRange": null,
+          "numeric": "15.2",
           "numrange": Object {
             "end": Object {
               "inclusive": false,
@@ -2009,6 +2458,22 @@ Object {
             "x": 1,
             "y": 3,
           },
+          "postById": Object {
+            "headline": "They’re not aliens, they’re Earth…liens!",
+            "id": 11,
+          },
+          "postBySmallint": Object {
+            "headline": "What’s with you kids? Every other day it’s food, food, food.",
+            "id": 10,
+          },
+          "regclass": null,
+          "regconfig": null,
+          "regdictionary": null,
+          "regoper": null,
+          "regoperator": null,
+          "regproc": null,
+          "regprocedure": null,
+          "regtype": null,
           "smallint": 10,
           "textArray": Array [
             "hey",
@@ -2017,6 +2482,12 @@ Object {
             "met",
             "you",
           ],
+          "textArrayDomain": null,
+          "time": "04:05:06",
+          "timestamp": "1999-01-08T04:05:06",
+          "timestamptz": "1999-01-08T08:05:06-04:00",
+          "timetz": "04:05:06-08",
+          "varchar": "xyz",
         },
         Object {
           "anIntRange": Object {
@@ -2031,6 +2502,7 @@ Object {
           },
           "bigint": "467131188225",
           "boolean": true,
+          "cidr": "192.168.0.0/24",
           "compoundType": Object {
             "a": null,
             "b": null,
@@ -2040,6 +2512,18 @@ Object {
             "f": null,
             "fooBar": null,
           },
+          "date": "2016-10-07",
+          "daterange": Object {
+            "end": Object {
+              "inclusive": false,
+              "value": "2016-10-07",
+            },
+            "start": Object {
+              "inclusive": true,
+              "value": "1998-07-12",
+            },
+          },
+          "decimal": "15.2",
           "domain": 5,
           "domain2": 6,
           "domainConstrainedCompoundType": null,
@@ -2048,8 +2532,58 @@ Object {
             "GREEN",
             "RED",
           ],
+          "id": 12,
+          "inet": "192.168.0.0",
+          "int8ArrayDomain": Array [
+            "1",
+            "2",
+            "2098288669218571760",
+          ],
+          "interval": Object {
+            "days": 3,
+            "hours": 4,
+            "minutes": 5,
+            "months": 2,
+            "seconds": 6.789123,
+            "years": 1,
+          },
+          "intervalArray": Array [
+            Object {
+              "days": 3,
+              "hours": 4,
+              "minutes": 5,
+              "months": 2,
+              "seconds": 6.789123,
+              "years": 1,
+            },
+            Object {
+              "days": 1,
+              "hours": 1,
+              "minutes": 1,
+              "months": 1,
+              "seconds": 1,
+              "years": 1,
+            },
+            Object {
+              "days": 0,
+              "hours": 0,
+              "minutes": 0,
+              "months": 0,
+              "seconds": 0,
+              "years": 200,
+            },
+            Object {
+              "days": 0,
+              "hours": 0,
+              "minutes": 3,
+              "months": 0,
+              "seconds": 20.2,
+              "years": 0,
+            },
+          ],
           "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
           "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+          "macaddr": "fe:ed:de:ad:be:ef",
           "money": 9876543.21,
           "nestedCompoundType": Object {
             "a": Object {
@@ -2076,6 +2610,7 @@ Object {
           "nullableNestedCompoundType": null,
           "nullablePoint": null,
           "nullableRange": null,
+          "numeric": "15.2",
           "numrange": Object {
             "end": Object {
               "inclusive": false,
@@ -2090,6 +2625,16 @@ Object {
             "x": 1,
             "y": 3,
           },
+          "postById": null,
+          "postBySmallint": null,
+          "regclass": "b.types",
+          "regconfig": "english",
+          "regdictionary": "simple",
+          "regoper": "!",
+          "regoperator": "*(integer,integer)",
+          "regproc": "b.guid_fn",
+          "regprocedure": "b.guid_fn(b.guid)",
+          "regtype": "integer",
           "smallint": 9999,
           "textArray": Array [
             "hey",
@@ -2098,6 +2643,16 @@ Object {
             "met",
             "you",
           ],
+          "textArrayDomain": Array [
+            "1 year",
+            "2 months",
+            "3 days",
+          ],
+          "time": "04:05:06",
+          "timestamp": "1999-01-08T04:05:06",
+          "timestamptz": "1999-01-08T08:05:06-04:00",
+          "timetz": "04:05:06-08",
+          "varchar": "xyz",
         },
       ],
     },
@@ -2115,6 +2670,7 @@ Object {
         },
         "bigint": "467131188225",
         "boolean": true,
+        "cidr": null,
         "compoundType": Object {
           "a": 1,
           "b": "2",
@@ -2124,6 +2680,18 @@ Object {
           "f": "_EMPTY_",
           "fooBar": 8,
         },
+        "date": "2016-10-07",
+        "daterange": Object {
+          "end": Object {
+            "inclusive": false,
+            "value": "2016-10-07",
+          },
+          "start": Object {
+            "inclusive": true,
+            "value": "1998-07-12",
+          },
+        },
+        "decimal": "15.2",
         "domain": 5,
         "domain2": 6,
         "domainConstrainedCompoundType": null,
@@ -2132,8 +2700,38 @@ Object {
           "GREEN",
           "RED",
         ],
+        "id": 11,
+        "inet": null,
+        "int8ArrayDomain": null,
+        "interval": Object {
+          "days": 3,
+          "hours": 4,
+          "minutes": 5,
+          "months": 2,
+          "seconds": 6.789123,
+          "years": 1,
+        },
+        "intervalArray": Array [
+          Object {
+            "days": 3,
+            "hours": 4,
+            "minutes": 5,
+            "months": 2,
+            "seconds": 6.789123,
+            "years": 1,
+          },
+          Object {
+            "days": 1,
+            "hours": 1,
+            "minutes": 1,
+            "months": 1,
+            "seconds": 1,
+            "years": 1,
+          },
+        ],
         "json": "{\\"a\\":1,\\"b\\":2,\\"c\\":3,\\"d\\":{\\"e\\":4,\\"f\\":5,\\"g\\":[6,7,8,\\"x\\",false,null]}}",
         "jsonb": "{\\"1\\":\\"a\\",\\"2\\":\\"b\\",\\"3\\":\\"c\\",\\"4\\":{\\"5\\":\\"d\\",\\"6\\":\\"e\\",\\"7\\":[\\"f\\",\\"g\\",\\"h\\",42,true,null]}}",
+        "macaddr": null,
         "money": 9876543.21,
         "nestedCompoundType": Object {
           "a": Object {
@@ -2160,6 +2758,7 @@ Object {
         "nullableNestedCompoundType": null,
         "nullablePoint": null,
         "nullableRange": null,
+        "numeric": "15.2",
         "numrange": Object {
           "end": Object {
             "inclusive": false,
@@ -2174,6 +2773,22 @@ Object {
           "x": 1,
           "y": 3,
         },
+        "postById": Object {
+          "headline": "They’re not aliens, they’re Earth…liens!",
+          "id": 11,
+        },
+        "postBySmallint": Object {
+          "headline": "What’s with you kids? Every other day it’s food, food, food.",
+          "id": 10,
+        },
+        "regclass": null,
+        "regconfig": null,
+        "regdictionary": null,
+        "regoper": null,
+        "regoperator": null,
+        "regproc": null,
+        "regprocedure": null,
+        "regtype": null,
         "smallint": 10,
         "textArray": Array [
           "hey",
@@ -2182,6 +2797,12 @@ Object {
           "met",
           "you",
         ],
+        "textArrayDomain": null,
+        "time": "04:05:06",
+        "timestamp": "1999-01-08T04:05:06",
+        "timestamptz": "1999-01-08T08:05:06-04:00",
+        "timetz": "04:05:06-08",
+        "varchar": "xyz",
       },
     },
     "updateTypeById": Object {
@@ -2198,6 +2819,7 @@ Object {
         },
         "bigint": "1",
         "boolean": true,
+        "cidr": "192.168.0.0/16",
         "compoundType": Object {
           "a": 1,
           "b": null,
@@ -2207,6 +2829,18 @@ Object {
           "f": null,
           "fooBar": null,
         },
+        "date": "2010-01-01",
+        "daterange": Object {
+          "end": Object {
+            "inclusive": false,
+            "value": "2020-01-02",
+          },
+          "start": Object {
+            "inclusive": true,
+            "value": "1985-01-01",
+          },
+        },
+        "decimal": "1",
         "domain": 1,
         "domain2": 1,
         "domainConstrainedCompoundType": Object {
@@ -2224,8 +2858,34 @@ Object {
           "GREEN",
           "BLUE",
         ],
+        "id": 11,
+        "inet": "192.168.0.0",
+        "int8ArrayDomain": Array [
+          "2098288669218571759",
+          "2098288669218571760",
+          "2098288669218571761",
+        ],
+        "interval": Object {
+          "days": 0,
+          "hours": 0,
+          "minutes": 27,
+          "months": 0,
+          "seconds": 0,
+          "years": 0,
+        },
+        "intervalArray": Array [
+          Object {
+            "days": 0,
+            "hours": 0,
+            "minutes": 27,
+            "months": 0,
+            "seconds": 0,
+            "years": 0,
+          },
+        ],
         "json": "{\\"json\\":true}",
         "jsonb": "{\\"jsonb\\":true}",
+        "macaddr": "08:00:2b:01:02:03",
         "money": 27,
         "nestedCompoundType": Object {
           "a": Object {
@@ -2242,8 +2902,12 @@ Object {
         },
         "nullableCompoundType": null,
         "nullableNestedCompoundType": null,
-        "nullablePoint": null,
+        "nullablePoint": Object {
+          "x": 0,
+          "y": 42,
+        },
         "nullableRange": null,
+        "numeric": "1",
         "numrange": Object {
           "end": Object {
             "inclusive": true,
@@ -2258,10 +2922,36 @@ Object {
           "x": 99,
           "y": 77,
         },
+        "postById": Object {
+          "headline": "They’re not aliens, they’re Earth…liens!",
+          "id": 11,
+        },
+        "postBySmallint": Object {
+          "headline": "No… It’s a thing; it’s like a plan, but with more greatness.",
+          "id": 1,
+        },
+        "regclass": "c.person",
+        "regconfig": "dutch",
+        "regdictionary": "dutch_stem",
+        "regoper": "*<>",
+        "regoperator": "+(integer,integer)",
+        "regproc": "b.type_function",
+        "regprocedure": "b.type_function(integer)",
+        "regtype": "numeric",
         "smallint": 1,
         "textArray": Array [
           "Hi",
         ],
+        "textArrayDomain": Array [
+          "T1",
+          "T2",
+          "T3",
+        ],
+        "time": "19:00:00",
+        "timestamp": "2012-01-11T00:00:00",
+        "timestamptz": "2012-01-01T00:00:00-04:00",
+        "timetz": "19:00:00-04",
+        "varchar": "1",
       },
     },
   },

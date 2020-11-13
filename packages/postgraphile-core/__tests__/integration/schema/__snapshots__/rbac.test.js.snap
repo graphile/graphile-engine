@@ -8587,7 +8587,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): PeopleConnection! @deprecated(reason: "This is deprecated (comment on function c.badly_behaved_function).")
+  ): PeopleConnection @deprecated(reason: "This is deprecated (comment on function c.badly_behaved_function).")
 
   """Reads a single \`CompoundKey\` using its globally unique \`ID\`."""
   compoundKey(
@@ -8619,7 +8619,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): CompoundTypesConnection!
+  ): CompoundTypesConnection
   currentUserId: Int
 
   """Reads a single \`DefaultValue\` using its globally unique \`ID\`."""
@@ -8655,7 +8655,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): FuncOutComplexSetofConnection!
+  ): FuncOutComplexSetofConnection
   funcOutOut: FuncOutOutRecord
   funcOutOutCompoundType(i1: Int): FuncOutOutCompoundTypeRecord
   funcOutOutSetof(
@@ -8676,7 +8676,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): FuncOutOutSetofConnection!
+  ): FuncOutOutSetofConnection
   funcOutOutUnnamed: FuncOutOutUnnamedRecord
   funcOutSetof(
     """Read all values in the set after (below) this cursor."""
@@ -8696,7 +8696,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): FuncOutSetofConnection!
+  ): FuncOutSetofConnection
   funcOutTable: Person
 
   """Reads and enables pagination through a set of \`Person\`."""
@@ -8718,7 +8718,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): PeopleConnection!
+  ): PeopleConnection
   funcOutUnnamed: Int
   funcOutUnnamedOutOutUnnamed: FuncOutUnnamedOutOutUnnamedRecord
   funcReturnsTableMultiCol(
@@ -8740,7 +8740,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): FuncReturnsTableMultiColConnection!
+  ): FuncReturnsTableMultiColConnection
   funcReturnsTableOneCol(
     """Read all values in the set after (below) this cursor."""
     after: Cursor
@@ -8760,7 +8760,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): FuncReturnsTableOneColConnection!
+  ): FuncReturnsTableOneColConnection
 
   """Reads a single \`Input\` using its globally unique \`ID\`."""
   input(
@@ -8789,7 +8789,7 @@ type Query implements Node {
     x: Int
     y: Int
     z: Int
-  ): IntSetQueryConnection!
+  ): IntSetQueryConnection
 
   """Reads a single \`Issue756\` using its globally unique \`ID\`."""
   issue756(
@@ -8898,7 +8898,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): QueryIntervalSetConnection!
+  ): QueryIntervalSetConnection
   queryOutputTwoRows(leftArmId: Int, postId: Int, txt: String): QueryOutputTwoRowsRecord
   queryTextArray: [String]
 
@@ -8927,6 +8927,13 @@ type Query implements Node {
   ): ReservedPatchRecord
   reservedPatchRecordById(id: Int!): ReservedPatchRecord
   returnTableWithoutGrants: CompoundKey
+  searchTestSummariesList(
+    """Only read the first \`n\` values of the set."""
+    first: Int
+
+    """Skip the first \`n\` values."""
+    offset: Int
+  ): [SearchTestSummariesRecord]
 
   """Reads a single \`SimilarTable1\` using its globally unique \`ID\`."""
   similarTable1(
@@ -8963,7 +8970,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): StaticBigIntegerConnection!
+  ): StaticBigIntegerConnection
   tableQuery(id: Int): Post
 
   """Reads and enables pagination through a set of \`Person\`."""
@@ -8993,7 +9000,7 @@ type Query implements Node {
 
     """The method to use when ordering \`Person\`."""
     orderBy: [PeopleOrderBy!]
-  ): PeopleConnection!
+  ): PeopleConnection
 
   """Reads and enables pagination through a set of \`Person\`."""
   tableSetQueryPlpgsql(
@@ -9014,7 +9021,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): PeopleConnection!
+  ): PeopleConnection
 
   """Reads a single \`Type\` using its globally unique \`ID\`."""
   type(
@@ -9043,7 +9050,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): TypesConnection!
+  ): TypesConnection
   typeFunctionList: [Type]
   typesQuery(a: BigInt!, b: Boolean!, c: String!, d: [Int]!, e: JSON!, f: FloatRangeInput!): Boolean
   uniqueForeignKeyByCompoundKey1AndCompoundKey2(compoundKey1: Int!, compoundKey2: Int!): UniqueForeignKey
@@ -9085,6 +9092,30 @@ type QueryOutputTwoRowsRecord {
   post: Post
   txt: String
 }
+
+"""A builtin object identifier type for a relation name"""
+scalar RegClass
+
+"""A builtin object identifier type for a text search configuration"""
+scalar RegConfig
+
+"""A builtin object identifier type for a text search dictionary"""
+scalar RegDictionary
+
+"""A builtin object identifier type for an operator"""
+scalar RegOper
+
+"""A builtin object identifier type for an operator with argument types"""
+scalar RegOperator
+
+"""A builtin object identifier type for a function name"""
+scalar RegProc
+
+"""A builtin object identifier type for a function with argument types"""
+scalar RegProcedure
+
+"""A builtin object identifier type for a data type name"""
+scalar RegType
 
 type Reserved implements Node {
   id: Int!
@@ -9312,6 +9343,12 @@ type ReturnVoidMutationPayload {
   Our root query field type. Allows us to run any query from our mutation payload.
   """
   query: Query
+}
+
+"""The return type of our \`searchTestSummaries\` query."""
+type SearchTestSummariesRecord {
+  id: Int
+  totalDuration: Interval
 }
 
 type SimilarTable1 implements Node {
@@ -9659,6 +9696,7 @@ type Type implements Node {
   enumArray: [Color]!
   id: Int!
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: Interval!
   intervalArray: [Interval]!
   json: JSON!
@@ -9684,8 +9722,17 @@ type Type implements Node {
 
   """Reads a single \`Post\` that is related to this \`Type\`."""
   postBySmallint: Post
+  regclass: RegClass
+  regconfig: RegConfig
+  regdictionary: RegDictionary
+  regoper: RegOper
+  regoperator: RegOperator
+  regproc: RegProc
+  regprocedure: RegProcedure
+  regtype: RegType
   smallint: Int!
   textArray: [String]!
+  textArrayDomain: [String]
   time: Time!
   timestamp: Datetime!
   timestamptz: Datetime!
@@ -9744,6 +9791,9 @@ input TypeCondition {
   """Checks for equality with the object’s \`inet\` field."""
   inet: InternetAddress
 
+  """Checks for equality with the object’s \`int8ArrayDomain\` field."""
+  int8ArrayDomain: [BigInt]
+
   """Checks for equality with the object’s \`interval\` field."""
   interval: IntervalInput
 
@@ -9788,11 +9838,38 @@ input TypeCondition {
   """Checks for equality with the object’s \`point\` field."""
   point: PointInput
 
+  """Checks for equality with the object’s \`regclass\` field."""
+  regclass: RegClass
+
+  """Checks for equality with the object’s \`regconfig\` field."""
+  regconfig: RegConfig
+
+  """Checks for equality with the object’s \`regdictionary\` field."""
+  regdictionary: RegDictionary
+
+  """Checks for equality with the object’s \`regoper\` field."""
+  regoper: RegOper
+
+  """Checks for equality with the object’s \`regoperator\` field."""
+  regoperator: RegOperator
+
+  """Checks for equality with the object’s \`regproc\` field."""
+  regproc: RegProc
+
+  """Checks for equality with the object’s \`regprocedure\` field."""
+  regprocedure: RegProcedure
+
+  """Checks for equality with the object’s \`regtype\` field."""
+  regtype: RegType
+
   """Checks for equality with the object’s \`smallint\` field."""
   smallint: Int
 
   """Checks for equality with the object’s \`textArray\` field."""
   textArray: [String]
+
+  """Checks for equality with the object’s \`textArrayDomain\` field."""
+  textArrayDomain: [String]
 
   """Checks for equality with the object’s \`time\` field."""
   time: Time
@@ -9912,6 +9989,7 @@ input TypeInput {
   enumArray: [Color]!
   id: Int
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: IntervalInput!
   intervalArray: [IntervalInput]!
   json: JSON!
@@ -9926,8 +10004,17 @@ input TypeInput {
   numeric: BigFloat!
   numrange: BigFloatRangeInput!
   point: PointInput!
+  regclass: RegClass
+  regconfig: RegConfig
+  regdictionary: RegDictionary
+  regoper: RegOper
+  regoperator: RegOperator
+  regproc: RegProc
+  regprocedure: RegProcedure
+  regtype: RegType
   smallint: Int!
   textArray: [String]!
+  textArrayDomain: [String]
   time: Time!
   timestamp: Datetime!
   timestamptz: Datetime!
@@ -9952,6 +10039,7 @@ input TypePatch {
   enumArray: [Color]
   id: Int
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: IntervalInput
   intervalArray: [IntervalInput]
   json: JSON
@@ -9966,8 +10054,17 @@ input TypePatch {
   numeric: BigFloat
   numrange: BigFloatRangeInput
   point: PointInput
+  regclass: RegClass
+  regconfig: RegConfig
+  regdictionary: RegDictionary
+  regoper: RegOper
+  regoperator: RegOperator
+  regproc: RegProc
+  regprocedure: RegProcedure
+  regtype: RegType
   smallint: Int
   textArray: [String]
+  textArrayDomain: [String]
   time: Time
   timestamp: Datetime
   timestamptz: Datetime
@@ -10065,6 +10162,8 @@ enum TypesOrderBy {
   ID_DESC
   INET_ASC
   INET_DESC
+  INT8_ARRAY_DOMAIN_ASC
+  INT8_ARRAY_DOMAIN_DESC
   INTERVAL_ARRAY_ASC
   INTERVAL_ARRAY_DESC
   INTERVAL_ASC
@@ -10096,10 +10195,28 @@ enum TypesOrderBy {
   POINT_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  REGCLASS_ASC
+  REGCLASS_DESC
+  REGCONFIG_ASC
+  REGCONFIG_DESC
+  REGDICTIONARY_ASC
+  REGDICTIONARY_DESC
+  REGOPER_ASC
+  REGOPER_DESC
+  REGOPERATOR_ASC
+  REGOPERATOR_DESC
+  REGPROC_ASC
+  REGPROC_DESC
+  REGPROCEDURE_ASC
+  REGPROCEDURE_DESC
+  REGTYPE_ASC
+  REGTYPE_DESC
   SMALLINT_ASC
   SMALLINT_DESC
   TEXT_ARRAY_ASC
   TEXT_ARRAY_DESC
+  TEXT_ARRAY_DOMAIN_ASC
+  TEXT_ARRAY_DOMAIN_DESC
   TIME_ASC
   TIME_DESC
   TIMESTAMP_ASC

@@ -3,13 +3,18 @@ import {
   makePluginHook,
   PostGraphileOptions,
 } from "postgraphile";
-import {
-  introspectionQuery as INTROSPECTION_QUERY,
-  buildClientSchema,
-} from "graphql";
+import * as graphql from "graphql";
 import { Pool, PoolClient } from "pg";
 import PgPubsub from "../src";
 import { runQuery, TestCtx } from "./runQuery";
+
+// Support new and old GraphQL.js
+const INTROSPECTION_QUERY: string =
+  typeof graphql.getIntrospectionQuery === "function"
+    ? graphql.getIntrospectionQuery()
+    : (graphql as any).introspectionQuery;
+
+const { buildClientSchema, lexicographicSortSchema } = graphql;
 
 let ctx: TestCtx | null = null;
 const CLI_DEFAULTS = {};
@@ -76,7 +81,7 @@ describe("Middleware defaults", () => {
         expect(res.statusCode).toEqual(200);
         expect(json.errors).toBeFalsy();
         const schema = buildClientSchema(json.data);
-        expect(schema).toMatchSnapshot();
+        expect(lexicographicSortSchema(schema)).toMatchSnapshot();
       }
     );
   });
@@ -100,7 +105,7 @@ describe("Subscriptions", () => {
       async (json, _req, res) => {
         expect(res.statusCode).toEqual(200);
         const schema = buildClientSchema(json.data);
-        expect(schema).toMatchSnapshot();
+        expect(lexicographicSortSchema(schema)).toMatchSnapshot();
       }
     );
   });

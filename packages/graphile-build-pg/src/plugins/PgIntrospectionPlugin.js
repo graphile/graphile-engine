@@ -11,6 +11,7 @@ import chalk from "chalk";
 import throttle from "lodash/throttle";
 import flatMap from "lodash/flatMap";
 import { makeIntrospectionQuery } from "./introspectionQuery";
+import * as pgSql from "pg-sql2";
 
 import { version } from "../../package.json";
 import queryFromResolveDataFactory from "../queryFromResolveDataFactory";
@@ -103,7 +104,12 @@ export type PgType = {
   domainBaseTypeId: ?string,
   domainBaseType: ?PgType,
   domainTypeModifier: ?number,
+  domainHasDefault: boolean,
+  enumVariants: ?(string[]),
+  enumDescriptions: ?(string[]),
+  rangeSubTypeId: ?string,
   tags: { [string]: string },
+  isFake: ?boolean,
 };
 
 export type PgAttribute = {
@@ -296,7 +302,7 @@ function smartCommentConstraints(introspectionResults) {
     });
   };
 
-  // First: primary keys
+  // First: primary and unique keys
   introspectionResults.class.forEach(klass => {
     const namespace = introspectionResults.namespace.find(
       n => n.id === klass.namespaceId
@@ -304,24 +310,30 @@ function smartCommentConstraints(introspectionResults) {
     if (!namespace) {
       return;
     }
-    if (klass.tags.primaryKey) {
-      if (typeof klass.tags.primaryKey !== "string") {
+    function addKey(key: string, isPrimary = false) {
+      const tag = isPrimary ? "@primaryKey" : "@unique";
+      if (typeof key !== "string") {
+        if (isPrimary) {
+          throw new Error(
+            `${tag} configuration of '${klass.namespaceName}.${klass.name}' is invalid; please specify just once "${tag} col1,col2"`
+          );
+        }
         throw new Error(
-          `@primaryKey configuration of '${klass.namespaceName}.${klass.name}' is invalid; please specify just once "@primaryKey col1,col2"`
+          `${tag} configuration of '${klass.namespaceName}.${
+            klass.name
+          }' is invalid; expected ${
+            isPrimary ? "a string" : "a string or string array"
+          } but found ${typeof key}`
         );
       }
-      const { spec: pkSpec, tags, description } = parseConstraintSpec(
-        klass.tags.primaryKey
-      );
-      const columns: string[] = parseSqlColumnArray(pkSpec);
-      const attributes = attributesByNames(
-        klass,
-        columns,
-        `@primaryKey ${klass.tags.primaryKey}`
-      );
-      attributes.forEach(attr => {
-        attr.tags.notNull = true;
-      });
+      const { spec: keySpec, tags, description } = parseConstraintSpec(key);
+      const columns: string[] = parseSqlColumnArray(keySpec);
+      const attributes = attributesByNames(klass, columns, `${tag} ${key}`);
+      if (isPrimary) {
+        attributes.forEach(attr => {
+          attr.tags.notNull = true;
+        });
+      }
       const keyAttributeNums = attributes.map(a => a.num);
       // Now we need to fake a constraint for this:
       const fakeConstraint = {
@@ -329,8 +341,8 @@ function smartCommentConstraints(introspectionResults) {
         isFake: true,
         isIndexed: true, // otherwise it gets ignored by ignoreIndexes
         id: Math.random(),
-        name: `FAKE_${klass.namespaceName}_${klass.name}_primaryKey`,
-        type: "p", // primary key
+        name: `FAKE_${klass.namespaceName}_${klass.name}_${tag}`,
+        type: isPrimary ? "p" : "u",
         classId: klass.id,
         foreignClassId: null,
         comment: null,
@@ -340,6 +352,16 @@ function smartCommentConstraints(introspectionResults) {
         tags,
       };
       introspectionResults.constraint.push(fakeConstraint);
+    }
+    if (klass.tags.primaryKey) {
+      addKey(klass.tags.primaryKey, true);
+    }
+    if (klass.tags.unique) {
+      if (Array.isArray(klass.tags.unique)) {
+        klass.tags.unique.forEach(key => addKey(key));
+      } else {
+        addKey(klass.tags.unique);
+      }
     }
   });
   // Now primary keys are in place, we can apply foreign keys
@@ -548,6 +570,228 @@ export default (async function PgIntrospectionPlugin(
             klass.isExtensionConfigurationTable =
               extensionConfigurationClassIds.indexOf(klass.id) >= 0;
           });
+
+          await Promise.all(
+            result.class.map(async klass => {
+              const isEnumTable =
+                klass.tags.enum === true || typeof klass.tags.enum === "string";
+
+              if (isEnumTable) {
+                // Prevent the table being recognised as a table
+                // eslint-disable-next-line require-atomic-updates
+                klass.tags.omit = true;
+                // eslint-disable-next-line require-atomic-updates
+                klass.isSelectable = false;
+                // eslint-disable-next-line require-atomic-updates
+                klass.isInsertable = false;
+                // eslint-disable-next-line require-atomic-updates
+                klass.isUpdatable = false;
+                // eslint-disable-next-line require-atomic-updates
+                klass.isDeletable = false;
+              }
+
+              const enumConstraints = result.constraint.filter(
+                (con: PgConstraint) => {
+                  if (con.classId === klass.id) {
+                    const isPrimaryKey = con.type === "p";
+                    const isUniqueConstraint = con.type === "u";
+                    if (isPrimaryKey || isUniqueConstraint) {
+                      const isExplicitEnumConstraint =
+                        con.tags.enum === true ||
+                        typeof con.tags.enum === "string";
+                      const isPrimaryKeyOfEnumTableConstraint =
+                        con.type === "p" && isEnumTable;
+                      if (
+                        isExplicitEnumConstraint ||
+                        isPrimaryKeyOfEnumTableConstraint
+                      ) {
+                        const hasExactlyOneColumn =
+                          con.keyAttributeNums.length === 1;
+                        if (!hasExactlyOneColumn) {
+                          throw new Error(
+                            `Enum table "${klass.namespaceName}"."${klass.name}" enum constraint '${con.name}' is composite; it should have exactly one column (found: ${con.keyAttributeNums.length})`
+                          );
+                        }
+                        return true;
+                      }
+                    }
+                  }
+                  return false;
+                }
+              );
+              if (enumConstraints.length > 0) {
+                // Get all the columns
+                const enumTableColumns = result.attribute
+                  .filter(attr => attr.classId === klass.id)
+                  .sort((a, z) => a.num - z.num);
+
+                // Get description column
+                const descriptionColumn = enumTableColumns.find(
+                  attr =>
+                    attr.name === "description" || attr.tags.enumDescription
+                );
+
+                // Assert the columns are text
+                const VARCHAR_ID = "1043";
+                const TEXT_ID = "25";
+                const CHAR_ID = "18";
+                const BPCHAR_ID = "1042";
+
+                // Get the list of columns enums are defined for
+                const enumColumns = enumConstraints.map(con => {
+                  const attr = enumTableColumns.find(
+                    attr => attr.num === con.keyAttributeNums[0]
+                  );
+                  if (!attr) {
+                    throw new Error(
+                      `Enum table "${klass.namespaceName}"."${klass.name}" enum column '${con.keyAttributeNums[0]}' couldn't be found`
+                    );
+                  }
+                  if (
+                    attr.typeId !== VARCHAR_ID &&
+                    attr.typeId !== TEXT_ID &&
+                    attr.typeId !== CHAR_ID &&
+                    attr.typeId !== BPCHAR_ID
+                  ) {
+                    throw new Error(
+                      `Enum table "${klass.namespaceName}"."${klass.name}" enum column '${attr.name}' must be 'text', 'char' or 'varchar' (actual type OID: ${attr.typeId})`
+                    );
+                  }
+                  return attr;
+                });
+
+                // Load data from the table.
+                const query = pgSql.compile(
+                  pgSql.fragment`select ${pgSql.join(
+                    enumColumns.map(col => pgSql.identifier(col.name)),
+                    ", "
+                  )}${
+                    descriptionColumn
+                      ? pgSql.fragment`, ${pgSql.identifier(
+                          descriptionColumn.name
+                        )}`
+                      : pgSql.blank
+                  } from ${pgSql.identifier(klass.namespaceName, klass.name)};`
+                );
+                let allData;
+                try {
+                  ({ rows: allData } = await pgClient.query(query));
+                } catch (e) {
+                  let role = "RELEVANT_POSTGRES_USER";
+                  try {
+                    const {
+                      rows: [{ user }],
+                    } = await pgClient.query("select user;");
+                    role = user;
+                  } catch (e) {
+                    /* ignore */
+                  }
+                  throw new Error(`Introspection could not read from enum table "${klass.namespaceName}"."${klass.name}", perhaps you need to grant access:
+
+  GRANT USAGE ON SCHEMA "${klass.namespaceName}" TO "${role}";
+  GRANT SELECT ON "${klass.namespaceName}"."${klass.name}" TO "${role}";
+
+Original error: ${e.message}
+`);
+                }
+
+                // Assert there's at least one value
+                enumConstraints.forEach(constraint => {
+                  const col = enumColumns.find(
+                    col => col.num === constraint.keyAttributeNums[0]
+                  );
+                  if (!col) {
+                    // Should never happen
+                    throw new Error(
+                      "Graphile Engine error - could not find column for enum constraint"
+                    );
+                  }
+                  const data = allData.filter(row => row[col.name] != null);
+                  if (data.length < 1) {
+                    throw new Error(
+                      `Enum table "${klass.namespaceName}"."${klass.name}" contains no entries for enum constraint '${constraint.name}'.`
+                    );
+                  }
+
+                  // Create fake enum type
+                  const constraintIdent =
+                    constraint.type === "p" ? "" : `_${constraint.name}`;
+                  const enumTypeArray = {
+                    kind: "type",
+                    isFake: true,
+                    id: `FAKE_ENUM_${klass.namespaceName}_${klass.name}${constraintIdent}_list`,
+                    name: `_${klass.name}${constraintIdent}`,
+                    description: null,
+                    tags: {},
+                    namespaceId: klass.namespaceId,
+                    namespaceName: klass.namespaceName,
+                    type: "b",
+                    category: "A",
+                    domainIsNotNull: null,
+                    arrayItemTypeId: null,
+                    typeLength: -1,
+                    isPgArray: true,
+                    classId: null,
+                    domainBaseTypeId: null,
+                    domainTypeModifier: null,
+                    domainHasDefault: false,
+                    enumVariants: null,
+                    enumDescriptions: null,
+                    rangeSubTypeId: null,
+                  };
+                  const enumType = {
+                    kind: "type",
+                    isFake: true,
+                    id: `FAKE_ENUM_${klass.namespaceName}_${klass.name}${constraintIdent}`,
+                    name: `${klass.name}${constraintIdent}`,
+                    description: klass.description,
+                    tags: { ...klass.tags, ...constraint.tags },
+                    namespaceId: klass.namespaceId,
+                    namespaceName: klass.namespaceName,
+                    type: "e",
+                    category: "E",
+                    domainIsNotNull: null,
+                    arrayItemTypeId: enumTypeArray.id,
+                    typeLength: 4, // ???
+                    isPgArray: false,
+                    classId: null,
+                    domainBaseTypeId: null,
+                    domainTypeModifier: null,
+                    domainHasDefault: false,
+                    enumVariants: data.map(r => r[col.name]),
+                    enumDescriptions: descriptionColumn
+                      ? data.map(r => r[descriptionColumn.name])
+                      : null,
+                    // TODO: enumDescriptions
+                    rangeSubTypeId: null,
+                  };
+                  result.type.push(enumType, enumTypeArray);
+
+                  // Change type of all attributes that reference this table to
+                  // reference this enum type
+                  result.constraint.forEach(c => {
+                    if (
+                      c.type === "f" &&
+                      c.foreignClassId === klass.id &&
+                      c.foreignKeyAttributeNums.length === 1 &&
+                      c.foreignKeyAttributeNums[0] === col.num
+                    ) {
+                      // Get the attribute
+                      const fkattr = result.attribute.find(
+                        attr =>
+                          attr.classId === c.classId &&
+                          attr.num === c.keyAttributeNums[0]
+                      );
+                      if (fkattr) {
+                        // Override the detected type to pretend to be our enum
+                        fkattr.typeId = enumType.id;
+                      }
+                    }
+                  });
+                });
+              }
+            })
+          );
 
           [
             "namespace",

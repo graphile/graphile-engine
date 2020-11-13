@@ -1021,9 +1021,33 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): TypesConnection!
+  ): TypesConnection
   typeFunctionList: [Type]
 }
+
+"""A builtin object identifier type for a relation name"""
+scalar RegClass
+
+"""A builtin object identifier type for a text search configuration"""
+scalar RegConfig
+
+"""A builtin object identifier type for a text search dictionary"""
+scalar RegDictionary
+
+"""A builtin object identifier type for an operator"""
+scalar RegOper
+
+"""A builtin object identifier type for an operator with argument types"""
+scalar RegOperator
+
+"""A builtin object identifier type for a function name"""
+scalar RegProc
+
+"""A builtin object identifier type for a function with argument types"""
+scalar RegProcedure
+
+"""A builtin object identifier type for a data type name"""
+scalar RegType
 
 """
 The exact time of day, does not include the date. May or may not have a timezone offset.
@@ -1046,6 +1070,7 @@ type Type implements Node {
   enumArray: [Color]!
   id: Int!
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: Interval!
   intervalArray: [Interval]!
   json: JSON!
@@ -1065,8 +1090,17 @@ type Type implements Node {
   numeric: BigFloat!
   numrange: BigFloatRange!
   point: Point!
+  regclass: RegClass
+  regconfig: RegConfig
+  regdictionary: RegDictionary
+  regoper: RegOper
+  regoperator: RegOperator
+  regproc: RegProc
+  regprocedure: RegProcedure
+  regtype: RegType
   smallint: Int!
   textArray: [String]!
+  textArrayDomain: [String]
   time: Time!
   timestamp: Datetime!
   timestamptz: Datetime!
@@ -1125,6 +1159,9 @@ input TypeCondition {
   """Checks for equality with the object’s \`inet\` field."""
   inet: InternetAddress
 
+  """Checks for equality with the object’s \`int8ArrayDomain\` field."""
+  int8ArrayDomain: [BigInt]
+
   """Checks for equality with the object’s \`interval\` field."""
   interval: IntervalInput
 
@@ -1169,11 +1206,38 @@ input TypeCondition {
   """Checks for equality with the object’s \`point\` field."""
   point: PointInput
 
+  """Checks for equality with the object’s \`regclass\` field."""
+  regclass: RegClass
+
+  """Checks for equality with the object’s \`regconfig\` field."""
+  regconfig: RegConfig
+
+  """Checks for equality with the object’s \`regdictionary\` field."""
+  regdictionary: RegDictionary
+
+  """Checks for equality with the object’s \`regoper\` field."""
+  regoper: RegOper
+
+  """Checks for equality with the object’s \`regoperator\` field."""
+  regoperator: RegOperator
+
+  """Checks for equality with the object’s \`regproc\` field."""
+  regproc: RegProc
+
+  """Checks for equality with the object’s \`regprocedure\` field."""
+  regprocedure: RegProcedure
+
+  """Checks for equality with the object’s \`regtype\` field."""
+  regtype: RegType
+
   """Checks for equality with the object’s \`smallint\` field."""
   smallint: Int
 
   """Checks for equality with the object’s \`textArray\` field."""
   textArray: [String]
+
+  """Checks for equality with the object’s \`textArrayDomain\` field."""
+  textArrayDomain: [String]
 
   """Checks for equality with the object’s \`time\` field."""
   time: Time
@@ -1287,6 +1351,7 @@ input TypeInput {
   enumArray: [Color]!
   id: Int
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: IntervalInput!
   intervalArray: [IntervalInput]!
   json: JSON!
@@ -1301,8 +1366,17 @@ input TypeInput {
   numeric: BigFloat!
   numrange: BigFloatRangeInput!
   point: PointInput!
+  regclass: RegClass
+  regconfig: RegConfig
+  regdictionary: RegDictionary
+  regoper: RegOper
+  regoperator: RegOperator
+  regproc: RegProc
+  regprocedure: RegProcedure
+  regtype: RegType
   smallint: Int!
   textArray: [String]!
+  textArrayDomain: [String]
   time: Time!
   timestamp: Datetime!
   timestamptz: Datetime!
@@ -1327,6 +1401,7 @@ input TypePatch {
   enumArray: [Color]
   id: Int
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: IntervalInput
   intervalArray: [IntervalInput]
   json: JSON
@@ -1341,8 +1416,17 @@ input TypePatch {
   numeric: BigFloat
   numrange: BigFloatRangeInput
   point: PointInput
+  regclass: RegClass
+  regconfig: RegConfig
+  regdictionary: RegDictionary
+  regoper: RegOper
+  regoperator: RegOperator
+  regproc: RegProc
+  regprocedure: RegProcedure
+  regtype: RegType
   smallint: Int
   textArray: [String]
+  textArrayDomain: [String]
   time: Time
   timestamp: Datetime
   timestamptz: Datetime
@@ -1408,6 +1492,8 @@ enum TypesOrderBy {
   ID_DESC
   INET_ASC
   INET_DESC
+  INT8_ARRAY_DOMAIN_ASC
+  INT8_ARRAY_DOMAIN_DESC
   INTERVAL_ARRAY_ASC
   INTERVAL_ARRAY_DESC
   INTERVAL_ASC
@@ -1439,10 +1525,28 @@ enum TypesOrderBy {
   POINT_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
+  REGCLASS_ASC
+  REGCLASS_DESC
+  REGCONFIG_ASC
+  REGCONFIG_DESC
+  REGDICTIONARY_ASC
+  REGDICTIONARY_DESC
+  REGOPER_ASC
+  REGOPER_DESC
+  REGOPERATOR_ASC
+  REGOPERATOR_DESC
+  REGPROC_ASC
+  REGPROC_DESC
+  REGPROCEDURE_ASC
+  REGPROCEDURE_DESC
+  REGTYPE_ASC
+  REGTYPE_DESC
   SMALLINT_ASC
   SMALLINT_DESC
   TEXT_ARRAY_ASC
   TEXT_ARRAY_DESC
+  TEXT_ARRAY_DOMAIN_ASC
+  TEXT_ARRAY_DOMAIN_DESC
   TIME_ASC
   TIME_DESC
   TIMESTAMP_ASC

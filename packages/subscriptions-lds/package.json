@@ -1,11 +1,10 @@
 {
   "name": "@graphile/subscriptions-lds",
-  "version": "4.5.0",
+  "version": "4.9.0",
   "description": "Subscriptions plugin for PostGraphile using PostgreSQL logicial decoding",
   "main": "dist/index.js",
   "scripts": {
-    "db:init": "dropdb --if-exists lds_test && createdb lds_test && psql -X1v ON_ERROR_STOP=1 -v VERBOSITY=verbose -f __tests__/schema.sql lds_test",
-    "test": "npm run db:init && jest -i",
+    "test": "jest -i",
     "prepack": "tsc",
     "watch": "tsc --watch"
   },
@@ -33,19 +32,20 @@
   },
   "homepage": "https://github.com/graphile/graphile-engine/tree/master/packages/subscriptions-lds#readme",
   "dependencies": {
-    "@graphile/lds": "4.5.0",
+    "@graphile/lds": "4.9.0",
     "@types/ws": "^6.0.1",
+    "tslib": "^2.0.1",
     "ws": "^7.0.0"
   },
   "peerDependencies": {
     "postgraphile-core": ">4.3.1 <5"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.12",
-    "jest": "24.9.0",
-    "pg": "^7.10.0",
-    "ts-jest": "^24.0.2",
-    "typescript": "^3.4.5"
+    "@types/jest": "25.x",
+    "jest": "25.x",
+    "pg": ">=6.1.0 <9",
+    "ts-jest": "25.x",
+    "typescript": "^4.0.2"
   },
   "files": [
     "dist"

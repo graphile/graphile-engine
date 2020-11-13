@@ -3,8 +3,7 @@ import type { Plugin } from "graphile-build";
 
 import makeGraphQLJSONType from "../GraphQLJSON";
 
-import rawParseInterval from "postgres-interval";
-import LRU from "@graphile/lru";
+import { parseInterval } from "../postgresInterval";
 
 function indent(str) {
   return "  " + str.replace(/\n/g, "\n  ");
@@ -14,23 +13,13 @@ function identity(value) {
   return value;
 }
 
-const parseCache = new LRU({ maxLength: 500 });
-function parseInterval(str) {
-  let result = parseCache.get(str);
-  if (!result) {
-    result = rawParseInterval(str);
-    Object.freeze(result);
-    parseCache.set(str, result);
-  }
-  return result;
-}
-
 export default (function PgTypesPlugin(
   builder,
   {
     pgExtendedTypes = true,
     // Adding hstore support is technically a breaking change; this allows people to opt out easily:
     pgSkipHstore = false,
+    pgGeometricTypes = false,
     pgUseCustomNetworkScalars = false,
     disableIssue390Fix = false,
   }
@@ -148,9 +137,11 @@ export default (function PgTypesPlugin(
           return sql.fragment`array[${sql.join(
             val.map(v => gql2pg(v, type.arrayItemType, modifier)),
             ", "
-          )}]::${sql.identifier(type.namespaceName)}.${sql.identifier(
-            type.name
-          )}`;
+          )}]::${
+            type.isFake
+              ? sql.identifier("unknown")
+              : sql.identifier(type.namespaceName, type.name)
+          }`;
         } else {
           return sql.value(val);
         }
@@ -159,28 +150,36 @@ export default (function PgTypesPlugin(
       const makeIntervalFields = () => {
         return {
           seconds: {
-            description:
+            description: build.wrapDescription(
               "A quantity of seconds. This is the only non-integer field, as all the other fields will dump their overflow into a smaller unit of time. Intervals don’t have a smaller unit than seconds.",
+              "field"
+            ),
             type: GraphQLFloat,
           },
           minutes: {
-            description: "A quantity of minutes.",
+            description: build.wrapDescription(
+              "A quantity of minutes.",
+              "field"
+            ),
             type: GraphQLInt,
           },
           hours: {
-            description: "A quantity of hours.",
+            description: build.wrapDescription("A quantity of hours.", "field"),
             type: GraphQLInt,
           },
           days: {
-            description: "A quantity of days.",
+            description: build.wrapDescription("A quantity of days.", "field"),
             type: GraphQLInt,
           },
           months: {
-            description: "A quantity of months.",
+            description: build.wrapDescription(
+              "A quantity of months.",
+              "field"
+            ),
             type: GraphQLInt,
           },
           years: {
-            description: "A quantity of years.",
+            description: build.wrapDescription("A quantity of years.", "field"),
             type: GraphQLInt,
           },
         };
@@ -189,8 +188,10 @@ export default (function PgTypesPlugin(
         GraphQLObjectType,
         {
           name: inflection.builtin("Interval"),
-          description:
+          description: build.wrapDescription(
             "An interval of time that has passed where the smallest distinct unit is a second.",
+            "type"
+          ),
           fields: makeIntervalFields(),
         },
         {
@@ -203,8 +204,10 @@ export default (function PgTypesPlugin(
         GraphQLInputObjectType,
         {
           name: inflection.inputType(inflection.builtin("Interval")),
-          description:
+          description: build.wrapDescription(
             "An interval of time that has passed where the smallest distinct unit is a second.",
+            "type"
+          ),
           fields: makeIntervalFields(),
         },
         {
@@ -213,27 +216,39 @@ export default (function PgTypesPlugin(
       );
       addType(GQLIntervalInput, "graphile-build-pg built-in");
 
-      const stringType = (name, description) =>
+      const stringType = (name, description, coerce) =>
         new GraphQLScalarType({
           name,
           description,
           serialize: value => String(value),
-          parseValue: value => String(value),
+          parseValue: coerce
+            ? value => coerce(String(value))
+            : value => String(value),
           parseLiteral: ast => {
             if (ast.kind !== Kind.STRING) {
               throw new Error("Can only parse string values");
             }
-            return ast.value;
+            if (coerce) {
+              return coerce(ast.value);
+            } else {
+              return ast.value;
+            }
           },
         });
 
       const BigFloat = stringType(
         inflection.builtin("BigFloat"),
-        "A floating point number that requires more precision than IEEE 754 binary 64"
+        build.wrapDescription(
+          "A floating point number that requires more precision than IEEE 754 binary 64",
+          "type"
+        )
       );
       const BitString = stringType(
         inflection.builtin("BitString"),
-        "A string representing a series of binary bits"
+        build.wrapDescription(
+          "A string representing a series of binary bits",
+          "type"
+        )
       );
       addType(BigFloat, "graphile-build-pg built-in");
       addType(BitString, "graphile-build-pg built-in");
@@ -248,9 +263,13 @@ export default (function PgTypesPlugin(
       ];
 
       const tweakToJson = fragment => fragment; // Since everything is to_json'd now, just pass through
+      const tweakToJsonArray = fragment => fragment;
       const tweakToText = fragment => sql.fragment`(${fragment})::text`;
+      const tweakToTextArray = fragment => sql.fragment`(${fragment})::text[]`;
       const tweakToNumericText = fragment =>
         sql.fragment`(${fragment})::numeric::text`;
+      const tweakToNumericTextArray = fragment =>
+        sql.fragment`(${fragment})::numeric[]::text[]`;
       const pgTweaksByTypeIdAndModifer = {};
       const pgTweaksByTypeId = {
         // '::text' rawTypes
@@ -260,15 +279,15 @@ export default (function PgTypesPlugin(
         }, {}),
 
         // cast numbers above our ken to strings to avoid loss of precision
-        "20": tweakToText,
-        "1700": tweakToText,
+        20: tweakToText,
+        1700: tweakToText,
         // to_json all dates to make them ISO (overrides rawTypes above)
-        "1082": tweakToJson,
-        "1114": tweakToJson,
-        "1184": tweakToJson,
-        "1083": tweakToJson,
-        "1266": tweakToJson,
-        "790": tweakToNumericText,
+        1082: tweakToJson,
+        1114: tweakToJson,
+        1184: tweakToJson,
+        1083: tweakToJson,
+        1266: tweakToJson,
+        790: tweakToNumericText,
       };
 
       const pgTweakFragmentForTypeAndModifier = (
@@ -285,13 +304,65 @@ export default (function PgTypesPlugin(
         if (tweaker) {
           return tweaker(fragment, resolveData);
         } else if (type.domainBaseType) {
-          // TODO: check that domains don't support atttypemod
-          return pgTweakFragmentForTypeAndModifier(
-            fragment,
-            type.domainBaseType,
-            type.domainBaseTypeModifier,
-            resolveData
-          );
+          if (type.domainBaseType.isPgArray) {
+            // If we have a domain that's for example an `int8[]`, we must
+            // process it into a `text[]` otherwise we risk loss of accuracy
+            // when taking PostgreSQL's JSON into Node.js.
+            const arrayItemType = type.domainBaseType.arrayItemType;
+
+            const domainBaseTypeModifierKey =
+              type.domainBaseTypeModifier != null
+                ? type.domainBaseTypeModifier
+                : -1;
+            const arrayItemTweaker =
+              (pgTweaksByTypeIdAndModifer[arrayItemType.id] &&
+                pgTweaksByTypeIdAndModifer[arrayItemType.id][
+                  domainBaseTypeModifierKey
+                ]) ||
+              pgTweaksByTypeId[arrayItemType.id];
+
+            // If it's a domain over a known type array (e.g. `bigint[]`), use
+            // the Array version of the tweaker.
+            switch (arrayItemTweaker) {
+              case tweakToText:
+                return tweakToTextArray(fragment);
+              case tweakToNumericText:
+                return tweakToNumericTextArray(fragment);
+              case tweakToJson:
+                return tweakToJsonArray(fragment);
+            }
+
+            // If we get here, it's not a simple type, so use our
+            // infrastructure to figure out what tweaks to apply to the array
+            // item.
+
+            const sqlVal = sql.fragment`val`;
+            const innerFragment = pgTweakFragmentForTypeAndModifier(
+              sqlVal,
+              arrayItemType,
+              type.domainBaseTypeModifier,
+              resolveData
+            );
+
+            if (innerFragment === sqlVal) {
+              // There was no tweak applied to the fragment, no change
+              // necessary.
+              return fragment;
+            } else {
+              // Tweaking was necessary, process each item in the array in this
+              // way, and then return the resulting array, being careful that
+              // nulls are preserved.
+              return sql.fragment`(case when ${fragment} is null then null else array(select ${innerFragment} from unnest(${fragment}) as unnest(${sqlVal})) end)`;
+            }
+          } else {
+            // TODO: check that domains don't support atttypemod
+            return pgTweakFragmentForTypeAndModifier(
+              fragment,
+              type.domainBaseType,
+              type.domainBaseTypeModifier,
+              resolveData
+            );
+          }
         } else if (type.isPgArray) {
           const error = new Error(
             `Internal graphile-build-pg error: should not attempt to tweak an array, please process array before tweaking (type: "${type.namespaceName}.${type.name}")`
@@ -316,41 +387,141 @@ export default (function PgTypesPlugin(
     */
       const SimpleDate = stringType(
         inflection.builtin("Date"),
-        "The day, does not include a time."
+        build.wrapDescription("The day, does not include a time.", "type")
       );
       const SimpleDatetime = stringType(
         inflection.builtin("Datetime"),
-        "A point in time as described by the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone."
+        build.wrapDescription(
+          "A point in time as described by the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone.",
+          "type"
+        )
       );
       const SimpleTime = stringType(
         inflection.builtin("Time"),
-        "The exact time of day, does not include the date. May or may not have a timezone offset."
+        build.wrapDescription(
+          "The exact time of day, does not include the date. May or may not have a timezone offset.",
+          "type"
+        )
       );
       const SimpleJSON = stringType(
         inflection.builtin("JSON"),
-        "A JavaScript object encoded in the JSON format as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf)."
+        build.wrapDescription(
+          "A JavaScript object encoded in the JSON format as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).",
+          "type"
+        )
       );
       const SimpleUUID = stringType(
         inflection.builtin("UUID"),
-        "A universally unique identifier as defined by [RFC 4122](https://tools.ietf.org/html/rfc4122)."
+        build.wrapDescription(
+          "A universally unique identifier as defined by [RFC 4122](https://tools.ietf.org/html/rfc4122).",
+          "type"
+        ),
+        string => {
+          if (
+            !/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(
+              string
+            )
+          ) {
+            throw new Error(
+              "Invalid UUID, expected 32 hexadecimal characters, optionally with hypens"
+            );
+          }
+          return string;
+        }
       );
       const InetType = stringType(
         inflection.builtin("InternetAddress"),
-        "An IPv4 or IPv6 host address, and optionally its subnet."
+        build.wrapDescription(
+          "An IPv4 or IPv6 host address, and optionally its subnet.",
+          "type"
+        )
+      );
+      const RegProcType = stringType(
+        inflection.builtin("RegProc"),
+        build.wrapDescription(
+          "A builtin object identifier type for a function name",
+          "type"
+        )
+      );
+      const RegProcedureType = stringType(
+        inflection.builtin("RegProcedure"),
+        build.wrapDescription(
+          "A builtin object identifier type for a function with argument types",
+          "type"
+        )
+      );
+      const RegOperType = stringType(
+        inflection.builtin("RegOper"),
+        build.wrapDescription(
+          "A builtin object identifier type for an operator",
+          "type"
+        )
+      );
+      const RegOperatorType = stringType(
+        inflection.builtin("RegOperator"),
+        build.wrapDescription(
+          "A builtin object identifier type for an operator with argument types",
+          "type"
+        )
+      );
+      const RegClassType = stringType(
+        inflection.builtin("RegClass"),
+        build.wrapDescription(
+          "A builtin object identifier type for a relation name",
+          "type"
+        )
+      );
+      const RegTypeType = stringType(
+        inflection.builtin("RegType"),
+        build.wrapDescription(
+          "A builtin object identifier type for a data type name",
+          "type"
+        )
+      );
+      const RegRoleType = stringType(
+        inflection.builtin("RegRole"),
+        build.wrapDescription(
+          "A builtin object identifier type for a role name",
+          "type"
+        )
+      );
+      const RegNamespaceType = stringType(
+        inflection.builtin("RegNamespace"),
+        build.wrapDescription(
+          "A builtin object identifier type for a namespace name",
+          "type"
+        )
+      );
+      const RegConfigType = stringType(
+        inflection.builtin("RegConfig"),
+        build.wrapDescription(
+          "A builtin object identifier type for a text search configuration",
+          "type"
+        )
+      );
+      const RegDictionaryType = stringType(
+        inflection.builtin("RegDictionary"),
+        build.wrapDescription(
+          "A builtin object identifier type for a text search dictionary",
+          "type"
+        )
       );
       const CidrType = pgUseCustomNetworkScalars
         ? stringType(
             inflection.builtin("CidrAddress"),
-            "An IPv4 or IPv6 CIDR address."
+            build.wrapDescription("An IPv4 or IPv6 CIDR address.", "type")
           )
         : GraphQLString;
       const MacAddrType = pgUseCustomNetworkScalars
-        ? stringType(inflection.builtin("MacAddress"), "A 6-byte MAC address.")
+        ? stringType(
+            inflection.builtin("MacAddress"),
+            build.wrapDescription("A 6-byte MAC address.", "type")
+          )
         : GraphQLString;
       const MacAddr8Type = pgUseCustomNetworkScalars
         ? stringType(
             inflection.builtin("MacAddress8"),
-            "An 8-byte MAC address."
+            build.wrapDescription("An 8-byte MAC address.", "type")
           )
         : GraphQLString;
 
@@ -405,47 +576,70 @@ export default (function PgTypesPlugin(
       addType(DateType, "graphile-build-pg built-in");
       addType(DateTimeType, "graphile-build-pg built-in");
       addType(TimeType, "graphile-build-pg built-in");
+      addType(RegProcType, "graphile-build-pg built-in");
+      addType(RegProcedureType, "graphile-build-pg built-in");
+      addType(RegOperType, "graphile-build-pg built-in");
+      addType(RegOperatorType, "graphile-build-pg built-in");
+      addType(RegClassType, "graphile-build-pg built-in");
+      addType(RegTypeType, "graphile-build-pg built-in");
+      addType(RegRoleType, "graphile-build-pg built-in");
+      addType(RegNamespaceType, "graphile-build-pg built-in");
+      addType(RegConfigType, "graphile-build-pg built-in");
+      addType(RegDictionaryType, "graphile-build-pg built-in");
 
       const oidLookup = {
-        "20": stringType(
+        20: stringType(
           inflection.builtin("BigInt"),
-          "A signed eight-byte integer. The upper big integer values are greater than the max value for a JavaScript number. Therefore all big integers will be output as strings and not numbers."
+          build.wrapDescription(
+            "A signed eight-byte integer. The upper big integer values are greater than the max value for a JavaScript number. Therefore all big integers will be output as strings and not numbers.",
+            "type"
+          )
         ), // bitint - even though this is int8, it's too big for JS int, so cast to string.
-        "21": GraphQLInt, // int2
-        "23": GraphQLInt, // int4
-        "700": GraphQLFloat, // float4
-        "701": GraphQLFloat, // float8
-        "1700": BigFloat, // numeric
-        "790": GraphQLFloat, // money
+        21: GraphQLInt, // int2
+        23: GraphQLInt, // int4
+        700: GraphQLFloat, // float4
+        701: GraphQLFloat, // float8
+        1700: BigFloat, // numeric
+        790: GraphQLFloat, // money
 
-        "1186": GQLInterval, // interval
-        "1082": DateType, // date
-        "1114": DateTimeType, // timestamp
-        "1184": DateTimeType, // timestamptz
-        "1083": TimeType, // time
-        "1266": TimeType, // timetz
+        1186: GQLInterval, // interval
+        1082: DateType, // date
+        1114: DateTimeType, // timestamp
+        1184: DateTimeType, // timestamptz
+        1083: TimeType, // time
+        1266: TimeType, // timetz
 
-        "114": JSONType, // json
-        "3802": JSONType, // jsonb
-        "2950": UUIDType, // uuid
+        114: JSONType, // json
+        3802: JSONType, // jsonb
+        2950: UUIDType, // uuid
 
-        "1560": BitString, // bit
-        "1562": BitString, // varbit
+        1560: BitString, // bit
+        1562: BitString, // varbit
 
-        "18": GraphQLString, // char
-        "25": GraphQLString, // text
-        "1043": GraphQLString, // varchar
+        18: GraphQLString, // char
+        25: GraphQLString, // text
+        1043: GraphQLString, // varchar
 
-        "600": Point, // point
+        600: Point, // point
 
-        "869": InetType,
-        "650": CidrType,
-        "829": MacAddrType,
-        "774": MacAddr8Type,
+        869: InetType,
+        650: CidrType,
+        829: MacAddrType,
+        774: MacAddr8Type,
+        24: RegProcType,
+        2202: RegProcedureType,
+        2203: RegOperType,
+        2204: RegOperatorType,
+        2205: RegClassType,
+        2206: RegTypeType,
+        4096: RegRoleType,
+        4089: RegNamespaceType,
+        3734: RegConfigType,
+        3769: RegDictionaryType,
       };
       const oidInputLookup = {
-        "1186": GQLIntervalInput, // interval
-        "600": PointInput, // point
+        1186: GQLIntervalInput, // interval
+        600: PointInput, // point
       };
       const jsonStringify = o => JSON.stringify(o);
       if (pgExtendedTypes) {
@@ -570,8 +764,11 @@ export default (function PgTypesPlugin(
             {
               name: inflection.enumType(type),
               description: type.description,
-              values: type.enumVariants.reduce((memo, value) => {
+              values: type.enumVariants.reduce((memo, value, i) => {
                 memo[inflection.enumName(value)] = {
+                  description: type.enumDescriptions
+                    ? type.enumDescriptions[i]
+                    : null,
                   value: value,
                 };
                 return memo;
@@ -612,16 +809,23 @@ export default (function PgTypesPlugin(
               GraphQLObjectType,
               {
                 name: inflection.rangeBoundType(gqlRangeSubType.name),
-                description:
+                description: build.wrapDescription(
                   "The value at one end of a range. A range can either include this value, or not.",
+                  "type"
+                ),
                 fields: {
                   value: {
-                    description: "The value at one end of our range.",
+                    description: build.wrapDescription(
+                      "The value at one end of our range.",
+                      "field"
+                    ),
                     type: new GraphQLNonNull(gqlRangeSubType),
                   },
                   inclusive: {
-                    description:
+                    description: build.wrapDescription(
                       "Whether or not the value of this bound is included in the range.",
+                      "field"
+                    ),
                     type: new GraphQLNonNull(GraphQLBoolean),
                   },
                 },
@@ -637,16 +841,23 @@ export default (function PgTypesPlugin(
               GraphQLInputObjectType,
               {
                 name: inflection.inputType(RangeBound.name),
-                description:
+                description: build.wrapDescription(
                   "The value at one end of a range. A range can either include this value, or not.",
+                  "type"
+                ),
                 fields: {
                   value: {
-                    description: "The value at one end of our range.",
+                    description: build.wrapDescription(
+                      "The value at one end of our range.",
+                      "field"
+                    ),
                     type: new GraphQLNonNull(gqlRangeInputSubType),
                   },
                   inclusive: {
-                    description:
+                    description: build.wrapDescription(
                       "Whether or not the value of this bound is included in the range.",
+                      "field"
+                    ),
                     type: new GraphQLNonNull(GraphQLBoolean),
                   },
                 },
@@ -662,14 +873,23 @@ export default (function PgTypesPlugin(
               GraphQLObjectType,
               {
                 name: inflection.rangeType(gqlRangeSubType.name),
-                description: `A range of \`${gqlRangeSubType.name}\`.`,
+                description: build.wrapDescription(
+                  `A range of \`${gqlRangeSubType.name}\`.`,
+                  "type"
+                ),
                 fields: {
                   start: {
-                    description: "The starting bound of our range.",
+                    description: build.wrapDescription(
+                      "The starting bound of our range.",
+                      "field"
+                    ),
                     type: RangeBound,
                   },
                   end: {
-                    description: "The ending bound of our range.",
+                    description: build.wrapDescription(
+                      "The ending bound of our range.",
+                      "field"
+                    ),
                     type: RangeBound,
                   },
                 },
@@ -685,14 +905,23 @@ export default (function PgTypesPlugin(
               GraphQLInputObjectType,
               {
                 name: inflection.inputType(Range.name),
-                description: `A range of \`${gqlRangeSubType.name}\`.`,
+                description: build.wrapDescription(
+                  `A range of \`${gqlRangeSubType.name}\`.`,
+                  "type"
+                ),
                 fields: {
                   start: {
-                    description: "The starting bound of our range.",
+                    description: build.wrapDescription(
+                      "The starting bound of our range.",
+                      "field"
+                    ),
                     type: RangeBoundInput,
                   },
                   end: {
-                    description: "The ending bound of our range.",
+                    description: build.wrapDescription(
+                      "The ending bound of our range.",
+                      "field"
+                    ),
                     type: RangeBoundInput,
                   },
                 },
@@ -1094,7 +1323,6 @@ end`;
         pgRegisterGqlInputTypeByTypeId,
         pg2GqlMapper,
         pgSql: sql,
-        graphql,
       } = build;
 
       // Check we have the hstore extension
@@ -1119,7 +1347,7 @@ end`;
       // We're going to use our own special HStore type for this so that we get
       // better validation; but you could just as easily use JSON directly if you
       // wanted to.
-      const GraphQLHStoreType = makeGraphQLHstoreType(graphql, hstoreTypeName);
+      const GraphQLHStoreType = makeGraphQLHstoreType(build, hstoreTypeName);
 
       // Now register the hstore type with the type system for both output and input.
       pgRegisterGqlTypeByTypeId(hstoreType.id, () => GraphQLHStoreType);
@@ -1144,9 +1372,370 @@ end`;
     ["PgTypes"]
   );
   /* End of hstore type */
+
+  /* Geometric types */
+  builder.hook(
+    "build",
+    build => {
+      // This hook tells graphile-build-pg about the hstore database type so it
+      // knows how to express it in input/output.
+      if (!pgGeometricTypes) return build;
+      const {
+        pgRegisterGqlTypeByTypeId,
+        pgRegisterGqlInputTypeByTypeId,
+        pgGetGqlTypeByTypeIdAndModifier,
+        pgGetGqlInputTypeByTypeIdAndModifier,
+        pg2GqlMapper,
+        pgSql: sql,
+        graphql: {
+          GraphQLObjectType,
+          GraphQLInputObjectType,
+          GraphQLList,
+          GraphQLBoolean,
+          GraphQLFloat,
+        },
+        inflection,
+      } = build;
+
+      // Check we have the hstore extension
+      const LINE = 628;
+      const LSEG = 601;
+      const BOX = 603;
+      const PATH = 602;
+      const POLYGON = 604;
+      const CIRCLE = 718;
+
+      pgRegisterGqlTypeByTypeId(LINE, () => {
+        const Point = pgGetGqlTypeByTypeIdAndModifier("600", null);
+        if (!Point) {
+          throw new Error("Need point type");
+        }
+        return new GraphQLObjectType({
+          name: inflection.builtin("Line"),
+          description: build.wrapDescription(
+            "An infinite line that passes through points 'a' and 'b'.",
+            "type"
+          ),
+          fields: {
+            a: { type: Point },
+            b: { type: Point },
+          },
+        });
+      });
+      pgRegisterGqlInputTypeByTypeId(LINE, () => {
+        const PointInput = pgGetGqlInputTypeByTypeIdAndModifier("600", null);
+        return new GraphQLInputObjectType({
+          name: inflection.builtin("LineInput"),
+          description: build.wrapDescription(
+            "An infinite line that passes through points 'a' and 'b'.",
+            "type"
+          ),
+          fields: {
+            a: { type: PointInput },
+            b: { type: PointInput },
+          },
+        });
+      });
+      pg2GqlMapper[LINE] = {
+        map: f => {
+          if (f[0] === "{" && f[f.length - 1] === "}") {
+            const [A, B, C] = f
+              .substr(1, f.length - 2)
+              .split(",")
+              .map(f => parseFloat(f));
+            // Lines have the form Ax + By + C = 0.
+            // So if y = 0, Ax + C = 0; x = -C/A.
+            // If x = 0, By + C = 0; y = -C/B.
+            return {
+              a: { x: -C / A, y: 0 },
+              b: { x: 0, y: -C / B },
+            };
+          }
+        },
+        unmap: o =>
+          sql.fragment`line(point(${sql.value(o.a.x)}, ${sql.value(
+            o.a.y
+          )}), point(${sql.value(o.b.x)}, ${sql.value(o.b.y)}))`,
+      };
+
+      pgRegisterGqlTypeByTypeId(LSEG, () => {
+        const Point = pgGetGqlTypeByTypeIdAndModifier("600", null);
+        return new GraphQLObjectType({
+          name: inflection.builtin("LineSegment"),
+          description: build.wrapDescription(
+            "An finite line between points 'a' and 'b'.",
+            "type"
+          ),
+          fields: {
+            a: { type: Point },
+            b: { type: Point },
+          },
+        });
+      });
+      pgRegisterGqlInputTypeByTypeId(LSEG, () => {
+        const PointInput = pgGetGqlInputTypeByTypeIdAndModifier("600", null);
+        return new GraphQLInputObjectType({
+          name: inflection.builtin("LineSegmentInput"),
+          description: build.wrapDescription(
+            "An finite line between points 'a' and 'b'.",
+            "type"
+          ),
+          fields: {
+            a: { type: PointInput },
+            b: { type: PointInput },
+          },
+        });
+      });
+      pg2GqlMapper[LSEG] = {
+        map: f => {
+          if (f[0] === "[" && f[f.length - 1] === "]") {
+            const [x1, y1, x2, y2] = f
+              .substr(1, f.length - 2)
+              .replace(/[()]/g, "")
+              .split(",")
+              .map(f => parseFloat(f));
+            return {
+              a: { x: x1, y: y1 },
+              b: { x: x2, y: y2 },
+            };
+          }
+        },
+        unmap: o =>
+          sql.fragment`lseg(point(${sql.value(o.a.x)}, ${sql.value(
+            o.a.y
+          )}), point(${sql.value(o.b.x)}, ${sql.value(o.b.y)}))`,
+      };
+
+      pgRegisterGqlTypeByTypeId(BOX, () => {
+        const Point = pgGetGqlTypeByTypeIdAndModifier("600", null);
+        return new GraphQLObjectType({
+          name: inflection.builtin("Box"),
+          description: build.wrapDescription(
+            "A rectangular box defined by two opposite corners 'a' and 'b'",
+            "type"
+          ),
+          fields: {
+            a: { type: Point },
+            b: { type: Point },
+          },
+        });
+      });
+      pgRegisterGqlInputTypeByTypeId(BOX, () => {
+        const PointInput = pgGetGqlInputTypeByTypeIdAndModifier("600", null);
+        return new GraphQLInputObjectType({
+          name: inflection.builtin("BoxInput"),
+          description: build.wrapDescription(
+            "A rectangular box defined by two opposite corners 'a' and 'b'",
+            "type"
+          ),
+          fields: {
+            a: { type: PointInput },
+            b: { type: PointInput },
+          },
+        });
+      });
+      pg2GqlMapper[BOX] = {
+        map: f => {
+          if (f[0] === "(" && f[f.length - 1] === ")") {
+            const [x1, y1, x2, y2] = f
+              .substr(1, f.length - 2)
+              .replace(/[()]/g, "")
+              .split(",")
+              .map(f => parseFloat(f));
+            return {
+              a: { x: x1, y: y1 },
+              b: { x: x2, y: y2 },
+            };
+          }
+        },
+        unmap: o =>
+          sql.fragment`box(point(${sql.value(o.a.x)}, ${sql.value(
+            o.a.y
+          )}), point(${sql.value(o.b.x)}, ${sql.value(o.b.y)}))`,
+      };
+
+      pgRegisterGqlTypeByTypeId(PATH, () => {
+        const Point = pgGetGqlTypeByTypeIdAndModifier("600", null);
+        return new GraphQLObjectType({
+          name: inflection.builtin("Path"),
+          description: build.wrapDescription(
+            "A path (open or closed) made up of points",
+            "type"
+          ),
+          fields: {
+            points: {
+              type: new GraphQLList(Point),
+            },
+            isOpen: {
+              description: build.wrapDescription(
+                "True if this is a closed path (similar to a polygon), false otherwise.",
+                "field"
+              ),
+              type: GraphQLBoolean,
+            },
+          },
+        });
+      });
+      pgRegisterGqlInputTypeByTypeId(PATH, () => {
+        const PointInput = pgGetGqlInputTypeByTypeIdAndModifier("600", null);
+        return new GraphQLInputObjectType({
+          name: inflection.builtin("PathInput"),
+          description: build.wrapDescription(
+            "A path (open or closed) made up of points",
+            "type"
+          ),
+          fields: {
+            points: {
+              type: new GraphQLList(PointInput),
+            },
+            isOpen: {
+              description: build.wrapDescription(
+                "True if this is a closed path (similar to a polygon), false otherwise.",
+                "field"
+              ),
+              type: GraphQLBoolean,
+            },
+          },
+        });
+      });
+      pg2GqlMapper[PATH] = {
+        map: f => {
+          let isOpen = null;
+          if (f[0] === "(" && f[f.length - 1] === ")") {
+            isOpen = false;
+          } else if (f[0] === "[" && f[f.length - 1] === "]") {
+            isOpen = true;
+          }
+          if (isOpen !== null) {
+            const xsAndYs = f
+              .substr(1, f.length - 2)
+              .replace(/[()]/g, "")
+              .split(",")
+              .map(f => parseFloat(f));
+            if (xsAndYs.length % 2 !== 0) {
+              throw new Error("Invalid path representation");
+            }
+            const points = [];
+            for (let i = 0, l = xsAndYs.length; i < l; i += 2) {
+              points.push({ x: xsAndYs[i], y: xsAndYs[i + 1] });
+            }
+            return {
+              isOpen,
+              points,
+            };
+          }
+        },
+        unmap: o => {
+          const openParen = o.isOpen ? "[" : "(";
+          const closeParen = o.isOpen ? "]" : ")";
+          const val = `${openParen}${o.points
+            .map(p => `(${p.x},${p.y})`)
+            .join(",")}${closeParen}`;
+          return sql.value(val);
+        },
+      };
+
+      pgRegisterGqlTypeByTypeId(POLYGON, () => {
+        const Point = pgGetGqlTypeByTypeIdAndModifier("600", null);
+        return new GraphQLObjectType({
+          name: inflection.builtin("Polygon"),
+          fields: {
+            points: {
+              type: new GraphQLList(Point),
+            },
+          },
+        });
+      });
+      pgRegisterGqlInputTypeByTypeId(POLYGON, () => {
+        const PointInput = pgGetGqlInputTypeByTypeIdAndModifier("600", null);
+        return new GraphQLInputObjectType({
+          name: inflection.builtin("PolygonInput"),
+          fields: {
+            points: {
+              type: new GraphQLList(PointInput),
+            },
+          },
+        });
+      });
+      pg2GqlMapper[POLYGON] = {
+        map: f => {
+          if (f[0] === "(" && f[f.length - 1] === ")") {
+            const xsAndYs = f
+              .substr(1, f.length - 2)
+              .replace(/[()]/g, "")
+              .split(",")
+              .map(f => parseFloat(f));
+            if (xsAndYs.length % 2 !== 0) {
+              throw new Error("Invalid polygon representation");
+            }
+            const points = [];
+            for (let i = 0, l = xsAndYs.length; i < l; i += 2) {
+              points.push({ x: xsAndYs[i], y: xsAndYs[i + 1] });
+            }
+            return {
+              points,
+            };
+          }
+        },
+        unmap: o => {
+          const val = `(${o.points.map(p => `(${p.x},${p.y})`).join(",")})`;
+          return sql.value(val);
+        },
+      };
+
+      pgRegisterGqlTypeByTypeId(CIRCLE, () => {
+        const Point = pgGetGqlTypeByTypeIdAndModifier("600", null);
+        return new GraphQLObjectType({
+          name: inflection.builtin("Circle"),
+          fields: {
+            center: { type: Point },
+            radius: { type: GraphQLFloat },
+          },
+        });
+      });
+      pgRegisterGqlInputTypeByTypeId(CIRCLE, () => {
+        const PointInput = pgGetGqlInputTypeByTypeIdAndModifier("600", null);
+        return new GraphQLInputObjectType({
+          name: inflection.builtin("CircleInput"),
+          fields: {
+            center: { type: PointInput },
+            radius: { type: GraphQLFloat },
+          },
+        });
+      });
+      pg2GqlMapper[CIRCLE] = {
+        map: f => {
+          if (f[0] === "<" && f[f.length - 1] === ">") {
+            const [x, y, r] = f
+              .substr(1, f.length - 2)
+              .replace(/[()]/g, "")
+              .split(",")
+              .map(f => parseFloat(f));
+            return {
+              center: { x, y },
+              radius: r,
+            };
+          }
+        },
+        unmap: o =>
+          sql.fragment`circle(point(${sql.value(o.center.x)}, ${sql.value(
+            o.center.y
+          )}), ${sql.value(o.radius)})`,
+      };
+
+      // TODO: add the non-nulls!
+
+      return build;
+    },
+    ["PgGeometryTypes"],
+    [],
+    ["PgTypes"]
+  );
+  /* End of geometric types */
 }: Plugin);
 
-function makeGraphQLHstoreType(graphql, hstoreTypeName) {
+function makeGraphQLHstoreType(build, hstoreTypeName) {
+  const { graphql } = build;
   const { GraphQLScalarType, Kind } = graphql;
 
   function isValidHstoreObject(obj) {
@@ -1245,8 +1834,10 @@ function makeGraphQLHstoreType(graphql, hstoreTypeName) {
   // TODO: use newWithHooks instead
   const GraphQLHStore = new GraphQLScalarType({
     name: hstoreTypeName,
-    description:
+    description: build.wrapDescription(
       "A set of key/value pairs, keys are strings, values may be a string or null. Exposed as a JSON object.",
+      "type"
+    ),
     serialize: identity,
     parseValue: identityWithCheck,
     parseLiteral,

@@ -84,14 +84,27 @@ insert into b.types values (
   '2016-10-07',
   '04:05:06',
   '04:05:06 -8:00',
-  '1 year 2 months 3 days 4 hours 5 minutes 6 seconds',
-  ARRAY['1 year 2 months 3 days 4 hours 5 minutes 6 seconds', '1 year 1 months 1 days 1 hours 1 minutes 1 seconds']::interval[],
+  '1 year 2 months 3 days 4 hours 5 minutes 6.789123456 seconds',
+  ARRAY['1 year 2 months 3 days 4 hours 5 minutes 6.789123456 seconds', '1 year 1 months 1 days 1 hours 1 minutes 1 seconds']::interval[],
   '9876543.21',
   (1, '2', 'blue', '4be8a712-3ff7-432e-aa34-fdb43fbd838d', 'FOO_BAR', '', interval '6 hours', 8),
   ((3, '456', 'red', 'aed18400-2a92-46df-8204-b70c728b3520', 'BAR_FOO', 'one', interval '6 hours', 93), (42, 'Hello, world!', 'blue', 'd34df5e0-83f1-11e6-8dd0-abee917ffd1e', 'BAZ_QUX', '', interval '6 hours', -5), 7),
   null,
   null,
   point(1,3),
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
   null
 );
 
@@ -119,8 +132,8 @@ insert into b.types values (
   '2016-10-07',
   '04:05:06',
   '04:05:06 -8:00',
-  '1 year 2 months 3 days 4 hours 5 minutes 6 seconds',
-  ARRAY['1 year 2 months 3 days 4 hours 5 minutes 6 seconds', '1 year 1 months 1 days 1 hours 1 minutes 1 seconds']::interval[],
+  '1 year 2 months 3 days 4 hours 5 minutes 6.789123456 seconds',
+  ARRAY['1 year 2 months 3 days 4 hours 5 minutes 6.789123456 seconds', '1 year 1 months 1 days 1 hours 1 minutes 1 seconds', '200 years', '200.200 seconds']::interval[],
   '9876543.21',
   (null, null, null, null, null, null, null, null),
   ((3, '456', 'red', 'aed18400-2a92-46df-8204-b70c728b3520', 'BAR_FOO', 'one', interval '6 hours', 93), (null, null, null, null, null, null, null, null), 7),
@@ -130,7 +143,17 @@ insert into b.types values (
   null,
   '192.168.0.0',
   '192.168.0.0/24',
-  'feed.dead.beef'
+  'feed.dead.beef',
+  'b.guid_fn', 
+  'b.guid_fn(b.guid)', 
+  '!',
+  '*(integer,integer)', 
+  'b.types', 
+  'int', 
+  'english', 
+  'simple',
+  ARRAY['1 year', '2 months', '3 days']::text[],
+  ARRAY[1, 2, 2098288669218571760]
 );
 
 insert into c.edge_case values
@@ -250,3 +273,33 @@ insert into named_query_builder.toy_categories(toy_id, category_id, approved) va
   (4, 1, true),
   (4, 2, true),
   (1, 3, false);
+
+--------------------------------------------------------------------------------
+alter sequence enum_tables.letter_descriptions_id_seq restart with 101;
+insert into enum_tables.letter_descriptions(letter, description) values
+  ('A', 'The first letter in the alphabet'),
+  ('B', 'Following closely behind the first letter, this is a popular choice'),
+  ('C', 'Pronounced like ''sea'''),
+  ('D', 'The first letter omitted from the ''ABC'' phrase');
+
+alter sequence enum_tables.referencing_table_id_seq restart with 432;
+insert into enum_tables.referencing_table(enum_1, enum_2, enum_3) values
+  ('a1', null, null),
+  ('a3', 'b2', 'c1'),
+  (null, null, 'c3');
+
+--------------------------------------------------------------------------------
+
+alter sequence geometry.geom_id_seq restart with 101;
+insert into geometry.geom(
+  point, line, lseg, box, open_path, closed_path, polygon, circle
+) values (
+  point(4, 2),
+  line(point(7, 11), point(13, 17)),
+  lseg(point(7, 11), point(13, 17)),
+  box(point(7, 11), point(13, 17)),
+  '[(1,3),(3,4),(4,1)]',
+  '((1,3),(3,4),(4,1))',
+  '((1,3),(3,4),(4,1))',
+  '<(10, 10), 7>'
+);

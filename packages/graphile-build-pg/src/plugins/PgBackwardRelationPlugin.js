@@ -174,6 +174,23 @@ export default (function PgBackwardRelationPlugin(
                                   table.primaryKeyConstraint
                                 ) {
                                   innerQueryBuilder.selectIdentifiers(table);
+                                  innerQueryBuilder.makeLiveCollection(table);
+                                  innerQueryBuilder.addLiveCondition(
+                                    data => record => {
+                                      return keys.every(
+                                        key =>
+                                          record[key.name] === data[key.name]
+                                      );
+                                    },
+                                    keys.reduce((memo, key, i) => {
+                                      memo[
+                                        key.name
+                                      ] = sql.fragment`${foreignTableAlias}.${sql.identifier(
+                                        foreignKeys[i].name
+                                      )}`;
+                                      return memo;
+                                    }, {})
+                                  );
                                 }
                                 keys.forEach((key, i) => {
                                   innerQueryBuilder.where(
@@ -196,7 +213,10 @@ export default (function PgBackwardRelationPlugin(
                     return {
                       description:
                         constraint.tags.backwardDescription ||
-                        `Reads a single \`${tableTypeName}\` that is related to this \`${foreignTableTypeName}\`.`,
+                        build.wrapDescription(
+                          `Reads a single \`${tableTypeName}\` that is related to this \`${foreignTableTypeName}\`.`,
+                          "field"
+                        ),
                       type: gqlTableType,
                       args: {},
                       resolve: (data, _args, resolveContext, resolveInfo) => {
@@ -207,6 +227,24 @@ export default (function PgBackwardRelationPlugin(
                         const liveRecord =
                           resolveInfo.rootValue &&
                           resolveInfo.rootValue.liveRecord;
+                        const liveCollection =
+                          resolveInfo.rootValue &&
+                          resolveInfo.rootValue.liveCollection;
+                        const liveConditions =
+                          resolveInfo.rootValue &&
+                          resolveInfo.rootValue.liveConditions;
+                        if (
+                          subscriptions &&
+                          liveCollection &&
+                          liveConditions &&
+                          data.__live
+                        ) {
+                          const { __id, ...rest } = data.__live;
+                          const condition = liveConditions[__id];
+                          const checker = condition(rest);
+
+                          liveCollection("pg", table, checker);
+                        }
                         if (record && liveRecord) {
                           liveRecord("pg", table, record.__identifiers);
                         }
@@ -357,7 +395,10 @@ export default (function PgBackwardRelationPlugin(
                     return {
                       description:
                         constraint.tags.backwardDescription ||
-                        `Reads and enables pagination through a set of \`${tableTypeName}\`.`,
+                        build.wrapDescription(
+                          `Reads and enables pagination through a set of \`${tableTypeName}\`.`,
+                          "field"
+                        ),
                       type: isConnection
                         ? new GraphQLNonNull(ConnectionType)
                         : new GraphQLNonNull(

@@ -2775,7 +2775,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): PeopleConnection! @deprecated(reason: "This is deprecated (comment on function c.badly_behaved_function).")
+  ): PeopleConnection @deprecated(reason: "This is deprecated (comment on function c.badly_behaved_function).")
 
   """Reads a single \`CompoundKey\` using its globally unique \`ID\`."""
   compoundKey(
@@ -2805,7 +2805,7 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): CompoundTypesConnection!
+  ): CompoundTypesConnection
   currentUserId: Int
   intSetQuery(
     """Read all values in the set after (below) this cursor."""
@@ -2828,7 +2828,7 @@ type Query implements Node {
     x: Int
     y: Int
     z: Int
-  ): IntSetQueryConnection!
+  ): IntSetQueryConnection
 
   """Reads a single \`Issue756\` using its globally unique \`ID\`."""
   issue756(
@@ -2927,7 +2927,7 @@ type Query implements Node {
 
     """The method to use when ordering \`Person\`."""
     orderBy: [PeopleOrderBy!]
-  ): PeopleConnection!
+  ): PeopleConnection
 
   """Reads and enables pagination through a set of \`Person\`."""
   tableSetQueryPlpgsql(
@@ -2948,9 +2948,33 @@ type Query implements Node {
     based pagination. May not be used with \`last\`.
     """
     offset: Int
-  ): PeopleConnection!
+  ): PeopleConnection
   typesQuery(a: BigInt!, b: Boolean!, c: String!, d: [Int]!, e: JSON!, f: FloatRangeInput!): Boolean
 }
+
+"""A builtin object identifier type for a relation name"""
+scalar RegClass
+
+"""A builtin object identifier type for a text search configuration"""
+scalar RegConfig
+
+"""A builtin object identifier type for a text search dictionary"""
+scalar RegDictionary
+
+"""A builtin object identifier type for an operator"""
+scalar RegOper
+
+"""A builtin object identifier type for an operator with argument types"""
+scalar RegOperator
+
+"""A builtin object identifier type for a function name"""
+scalar RegProc
+
+"""A builtin object identifier type for a function with argument types"""
+scalar RegProcedure
+
+"""A builtin object identifier type for a data type name"""
+scalar RegType
 
 """All input for the \`tableMutation\` mutation."""
 input TableMutationInput {
@@ -3022,6 +3046,7 @@ type Type {
   enumArray: [Color]!
   id: Int!
   inet: InternetAddress
+  int8ArrayDomain: [BigInt]
   interval: Interval!
   intervalArray: [Interval]!
   json: JSON!
@@ -3036,8 +3061,17 @@ type Type {
   numeric: BigFloat!
   numrange: BigFloatRange!
   point: Point!
+  regclass: RegClass
+  regconfig: RegConfig
+  regdictionary: RegDictionary
+  regoper: RegOper
+  regoperator: RegOperator
+  regproc: RegProc
+  regprocedure: RegProcedure
+  regtype: RegType
   smallint: Int!
   textArray: [String]!
+  textArrayDomain: [String]
   time: Time!
   timestamp: Datetime!
   timestamptz: Datetime!

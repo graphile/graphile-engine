@@ -3,7 +3,101 @@
 We use PostGraphile's GitHub releases tab to log our changes in detail, but
 this auto-generated changelog helps us to produce that list, and it may be
 helpful to you also.
-# [](https://github.com/graphile/graphile-engine/compare/v4.6.0...v) (2020-01-27)
+# [](https://github.com/graphile/graphile-engine/compare/v4.9.2...v) (2020-10-23)
+
+
+
+## [4.9.2](https://github.com/graphile/graphile-engine/compare/v4.9.1...v4.9.2) (2020-10-23)
+
+
+### Bug Fixes
+
+* **tags:** fix non-null for multiple [@unique](https://github.com/unique) tags ([#681](https://github.com/graphile/graphile-engine/issues/681)) ([0747562](https://github.com/graphile/graphile-engine/commit/07475622372a42e1f2105abb50a8a4d8ceb0ba61))
+* **types:** fix enum tables when used in custom mutations ([#680](https://github.com/graphile/graphile-engine/issues/680)) ([ed75ce2](https://github.com/graphile/graphile-engine/commit/ed75ce23e711d5f1190991faabc52cf610e9c482))
+
+
+
+## [4.9.1](https://github.com/graphile/graphile-engine/compare/v4.9.0...v4.9.1) (2020-10-16)
+
+
+### Bug Fixes
+
+* **types:** fix parsing interval to support fractional seconds ([#678](https://github.com/graphile/graphile-engine/issues/678)) ([79017c5](https://github.com/graphile/graphile-engine/commit/79017c56d0b3b7ec76cd36b069d00129f6b8501f))
+* domains over array types now correctly apply "tweaks" ([#672](https://github.com/graphile/graphile-engine/issues/672)) ([99259f4](https://github.com/graphile/graphile-engine/commit/99259f4045d95d2e7a555f6788c0755a513a26bc))
+* **graphile-build-pg:** add more numeric casting exceptions ([#661](https://github.com/graphile/graphile-engine/issues/661)) ([ea8480e](https://github.com/graphile/graphile-engine/commit/ea8480e844bfdc025c615af07bbd82886e0f4faf))
+* **proc:** fix output of record/table returning functions ([#667](https://github.com/graphile/graphile-engine/issues/667)) ([7182d92](https://github.com/graphile/graphile-engine/commit/7182d9277f69bd342ffeb7b0c6aefc6a2a2d81fa))
+* **utils:** selectGraphQLResultFromTable now debugs SQL ([#668](https://github.com/graphile/graphile-engine/issues/668)) ([04a996a](https://github.com/graphile/graphile-engine/commit/04a996aa6aca32f2b273001a7500f1ae96dce533))
+* load makeAddPgTableConditionPlugins before PgConnectionArgOrderBy ([#658](https://github.com/graphile/graphile-engine/issues/658)) ([16d7b30](https://github.com/graphile/graphile-engine/commit/16d7b3086649ef972ea8e337acf3bfb56be9416e))
+
+
+### Features
+
+* **smart-tags:** add support for '[@unique](https://github.com/unique)' fake constraints ([#673](https://github.com/graphile/graphile-engine/issues/673)) ([5cd51b6](https://github.com/graphile/graphile-engine/commit/5cd51b66ce1a9ecd0f2574e0105a0d6cbfecbb75))
+
+
+
+# [4.9.0](https://github.com/graphile/graphile-engine/compare/v4.8.0...v4.9.0) (2020-09-09)
+
+
+### Bug Fixes
+
+* intervals now return zeros instead of nulls (also updated dependencies) ([#656](https://github.com/graphile/graphile-engine/issues/656)) ([2739f79](https://github.com/graphile/graphile-engine/commit/2739f7941c97ca383887686e97cf659b8c20f802))
+* **graphql:** root level custom query connection fields now nullable ([#653](https://github.com/graphile/graphile-engine/issues/653)) ([131c6ac](https://github.com/graphile/graphile-engine/commit/131c6ac16058d8fe81e423c7495dbdaf11ae3cd5))
+* improve error when cannot read from enum table ([#651](https://github.com/graphile/graphile-engine/issues/651)) ([dbafe55](https://github.com/graphile/graphile-engine/commit/dbafe5578c6680a4fd4f81fa0a9097f9fa137774))
+
+
+### Features
+
+* add UUID validation so errors are raised earlier ([#652](https://github.com/graphile/graphile-engine/issues/652)) ([9265262](https://github.com/graphile/graphile-engine/commit/92652620aefe01f81a514477f0dfa1faaf1590cf))
+
+
+
+# [4.8.0](https://github.com/graphile/graphile-engine/compare/v4.8.0-rc.0...v4.8.0) (2020-08-11)
+
+
+### Bug Fixes
+
+* **sql:** fix POSTGRAPHILE_PREPARED_STATEMENT_CACHE_SIZE envvar ([#639](https://github.com/graphile/graphile-engine/issues/639)) ([5e79bd0](https://github.com/graphile/graphile-engine/commit/5e79bd096abe6baa6dd0d3524ba12ccfc74668bf))
+
+
+### Features
+
+* add support for "enum constraints" ([#638](https://github.com/graphile/graphile-engine/issues/638)) ([4944e63](https://github.com/graphile/graphile-engine/commit/4944e630a8db3fdb4e2763bbddd928249948f71e))
+
+
+
+# [4.8.0-rc.0](https://github.com/graphile/graphile-engine/compare/v4.7.0...v4.8.0-rc.0) (2020-08-04)
+
+
+### Bug Fixes
+
+* error message typo ([001de88](https://github.com/graphile/graphile-engine/commit/001de88d93fba7657459e581b7f36dbcfee39ff4))
+* **live:** live collection for single backward relation record ([#625](https://github.com/graphile/graphile-engine/issues/625)) ([7f0225e](https://github.com/graphile/graphile-engine/commit/7f0225e7bb69bbf3c135cdf1c5c155d92e916a71))
+* **watch:** handle errors during watchSchema ([#624](https://github.com/graphile/graphile-engine/issues/624)) ([4ef1b7b](https://github.com/graphile/graphile-engine/commit/4ef1b7b182390e9eeec6a7917b940243dc9c3b0e))
+
+
+### Features
+
+* add support for "enum tables" ([#635](https://github.com/graphile/graphile-engine/issues/635)) ([e6bde66](https://github.com/graphile/graphile-engine/commit/e6bde667e7e9b151e976d504f9c7a60b2b2f5c0c))
+* add support for geometric types ([#637](https://github.com/graphile/graphile-engine/issues/637)) ([419ec87](https://github.com/graphile/graphile-engine/commit/419ec87b5a8affd1d2c24c55b47f3252cd9e6b7f))
+* warn early if placeholders will be exhausted ([#632](https://github.com/graphile/graphile-engine/issues/632)) ([5c22e41](https://github.com/graphile/graphile-engine/commit/5c22e41d667412b2ce2ba6d9870d82fdfad65574))
+* **graphile-utils:** Type update on addPgTableOrderByPlugin ([#629](https://github.com/graphile/graphile-engine/issues/629)) ([91dbf6f](https://github.com/graphile/graphile-engine/commit/91dbf6f117f4995b22d7105e521bbb927d21b2a1))
+* **subscriptions:** [@pg](https://github.com/pg)Subscription now supports initial events ([#612](https://github.com/graphile/graphile-engine/issues/612)) ([e862aad](https://github.com/graphile/graphile-engine/commit/e862aad7f9188975e201dbe01e2d3ed6dbd61476))
+
+
+
+# [4.7.0](https://github.com/graphile/graphile-engine/compare/v4.6.0...v4.7.0) (2020-04-27)
+
+
+### Bug Fixes
+
+* **introspection:** don't query roles when ignoring RBAC ([#598](https://github.com/graphile/graphile-engine/issues/598)) ([bfe2427](https://github.com/graphile/graphile-engine/commit/bfe24276c9ff5eb7d3e9e7aff56a4d2ea61f30c6))
+* **types:** relax index signature in JSONPgSmartTags ([#618](https://github.com/graphile/graphile-engine/issues/618)) ([edf2abf](https://github.com/graphile/graphile-engine/commit/edf2abf18dd87e63415c273631dc38741b4e531b))
+
+
+### Features
+
+* **graphile-build-pg:** expose more utils ([#601](https://github.com/graphile/graphile-engine/issues/601)) ([ac74e2d](https://github.com/graphile/graphile-engine/commit/ac74e2d7088a9d96ef9cac7645f2c6b52d7a66d8))
 
 
 

@@ -17,7 +17,12 @@ import type { ResolveTree } from "graphql-parse-resolve-info";
 import pluralize from "pluralize";
 import LRU from "@graphile/lru";
 import semver from "semver";
-import { upperCamelCase, camelCase, constantCase } from "./utils";
+import {
+  upperCamelCase,
+  camelCase,
+  constantCase,
+  wrapDescription,
+} from "./utils";
 import swallowError from "./swallowError";
 import resolveNode from "./resolveNode";
 import { LiveCoordinator } from "./Live";
@@ -63,9 +68,7 @@ const hashCache = new LRU({ maxLength: 100000 });
 function hashFieldAlias(str) {
   const precomputed = hashCache.get(str);
   if (precomputed) return precomputed;
-  const hash = createHash("sha1")
-    .update(str)
-    .digest("hex");
+  const hash = createHash("sha1").update(str).digest("hex");
   hashCache.set(str, hash);
   return hash;
 }
@@ -519,7 +522,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
               fieldWithHooks: ((fieldName, spec, fieldScope) => {
                 if (!isString(fieldName)) {
                   throw new Error(
-                    "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
+                    "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is currently necessary."
                   );
                 }
                 if (!fieldScope) {
@@ -721,7 +724,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
               fieldWithHooks: ((fieldName, spec, fieldScope = {}) => {
                 if (!isString(fieldName)) {
                   throw new Error(
-                    "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is current necessary."
+                    "It looks like you forgot to pass the fieldName to `fieldWithHooks`, we're sorry this is currently necessary."
                   );
                 }
                 const context = {
@@ -989,6 +992,7 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
         return resultingName;
       },
     },
+    wrapDescription,
     swallowError,
     // resolveNode: EXPERIMENTAL, API might change!
     resolveNode,

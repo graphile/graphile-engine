@@ -1,11 +1,10 @@
 {
   "name": "@graphile/lds",
-  "version": "4.5.0",
+  "version": "4.9.0",
   "description": "Logical decoding server for PostgreSQL, monitors for new/edited/deleted rows and announces them to interested clients.",
   "main": "dist/index.js",
   "scripts": {
-    "db:init": "dropdb --if-exists lds_test && createdb lds_test && psql -X1v ON_ERROR_STOP=1 -v VERBOSITY=verbose -f __tests__/schema.sql lds_test",
-    "test": "npm run db:init && jest -i",
+    "test": "jest -i",
     "prepack": "tsc",
     "watch": "tsc --watch"
   },
@@ -37,14 +36,15 @@
   "dependencies": {
     "@types/pg": "^7.4.14",
     "@types/ws": "^6.0.1",
-    "pg": ">=6.5 <8",
+    "pg": ">=6.1.0 <9",
+    "tslib": "^2.0.1",
     "ws": "^7.0.0"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.12",
-    "jest": "24.9.0",
-    "ts-jest": "^24.0.2",
-    "typescript": "^3.4.5"
+    "@types/jest": "25.x",
+    "jest": "25.x",
+    "ts-jest": "25.x",
+    "typescript": "^4.0.2"
   },
   "files": [
     "dist"

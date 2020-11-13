@@ -57,6 +57,16 @@ function escapeLarge(sqlFragment: SQL, type: PgType) {
         "23" /* int4 */,
         "700" /* float4 */,
         "701" /* float8 */,
+        "24" /* regproc */,
+        "2202" /* regprocedure */,
+        "2203" /* regoper */,
+        "2204" /* regoperator */,
+        "2205" /* regclass */,
+        "2206" /* regtype */,
+        "4096" /* regrole */,
+        "4089" /* regnamespace */,
+        "3734" /* regconfig */,
+        "3769" /* regdictionary */,
       ].includes(actualType.id)
     ) {
       // No need for special handling
@@ -735,8 +745,10 @@ ${sql.join(
 
     let fragment = sql.fragment`\
 select ${useAsterisk ? sql.fragment`${this.getTableAlias()}.*` : fields}
-${this.compiledData.from &&
-  sql.fragment`from ${this.compiledData.from[0]} as ${this.getTableAlias()}`}
+${
+  this.compiledData.from &&
+  sql.fragment`from ${this.compiledData.from[0]} as ${this.getTableAlias()}`
+}
 ${this.compiledData.join.length && sql.join(this.compiledData.join, " ")}
 where ${this.buildWhereClause(true, true, options)}
 ${

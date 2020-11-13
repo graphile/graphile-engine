@@ -1,0 +1,26 @@
+mutation {
+  deleteLetterDescriptionByLetter(input: { letter: C }) {
+    letterDescription {
+      id
+      letter
+    }
+  }
+  createLetterDescription(
+    input: {
+      letterDescription: {
+        letter: C
+        description: "One does like to see the letter C"
+      }
+    }
+  ) {
+    letterDescription {
+      id
+      letter
+      description
+    }
+  }
+
+  referencingTableMutation(input: { t: { enum1: A1, enum2: B2, enum3: C4 } }) {
+    integer
+  }
+}
