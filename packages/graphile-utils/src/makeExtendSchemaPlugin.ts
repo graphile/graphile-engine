@@ -545,7 +545,6 @@ export default function makeExtendSchemaPlugin(
         const {
           extend,
           [`ExtendSchemaPlugin_${uniqueId}_typeExtensions`]: typeExtensions,
-          [`ExtendSchemaPlugin_${uniqueId}_resolvers`]: resolvers,
         } = build;
         const { Self } = context;
         if (typeExtensions.GraphQLInterfaceType[Self.name]) {
