@@ -36,9 +36,10 @@ import {
   GraphQLList,
   GraphQLEnumType,
   GraphQLDirective,
+  InputObjectTypeExtensionNode,
+  InterfaceTypeExtensionNode,
 } from "graphql";
 import { GraphileEmbed } from "./gql";
-import { InputObjectTypeExtensionNode } from "graphql/language/ast";
 
 import { GraphileHelpers, makeFieldHelpers } from "./fieldHelpers";
 
