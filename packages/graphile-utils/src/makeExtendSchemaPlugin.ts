@@ -142,6 +142,7 @@ export default function makeExtendSchemaPlugin(
         },
         GraphQLInputObjectType: {},
         GraphQLObjectType: {},
+        GraphQLInterfaceType: {},
       };
       const newTypes: Array<NewTypeDef> = [];
       mergedTypeDefinitions.forEach(definition => {
@@ -162,6 +163,12 @@ export default function makeExtendSchemaPlugin(
             typeExtensions.GraphQLInputObjectType[name] = [];
           }
           typeExtensions.GraphQLInputObjectType[name].push(definition);
+        } else if (definition.kind === "InterfaceTypeExtension") {
+          const name = getName(definition.name);
+          if (!typeExtensions.GraphQLInterfaceType[name]) {
+            typeExtensions.GraphQLInterfaceType[name] = [];
+          }
+          typeExtensions.GraphQLInterfaceType[name].push(definition);
         } else if (definition.kind === "ObjectTypeDefinition") {
           newTypes.push({
             type: GraphQLObjectType,
@@ -531,6 +538,41 @@ export default function makeExtendSchemaPlugin(
         return fields;
       }
     });
+
+    builder.hook(
+      "GraphQLInterfaceType:fields",
+      (fields, build, context: any) => {
+        const {
+          extend,
+          [`ExtendSchemaPlugin_${uniqueId}_typeExtensions`]: typeExtensions,
+          [`ExtendSchemaPlugin_${uniqueId}_resolvers`]: resolvers,
+        } = build;
+        const { Self } = context;
+        if (typeExtensions.GraphQLInterfaceType[Self.name]) {
+          const newFields = typeExtensions.GraphQLInterfaceType[
+            Self.name
+          ].reduce(
+            (
+              memo: GraphQLFieldConfigMap<any, any>,
+              extension: InterfaceTypeExtensionNode
+            ) => {
+              const moreFields = getFields(
+                Self,
+                extension.fields,
+                {}, // No resolvers for interfaces
+                context,
+                build
+              );
+              return extend(memo, moreFields);
+            },
+            {}
+          );
+          return extend(fields, newFields);
+        } else {
+          return fields;
+        }
+      }
+    );
   };
 
   function getName(name: NameNode) {

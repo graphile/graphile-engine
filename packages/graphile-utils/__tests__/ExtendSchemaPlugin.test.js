@@ -822,17 +822,27 @@ it("supports interfaces and unions", async () => {
           abc: [ABC!]
           named: [Named!]
         }
+
+        extend interface Named {
+          nameLanguage: String
+        }
+        extend type A {
+          nameLanguage: String
+        }
+        extend type B {
+          nameLanguage: String
+        }
       `,
       resolvers: {
         Query: {
           abc: () => [
-            { name: "A-one", a: 1 },
-            { name: "B-two", b: 2 },
+            { name: "A-one", a: 1, nameLanguage: "en" },
+            { name: "B-two", b: 2, nameLanguage: "en" },
             { c: 3 },
           ],
           named: () => [
-            { name: "A-one", a: 1 },
-            { name: "B-two", b: 2 },
+            { name: "A-one", a: 1, nameLanguage: "en" },
+            { name: "B-two", b: 2, nameLanguage: "en" },
           ],
         },
         ABC: {
@@ -862,10 +872,12 @@ it("supports interfaces and unions", async () => {
           __typename
           ... on A {
             name
+            nameLanguage
             a
           }
           ... on B {
             name
+            nameLanguage
             b
           }
           ... on C {
@@ -875,6 +887,7 @@ it("supports interfaces and unions", async () => {
         named {
           __typename
           name
+          nameLanguage
           ... on A {
             a
           }

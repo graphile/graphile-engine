@@ -411,15 +411,18 @@ union ABC = A | B | C
 type A implements Named {
   name: String!
   a: Int!
+  nameLanguage: String
 }
 
 interface Named {
   name: String!
+  nameLanguage: String
 }
 
 type B implements Named {
   name(suffix: String): String!
   b: Int!
+  nameLanguage: String
 }
 
 type C {
@@ -435,11 +438,13 @@ Object {
       "__typename": "A",
       "a": 1,
       "name": "A-one",
+      "nameLanguage": "en",
     },
     Object {
       "__typename": "B",
       "b": 2,
       "name": "B-two",
+      "nameLanguage": "en",
     },
     Object {
       "__typename": "C",
@@ -451,11 +456,13 @@ Object {
       "__typename": "A",
       "a": 1,
       "name": "A-one",
+      "nameLanguage": "en",
     },
     Object {
       "__typename": "B",
       "b": 2,
       "name": "B-two",
+      "nameLanguage": "en",
     },
   ],
 }
