@@ -114,6 +114,7 @@ export default function makeExtendSchemaPlugin(
         GraphQLScalarType,
         GraphQLDirective,
         GraphQLUnionType,
+        GraphQLInterfaceType,
       } = graphql;
       const { typeDefs, resolvers = {} } =
         typeof generator === "function"
@@ -176,6 +177,11 @@ export default function makeExtendSchemaPlugin(
             type: GraphQLUnionType,
             definition,
           });
+        } else if (definition.kind === "InterfaceTypeDefinition") {
+          newTypes.push({
+            type: GraphQLInterfaceType,
+            definition,
+          });
         } else if (definition.kind === "DirectiveDefinition") {
           newTypes.push({
             type: GraphQLDirective,
@@ -230,6 +236,7 @@ export default function makeExtendSchemaPlugin(
           GraphQLObjectType,
           GraphQLInputObjectType,
           GraphQLUnionType,
+          GraphQLInterfaceType,
           GraphQLScalarType,
           GraphQLDirective,
           Kind,
@@ -369,6 +376,42 @@ export default function makeExtendSchemaPlugin(
               },
               ...(resolveType ? { resolveType } : null),
               ...(description ? { description } : null),
+            },
+            scope
+          );
+        } else if (type === GraphQLInterfaceType) {
+          // https://graphql.org/graphql-js/type/#graphqluniontype
+          const name = getName(definition.name);
+          const description = getDescription(definition.description);
+          const directives = getDirectives(definition.directives);
+          const scope = {
+            __origin: `makeExtendSchemaPlugin`,
+            directives,
+            ...(directives.scope || {}),
+          };
+          const resolveType = resolvers[name] && resolvers[name].__resolveType;
+          newWithHooks(
+            type,
+            {
+              name,
+              ...(resolveType ? { resolveType } : null),
+              ...(description ? { description } : null),
+              fields: (fieldsContext: {
+                Self: typeof type;
+                fieldWithHooks: any;
+              }) =>
+                getFields(
+                  fieldsContext.Self,
+                  definition.fields,
+                  {}, // Interface doesn't need resolvers
+                  fieldsContext,
+                  build
+                ),
+              ...(description
+                ? {
+                    description,
+                  }
+                : null),
             },
             scope
           );
@@ -531,14 +574,9 @@ export default function makeExtendSchemaPlugin(
 
   function getInterfaces(
     interfaces: ReadonlyArray<NamedTypeNode>,
-    _build: Build
+    build: Build
   ) {
-    if (interfaces.length) {
-      throw new Error(
-        `We don't support interfaces via makeExtendSchemaPlugin yet; PRs welcome!`
-      );
-    }
-    return [];
+    return interfaces.map(i => build.getTypeByName(i.name.value));
   }
 
   function getValue(
