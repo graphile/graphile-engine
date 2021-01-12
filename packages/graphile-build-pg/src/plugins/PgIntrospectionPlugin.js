@@ -81,6 +81,9 @@ export type PgClass = {
   aclUpdatable: boolean,
   aclDeletable: boolean,
   canUseAsterisk: boolean,
+
+  // eslint-disable-next-line flowtype/no-weak-types
+  _internalEnumData?: any[], // This is Graphile internal, do not use this.
 };
 
 export type PgType = {
@@ -526,7 +529,7 @@ function enumTables(introspectionResults) {
     const descriptionColumn = enumTableColumns.find(
       attr => attr.name === "description" || attr.tags.enumDescription
     );
-    const allData = klass.fakeEnumData;
+    const allData = klass._internalEnumData || [];
 
     enumConstraints.forEach(constraint => {
       const col = enumTableColumns.find(
@@ -795,7 +798,7 @@ Original error: ${e.message}
 `);
                 }
 
-                klass.fakeEnumData = allData;
+                klass._internalEnumData = allData;
               }
             })
           );
