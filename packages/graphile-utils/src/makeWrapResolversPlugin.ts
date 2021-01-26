@@ -27,19 +27,33 @@ interface ResolverWrapperRequirements {
   siblingColumns?: Array<{ column: string; alias: string }>;
 }
 
-interface ResolverWrapperRule {
+interface ResolverWrapperRule<
+  TSource extends unknown = any,
+  TContext extends unknown = any,
+  TArgs extends unknown = { [argName: string]: any }
+> {
   requires?: ResolverWrapperRequirements;
-  resolve?: ResolverWrapperFn;
+  resolve?: ResolverWrapperFn<TSource, TContext, TArgs>;
   // subscribe?: ResolverWrapperFn;
 }
 
-interface ResolverWrapperRules {
+interface ResolverWrapperRules<
+  TSource extends unknown = any,
+  TContext extends unknown = any,
+  TArgs extends unknown = { [argName: string]: any }
+> {
   [typeName: string]: {
-    [fieldName: string]: ResolverWrapperRule | ResolverWrapperFn;
+    [fieldName: string]:
+      | ResolverWrapperRule<TSource, TContext, TArgs>
+      | ResolverWrapperFn<TSource, TContext, TArgs>;
   };
 }
 
-type ResolverWrapperRulesGenerator = (options: Options) => ResolverWrapperRules;
+type ResolverWrapperRulesGenerator<
+  TSource extends unknown = any,
+  TContext extends unknown = any,
+  TArgs extends unknown = { [argName: string]: any }
+> = (options: Options) => ResolverWrapperRules<TSource, TContext, TArgs>;
 
 type ResolverWrapperFilter<T> = (
   context: Context<GraphQLObjectType>,
@@ -48,21 +62,44 @@ type ResolverWrapperFilter<T> = (
   options: Options
 ) => T | null;
 
-type ResolverWrapperFilterRule<T> = (
+type ResolverWrapperFilterRule<
+  T,
+  TSource extends unknown = any,
+  TContext extends unknown = any,
+  TArgs extends unknown = { [argName: string]: any }
+> = (
   match: T
-) => ResolverWrapperRule | ResolverWrapperFn;
+) =>
+  | ResolverWrapperRule<TSource, TContext, TArgs>
+  | ResolverWrapperFn<TSource, TContext, TArgs>;
 
-export default function makeWrapResolversPlugin(
-  rulesOrGenerator: ResolverWrapperRules | ResolverWrapperRulesGenerator
+export default function makeWrapResolversPlugin<
+  TSource extends unknown = any,
+  TContext extends unknown = any,
+  TArgs extends unknown = { [argName: string]: any }
+>(
+  rulesOrGenerator:
+    | ResolverWrapperRules<TSource, TContext, TArgs>
+    | ResolverWrapperRulesGenerator<TSource, TContext, TArgs>
 ): Plugin;
-export default function makeWrapResolversPlugin<T>(
+export default function makeWrapResolversPlugin<
+  T,
+  TSource extends unknown = any,
+  TContext extends unknown = any,
+  TArgs extends unknown = { [argName: string]: any }
+>(
   filter: ResolverWrapperFilter<T>,
-  rule: ResolverWrapperFilterRule<T>
+  rule: ResolverWrapperFilterRule<T, TSource, TContext, TArgs>
 ): Plugin;
-export default function makeWrapResolversPlugin<T>(
+export default function makeWrapResolversPlugin<
+  T,
+  TSource extends unknown = any,
+  TContext extends unknown = any,
+  TArgs extends unknown = { [argName: string]: any }
+>(
   rulesOrGeneratorOrFilter:
-    | ResolverWrapperRules
-    | ResolverWrapperRulesGenerator
+    | ResolverWrapperRules<TSource, TContext, TArgs>
+    | ResolverWrapperRulesGenerator<TSource, TContext, TArgs>
     | ResolverWrapperFilter<T>,
   rule?: ResolverWrapperFilterRule<T>
 ): Plugin {
