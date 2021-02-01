@@ -143,7 +143,7 @@ export default function makeWrapResolversPlugin<T>(
       if (!resolveWrapperOrSpec) {
         return field;
       }
-      const resolveWrapper: ResolverWrapperFn<unknown, unknown> | undefined =
+      const resolveWrapper: ResolverWrapperFn | undefined =
         typeof resolveWrapperOrSpec === "function"
           ? resolveWrapperOrSpec
           : resolveWrapperOrSpec.resolve;
