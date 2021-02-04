@@ -476,13 +476,14 @@ export default function makeProcField(
                 if (aggregateWrapper) {
                   return aggregateWrapper(sqlFunctionCall);
                 } else {
-                  return makeQuery(
+                  const query = makeQuery(
                     parsedResolveInfoFragment,
                     ReturnType,
                     sqlFunctionCall,
                     functionAlias,
                     queryBuilder
                   );
+                  return sql.fragment`(${query})`;
                 }
               }, getSafeAliasFromAlias(parsedResolveInfoFragment.alias));
             },
