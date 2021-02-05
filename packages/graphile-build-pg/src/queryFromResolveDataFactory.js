@@ -58,9 +58,8 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
     calculateHasPreviousPage,
     usesCursor: explicitlyUsesCursor,
   } = resolveData;
-  // Convert pgAggregateQuery to pgNamedQueryContainer/pgNamedQuery combo
-  if (pgAggregateQuery && pgAggregateQuery.length) {
-    // Push a query container
+  // Push a query container for aggregates
+  if ((pgAggregateQuery && pgAggregateQuery.length) || pgNamedQuery.length) {
     pgNamedQueryContainer.push({
       name: "aggregates",
       query: ({ queryBuilder, options, innerQueryBuilder }) => sql.fragment`\
@@ -70,7 +69,9 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   where ${queryBuilder.buildWhereClause(false, false, options)}
 )`,
     });
-
+  }
+  // Convert pgAggregateQuery to pgNamedQueryContainer/pgNamedQuery combo
+  if (pgAggregateQuery && pgAggregateQuery.length) {
     // And a query for each previous query
     pgAggregateQuery.forEach(query => {
       pgNamedQuery.push({ name: "aggregates", query });
