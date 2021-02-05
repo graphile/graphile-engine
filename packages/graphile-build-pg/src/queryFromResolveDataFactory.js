@@ -7,11 +7,25 @@ import type { SQL } from "pg-sql2";
 import type { DataForType } from "graphile-build";
 import isSafeInteger from "lodash/isSafeInteger";
 import assert from "assert";
+import { inspect } from "util";
 
 // eslint-disable-next-line flowtype/no-weak-types
 type GraphQLContext = any;
 
 const identity = _ => _ !== null && _ !== undefined;
+
+function assertSafeName(name: mixed) {
+  if (typeof name !== "string") {
+    throw new Error(
+      `Expected name to be a string; instead received '${inspect(name)}'`
+    );
+  }
+  if (!/^[@a-zA-Z0-9_]{1,63}$/.test(name)) {
+    throw new Error(
+      `Name '${name}' is not safe - either it is too long, too short, or has invalid characters`
+    );
+  }
+}
 
 export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   from: SQL,
@@ -35,13 +49,20 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
 ) => {
   const {
     pgQuery,
-    pgAggregateQuery,
+    pgAggregateQuery, // Deprecated, use pgNamedQuery with the `aggregates` key instead
+    pgNamedQuery = [],
     pgCursorPrefix: reallyRawCursorPrefix,
     pgDontUseAsterisk,
     calculateHasNextPage,
     calculateHasPreviousPage,
     usesCursor: explicitlyUsesCursor,
   } = resolveData;
+  // Convert pgAggregateQuery to pgNamedQuery
+  if (pgAggregateQuery && pgAggregateQuery.length) {
+    pgAggregateQuery.forEach(query => {
+      pgNamedQuery.push({ name: "aggregates", query });
+    });
+  }
 
   const preventAsterisk = pgDontUseAsterisk
     ? pgDontUseAsterisk.length > 0
@@ -450,30 +471,41 @@ OR\
         fields.push([hasPreviousPage, "hasPreviousPage"]);
       }
     }
-    if (pgAggregateQuery && pgAggregateQuery.length) {
-      const aggregateQueryBuilder = new QueryBuilder(
-        queryBuilderOptions,
-        context,
-        rootValue
-      );
-      aggregateQueryBuilder.from(
-        queryBuilder.getTableExpression(),
-        queryBuilder.getTableAlias()
-      );
-
-      for (let i = 0, l = pgAggregateQuery.length; i < l; i++) {
-        pgAggregateQuery[i](aggregateQueryBuilder);
-      }
-      const aggregateJsonBuildObject = aggregateQueryBuilder.build({
-        onlyJsonField: true,
+    if (pgNamedQuery && pgNamedQuery.length) {
+      const groups = {};
+      pgNamedQuery.forEach(({ name, query }) => {
+        assertSafeName(name);
+        if (!groups[name]) {
+          groups[name] = [];
+        }
+        groups[name].push(query);
       });
-      const aggregatesSql = sql.fragment`\
+      Object.keys(groups).forEach(groupName => {
+        const queryCallbacks = groups[groupName];
+        const aggregateQueryBuilder = new QueryBuilder(
+          queryBuilderOptions,
+          context,
+          rootValue
+        );
+        aggregateQueryBuilder.from(
+          queryBuilder.getTableExpression(),
+          queryBuilder.getTableAlias()
+        );
+
+        for (let i = 0, l = queryCallbacks.length; i < l; i++) {
+          queryCallbacks[i](aggregateQueryBuilder);
+        }
+        const aggregateJsonBuildObject = aggregateQueryBuilder.build({
+          onlyJsonField: true,
+        });
+        const aggregatesSql = sql.fragment`\
 (
   select ${aggregateJsonBuildObject}
   from ${queryBuilder.getTableExpression()} as ${queryBuilder.getTableAlias()}
   where ${queryBuilder.buildWhereClause(false, false, options)}
 )`;
-      fields.push([aggregatesSql, "aggregates"]);
+        fields.push([aggregatesSql, groupName]);
+      });
     }
     if (options.withPaginationAsFields) {
       return sql.fragment`${sqlWith} select ${sql.join(

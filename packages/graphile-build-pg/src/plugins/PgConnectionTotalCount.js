@@ -39,11 +39,14 @@ export default (function PgConnectionTotalCount(builder) {
             ({ addDataGenerator }) => {
               addDataGenerator(() => {
                 return {
-                  pgAggregateQuery: aggregateQueryBuilder => {
-                    aggregateQueryBuilder.select(
-                      sql.fragment`count(1)`,
-                      "totalCount"
-                    );
+                  pgNamedQuery: {
+                    name: "aggregates",
+                    query: aggregateQueryBuilder => {
+                      aggregateQueryBuilder.select(
+                        sql.fragment`count(1)`,
+                        "totalCount"
+                      );
+                    },
                   },
                 };
               });
