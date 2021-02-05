@@ -2,7 +2,6 @@
 import type { Plugin, Build } from "graphile-build";
 import type { PgClass, PgProc } from "./PgIntrospectionPlugin";
 
-// This interface is not official yet, don't rely on it.
 export const getComputedColumnDetails = (
   build: Build,
   table: PgClass,

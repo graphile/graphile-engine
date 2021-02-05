@@ -3,7 +3,7 @@ const nullableIf = (GraphQLNonNull, condition, Type) =>
   condition ? Type : new GraphQLNonNull(Type);
 
 import type { Build, FieldWithHooksFunction } from "graphile-build";
-import type { PgProc } from "./PgIntrospectionPlugin";
+import type { PgProc, PgType } from "./PgIntrospectionPlugin";
 import type { SQL } from "pg-sql2";
 import debugSql from "./debugSql";
 import chalk from "chalk";
@@ -28,12 +28,23 @@ export default function makeProcField(
     isMutation = false,
     isRootQuery = false,
     forceList = false,
+    aggregateWrapper = null,
+    description: overrideDescription = null,
+    pgTypeAndModifierModifier = null,
   }: {
     fieldWithHooks: FieldWithHooksFunction,
     computed?: boolean,
     isMutation?: boolean,
     isRootQuery?: boolean,
     forceList?: boolean,
+    aggregateWrapper?: null | ((sql: SQL) => SQL),
+    description?: string,
+    pgTypeAndModifierModifier?:
+      | null
+      | ((
+          pgType: PgType,
+          pgTypeModifier: null | string | number
+        ) => [PgType, null | string | number]),
   }
 ) {
   const {
@@ -163,7 +174,24 @@ export default function makeProcField(
     }
   });
 
-  const rawReturnType = introspectionResultsByKind.typeById[proc.returnTypeId];
+  /**
+   * This is the return type the function claims to have; we
+   * should not use it anywhere but these next few lines.
+   */
+  const baseReturnType = introspectionResultsByKind.typeById[proc.returnTypeId];
+
+  /**
+   * This is the return type we treat it as having, e.g. in
+   * case it was modified by wrapping it in an aggregate or
+   * similar.
+   */
+  const rawReturnType = pgTypeAndModifierModifier
+    ? pgTypeAndModifierModifier(baseReturnType, null)[0]
+    : baseReturnType;
+
+  /**
+   * This is the type without the array wrapper.
+   */
   const returnType = rawReturnType.isPgArray
     ? rawReturnType.arrayItemType
     : rawReturnType;
@@ -312,7 +340,7 @@ export default function makeProcField(
           };
         });
       }
-      function makeMutationCall(
+      function makeSqlFunctionCall(
         parsedResolveInfoFragment,
         ReturnType,
         { implicitArgs = [] } = {}
@@ -438,21 +466,25 @@ export default function makeProcField(
               queryBuilder.select(() => {
                 const parentTableAlias = queryBuilder.getTableAlias();
                 const functionAlias = sql.identifier(Symbol());
-                const sqlMutationQuery = makeMutationCall(
+                const sqlFunctionCall = makeSqlFunctionCall(
                   parsedResolveInfoFragment,
                   ReturnType,
                   {
                     implicitArgs: [parentTableAlias],
                   }
                 );
-                const query = makeQuery(
-                  parsedResolveInfoFragment,
-                  ReturnType,
-                  sqlMutationQuery,
-                  functionAlias,
-                  queryBuilder
-                );
-                return sql.fragment`(${query})`;
+                if (aggregateWrapper) {
+                  return aggregateWrapper(sqlFunctionCall);
+                } else {
+                  const query = makeQuery(
+                    parsedResolveInfoFragment,
+                    ReturnType,
+                    sqlFunctionCall,
+                    functionAlias,
+                    queryBuilder
+                  );
+                  return sql.fragment`(${query})`;
+                }
               }, getSafeAliasFromAlias(parsedResolveInfoFragment.alias));
             },
           };
@@ -585,7 +617,9 @@ export default function makeProcField(
             };
 
       return {
-        description: proc.description
+        description: overrideDescription
+          ? overrideDescription
+          : proc.description
           ? proc.description
           : isMutation
           ? null
@@ -661,7 +695,7 @@ export default function makeProcField(
               const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
               parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
               const functionAlias = sql.identifier(Symbol());
-              const sqlMutationQuery = makeMutationCall(
+              const sqlFunctionCall = makeSqlFunctionCall(
                 parsedResolveInfoFragment,
                 resolveInfo.returnType,
                 {}
@@ -700,7 +734,7 @@ export default function makeProcField(
                         : isPgRecord
                         ? sql.query`${intermediateIdentifier}.*`
                         : sql.query`${intermediateIdentifier} as ${functionAlias}`
-                    } from ${sqlMutationQuery} ${intermediateIdentifier}`,
+                    } from ${sqlFunctionCall} ${intermediateIdentifier}`,
                     functionAlias,
                     query,
                     isPgClass,
@@ -722,7 +756,7 @@ export default function makeProcField(
                 const query = makeQuery(
                   parsedResolveInfoFragment,
                   resolveInfo.returnType,
-                  sqlMutationQuery,
+                  sqlFunctionCall,
                   functionAlias,
                   null,
                   resolveContext,
