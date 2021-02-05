@@ -50,6 +50,7 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   const {
     pgQuery,
     pgAggregateQuery, // Deprecated, use pgNamedQuery with the `aggregates` key instead
+    pgNamedQueryContainer = [],
     pgNamedQuery = [],
     pgCursorPrefix: reallyRawCursorPrefix,
     pgDontUseAsterisk,
@@ -59,6 +60,18 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   } = resolveData;
   // Convert pgAggregateQuery to pgNamedQuery
   if (pgAggregateQuery && pgAggregateQuery.length) {
+    // Push a query container
+    pgNamedQueryContainer.push({
+      name: "aggregates",
+      query: ({ queryBuilder, options, innerQueryBuilder }) => sql.fragment`\
+(
+  select ${innerQueryBuilder.build({ onlyJsonField: true })}
+  from ${queryBuilder.getTableExpression()} as ${queryBuilder.getTableAlias()}
+  where ${queryBuilder.buildWhereClause(false, false, options)}
+)`,
+    });
+
+    // And a query for each previous query
     pgAggregateQuery.forEach(query => {
       pgNamedQuery.push({ name: "aggregates", query });
     });
@@ -482,28 +495,44 @@ OR\
       });
       Object.keys(groups).forEach(groupName => {
         const queryCallbacks = groups[groupName];
-        const aggregateQueryBuilder = new QueryBuilder(
+
+        // Get container
+        const containers = pgNamedQueryContainer.filter(
+          c => c.name === groupName
+        );
+        if (containers.length === 0) {
+          throw new Error(
+            `${queryCallbacks.length} pgNamedQuery entries with name: '${groupName}' existed, but there was no matching pgNamedQueryContainer.`
+          );
+        }
+        if (containers.length > 1) {
+          throw new Error(
+            `${containers.length} pgNamedQueryContainer entries with name: '${groupName}' existed, but there should be exactly one.`
+          );
+        }
+        const container = containers[0];
+
+        const innerQueryBuilder = new QueryBuilder(
           queryBuilderOptions,
           context,
           rootValue
         );
-        aggregateQueryBuilder.from(
+        innerQueryBuilder.from(
           queryBuilder.getTableExpression(),
           queryBuilder.getTableAlias()
         );
 
         for (let i = 0, l = queryCallbacks.length; i < l; i++) {
-          queryCallbacks[i](aggregateQueryBuilder);
+          queryCallbacks[i](innerQueryBuilder);
         }
-        const aggregateJsonBuildObject = aggregateQueryBuilder.build({
-          onlyJsonField: true,
+
+        // Generate the SQL statement (e.g. `select ${innerQueryBuilder.build({onlyJsonField: true})} from ${queryBuilder.getTableExpression()} as ...`)
+        const aggregatesSql = container.query({
+          queryBuilder,
+          innerQueryBuilder,
+          options,
         });
-        const aggregatesSql = sql.fragment`\
-(
-  select ${aggregateJsonBuildObject}
-  from ${queryBuilder.getTableExpression()} as ${queryBuilder.getTableAlias()}
-  where ${queryBuilder.buildWhereClause(false, false, options)}
-)`;
+
         fields.push([aggregatesSql, groupName]);
       });
     }
