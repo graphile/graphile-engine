@@ -49,7 +49,7 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
 ) => {
   const {
     pgQuery,
-    pgAggregateQuery, // Deprecated, use pgNamedQuery with the `aggregates` key instead
+    pgAggregateQuery, // Shorthand for using pgNamedQueryContainer/pgNamedQuery combo
     pgNamedQueryContainer = [],
     pgNamedQuery = [],
     pgCursorPrefix: reallyRawCursorPrefix,
@@ -58,7 +58,7 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
     calculateHasPreviousPage,
     usesCursor: explicitlyUsesCursor,
   } = resolveData;
-  // Convert pgAggregateQuery to pgNamedQuery
+  // Convert pgAggregateQuery to pgNamedQueryContainer/pgNamedQuery combo
   if (pgAggregateQuery && pgAggregateQuery.length) {
     // Push a query container
     pgNamedQueryContainer.push({
