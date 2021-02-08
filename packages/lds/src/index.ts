@@ -10,6 +10,7 @@ export interface Options {
   tablePattern?: string;
   sleepDuration?: number;
   temporary?: boolean;
+  liveSSL?: boolean;
 }
 
 const DROP_STALE_SLOTS_INTERVAL = 15 * 60 * 1000;
@@ -62,12 +63,14 @@ export default async function subscribeToLogicalDecoding(
     tablePattern = "*.*",
     sleepDuration = 200,
     temporary = false,
+    liveSSL = false,
   } = options;
   let lastLsn: string | null = null;
   const client = new PgLogicalDecoding(connectionString, {
     tablePattern,
     slotName,
     temporary,
+    ssl: liveSSL,
   });
 
   // We must do this before we create the temporary slot, since errors will release a temporary slot immediately

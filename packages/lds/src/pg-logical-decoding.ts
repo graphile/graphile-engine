@@ -85,6 +85,7 @@ interface Options {
   tablePattern?: string;
   slotName?: string;
   temporary?: boolean;
+  ssl?: boolean;
 }
 
 export default class PgLogicalDecoding extends EventEmitter {
@@ -102,6 +103,7 @@ export default class PgLogicalDecoding extends EventEmitter {
       tablePattern = "*.*",
       slotName = "postgraphile",
       temporary = false,
+      ssl = false,
     } = options || {};
     this.tablePattern = tablePattern;
     this.slotName = slotName;
@@ -110,6 +112,7 @@ export default class PgLogicalDecoding extends EventEmitter {
     this.pool = new pg.Pool({
       connectionString: this.connectionString,
       max: 1,
+      ssl,
     });
     this.pool.on("error", this.onPoolError);
   }

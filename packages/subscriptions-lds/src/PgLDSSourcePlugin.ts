@@ -26,6 +26,7 @@ export class LDSLiveSource {
 
   private reconnecting: boolean;
   private live: boolean;
+  private liveSSL: boolean;
   private subscriptions: {
     [topic: string]: Array<[SubscriptionCallback, Predicate | void]>;
   };
@@ -37,7 +38,13 @@ export class LDSLiveSource {
    * @param url - If not specified, we'll spawn our own LDS listener
    */
   constructor(options: Options) {
-    const { ldsURL, connectionString, sleepDuration, tablePattern } = options;
+    const {
+      ldsURL,
+      connectionString,
+      sleepDuration,
+      tablePattern,
+      liveSSL = false,
+    } = options;
     if (!ldsURL && !connectionString) {
       throw new Error(
         "No LDS URL or connectionString was passed to LDSLiveSource; this likely means that you don't have `ownerConnectionString` specified in the PostGraphile library call."
@@ -53,6 +60,7 @@ export class LDSLiveSource {
     this.ws = null;
     this.reconnecting = false;
     this.live = true;
+    this.liveSSL = liveSSL;
     this.subscriptions = {};
   }
 
@@ -74,6 +82,7 @@ export class LDSLiveSource {
           temporary: true,
           sleepDuration: this.sleepDuration,
           tablePattern: this.tablePattern,
+          liveSSL: this.liveSSL,
         }
       );
     }
@@ -291,6 +300,7 @@ interface Options {
    * Not valid when used with `ldsUrl`
    */
   tablePattern?: string;
+  liveSSL?: boolean;
 }
 
 async function makeLDSLiveSource(options: Options): Promise<LDSLiveSource> {
@@ -314,6 +324,7 @@ const PgLDSSourcePlugin: Plugin = async function (
   {
     pgLDSUrl = process.env.LDS_URL,
     pgOwnerConnectionString,
+    liveSSL = false,
     ldsSleepDuration = getSafeNumber(process.env.LD_WAIT),
     ldsTablePattern = process.env.LD_TABLE_PATTERN,
   }
@@ -326,6 +337,7 @@ const PgLDSSourcePlugin: Plugin = async function (
       connectionString: pgOwnerConnectionString as string,
       sleepDuration: ldsSleepDuration,
       tablePattern: ldsTablePattern,
+      liveSSL,
     });
     builder.hook(
       "build",

@@ -113,6 +113,7 @@ export interface PostGraphileCoreOptions {
   hideIndexWarnings?: boolean;
   subscriptions?: boolean;
   live?: boolean;
+  liveSSL?: boolean;
   ownerConnectionString?: string;
 }
 
@@ -233,6 +234,7 @@ export const getPostGraphileBuilder = async (
     hideIndexWarnings = false,
     subscriptions: inSubscriptions = false, // TODO:v5: Change to 'true' in v5
     live = false,
+    liveSSL = false,
     ownerConnectionString,
   } = options;
   const subscriptions = live || inSubscriptions;
@@ -421,6 +423,7 @@ export const getPostGraphileBuilder = async (
      */
     subscriptions,
     live,
+    liveSSL,
 
     ...graphileBuildOptions,
     ...graphqlBuildOptions, // DEPRECATED!
