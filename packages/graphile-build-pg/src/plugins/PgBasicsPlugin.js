@@ -25,7 +25,7 @@ import baseOmit, {
   FILTER,
   EXECUTE,
 } from "../omit";
-import makeProcField from "./makeProcField";
+import makeProcField, { procFieldDetails } from "./makeProcField";
 import parseIdentifier from "../parseIdentifier";
 import viaTemporaryTable from "./viaTemporaryTable";
 import chalk from "chalk";
@@ -349,6 +349,7 @@ export default (function PgBasicsPlugin(
         pgAddStartEndCursor: addStartEndCursor,
         pgOmit,
         pgMakeProcField: makeProcField,
+        pgProcFieldDetails: procFieldDetails,
         pgParseIdentifier: parseIdentifier,
         pgViaTemporaryTable: viaTemporaryTable,
         describePgEntity,

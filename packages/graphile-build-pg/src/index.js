@@ -42,9 +42,7 @@ import * as inflections from "./inflections";
 
 import parseIdentifier from "./parseIdentifier";
 import omit from "./omit";
-
 export { formatSQLForDebugging } from "./plugins/debugSql";
-export { procFieldDetails } from "./plugins/makeProcField";
 
 export { parseIdentifier, omit };
 
