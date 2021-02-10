@@ -26,6 +26,7 @@ import baseOmit, {
   EXECUTE,
 } from "../omit";
 import makeProcField, { procFieldDetails } from "./makeProcField";
+import { getComputedColumnDetails } from "./PgComputedColumnsPlugin";
 import parseIdentifier from "../parseIdentifier";
 import viaTemporaryTable from "./viaTemporaryTable";
 import chalk from "chalk";
@@ -350,6 +351,7 @@ export default (function PgBasicsPlugin(
         pgOmit,
         pgMakeProcField: makeProcField,
         pgProcFieldDetails: procFieldDetails,
+        pgGetComputedColumnDetails: getComputedColumnDetails,
         pgParseIdentifier: parseIdentifier,
         pgViaTemporaryTable: viaTemporaryTable,
         describePgEntity,

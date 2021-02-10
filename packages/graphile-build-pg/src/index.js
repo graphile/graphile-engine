@@ -17,9 +17,7 @@ import PgColumnDeprecationPlugin from "./plugins/PgColumnDeprecationPlugin";
 import PgForwardRelationPlugin from "./plugins/PgForwardRelationPlugin";
 import PgBackwardRelationPlugin from "./plugins/PgBackwardRelationPlugin";
 import PgRowByUniqueConstraint from "./plugins/PgRowByUniqueConstraint";
-import PgComputedColumnsPlugin, {
-  getComputedColumnDetails,
-} from "./plugins/PgComputedColumnsPlugin";
+import PgComputedColumnsPlugin from "./plugins/PgComputedColumnsPlugin";
 import PgQueryProceduresPlugin from "./plugins/PgQueryProceduresPlugin";
 import PgOrderAllColumnsPlugin from "./plugins/PgOrderAllColumnsPlugin";
 import PgOrderComputedColumnsPlugin from "./plugins/PgOrderComputedColumnsPlugin";
@@ -83,7 +81,7 @@ export const defaultPlugins = [
   PgMutationPayloadEdgePlugin,
 ];
 
-export { inflections, getComputedColumnDetails };
+export { inflections };
 
 // TypeScript compatibility
 export { PgEntityKind };
