@@ -7,11 +7,25 @@ import type { SQL } from "pg-sql2";
 import type { DataForType } from "graphile-build";
 import isSafeInteger from "lodash/isSafeInteger";
 import assert from "assert";
+import { inspect } from "util";
 
 // eslint-disable-next-line flowtype/no-weak-types
 type GraphQLContext = any;
 
 const identity = _ => _ !== null && _ !== undefined;
+
+function assertSafeName(name: mixed) {
+  if (typeof name !== "string") {
+    throw new Error(
+      `Expected name to be a string; instead received '${inspect(name)}'`
+    );
+  }
+  if (!/^[@a-zA-Z0-9_]{1,63}$/.test(name)) {
+    throw new Error(
+      `Name '${name}' is not safe - either it is too long, too short, or has invalid characters`
+    );
+  }
+}
 
 export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
   from: SQL,
@@ -35,13 +49,34 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
 ) => {
   const {
     pgQuery,
-    pgAggregateQuery,
+    pgAggregateQuery, // Shorthand for using pgNamedQueryContainer/pgNamedQuery combo
+    pgNamedQueryContainer = [],
+    pgNamedQuery = [],
     pgCursorPrefix: reallyRawCursorPrefix,
     pgDontUseAsterisk,
     calculateHasNextPage,
     calculateHasPreviousPage,
     usesCursor: explicitlyUsesCursor,
   } = resolveData;
+  // Push a query container for aggregates
+  if ((pgAggregateQuery && pgAggregateQuery.length) || pgNamedQuery.length) {
+    pgNamedQueryContainer.push({
+      name: "aggregates",
+      query: ({ queryBuilder, options, innerQueryBuilder }) => sql.fragment`\
+(
+  select ${innerQueryBuilder.build({ onlyJsonField: true })}
+  from ${queryBuilder.getTableExpression()} as ${queryBuilder.getTableAlias()}
+  where ${queryBuilder.buildWhereClause(false, false, options)}
+)`,
+    });
+  }
+  // Convert pgAggregateQuery to pgNamedQueryContainer/pgNamedQuery combo
+  if (pgAggregateQuery && pgAggregateQuery.length) {
+    // And a query for each previous query
+    pgAggregateQuery.forEach(query => {
+      pgNamedQuery.push({ name: "aggregates", query });
+    });
+  }
 
   const preventAsterisk = pgDontUseAsterisk
     ? pgDontUseAsterisk.length > 0
@@ -450,30 +485,57 @@ OR\
         fields.push([hasPreviousPage, "hasPreviousPage"]);
       }
     }
-    if (pgAggregateQuery && pgAggregateQuery.length) {
-      const aggregateQueryBuilder = new QueryBuilder(
-        queryBuilderOptions,
-        context,
-        rootValue
-      );
-      aggregateQueryBuilder.from(
-        queryBuilder.getTableExpression(),
-        queryBuilder.getTableAlias()
-      );
-
-      for (let i = 0, l = pgAggregateQuery.length; i < l; i++) {
-        pgAggregateQuery[i](aggregateQueryBuilder);
-      }
-      const aggregateJsonBuildObject = aggregateQueryBuilder.build({
-        onlyJsonField: true,
+    if (pgNamedQuery && pgNamedQuery.length) {
+      const groups = {};
+      pgNamedQuery.forEach(({ name, query }) => {
+        assertSafeName(name);
+        if (!groups[name]) {
+          groups[name] = [];
+        }
+        groups[name].push(query);
       });
-      const aggregatesSql = sql.fragment`\
-(
-  select ${aggregateJsonBuildObject}
-  from ${queryBuilder.getTableExpression()} as ${queryBuilder.getTableAlias()}
-  where ${queryBuilder.buildWhereClause(false, false, options)}
-)`;
-      fields.push([aggregatesSql, "aggregates"]);
+      Object.keys(groups).forEach(groupName => {
+        const queryCallbacks = groups[groupName];
+
+        // Get container
+        const containers = pgNamedQueryContainer.filter(
+          c => c.name === groupName
+        );
+        if (containers.length === 0) {
+          throw new Error(
+            `${queryCallbacks.length} pgNamedQuery entries with name: '${groupName}' existed, but there was no matching pgNamedQueryContainer.`
+          );
+        }
+        if (containers.length > 1) {
+          throw new Error(
+            `${containers.length} pgNamedQueryContainer entries with name: '${groupName}' existed, but there should be exactly one.`
+          );
+        }
+        const container = containers[0];
+
+        const innerQueryBuilder = new QueryBuilder(
+          queryBuilderOptions,
+          context,
+          rootValue
+        );
+        innerQueryBuilder.from(
+          queryBuilder.getTableExpression(),
+          queryBuilder.getTableAlias()
+        );
+
+        for (let i = 0, l = queryCallbacks.length; i < l; i++) {
+          queryCallbacks[i](innerQueryBuilder);
+        }
+
+        // Generate the SQL statement (e.g. `select ${innerQueryBuilder.build({onlyJsonField: true})} from ${queryBuilder.getTableExpression()} as ...`)
+        const aggregatesSql = container.query({
+          queryBuilder,
+          innerQueryBuilder,
+          options,
+        });
+
+        fields.push([aggregatesSql, groupName]);
+      });
     }
     if (options.withPaginationAsFields) {
       return sql.fragment`${sqlWith} select ${sql.join(
