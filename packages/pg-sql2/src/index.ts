@@ -329,4 +329,9 @@ export function escapeSqlIdentifier(str: string) {
 
 export const blank = query``;
 
-export { query as fragment, nullNode as null };
+export {
+  query as fragment,
+  nullNode as null,
+  trueNode as true,
+  falseNode as false,
+};
