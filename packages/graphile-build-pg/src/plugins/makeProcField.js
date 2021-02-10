@@ -8,6 +8,22 @@ import type { SQL } from "pg-sql2";
 import debugSql from "./debugSql";
 import chalk from "chalk";
 
+type MakeProcOptions = {
+  fieldWithHooks: FieldWithHooksFunction,
+  computed?: boolean,
+  isMutation?: boolean,
+  isRootQuery?: boolean,
+  forceList?: boolean,
+  aggregateWrapper?: null | ((sql: SQL) => SQL),
+  description?: string,
+  pgTypeAndModifierModifier?:
+    | null
+    | ((
+        pgType: PgType,
+        pgTypeModifier: null | string | number
+      ) => [PgType, null | string | number]),
+};
+
 const firstValue = obj => {
   let firstKey;
   for (const k in obj) {
@@ -18,35 +34,15 @@ const firstValue = obj => {
   return obj[firstKey];
 };
 
-export default function makeProcField(
-  fieldName: string,
+export function procFieldDetails(
   proc: PgProc,
   build: {| ...Build |},
-  {
-    fieldWithHooks,
-    computed = false,
-    isMutation = false,
-    isRootQuery = false,
-    forceList = false,
-    aggregateWrapper = null,
-    description: overrideDescription = null,
-    pgTypeAndModifierModifier = null,
-  }: {
-    fieldWithHooks: FieldWithHooksFunction,
+  options: {
     computed?: boolean,
     isMutation?: boolean,
-    isRootQuery?: boolean,
-    forceList?: boolean,
-    aggregateWrapper?: null | ((sql: SQL) => SQL),
-    description?: string,
-    pgTypeAndModifierModifier?:
-      | null
-      | ((
-          pgType: PgType,
-          pgTypeModifier: null | string | number
-        ) => [PgType, null | string | number]),
   }
 ) {
+  const { computed = false, isMutation = false } = options;
   const {
     pgIntrospectionResultsByKind: introspectionResultsByKind,
     pgGetGqlTypeByTypeIdAndModifier,
@@ -84,9 +80,6 @@ export default function makeProcField(
     pgPrepareAndRun,
   } = build;
 
-  if (computed && isMutation) {
-    throw new Error("Mutation procedure cannot be computed");
-  }
   const sliceAmount = computed ? 1 : 0;
   const argNames = proc.argTypeIds.reduce((prev, _, idx) => {
     if (
@@ -128,7 +121,7 @@ export default function makeProcField(
     return prev;
   }, []);
   const requiredArgCount = Math.max(0, argNames.length - proc.argDefaultsNum);
-  const variantFromName = (name, _type) => {
+  const variantFromName = name => {
     if (name.match(/(_p|P)atch$/)) {
       return "patch";
     }
@@ -146,7 +139,7 @@ export default function makeProcField(
   const argGqlTypes = argTypes.map((type, idx) => {
     // TODO: PG10 doesn't support the equivalent of pg_attribute.atttypemod on function return values, but maybe a later version might
     const variant =
-      variantFromTags(proc.tags, idx) || variantFromName(argNames[idx], type);
+      variantFromTags(proc.tags, idx) || variantFromName(argNames[idx]);
     const Type = pgGetGqlInputTypeByTypeIdAndModifier(type.id, variant);
     if (!Type) {
       const hint = type.class
@@ -173,6 +166,126 @@ export default function makeProcField(
       return new GraphQLNonNull(Type);
     }
   });
+  // This wants to be compatible with both being field arguments and being
+  // input object fields (e.g. for the aggregates plugin).
+  const inputs = argNames.reduce((memo, argName, argIndex) => {
+    const gqlArgName = inflection.argument(argName, argIndex);
+    memo[gqlArgName] = {
+      type: argGqlTypes[argIndex],
+    };
+    return memo;
+  }, {});
+
+  function makeSqlFunctionCall(
+    rawArgs = {},
+    { implicitArgs = [], unnest = false } = {}
+  ): SQL {
+    const args = isMutation ? rawArgs.input : rawArgs;
+    const sqlArgValues = [];
+    let haveNames = true;
+    for (let argIndex = argNames.length - 1; argIndex >= 0; argIndex--) {
+      const argName = argNames[argIndex];
+      const gqlArgName = inflection.argument(argName, argIndex);
+      const value = args[gqlArgName];
+      const variant =
+        variantFromTags(proc.tags, argIndex) ||
+        variantFromName(argNames[argIndex]);
+
+      const sqlValue = gql2pg(value, argTypes[argIndex], variant);
+
+      if (argIndex + 1 > requiredArgCount && haveNames && value == null) {
+        // No need to pass argument to function
+        continue;
+      } else if (argIndex + 1 > requiredArgCount && haveNames) {
+        const sqlArgName = argName ? sql.identifier(argName) : null;
+        if (sqlArgName) {
+          sqlArgValues.unshift(sql.fragment`${sqlArgName} := ${sqlValue}`);
+        } else {
+          haveNames = false;
+          sqlArgValues.unshift(sqlValue);
+        }
+      } else {
+        sqlArgValues.unshift(sqlValue);
+      }
+    }
+    const functionCall = sql.fragment`${sql.identifier(
+      proc.namespace.name,
+      proc.name
+    )}(${sql.join([...implicitArgs, ...sqlArgValues], ", ")})`;
+    return unnest ? sql.fragment`unnest(${functionCall})` : functionCall;
+  }
+
+  return {
+    inputs,
+    makeSqlFunctionCall,
+    outputArgNames,
+    outputArgTypes,
+  };
+}
+
+export default function makeProcField(
+  fieldName: string,
+  proc: PgProc,
+  build: {| ...Build |},
+  options: ProcFieldOptions
+) {
+  const {
+    fieldWithHooks,
+    computed = false,
+    isMutation = false,
+    isRootQuery = false,
+    forceList = false,
+    aggregateWrapper = null,
+    description: overrideDescription = null,
+    pgTypeAndModifierModifier = null,
+  } = options;
+  const {
+    pgIntrospectionResultsByKind: introspectionResultsByKind,
+    pgGetGqlTypeByTypeIdAndModifier,
+    pgGetGqlInputTypeByTypeIdAndModifier,
+    getTypeByName,
+    pgSql: sql,
+    parseResolveInfo,
+    getSafeAliasFromResolveInfo,
+    getSafeAliasFromAlias,
+    gql2pg,
+    pg2gql,
+    newWithHooks,
+    pgStrictFunctions: strictFunctions,
+    pgTweakFragmentForTypeAndModifier,
+    graphql: {
+      GraphQLNonNull,
+      GraphQLList,
+      GraphQLString,
+      GraphQLObjectType,
+      GraphQLInputObjectType,
+      getNamedType,
+      isCompositeType,
+    },
+    inflection,
+    pgQueryFromResolveData: queryFromResolveData,
+    pgAddStartEndCursor: addStartEndCursor,
+    pgViaTemporaryTable: viaTemporaryTable,
+    describePgEntity,
+    sqlCommentByAddingTags,
+    pgField,
+    options: {
+      subscriptions = false,
+      pgForbidSetofFunctionsToReturnNull = false,
+    },
+    pgPrepareAndRun,
+  } = build;
+
+  if (computed && isMutation) {
+    throw new Error("Mutation procedure cannot be computed");
+  }
+
+  const {
+    inputs: args,
+    makeSqlFunctionCall,
+    outputArgNames,
+    outputArgTypes,
+  } = procFieldDetails(proc, build, options);
 
   /**
    * This is the return type the function claims to have; we
@@ -340,48 +453,6 @@ export default function makeProcField(
           };
         });
       }
-      function makeSqlFunctionCall(
-        parsedResolveInfoFragment,
-        ReturnType,
-        { implicitArgs = [] } = {}
-      ): SQL {
-        const { args: rawArgs = {} } = parsedResolveInfoFragment;
-        const args = isMutation ? rawArgs.input : rawArgs;
-        const sqlArgValues = [];
-        let haveNames = true;
-        for (let argIndex = argNames.length - 1; argIndex >= 0; argIndex--) {
-          const argName = argNames[argIndex];
-          const gqlArgName = inflection.argument(argName, argIndex);
-          const value = args[gqlArgName];
-          const variant =
-            variantFromTags(proc.tags, argIndex) ||
-            variantFromName(argNames[argIndex], type);
-
-          const sqlValue = gql2pg(value, argTypes[argIndex], variant);
-
-          if (argIndex + 1 > requiredArgCount && haveNames && value == null) {
-            // No need to pass argument to function
-            continue;
-          } else if (argIndex + 1 > requiredArgCount && haveNames) {
-            const sqlArgName = argName ? sql.identifier(argName) : null;
-            if (sqlArgName) {
-              sqlArgValues.unshift(sql.fragment`${sqlArgName} := ${sqlValue}`);
-            } else {
-              haveNames = false;
-              sqlArgValues.unshift(sqlValue);
-            }
-          } else {
-            sqlArgValues.unshift(sqlValue);
-          }
-        }
-        const functionCall = sql.fragment`${sql.identifier(
-          proc.namespace.name,
-          proc.name
-        )}(${sql.join([...implicitArgs, ...sqlArgValues], ", ")})`;
-        return rawReturnType.isPgArray
-          ? sql.fragment`unnest(${functionCall})`
-          : functionCall;
-      }
       function makeQuery(
         parsedResolveInfoFragment,
         ReturnType,
@@ -467,10 +538,10 @@ export default function makeProcField(
                 const parentTableAlias = queryBuilder.getTableAlias();
                 const functionAlias = sql.identifier(Symbol());
                 const sqlFunctionCall = makeSqlFunctionCall(
-                  parsedResolveInfoFragment,
-                  ReturnType,
+                  parsedResolveInfoFragment.args,
                   {
                     implicitArgs: [parentTableAlias],
+                    unnest: rawReturnType.isPgArray,
                   }
                 );
                 if (aggregateWrapper) {
@@ -493,13 +564,6 @@ export default function makeProcField(
 
       let ReturnType = type;
       let PayloadType;
-      let args = argNames.reduce((memo, argName, argIndex) => {
-        const gqlArgName = inflection.argument(argName, argIndex);
-        memo[gqlArgName] = {
-          type: argGqlTypes[argIndex],
-        };
-        return memo;
-      }, {});
       if (isMutation) {
         const resultFieldName = inflection.functionMutationResultFieldName(
           proc,
@@ -696,9 +760,10 @@ export default function makeProcField(
               parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
               const functionAlias = sql.identifier(Symbol());
               const sqlFunctionCall = makeSqlFunctionCall(
-                parsedResolveInfoFragment,
-                resolveInfo.returnType,
-                {}
+                parsedResolveInfoFragment.args,
+                {
+                  unnest: rawReturnType.isPgArray,
+                }
               );
 
               let queryResultRows;

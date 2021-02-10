@@ -107,6 +107,7 @@ export {
   CursorValue,
   CursorComparator,
 } from "./QueryBuilder";
+export { procFieldDetails } from "./plugins/makeProcField";
 
 export function parseTags(
   str: string
