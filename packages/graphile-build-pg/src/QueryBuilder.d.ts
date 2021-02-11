@@ -19,7 +19,7 @@ export type CursorValue = Array<any>;
 export type CursorComparator = (val: CursorValue, isAfter: boolean) => void;
 
 export default class QueryBuilder {
-  public parentQueryBuilder: QueryBuilder | void;
+  public parentQueryBuilder: QueryBuilder | undefined;
   public context: GraphQLContext;
   public rootValue: any;
   public beforeLock(field: string, fn: () => void): void;
