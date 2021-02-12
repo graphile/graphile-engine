@@ -588,7 +588,7 @@ export default function makeExtendSchemaPlugin(
     throw new Error("Could not extract name from AST");
   }
 
-  function getDescription(desc: StringValueNode | void) {
+  function getDescription(desc: StringValueNode | undefined) {
     if (!desc) {
       return null;
     } else if (desc.kind === "StringValue") {
@@ -690,7 +690,7 @@ export default function makeExtendSchemaPlugin(
   }
 
   function getDirectives(
-    directives: ReadonlyArray<DirectiveNode> | void
+    directives: ReadonlyArray<DirectiveNode> | undefined
   ): DirectiveMap {
     return (directives || []).reduce((directivesList, directive) => {
       if (directive.kind === "Directive") {
@@ -731,7 +731,7 @@ export default function makeExtendSchemaPlugin(
   }
 
   function getArguments(
-    args: ReadonlyArray<InputValueDefinitionNode> | void,
+    args: ReadonlyArray<InputValueDefinitionNode> | undefined,
     build: Build
   ) {
     if (args && args.length) {
@@ -762,7 +762,7 @@ export default function makeExtendSchemaPlugin(
 
   function getFields<TSource>(
     SelfGeneric: TSource,
-    fields: ReadonlyArray<FieldDefinitionNode> | void,
+    fields: ReadonlyArray<FieldDefinitionNode> | undefined,
     resolvers: Resolvers,
     {
       fieldWithHooks,
@@ -1140,7 +1140,7 @@ export default function makeExtendSchemaPlugin(
 
   function getInputFields<TSource>(
     _Self: TSource,
-    fields: ReadonlyArray<InputValueDefinitionNode> | void,
+    fields: ReadonlyArray<InputValueDefinitionNode> | undefined,
     build: Build
   ) {
     if (fields && fields.length) {

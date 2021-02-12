@@ -27,7 +27,7 @@ export class LDSLiveSource {
   private reconnecting: boolean;
   private live: boolean;
   private subscriptions: {
-    [topic: string]: Array<[SubscriptionCallback, Predicate | void]>;
+    [topic: string]: Array<[SubscriptionCallback, Predicate | undefined]>;
   };
   private ws: WebSocket | null;
   private sleepDuration?: number;
@@ -170,12 +170,15 @@ export class LDSLiveSource {
   private sub(
     topic: string,
     cb: SubscriptionCallback,
-    predicate?: Predicate | void
+    predicate?: Predicate | undefined
   ) {
     if (!this.live) {
       return null;
     }
-    const entry: [SubscriptionCallback, Predicate | void] = [cb, predicate];
+    const entry: [SubscriptionCallback, Predicate | undefined] = [
+      cb,
+      predicate,
+    ];
     if (!this.subscriptions[topic]) {
       this.subscriptions[topic] = [];
     }

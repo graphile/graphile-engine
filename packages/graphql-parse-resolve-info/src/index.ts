@@ -103,7 +103,7 @@ export interface ParseOptions {
 export function parseResolveInfo(
   resolveInfo: GraphQLResolveInfo,
   options: ParseOptions = {}
-): ResolveTree | FieldsByTypeName | null | void {
+): ResolveTree | FieldsByTypeName | null | undefined {
   const fieldNodes: ReadonlyArray<FieldNode> =
     // @ts-ignore Property 'fieldASTs' does not exist on type 'GraphQLResolveInfo'.
     resolveInfo.fieldNodes || resolveInfo.fieldASTs;
