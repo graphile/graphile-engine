@@ -331,7 +331,9 @@ export const blank = query``;
 
 export {
   query as fragment,
+  // sql.null deprecated; use `sql.NULL` instead.
   nullNode as null,
-  trueNode as true,
-  falseNode as false,
+  nullNode as NULL,
+  trueNode as TRUE,
+  falseNode as FALSE,
 };
