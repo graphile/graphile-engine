@@ -8,7 +8,7 @@ import type { SQL } from "pg-sql2";
 import debugSql from "./debugSql";
 import chalk from "chalk";
 
-type MakeProcOptions = {
+type ProcFieldOptions = {
   fieldWithHooks: FieldWithHooksFunction,
   computed?: boolean,
   isMutation?: boolean,
@@ -45,39 +45,14 @@ export function procFieldDetails(
   const { computed = false, isMutation = false } = options;
   const {
     pgIntrospectionResultsByKind: introspectionResultsByKind,
-    pgGetGqlTypeByTypeIdAndModifier,
     pgGetGqlInputTypeByTypeIdAndModifier,
-    getTypeByName,
     pgSql: sql,
-    parseResolveInfo,
-    getSafeAliasFromResolveInfo,
-    getSafeAliasFromAlias,
     gql2pg,
-    pg2gql,
-    newWithHooks,
     pgStrictFunctions: strictFunctions,
-    pgTweakFragmentForTypeAndModifier,
-    graphql: {
-      GraphQLNonNull,
-      GraphQLList,
-      GraphQLString,
-      GraphQLObjectType,
-      GraphQLInputObjectType,
-      getNamedType,
-      isCompositeType,
-    },
+    graphql: { GraphQLNonNull },
     inflection,
-    pgQueryFromResolveData: queryFromResolveData,
-    pgAddStartEndCursor: addStartEndCursor,
-    pgViaTemporaryTable: viaTemporaryTable,
     describePgEntity,
     sqlCommentByAddingTags,
-    pgField,
-    options: {
-      subscriptions = false,
-      pgForbidSetofFunctionsToReturnNull = false,
-    },
-    pgPrepareAndRun,
   } = build;
 
   const sliceAmount = computed ? 1 : 0;
@@ -242,16 +217,13 @@ export default function makeProcField(
   const {
     pgIntrospectionResultsByKind: introspectionResultsByKind,
     pgGetGqlTypeByTypeIdAndModifier,
-    pgGetGqlInputTypeByTypeIdAndModifier,
     getTypeByName,
     pgSql: sql,
     parseResolveInfo,
     getSafeAliasFromResolveInfo,
     getSafeAliasFromAlias,
-    gql2pg,
     pg2gql,
     newWithHooks,
-    pgStrictFunctions: strictFunctions,
     pgTweakFragmentForTypeAndModifier,
     graphql: {
       GraphQLNonNull,
@@ -281,11 +253,12 @@ export default function makeProcField(
   }
 
   const {
-    inputs: args,
+    inputs,
     makeSqlFunctionCall,
     outputArgNames,
     outputArgTypes,
   } = procFieldDetails(proc, build, options);
+  let args = inputs;
 
   /**
    * This is the return type the function claims to have; we
