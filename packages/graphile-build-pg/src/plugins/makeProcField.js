@@ -55,6 +55,10 @@ export function procFieldDetails(
     sqlCommentByAddingTags,
   } = build;
 
+  if (computed && isMutation) {
+    throw new Error("Mutation procedure cannot be computed");
+  }
+
   const sliceAmount = computed ? 1 : 0;
   const argNames = proc.argTypeIds.reduce((prev, _, idx) => {
     if (
@@ -247,10 +251,6 @@ export default function makeProcField(
     },
     pgPrepareAndRun,
   } = build;
-
-  if (computed && isMutation) {
-    throw new Error("Mutation procedure cannot be computed");
-  }
 
   const {
     inputs,
