@@ -147,7 +147,7 @@ const PgGenericSubscriptionPlugin: Plugin = function (
               const { pgClient } = _context;
               const topic = (pgSubscriptionPrefix || "") + args.topic;
               // Check they're allowed
-              let unsubscribeTopic: string | void;
+              let unsubscribeTopic: string | undefined;
               if (parsedFunctionParts) {
                 const { text, values } = sql.compile(
                   sql.query`select unsubscribe_topic from ${sql.identifier(

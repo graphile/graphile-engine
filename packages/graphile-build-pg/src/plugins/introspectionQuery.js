@@ -30,7 +30,7 @@ function makeIntrospectionQuery(
 -- - \`$1\`: An array of strings that represent the namespaces we are introspecting.
 -- - \`$2\`: set true to include functions/tables/etc that come from extensions
 with
-  ${!pgIgnoreRBAC ? "recursive" : ""} accessible_roles(_oid) as (
+  ${!pgIgnoreRBAC ? "recursive" : ""} accessible_roles as (
     select oid _oid, pg_roles.*
     from pg_roles
     where rolname = current_user

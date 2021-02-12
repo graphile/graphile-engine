@@ -16,7 +16,7 @@ export default function makeAddPgTableConditionPlugin(
       sqlTableAlias: SQL;
     },
     build: Build
-  ) => SQL | null | void
+  ) => SQL | null | undefined
 ) {
   const displayName = `makeAddPgTableConditionPlugin__${schemaName}__${tableName}__${conditionFieldName}`;
   const plugin: Plugin = builder => {

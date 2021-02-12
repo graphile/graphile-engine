@@ -14,8 +14,8 @@ export interface PgNamespace {
   kind: PgEntityKind.NAMESPACE;
   id: string;
   name: string;
-  comment: string | void;
-  description: string | void;
+  comment: string | undefined;
+  description: string | undefined;
   tags: { [tag: string]: true | string | Array<string> };
 }
 
@@ -23,8 +23,8 @@ export interface PgProc {
   kind: PgEntityKind.PROCEDURE;
   id: string;
   name: string;
-  comment: string | void;
-  description: string | void;
+  comment: string | undefined;
+  description: string | undefined;
   namespaceId: string;
   namespaceName: string;
   isStrict: boolean;
@@ -47,8 +47,8 @@ export interface PgClass {
   kind: PgEntityKind.CLASS;
   id: string;
   name: string;
-  comment: string | void;
-  description: string | void;
+  comment: string | undefined;
+  description: string | undefined;
   classKind: string;
   namespaceId: string;
   namespaceName: string;
@@ -64,7 +64,7 @@ export interface PgClass {
   attributes: Array<PgAttribute>;
   constraints: Array<PgConstraint>;
   foreignConstraints: Array<PgConstraint>;
-  primaryKeyConstraint: PgConstraint | void;
+  primaryKeyConstraint: PgConstraint | undefined;
   aclSelectable: boolean;
   aclInsertable: boolean;
   aclUpdatable: boolean;
@@ -76,27 +76,27 @@ export interface PgType {
   kind: PgEntityKind.TYPE;
   id: string;
   name: string;
-  comment: string | void;
-  description: string | void;
+  comment: string | undefined;
+  description: string | undefined;
   namespaceId: string;
   namespaceName: string;
   type: string;
   category: string;
   domainIsNotNull: boolean;
-  arrayItemTypeId: string | void;
-  arrayItemType: PgType | void;
-  arrayType: PgType | void;
-  typeLength: number | void;
+  arrayItemTypeId: string | undefined;
+  arrayItemType: PgType | undefined;
+  arrayType: PgType | undefined;
+  typeLength: number | undefined;
   isPgArray: boolean;
-  classId: string | void;
-  class: PgClass | void;
-  domainBaseTypeId: string | void;
-  domainBaseType: PgType | void;
-  domainTypeModifier: number | void;
+  classId: string | undefined;
+  class: PgClass | undefined;
+  domainBaseTypeId: string | undefined;
+  domainBaseType: PgType | undefined;
+  domainTypeModifier: number | undefined;
   domainHasDefault: boolean;
-  enumVariants: string[] | void;
-  enumDescriptions: string[] | void;
-  rangeSubTypeId: string | void;
+  enumVariants: string[] | undefined;
+  enumDescriptions: string[] | undefined;
+  rangeSubTypeId: string | undefined;
   tags: { [tag: string]: true | string | Array<string> };
   isFake?: boolean;
 }
@@ -106,8 +106,8 @@ export interface PgAttribute {
   classId: string;
   num: number;
   name: string;
-  comment: string | void;
-  description: string | void;
+  comment: string | undefined;
+  description: string | undefined;
   typeId: string;
   typeModifier: number;
   isNotNull: boolean;
@@ -120,8 +120,8 @@ export interface PgAttribute {
   aclSelectable: boolean;
   aclInsertable: boolean;
   aclUpdatable: boolean;
-  isIndexed: boolean | void;
-  isUnique: boolean | void;
+  isIndexed: boolean | undefined;
+  isUnique: boolean | undefined;
   columnLevelSelectGrant: boolean;
 }
 
@@ -132,16 +132,16 @@ export interface PgConstraint {
   type: string;
   classId: string;
   class: PgClass;
-  foreignClassId: string | void;
-  foreignClass: PgClass | void;
-  comment: string | void;
-  description: string | void;
+  foreignClassId: string | undefined;
+  foreignClass: PgClass | undefined;
+  comment: string | undefined;
+  description: string | undefined;
   keyAttributeNums: Array<number>;
   keyAttributes: Array<PgAttribute>;
   foreignKeyAttributeNums: Array<number>;
   foreignKeyAttributes: Array<PgAttribute>;
   namespace: PgNamespace;
-  isIndexed: boolean | void;
+  isIndexed: boolean | undefined;
   tags: { [tag: string]: true | string | Array<string> };
 }
 
@@ -154,8 +154,8 @@ export interface PgExtension {
   relocatable: boolean;
   version: string;
   configurationClassIds?: Array<string>;
-  comment: string | void;
-  description: string | void;
+  comment: string | undefined;
+  description: string | undefined;
   tags: { [tag: string]: true | string | Array<string> };
 }
 
@@ -171,9 +171,9 @@ export interface PgIndex {
   isPrimary: boolean;
   isPartial: boolean;
   attributeNums: Array<number>;
-  attributePropertiesAsc: Array<boolean> | void;
-  attributePropertiesNullsFirst: Array<boolean> | void;
-  description: string | void;
+  attributePropertiesAsc: Array<boolean> | undefined;
+  attributePropertiesNullsFirst: Array<boolean> | undefined;
+  description: string | undefined;
   tags: { [tag: string]: true | string | Array<string> };
 }
 
