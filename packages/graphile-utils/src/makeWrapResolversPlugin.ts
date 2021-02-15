@@ -1,5 +1,11 @@
-import { SchemaBuilder, Options, Plugin, Context, Build } from "graphile-build";
-import {
+import type {
+  SchemaBuilder,
+  Options,
+  Plugin,
+  Context,
+  Build,
+} from "graphile-build";
+import type {
   GraphQLFieldResolver,
   GraphQLResolveInfo,
   GraphQLFieldConfig,

@@ -1,6 +1,12 @@
-import { SchemaBuilder, Build, Context, Plugin, Options } from "graphile-build";
-import { QueryBuilder, PgClass } from "graphile-build-pg";
-import {
+import type {
+  SchemaBuilder,
+  Build,
+  Context,
+  Plugin,
+  Options,
+} from "graphile-build";
+import type { QueryBuilder, PgClass } from "graphile-build-pg";
+import type {
   // ONLY import types here, not values
   // Misc:
   GraphQLIsTypeOfFn,

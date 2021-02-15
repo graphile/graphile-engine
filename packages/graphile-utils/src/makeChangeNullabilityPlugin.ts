@@ -1,5 +1,11 @@
-import { SchemaBuilder, Build, Context, Plugin, Options } from "graphile-build";
-import { GraphQLInputFieldConfig, GraphQLFieldConfig } from "graphql";
+import type {
+  SchemaBuilder,
+  Build,
+  Context,
+  Plugin,
+  Options,
+} from "graphile-build";
+import type { GraphQLInputFieldConfig, GraphQLFieldConfig } from "graphql";
 
 interface ChangeNullabilityRules {
   [typeName: string]: {

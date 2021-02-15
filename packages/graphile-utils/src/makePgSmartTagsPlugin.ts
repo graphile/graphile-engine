@@ -1,5 +1,5 @@
-import { Plugin, Build } from "graphile-build";
-import {
+import type { Plugin, Build } from "graphile-build";
+import type {
   PgEntityKind,
   PgEntity,
   PgIntrospectionResultsByKind,
@@ -36,11 +36,10 @@ export type PgSmartTagSupportedKinds =
 const meaningByKind: {
   [kind in PgSmartTagSupportedKinds]: string;
 } = {
-  [PgEntityKind.CLASS]:
-    "for tables, composite types, views and materialized views",
-  [PgEntityKind.ATTRIBUTE]: "for columns/attributes (of any 'class' type)",
-  [PgEntityKind.CONSTRAINT]: "for table constraints",
-  [PgEntityKind.PROCEDURE]: "for functions/procedures",
+  ["class"]: "for tables, composite types, views and materialized views",
+  ["attribute"]: "for columns/attributes (of any 'class' type)",
+  ["constraint"]: "for table constraints",
+  ["procedure"]: "for functions/procedures",
 };
 
 const validKinds = Object.entries(meaningByKind)
@@ -263,7 +262,7 @@ function pgSmartTagRulesFromJSON(
     key: string,
     deprecated = false
   ): void {
-    if (kind !== PgEntityKind.CLASS) {
+    if (kind !== "class") {
       throw new Error(
         `makeJSONPgSmartTagsPlugin: '${key}' is only valid on a class; you tried to set it on a '${kind}' at 'config.${kind}.${identifier}.${key}'`
       );
@@ -347,7 +346,7 @@ function pgSmartTagRulesFromJSON(
         process(
           kind,
           identifier,
-          PgEntityKind.ATTRIBUTE,
+          "attribute" as PgEntityKind.ATTRIBUTE,
           columns,
           "columns",
           true
@@ -357,7 +356,7 @@ function pgSmartTagRulesFromJSON(
         process(
           kind,
           identifier,
-          PgEntityKind.ATTRIBUTE,
+          "attribute" as PgEntityKind.ATTRIBUTE,
           attribute,
           "attribute"
         );
@@ -366,7 +365,7 @@ function pgSmartTagRulesFromJSON(
         process(
           kind,
           identifier,
-          PgEntityKind.CONSTRAINT,
+          "constraint" as PgEntityKind.CONSTRAINT,
           constraint,
           "constraint"
         );

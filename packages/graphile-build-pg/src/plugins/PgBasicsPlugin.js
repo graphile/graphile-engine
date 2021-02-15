@@ -33,6 +33,7 @@ import chalk from "chalk";
 import pickBy from "lodash/pickBy";
 import PgLiveProvider from "../PgLiveProvider";
 import pgPrepareAndRun from "../pgPrepareAndRun";
+import { formatSQLForDebugging } from "./debugSql";
 
 const defaultPgColumnFilter = (_attr, _build, _context) => true;
 type Keys = Array<{
@@ -359,6 +360,7 @@ export default (function PgBasicsPlugin(
         sqlCommentByAddingTags,
         pgPrepareAndRun,
         pgAugmentIntrospectionResults,
+        formatSQLForDebugging,
       });
     },
     ["PgBasics"]

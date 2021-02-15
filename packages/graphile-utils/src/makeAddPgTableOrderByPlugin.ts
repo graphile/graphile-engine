@@ -1,6 +1,6 @@
 // BELOW HERE, IMPORTS ARE ONLY TYPES (not values)
-import { SQL, QueryBuilder } from "graphile-build-pg";
-import { Build, Plugin } from "graphile-build";
+import type { SQL, QueryBuilder } from "graphile-build-pg";
+import type { Build, Plugin } from "graphile-build";
 
 type OrderBySpecIdentity =
   | string
