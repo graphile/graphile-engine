@@ -3,7 +3,14 @@
 We use PostGraphile's GitHub releases tab to log our changes in detail, but
 this auto-generated changelog helps us to produce that list, and it may be
 helpful to you also.
-# [](https://github.com/graphile/graphile-engine/compare/v4.11.2...v) (2021-01-29)
+# [](https://github.com/graphile/graphile-engine/compare/v4.11.2...v) (2021-02-15)
+
+
+### Features
+
+* **pg:** connections can use named queries ([#715](https://github.com/graphile/graphile-engine/issues/715)) ([352dab3](https://github.com/graphile/graphile-engine/commit/352dab32104e8c4fb9a5693f2cfe8d8c0fed4219))
+* **pg:** makeProcField can be used to construct aggregates ([#714](https://github.com/graphile/graphile-engine/issues/714)) ([8e0102b](https://github.com/graphile/graphile-engine/commit/8e0102b2a8c93f8eead89f41c9b0f988aee68411))
+* **pg:** procFieldDetails helper ([#717](https://github.com/graphile/graphile-engine/issues/717)) ([59a07a2](https://github.com/graphile/graphile-engine/commit/59a07a2c0ed80ef43d22759c1d0e1cafa129bd1f))
 
 
 
