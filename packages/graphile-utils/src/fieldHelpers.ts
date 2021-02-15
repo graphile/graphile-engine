@@ -1,7 +1,11 @@
 import debugFactory from "debug";
-import { GraphQLResolveInfo } from "graphql";
-import { Build, Context } from "graphile-build";
-import { QueryBuilder, SQL, formatSQLForDebugging } from "graphile-build-pg";
+import type { GraphQLResolveInfo } from "graphql";
+import type { Build, Context } from "graphile-build";
+import type {
+  QueryBuilder,
+  SQL,
+  formatSQLForDebugging,
+} from "graphile-build-pg";
 
 // Not really the right scope, but eases debugging for users
 const debugSql = debugFactory("graphile-build-pg:sql");

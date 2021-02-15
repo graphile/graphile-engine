@@ -1,28 +1,27 @@
-import {
+import type {
   PgClass,
-  PgEntityKind,
   PgConstraint,
   PgAttribute,
   PgEntity,
   PgProc,
 } from "graphile-build-pg";
 import parseIdentifierParts from "./parseIdentifierParts";
-import { Build } from "graphile-build";
+import type { Build } from "graphile-build";
 
 export function isAttribute(obj: PgEntity): obj is PgAttribute {
-  return obj.kind === PgEntityKind.ATTRIBUTE;
+  return obj.kind === "attribute";
 }
 
 export function isConstraint(obj: PgEntity): obj is PgConstraint {
-  return obj.kind === PgEntityKind.CONSTRAINT;
+  return obj.kind === "constraint";
 }
 
 export function isClass(obj: PgEntity): obj is PgClass {
-  return obj.kind === PgEntityKind.CLASS;
+  return obj.kind === "class";
 }
 
 export function isProcedure(obj: PgEntity): obj is PgProc {
-  return obj.kind === PgEntityKind.PROCEDURE;
+  return obj.kind === "procedure";
 }
 
 export function entityIsIdentifiedBy(
