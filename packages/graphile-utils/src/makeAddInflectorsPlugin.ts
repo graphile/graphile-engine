@@ -1,4 +1,4 @@
-import { Plugin, Options, Build } from "graphile-build";
+import type { Plugin, Options, Build } from "graphile-build";
 
 interface Inflectors {
   [str: string]: (...args: Array<any>) => any;

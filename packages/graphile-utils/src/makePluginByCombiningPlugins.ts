@@ -1,4 +1,4 @@
-import { Plugin } from "graphile-build";
+import type { Plugin } from "graphile-build";
 
 export default function makePluginByCombiningPlugins(
   ...plugins: Array<Plugin>

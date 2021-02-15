@@ -1,5 +1,5 @@
-import { GraphQLSchema } from "graphql";
-import { SchemaBuilder } from "graphile-build";
+import type { GraphQLSchema } from "graphql";
+import type { SchemaBuilder } from "graphile-build";
 
 type ProcessSchemaFunction = (schema: GraphQLSchema) => GraphQLSchema;
 export default function makeProcessSchemaPlugin(
