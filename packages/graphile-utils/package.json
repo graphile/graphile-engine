@@ -49,7 +49,5 @@
     "graphile-build": "^4.5.0",
     "graphile-build-pg": "^4.5.0"
   },
-  "files": [
-    "node8plus"
-  ]
+  "files": ["node8plus"]
 }

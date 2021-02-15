@@ -1,11 +1,7 @@
 import debugFactory from "debug";
 import type { GraphQLResolveInfo } from "graphql";
 import type { Build, Context } from "graphile-build";
-import type {
-  QueryBuilder,
-  SQL,
-  formatSQLForDebugging,
-} from "graphile-build-pg";
+import type { QueryBuilder, SQL } from "graphile-build-pg";
 
 // Not really the right scope, but eases debugging for users
 const debugSql = debugFactory("graphile-build-pg:sql");
@@ -27,7 +23,14 @@ export function makeFieldHelpers<TSource>(
   context: any,
   resolveInfo: GraphQLResolveInfo
 ) {
-  const { parseResolveInfo, pgQueryFromResolveData, pgSql: sql } = build;
+  const {
+    parseResolveInfo,
+    pgQueryFromResolveData,
+    pgSql: sql,
+
+    // Default is for support of graphile-build-pg pre 4.12:
+    formatSQLForDebugging = require("graphile-build-pg").formatSQLForDebugging,
+  } = build;
   const { getDataFromParsedResolveInfoFragment, scope } = fieldContext;
   const { pgFieldIntrospection, isPgFieldConnection } = scope;
 

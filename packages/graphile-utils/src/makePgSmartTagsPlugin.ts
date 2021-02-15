@@ -343,13 +343,32 @@ function pgSmartTagRulesFromJSON(
 
       if (columns) {
         // This was in graphile-utils 4.0.0 but was deprecated in 4.0.1 for consistency reasons.
-        process(kind, identifier, "attribute", columns, "columns", true);
+        process(
+          kind,
+          identifier,
+          "attribute" as PgEntityKind.ATTRIBUTE,
+          columns,
+          "columns",
+          true
+        );
       }
       if (attribute) {
-        process(kind, identifier, "attribute", attribute, "attribute");
+        process(
+          kind,
+          identifier,
+          "attribute" as PgEntityKind.ATTRIBUTE,
+          attribute,
+          "attribute"
+        );
       }
       if (constraint) {
-        process(kind, identifier, "constraint", constraint, "constraint");
+        process(
+          kind,
+          identifier,
+          "constraint" as PgEntityKind.CONSTRAINT,
+          constraint,
+          "constraint"
+        );
       }
     }
   }
