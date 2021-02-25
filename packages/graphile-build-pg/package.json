@@ -42,7 +42,12 @@
     "debug": "^4.1.1",
     "graphile-build": "4.12.0-alpha.0",
     "jsonwebtoken": "^8.5.1",
-    "lodash": ">=4 <5",
+    "lodash.chunk": "^4.2.0",
+    "lodash.flatmap": "^4.5.0",
+    "lodash.issafeinteger": "^4.0.4",
+    "lodash.isstring": "^4.0.1",
+    "lodash.pickby": "^4.6.0",
+    "lodash.throttle": "^4.1.1",
     "lru-cache": ">=4 <5",
     "pg-sql2": "4.12.0-alpha.0"
   },

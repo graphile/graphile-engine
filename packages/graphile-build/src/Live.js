@@ -2,7 +2,7 @@
 /* eslint-disable flowtype/no-weak-types */
 import callbackToAsyncIterator from "./callbackToAsyncIterator";
 import type { GraphQLResolveInfo } from "graphql";
-import { throttle } from "lodash";
+import throttle from "lodash.throttle";
 
 type SubscriptionReleaser = () => void;
 type SubscriptionCallback = () => void;

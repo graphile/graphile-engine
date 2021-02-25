@@ -8,8 +8,8 @@ import { parseTags } from "../utils";
 import { readFile as rawReadFile } from "fs";
 import debugFactory from "debug";
 import chalk from "chalk";
-import throttle from "lodash/throttle";
-import flatMap from "lodash/flatMap";
+import throttle from "lodash.throttle";
+import flatMap from "lodash.flatmap";
 import { makeIntrospectionQuery } from "./introspectionQuery";
 import * as pgSql from "pg-sql2";
 

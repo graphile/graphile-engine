@@ -30,7 +30,7 @@ import { getComputedColumnDetails } from "./PgComputedColumnsPlugin";
 import parseIdentifier from "../parseIdentifier";
 import viaTemporaryTable from "./viaTemporaryTable";
 import chalk from "chalk";
-import pickBy from "lodash/pickBy";
+import pickBy from "lodash.pickby";
 import PgLiveProvider from "../PgLiveProvider";
 import pgPrepareAndRun from "../pgPrepareAndRun";
 import { formatSQLForDebugging } from "./debugSql";

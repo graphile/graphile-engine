@@ -1,8 +1,8 @@
 // @flow
 import * as sql from "pg-sql2";
 import type { SQL } from "pg-sql2";
-import isSafeInteger from "lodash/isSafeInteger";
-import chunk from "lodash/chunk";
+import isSafeInteger from "lodash.issafeinteger";
+import chunk from "lodash.chunk";
 import type { PgClass, PgType } from "./plugins/PgIntrospectionPlugin";
 
 // eslint-disable-next-line flowtype/no-weak-types

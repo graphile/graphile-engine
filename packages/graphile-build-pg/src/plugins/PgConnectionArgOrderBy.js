@@ -1,5 +1,5 @@
 // @flow
-import isString from "lodash/isString";
+import isString from "lodash.isstring";
 import type { Plugin } from "graphile-build";
 
 export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {

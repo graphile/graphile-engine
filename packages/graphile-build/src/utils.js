@@ -1,6 +1,6 @@
 // @flow
-import upperFirstAll from "lodash/upperFirst";
-import camelCaseAll from "lodash/camelCase";
+import upperFirstAll from "lodash.upperfirst";
+import camelCaseAll from "lodash.camelcase";
 import plz from "pluralize";
 
 const bindAll = (obj: {}, keys: Array<string>): string => {

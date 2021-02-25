@@ -1,6 +1,6 @@
 // @flow
 import type { Plugin } from "graphile-build";
-import isString from "lodash/isString";
+import isString from "lodash.isstring";
 
 export default (function PgMutationPayloadEdgePlugin(
   builder,

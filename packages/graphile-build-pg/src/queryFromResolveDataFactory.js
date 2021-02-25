@@ -5,7 +5,7 @@ import type { RawAlias } from "./QueryBuilder";
 import * as sql from "pg-sql2";
 import type { SQL } from "pg-sql2";
 import type { DataForType } from "graphile-build";
-import isSafeInteger from "lodash/isSafeInteger";
+import isSafeInteger from "lodash.issafeinteger";
 import assert from "assert";
 import { inspect } from "util";
 
