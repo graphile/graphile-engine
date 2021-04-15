@@ -240,7 +240,7 @@ export type JSONPgSmartTags = {
   };
 };
 
-function pgSmartTagRulesFromJSON(
+export function pgSmartTagRulesFromJSON(
   json: JSONPgSmartTags | null
 ): PgSmartTagRule[] {
   if (!json) {
