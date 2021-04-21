@@ -95,7 +95,7 @@ Builds part of (or the whole of) an SQL query, safely interpretting the embedded
 sql.query`select ${1}`;
 ```
 
-then an error will be thrown.
+then an error will be thrown. Also accessible by the alias `sql.fragment`.
 
 ### `sql.identifier(ident, ...)`
 
