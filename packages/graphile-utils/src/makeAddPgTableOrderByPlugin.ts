@@ -25,7 +25,7 @@ export default function makeAddPgTableOrderByPlugin(
   tableName: string,
   ordersGenerator: (build: Build) => MakeAddPgTableOrderByPluginOrders,
   hint = `Adding orders with makeAddPgTableOrderByPlugin to "${schemaName}"."${tableName}"`
-) {
+): Plugin {
   const displayName = `makeAddPgTableOrderByPlugin_${schemaName}_${tableName}`;
   const plugin: Plugin = builder => {
     builder.hook("GraphQLEnumType:values", (values, build, context) => {
@@ -55,9 +55,13 @@ export default function makeAddPgTableOrderByPlugin(
 export function orderByAscDesc(
   baseName: string,
   columnOrSqlFragment: OrderBySpecIdentity,
-  unique = false
+  unique = false,
+  options?: { createNullsFirst?: boolean; createNullsLast?: boolean }
 ): MakeAddPgTableOrderByPluginOrders {
-  return {
+  const createNullsFirst = options?.createNullsFirst || false;
+  const createNullsLast = options?.createNullsLast || false;
+
+  const naturals: MakeAddPgTableOrderByPluginOrders = {
     [`${baseName}_ASC`]: {
       value: {
         alias: `${baseName}_ASC`,
@@ -73,4 +77,44 @@ export function orderByAscDesc(
       },
     },
   };
+
+  const nullFirsts: MakeAddPgTableOrderByPluginOrders = createNullsFirst
+    ? {
+        [`${baseName}_ASC_NULLS_FIRST`]: {
+          value: {
+            alias: `${baseName}_ASC_NULLS_FIRST`,
+            specs: [[columnOrSqlFragment, true, true]],
+            unique,
+          },
+        },
+        [`${baseName}_DESC_NULLS_FIRST`]: {
+          value: {
+            alias: `${baseName}_DESC_NULLS_FIRST`,
+            specs: [[columnOrSqlFragment, false, true]],
+            unique,
+          },
+        },
+      }
+    : {};
+
+  const nullLasts: MakeAddPgTableOrderByPluginOrders = createNullsLast
+    ? {
+        [`${baseName}_ASC_NULLS_LAST`]: {
+          value: {
+            alias: `${baseName}_ASC_NULLS_LAST`,
+            specs: [[columnOrSqlFragment, true, false]],
+            unique,
+          },
+        },
+        [`${baseName}_DESC_NULLS_LAST`]: {
+          value: {
+            alias: `${baseName}_DESC_NULLS_LAST`,
+            specs: [[columnOrSqlFragment, false, false]],
+            unique,
+          },
+        },
+      }
+    : {};
+
+  return { ...naturals, ...nullFirsts, ...nullLasts };
 }
