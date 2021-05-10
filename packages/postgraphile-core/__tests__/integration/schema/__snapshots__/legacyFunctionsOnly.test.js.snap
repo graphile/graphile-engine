@@ -2,9 +2,6 @@
 
 exports[`prints a schema with only legacy functions 1`] = `
 enum AnEnum {
-  _ASTERISK_BAR_
-  _ASTERISK_BAZ_ASTERISK_
-  _FOO_ASTERISK
   ASTERISK
   ASTERISK_ASTERISK
   ASTERISK_ASTERISK_ASTERISK
@@ -20,6 +17,9 @@ enum AnEnum {
   PERCENT
   PUBLISHED
   REJECTED
+  _ASTERISK_BAR_
+  _ASTERISK_BAZ_ASTERISK_
+  _FOO_ASTERISK
 }
 
 scalar AnInt
@@ -979,16 +979,16 @@ enum EdgeCasesOrderBy {
 scalar Email
 
 enum EnumCaps {
-  _0_BAR
   BAR_FOO
   BAZ_QUX
   FOO_BAR
+  _0_BAR
 }
 
 enum EnumWithEmptyString {
-  _EMPTY_
   ONE
   TWO
+  _EMPTY_
 }
 
 """
@@ -1009,36 +1009,6 @@ input FloatRangeInput {
 
   """The starting bound of our range."""
   start: FloatRangeBoundInput
-}
-
-"""An IPv4 or IPv6 host address, and optionally its subnet."""
-scalar InternetAddress
-
-"""
-An interval of time that has passed where the smallest distinct unit is a second.
-"""
-type Interval {
-  """A quantity of days."""
-  days: Int
-
-  """A quantity of hours."""
-  hours: Int
-
-  """A quantity of minutes."""
-  minutes: Int
-
-  """A quantity of months."""
-  months: Int
-
-  """
-  A quantity of seconds. This is the only non-integer field, as all the other
-  fields will dump their overflow into a smaller unit of time. Intervals don’t
-  have a smaller unit than seconds.
-  """
-  seconds: Float
-
-  """A quantity of years."""
-  years: Int
 }
 
 """All input for the \`intSetMutation\` mutation."""
@@ -1089,6 +1059,36 @@ type IntSetQueryEdge {
 
   """The \`Int\` at the end of the edge."""
   node: Int
+}
+
+"""An IPv4 or IPv6 host address, and optionally its subnet."""
+scalar InternetAddress
+
+"""
+An interval of time that has passed where the smallest distinct unit is a second.
+"""
+type Interval {
+  """A quantity of days."""
+  days: Int
+
+  """A quantity of hours."""
+  hours: Int
+
+  """A quantity of minutes."""
+  minutes: Int
+
+  """A quantity of months."""
+  months: Int
+
+  """
+  A quantity of seconds. This is the only non-integer field, as all the other
+  fields will dump their overflow into a smaller unit of time. Intervals don’t
+  have a smaller unit than seconds.
+  """
+  seconds: Float
+
+  """A quantity of years."""
+  years: Int
 }
 
 type Issue756 implements Node {
@@ -1183,6 +1183,17 @@ type Issue756SEdge {
   node: Issue756
 }
 
+"""Methods to use when ordering \`Issue756\`."""
+enum Issue756SOrderBy {
+  ID_ASC
+  ID_DESC
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+  TS_ASC
+  TS_DESC
+}
+
 """All input for the \`issue756SetMutation\` mutation."""
 input Issue756SetMutationInput {
   """
@@ -1207,21 +1218,35 @@ type Issue756SetMutationPayload {
   query: Query
 }
 
-"""Methods to use when ordering \`Issue756\`."""
-enum Issue756SOrderBy {
-  ID_ASC
-  ID_DESC
-  NATURAL
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-  TS_ASC
-  TS_DESC
-}
-
 """
 A JavaScript object encoded in the JSON format as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSON
+
+"""All input for the \`jsonIdentityMutation\` mutation."""
+input JsonIdentityMutationInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  json: JSON
+}
+
+"""The output of our \`jsonIdentityMutation\` mutation."""
+type JsonIdentityMutationPayload {
+  """
+  The exact same \`clientMutationId\` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  json: JSON
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
 
 """All input for the \`jsonbIdentityMutation\` mutation."""
 input JsonbIdentityMutationInput {
@@ -1287,31 +1312,6 @@ input JsonbIdentityMutationPlpgsqlWithDefaultInput {
 
 """The output of our \`jsonbIdentityMutationPlpgsqlWithDefault\` mutation."""
 type JsonbIdentityMutationPlpgsqlWithDefaultPayload {
-  """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
-  """
-  clientMutationId: String
-  json: JSON
-
-  """
-  Our root query field type. Allows us to run any query from our mutation payload.
-  """
-  query: Query
-}
-
-"""All input for the \`jsonIdentityMutation\` mutation."""
-input JsonIdentityMutationInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-  json: JSON
-}
-
-"""The output of our \`jsonIdentityMutation\` mutation."""
-type JsonIdentityMutationPayload {
   """
   The exact same \`clientMutationId\` that was provided in the mutation input,
   unchanged and unused. May be used by a client to track mutations.
@@ -1677,6 +1677,12 @@ type Mutation {
     """
     input: Issue756SetMutationInput!
   ): Issue756SetMutationPayload
+  jsonIdentityMutation(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: JsonIdentityMutationInput!
+  ): JsonIdentityMutationPayload
   jsonbIdentityMutation(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -1695,12 +1701,6 @@ type Mutation {
     """
     input: JsonbIdentityMutationPlpgsqlWithDefaultInput!
   ): JsonbIdentityMutationPlpgsqlWithDefaultPayload
-  jsonIdentityMutation(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: JsonIdentityMutationInput!
-  ): JsonIdentityMutationPayload
   leftArmIdentity(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -2824,8 +2824,8 @@ type Query implements Node {
     nodeId: ID!
   ): Issue756
   issue756ById(id: Int!): Issue756
-  jsonbIdentity(json: JSON): JSON
   jsonIdentity(json: JSON): JSON
+  jsonbIdentity(json: JSON): JSON
 
   """Reads a single \`LeftArm\` using its globally unique \`ID\`."""
   leftArm(
@@ -3123,6 +3123,11 @@ type TypesMutationPayload {
   """
   query: Query
 }
+
+"""
+A universally unique identifier as defined by [RFC 4122](https://tools.ietf.org/html/rfc4122).
+"""
+scalar UUID
 
 """All input for the \`updateCompoundKeyByPersonId1AndPersonId2\` mutation."""
 input UpdateCompoundKeyByPersonId1AndPersonId2Input {
@@ -3567,11 +3572,6 @@ type UpdatePersonSecretPayload {
   """
   query: Query
 }
-
-"""
-A universally unique identifier as defined by [RFC 4122](https://tools.ietf.org/html/rfc4122).
-"""
-scalar UUID
 
 type WrappedUrl {
   url: NotNullUrl!
