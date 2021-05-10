@@ -1878,14 +1878,14 @@ type StreetProperty implements Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
+  propId: Int!
 
   """Reads a single \`Property\` that is related to this \`StreetProperty\`."""
   propertyByPropId: Property
-  propId: Int!
+  strId: Int!
 
   """Reads a single \`Street\` that is related to this \`StreetProperty\`."""
   streetByStrId: Street
-  strId: Int!
 }
 
 """
@@ -2261,12 +2261,12 @@ input UpdateStreetPropertyByStrIdAndPropIdInput {
   """
   clientMutationId: String
   propId: Int!
+  strId: Int!
 
   """
   An object where the defined keys will be set on the \`StreetProperty\` being updated.
   """
   streetPropertyPatch: StreetPropertyPatch!
-  strId: Int!
 }
 
 """All input for the \`updateStreetProperty\` mutation."""
@@ -4159,14 +4159,14 @@ type StreetProperty implements Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
+  propId: Int!
 
   """Reads a single \`Property\` that is related to this \`StreetProperty\`."""
   propertyByPropId: Property
-  propId: Int!
+  strId: Int!
 
   """Reads a single \`Street\` that is related to this \`StreetProperty\`."""
   streetByStrId: Street
-  strId: Int!
 }
 
 """
@@ -4539,12 +4539,12 @@ input UpdateStreetPropertyByStrIdAndPropIdInput {
   """
   clientMutationId: String
   propId: Int!
+  strId: Int!
 
   """
   An object where the defined keys will be set on the \`StreetProperty\` being updated.
   """
   streetPropertyPatch: StreetPropertyPatch!
-  strId: Int!
 }
 
 """All input for the \`updateStreetProperty\` mutation."""
@@ -6475,14 +6475,14 @@ type StreetProperty implements Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
+  propId: Int!
 
   """Reads a single \`Property\` that is related to this \`StreetProperty\`."""
   propertyByPropId: Property
-  propId: Int!
+  strId: Int!
 
   """Reads a single \`Street\` that is related to this \`StreetProperty\`."""
   streetByStrId: Street
-  strId: Int!
 }
 
 """
@@ -6858,12 +6858,12 @@ input UpdateStreetPropertyByStrIdAndPropIdInput {
   """
   clientMutationId: String
   propId: Int!
+  strId: Int!
 
   """
   An object where the defined keys will be set on the \`StreetProperty\` being updated.
   """
   streetPropertyPatch: StreetPropertyPatch!
-  strId: Int!
 }
 
 """All input for the \`updateStreetProperty\` mutation."""
@@ -8695,14 +8695,14 @@ type StreetProperty implements Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
+  propId: Int!
 
   """Reads a single \`Property\` that is related to this \`StreetProperty\`."""
   propertyByPropId: Property
-  propId: Int!
+  strId: Int!
 
   """Reads a single \`Street\` that is related to this \`StreetProperty\`."""
   streetByStrId: Street
-  strId: Int!
 }
 
 """
@@ -9021,12 +9021,12 @@ input UpdateStreetPropertyByStrIdAndPropIdInput {
   """
   clientMutationId: String
   propId: Int!
+  strId: Int!
 
   """
   An object where the defined keys will be set on the \`StreetProperty\` being updated.
   """
   streetPropertyPatch: StreetPropertyPatch!
-  strId: Int!
 }
 
 """All input for the \`updateStreetProperty\` mutation."""
@@ -10914,14 +10914,14 @@ type StreetProperty implements Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
+  propId: Int!
 
   """Reads a single \`Property\` that is related to this \`StreetProperty\`."""
   propertyByPropId: Property
-  propId: Int!
+  strId: Int!
 
   """Reads a single \`Street\` that is related to this \`StreetProperty\`."""
   streetByStrId: Street
-  strId: Int!
 }
 
 """
@@ -11278,12 +11278,12 @@ input UpdateStreetPropertyByStrIdAndPropIdInput {
   """
   clientMutationId: String
   propId: Int!
+  strId: Int!
 
   """
   An object where the defined keys will be set on the \`StreetProperty\` being updated.
   """
   streetPropertyPatch: StreetPropertyPatch!
-  strId: Int!
 }
 
 """All input for the \`updateStreetProperty\` mutation."""
@@ -13087,14 +13087,14 @@ type StreetProperty implements Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
+  propId: Int!
 
   """Reads a single \`Property\` that is related to this \`StreetProperty\`."""
   propertyByPropId: Property
-  propId: Int!
+  strId: Int!
 
   """Reads a single \`Street\` that is related to this \`StreetProperty\`."""
   streetByStrId: Street
-  strId: Int!
 }
 
 """
@@ -13470,12 +13470,12 @@ input UpdateStreetPropertyByStrIdAndPropIdInput {
   """
   clientMutationId: String
   propId: Int!
+  strId: Int!
 
   """
   An object where the defined keys will be set on the \`StreetProperty\` being updated.
   """
   streetPropertyPatch: StreetPropertyPatch!
-  strId: Int!
 }
 
 """All input for the \`updateStreetProperty\` mutation."""
