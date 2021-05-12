@@ -3,7 +3,13 @@
 We use PostGraphile's GitHub releases tab to log our changes in detail, but
 this auto-generated changelog helps us to produce that list, and it may be
 helpful to you also.
-# [](https://github.com/graphile/graphile-engine/compare/v4.12.0-alpha.0...v) (2021-02-15)
+# [4.12.0-alpha.1](https://github.com/graphile/graphile-engine/compare/v4.12.0-alpha.0...v4.12.0-alpha.1) (2021-05-12)
+
+
+### Features
+
+* **utils:** allow creating 'nullsFirst' and 'nullsLast'  in orderByAscDesc; ([a89d051](https://github.com/graphile/graphile-engine/commit/a89d051cc5d7d243e98c2720ceef7ae5d0f586da))
+* export pgSmartTagRulesFromJSON ([#722](https://github.com/graphile/graphile-engine/issues/722)) ([48e07cd](https://github.com/graphile/graphile-engine/commit/48e07cd8bc31834200a91dde9dfc4d2f0d65339d))
 
 
 
