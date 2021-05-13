@@ -52,69 +52,57 @@ export default function makeAddPgTableOrderByPlugin(
   return plugin;
 }
 
+export interface OrderByAscDescOptions {
+  unique?: boolean;
+  nulls?: "first" | "last" | "first-iff-ascending" | "last-iff-ascending";
+}
+
 export function orderByAscDesc(
   baseName: string,
   columnOrSqlFragment: OrderBySpecIdentity,
-  unique = false,
-  options?: { createNullsFirst?: boolean; createNullsLast?: boolean }
+  uniqueOrOptions: boolean | OrderByAscDescOptions = false
 ): MakeAddPgTableOrderByPluginOrders {
-  const createNullsFirst = options?.createNullsFirst || false;
-  const createNullsLast = options?.createNullsLast || false;
+  const options =
+    typeof uniqueOrOptions === "boolean"
+      ? { unique: uniqueOrOptions }
+      : uniqueOrOptions ?? {};
+  const { unique = false, nulls = "last-iff-ascending" } = options;
 
-  const naturals: MakeAddPgTableOrderByPluginOrders = {
+  const isValidNullsOption = [
+    "first",
+    "last",
+    "first-iff-ascending",
+    "last-iff-ascending",
+  ].includes(nulls);
+
+  const nullsOption = isValidNullsOption ? nulls : "last-iff-ascending";
+
+  const ascendingShouldHaveNullsFirst = [
+    "first",
+    "first-iff-ascending",
+  ].includes(nullsOption);
+
+  const descendingShouldHaveNullsFirst = [
+    "first",
+    "last-iff-ascending",
+  ].includes(nullsOption);
+
+  const orders: MakeAddPgTableOrderByPluginOrders = {
     [`${baseName}_ASC`]: {
       value: {
         alias: `${baseName}_ASC`,
-        specs: [[columnOrSqlFragment, true]],
+        specs: [[columnOrSqlFragment, true, ascendingShouldHaveNullsFirst]],
         unique,
       },
     },
     [`${baseName}_DESC`]: {
       value: {
         alias: `${baseName}_DESC`,
-        specs: [[columnOrSqlFragment, false]],
+        specs: [[columnOrSqlFragment, false, descendingShouldHaveNullsFirst]],
         unique,
       },
     },
   };
 
-  const nullFirsts: MakeAddPgTableOrderByPluginOrders = createNullsFirst
-    ? {
-        [`${baseName}_ASC_NULLS_FIRST`]: {
-          value: {
-            alias: `${baseName}_ASC_NULLS_FIRST`,
-            specs: [[columnOrSqlFragment, true, true]],
-            unique,
-          },
-        },
-        [`${baseName}_DESC_NULLS_FIRST`]: {
-          value: {
-            alias: `${baseName}_DESC_NULLS_FIRST`,
-            specs: [[columnOrSqlFragment, false, true]],
-            unique,
-          },
-        },
-      }
-    : {};
-
-  const nullLasts: MakeAddPgTableOrderByPluginOrders = createNullsLast
-    ? {
-        [`${baseName}_ASC_NULLS_LAST`]: {
-          value: {
-            alias: `${baseName}_ASC_NULLS_LAST`,
-            specs: [[columnOrSqlFragment, true, false]],
-            unique,
-          },
-        },
-        [`${baseName}_DESC_NULLS_LAST`]: {
-          value: {
-            alias: `${baseName}_DESC_NULLS_LAST`,
-            specs: [[columnOrSqlFragment, false, false]],
-            unique,
-          },
-        },
-      }
-    : {};
-
-  return { ...naturals, ...nullFirsts, ...nullLasts };
+  return orders;
 }
