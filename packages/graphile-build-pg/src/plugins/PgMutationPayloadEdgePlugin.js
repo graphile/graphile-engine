@@ -168,8 +168,10 @@ export default (function PgMutationPayloadEdgePlugin(
                         return;
                       }
                       const expr = isString(col)
-                        ? sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(col)}`
-                        : typeof col === 'function'
+                        ? sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
+                            col
+                          )}`
+                        : typeof col === "function"
                         ? col({ queryBuilder })
                         : col;
                       expressions.push(expr);
