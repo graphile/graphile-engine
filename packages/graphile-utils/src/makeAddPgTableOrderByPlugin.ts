@@ -66,39 +66,59 @@ export function orderByAscDesc(
     typeof uniqueOrOptions === "boolean"
       ? { unique: uniqueOrOptions }
       : uniqueOrOptions ?? {};
-  const { unique = false, nulls = "last-iff-ascending" } = options;
+  const { unique = false, nulls } = options;
+
+  if (typeof unique !== "boolean") {
+    throw new Error(
+      `Invalid value for "unique" passed to orderByAscDesc for ${baseName}. Unique must be a boolean.`
+    );
+  }
 
   const isValidNullsOption = [
     "first",
     "last",
     "first-iff-ascending",
     "last-iff-ascending",
+    undefined,
   ].includes(nulls);
 
-  const nullsOption = isValidNullsOption ? nulls : "last-iff-ascending";
+  if (!isValidNullsOption) {
+    throw new Error(
+      `Invalid value for "nulls" passed to orderByAscDesc for ${baseName}. Nulls must be one of: undefined | "first" | "last" | "first-iff-ascending" | "last-iff-ascending".`
+    );
+  }
 
-  const ascendingShouldHaveNullsFirst = [
-    "first",
-    "first-iff-ascending",
-  ].includes(nullsOption);
+  const defaultAscendingSpec: OrderSpec = [columnOrSqlFragment, true];
+  const defaultDescendingSpec: OrderSpec = [columnOrSqlFragment, false];
 
-  const descendingShouldHaveNullsFirst = [
-    "first",
-    "last-iff-ascending",
-  ].includes(nullsOption);
+  const ascendingSpec: OrderSpec =
+    typeof nulls === "undefined"
+      ? defaultAscendingSpec
+      : [
+          ...defaultAscendingSpec,
+          ["first", "first-iff-ascending"].includes(nulls),
+        ];
+
+  const descendingSpec: OrderSpec =
+    typeof nulls === "undefined"
+      ? defaultDescendingSpec
+      : [
+          ...defaultDescendingSpec,
+          ["first", "last-iff-ascending"].includes(nulls),
+        ];
 
   const orders: MakeAddPgTableOrderByPluginOrders = {
     [`${baseName}_ASC`]: {
       value: {
         alias: `${baseName}_ASC`,
-        specs: [[columnOrSqlFragment, true, ascendingShouldHaveNullsFirst]],
+        specs: [ascendingSpec],
         unique,
       },
     },
     [`${baseName}_DESC`]: {
       value: {
         alias: `${baseName}_DESC`,
-        specs: [[columnOrSqlFragment, false, descendingShouldHaveNullsFirst]],
+        specs: [descendingSpec],
         unique,
       },
     },
