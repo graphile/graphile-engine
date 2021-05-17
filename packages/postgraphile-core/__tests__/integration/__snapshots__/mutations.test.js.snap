@@ -893,6 +893,21 @@ Object {
         "nodeId": "query",
       },
     },
+    "m": Object {
+      "clientMutationId": null,
+      "deletedPersonId": "WyJwZW9wbGUiLDFd",
+      "personEdge": Object {
+        "node": Object {
+          "email": "john.smith@email.com",
+          "firstName": "John",
+          "id": 1,
+          "nodeId": "WyJwZW9wbGUiLDFd",
+        },
+      },
+      "query": Object {
+        "nodeId": "query",
+      },
+    },
   },
   "errors": Array [
     [GraphQLError: No values were deleted in collection 'posts' because no values you can delete were found matching these criteria.],
