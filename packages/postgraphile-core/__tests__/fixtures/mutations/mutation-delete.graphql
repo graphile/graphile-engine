@@ -68,6 +68,7 @@ fragment deletePersonPayloadWithEdge on DeletePersonPayload {
   clientMutationId
   deletedPersonId
   personEdge(orderBy: FIRST_NAME_ASC) {
+    cursor
     node {
       firstName
       id
