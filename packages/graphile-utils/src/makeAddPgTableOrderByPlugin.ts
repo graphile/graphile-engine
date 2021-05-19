@@ -52,9 +52,16 @@ export default function makeAddPgTableOrderByPlugin(
   return plugin;
 }
 
+export type NullsSortMethod =
+  | "first"
+  | "last"
+  | "first-iff-ascending"
+  | "last-iff-ascending"
+  | undefined;
+
 export interface OrderByAscDescOptions {
   unique?: boolean;
-  nulls?: "first" | "last" | "first-iff-ascending" | "last-iff-ascending";
+  nulls?: NullsSortMethod;
 }
 
 export function orderByAscDesc(
@@ -84,7 +91,7 @@ export function orderByAscDesc(
 
   if (!isValidNullsOption) {
     throw new Error(
-      `Invalid value for "nulls" passed to orderByAscDesc for ${baseName}. Nulls must be one of: undefined | "first" | "last" | "first-iff-ascending" | "last-iff-ascending".`
+      `Invalid value for "nulls" passed to orderByAscDesc for ${baseName}. Nulls must be sorted by one of: undefined | "first" | "last" | "first-iff-ascending" | "last-iff-ascending".`
     );
   }
 
