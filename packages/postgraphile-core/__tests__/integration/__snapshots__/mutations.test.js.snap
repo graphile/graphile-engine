@@ -897,6 +897,7 @@ Object {
       "clientMutationId": null,
       "deletedPersonId": "WyJwZW9wbGUiLDFd",
       "personEdge": Object {
+        "cursor": "WyJmaXJzdF9uYW1lX2FzYyIsWyJKb2huIiwxXV0=",
         "node": Object {
           "email": "john.smith@email.com",
           "firstName": "John",
