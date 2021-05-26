@@ -369,6 +369,7 @@ create function c.no_args_mutation() returns int as $$ select 2 $$ language sql;
 create function a.return_void_mutation() returns void as $$ begin return; end; $$ language plpgsql;
 
 create function c.person_first_name(person c.person) returns text as $$ select split_part(person.person_full_name, ' ', 1) $$ language sql stable;
+comment on function c.person_first_name(c.person) is E'@sortable';
 create function c.person_friends(person c.person) returns setof c.person as $$ select friend.* from c.person as friend where friend.id in (person.id + 1, person.id + 2) $$ language sql stable;
 comment on function c.person_friends(c.person) is E'@sortable';
 create function c.person_first_post(person c.person) returns a.post as $$ select * from a.post where a.post.author_id = person.id order by id asc limit 1 $$ language sql stable;

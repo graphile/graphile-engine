@@ -171,6 +171,8 @@ export default (function PgMutationPayloadEdgePlugin(
                         ? sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
                             col
                           )}`
+                        : typeof col === "function"
+                        ? col({ queryBuilder })
                         : col;
                       expressions.push(expr);
                     });

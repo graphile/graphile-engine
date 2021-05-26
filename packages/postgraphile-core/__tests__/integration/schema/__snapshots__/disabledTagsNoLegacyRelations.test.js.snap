@@ -2939,6 +2939,8 @@ type Person implements Node {
 
   """@deprecated This is deprecated (comment on function c.person_exists)."""
   exists(email: Email): Boolean
+
+  """@sortable"""
   firstName: String
   firstPost: Post
 
