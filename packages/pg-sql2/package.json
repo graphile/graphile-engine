@@ -47,13 +47,11 @@
   },
   "dependencies": {
     "@graphile/lru": "4.11.0",
-    "@types/pg": ">=6 <8",
+    "@types/pg": ">=6 <9",
     "debug": ">=3 <5",
     "tslib": "^2.0.1"
   },
-  "files": [
-    "node8plus"
-  ],
+  "files": ["node8plus"],
   "engines": {
     "node": ">=8.6"
   }
