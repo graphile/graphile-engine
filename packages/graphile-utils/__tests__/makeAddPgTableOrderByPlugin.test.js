@@ -3,26 +3,6 @@ import { graphql } from "graphql";
 import { createPostGraphileSchema } from "postgraphile-core";
 import { makeAddPgTableOrderByPlugin, orderByAscDesc } from "..";
 
-const clean = data => {
-  if (Array.isArray(data)) {
-    return data.map(clean);
-  } else if (data && typeof data === "object") {
-    return Object.keys(data).reduce((memo, key) => {
-      const value = data[key];
-      if (key === "id" && typeof value === "number") {
-        memo[key] = "[id]";
-      } else if (key === "nodeId" && typeof value === "string") {
-        memo[key] = "[nodeId]";
-      } else {
-        memo[key] = clean(value);
-      }
-      return memo;
-    }, {});
-  } else {
-    return data;
-  }
-};
-
 let pgPool;
 
 beforeAll(() => {
