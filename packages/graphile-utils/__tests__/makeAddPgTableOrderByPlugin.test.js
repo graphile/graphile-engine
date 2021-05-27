@@ -68,15 +68,14 @@ const getResultingOrderFromUserNodes = userNodes =>
 const checkArraysAreEqual = (array1, array2) =>
   JSON.stringify(array1) === JSON.stringify(array2);
 
-const getSchemaAndPgClient = async nullsSortMethod => {
+const getSchema = async nullsSortMethod => {
   const schema = await createPostGraphileSchema(pgPool, ["graphile_utils"], {
     disableDefaultMutations: true,
     simpleCollections: "both",
     appendPlugins: [makePetsPlugin(nullsSortMethod)],
   });
-  const pgClient = await pgPool.connect();
 
-  return { schema, pgClient };
+  return schema;
 };
 
 /**
@@ -138,7 +137,8 @@ const getAscDescData = async (schema, pgClient) => {
 };
 
 it('allows creating a "order by" plugin with DEFAULT asc/desc ordering', async () => {
-  const { schema, pgClient } = await getSchemaAndPgClient();
+  const schema = await getSchema();
+  const pgClient = await pgPool.connect();
 
   try {
     const {
@@ -181,7 +181,8 @@ it('allows creating a "order by" plugin with DEFAULT asc/desc ordering', async (
 });
 
 it('allows creating a "order by" plugin with NULLS FIRST asc/desc ordering', async () => {
-  const { schema, pgClient } = await getSchemaAndPgClient("first");
+  const schema = await getSchema("first");
+  const pgClient = await pgPool.connect();
 
   try {
     const {
@@ -224,7 +225,8 @@ it('allows creating a "order by" plugin with NULLS FIRST asc/desc ordering', asy
 });
 
 it('allows creating a "order by" plugin with NULLS LAST asc/desc ordering', async () => {
-  const { schema, pgClient } = await getSchemaAndPgClient("last");
+  const schema = await getSchema("last");
+  const pgClient = await pgPool.connect();
 
   try {
     const {
@@ -267,9 +269,8 @@ it('allows creating a "order by" plugin with NULLS LAST asc/desc ordering', asyn
 });
 
 it('allows creating a "order by" plugin with NULLS FIRST IFF ASCENDING asc/desc ordering', async () => {
-  const { schema, pgClient } = await getSchemaAndPgClient(
-    "first-iff-ascending"
-  );
+  const schema = await getSchema("first-iff-ascending");
+  const pgClient = await pgPool.connect();
 
   try {
     const {
@@ -312,7 +313,8 @@ it('allows creating a "order by" plugin with NULLS FIRST IFF ASCENDING asc/desc 
 });
 
 it('allows creating a "order by" plugin with NULLS LAST IFF ASCENDING asc/desc ordering', async () => {
-  const { schema, pgClient } = await getSchemaAndPgClient("last-iff-ascending");
+  const schema = await getSchema("last-iff-ascending");
+  const pgClient = await pgPool.connect();
 
   try {
     const {
