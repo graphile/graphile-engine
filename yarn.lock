@@ -2353,22 +2353,13 @@
   resolved "https://registry.yarnpkg.com/@types/pg-types/-/pg-types-1.11.5.tgz#1eebbe62b6772fcc75c18957a90f933d155e005b"
   integrity sha512-L8ogeT6vDzT1vxlW3KITTCt+BVXXVkLXfZ/XNm6UqbcJgxf+KPO7yjWx7dQQE8RW07KopL10x2gNMs41+IkMGQ==
 
-"@types/pg@>=6 <8", "@types/pg@^7.4.10":
+"@types/pg@>=6 <8", "@types/pg@>=6 <9", "@types/pg@^7.4.10":
   version "7.14.4"
   resolved "https://registry.yarnpkg.com/@types/pg/-/pg-7.14.4.tgz#15cfcfd9300f94fd44e6191a1b0ba18d2de209f6"
   integrity sha512-yCKVMCcFPZSFHGg+8qjY368uf3ruyDBPjxvOU2ZcGa/vRFo5Ti5Y6z6vl+2hxtwm9VMWUGb6TWkIk3cIV8C0Cw==
   dependencies:
     "@types/node" "*"
     "@types/pg-types" "*"
-
-"@types/pg@>=6 <9":
-  version "8.6.0"
-  resolved "https://registry.yarnpkg.com/@types/pg/-/pg-8.6.0.tgz#34233b891a127d6caaad28e177b1baec1a2958d4"
-  integrity sha512-3JXFrsl8COoqVB1+2Pqelx6soaiFVXzkT3fkuSNe7GB40ysfT0FHphZFPiqIXpMyTHSFRdLTyZzrFBrJRPAArA==
-  dependencies:
-    "@types/node" "*"
-    pg-protocol "*"
-    pg-types "^2.2.0"
 
 "@types/prettier@^1.19.0":
   version "1.19.1"
@@ -7684,11 +7675,6 @@ pg-pool@^3.2.1:
   resolved "https://registry.yarnpkg.com/pg-pool/-/pg-pool-3.2.1.tgz#5f4afc0f58063659aeefa952d36af49fa28b30e0"
   integrity sha512-BQDPWUeKenVrMMDN9opfns/kZo4lxmSWhIqo+cSAF7+lfi9ZclQbr9vfnlNaPr8wYF3UYjm5X0yPAhbcgqNOdA==
 
-pg-protocol@*:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/pg-protocol/-/pg-protocol-1.5.0.tgz#b5dd452257314565e2d54ab3c132adc46565a6a0"
-  integrity sha512-muRttij7H8TqRNu/DxrAJQITO4Ac7RmX3Klyr/9mJEOBeIpgnF8f9jAfRz5d3XwQZl5qBjF9gLsUtMPJE0vezQ==
-
 pg-protocol@^1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/pg-protocol/-/pg-protocol-1.2.5.tgz#28a1492cde11646ff2d2d06bdee42a3ba05f126c"
@@ -7704,7 +7690,7 @@ pg-sql2@4.9.0:
     debug ">=3 <5"
     tslib "^2.0.1"
 
-pg-types@^2.1.0, pg-types@^2.2.0:
+pg-types@^2.1.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/pg-types/-/pg-types-2.2.0.tgz#2d0250d636454f7cfa3b6ae0382fdfa8063254a3"
   integrity sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA==
