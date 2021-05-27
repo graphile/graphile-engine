@@ -1,6 +1,6 @@
 {
   "name": "pg-sql2",
-  "version": "4.12.0",
+  "version": "4.12.1",
   "description": "Generate safe Postgres-compliant SQL with tagged template literals",
   "main": "node8plus/index.js",
   "types": "node8plus/index.d.ts",
@@ -51,7 +51,9 @@
     "debug": ">=3 <5",
     "tslib": "^2.0.1"
   },
-  "files": ["node8plus"],
+  "files": [
+    "node8plus"
+  ],
   "engines": {
     "node": ">=8.6"
   }

@@ -3,7 +3,12 @@
 We use PostGraphile's GitHub releases tab to log our changes in detail, but
 this auto-generated changelog helps us to produce that list, and it may be
 helpful to you also.
-# [](https://github.com/graphile/graphile-engine/compare/v4.12.0...v) (2021-05-26)
+# [](https://github.com/graphile/graphile-engine/compare/v4.12.0...v) (2021-05-27)
+
+
+### Features
+
+* **utils:** support for NULLS FIRST/LAST in orderByAscDesc ([#737](https://github.com/graphile/graphile-engine/issues/737)) ([99b1a8e](https://github.com/graphile/graphile-engine/commit/99b1a8ee638322e61b0617c5d1497e9904a6ff21))
 
 
 
