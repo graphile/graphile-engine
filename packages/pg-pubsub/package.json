@@ -31,7 +31,7 @@
   "homepage": "https://github.com/graphile/graphile-engine/tree/master/packages/pg-pubsub#readme",
   "dependencies": {
     "@types/debug": "^4.1.4",
-    "@types/pg": "^7.4.14",
+    "@types/pg": ">=6 <9",
     "debug": "^4.1.1",
     "graphql-subscriptions": "^1.1.0",
     "tslib": "^2.0.1"
@@ -53,7 +53,5 @@
     "ts-jest": "25.x",
     "typescript": "^4.0.2"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }

@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/graphile/graphile-engine/tree/master/packages/lds#readme",
   "dependencies": {
-    "@types/pg": "^7.4.14",
+    "@types/pg": ">=6 <9",
     "@types/ws": "^6.0.1",
     "pg": ">=6.1.0 <9",
     "tslib": "^2.0.1",
@@ -46,7 +46,5 @@
     "ts-jest": "25.x",
     "typescript": "^4.0.2"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }
