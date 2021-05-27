@@ -1,7 +1,7 @@
 import pg from "pg";
 import { graphql } from "graphql";
 import { createPostGraphileSchema } from "postgraphile-core";
-import { makeAddPgTableOrderByPlugin, orderByAscDesc } from "../node8plus";
+import { makeAddPgTableOrderByPlugin, orderByAscDesc } from "..";
 
 const clean = data => {
   if (Array.isArray(data)) {
