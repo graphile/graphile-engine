@@ -53,7 +53,7 @@ jobs:
 
     services:
       postgres:
-        image: us.gcr.io/cockroach-cloud-images/cockroach:v21.2.0-alpha.00000000-1829-gd43d9fddbe
+        image: us.gcr.io/cockroach-cloud-images/cockroach:v21.2.0-alpha.00000000-1829-gd43d9fddbe start-single-node --insecure --listen-addr=:5432
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -62,7 +62,7 @@ jobs:
           - "0.0.0.0:5432:5432"
         options:
           --health-cmd pg_isready --health-interval 10s --health-timeout 5s
-          --health-retries 5 --name postgres start-single-node --insecure --listen-addr=:5432
+          --health-retries 5 --name postgres
 
     steps:
       - name: Checkout
