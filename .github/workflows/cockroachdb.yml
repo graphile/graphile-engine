@@ -1,0 +1,92 @@
+name: Node CI
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    env:
+      CI: true
+      PGVERSION: 9.4
+      TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/graphileengine_test
+      TEST_PG_URL: postgres://postgres:postgres@localhost:5432/postgraphile_test
+      LDS_TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/lds_test
+      TERM: xterm
+      FORCE_COLOR: 1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - run: yarn --immutable --ignore-engines
+
+      - name: "Check Code Format"
+        run: yarn prettier:check
+
+      - name: "Lint Code"
+        run: yarn eslint .
+
+      - name: "Flow"
+        run: npm run flow:check
+
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      CI: true
+      PGVERSION: 13
+      TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/graphileengine_test
+      TEST_PG_URL: postgres://postgres:postgres@localhost:5432/postgraphile_test
+      LDS_TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/lds_test
+      TERM: xterm
+      FORCE_COLOR: 1
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version:
+          - 14.x
+
+    services:
+      postgres:
+        image: us.gcr.io/cockroach-cloud-images/cockroach:v21.2.0-alpha.00000000-1829-gd43d9fddbe
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - "0.0.0.0:5432:5432"
+        options:
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s
+          --health-retries 5 --name postgres start-single-node --insecure --listen-addr=:5432
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Configure PostgreSQL
+        run: |
+          # cat .github/workflows/ci/docker-entrypoint-initdb.d/010-enable_wal.sh | docker exec -i postgres bash
+          # cat .github/workflows/ci/docker-entrypoint-initdb.d/020-wal2json.sh | docker exec -i postgres bash
+          cat .github/workflows/ci/docker-entrypoint-initdb.d/030-setup.sh | docker exec -i postgres bash
+          docker restart postgres
+      - name: Install pg_dump
+        run: |
+          sudo bash -c "echo deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main >> /etc/apt/sources.list.d/pgdg.list"
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          sudo apt-get update
+          sudo apt-get -yqq install postgresql-client-13
+      - run: yarn --immutable --ignore-engines
+
+      - name: "Build Code"
+        run: yarn prepack:all
+
+      - name: "Test Project"
+        run: yarn run pretest && ./scripts/ci && yarn run posttest
