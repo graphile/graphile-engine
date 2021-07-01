@@ -25,7 +25,8 @@ fi;
 SERVER_VERSION_NUM=$(psql -Xqtv ON_ERROR_STOP=1 -c "show server_version_num;" "$TEST_DATABASE_URL")
 
 # Import latest schema (throw on error)
-psql -Xqv ON_ERROR_STOP=1 "$TEST_DATABASE_URL" <<HERE
+if [ "x$COCKROACH" = "x" ]; then
+  psql -Xqv ON_ERROR_STOP=1 "$TEST_DATABASE_URL" <<HERE
 -- Drop our created schemas
 do \$\$
 declare
@@ -58,6 +59,18 @@ grant postgraphile_test_visitor to postgraphile_test_user2;
 grant postgraphile_test_user1 to postgraphile_test_authenticator;
 grant postgraphile_test_user2 to postgraphile_test_authenticator;
 HERE
+else
+  psql -Xqv ON_ERROR_STOP=1 "$TEST_DATABASE_URL" <<HERE
+create role postgraphile_test_authenticator login password 'testpassword';
+create role postgraphile_test_visitor;
+create role postgraphile_test_user1;
+create role postgraphile_test_user2;
+grant postgraphile_test_visitor to postgraphile_test_user1;
+grant postgraphile_test_visitor to postgraphile_test_user2;
+grant postgraphile_test_user1 to postgraphile_test_authenticator;
+grant postgraphile_test_user2 to postgraphile_test_authenticator;
+HERE
+fi
 
 psql -Xqv ON_ERROR_STOP=1 -f packages/graphile-utils/__tests__/utils-schema.sql "$TEST_DATABASE_URL"
 psql -Xqv ON_ERROR_STOP=1 -f packages/postgraphile-core/__tests__/kitchen-sink-schema.sql "$TEST_DATABASE_URL"
