@@ -87,11 +87,11 @@ beforeAll(() => {
           }),
         ],
       }),
-      /*
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         classicIds: true,
       }),
+      /*
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         dynamicJson: true,
