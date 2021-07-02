@@ -11,7 +11,7 @@ insert into c.person (id, person_full_name, email, about, config, last_login_fro
   (5, 'Joe Tucker', 'joe.tucker@email.com', null, 'a => 5, b => 6, actually_null => NULL, null_string => "null", "_\"_$@£$)(@*£$" => "_\"_$@£$)(@*£$"', '192.168.0.2', '192.168.0.0/23', '334455-667788', null),
   (6, 'Twenty Seventwo', 'graphile-build.issue.27.exists@example.com', null, 'null_1 => NULL, null_2 => null', '10.1.2.254', '10.0.0.0/9', '99aabb:ccddee', null);
 
-alter sequence c.person_id_seq restart with 10;
+-- select setval('c.person_id_seq', 10); -- alter sequence c.person_id_seq restart with 10;
 
 insert into c.person_secret (person_id, sekrit) values
   (2, 'Sara Smith is not really my name!'),
@@ -25,7 +25,7 @@ insert into c.left_arm (id, person_id, length_in_metres) values
   (47, 5, 0.65),
   (50, 1, 0.65);
 
-alter sequence c.left_arm_id_seq restart with 100;
+-- select setval('c.left_arm_id_seq', 100); -- alter sequence c.left_arm_id_seq restart with 100;
 
 insert into a.post (id, author_id, headline) values
   (1, 2, 'No… It’s a thing; it’s like a plan, but with more greatness.'),
@@ -40,7 +40,7 @@ insert into a.post (id, author_id, headline) values
   (10, 2, 'What’s with you kids? Every other day it’s food, food, food.'),
   (11, 3, 'They’re not aliens, they’re Earth…liens!');
 
-alter sequence a.post_id_seq restart with 12;
+-- select setval('a.post_id_seq', 12); -- alter sequence a.post_id_seq restart with 12;
 
 insert into c.compound_key (person_id_1, person_id_2, extra) values
   (1, 2, null),
@@ -70,15 +70,15 @@ insert into b.types values (
   'xyz',
   'green',
   ARRAY['green', 'red']::b.color[],
-  5,
-  6,
+  -- 5,
+  -- 6,
   array['hey', 'i', 'just', 'met', 'you'],
   '{"a":1,"b":2,"c":3,"d":{"e":4,"f":5,"g":[6,7,8,"x",false,null]}}',
   '{"1":"a","2":"b","3":"c","4":{"5":"d","6":"e","7":["f","g","h",42,true,null]}}',
-  null,
-  numrange(-10, 52),
-  daterange('1998-07-12', '2016-10-07'),
-  '[20, 53]',
+  -- null,
+  -- numrange(-10, 52),
+  -- daterange('1998-07-12', '2016-10-07'),
+  -- '[20, 53]',
   '1999-01-08 04:05:06',
   '1999-01-08 04:05:06 -8:00',
   '2016-10-07',
@@ -86,26 +86,26 @@ insert into b.types values (
   '04:05:06 -8:00',
   '1 year 2 months 3 days 4 hours 5 minutes 6.789123456 seconds',
   ARRAY['1 year 2 months 3 days 4 hours 5 minutes 6.789123456 seconds', '1 year 1 months 1 days 1 hours 1 minutes 1 seconds']::interval[],
-  '9876543.21',
-  (1, '2', 'blue', '4be8a712-3ff7-432e-aa34-fdb43fbd838d', 'FOO_BAR', '', interval '6 hours', 8),
-  ((3, '456', 'red', 'aed18400-2a92-46df-8204-b70c728b3520', 'BAR_FOO', 'one', interval '6 hours', 93), (42, 'Hello, world!', 'blue', 'd34df5e0-83f1-11e6-8dd0-abee917ffd1e', 'BAZ_QUX', '', interval '6 hours', -5), 7),
+  -- '9876543.21',
+  -- (1, '2', 'blue', '4be8a712-3ff7-432e-aa34-fdb43fbd838d', 'FOO_BAR', '', interval '6 hours', 8),
+  -- ((3, '456', 'red', 'aed18400-2a92-46df-8204-b70c728b3520', 'BAR_FOO', 'one', interval '6 hours', 93), (42, 'Hello, world!', 'blue', 'd34df5e0-83f1-11e6-8dd0-abee917ffd1e', 'BAZ_QUX', '', interval '6 hours', -5), 7),
+  -- null,
+  -- null,
+  -- point(1,3),
+  -- null,
+  null,
+  -- null,
+  -- null,
   null,
   null,
-  point(1,3),
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
+  -- null,
+  -- null,
   null,
   null
+  -- null,
+  -- null,
+  -- null,
+  -- null
 );
 
 insert into b.types values (
@@ -118,15 +118,15 @@ insert into b.types values (
   'xyz',
   'green',
   ARRAY['green', 'red']::b.color[],
-  5,
-  6,
+  -- 5,
+  -- 6,
   array['hey', 'i', 'just', 'met', 'you'],
   '{"a":1,"b":2,"c":3,"d":{"e":4,"f":5,"g":[6,7,8,"x",false,null]}}',
   '{"1":"a","2":"b","3":"c","4":{"5":"d","6":"e","7":["f","g","h",42,true,null]}}',
-  null,
-  numrange(-10, 52),
-  daterange('1998-07-12', '2016-10-07'),
-  '[20, 53]',
+  -- null,
+  -- numrange(-10, 52),
+  -- daterange('1998-07-12', '2016-10-07'),
+  -- '[20, 53]',
   '1999-01-08 04:05:06',
   '1999-01-08 04:05:06 -8:00',
   '2016-10-07',
@@ -134,26 +134,26 @@ insert into b.types values (
   '04:05:06 -8:00',
   '1 year 2 months 3 days 4 hours 5 minutes 6.789123456 seconds',
   ARRAY['1 year 2 months 3 days 4 hours 5 minutes 6.789123456 seconds', '1 year 1 months 1 days 1 hours 1 minutes 1 seconds', '200 years', '200.200 seconds']::interval[],
-  '9876543.21',
-  (null, null, null, null, null, null, null, null),
-  ((3, '456', 'red', 'aed18400-2a92-46df-8204-b70c728b3520', 'BAR_FOO', 'one', interval '6 hours', 93), (null, null, null, null, null, null, null, null), 7),
-  null,
-  null,
-  point(1,3),
-  null,
+  -- '9876543.21',
+  -- (null, null, null, null, null, null, null, null),
+  -- ((3, '456', 'red', 'aed18400-2a92-46df-8204-b70c728b3520', 'BAR_FOO', 'one', interval '6 hours', 93), (null, null, null, null, null, null, null, null), 7),
+  -- null,
+  -- null,
+  -- point(1,3),
+  -- null,
   '192.168.0.0',
-  '192.168.0.0/24',
-  'feed.dead.beef',
+  -- '192.168.0.0/24',
+  -- 'feed.dead.beef',
   'b.guid_fn', 
   'b.guid_fn(b.guid)', 
-  '!',
-  '*(integer,integer)', 
+  -- '!',
+  -- '*(integer,integer)', 
   'b.types', 
-  'int', 
-  'english', 
-  'simple',
-  ARRAY['1 year', '2 months', '3 days']::text[],
-  ARRAY[1, 2, 2098288669218571760]
+  'int'
+  -- 'english', 
+  -- 'simple',
+  -- ARRAY['1 year', '2 months', '3 days']::text[],
+  -- ARRAY[1, 2, 2098288669218571760]
 );
 
 insert into c.edge_case values
@@ -189,7 +189,7 @@ insert into c.my_table(id, json_data) values
   (2, '{"stringField":"test","otherField":"whatever"}'),
   (3, '{"stringField":"notTest"}');
 
-alter sequence c.my_table_id_seq restart with 10;
+-- select setval('c.my_table_id_seq', 10); -- alter sequence c.my_table_id_seq restart with 10;
 
 insert into c.null_test_record (id, nullable_text, nullable_int, non_null_text) values
   (1, 'Hello', 99, 'World'),
@@ -213,7 +213,7 @@ update d.person set
   col_no_create_update_order_filter = col_no_create_update_order_filter || id::text,
   col_no_anything = col_no_anything || id::text;
 
-alter sequence d.person_id_seq restart with 10;
+-- select setval('d.person_id_seq', 10); -- alter sequence d.person_id_seq restart with 10;
 
 
 -- Begin data for smart_comment_relations
@@ -253,7 +253,7 @@ insert into network_types.network values
   (5, '2001:4f8:3:ba::', '2001:4f8:3:ba::/64', '0800.2b01.0203'),
   (6, '2001:4f8:3:ba:2e0:81ff:fe22:d1f1', '2001:4f8:3:ba:2e0:81ff:fe22:d1f1/128', '08002b010203');
 
-alter sequence network_types.network_id_seq restart with 7;
+-- select setval('network_types.network_id_seq', 7); -- alter sequence network_types.network_id_seq restart with 7;
 
 
 insert into named_query_builder.categories (id, name) values
@@ -275,14 +275,14 @@ insert into named_query_builder.toy_categories(toy_id, category_id, approved) va
   (1, 3, false);
 
 --------------------------------------------------------------------------------
-alter sequence enum_tables.letter_descriptions_id_seq restart with 101;
+-- select setval('enum_tables.letter_descriptions_id_seq', 101); -- alter sequence enum_tables.letter_descriptions_id_seq restart with 101;
 insert into enum_tables.letter_descriptions(letter, letter_via_view, description) values
   ('A', 'A', 'The first letter in the alphabet'),
   ('B', 'B', 'Following closely behind the first letter, this is a popular choice'),
   ('C', 'C', 'Pronounced like ''sea'''),
   ('D', 'D', 'The first letter omitted from the ''ABC'' phrase');
 
-alter sequence enum_tables.referencing_table_id_seq restart with 432;
+-- select setval('enum_tables.referencing_table_id_seq', 432); -- alter sequence enum_tables.referencing_table_id_seq restart with 432;
 insert into enum_tables.referencing_table(enum_1, enum_2, enum_3) values
   ('a1', null, null),
   ('a3', 'b2', 'c1'),
@@ -290,16 +290,16 @@ insert into enum_tables.referencing_table(enum_1, enum_2, enum_3) values
 
 --------------------------------------------------------------------------------
 
-alter sequence geometry.geom_id_seq restart with 101;
-insert into geometry.geom(
-  point, line, lseg, box, open_path, closed_path, polygon, circle
-) values (
-  point(4, 2),
-  line(point(7, 11), point(13, 17)),
-  lseg(point(7, 11), point(13, 17)),
-  box(point(7, 11), point(13, 17)),
-  '[(1,3),(3,4),(4,1)]',
-  '((1,3),(3,4),(4,1))',
-  '((1,3),(3,4),(4,1))',
-  '<(10, 10), 7>'
-);
+-- select setval('geometry.geom_id_seq', 101); -- alter sequence geometry.geom_id_seq restart with 101;
+-- insert into geometry.geom(
+--   point, line, lseg, box, open_path, closed_path, polygon, circle
+-- ) values (
+--   point(4, 2),
+--   line(point(7, 11), point(13, 17)),
+--   lseg(point(7, 11), point(13, 17)),
+--   box(point(7, 11), point(13, 17)),
+--   '[(1,3),(3,4),(4,1)]',
+--   '((1,3),(3,4),(4,1))',
+--   '((1,3),(3,4),(4,1))',
+--   '<(10, 10), 7>'
+-- );
