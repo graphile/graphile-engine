@@ -34,7 +34,9 @@ limitations are applied:
 - No `COMMENT ON CONSTRAINT`
 - No `COMMENT ON VIEW`
 - No `COMMENT ON COLUMN` on a view's column
-- No `ALTER DEFAULT PRIVILEGES`
 - No `DO $$`
 - No `CREATE ROLE ... NOINHERIT`
 - No `CREATE INDEX` over expressions (columns only)
+- No `ALTER DEFAULT PRIVILEGES`
+- No `GRANT ... ON ALL SEQUENCES IN SCHEMA ...`
+- No column-based grants (`GRANT SELECT (...), INSERT (...), UPDATE (...) ON ...`)
