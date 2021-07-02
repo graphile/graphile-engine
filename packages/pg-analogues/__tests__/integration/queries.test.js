@@ -25,9 +25,6 @@ let queryResults = [];
 const kitchenSinkData = () =>
   readFile(`${__dirname}/../kitchen-sink-data.analogue.sql`, "utf8");
 
-const pg11Data = () =>
-  readFile(`${__dirname}/../pg11-data.analogue.sql`, "utf8");
-
 const dSchemaComments = () =>
   readFile(
     `${__dirname}/../kitchen-sink-d-schema-comments.analogue.sql`,
@@ -64,11 +61,8 @@ beforeAll(() => {
       orderByNullsLast,
       smartCommentRelations,
       largeBigint,
-      useCustomNetworkScalars,
-      pg11UseCustomNetworkScalars,
       namedQueryBuilder,
       enumTables,
-      geometry,
     ] = await Promise.all([
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
@@ -91,7 +85,6 @@ beforeAll(() => {
         subscriptions: true,
         classicIds: true,
       }),
-      /*
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         dynamicJson: true,
@@ -120,12 +113,6 @@ beforeAll(() => {
       }),
       createPostGraphileSchema(pgClient, ["smart_comment_relations"], {}),
       createPostGraphileSchema(pgClient, ["large_bigint"], {}),
-      createPostGraphileSchema(pgClient, ["network_types"], {
-        graphileBuildOptions: {
-          pgUseCustomNetworkScalars: true,
-        },
-      }),
-         null,
       createPostGraphileSchema(pgClient, ["named_query_builder"], {
         subscriptions: true,
         appendPlugins: [ToyCategoriesPlugin],
@@ -133,13 +120,6 @@ beforeAll(() => {
       createPostGraphileSchema(pgClient, ["enum_tables"], {
         subscriptions: true,
       }),
-      createPostGraphileSchema(pgClient, ["geometry"], {
-        subscriptions: true,
-        graphileBuildOptions: {
-          pgGeometricTypes: true,
-        },
-      }),
-      */
     ]);
     console.log("beforeAll schemas built");
     debug(printSchema(normal));
@@ -154,11 +134,8 @@ beforeAll(() => {
       orderByNullsLast,
       smartCommentRelations,
       largeBigint,
-      useCustomNetworkScalars,
-      pg11UseCustomNetworkScalars,
       namedQueryBuilder,
       enumTables,
-      geometry,
     };
   });
 
@@ -212,17 +189,11 @@ beforeAll(() => {
             "simple-procedure-query.graphql": gqlSchemas.simpleCollections,
             "types.graphql": gqlSchemas.simpleCollections,
             "orderByNullsLast.graphql": gqlSchemas.orderByNullsLast,
-            "network_types.graphql": gqlSchemas.useCustomNetworkScalars,
-            "pg11.network_types.graphql":
-              gqlSchemas.pg11UseCustomNetworkScalars,
-            "pg11.types.graphql": gqlSchemas.pg11UseCustomNetworkScalars,
           };
           let gqlSchema = schemas[fileName];
           if (!gqlSchema) {
             if (fileName.startsWith("d.")) {
               gqlSchema = gqlSchemas.dSchema;
-            } else if (fileName.startsWith("rbac.")) {
-              gqlSchema = gqlSchemas.rbac;
             } else if (fileName.startsWith("smart_comment_relations.")) {
               gqlSchema = gqlSchemas.smartCommentRelations;
             } else if (fileName.startsWith("large_bigint")) {
@@ -231,8 +202,6 @@ beforeAll(() => {
               gqlSchema = gqlSchemas.namedQueryBuilder;
             } else if (fileName.startsWith("enum_tables.")) {
               gqlSchema = gqlSchemas.enumTables;
-            } else if (fileName.startsWith("geometry.")) {
-              gqlSchema = gqlSchemas.geometry;
             } else {
               gqlSchema = gqlSchemas.normal;
             }
@@ -240,11 +209,6 @@ beforeAll(() => {
           console.log("Got schema");
 
           await pgClient.query("savepoint test");
-          if (gqlSchema === gqlSchemas.rbac) {
-            await pgClient.query(
-              "select set_config('role', 'postgraphile_test_visitor', true), set_config('jwt.claims.user_id', '3', true)"
-            );
-          }
 
           try {
             console.log("Calling GraphQL");
