@@ -43,5 +43,6 @@ limitations are applied:
 - No column-based grants (`GRANT SELECT (...), INSERT (...), UPDATE (...) ON ...`)
 - No `SET LOCAL TIMEZONE TO ...`
 - No `SET [LOCAL] ROLE ...`
+- No generated identity columns `... GENERATED ALWAYS AS IDENTITY ...`
 - No `ALTER SEQUENCE ... RESTART WITH`
   - _In CockroachDB, `SERIAL` out of the box uses `unique_rowid()` rather than a sequence. This can be changed via session var `serial_normalization`.
