@@ -11,10 +11,11 @@ jobs:
       PGVERSION: 13
       PGHOSTADDR: 127.0.0.1
       PGUSER: root
+      PGPASSWORD: root
       COCKROACH: 1
-      TEST_DATABASE_URL: postgres://root@localhost:5432/graphileengine_test
-      TEST_PG_URL: postgres://root@localhost:5432/postgraphile_test
-      LDS_TEST_DATABASE_URL: postgres://root@localhost:5432/lds_test
+      TEST_DATABASE_URL: postgres://root:root@localhost:5432/graphileengine_test
+      TEST_PG_URL: postgres://root:root@localhost:5432/postgraphile_test
+      LDS_TEST_DATABASE_URL: postgres://root:root@localhost:5432/lds_test
       TERM: xterm
       FORCE_COLOR: 1
 
@@ -35,8 +36,14 @@ jobs:
         run: |
           curl -LO https://edge-binaries.cockroachdb.com/cockroach/cockroach.linux-gnu-amd64.LATEST
           chmod +x cockroach.linux-gnu-amd64.LATEST
-          ./cockroach.linux-gnu-amd64.LATEST start-single-node --insecure --listen-addr=:5432 &
+          mkdir certs
+          mkdir my-safe-directory
+          ./cockroach.linux-gnu-amd64.LATEST cert create-ca --certs-dir=certs --ca-key=my-safe-directory/ca.key
+          ./cockroach.linux-gnu-amd64.LATEST cert create-node localhost --certs-dir=certs --ca-key=my-safe-directory/ca.key
+          ./cockroach.linux-gnu-amd64.LATEST cert create-client root --certs-dir=certs --ca-key=my-safe-directory/ca.key
+          ./cockroach.linux-gnu-amd64.LATEST start-single-node --accept-sql-without-tls --listen-addr=:5432 --http-addr=:5757 --certs-dir=certs &
           sleep 2
+          ./cockroach.linux-gnu-amd64.LATEST sql --certs-dir=certs --host=localhost -e "alter role root password 'root';"
       - name: Install pg_dump
         run: |
           sudo bash -c "echo deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main >> /etc/apt/sources.list.d/pgdg.list"
