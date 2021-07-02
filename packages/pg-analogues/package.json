@@ -5,6 +5,7 @@
   "description": "",
   "main": "Graphile Engine test suite for PostgreSQL analogues",
   "scripts": {
+    "watch": "sleep 1000000000",
     "test": "scripts/test"
   },
   "author": "Benjie Gillam <code@benjiegillam.com>",
