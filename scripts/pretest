@@ -61,6 +61,10 @@ grant postgraphile_test_user2 to postgraphile_test_authenticator;
 HERE
 else
   psql -Xqv ON_ERROR_STOP=1 "$TEST_DATABASE_URL" <<HERE
+drop role if exists postgraphile_test_authenticator;
+drop role if exists postgraphile_test_user1;
+drop role if exists postgraphile_test_user2;
+drop role if exists postgraphile_test_visitor;
 create role postgraphile_test_authenticator login password 'testpassword';
 create role postgraphile_test_visitor;
 create role postgraphile_test_user1;
