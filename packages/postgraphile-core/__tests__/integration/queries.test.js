@@ -23,12 +23,16 @@ const testsToSkip = [];
 let queryResults = [];
 
 const kitchenSinkData = () =>
-  readFile(`${__dirname}/../kitchen-sink-data.sql`, "utf8");
+  readFile(`${__dirname}/../kitchen-sink-data.analogue.sql`, "utf8");
 
-const pg11Data = () => readFile(`${__dirname}/../pg11-data.sql`, "utf8");
+const pg11Data = () =>
+  readFile(`${__dirname}/../pg11-data.analogue.sql`, "utf8");
 
 const dSchemaComments = () =>
-  readFile(`${__dirname}/../kitchen-sink-d-schema-comments.sql`, "utf8");
+  readFile(
+    `${__dirname}/../kitchen-sink-d-schema-comments.analogue.sql`,
+    "utf8"
+  );
 
 beforeAll(() => {
   // Get a few GraphQL schema instance that we can query.
