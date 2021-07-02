@@ -4,12 +4,12 @@ insert into a.no_primary_key (id, str) values
   (3, 'three');
 
 insert into c.person (id, person_full_name, email, about, config, last_login_from_ip, last_login_from_subnet, user_mac, created_at) values
-  (1, 'John Smith', 'john.smith@email.com', null, '', '192.168.0.1', '192.168.0.0/24', '00:00:00:00:00:00', null),
-  (2, 'Sara Smith', 'sara.smith@email.com', null, 'a => 1', '10.1.2.3', '10.0.0.0/8', '11-22-33-44-55-66', null),
-  (3, 'Budd Deey', 'budd.deey@email.com', 'Just a friendly human', 'b => 2', '172.21.22.23', '172.16.0.0/12', '778899AABBCC', null),
-  (4, 'Kathryn Ramirez', 'kathryn.ramirez@email.com', null, 'a => 3, b => 4', '192.168.1.2', '192.168.0.0/16', 'ddee.ff00.1122', null),
-  (5, 'Joe Tucker', 'joe.tucker@email.com', null, 'a => 5, b => 6, actually_null => NULL, null_string => "null", "_\"_$@£$)(@*£$" => "_\"_$@£$)(@*£$"', '192.168.0.2', '192.168.0.0/23', '334455-667788', null),
-  (6, 'Twenty Seventwo', 'graphile-build.issue.27.exists@example.com', null, 'null_1 => NULL, null_2 => null', '10.1.2.254', '10.0.0.0/9', '99aabb:ccddee', null);
+  (1, 'John Smith', 'john.smith@email.com', null, '{}', '192.168.0.1', '192.168.0.0/24', '00:00:00:00:00:00', null),
+  (2, 'Sara Smith', 'sara.smith@email.com', null, '{"a":1}', '10.1.2.3', '10.0.0.0/8', '11-22-33-44-55-66', null),
+  (3, 'Budd Deey', 'budd.deey@email.com', 'Just a friendly human', '{"b":2}', '172.21.22.23', '172.16.0.0/12', '778899AABBCC', null),
+  (4, 'Kathryn Ramirez', 'kathryn.ramirez@email.com', null, '{"a": 3, "b": 4}', '192.168.1.2', '192.168.0.0/16', 'ddee.ff00.1122', null),
+  (5, 'Joe Tucker', 'joe.tucker@email.com', null, '{"a": 5, "b": 6, "actually_null": null, "null_string": "null", "_\"_$@£$)(@*£$": "_\"_$@£$)(@*£$"}', '192.168.0.2', '192.168.0.0/23', '334455-667788', null),
+  (6, 'Twenty Seventwo', 'graphile-build.issue.27.exists@example.com', null, '{"null_1": null, "null_2": null}', '10.1.2.254', '10.0.0.0/9', '99aabb:ccddee', null);
 
 -- select setval('c.person_id_seq', 10); -- alter sequence c.person_id_seq restart with 10;
 
@@ -93,15 +93,15 @@ insert into b.types values (
   -- null,
   -- point(1,3),
   -- null,
-  null,
-  -- null,
-  -- null,
-  null,
-  null,
-  -- null,
-  -- null,
-  null,
   null
+  -- null,
+  -- null,
+  -- null,
+  -- null,
+  -- null,
+  -- null,
+  -- null,
+  -- null,
   -- null,
   -- null,
   -- null,
@@ -141,15 +141,15 @@ insert into b.types values (
   -- null,
   -- point(1,3),
   -- null,
-  '192.168.0.0',
+  '192.168.0.0'
   -- '192.168.0.0/24',
   -- 'feed.dead.beef',
-  'b.guid_fn', 
-  'b.guid_fn(b.guid)', 
+  -- 'b.guid_fn', 
+  -- 'b.guid_fn(b.guid)', 
   -- '!',
   -- '*(integer,integer)', 
-  'b.types', 
-  'int'
+  -- 'b.types', 
+  -- 'int',
   -- 'english', 
   -- 'simple',
   -- ARRAY['1 year', '2 months', '3 days']::text[],
@@ -246,12 +246,12 @@ insert into large_bigint.large_node_id (id, text) values (9007199254740990, 'Sho
 insert into large_bigint.large_node_id (id, text) values (2098288669218571760, 'Graphile Engine issue #491');
 
 insert into network_types.network values
-  (1, '192.168.0.0', '192.168.0.0/16', '08:00:2b:01:02:03'),
-  (2, '192.168.0.1', '192.168', '08-00-2b-01-02-03'),
-  (3, '172.16.0.0/12', '172.16.0.0/12', '08002b:010203'),
-  (4, '172.16.0.1/12', '172.16.0', '08002b-010203'),
-  (5, '2001:4f8:3:ba::', '2001:4f8:3:ba::/64', '0800.2b01.0203'),
-  (6, '2001:4f8:3:ba:2e0:81ff:fe22:d1f1', '2001:4f8:3:ba:2e0:81ff:fe22:d1f1/128', '08002b010203');
+  (1, '192.168.0.0'), -- , '192.168.0.0/16', '08:00:2b:01:02:03'),
+  (2, '192.168.0.1'), -- , '192.168', '08-00-2b-01-02-03'),
+  (3, '172.16.0.0/12'), -- , '172.16.0.0/12', '08002b:010203'),
+  (4, '172.16.0.1/12'), -- , '172.16.0', '08002b-010203'),
+  (5, '2001:4f8:3:ba::'), -- , '2001:4f8:3:ba::/64', '0800.2b01.0203'),
+  (6, '2001:4f8:3:ba:2e0:81ff:fe22:d1f1'); -- , '2001:4f8:3:ba:2e0:81ff:fe22:d1f1/128', '08002b010203');
 
 -- select setval('network_types.network_id_seq', 7); -- alter sequence network_types.network_id_seq restart with 7;
 

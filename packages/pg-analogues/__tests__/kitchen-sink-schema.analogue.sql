@@ -287,15 +287,15 @@ create table b.types (
   -- "nullable_nested_compound_type" b.nested_compound_type,
   -- "point" point not null,
   -- "nullablePoint" point,
-  "inet" inet,
+  "inet" inet
   -- "cidr" cidr text,
   -- "macaddr" macaddr text,
-  "regproc" regproc, 
-  "regprocedure" regprocedure, 
+  -- "regproc" regproc, 
+  -- "regprocedure" regprocedure, 
   -- "regoper" regoper, 
   -- "regoperator" regoperator, 
-  "regclass" regclass, 
-  "regtype" regtype
+  -- "regclass" regclass, 
+  -- "regtype" regtype
   -- "regconfig" regconfig, 
   -- "regdictionary" regdictionary,
   -- "text_array_domain" c.text_array_domain,
