@@ -9,7 +9,7 @@ jobs:
     env:
       CI: true
       PGVERSION: 13
-      PGHOSTADDR: 127.0.0.1
+      PGHOST: 127.0.0.1
       PGUSER: root
       PGPASSWORD: root
       COCKROACH: 1
