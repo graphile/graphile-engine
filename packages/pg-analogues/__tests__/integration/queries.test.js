@@ -5,7 +5,11 @@ const { readdirSync, readFile: rawReadFile } = require("fs");
 const { resolve: resolvePath } = require("path");
 const { printSchema } = require("graphql/utilities");
 const debug = require("debug")("graphile-build:schema");
-const { makeExtendSchemaPlugin, gql } = require("graphile-utils");
+const {
+  makeExtendSchemaPlugin,
+  gql,
+  makeJSONPgSmartTagsPlugin,
+} = require("graphile-utils");
 const ToyCategoriesPlugin = require("./ToyCategoriesPlugin");
 
 function readFile(filename, encoding) {
@@ -30,6 +34,97 @@ const dSchemaComments = () =>
     `${__dirname}/../kitchen-sink-d-schema-comments.analogue.sql`,
     "utf8"
   );
+
+const TagsPlugin = makeJSONPgSmartTagsPlugin({
+  version: 1,
+  config: {
+    namespace: {
+      a: {
+        description: "The a schema.",
+      },
+      b: {
+        description: "qwerty",
+      },
+    },
+    class: {
+      "b.updatable_view": {
+        tags: {
+          uniqueKey: "x",
+          description: "YOYOYO!!",
+        },
+      },
+      "smart_comment_relations.houses": {
+        tags: {
+          primaryKey: "street_id,property_id",
+          foreignKey: [
+            "(street_id) references smart_comment_relations.streets",
+            "(building_id) references smart_comment_relations.buildings (id)",
+            "(property_id) references properties",
+            "(street_id, property_id) references street_property (str_id, prop_id)",
+          ],
+        },
+      },
+      "smart_comment_relations.post_view": {
+        tags: {
+          name: "posts",
+          primaryKey: "id",
+        },
+      },
+      "smart_comment_relations.offer_view": {
+        tags: {
+          name: "offers",
+          primaryKey: "id",
+          foreignKey: "(post_id) references post_view (id)",
+        },
+      },
+      "enum_tables.abcd_view": {
+        tags: {
+          primaryKey: "letter",
+          enum: true,
+          enumName: "LetterAToDViaView",
+        },
+      },
+    },
+
+    attribute: {
+      "b.updatable_view.constant": {
+        description: "This is constantly 2",
+      },
+      "smart_comment_relations.houses.property_name_or_number": {
+        tags: { notNull: true },
+      },
+      "smart_comment_relations.houses.street_name": {
+        tags: { notNull: true },
+      },
+    },
+    constraint: {
+      "c.person_secret.person_secret_person_id_fkey": {
+        tags: {
+          forwardDescription: "The `Person` this `PersonSecret` belongs to.",
+          backwardDescription: "This `Person`'s `PersonSecret`.",
+        },
+      },
+      "d.post.post_author_id_fkey": {
+        tags: { foreignFieldName: "posts", fieldName: "author" },
+      },
+      "d.person.person_pkey": {
+        tags: { fieldName: "findPersonById" },
+      },
+      "enum_tables.lots_of_enums.enum_1": {
+        tags: { enum: true, enumName: "EnumTheFirst" },
+      },
+      "enum_tables.lots_of_enums.enum_2": {
+        tags: { enum: true, enumName: "EnumTheSecond" },
+      },
+      "enum_tables.lots_of_enums.enum_3": {
+        tags: { enum: true },
+      },
+      "enum_tables.lots_of_enums.enum_4": {
+        tags: { enum: true },
+      },
+    },
+  },
+});
 
 beforeAll(() => {
   // Get a few GraphQL schema instance that we can query.
@@ -67,6 +162,7 @@ beforeAll(() => {
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         appendPlugins: [
+          TagsPlugin,
           makeExtendSchemaPlugin({
             typeDefs: gql`
               extend type Query {
@@ -84,41 +180,54 @@ beforeAll(() => {
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         classicIds: true,
+        appendPlugins: [TagsPlugin],
       }),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         dynamicJson: true,
         setofFunctionsContainNulls: null,
+        appendPlugins: [TagsPlugin],
       }),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         pgColumnFilter: attr => attr.name !== "headline",
         setofFunctionsContainNulls: false,
+        appendPlugins: [TagsPlugin],
       }),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         viewUniqueKey: "testviewid",
         setofFunctionsContainNulls: true,
+        appendPlugins: [TagsPlugin],
       }),
-      createPostGraphileSchema(pgClient, ["d"], {}),
+      createPostGraphileSchema(pgClient, ["d"], {
+        appendPlugins: [TagsPlugin],
+      }),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         simpleCollections: "both",
+        appendPlugins: [TagsPlugin],
       }),
       createPostGraphileSchema(pgClient, ["a"], {
         subscriptions: true,
         graphileBuildOptions: {
           orderByNullsLast: true,
         },
+        appendPlugins: [TagsPlugin],
       }),
-      createPostGraphileSchema(pgClient, ["smart_comment_relations"], {}),
-      createPostGraphileSchema(pgClient, ["large_bigint"], {}),
+      createPostGraphileSchema(pgClient, ["smart_comment_relations"], {
+        appendPlugins: [TagsPlugin],
+      }),
+      createPostGraphileSchema(pgClient, ["large_bigint"], {
+        appendPlugins: [TagsPlugin],
+      }),
       createPostGraphileSchema(pgClient, ["named_query_builder"], {
         subscriptions: true,
-        appendPlugins: [ToyCategoriesPlugin],
+        appendPlugins: [ToyCategoriesPlugin, TagsPlugin],
       }),
       createPostGraphileSchema(pgClient, ["enum_tables"], {
         subscriptions: true,
+        appendPlugins: [TagsPlugin],
       }),
     ]);
     console.log("beforeAll schemas built");
