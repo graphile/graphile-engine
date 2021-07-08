@@ -30,6 +30,7 @@ export default (function PgTypesPlugin(
     build => {
       const {
         pgIntrospectionResultsByKind: introspectionResultsByKind,
+        pgMakeFakeEnumIdentifier,
         getTypeByName,
         pgSql: sql,
         inflection,
@@ -1009,7 +1010,10 @@ end`;
               ? type.name.replace("_enum_domain", "")
               : type.tags.enum;
 
-            const baseTypeId = `FAKE_ENUM_${type.namespaceName}_${underlyingEnumTypeName}`;
+            const baseTypeId = pgMakeFakeEnumIdentifier(
+              type.namespaceName,
+              underlyingEnumTypeName
+            );
 
             const baseType = getGqlTypeByTypeIdAndModifier(
               baseTypeId,
