@@ -20,7 +20,7 @@ trap 'kill $(jobs -p)' EXIT
 sleep 2
 ./cockroach.linux-gnu-amd64.LATEST sql --certs-dir=certs --host=localhost -e "alter role root password 'root';"
 ./cockroach.linux-gnu-amd64.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING sql.defaults.default_int_size = 4;"
-./cockroach.linux-gnu-amd64.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING sql.defaults.serial_normalization = 'sql_sequence';"
+./cockroach.linux-gnu-amd64.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING sql.defaults.serial_normalization = sql_sequence_cached;"
 ./cockroach.linux-gnu-amd64.LATEST sql --certs-dir=certs --host=localhost -e "create database pggql_test;"
 
 # Continue running
