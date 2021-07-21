@@ -26,7 +26,7 @@ interface ChangeNullabilityRules {
 }
 
 export default function makeChangeNullabilityPlugin(
-    rules: ChangeNullabilityRules
+  rules: ChangeNullabilityRules
 ): Plugin {
   return (builder: SchemaBuilder, _options: Options) => {
     function applyNullability<Type extends GraphQLType | GraphQLInputType>(type: Type, allNullabilities: boolean[]): Type {
