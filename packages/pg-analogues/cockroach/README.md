@@ -1,3 +1,5 @@
+Don't forget to run `yarn watch` at the root of the repo!
+
 To run tests against cockroach:
 
 1. install cockroach via `./cockroach-get-nightly.sh`
