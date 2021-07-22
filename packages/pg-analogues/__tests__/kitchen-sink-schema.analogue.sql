@@ -811,7 +811,7 @@ comment on column d.original_table.col1 is E'@name colA';
 -- Rename relations and computed column
 
 create table d.person (
-  id serial primary key,
+  id serial,
   first_name varchar,
   last_name varchar,
   col_no_create text default 'col_no_create',
@@ -820,7 +820,8 @@ create table d.person (
   col_no_filter text default 'col_no_filter',
   col_no_create_update text default 'col_no_create_update',
   col_no_create_update_order_filter text default 'col_no_create_update_order_filter',
-  col_no_anything text default 'col_no_anything'
+  col_no_anything text default 'col_no_anything',
+  constraint person_pkey primary key (id)
 );
 
 comment on column d.person.col_no_create is E'@omit create';
