@@ -128,19 +128,15 @@ const TagsPlugin = makeJSONPgSmartTagsPlugin({
 
 beforeAll(() => {
   // Get a few GraphQL schema instance that we can query.
-  console.log("beforeAll withPgClient");
   const gqlSchemasPromise = withPgClient(async pgClient => {
-    console.log("beforeAll getVersion");
     const serverVersionNum = await getServerVersionNum(pgClient);
     if (serverVersionNum < 90500) {
       // Remove tests not supported by PG9.4
       testsToSkip.push("json-overflow.graphql");
     }
 
-    console.log("beforeAll add dSchemaComments");
     // A selection of omit/rename comments on the d schema
     await pgClient.query(await dSchemaComments());
-    console.log("beforeAll building schemas");
 
     // Different fixtures need different schemas with different configurations.
     // Make all of the different schemas with different configurations that we
@@ -230,7 +226,6 @@ beforeAll(() => {
         appendPlugins: [TagsPlugin],
       }),
     ]);
-    console.log("beforeAll schemas built");
     debug(printSchema(normal));
     return {
       normal,
@@ -256,30 +251,24 @@ beforeAll(() => {
     // Wait for the schema to resolve. We need the schema to be introspected
     // before we can do anything else!
     const gqlSchemas = await gqlSchemasPromise;
-    console.log("withPgClient");
     // Get a new Postgres client instance.
     return await withPgClient(async pgClient => {
       // Add data to the client instance we are using.
-      console.log("Loading data");
       await pgClient.query(await kitchenSinkData());
-      console.log("Getting version");
       const serverVersionNum = await getServerVersionNum(pgClient);
       // Run all of our queries in parallel.
       const results = [];
       for (const filename of queryFileNames) {
-        console.log(`Processing '${filename}'`);
         if (testsToSkip.indexOf(filename) >= 0) {
           results.push(Promise.resolve());
           continue;
         }
         const process = async fileName => {
-          console.log("Loading query");
           // Read the query from the file system.
           const query = await readFile(
             resolvePath(queriesDir, fileName),
             "utf8"
           );
-          console.log(`Loaded query (${query.length})`);
           // Get the appropriate GraphQL schema for this fixture. We want to test
           // some specific fixtures against a schema configured slightly
           // differently.
@@ -315,24 +304,20 @@ beforeAll(() => {
               gqlSchema = gqlSchemas.normal;
             }
           }
-          console.log("Got schema");
 
           await pgClient.query("savepoint test");
 
           try {
-            console.log("Calling GraphQL");
             // Return the result of our GraphQL query.
             const result = await graphql(gqlSchema, query, null, {
               pgClient: pgClient,
             });
-            console.log("GraphQL complete");
             if (result.errors) {
               // eslint-disable-next-line no-console
               console.log(result.errors.map(e => e.originalError || e));
             }
             return result;
           } finally {
-            console.log("Finally");
             await pgClient.query("rollback to savepoint test");
           }
         };
@@ -356,9 +341,7 @@ for (let i = 0; i < queryFileNames.length; i++) {
       console.log(`SKIPPED '${filename}'`);
       // Technically this will never be ran because we handle it in scripts/test
     } else {
-      console.log("Awaiting...");
       expect(await queryResults[i]).toMatchSnapshot();
-      console.log("Complete");
     }
   });
 }
