@@ -4,11 +4,4 @@
     id
     name
   }
-  searchTestSummariesList {
-    id
-    totalDuration {
-      hours
-      minutes
-    }
-  }
 }
