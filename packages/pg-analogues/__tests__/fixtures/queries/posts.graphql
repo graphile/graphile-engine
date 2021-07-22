@@ -4,20 +4,6 @@
       cursor
       node {
         ...PostDetails
-        author: personByAuthorId {
-          firstPost {
-            ...PostDetails
-          }
-          friends {
-            nodes {
-              ...PersonDetails
-            }
-            totalCount
-            pageInfo {
-              startCursor
-            }
-          }
-        }
       }
     }
   }
