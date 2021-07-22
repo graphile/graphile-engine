@@ -18,7 +18,6 @@ fragment PersonDetails on Person {
 fragment PostDetails on Post {
   id
   headline
-  headlineTrimmed
   author: personByAuthorId {
     ...PersonDetails
   }
