@@ -8,20 +8,20 @@ rm -Rf certs my-safe-directory cockroach-data
 # Create certificates if necessary
 mkdir certs
 mkdir my-safe-directory
-./cockroach.linux-gnu-amd64.LATEST cert create-ca --certs-dir=certs --ca-key=my-safe-directory/ca.key
-./cockroach.linux-gnu-amd64.LATEST cert create-node localhost --certs-dir=certs --ca-key=my-safe-directory/ca.key
-./cockroach.linux-gnu-amd64.LATEST cert create-client root --certs-dir=certs --ca-key=my-safe-directory/ca.key
+./cockroach.LATEST cert create-ca --certs-dir=certs --ca-key=my-safe-directory/ca.key
+./cockroach.LATEST cert create-node localhost --certs-dir=certs --ca-key=my-safe-directory/ca.key
+./cockroach.LATEST cert create-client root --certs-dir=certs --ca-key=my-safe-directory/ca.key
 
 # Run
-./cockroach.linux-gnu-amd64.LATEST start-single-node --accept-sql-without-tls --http-addr=:5757 --certs-dir=certs &
+./cockroach.LATEST start-single-node --accept-sql-without-tls --http-addr=:5757 --certs-dir=certs &
 trap 'kill $(jobs -p)' EXIT
 
 # Change root password
 sleep 2
-./cockroach.linux-gnu-amd64.LATEST sql --certs-dir=certs --host=localhost -e "alter role root password 'root';"
-./cockroach.linux-gnu-amd64.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING sql.defaults.default_int_size = 4;"
-./cockroach.linux-gnu-amd64.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING sql.defaults.serial_normalization = sql_sequence_cached;"
-./cockroach.linux-gnu-amd64.LATEST sql --certs-dir=certs --host=localhost -e "create database pggql_test;"
+./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "alter role root password 'root';"
+./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING sql.defaults.default_int_size = 4;"
+./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING sql.defaults.serial_normalization = sql_sequence_cached;"
+./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "create database pggql_test;"
 
 # Continue running
 wait %1
