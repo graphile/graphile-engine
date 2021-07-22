@@ -11,8 +11,7 @@
 
 fragment PersonDetails on Person {
   id
-  name
-  firstName
+  names
 }
 
 fragment PostDetails on Post {
