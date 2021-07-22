@@ -4,20 +4,6 @@
     id
     name
   }
-  queryOutputTwoRowsBothExist: queryOutputTwoRows(
-    leftArmId: 42
-    postId: 1
-    txt: "Hi"
-  ) {
-    ...OutputTwoRowsFragment
-  }
-  queryOutputTwoRowsNeitherExist: queryOutputTwoRows(
-    leftArmId: 999999999
-    postId: 999999999
-    txt: "Don't fail me now..."
-  ) {
-    ...OutputTwoRowsFragment
-  }
   searchTestSummariesList {
     id
     totalDuration {
@@ -25,33 +11,4 @@
       minutes
     }
   }
-}
-
-fragment OutputTwoRowsFragment on QueryOutputTwoRowsRecord {
-  leftArm {
-    id
-    lengthInMetres
-    mood
-    personByPersonId {
-      name
-      personSecretByPersonId {
-        secret
-      }
-    }
-  }
-  l2: leftArm {
-    personId
-  }
-  post {
-    id
-    headline
-    authorId
-    personByAuthorId {
-      name
-      personSecretByPersonId {
-        secret
-      }
-    }
-  }
-  txt
 }
