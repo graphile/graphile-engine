@@ -12,6 +12,7 @@ mutation {
   j: deleteCompoundKeyByPersonId1AndPersonId2(input: { personId1: 2, personId2:3 }) { ...deleteCompoundKeyPayload }
 	k: deletePersonByEmail(input: { email: "budd.deey@email.com" }) { ...deletePersonPayload }
 	l: deletePersonByEmail(input: { email: "graphile-build.issue.27.exists@example.com" }) { ...deletePersonPayload2 }
+  m: deletePersonById(input: { id: 1 }) { ...deletePersonPayloadWithEdge }
 }
 
 fragment deletePostPayload on DeletePostPayload {
@@ -61,4 +62,21 @@ fragment deletePersonPayload2 on DeletePersonPayload {
     issue27UserExists: exists(email: "graphile-build.issue.27.exists@example.com")
   }
   query { nodeId }
+}
+
+fragment deletePersonPayloadWithEdge on DeletePersonPayload {
+  clientMutationId
+  deletedPersonId
+  personEdge(orderBy: FIRST_NAME_ASC) {
+    cursor
+    node {
+      firstName
+      id
+      nodeId
+      email
+    }
+  }
+  query {
+    nodeId
+  }
 }

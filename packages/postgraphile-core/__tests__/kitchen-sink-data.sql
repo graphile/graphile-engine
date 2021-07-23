@@ -11,7 +11,7 @@ insert into c.person (id, person_full_name, email, about, config, last_login_fro
   (5, 'Joe Tucker', 'joe.tucker@email.com', null, 'a => 5, b => 6, actually_null => NULL, null_string => "null", "_\"_$@£$)(@*£$" => "_\"_$@£$)(@*£$"', '192.168.0.2', '192.168.0.0/23', '334455-667788', null),
   (6, 'Twenty Seventwo', 'graphile-build.issue.27.exists@example.com', null, 'null_1 => NULL, null_2 => null', '10.1.2.254', '10.0.0.0/9', '99aabb:ccddee', null);
 
--- select setval('c.person_id_seq', 10); -- alter sequence c.person_id_seq restart with 10;
+alter sequence c.person_id_seq restart with 10;
 
 insert into c.person_secret (person_id, sekrit) values
   (2, 'Sara Smith is not really my name!'),
@@ -25,7 +25,7 @@ insert into c.left_arm (id, person_id, length_in_metres) values
   (47, 5, 0.65),
   (50, 1, 0.65);
 
--- select setval('c.left_arm_id_seq', 100); -- alter sequence c.left_arm_id_seq restart with 100;
+alter sequence c.left_arm_id_seq restart with 100;
 
 insert into a.post (id, author_id, headline) values
   (1, 2, 'No… It’s a thing; it’s like a plan, but with more greatness.'),
@@ -40,7 +40,7 @@ insert into a.post (id, author_id, headline) values
   (10, 2, 'What’s with you kids? Every other day it’s food, food, food.'),
   (11, 3, 'They’re not aliens, they’re Earth…liens!');
 
--- select setval('a.post_id_seq', 12); -- alter sequence a.post_id_seq restart with 12;
+alter sequence a.post_id_seq restart with 12;
 
 insert into c.compound_key (person_id_1, person_id_2, extra) values
   (1, 2, null),
@@ -189,7 +189,7 @@ insert into c.my_table(id, json_data) values
   (2, '{"stringField":"test","otherField":"whatever"}'),
   (3, '{"stringField":"notTest"}');
 
--- select setval('c.my_table_id_seq', 10); -- alter sequence c.my_table_id_seq restart with 10;
+alter sequence c.my_table_id_seq restart with 10;
 
 insert into c.null_test_record (id, nullable_text, nullable_int, non_null_text) values
   (1, 'Hello', 99, 'World'),
@@ -213,7 +213,7 @@ update d.person set
   col_no_create_update_order_filter = col_no_create_update_order_filter || id::text,
   col_no_anything = col_no_anything || id::text;
 
--- select setval('d.person_id_seq', 10); -- alter sequence d.person_id_seq restart with 10;
+alter sequence d.person_id_seq restart with 10;
 
 
 -- Begin data for smart_comment_relations
@@ -253,7 +253,7 @@ insert into network_types.network values
   (5, '2001:4f8:3:ba::', '2001:4f8:3:ba::/64', '0800.2b01.0203'),
   (6, '2001:4f8:3:ba:2e0:81ff:fe22:d1f1', '2001:4f8:3:ba:2e0:81ff:fe22:d1f1/128', '08002b010203');
 
--- select setval('network_types.network_id_seq', 7); -- alter sequence network_types.network_id_seq restart with 7;
+alter sequence network_types.network_id_seq restart with 7;
 
 
 insert into named_query_builder.categories (id, name) values
@@ -275,14 +275,14 @@ insert into named_query_builder.toy_categories(toy_id, category_id, approved) va
   (1, 3, false);
 
 --------------------------------------------------------------------------------
--- select setval('enum_tables.letter_descriptions_id_seq', 101); -- alter sequence enum_tables.letter_descriptions_id_seq restart with 101;
+alter sequence enum_tables.letter_descriptions_id_seq restart with 101;
 insert into enum_tables.letter_descriptions(letter, letter_via_view, description) values
   ('A', 'A', 'The first letter in the alphabet'),
   ('B', 'B', 'Following closely behind the first letter, this is a popular choice'),
   ('C', 'C', 'Pronounced like ''sea'''),
   ('D', 'D', 'The first letter omitted from the ''ABC'' phrase');
 
--- select setval('enum_tables.referencing_table_id_seq', 432); -- alter sequence enum_tables.referencing_table_id_seq restart with 432;
+alter sequence enum_tables.referencing_table_id_seq restart with 432;
 insert into enum_tables.referencing_table(enum_1, enum_2, enum_3) values
   ('a1', null, null),
   ('a3', 'b2', 'c1'),
@@ -290,7 +290,7 @@ insert into enum_tables.referencing_table(enum_1, enum_2, enum_3) values
 
 --------------------------------------------------------------------------------
 
--- select setval('geometry.geom_id_seq', 101); -- alter sequence geometry.geom_id_seq restart with 101;
+alter sequence geometry.geom_id_seq restart with 101;
 insert into geometry.geom(
   point, line, lseg, box, open_path, closed_path, polygon, circle
 ) values (
