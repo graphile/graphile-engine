@@ -25,20 +25,22 @@ export default (function PgColumnsPlugin(builder) {
         if (type.isPgArray) {
           const ident = sql.identifier(Symbol());
           return sql.fragment`(\
+select
 case
 when ${sqlFullName} is null then null
 when coalesce(array_length(${sqlFullName}, 1), 0) = 0 then '[]'::json
 else (
-  select json_agg(${getSelectValueForFieldAndTypeAndModifier(
+  json_agg(${getSelectValueForFieldAndTypeAndModifier(
     ReturnType,
     fieldScope,
     parsedResolveInfoFragment,
     ident,
     type.arrayItemType,
     typeModifier
-  )}) from unnest(${sqlFullName}) as ${ident}
+  )})
 )
 end
+from unnest(${sqlFullName}) as ${ident}
 )`;
         } else {
           const resolveData = getDataFromParsedResolveInfoFragment(
