@@ -1,10 +1,2 @@
 query {
-  allPeople(condition: {
-    computedOut: "o1 Budd Deey"
-  }) {
-    nodes {
-      id
-      name
-    }
-  }
 }
