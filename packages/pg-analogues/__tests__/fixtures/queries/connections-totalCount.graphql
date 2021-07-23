@@ -4,12 +4,6 @@ query {
   }
   b: allPeople {
     nodes {
-      friends {
-        totalCount
-      }
     }
-  }
-  c: tableSetQuery {
-    totalCount
   }
 }
