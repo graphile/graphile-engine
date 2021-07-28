@@ -1,7 +1,0 @@
-{
-  personById(id: 1) {
-    nodeId
-    id
-    name
-  }
-}
