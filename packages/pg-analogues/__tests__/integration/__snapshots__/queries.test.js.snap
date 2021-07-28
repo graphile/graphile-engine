@@ -825,52 +825,6 @@ Object {
         },
       ],
     },
-    "w": Object {
-      "edges": Array [
-        Object {
-          "cursor": "WyJwcmltYXJ5X2tleV9hc2MiLFsxXV0=",
-          "node": Object {
-            "config": Object {},
-            "email": "john.smith@email.com",
-            "id": 1,
-            "lastLoginFromIp": "192.168.0.1",
-            "lastLoginFromSubnet": "192.168.0.0/24",
-            "name": "John Smith",
-            "userMac": "00:00:00:00:00:00",
-          },
-        },
-      ],
-      "pageInfo": Object {
-        "endCursor": "WyJwcmltYXJ5X2tleV9hc2MiLFsxXV0=",
-        "hasNextPage": false,
-        "hasPreviousPage": false,
-        "startCursor": "WyJwcmltYXJ5X2tleV9hc2MiLFsxXV0=",
-      },
-      "totalCount": 1,
-    },
-    "x": Object {
-      "edges": Array [
-        Object {
-          "cursor": "WyJwcmltYXJ5X2tleV9hc2MiLFsxXV0=",
-          "node": Object {
-            "config": Object {},
-            "email": "john.smith@email.com",
-            "id": 1,
-            "lastLoginFromIp": "192.168.0.1",
-            "lastLoginFromSubnet": "192.168.0.0/24",
-            "name": "John Smith",
-            "userMac": "00:00:00:00:00:00",
-          },
-        },
-      ],
-      "pageInfo": Object {
-        "endCursor": "WyJwcmltYXJ5X2tleV9hc2MiLFsxXV0=",
-        "hasNextPage": false,
-        "hasPreviousPage": false,
-        "startCursor": "WyJwcmltYXJ5X2tleV9hc2MiLFsxXV0=",
-      },
-      "totalCount": 1,
-    },
   },
 }
 `;
@@ -888,84 +842,6 @@ Object {
 }
 `;
 
-exports[`connections-condition-computed-column.graphql 1`] = `
-Object {
-  "data": Object {
-    "allPeople": Object {
-      "nodes": Array [
-        Object {
-          "id": 3,
-          "name": "Budd Deey",
-        },
-      ],
-    },
-  },
-}
-`;
-
-exports[`connections-order-computed-column.graphql 1`] = `
-Object {
-  "data": Object {
-    "asc": Object {
-      "nodes": Array [
-        Object {
-          "id": 3,
-          "name": "Budd Deey",
-        },
-        Object {
-          "id": 5,
-          "name": "Joe Tucker",
-        },
-        Object {
-          "id": 1,
-          "name": "John Smith",
-        },
-        Object {
-          "id": 4,
-          "name": "Kathryn Ramirez",
-        },
-        Object {
-          "id": 2,
-          "name": "Sara Smith",
-        },
-        Object {
-          "id": 6,
-          "name": "Twenty Seventwo",
-        },
-      ],
-    },
-    "desc": Object {
-      "nodes": Array [
-        Object {
-          "id": 6,
-          "name": "Twenty Seventwo",
-        },
-        Object {
-          "id": 2,
-          "name": "Sara Smith",
-        },
-        Object {
-          "id": 4,
-          "name": "Kathryn Ramirez",
-        },
-        Object {
-          "id": 1,
-          "name": "John Smith",
-        },
-        Object {
-          "id": 5,
-          "name": "Joe Tucker",
-        },
-        Object {
-          "id": 3,
-          "name": "Budd Deey",
-        },
-      ],
-    },
-  },
-}
-`;
-
 exports[`connections-totalCount.graphql 1`] = `
 Object {
   "data": Object {
@@ -975,39 +851,36 @@ Object {
     "b": Object {
       "nodes": Array [
         Object {
-          "friends": Object {
-            "totalCount": 2,
+          "postsByAuthorId": Object {
+            "totalCount": 4,
           },
         },
         Object {
-          "friends": Object {
-            "totalCount": 2,
+          "postsByAuthorId": Object {
+            "totalCount": 3,
           },
         },
         Object {
-          "friends": Object {
-            "totalCount": 2,
+          "postsByAuthorId": Object {
+            "totalCount": 3,
           },
         },
         Object {
-          "friends": Object {
-            "totalCount": 2,
+          "postsByAuthorId": Object {
+            "totalCount": 0,
           },
         },
         Object {
-          "friends": Object {
+          "postsByAuthorId": Object {
             "totalCount": 1,
           },
         },
         Object {
-          "friends": Object {
+          "postsByAuthorId": Object {
             "totalCount": 0,
           },
         },
       ],
-    },
-    "c": Object {
-      "totalCount": 6,
     },
   },
 }
@@ -1117,7 +990,6 @@ Object {
 exports[`dynamic-json.graphql 1`] = `
 Object {
   "data": Object {
-    "a": true,
     "allTypes": Object {
       "nodes": Array [
         Object {
@@ -1194,92 +1066,6 @@ Object {
         },
       ],
     },
-    "b": false,
-    "c": 42,
-    "d": 3.1415,
-    "e": "hello, world!",
-    "f": Object {
-      "a": 1,
-      "b": 2,
-      "c": 3,
-    },
-    "g": Array [
-      1,
-      2,
-      3,
-      4,
-    ],
-    "h": Object {
-      "array": Array [
-        1,
-        2,
-        3,
-        4,
-      ],
-      "boolean": true,
-      "float": 3.1415,
-      "integer": 42,
-      "object": Object {
-        "a": 1,
-        "b": 2,
-        "c": 3,
-      },
-    },
-    "i": Array [
-      true,
-      42,
-      3.1415,
-      Object {
-        "a": 1,
-        "b": 2,
-        "c": 3,
-      },
-      Array [
-        1,
-        2,
-        3,
-        4,
-      ],
-    ],
-    "j": Array [
-      true,
-      null,
-      42,
-      3.1415,
-      Object {
-        "a": 1,
-        "b": null,
-        "c": 3,
-      },
-      Array [
-        1,
-        2,
-        null,
-        3,
-        4,
-      ],
-    ],
-    "k": Object {
-      "a": 1,
-      "b": 2,
-      "c": 3,
-    },
-    "l": Array [
-      true,
-      42,
-      3.1415,
-      Object {
-        "a": 1,
-        "b": 2,
-        "c": 3,
-      },
-      Array [
-        1,
-        2,
-        3,
-        4,
-      ],
-    ],
   },
 }
 `;
