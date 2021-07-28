@@ -679,7 +679,7 @@ export default (async function PgIntrospectionPlugin(
             10
           );
           let pgIsCockroach = false;
-          if (serverVersionNum >= 10) {
+          if (serverVersionNum >= 100000) {
             const crdbResult = await pgClient.query(
               "select current_setting('crdb_version', true) as crdb_version;"
             );
