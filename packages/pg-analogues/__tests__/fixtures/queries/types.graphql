@@ -14,26 +14,6 @@ query {
   node(nodeId: "WyJ0eXBlcyIsMTFd") {
     ...type
   }
-  typeFunction(id: 11) {
-    ...type
-  }
-  typeFunctionList {
-    ...type
-  }
-  typeFunctionConnection {
-    ...typesConnection
-  }
-  personById(id: 1) {
-    typeFunction(id: 11) {
-      ...type
-    }
-    typeFunctionList {
-      ...type
-    }
-    typeFunctionConnection {
-      ...typesConnection
-    }
-  }
   postById(id: 11) {
     id
     headline
@@ -44,16 +24,6 @@ query {
       ...typesConnection
     }
   }
-}
-
-fragment compoundType on CompoundType {
-  a
-  b
-  c
-  d
-  e
-  f
-  fooBar
 }
 
 # This should be the same fragment as in mutations/types.graphql
