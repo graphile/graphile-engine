@@ -672,7 +672,7 @@ export default (async function PgIntrospectionPlugin(
       await persistentMemoizeWithKey(cacheKey, () =>
         withPgClient(pgConfig, async pgClient => {
           const versionResult = await pgClient.query(
-            "select current_setting('server_version_num') as server_version_num, current_setting('crdb_version', true) as crdb_version;"
+            "select current_setting('server_version_num') as server_version_num, current_setting('crdb_version') as crdb_version;"
           );
           const serverVersionNum = parseInt(
             versionResult.rows[0].server_version_num,
