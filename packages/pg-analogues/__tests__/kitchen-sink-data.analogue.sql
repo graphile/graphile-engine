@@ -276,17 +276,17 @@ insert into named_query_builder.toy_categories(toy_id, category_id, approved) va
 
 --------------------------------------------------------------------------------
 -- select setval('enum_tables.letter_descriptions_id_seq', 101); -- alter sequence enum_tables.letter_descriptions_id_seq restart with 101;
-insert into enum_tables.letter_descriptions(letter, letter_via_view, description) values
-  ('A', 'A', 'The first letter in the alphabet'),
-  ('B', 'B', 'Following closely behind the first letter, this is a popular choice'),
-  ('C', 'C', 'Pronounced like ''sea'''),
-  ('D', 'D', 'The first letter omitted from the ''ABC'' phrase');
+insert into enum_tables.letter_descriptions(id, letter, letter_via_view, description) values
+  (101, 'A', 'A', 'The first letter in the alphabet'),
+  (102, 'B', 'B', 'Following closely behind the first letter, this is a popular choice'),
+  (103, 'C', 'C', 'Pronounced like ''sea'''),
+  (104, 'D', 'D', 'The first letter omitted from the ''ABC'' phrase');
 
 -- select setval('enum_tables.referencing_table_id_seq', 432); -- alter sequence enum_tables.referencing_table_id_seq restart with 432;
-insert into enum_tables.referencing_table(enum_1, enum_2, enum_3) values
-  ('a1', null, null),
-  ('a3', 'b2', 'c1'),
-  (null, null, 'c3');
+insert into enum_tables.referencing_table(id, enum_1, enum_2, enum_3) values
+  (432, 'a1', null, null),
+  (433, 'a3', 'b2', 'c1'),
+  (434, null, null, 'c3');
 
 --------------------------------------------------------------------------------
 
