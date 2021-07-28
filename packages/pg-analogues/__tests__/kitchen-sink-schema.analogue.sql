@@ -57,10 +57,10 @@ create table c.person (
   about text,
   email /* b.email */ text not null unique,
   site /* b.wrapped_url */ text default null,
-  config /* hstore */ json,
+  /* config hstore, */
   last_login_from_ip inet,
-  last_login_from_subnet /* cidr */ text,
-  user_mac /* macaddr */ text,
+  /* last_login_from_subnet cidr, */
+  /* user_mac macaddr, */
   created_at timestamp default current_timestamp
 );
 
