@@ -146,24 +146,7 @@ const EnumTablesTagsPlugin = makeJSONPgSmartTagsPlugin({
       "enum_tables.abcd_view": {
         tags: {
           primaryKey: "letter",
-          enum: true,
-          enumName: "LetterAToDViaView",
         },
-      },
-    },
-
-    constraint: {
-      "enum_tables.lots_of_enums.enum_1": {
-        tags: { enum: true, enumName: "EnumTheFirst" },
-      },
-      "enum_tables.lots_of_enums.enum_2": {
-        tags: { enum: true, enumName: "EnumTheSecond" },
-      },
-      "enum_tables.lots_of_enums.enum_3": {
-        tags: { enum: true },
-      },
-      "enum_tables.lots_of_enums.enum_4": {
-        tags: { enum: true },
       },
     },
   },
