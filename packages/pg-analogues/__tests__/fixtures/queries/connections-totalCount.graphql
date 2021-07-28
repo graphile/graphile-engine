@@ -4,6 +4,9 @@ query {
   }
   b: allPeople {
     nodes {
+      postsByAuthorId {
+        totalCount
+      }
     }
   }
 }
