@@ -672,13 +672,19 @@ export default (async function PgIntrospectionPlugin(
       await persistentMemoizeWithKey(cacheKey, () =>
         withPgClient(pgConfig, async pgClient => {
           const versionResult = await pgClient.query(
-            "select current_setting('server_version_num') as server_version_num, current_setting('crdb_version') as crdb_version;"
+            "select current_setting('server_version_num') as server_version_num;"
           );
           const serverVersionNum = parseInt(
             versionResult.rows[0].server_version_num,
             10
           );
-          const pgIsCockroach = versionResult.rows[0].crdb_version !== null;
+          let pgIsCockroach = false;
+          if (serverVersionNum >= 10) {
+            const crdbResult = await pgClient.query(
+              "select current_setting('crdb_version', true) as crdb_version;"
+            );
+            pgIsCockroach = crdbResult.rows[0].crdb_version !== null;
+          }
           const introspectionQuery = makeIntrospectionQuery(serverVersionNum, {
             pgLegacyFunctionsOnly,
             pgIgnoreRBAC,
