@@ -35,13 +35,21 @@ const dSchemaComments = () =>
     "utf8"
   );
 
-const TagsPlugin = makeJSONPgSmartTagsPlugin({
+const ATagsPlugin = makeJSONPgSmartTagsPlugin({
   version: 1,
   config: {
     namespace: {
       a: {
         description: "The a schema.",
       },
+    },
+  },
+});
+
+const BTagsPlugin = makeJSONPgSmartTagsPlugin({
+  version: 1,
+  config: {
+    namespace: {
       b: {
         description: "qwerty",
       },
@@ -53,6 +61,47 @@ const TagsPlugin = makeJSONPgSmartTagsPlugin({
           description: "YOYOYO!!",
         },
       },
+    },
+
+    attribute: {
+      "b.updatable_view.constant": {
+        description: "This is constantly 2",
+      },
+    },
+  },
+});
+
+const CTagsPlugin = makeJSONPgSmartTagsPlugin({
+  version: 1,
+  config: {
+    constraint: {
+      "c.person_secret.person_secret_person_id_fkey": {
+        tags: {
+          forwardDescription: "The `Person` this `PersonSecret` belongs to.",
+          backwardDescription: "This `Person`'s `PersonSecret`.",
+        },
+      },
+    },
+  },
+});
+
+const DTagsPlugin = makeJSONPgSmartTagsPlugin({
+  version: 1,
+  config: {
+    constraint: {
+      "d.post.post_author_id_fkey": {
+        tags: { foreignFieldName: "posts", fieldName: "author" },
+      },
+      "d.person.person_pkey": {
+        tags: { fieldName: "findPersonById" },
+      },
+    },
+  },
+});
+const SmartCommentRelationsTagsPlugin = makeJSONPgSmartTagsPlugin({
+  version: 1,
+  config: {
+    class: {
       "smart_comment_relations.houses": {
         tags: {
           primaryKey: "street_id,property_id",
@@ -77,6 +126,23 @@ const TagsPlugin = makeJSONPgSmartTagsPlugin({
           foreignKey: "(post_id) references post_view (id)",
         },
       },
+    },
+
+    attribute: {
+      "smart_comment_relations.houses.property_name_or_number": {
+        tags: { notNull: true },
+      },
+      "smart_comment_relations.houses.street_name": {
+        tags: { notNull: true },
+      },
+    },
+  },
+});
+
+const EnumTablesTagsPlugin = makeJSONPgSmartTagsPlugin({
+  version: 1,
+  config: {
+    class: {
       "enum_tables.abcd_view": {
         tags: {
           primaryKey: "letter",
@@ -86,30 +152,7 @@ const TagsPlugin = makeJSONPgSmartTagsPlugin({
       },
     },
 
-    attribute: {
-      "b.updatable_view.constant": {
-        description: "This is constantly 2",
-      },
-      "smart_comment_relations.houses.property_name_or_number": {
-        tags: { notNull: true },
-      },
-      "smart_comment_relations.houses.street_name": {
-        tags: { notNull: true },
-      },
-    },
     constraint: {
-      "c.person_secret.person_secret_person_id_fkey": {
-        tags: {
-          forwardDescription: "The `Person` this `PersonSecret` belongs to.",
-          backwardDescription: "This `Person`'s `PersonSecret`.",
-        },
-      },
-      "d.post.post_author_id_fkey": {
-        tags: { foreignFieldName: "posts", fieldName: "author" },
-      },
-      "d.person.person_pkey": {
-        tags: { fieldName: "findPersonById" },
-      },
       "enum_tables.lots_of_enums.enum_1": {
         tags: { enum: true, enumName: "EnumTheFirst" },
       },
@@ -158,7 +201,9 @@ beforeAll(() => {
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         appendPlugins: [
-          TagsPlugin,
+          ATagsPlugin,
+          BTagsPlugin,
+          CTagsPlugin,
           makeExtendSchemaPlugin({
             typeDefs: gql`
               extend type Query {
@@ -176,54 +221,54 @@ beforeAll(() => {
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         classicIds: true,
-        appendPlugins: [TagsPlugin],
+        appendPlugins: [ATagsPlugin, BTagsPlugin, CTagsPlugin],
       }),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         dynamicJson: true,
         setofFunctionsContainNulls: null,
-        appendPlugins: [TagsPlugin],
+        appendPlugins: [ATagsPlugin, BTagsPlugin, CTagsPlugin],
       }),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         pgColumnFilter: attr => attr.name !== "headline",
         setofFunctionsContainNulls: false,
-        appendPlugins: [TagsPlugin],
+        appendPlugins: [ATagsPlugin, BTagsPlugin, CTagsPlugin],
       }),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         viewUniqueKey: "testviewid",
         setofFunctionsContainNulls: true,
-        appendPlugins: [TagsPlugin],
+        appendPlugins: [ATagsPlugin, BTagsPlugin, CTagsPlugin],
       }),
       createPostGraphileSchema(pgClient, ["d"], {
-        appendPlugins: [TagsPlugin],
+        appendPlugins: [DTagsPlugin],
       }),
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         simpleCollections: "both",
-        appendPlugins: [TagsPlugin],
+        appendPlugins: [ATagsPlugin, BTagsPlugin, CTagsPlugin],
       }),
       createPostGraphileSchema(pgClient, ["a"], {
         subscriptions: true,
         graphileBuildOptions: {
           orderByNullsLast: true,
         },
-        appendPlugins: [TagsPlugin],
+        appendPlugins: [ATagsPlugin],
       }),
       createPostGraphileSchema(pgClient, ["smart_comment_relations"], {
-        appendPlugins: [TagsPlugin],
+        appendPlugins: [SmartCommentRelationsTagsPlugin],
       }),
       createPostGraphileSchema(pgClient, ["large_bigint"], {
-        appendPlugins: [TagsPlugin],
+        appendPlugins: [],
       }),
       createPostGraphileSchema(pgClient, ["named_query_builder"], {
         subscriptions: true,
-        appendPlugins: [ToyCategoriesPlugin, TagsPlugin],
+        appendPlugins: [ToyCategoriesPlugin],
       }),
       createPostGraphileSchema(pgClient, ["enum_tables"], {
         subscriptions: true,
-        appendPlugins: [TagsPlugin],
+        appendPlugins: [EnumTablesTagsPlugin],
       }),
     ]);
     debug(printSchema(normal));
@@ -278,13 +323,9 @@ beforeAll(() => {
             "dynamic-json.condition-json-field-variable.graphql":
               gqlSchemas.dynamicJson,
             "view.graphql": gqlSchemas.viewUniqueKey,
-            "badlyBehavedFunction.graphql": gqlSchemas.viewUniqueKey,
             "simple-collections.graphql": gqlSchemas.simpleCollections,
             "simple-relations-head-tail.graphql": gqlSchemas.simpleCollections,
             "simple-relations-tail-head.graphql": gqlSchemas.simpleCollections,
-            "simple-procedure-computed-fields.graphql":
-              gqlSchemas.simpleCollections,
-            "simple-procedure-query.graphql": gqlSchemas.simpleCollections,
             "types.graphql": gqlSchemas.simpleCollections,
             "orderByNullsLast.graphql": gqlSchemas.orderByNullsLast,
           };
