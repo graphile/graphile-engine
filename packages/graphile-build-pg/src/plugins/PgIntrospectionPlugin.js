@@ -516,9 +516,11 @@ function enumTables(introspectionResults) {
 
     // By this point, even views should have "fake" constraints we can use
     // (e.g. `@primaryKey`)
-    const enumConstraints = introspectionResults.constraint.filter(con =>
-      isEnumConstraint(klass, con, isEnumTable)
-    );
+    const enumConstraints = klass._internalEnumData
+      ? introspectionResults.constraint.filter(con =>
+          isEnumConstraint(klass, con, isEnumTable)
+        )
+      : [];
 
     // Get all the columns
     const enumTableColumns = introspectionResults.attribute.filter(
