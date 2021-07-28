@@ -83,8 +83,9 @@ create table c.person (
 
 -- This is to test that "one-to-one" relationships work on primary keys
 create table c.person_secret (
-  person_id int not null primary key references c.person on delete cascade,
-  sekrit text
+  person_id int not null primary key,
+  sekrit text,
+  constraint person_secret_person_id_fkey foreign key (person_id) references c.person on delete cascade
 );
 
 comment on column c.person_secret.sekrit is E'@name secret\r\nA secret held by the associated Person';
@@ -95,9 +96,10 @@ comment on table c.person_secret is E'@deprecated This is deprecated (comment on
 -- This is to test that "one-to-one" relationships also work on unique keys
 create table c.left_arm (
   id serial primary key,
-  person_id int not null default 1 unique references c.person on delete cascade,
+  person_id int not null default 1 unique,
   length_in_metres float,
-  mood text not null default 'neutral'
+  mood text not null default 'neutral',
+  constraint left_arm_person_id_fkey foreign key (person_id) references c.person on delete cascade
 );
 
 comment on table c.left_arm is 'Tracks metadata about the left arms of various people';
@@ -154,9 +156,10 @@ create table a.post (
   id serial primary key,
   headline text not null,
   body text,
-  author_id int4 default 1 references c.person(id) on delete cascade,
-  enums a.an_enum[]
+  author_id int4 default 1,
+  enums a.an_enum[],
   -- comptypes a.comptype[]
+  constraint post_author_id_fkey foreign key (author_id) references c.person(id) on delete cascade
 );
 CREATE INDEX ON "a"."post"("author_id");
 
@@ -204,17 +207,20 @@ create view b.updatable_view as
 create view a.non_updatable_view as select 2;
 
 create table c.compound_key (
-  person_id_2 int references c.person(id) on delete cascade,
-  person_id_1 int references c.person(id) on delete cascade,
+  person_id_2 int,
+  person_id_1 int,
   extra boolean,
-  primary key (person_id_1, person_id_2)
+  primary key (person_id_1, person_id_2),
+  constraint compound_key_person_id_2_fkey foreign key (person_id_2) references c.person(id) on delete cascade,
+  constraint compound_key_person_id_1_fkey foreign key (person_id_1) references c.person(id) on delete cascade
 );
 
 create table a.foreign_key (
-  person_id int references c.person(id) on delete cascade,
+  person_id int,
   compound_key_1 int,
   compound_key_2 int,
-  foreign key (compound_key_1, compound_key_2) references c.compound_key(person_id_1, person_id_2) on delete cascade
+  constraint foreign_key_compound_key_1_compound_key_2_fkey foreign key (compound_key_1, compound_key_2) references c.compound_key(person_id_1, person_id_2) on delete cascade,
+  constraint foreign_key_person_id_fkey foreign key (person_id) references c.person(id) on delete cascade
 );
 
 alter table a.foreign_key add constraint second_fkey
@@ -842,7 +848,8 @@ comment on column d.person.col_no_anything is E'@omit';
 create table d.post (
   id serial primary key,
   body text,
-  author_id int4 references d.person(id) on delete cascade
+  author_id int4,
+  constraint post_author_id_fkey foreign key (author_id) references d.person(id) on delete cascade
 );
 
 -- comment on constraint post_author_id_fkey on d.post is E'@foreignFieldName posts\n@fieldName author';
@@ -905,14 +912,16 @@ create table d.studios (
 create table d.tv_shows (
     code        integer PRIMARY KEY,
     title       varchar(40),
-    studio_id   integer references d.studios on delete cascade
+    studio_id   integer,
+    constraint tv_shows_studio_id_fkey foreign key (studio_id) references d.studios on delete cascade
 );
 
 
 create table d.tv_episodes (
     code        integer PRIMARY KEY,
     title       varchar(40),
-    show_id     integer references d.tv_shows on delete cascade
+    show_id     integer,
+    constraint tv_episodes_show_id_fkey foreign key (show_id) references d.tv_shows on delete cascade
 );
 
 /*
@@ -957,23 +966,27 @@ create table smart_comment_relations.streets (
 
 create table smart_comment_relations.properties (
   id serial primary key,
-  street_id int not null references smart_comment_relations.streets on delete cascade,
-  name_or_number text not null
+  street_id int not null,
+  name_or_number text not null,
+  constraint properties_street_id_fkey foreign key (street_id) references smart_comment_relations.streets on delete cascade
 );
 
 create table smart_comment_relations.street_property (
-  str_id int not null references smart_comment_relations.streets on delete cascade,
-  prop_id int not null references smart_comment_relations.properties on delete cascade,
+  str_id int not null,
+  prop_id int not null,
   current_owner text,
-  primary key (str_id, prop_id)
+  primary key (str_id, prop_id),
+  constraint street_property_str_id foreign key (str_id) references smart_comment_relations.streets on delete cascade,
+  constraint street_property_prop_id foreign key (prop_id) references smart_comment_relations.properties on delete cascade
 );
 
 create table smart_comment_relations.buildings (
   id serial primary key,
-  property_id int not null references smart_comment_relations.properties on delete cascade,
+  property_id int not null,
   name text not null,
   floors int not null default 1,
-  is_primary boolean not null default true
+  is_primary boolean not null default true,
+  constraint buildings_property_id_fkey foreign key (property_id) references smart_comment_relations.properties on delete cascade
 );
 
 comment on table smart_comment_relations.buildings is E'@foreignKey (name) references streets (name)|@fieldName namedAfterStreet|@foreignFieldName buildingsNamedAfterStreet|@foreignSimpleFieldName buildingsNamedAfterStreetList';
@@ -1014,7 +1027,8 @@ comment on table smart_comment_relations.post is E'@name post_table
 
 create table smart_comment_relations.offer (
   id serial primary key,
-  post_id text references smart_comment_relations.post(id) not null
+  post_id text not null,
+  constraint offer_post_id_fkey foreign key (post_id) references smart_comment_relations.post(id)
 );
 comment on table smart_comment_relations.offer is E'@name offer_table
 @omit';
@@ -1067,8 +1081,9 @@ create table simple_collections.people (
 
 create table simple_collections.pets (
   id serial primary key,
-  owner_id int not null references simple_collections.people,
-  name text
+  owner_id int not null,
+  name text,
+  constraint pets_owner_id_fkey foreign key (owner_id) references simple_collections.people
 );
 
 -- create function simple_collections.people_odd_pets(p simple_collections.people) returns setof simple_collections.pets as $$
@@ -1085,16 +1100,19 @@ create table live_test.users (
 
 create table live_test.todos (
   id serial primary key,
-  user_id int not null references live_test.users on delete cascade,
+  user_id int not null,
   task text not null,
-  completed boolean not null default false
+  completed boolean not null default false,
+  constraint todos_user_id_fkey foreign key (user_id) references live_test.users on delete cascade
 );
 
 create table live_test.todos_log (
-  todo_id int not null references live_test.todos on delete cascade,
-  user_id int not null references live_test.users on delete cascade,
+  todo_id int not null,
+  user_id int not null,
   action text not null,
-  PRIMARY KEY ("todo_id","user_id")
+  PRIMARY KEY ("todo_id","user_id"),
+  constraint todos_log_todo_id_fkey foreign key (todo_id) references live_test.todos on delete cascade,
+  constraint todos_log_user_id_fkey foreign key (user_id) references live_test.users on delete cascade
 );
 
 create table live_test.todos_log_viewed (
@@ -1102,7 +1120,7 @@ create table live_test.todos_log_viewed (
   user_id int not null,
   todo_id int not null,
   viewed_at timestamp not null default now(),
-  foreign key (user_id, todo_id) references live_test.todos_log(user_id, todo_id) on delete cascade
+  constraint todos_log_viewed_user_id_todo_id_fkey foreign key (user_id, todo_id) references live_test.todos_log(user_id, todo_id) on delete cascade
 );
 
 create table large_bigint.large_node_id (
@@ -1133,9 +1151,11 @@ create table named_query_builder.categories (
 );
 
 create table named_query_builder.toy_categories (
-  toy_id int not null references named_query_builder.toys,
-  category_id int not null references named_query_builder.categories,
-  approved boolean not null
+  toy_id int not null,
+  category_id int not null,
+  approved boolean not null,
+  constraint toy_categories_toy_id foreign key (toy_id) references named_query_builder.toys,
+  constraint toy_categories_category_id foreign key (category_id) references named_query_builder.categories
 );
 
 --------------------------------------------------------------------------------
@@ -1150,9 +1170,10 @@ create view enum_tables.abcd_view as (select letter, description from enum_table
 
 create table enum_tables.letter_descriptions(
   id serial primary key,
-  letter text not null references enum_tables.abcd unique,
+  letter text not null unique,
   letter_via_view text not null unique,
-  description text
+  description text,
+  constraint letter_descriptions_letter_fkey foreign key (letter) references enum_tables.abcd
 );
 
 comment on table enum_tables.letter_descriptions is '@foreignKey (letter_via_view) references enum_tables.abcd_view';
@@ -1181,9 +1202,12 @@ comment on table enum_tables.lots_of_enums is E'@omit';
 
 create table enum_tables.referencing_table(
   id serial primary key,
-  enum_1 text references enum_tables.lots_of_enums(enum_1),
-  enum_2 varchar(3) references enum_tables.lots_of_enums(enum_2),
-  enum_3 char(2) references enum_tables.lots_of_enums(enum_3)
+  enum_1 text,
+  enum_2 varchar(3),
+  enum_3 char(2),
+  constraint referencing_table_enum_1_fkey foreign key (enum_1) references enum_tables.lots_of_enums(enum_1),
+  constraint referencing_table_enum_2_fkey foreign key (enum_2) references enum_tables.lots_of_enums(enum_2),
+  constraint referencing_table_enum_3_fkey foreign key (enum_3) references enum_tables.lots_of_enums(enum_3)
 );
 
 -- Relates to https://github.com/graphile/postgraphile/issues/1365
