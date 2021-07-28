@@ -1,0 +1,123 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`column naming clash - rename 1`] = `
+[Error: A naming conflict has occurred - two entities have tried to define the same key '[1mWONT_CAST_EASY_ASC[22m'.
+
+  The first entity was:
+
+    [35mAdding ascending orderBy enum value for column [1m"wont_cast_easy"[22m on table [1m"c"."edge_case"[22m. You can rename this field with a 'Smart Comment':[39m
+    [35m[39m
+    [35m  COMMENT ON COLUMN "c"."edge_case"."wont_cast_easy" IS E'[1m[32m@name newNameHere[35m[22m';[39m
+
+  The second entity was:
+
+    [33mAdding ascending orderBy enum value for column [1m"row_id"[22m on table [1m"c"."edge_case"[22m (with smart comments: [1m@name wontCastEasy[22m). You can rename this field with a 'Smart Comment':[39m
+    [33m[39m
+    [33m  COMMENT ON COLUMN "c"."edge_case"."row_id" IS E'[1m[32m@name newNameHere[33m[22m\\nRest of existing \\'comment\\' \\nhere.';[39m]
+`;
+
+exports[`simple collections naming clash 1`] = `
+[Error: A naming conflict has occurred - two entities have tried to define the same key '[1mclash[22m'.
+
+  The first entity was:
+
+    [35mBackward relation (connection) for constraint [1m"post_author_id_fkey"[22m on table [1m"a"."post"[22m (with smart comments: [1m@foreignFieldName clash[22m). To rename this relation with a 'Smart Comment':[39m
+    [35m[39m
+    [35m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'[1m[32m@foreignFieldName newNameHere[35m[22m\\nRest of existing \\'comment\\' \\nhere.';[39m
+
+  The second entity was:
+
+    [33mBackward relation (simple collection) for constraint [1m"post_author_id_fkey"[22m on table [1m"a"."post"[22m (with smart comments: [1m@foreignFieldName clash[22m). To rename this relation with a 'Smart Comment':[39m
+    [33m[39m
+    [33m  COMMENT ON CONSTRAINT "post_author_id_fkey" ON "a"."post" IS E'[1m[32m@foreignSimpleFieldName newNameHere[33m[22m\\n@foreignFieldName clash\\nRest of existing \\'comment\\' \\nhere.';[39m]
+`;
+
+exports[`table naming clash - condition 1`] = `
+[Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mPersonCondition[22m'.
+
+  The first entity was:
+
+    [35mAdding condition type for table [1m"c"."person"[22m. You can rename the table's GraphQL type via a 'Smart Comment':[39m
+    [35m[39m
+    [35m  COMMENT ON TABLE "c"."person" IS E'[1m[32m@name newNameHere[35m[22m\\nPerson test comment';[39m
+
+  The second entity was:
+
+    [33mAdding table type for table [1m"a"."post"[22m (with smart comments: [1m@name person_condition[22m). You can rename the table's GraphQL type via a 'Smart Comment':[39m
+    [33m[39m
+    [33m  COMMENT ON TABLE "a"."post" IS E'[1m[32m@name newNameHere[33m[22m\\nRest of existing \\'comment\\' \\nhere.';[39m]
+`;
+
+exports[`table naming clash - direct 1`] = `
+[Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mPeopleOrderBy[22m'.
+
+  The first entity was:
+
+    [35mAdding connection "orderBy" argument for table [1m"a"."post"[22m (with smart comments: [1m@name person[22m). You can rename the table's GraphQL type via a 'Smart Comment':[39m
+    [35m[39m
+    [35m  COMMENT ON TABLE "a"."post" IS E'[1m[32m@name newNameHere[35m[22m\\nRest of existing \\'comment\\' \\nhere.';[39m
+
+  The second entity was:
+
+    [33mAdding connection "orderBy" argument for table [1m"c"."person"[22m. You can rename the table's GraphQL type via a 'Smart Comment':[39m
+    [33m[39m
+    [33m  COMMENT ON TABLE "c"."person" IS E'[1m[32m@name newNameHere[33m[22m\\nPerson test comment';[39m]
+`;
+
+exports[`table naming clash - mutation 1`] = `
+[Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mMutation[22m'.
+
+  The first entity was:
+
+    [35mAdding table type for table [1m"a"."post"[22m (with smart comments: [1m@name mutation[22m). You can rename the table's GraphQL type via a 'Smart Comment':[39m
+    [35m[39m
+    [35m  COMMENT ON TABLE "a"."post" IS E'[1m[32m@name newNameHere[35m[22m\\nRest of existing \\'comment\\' \\nhere.';[39m
+
+  The second entity was:
+
+    [33mgraphile-build built-in (root mutation type)[39m]
+`;
+
+exports[`table naming clash - order 1`] = `
+[Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mPeopleOrderBy[22m'.
+
+  The first entity was:
+
+    [35mAdding connection "orderBy" argument for table [1m"c"."person"[22m. You can rename the table's GraphQL type via a 'Smart Comment':[39m
+    [35m[39m
+    [35m  COMMENT ON TABLE "c"."person" IS E'[1m[32m@name newNameHere[35m[22m\\nPerson test comment';[39m
+
+  The second entity was:
+
+    [33mAdding table type for table [1m"a"."post"[22m (with smart comments: [1m@name people_order_by[22m). You can rename the table's GraphQL type via a 'Smart Comment':[39m
+    [33m[39m
+    [33m  COMMENT ON TABLE "a"."post" IS E'[1m[32m@name newNameHere[33m[22m\\nRest of existing \\'comment\\' \\nhere.';[39m]
+`;
+
+exports[`table naming clash - query 1`] = `
+[Error: A naming conflict has occurred - two entities have tried to define the same key '[1mquery[22m'.
+
+  The first entity was:
+
+    [35mDefault field included in newWithHooks call for 'Query'. graphile-build built-in (root query type)[39m
+
+  The second entity was:
+
+    [33mAdding row by globally unique identifier field for table [1m"a"."post"[22m (with smart comments: [1m@name query[22m). You can rename this table via a 'Smart Comment':[39m
+    [33m[39m
+    [33m  COMMENT ON TABLE "a"."post" IS E'[1m[32m@name newNameHere[33m[22m\\nRest of existing \\'comment\\' \\nhere.';[39m]
+`;
+
+exports[`table naming clash - subscription 1`] = `
+[Error: A type naming conflict has occurred - two entities have tried to define the same type '[1mSubscription[22m'.
+
+  The first entity was:
+
+    [35mAdding table type for table [1m"a"."post"[22m (with smart comments: [1m@name subscription[22m). You can rename the table's GraphQL type via a 'Smart Comment':[39m
+    [35m[39m
+    [35m  COMMENT ON TABLE "a"."post" IS E'[1m[32m@name newNameHere[35m[22m\\nRest of existing \\'comment\\' \\nhere.';[39m
+
+  The second entity was:
+
+    [33mgraphile-build built-in (root subscription type)[39m]
+`;
