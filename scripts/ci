@@ -4,7 +4,7 @@ export PATH="$PATH:`pwd`/node_modules/.bin"
 
 set -e
 if [ "$COCKROACH" = "" ]; then
-  echo "RUNNING ALL TESTS '$COCKROACH'"
+  echo "RUNNING ALL TESTS"
   for I in packages/*/; do
     if [[ "$PGVERSION" != "9.4" || ( "$I" != "packages/lds/" && "$I" != "packages/subscriptions-lds/" ) ]]; then
       cd $I
@@ -14,5 +14,5 @@ if [ "$COCKROACH" = "" ]; then
   done
 else
   cd packages/pg-analogues/
-  npm run test -- cockroach
+  npm run test
 fi;
