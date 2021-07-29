@@ -179,6 +179,7 @@ export interface PgIndex {
 
 export type PgIntrospectionResultsByKind = {
   __pgVersion: number;
+  __pgVariant: "postgres" | "cockroach";
   attribute: PgAttribute[];
   attributeByClassIdAndNum: {
     [classId: string]: { [num: string]: PgAttribute };

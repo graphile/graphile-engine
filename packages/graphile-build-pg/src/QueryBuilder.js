@@ -46,6 +46,14 @@ type CursorComparator = (val: CursorValue, isAfter: boolean) => void;
 
 export type QueryBuilderOptions = {
   supportsJSONB?: boolean, // Defaults to true
+
+  supportsNullsFirst?: boolean, // Defaults to true
+
+  // If `select * from (select * from foo order by bar) tmp` doesn't return
+  // records in the same order as `select * from foo order by bar` in your
+  // PostgreSQL server then supply this boolean as true to force us to add
+  // additional `ORDER BY` clauses.
+  paranoidSqlStandardOrder?: boolean,
 };
 
 function escapeLarge(sqlFragment: SQL, type: PgType) {
@@ -83,6 +91,8 @@ class QueryBuilder {
   context: GraphQLContext;
   rootValue: any; // eslint-disable-line flowtype/no-weak-types
   supportsJSONB: boolean;
+  supportsNullsFirst: boolean;
+  paranoidSqlStandardOrder: boolean;
   locks: {
     [string]: false | true | string,
   };
@@ -148,10 +158,11 @@ class QueryBuilder {
     this.context = context || {};
     this.rootValue = rootValue;
     this.supportsJSONB =
-      typeof options.supportsJSONB === "undefined" ||
-      options.supportsJSONB === null
-        ? true
-        : !!options.supportsJSONB;
+      options.supportsJSONB == null ? true : !!options.supportsJSONB;
+    this.supportsNullsFirst =
+      options.supportsNullsFirst == null ? true : !!options.supportsNullsFirst;
+    this.paranoidSqlOrder =
+      options.paranoidSqlOrder == null ? true : !!options.paranoidSqlOrder;
 
     this.locks = {
       // As a performance optimisation, we're going to list a number of lock
@@ -711,6 +722,7 @@ ${sql.join(
       addNullCase?: boolean,
       addNotDistinctFromNullCase?: boolean,
       useAsterisk?: boolean,
+      includeOrder?: boolean,
     } = {}
   ) {
     this.lockEverything();
@@ -729,6 +741,7 @@ ${sql.join(
       addNullCase = false,
       addNotDistinctFromNullCase = false,
       useAsterisk = false,
+      includeOrder = false,
     } = options;
 
     if (onlyJsonField) {
@@ -742,36 +755,48 @@ ${sql.join(
             addNotDistinctFromNullCase,
           })} as object`
         : this.buildSelectFields();
+    const orderBy = this.compiledData.orderBy.length
+      ? sql.fragment`order by ${sql.join(
+          this.compiledData.orderBy.map(
+            ([expr, ascending, nullsFirst]) =>
+              sql.fragment`${expr} ${
+                Number(ascending) ^ Number(flip)
+                  ? sql.fragment`ASC`
+                  : sql.fragment`DESC`
+              }${
+                this.supportsNullsFirst
+                  ? nullsFirst === true
+                    ? sql.fragment` NULLS FIRST`
+                    : nullsFirst === false
+                    ? sql.fragment` NULLS LAST`
+                    : null
+                  : null
+              }`
+          ),
+          ","
+        )}`
+      : null;
+    const orderFrag = includeOrder
+      ? sql.fragment`, ${
+          orderBy
+            ? sql.fragment`row_number() over (${orderBy})`
+            : sql.fragment`1`
+        } as "@@@order@@@"`
+      : sql.blank;
 
     let fragment = sql.fragment`\
-select ${useAsterisk ? sql.fragment`${this.getTableAlias()}.*` : fields}
+select ${
+      useAsterisk
+        ? sql.fragment`${this.getTableAlias()}.*`
+        : sql.fragment`${fields}${orderFrag}`
+    }
 ${
   this.compiledData.from &&
   sql.fragment`from ${this.compiledData.from[0]} as ${this.getTableAlias()}`
 }
 ${this.compiledData.join.length && sql.join(this.compiledData.join, " ")}
 where ${this.buildWhereClause(true, true, options)}
-${
-  this.compiledData.orderBy.length
-    ? sql.fragment`order by ${sql.join(
-        this.compiledData.orderBy.map(
-          ([expr, ascending, nullsFirst]) =>
-            sql.fragment`${expr} ${
-              Number(ascending) ^ Number(flip)
-                ? sql.fragment`ASC`
-                : sql.fragment`DESC`
-            }${
-              nullsFirst === true
-                ? sql.fragment` NULLS FIRST`
-                : nullsFirst === false
-                ? sql.fragment` NULLS LAST`
-                : null
-            }`
-        ),
-        ","
-      )}`
-    : ""
-}
+${orderBy ? orderBy : sql.blank}
 ${isSafeInteger(limit) && sql.fragment`limit ${sql.literal(limit)}`}
 ${offset && sql.fragment`offset ${sql.literal(offset)}`}`;
     if (flip) {
@@ -790,7 +815,7 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
        * subquery, row_number() outside of this subquery WON'T include the
        * offset. We must add it back wherever row_number() is used.
        */
-      fragment = sql.fragment`select ${fields} from (${fragment}) ${this.getTableAlias()}`;
+      fragment = sql.fragment`select ${fields}${orderFrag} from (${fragment}) ${this.getTableAlias()}`;
     }
     if (asJsonAggregate) {
       const aggAlias = Symbol();
@@ -932,7 +957,11 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
   }
   /** this method is experimental */
   buildChild() {
-    const options = { supportsJSONB: this.supportsJSONB };
+    const options = {
+      supportsJSONB: this.supportsJSONB,
+      supportsNullsFirst: this.supportsNullsFirst,
+      paranoidSqlStandardOrder: this.paranoidSqlStandardOrder,
+    };
     const child = new QueryBuilder(options, this.context, this.rootValue);
     child.parentQueryBuilder = this;
     return child;

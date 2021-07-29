@@ -211,6 +211,7 @@ export type PgEntity =
 
 export type PgIntrospectionResultsByKind = {
   __pgVersion: number,
+  __pgVariant: "postgres" | "cockroach",
   attribute: PgAttribute[],
   attributeByClassIdAndNum: {
     [classId: string]: { [num: string]: PgAttribute },
@@ -697,6 +698,7 @@ export default (async function PgIntrospectionPlugin(
 
           const result = {
             __pgVersion: serverVersionNum,
+            __pgVariant: pgIsCockroach ? "cockroach" : "postgres",
             namespace: [],
             class: [],
             attribute: [],
@@ -1329,12 +1331,17 @@ Original error: ${e.message}
         rawIntrospectionResultsByKind,
         build.pgAugmentIntrospectionResults
       );
-      if (introspectionResultsByKind.__pgVersion < 90500) {
+      const supportsJSONB = introspectionResultsByKind.__pgVersion >= 90500;
+      const isCockroach =
+        introspectionResultsByKind.__pgVariant === "cockroach";
+      if (!supportsJSONB || isCockroach) {
         // TODO:v5: remove this workaround
         // This is a bit of a hack, but until we have plugin priorities it's the
-        // easiest way to conditionally support PG9.4.
+        // easiest way to conditionally support PG9.4 and CockroachDB
         build.pgQueryFromResolveData = queryFromResolveDataFactory({
-          supportsJSONB: false,
+          supportsJSONB,
+          supportsNullsFirst: !isCockroach,
+          paranoidSqlStandardOrder: isCockroach,
         });
       }
       return build.extend(build, {

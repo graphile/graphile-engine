@@ -345,7 +345,7 @@ export default (function PgBasicsPlugin(
         pgColumnFilter,
 
         // TODO:v5: remove this workaround
-        // BEWARE: this may be overridden in PgIntrospectionPlugin for PG < 9.5
+        // BEWARE: this may be overridden in PgIntrospectionPlugin for PG < 9.5, Cockroach, etc
         pgQueryFromResolveData: queryFromResolveDataFactory(),
 
         pgAddStartEndCursor: addStartEndCursor,
