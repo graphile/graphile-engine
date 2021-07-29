@@ -193,7 +193,7 @@ create view b.updatable_view as
     id as x,
     person_full_name as name,
     about as description,
-    2 as constant
+    2::int as constant
   from
     c.person;
 
