@@ -794,7 +794,7 @@ ${sql.join(
     let fragment = sql.fragment`\
 select ${
       useAsterisk
-        ? sql.fragment`${this.getTableAlias()}.*`
+        ? sql.fragment`${this.getTableAlias()}.*${flip ? orderFrag : sql.blank}`
         : sql.fragment`${fields}${orderFrag}`
     }
 ${
@@ -822,7 +822,9 @@ order by ${sql.identifier(flipAlias, "@@@order@@@")} desc`;
        * subquery, row_number() outside of this subquery WON'T include the
        * offset. We must add it back wherever row_number() is used.
        */
-      fragment = sql.fragment`select ${fields}${orderFrag} from (${fragment}) ${this.getTableAlias()}`;
+      fragment = sql.fragment`select ${fields}${
+        flip ? sql.fragment`, ( - "@@@order@@@") as "@@@order@@@"` : orderFrag
+      } from (${fragment}) ${this.getTableAlias()}`;
     }
     if (asJsonAggregate) {
       fragment = sql.fragment`select coalesce((${fragment}), '[]'::json)`;
