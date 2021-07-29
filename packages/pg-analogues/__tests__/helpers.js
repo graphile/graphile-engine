@@ -5,8 +5,8 @@ const pgConnectionString = require("pg-connection-string");
 // Reduce throttling on CI
 process.env.LIVE_THROTTLE = "100";
 
-// This test suite can be flaky. Increase it’s timeout.
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 60;
+// Cockroach takes _ages_ to do introspection, lets cut it some slack.
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 60 * 10;
 
 function readFilePromise(filename, encoding) {
   return new Promise((resolve, reject) => {
