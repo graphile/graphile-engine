@@ -46,4 +46,5 @@ limitations are applied:
 - No `SELECT set_config(..., true)`
 - No generated identity columns `... GENERATED ALWAYS AS IDENTITY ...`
 - No `ALTER SEQUENCE ... RESTART WITH`
-  - _In CockroachDB, `SERIAL` out of the box uses `unique_rowid()` rather than a sequence. This can be changed via session var `serial_normalization`.
+  - In CockroachDB, `SERIAL` out of the box uses `unique_rowid()` rather than a sequence. This can be changed via session var `serial_normalization`.
+- No `ORDER BY ... NULLS FIRST` / `NULLS LAST`
