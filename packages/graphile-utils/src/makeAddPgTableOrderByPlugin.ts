@@ -25,7 +25,7 @@ export default function makeAddPgTableOrderByPlugin(
   tableName: string,
   ordersGenerator: (build: Build) => MakeAddPgTableOrderByPluginOrders,
   hint = `Adding orders with makeAddPgTableOrderByPlugin to "${schemaName}"."${tableName}"`
-) {
+): Plugin {
   const displayName = `makeAddPgTableOrderByPlugin_${schemaName}_${tableName}`;
   const plugin: Plugin = builder => {
     builder.hook("GraphQLEnumType:values", (values, build, context) => {
@@ -52,25 +52,84 @@ export default function makeAddPgTableOrderByPlugin(
   return plugin;
 }
 
+export type NullsSortMethod =
+  | "first"
+  | "last"
+  | "first-iff-ascending"
+  | "last-iff-ascending"
+  | undefined;
+
+export interface OrderByAscDescOptions {
+  unique?: boolean;
+  nulls?: NullsSortMethod;
+}
+
 export function orderByAscDesc(
   baseName: string,
   columnOrSqlFragment: OrderBySpecIdentity,
-  unique = false
+  uniqueOrOptions: boolean | OrderByAscDescOptions = false
 ): MakeAddPgTableOrderByPluginOrders {
-  return {
+  const options =
+    typeof uniqueOrOptions === "boolean"
+      ? { unique: uniqueOrOptions }
+      : uniqueOrOptions ?? {};
+  const { unique = false, nulls } = options;
+
+  if (typeof unique !== "boolean") {
+    throw new Error(
+      `Invalid value for "unique" passed to orderByAscDesc for ${baseName}. Unique must be a boolean.`
+    );
+  }
+
+  const isValidNullsOption = [
+    "first",
+    "last",
+    "first-iff-ascending",
+    "last-iff-ascending",
+    undefined,
+  ].includes(nulls);
+
+  if (!isValidNullsOption) {
+    throw new Error(
+      `Invalid value for "nulls" passed to orderByAscDesc for ${baseName}. Nulls must be sorted by one of: undefined | "first" | "last" | "first-iff-ascending" | "last-iff-ascending".`
+    );
+  }
+
+  const defaultAscendingSpec: OrderSpec = [columnOrSqlFragment, true];
+  const defaultDescendingSpec: OrderSpec = [columnOrSqlFragment, false];
+
+  const ascendingSpec: OrderSpec =
+    typeof nulls === "undefined"
+      ? defaultAscendingSpec
+      : [
+          ...defaultAscendingSpec,
+          ["first", "first-iff-ascending"].includes(nulls),
+        ];
+
+  const descendingSpec: OrderSpec =
+    typeof nulls === "undefined"
+      ? defaultDescendingSpec
+      : [
+          ...defaultDescendingSpec,
+          ["first", "last-iff-ascending"].includes(nulls),
+        ];
+
+  const orders: MakeAddPgTableOrderByPluginOrders = {
     [`${baseName}_ASC`]: {
       value: {
         alias: `${baseName}_ASC`,
-        specs: [[columnOrSqlFragment, true]],
+        specs: [ascendingSpec],
         unique,
       },
     },
     [`${baseName}_DESC`]: {
       value: {
         alias: `${baseName}_DESC`,
-        specs: [[columnOrSqlFragment, false]],
+        specs: [descendingSpec],
         unique,
       },
     },
   };
+
+  return orders;
 }

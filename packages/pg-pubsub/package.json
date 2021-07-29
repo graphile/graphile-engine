@@ -1,6 +1,6 @@
 {
   "name": "@graphile/pg-pubsub",
-  "version": "4.12.0-alpha.0",
+  "version": "4.12.1",
   "description": "Subscriptions plugin for PostGraphile using PostgreSQL's LISTEN/NOTIFY",
   "main": "dist/index.js",
   "scripts": {
@@ -31,7 +31,7 @@
   "homepage": "https://github.com/graphile/graphile-engine/tree/master/packages/pg-pubsub#readme",
   "dependencies": {
     "@types/debug": "^4.1.4",
-    "@types/pg": "^7.4.14",
+    "@types/pg": ">=6 <9",
     "debug": "^4.1.1",
     "graphql-subscriptions": "^1.1.0",
     "tslib": "^2.0.1"

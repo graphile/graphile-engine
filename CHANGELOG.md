@@ -3,7 +3,31 @@
 We use PostGraphile's GitHub releases tab to log our changes in detail, but
 this auto-generated changelog helps us to produce that list, and it may be
 helpful to you also.
-# [](https://github.com/graphile/graphile-engine/compare/v4.12.0-alpha.0...v) (2021-02-15)
+# [](https://github.com/graphile/graphile-engine/compare/v4.12.1...v) (2021-05-27)
+
+
+
+## [4.12.1](https://github.com/graphile/graphile-engine/compare/v4.12.0...v4.12.1) (2021-05-27)
+
+
+### Features
+
+* **utils:** support for NULLS FIRST/LAST in orderByAscDesc ([#737](https://github.com/graphile/graphile-engine/issues/737)) ([99b1a8e](https://github.com/graphile/graphile-engine/commit/99b1a8ee638322e61b0617c5d1497e9904a6ff21))
+
+
+
+# [4.12.0](https://github.com/graphile/graphile-engine/compare/v4.12.0-alpha.0...v4.12.0) (2021-05-26)
+
+
+### Bug Fixes
+
+* **order:** fix order by computed column SQL item bug ([#741](https://github.com/graphile/graphile-engine/issues/741)) ([0635ecb](https://github.com/graphile/graphile-engine/commit/0635ecb64f8211265a00ae4764b85a6f5c8bb70b))
+* uniqueKey/pgViewUniqueKey applies to views ([#739](https://github.com/graphile/graphile-engine/issues/739)) ([b715f6d](https://github.com/graphile/graphile-engine/commit/b715f6d1be7dd19e39830b4329fa3c758e5ae91b))
+
+
+### Features
+
+* export pgSmartTagRulesFromJSON ([#722](https://github.com/graphile/graphile-engine/issues/722)) ([48e07cd](https://github.com/graphile/graphile-engine/commit/48e07cd8bc31834200a91dde9dfc4d2f0d65339d))
 
 
 

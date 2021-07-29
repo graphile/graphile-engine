@@ -8,6 +8,7 @@ import makeProcessSchemaPlugin from "./makeProcessSchemaPlugin";
 import makeAddPgTableConditionPlugin from "./makeAddPgTableConditionPlugin";
 import makeAddPgTableOrderByPlugin, {
   orderByAscDesc,
+  OrderByAscDescOptions,
   MakeAddPgTableOrderByPluginOrders,
 } from "./makeAddPgTableOrderByPlugin";
 
@@ -32,5 +33,6 @@ export {
   makeAddPgTableConditionPlugin,
   makeAddPgTableOrderByPlugin,
   orderByAscDesc,
+  OrderByAscDescOptions,
   MakeAddPgTableOrderByPluginOrders,
 };
