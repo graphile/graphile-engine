@@ -3014,23 +3014,23 @@ Object {
         "personId": 5,
       },
       Object {
-        "compoundKey1": 4,
-        "compoundKey2": 4,
-        "compoundKeyByCompoundKey1AndCompoundKey2": Object {
-          "extra": false,
-          "personId1": 4,
-          "personId2": 4,
-        },
-        "personByPersonId": null,
-        "personId": null,
-      },
-      Object {
         "compoundKey1": 2,
         "compoundKey2": 1,
         "compoundKeyByCompoundKey1AndCompoundKey2": Object {
           "extra": false,
           "personId1": 2,
           "personId2": 1,
+        },
+        "personByPersonId": null,
+        "personId": null,
+      },
+      Object {
+        "compoundKey1": 4,
+        "compoundKey2": 4,
+        "compoundKeyByCompoundKey1AndCompoundKey2": Object {
+          "extra": false,
+          "personId1": 4,
+          "personId2": 4,
         },
         "personByPersonId": null,
         "personId": null,
