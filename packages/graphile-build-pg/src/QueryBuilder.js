@@ -823,7 +823,9 @@ order by ${sql.identifier(flipAlias, "@@@order@@@")} desc`;
        * offset. We must add it back wherever row_number() is used.
        */
       fragment = sql.fragment`select ${fields}${
-        flip ? sql.fragment`, ( - "@@@order@@@") as "@@@order@@@"` : orderFrag
+        flip
+          ? sql.fragment`, ( - ${this.getTableAlias()}."@@@order@@@") as "@@@order@@@"`
+          : orderFrag
       } from (${fragment}) ${this.getTableAlias()}`;
     }
     if (asJsonAggregate) {
