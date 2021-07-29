@@ -784,7 +784,7 @@ ${sql.join(
       : null;
     const orderFrag =
       includeOrder || flip
-        ? sql.fragment`, ${
+        ? sql.fragment`, ${flip ? sql.fragment`-` : sql.blank}${
             orderBy
               ? sql.fragment`row_number() over (${orderBy})`
               : sql.fragment`row_number() over (partition by 1)`
@@ -814,7 +814,7 @@ with ${sql.identifier(flipAlias)} as (
 )
 select *
 from ${sql.identifier(flipAlias)}
-order by ${sql.identifier(flipAlias, "@@@order@@@")} desc`;
+order by ${sql.identifier(flipAlias, "@@@order@@@")} asc`;
     }
     if (useAsterisk) {
       /*
@@ -824,7 +824,7 @@ order by ${sql.identifier(flipAlias, "@@@order@@@")} desc`;
        */
       fragment = sql.fragment`select ${fields}${
         flip
-          ? sql.fragment`, ( - ${this.getTableAlias()}."@@@order@@@") as "@@@order@@@"`
+          ? sql.fragment`, ${this.getTableAlias()}."@@@order@@@" as "@@@order@@@"`
           : orderFrag
       } from (${fragment}) ${this.getTableAlias()}`;
     }
