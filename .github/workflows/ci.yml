@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14.x
-      - run: yarn --immutable --ignore-engines
+      - run: yarn --frozen-lockfile --ignore-engines
 
       - name: "Check Code Format"
         run: yarn prettier:check

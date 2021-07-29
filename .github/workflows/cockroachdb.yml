@@ -55,7 +55,7 @@ jobs:
           # bash .github/workflows/ci/docker-entrypoint-initdb.d/010-enable_wal.sh
           # bash .github/workflows/ci/docker-entrypoint-initdb.d/020-wal2json.sh
           bash .github/workflows/ci/docker-entrypoint-initdb.d/030-setup.sh
-      - run: yarn --immutable --ignore-engines
+      - run: yarn --frozen-lockfile --ignore-engines
 
       - name: "Build Code"
         run: yarn prepack:all
