@@ -740,21 +740,27 @@ ${sql.join(
       onlyJsonField = false,
       addNullCase = false,
       addNotDistinctFromNullCase = false,
-      useAsterisk = false,
+      useAsterisk: rawUseAsterisk = false,
       includeOrder = false,
     } = options;
+
+    const useAsterisk = rawUseAsterisk && !this.paranoidSqlStandardOrder;
 
     if (onlyJsonField) {
       return this.buildSelectJson({ addNullCase, addNotDistinctFromNullCase });
     }
     const { limit, offset, flip } = this.getFinalLimitAndOffset();
-    const fields =
-      asJson || asJsonAggregate
-        ? sql.fragment`${this.buildSelectJson({
-            addNullCase,
-            addNotDistinctFromNullCase,
-          })} as object`
-        : this.buildSelectFields();
+    const fields = asJsonAggregate
+      ? sql.fragment`json_agg(${this.buildSelectJson({
+          addNullCase,
+          addNotDistinctFromNullCase,
+        })})`
+      : asJson
+      ? sql.fragment`${this.buildSelectJson({
+          addNullCase,
+          addNotDistinctFromNullCase,
+        })} as object`
+      : this.buildSelectFields();
     const orderBy = this.compiledData.orderBy.length
       ? sql.fragment`order by ${sql.join(
           this.compiledData.orderBy.map(
@@ -776,13 +782,14 @@ ${sql.join(
           ","
         )}`
       : null;
-    const orderFrag = includeOrder
-      ? sql.fragment`, ${
-          orderBy
-            ? sql.fragment`row_number() over (${orderBy})`
-            : sql.fragment`1`
-        } as "@@@order@@@"`
-      : sql.blank;
+    const orderFrag =
+      includeOrder || flip
+        ? sql.fragment`, ${
+            orderBy
+              ? sql.fragment`row_number() over (${orderBy})`
+              : sql.fragment`row_number() over (partition by 1)`
+          } as "@@@order@@@"`
+        : sql.blank;
 
     let fragment = sql.fragment`\
 select ${
@@ -807,7 +814,7 @@ with ${sql.identifier(flipAlias)} as (
 )
 select *
 from ${sql.identifier(flipAlias)}
-order by (row_number() over (partition by 1)) desc`; /* We don't need to factor useAsterisk into this row_number() usage */
+order by ${sql.identifier(flipAlias, "@@@order@@@")} desc`;
     }
     if (useAsterisk) {
       /*
@@ -818,11 +825,6 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
       fragment = sql.fragment`select ${fields}${orderFrag} from (${fragment}) ${this.getTableAlias()}`;
     }
     if (asJsonAggregate) {
-      const aggAlias = Symbol();
-      fragment = sql.fragment`select json_agg(${sql.identifier(
-        aggAlias,
-        "object"
-      )}) from (${fragment}) as ${sql.identifier(aggAlias)}`;
       fragment = sql.fragment`select coalesce((${fragment}), '[]'::json)`;
     }
     return fragment;

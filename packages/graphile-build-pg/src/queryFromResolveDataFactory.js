@@ -78,7 +78,9 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
     });
   }
 
-  const preventAsterisk = pgDontUseAsterisk
+  const preventAsterisk = queryBuilderOptions.paranoidSqlStandardOrder
+    ? true
+    : pgDontUseAsterisk
     ? pgDontUseAsterisk.length > 0
     : false;
   const { paranoidSqlStandardOrder } = queryBuilderOptions;
