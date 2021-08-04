@@ -57,7 +57,7 @@ export default function makeChangeNullabilityPlugin(
       shouldBeNullable: boolean | boolean[]
     ): any {
       const allNullabilities: boolean[] =
-        shouldBeNullable instanceof Array
+        Array.isArray(shouldBeNullable)
           ? shouldBeNullable
           : [shouldBeNullable];
       return allNullabilities.length > 0
