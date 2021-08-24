@@ -21,6 +21,7 @@ sleep 2
 ./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "alter role root password 'root';"
 ./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING sql.defaults.default_int_size = 4;"
 ./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING sql.defaults.serial_normalization = sql_sequence_cached;"
+./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING sql.defaults.propagate_input_ordering.enabled = true;"
 ./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "create database pggql_test;"
 
 # Continue running
