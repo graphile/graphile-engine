@@ -78,12 +78,9 @@ export default (queryBuilderOptions: QueryBuilderOptions = {}) => (
     });
   }
 
-  const preventAsterisk = queryBuilderOptions.paranoidSqlStandardOrder
-    ? true
-    : pgDontUseAsterisk
+  const preventAsterisk = pgDontUseAsterisk
     ? pgDontUseAsterisk.length > 0
     : false;
-  const { paranoidSqlStandardOrder } = queryBuilderOptions;
   const options = {
     ...inOptions,
     // Allow pgDontUseAsterisk to override useAsterisk
@@ -429,9 +426,8 @@ OR\
       }
     });
 
+    const query = queryBuilder.build(options);
     const haveFields = queryBuilder.getSelectFieldsCount() > 0;
-    const includeOrder = paranoidSqlStandardOrder && haveFields;
-    const query = queryBuilder.build({ ...options, includeOrder });
     const sqlQueryAlias = sql.identifier(Symbol());
     const sqlSummaryAlias = sql.identifier(Symbol());
     //
@@ -472,11 +468,8 @@ OR\
           true
         );
 
-    const orderJsonAggBy = includeOrder
-      ? sql.fragment` order by ${sqlQueryAlias}."@@@order@@@"`
-      : sql.blank;
     const sqlWith = haveFields
-      ? sql.fragment`with ${sqlQueryAlias} as (${query}), ${sqlSummaryAlias} as (select json_agg(to_json(${sqlQueryAlias})${orderJsonAggBy}) as data from ${sqlQueryAlias})`
+      ? sql.fragment`with ${sqlQueryAlias} as (${query}), ${sqlSummaryAlias} as (select json_agg(to_json(${sqlQueryAlias})) as data from ${sqlQueryAlias})`
       : sql.fragment``;
     const sqlFrom = sql.fragment``;
     const fields: Array<[SQL, RawAlias]> = [];

@@ -1341,7 +1341,6 @@ Original error: ${e.message}
         build.pgQueryFromResolveData = queryFromResolveDataFactory({
           supportsJSONB,
           supportsNullsFirst: !isCockroach,
-          paranoidSqlStandardOrder: isCockroach,
         });
       }
       return build.extend(build, {

@@ -48,12 +48,6 @@ export type QueryBuilderOptions = {
   supportsJSONB?: boolean, // Defaults to true
 
   supportsNullsFirst?: boolean, // Defaults to true
-
-  // If `select * from (select * from foo order by bar) tmp` doesn't return
-  // records in the same order as `select * from foo order by bar` in your
-  // PostgreSQL server then supply this boolean as true to force us to add
-  // additional `ORDER BY` clauses.
-  paranoidSqlStandardOrder?: boolean,
 };
 
 function escapeLarge(sqlFragment: SQL, type: PgType) {
@@ -92,7 +86,6 @@ class QueryBuilder {
   rootValue: any; // eslint-disable-line flowtype/no-weak-types
   supportsJSONB: boolean;
   supportsNullsFirst: boolean;
-  paranoidSqlStandardOrder: boolean;
   locks: {
     [string]: false | true | string,
   };
@@ -161,8 +154,6 @@ class QueryBuilder {
       options.supportsJSONB == null ? true : !!options.supportsJSONB;
     this.supportsNullsFirst =
       options.supportsNullsFirst == null ? true : !!options.supportsNullsFirst;
-    this.paranoidSqlOrder =
-      options.paranoidSqlOrder == null ? true : !!options.paranoidSqlOrder;
 
     this.locks = {
       // As a performance optimisation, we're going to list a number of lock
@@ -722,7 +713,6 @@ ${sql.join(
       addNullCase?: boolean,
       addNotDistinctFromNullCase?: boolean,
       useAsterisk?: boolean,
-      includeOrder?: boolean,
     } = {}
   ) {
     this.lockEverything();
@@ -740,70 +730,52 @@ ${sql.join(
       onlyJsonField = false,
       addNullCase = false,
       addNotDistinctFromNullCase = false,
-      useAsterisk: rawUseAsterisk = false,
-      includeOrder = false,
+      useAsterisk = false,
     } = options;
-
-    const useAsterisk = rawUseAsterisk && !this.paranoidSqlStandardOrder;
 
     if (onlyJsonField) {
       return this.buildSelectJson({ addNullCase, addNotDistinctFromNullCase });
     }
     const { limit, offset, flip } = this.getFinalLimitAndOffset();
-    const fields = asJsonAggregate
-      ? sql.fragment`json_agg(${this.buildSelectJson({
-          addNullCase,
-          addNotDistinctFromNullCase,
-        })})`
-      : asJson
-      ? sql.fragment`${this.buildSelectJson({
-          addNullCase,
-          addNotDistinctFromNullCase,
-        })} as object`
-      : this.buildSelectFields();
-    const orderBy = this.compiledData.orderBy.length
-      ? sql.fragment`order by ${sql.join(
-          this.compiledData.orderBy.map(
-            ([expr, ascending, nullsFirst]) =>
-              sql.fragment`${expr} ${
-                Number(ascending) ^ Number(flip)
-                  ? sql.fragment`ASC`
-                  : sql.fragment`DESC`
-              }${
-                this.supportsNullsFirst
-                  ? nullsFirst === true
-                    ? sql.fragment` NULLS FIRST`
-                    : nullsFirst === false
-                    ? sql.fragment` NULLS LAST`
-                    : null
-                  : null
-              }`
-          ),
-          ","
-        )}`
-      : null;
-    const orderFrag =
-      includeOrder || (flip && !useAsterisk)
-        ? sql.fragment`, ${flip ? sql.fragment`-` : sql.blank}${
-            orderBy
-              ? sql.fragment`row_number() over (${orderBy})`
-              : sql.fragment`row_number() over (partition by 1)`
-          } as "@@@order@@@"`
-        : sql.blank;
+    const fields =
+      asJson || asJsonAggregate
+        ? sql.fragment`${this.buildSelectJson({
+            addNullCase,
+            addNotDistinctFromNullCase,
+          })} as object`
+        : this.buildSelectFields();
 
     let fragment = sql.fragment`\
-select ${
-      useAsterisk
-        ? sql.fragment`${this.getTableAlias()}.*${flip ? orderFrag : sql.blank}`
-        : sql.fragment`${fields}${orderFrag}`
-    }
+select ${useAsterisk ? sql.fragment`${this.getTableAlias()}.*` : fields}
 ${
   this.compiledData.from &&
   sql.fragment`from ${this.compiledData.from[0]} as ${this.getTableAlias()}`
 }
 ${this.compiledData.join.length && sql.join(this.compiledData.join, " ")}
 where ${this.buildWhereClause(true, true, options)}
-${orderBy ? orderBy : sql.blank}
+${
+  this.compiledData.orderBy.length
+    ? sql.fragment`order by ${sql.join(
+        this.compiledData.orderBy.map(
+          ([expr, ascending, nullsFirst]) =>
+            sql.fragment`${expr} ${
+              Number(ascending) ^ Number(flip)
+                ? sql.fragment`ASC`
+                : sql.fragment`DESC`
+            }${
+              this.supportsNullsFirst
+                ? nullsFirst === true
+                  ? sql.fragment` NULLS FIRST`
+                  : nullsFirst === false
+                  ? sql.fragment` NULLS LAST`
+                  : null
+                : null
+            }`
+        ),
+        ","
+      )}`
+    : ""
+}
 ${isSafeInteger(limit) && sql.fragment`limit ${sql.literal(limit)}`}
 ${offset && sql.fragment`offset ${sql.literal(offset)}`}`;
     if (flip) {
@@ -814,11 +786,7 @@ with ${sql.identifier(flipAlias)} as (
 )
 select *
 from ${sql.identifier(flipAlias)}
-order by ${
-        useAsterisk
-          ? sql.fragment`(row_number() over (partition by 1)) desc` /* We don't need to factor useAsterisk into this row_number() usage */
-          : sql.fragment`${sql.identifier(flipAlias, "@@@order@@@")} asc`
-      }`;
+order by (row_number() over (partition by 1)) desc`; /* We don't need to factor useAsterisk into this row_number() usage */
     }
     if (useAsterisk) {
       /*
@@ -829,6 +797,11 @@ order by ${
       fragment = sql.fragment`select ${fields} from (${fragment}) ${this.getTableAlias()}`;
     }
     if (asJsonAggregate) {
+      const aggAlias = Symbol();
+      fragment = sql.fragment`select json_agg(${sql.identifier(
+        aggAlias,
+        "object"
+      )}) from (${fragment}) as ${sql.identifier(aggAlias)}`;
       fragment = sql.fragment`select coalesce((${fragment}), '[]'::json)`;
     }
     return fragment;
@@ -966,7 +939,6 @@ order by ${
     const options = {
       supportsJSONB: this.supportsJSONB,
       supportsNullsFirst: this.supportsNullsFirst,
-      paranoidSqlStandardOrder: this.paranoidSqlStandardOrder,
     };
     const child = new QueryBuilder(options, this.context, this.rootValue);
     child.parentQueryBuilder = this;
