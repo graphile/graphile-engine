@@ -2,8 +2,13 @@
 
 set -e
 
-psql -Xqv ON_ERROR_STOP=1 -f __tests__/kitchen-sink-schema.analogue.sql "$TEST_DATABASE_URL"
-psql -Xqv ON_ERROR_STOP=1 -f __tests__/kitchen-sink-schema-inserts.analogue.sql "$TEST_DATABASE_URL"
-psql -Xqv ON_ERROR_STOP=1 -f __tests__/kitchen-sink-permissions.analogue.sql "$TEST_DATABASE_URL"
+if [[ "$PGVERSION" != "9.4" ]]; then
+  psql -Xqv ON_ERROR_STOP=1 -f __tests__/kitchen-sink-schema.analogue.sql "$TEST_DATABASE_URL"
+  psql -Xqv ON_ERROR_STOP=1 -f __tests__/kitchen-sink-schema-inserts.analogue.sql "$TEST_DATABASE_URL"
+  psql -Xqv ON_ERROR_STOP=1 -f __tests__/kitchen-sink-permissions.analogue.sql "$TEST_DATABASE_URL"
 
-jest -i $@
+  jest -i $@
+else
+  echo "POSTGRESQL 9.4 DETECTED - SKIPPING pg-analogues TESTS"
+  exit 0
+fi
