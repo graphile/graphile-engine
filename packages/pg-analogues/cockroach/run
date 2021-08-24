@@ -13,7 +13,7 @@ mkdir my-safe-directory
 ./cockroach.LATEST cert create-client root --certs-dir=certs --ca-key=my-safe-directory/ca.key
 
 # Run
-./cockroach.LATEST start-single-node --accept-sql-without-tls --http-addr=:5757 --certs-dir=certs &
+./cockroach.LATEST start-single-node --certs-dir=certs --host=localhost --accept-sql-without-tls --http-addr=:5757 &
 trap 'kill $(jobs -p)' EXIT
 
 # Change root password
