@@ -92,23 +92,26 @@ export default async function subscribeToLogicalDecoding(
   }
 
   let loopTimeout: NodeJS.Timer;
-  /** A value of `-1` means to stop looping. */
-  let nextSleepDuration = -1;
+  /** Set true to halt the loop. */
+  let isClosing = false;
 
   const ldSubscription = {
     close: async () => {
       clearTimeout(loopTimeout);
-      nextSleepDuration = -1;
+      // If the `loop` function is currently in progress, tell it not to queue again.
+      isClosing = true;
       await client.close();
     },
   };
 
   let nextStaleCheck = Date.now() + DROP_STALE_SLOTS_INTERVAL;
   async function loop() {
-    // Reset the sleep duration (useful after an error where sleep is 10x larger)
-    nextSleepDuration = sleepDuration;
     try {
       const rows = await client.getChanges(null, 500);
+      if (isClosing) {
+        // Skip processing this data and exit.
+        return;
+      }
       if (rows.length) {
         for (const row of rows) {
           const {
@@ -166,15 +169,13 @@ export default async function subscribeToLogicalDecoding(
     } catch (e) {
       console.error("Error during LDS loop:", e.message);
       // Recovery time...
-      if (nextSleepDuration >= 0) {
-        nextSleepDuration = sleepDuration * 10;
+      if (!isClosing) {
+        loopTimeout = setTimeout(loop, sleepDuration * 10);
       }
-    }
-    if (nextSleepDuration >= 0) {
-      loopTimeout = setTimeout(loop, nextSleepDuration);
-    } else {
-      // loop() was stopped; abort
       return;
+    }
+    if (!isClosing) {
+      loopTimeout = setTimeout(loop, sleepDuration);
     }
   }
   loop();
