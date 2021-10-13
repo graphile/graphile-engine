@@ -5,7 +5,7 @@ export default (function PgOrderByPrimaryKeyPlugin(builder) {
   builder.hook(
     "GraphQLEnumType:values",
     (values, build, context) => {
-      const { extend } = build;
+      const { extend, inflection } = build;
       const {
         scope: { isPgRowSortEnum, pgIntrospection: table },
       } = context;
@@ -22,14 +22,14 @@ export default (function PgOrderByPrimaryKeyPlugin(builder) {
       return extend(
         values,
         {
-          PRIMARY_KEY_ASC: {
+          [inflection.builtin('PRIMARY_KEY_ASC')]: {
             value: {
               alias: "primary_key_asc",
               specs: primaryKeys.map(key => [key.name, true]),
               unique: true,
             },
           },
-          PRIMARY_KEY_DESC: {
+          [inflection.builtin('PRIMARY_KEY_DESC')]: {
             value: {
               alias: "primary_key_desc",
               specs: primaryKeys.map(key => [key.name, false]),

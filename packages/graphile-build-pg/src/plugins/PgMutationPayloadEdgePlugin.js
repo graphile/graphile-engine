@@ -70,7 +70,7 @@ export default (function PgMutationPayloadEdgePlugin(
       const fieldName = inflection.edgeField(table);
       const defaultValueEnum =
         canOrderBy &&
-        (TableOrderByType.getValues().find(v => v.name === "PRIMARY_KEY_ASC") ||
+        (TableOrderByType.getValues().find(v => v.name === inflection.builtin('PRIMARY_KEY_ASC')) ||
           TableOrderByType.getValues()[0]);
       return extend(
         fields,
