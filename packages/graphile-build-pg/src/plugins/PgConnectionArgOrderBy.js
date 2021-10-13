@@ -31,7 +31,7 @@ export default (function PgConnectionArgOrderBy(builder, { orderByNullsLast }) {
               "type"
             ),
             values: {
-              [inflection.builtin('NATURAL')]: {
+              [inflection.builtin("NATURAL")]: {
                 value: {
                   alias: null,
                   specs: [],
