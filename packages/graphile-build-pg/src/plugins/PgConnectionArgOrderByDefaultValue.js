@@ -37,7 +37,8 @@ export default (function PgConnectionArgOrderByDefaultValue(builder) {
 
       const primaryKeyAsc = inflection.builtin("PRIMARY_KEY_ASC");
       const defaultValueEnum =
-        TableOrderByType.getValues().find(v => v.name === primaryKeyAsc) || TableOrderByType.getValues()[0];
+        TableOrderByType.getValues().find(v => v.name === primaryKeyAsc) ||
+        TableOrderByType.getValues()[0];
 
       return extend(args, {
         orderBy: extend(
