@@ -68,9 +68,10 @@ export default (function PgMutationPayloadEdgePlugin(
       const canOrderBy = !omit(table, "order");
 
       const fieldName = inflection.edgeField(table);
+      const primaryKeyAsc = inflection.builtin("PRIMARY_KEY_ASC");
       const defaultValueEnum =
         canOrderBy &&
-        (TableOrderByType.getValues().find(v => v.name === "PRIMARY_KEY_ASC") ||
+        (TableOrderByType.getValues().find(v => v.name === primaryKeyAsc) ||
           TableOrderByType.getValues()[0]);
       return extend(
         fields,
