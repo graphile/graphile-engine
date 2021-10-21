@@ -392,9 +392,11 @@ function smartCommentConstraints(introspectionResults) {
             `Invalid foreign key spec (${index}) on '${klass.namespaceName}.${klass.name}'`
           );
         }
-        const { spec: fkSpec, tags, description } = parseConstraintSpec(
-          fkSpecRaw
-        );
+        const {
+          spec: fkSpec,
+          tags,
+          description,
+        } = parseConstraintSpec(fkSpecRaw);
         const matches = fkSpec.match(
           /^\(([^()]+)\) references ([^().]+)(?:\.([^().]+))?(?:\s*\(([^()]+)\))?$/i
         );
@@ -1057,9 +1059,10 @@ Original error: ${e.message}
         constraint.keyAttributes = [];
       }
       if (constraint.foreignKeyAttributeNums && constraint.foreignClass) {
-        constraint.foreignKeyAttributes = constraint.foreignKeyAttributeNums.map(
-          nr => constraint.foreignClass.attributes.find(attr => attr.num === nr)
-        );
+        constraint.foreignKeyAttributes =
+          constraint.foreignKeyAttributeNums.map(nr =>
+            constraint.foreignClass.attributes.find(attr => attr.num === nr)
+          );
       } else {
         constraint.foreignKeyAttributes = [];
       }
@@ -1138,10 +1141,8 @@ Original error: ${e.message}
       }
       // Connect to DB
       try {
-        const {
-          pgClient,
-          releasePgClient,
-        } = await getPgClientAndReleaserFromConfig(pgConfig);
+        const { pgClient, releasePgClient } =
+          await getPgClientAndReleaserFromConfig(pgConfig);
         this.client = pgClient;
         // $FlowFixMe: hack property
         this._reallyReleaseClient = releasePgClient;

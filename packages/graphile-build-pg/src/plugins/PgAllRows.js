@@ -96,9 +96,8 @@ export default (async function PgAllRows(
                   args: {},
                   async resolve(parent, args, resolveContext, resolveInfo) {
                     const { pgClient } = resolveContext;
-                    const parsedResolveInfoFragment = parseResolveInfo(
-                      resolveInfo
-                    );
+                    const parsedResolveInfoFragment =
+                      parseResolveInfo(resolveInfo);
                     parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
                     const resolveData = getDataFromParsedResolveInfoFragment(
                       parsedResolveInfoFragment,

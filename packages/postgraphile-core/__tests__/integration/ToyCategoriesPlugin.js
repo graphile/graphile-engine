@@ -40,12 +40,16 @@ module.exports = builder => {
                     innerQueryBuilder => {
                       innerQueryBuilder.parentQueryBuilder = queryBuilder;
                       const alias = Symbol("toyCategoriesSubquery");
-                      const innerInnerQueryBuilder = innerQueryBuilder.buildNamedChildSelecting(
-                        "toyCategoriesSubquery",
-                        sql.identifier("named_query_builder", "toy_categories"),
-                        sql.identifier(alias, "category_id"),
-                        sql.identifier(alias)
-                      );
+                      const innerInnerQueryBuilder =
+                        innerQueryBuilder.buildNamedChildSelecting(
+                          "toyCategoriesSubquery",
+                          sql.identifier(
+                            "named_query_builder",
+                            "toy_categories"
+                          ),
+                          sql.identifier(alias, "category_id"),
+                          sql.identifier(alias)
+                        );
                       innerInnerQueryBuilder.where(
                         sql.fragment`${innerInnerQueryBuilder.getTableAlias()}.toy_id = ${queryBuilder.getTableAlias()}.id`
                       );

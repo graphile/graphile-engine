@@ -21,16 +21,16 @@ export const constantCaseAll = (str: string): string =>
     .replace(/^[0-9]/, "_$&") // GraphQL enums must not start with a number
     .toUpperCase();
 
-export const formatInsideUnderscores = (fn: (input: string) => string) => (
-  str: string
-): string => {
-  const matches = str.match(/^(_*)([\s\S]*?)(_*)$/);
-  if (!matches) {
-    throw new Error("Impossible?"); // Satiate Flow
-  }
-  const [, start, middle, end] = matches;
-  return `${start}${fn(middle)}${end}`;
-};
+export const formatInsideUnderscores =
+  (fn: (input: string) => string) =>
+  (str: string): string => {
+    const matches = str.match(/^(_*)([\s\S]*?)(_*)$/);
+    if (!matches) {
+      throw new Error("Impossible?"); // Satiate Flow
+    }
+    const [, start, middle, end] = matches;
+    return `${start}${fn(middle)}${end}`;
+  };
 
 export const upperFirst = formatInsideUnderscores(upperFirstAll);
 export const camelCase = formatInsideUnderscores(camelCaseAll);

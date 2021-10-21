@@ -29,9 +29,7 @@ export {
 
 export function formatSQLForDebugging(sql: string): string;
 
-export function parseIdentifier(
-  typeIdentifier: string
-): {
+export function parseIdentifier(typeIdentifier: string): {
   namespaceName: string;
   entityName: string;
 };
@@ -108,9 +106,7 @@ export {
   CursorComparator,
 } from "./QueryBuilder";
 
-export function parseTags(
-  str: string
-): {
+export function parseTags(str: string): {
   tags: { [key: string]: string | string[] | boolean };
   text: string;
 };

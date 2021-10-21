@@ -124,9 +124,8 @@ export default (async function PgRowByUniqueConstraint(
                       const liveRecord =
                         resolveInfo.rootValue &&
                         resolveInfo.rootValue.liveRecord;
-                      const parsedResolveInfoFragment = parseResolveInfo(
-                        resolveInfo
-                      );
+                      const parsedResolveInfoFragment =
+                        parseResolveInfo(resolveInfo);
                       parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
                       const resolveData = getDataFromParsedResolveInfoFragment(
                         parsedResolveInfoFragment,

@@ -318,14 +318,8 @@ export function pgSmartTagRulesFromJSON(
 
     for (const identifier of Object.keys(specByIdentifier)) {
       const spec = specByIdentifier[identifier];
-      const {
-        tags,
-        description,
-        columns,
-        attribute,
-        constraint,
-        ...rest
-      } = spec;
+      const { tags, description, columns, attribute, constraint, ...rest } =
+        spec;
       if (Object.keys(rest).length > 0) {
         console.warn(
           `WARNING: makeJSONPgSmartTagsPlugin identifier spec only supports 'tags', 'description', 'attribute' and 'constraint' currently, you have also set '${Object.keys(
@@ -392,22 +386,23 @@ export function makeJSONPgSmartTagsPlugin(
   let rules = pgSmartTagRulesFromJSON(json);
 
   // Wrap listener callback with JSON conversion
-  const subscribeToUpdatesCallback: SubscribeToPgSmartTagUpdatesCallback | null = subscribeToJSONUpdatesCallback
-    ? cb => {
-        if (!cb) {
-          return subscribeToJSONUpdatesCallback(cb);
-        } else {
-          return subscribeToJSONUpdatesCallback(json => {
-            try {
-              rules = pgSmartTagRulesFromJSON(json);
-              return cb(rules);
-            } catch (e) {
-              console.error(e);
-            }
-          });
+  const subscribeToUpdatesCallback: SubscribeToPgSmartTagUpdatesCallback | null =
+    subscribeToJSONUpdatesCallback
+      ? cb => {
+          if (!cb) {
+            return subscribeToJSONUpdatesCallback(cb);
+          } else {
+            return subscribeToJSONUpdatesCallback(json => {
+              try {
+                rules = pgSmartTagRulesFromJSON(json);
+                return cb(rules);
+              } catch (e) {
+                console.error(e);
+              }
+            });
+          }
         }
-      }
-    : null;
+      : null;
 
   return makePgSmartTagsPlugin(rules, subscribeToUpdatesCallback);
 }

@@ -411,12 +411,10 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
             );
             const results = [];
             const StrippedType: GraphQLNamedType = getNamedType(ReturnType);
-            const fieldDataGeneratorsByFieldName = fieldDataGeneratorsByFieldNameByType.get(
-              StrippedType
-            );
-            const argDataGeneratorsForSelfByFieldName = fieldArgDataGeneratorsByFieldNameByType.get(
-              Self
-            );
+            const fieldDataGeneratorsByFieldName =
+              fieldDataGeneratorsByFieldNameByType.get(StrippedType);
+            const argDataGeneratorsForSelfByFieldName =
+              fieldArgDataGeneratorsByFieldNameByType.get(Self);
             if (argDataGeneratorsForSelfByFieldName) {
               const argDataGenerators =
                 argDataGeneratorsForSelfByFieldName[fieldName];
@@ -538,9 +536,8 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                 }
 
                 const argDataGenerators = [];
-                fieldArgDataGeneratorsByFieldName[
-                  fieldName
-                ] = argDataGenerators;
+                fieldArgDataGeneratorsByFieldName[fieldName] =
+                  argDataGenerators;
 
                 let newSpec = spec;
                 const context = {
@@ -560,13 +557,11 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                     const Type: GraphQLNamedType = getNamedType(ReturnType);
                     const data = {};
 
-                    const {
-                      fields,
-                      args,
-                    } = this.simplifyParsedResolveInfoFragmentWithType(
-                      parsedResolveInfoFragment,
-                      ReturnType
-                    );
+                    const { fields, args } =
+                      this.simplifyParsedResolveInfoFragmentWithType(
+                        parsedResolveInfoFragment,
+                        ReturnType
+                      );
 
                     // Args -> argDataGenerators
                     for (
@@ -594,9 +589,8 @@ export default function makeNewBuild(builder: SchemaBuilder): { ...Build } {
                         "It's too early to call this! Call from within resolve"
                       );
                     }
-                    const fieldDataGeneratorsByFieldName = fieldDataGeneratorsByFieldNameByType.get(
-                      Type
-                    );
+                    const fieldDataGeneratorsByFieldName =
+                      fieldDataGeneratorsByFieldNameByType.get(Type);
                     if (
                       fieldDataGeneratorsByFieldName &&
                       isCompositeType(Type) &&

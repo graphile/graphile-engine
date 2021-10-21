@@ -35,9 +35,7 @@ export type BuildExtensionNode = {|
     Type: GraphQLType,
     ...identifiers: Array<mixed>
   ): string,
-  getTypeAndIdentifiersFromNodeId(
-    nodeId: string
-  ): {
+  getTypeAndIdentifiersFromNodeId(nodeId: string): {
     Type: GraphQLType,
     identifiers: Array<mixed>,
   },

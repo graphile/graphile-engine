@@ -37,11 +37,10 @@ export function entityIsIdentifiedBy(
     const [parentName, expectedName] = parts;
     if (isAttribute(obj) || isConstraint(obj)) {
       // Parent is a table
-      const klass:
-        | PgClass
-        | undefined = build.pgIntrospectionResultsByKind.class.find(
-        (kls: PgClass) => kls.id === obj.classId
-      );
+      const klass: PgClass | undefined =
+        build.pgIntrospectionResultsByKind.class.find(
+          (kls: PgClass) => kls.id === obj.classId
+        );
       return obj.name === expectedName && !!klass && klass.name === parentName;
     } else if (isClass(obj) || isProcedure(obj)) {
       // Parent is a schema
@@ -55,11 +54,10 @@ export function entityIsIdentifiedBy(
     const [grandparentName, parentName, expectedName] = parts;
     if (isAttribute(obj) || isConstraint(obj)) {
       // Parent is a table, grandparent is a schema
-      const klass:
-        | PgClass
-        | undefined = build.pgIntrospectionResultsByKind.class.find(
-        (kls: PgClass) => kls.id === obj.classId
-      );
+      const klass: PgClass | undefined =
+        build.pgIntrospectionResultsByKind.class.find(
+          (kls: PgClass) => kls.id === obj.classId
+        );
       return (
         obj.name === expectedName &&
         !!klass &&

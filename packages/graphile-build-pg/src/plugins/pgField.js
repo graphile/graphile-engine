@@ -34,10 +34,8 @@ export default function pgField(
           "pgField call omits options.pgType for a leaf type; certain tweaks may not be applied!"
         );
       }
-      const {
-        getDataFromParsedResolveInfoFragment,
-        addDataGenerator,
-      } = fieldContext;
+      const { getDataFromParsedResolveInfoFragment, addDataGenerator } =
+        fieldContext;
       addDataGenerator(parsedResolveInfoFragment => {
         const safeAlias = getSafeAliasFromAlias(
           parsedResolveInfoFragment.alias

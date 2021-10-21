@@ -96,9 +96,8 @@ export default (function PgRecordFunctionConnectionPlugin(
                       NodeType
                     ),
                     resolve(data, _args, _context, resolveInfo) {
-                      const safeAlias = getSafeAliasFromResolveInfo(
-                        resolveInfo
-                      );
+                      const safeAlias =
+                        getSafeAliasFromResolveInfo(resolveInfo);
                       return data[safeAlias];
                     },
                   },
@@ -162,9 +161,8 @@ export default (function PgRecordFunctionConnectionPlugin(
                       new GraphQLList(new GraphQLNonNull(EdgeType))
                     ),
                     resolve(data, _args, _context, resolveInfo) {
-                      const safeAlias = getSafeAliasFromResolveInfo(
-                        resolveInfo
-                      );
+                      const safeAlias =
+                        getSafeAliasFromResolveInfo(resolveInfo);
                       return data.data.map(entry => ({
                         __cursor: entry.__cursor,
                         ...entry[safeAlias],

@@ -749,9 +749,8 @@ export default (function PgTypesPlugin(
         if (!gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey]) {
           const gqlInputType = oidInputLookup[type.id];
           if (gqlInputType) {
-            gqlInputTypeByTypeIdAndModifier[type.id][
-              typeModifierKey
-            ] = gqlInputType;
+            gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] =
+              gqlInputType;
           }
         }
         // Enums
@@ -939,15 +938,13 @@ export default (function PgTypesPlugin(
             RangeInput = getTypeByName(inflection.inputType(Range.name));
           }
           gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = Range;
-          gqlInputTypeByTypeIdAndModifier[type.id][
-            typeModifierKey
-          ] = RangeInput;
+          gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] =
+            RangeInput;
           if (pgTweaksByTypeIdAndModifer[type.id] === undefined) {
             pgTweaksByTypeIdAndModifer[type.id] = {};
           }
-          pgTweaksByTypeIdAndModifer[type.id][
-            typeModifierKey
-          ] = fragment => sql.fragment`\
+          pgTweaksByTypeIdAndModifer[type.id][typeModifierKey] =
+            fragment => sql.fragment`\
 case
 when (${fragment}) is null then null
 else json_build_object(
@@ -1014,14 +1011,13 @@ end`;
             }
           );
           if (baseInputType && baseInputType !== baseType) {
-            gqlInputTypeByTypeIdAndModifier[type.id][
-              typeModifierKey
-            ] = Object.assign(Object.create(baseInputType), {
-              name: inflection.inputType(
-                gqlTypeByTypeIdAndModifier[type.id][typeModifierKey]
-              ),
-              description: type.description,
-            });
+            gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] =
+              Object.assign(Object.create(baseInputType), {
+                name: inflection.inputType(
+                  gqlTypeByTypeIdAndModifier[type.id][typeModifierKey]
+                ),
+                description: type.description,
+              });
           }
         }
 
@@ -1034,18 +1030,16 @@ end`;
             type.arrayItemTypeId,
             typeModifier
           );
-          gqlTypeByTypeIdAndModifier[type.id][
-            typeModifierKey
-          ] = new GraphQLList(arrayEntryOutputType);
+          gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] =
+            new GraphQLList(arrayEntryOutputType);
           if (!disableIssue390Fix) {
             const arrayEntryInputType = getGqlInputTypeByTypeIdAndModifier(
               type.arrayItemTypeId,
               typeModifier
             );
             if (arrayEntryInputType) {
-              gqlInputTypeByTypeIdAndModifier[type.id][
-                typeModifierKey
-              ] = new GraphQLList(arrayEntryInputType);
+              gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] =
+                new GraphQLList(arrayEntryInputType);
             }
           }
         }
@@ -1180,9 +1174,8 @@ end`;
                   `Callback and return types differ when defining type for '${type.id}'`
                 );
               }
-              gqlInputTypeByTypeIdAndModifier[type.id][
-                typeModifierKey
-              ] = result;
+              gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] =
+                result;
             }
           }
         }
@@ -1276,7 +1269,8 @@ end`;
         pgRegisterGqlTypeByTypeId: registerGqlTypeByTypeId,
         pgRegisterGqlInputTypeByTypeId: registerGqlInputTypeByTypeId,
         pgGetGqlTypeByTypeIdAndModifier: getGqlTypeByTypeIdAndModifier,
-        pgGetGqlInputTypeByTypeIdAndModifier: getGqlInputTypeByTypeIdAndModifier,
+        pgGetGqlInputTypeByTypeIdAndModifier:
+          getGqlInputTypeByTypeIdAndModifier,
         pg2GqlMapper,
         pg2gql,
         pg2gqlForType,
