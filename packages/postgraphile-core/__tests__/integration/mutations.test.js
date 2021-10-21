@@ -14,7 +14,7 @@ function readFile(filename, encoding) {
 }
 
 // This test suite can be flaky. Increase it’s timeout.
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 20;
+jest.setTimeout(1000 * 20);
 
 const kitchenSinkData = () =>
   readFile(`${__dirname}/../kitchen-sink-data.sql`, "utf8");

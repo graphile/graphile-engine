@@ -6,7 +6,7 @@ const pgConnectionString = require("pg-connection-string");
 process.env.LIVE_THROTTLE = "100";
 
 // This test suite can be flaky. Increase it’s timeout.
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 60;
+jest.setTimeout(1000 * 60);
 
 function readFilePromise(filename, encoding) {
   return new Promise((resolve, reject) => {

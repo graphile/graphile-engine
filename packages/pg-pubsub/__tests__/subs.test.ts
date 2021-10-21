@@ -42,6 +42,7 @@ const init = async (options: PostGraphileOptions = {}) => {
   const middleware = postgraphile(pgPool, ["pubsub_test"], {
     pluginHook,
     ignoreRBAC: false,
+    disableQueryLog: true,
     ...options,
   });
   ctx = {
