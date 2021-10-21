@@ -7,9 +7,9 @@ module.exports = {
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended",
-    "prettier",
+    "prettier/@typescript-eslint",
   ],
-  plugins: ["jest", "graphql", "tsdoc"],
+  plugins: ["jest", "flowtype", "graphql", "tsdoc"],
   env: {
     jest: true,
     node: true,
@@ -54,13 +54,27 @@ module.exports = {
     "@typescript-eslint/no-inferrable-types": "warn",
     "no-inner-declarations": "warn",
   },
-  settings: {},
+  settings: {
+    flowtype: {
+      onlyFilesWithFlowAnnotation: false,
+    },
+  },
   overrides: [
     // Rules for Flow only
     {
       files: ["*.js", "*.jsx"],
       rules: {
         "@typescript-eslint/explicit-function-return-type": "off",
+        "flowtype/boolean-style": [2, "boolean"],
+        "flowtype/delimiter-dangle": [2, "always-multiline"],
+        "flowtype/no-primitive-constructor-types": 2,
+        "flowtype/no-types-missing-file-annotation": 2,
+        "flowtype/no-weak-types": 2,
+        "flowtype/object-type-delimiter": [2, "comma"],
+        "flowtype/require-valid-file-annotation": 2,
+        "flowtype/semi": [2, "always"],
+        "flowtype/define-flow-type": 1,
+        "flowtype/use-flow-type": 1,
       },
     },
 
