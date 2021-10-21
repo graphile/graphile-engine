@@ -80,20 +80,13 @@ export default function makeChangeNullabilityPlugin(
       if (shouldBeNullable == null) {
         return field;
       }
-      const shouldApplyNullabilities: NullabilityOpts = {};
-      if (
-        typeof shouldBeNullable === "object" &&
-        !Array.isArray(shouldBeNullable)
-      ) {
-        shouldApplyNullabilities.type = shouldBeNullable.type;
-        shouldApplyNullabilities.args = shouldBeNullable.args;
-      } else {
-        shouldApplyNullabilities.type = shouldBeNullable;
-      }
-      const updatedField = field;
+      const shouldApplyNullabilities: NullabilityOpts =
+        typeof shouldBeNullable === "boolean" || Array.isArray(shouldBeNullable)
+          ? { type: shouldBeNullable }
+          : shouldBeNullable;
       try {
         if (shouldApplyNullabilities.type) {
-          updatedField.type = applyTypeNullability(
+          field.type = applyTypeNullability(
             build,
             field.type,
             shouldApplyNullabilities.type
@@ -102,16 +95,16 @@ export default function makeChangeNullabilityPlugin(
         if (shouldApplyNullabilities.args) {
           Object.entries(shouldApplyNullabilities.args).forEach(
             ([argName, argShouldBeNullable]) => {
-              if (!("args" in field) || !field["args"]?.[argName]) {
+              if (!field.args || !field.args[argName]) {
                 console.warn(
                   `warning: makeChangeNullabilityPlugin. For ${typeName} > ${fieldName}: can't apply nullability rule for non-existing arg ${argName}`
                 );
                 return;
               }
-              const argType = field["args"][argName].type;
-              field["args"][argName].type = applyTypeNullability(
+              const arg = field.args[argName];
+              arg.type = applyTypeNullability(
                 build,
-                argType,
+                arg.type,
                 argShouldBeNullable
               );
             }
@@ -122,7 +115,7 @@ export default function makeChangeNullabilityPlugin(
           `makeChangeNullabilityPlugin. For ${typeName} > ${fieldName}: ${err.message}`
         );
       }
-      return updatedField;
+      return field;
     }
     builder.hook("GraphQLInputObjectType:fields:field", changeNullability);
     builder.hook("GraphQLObjectType:fields:field", changeNullability);
