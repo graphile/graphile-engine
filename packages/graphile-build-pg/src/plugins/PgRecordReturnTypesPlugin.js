@@ -15,7 +15,8 @@ export default (function PgRecordReturnTypesPlugin(builder) {
         describePgEntity,
         sqlCommentByAddingTags,
         pgSql: sql,
-        pgGetSelectValueForFieldAndTypeAndModifier: getSelectValueForFieldAndTypeAndModifier,
+        pgGetSelectValueForFieldAndTypeAndModifier:
+          getSelectValueForFieldAndTypeAndModifier,
         getSafeAliasFromResolveInfo,
         getSafeAliasFromAlias,
         pg2gqlForType,
@@ -137,9 +138,8 @@ export default (function PgRecordReturnTypesPlugin(builder) {
                     return {
                       type: fieldType,
                       resolve(data, _args, _context, resolveInfo) {
-                        const safeAlias = getSafeAliasFromResolveInfo(
-                          resolveInfo
-                        );
+                        const safeAlias =
+                          getSafeAliasFromResolveInfo(resolveInfo);
                         return convertFromPg(data[safeAlias]);
                       },
                     };

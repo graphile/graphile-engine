@@ -823,7 +823,8 @@ export default function makeExtendSchemaPlugin(
           },
           graphileHelpers
         );
-        const recurseDataGeneratorsWorkaroundField = getRecurseDataGeneratorsWorkaroundField();
+        const recurseDataGeneratorsWorkaroundField =
+          getRecurseDataGeneratorsWorkaroundField();
         if (
           result != null &&
           !result.data &&
@@ -898,9 +899,8 @@ export default function makeExtendSchemaPlugin(
                 _resolveContext: any,
                 resolveInfo: any
               ) => {
-                const safeAlias = build.getSafeAliasFromResolveInfo(
-                  resolveInfo
-                );
+                const safeAlias =
+                  build.getSafeAliasFromResolveInfo(resolveInfo);
                 const liveRecord =
                   resolveInfo.rootValue && resolveInfo.rootValue.liveRecord;
                 if (isConnection) {
@@ -1017,10 +1017,11 @@ export default function makeExtendSchemaPlugin(
                               )
                             : directives.pgQuery.source;
                         queryBuilder.select(() => {
-                          const resolveData = fieldContext.getDataFromParsedResolveInfoFragment(
-                            parsedResolveInfoFragment,
-                            namedType
-                          );
+                          const resolveData =
+                            fieldContext.getDataFromParsedResolveInfoFragment(
+                              parsedResolveInfoFragment,
+                              namedType
+                            );
                           const tableAlias = sql.identifier(Symbol());
                           const query = build.pgQueryFromResolveData(
                             source,
@@ -1034,7 +1035,8 @@ export default function makeExtendSchemaPlugin(
                               addNullCase: !isConnection,
                             },
                             (innerQueryBuilder: QueryBuilder) => {
-                              innerQueryBuilder.parentQueryBuilder = queryBuilder;
+                              innerQueryBuilder.parentQueryBuilder =
+                                queryBuilder;
                               if (
                                 build.options.subscriptions &&
                                 table.primaryKeyConstraint

@@ -70,7 +70,8 @@ end
         }
       };
       return build.extend(build, {
-        pgGetSelectValueForFieldAndTypeAndModifier: getSelectValueForFieldAndTypeAndModifier,
+        pgGetSelectValueForFieldAndTypeAndModifier:
+          getSelectValueForFieldAndTypeAndModifier,
       });
     },
     ["PgColumns"],
@@ -90,7 +91,8 @@ end
         pgColumnFilter,
         inflection,
         pgOmit: omit,
-        pgGetSelectValueForFieldAndTypeAndModifier: getSelectValueForFieldAndTypeAndModifier,
+        pgGetSelectValueForFieldAndTypeAndModifier:
+          getSelectValueForFieldAndTypeAndModifier,
         describePgEntity,
         sqlCommentByAddingTags,
       } = build;

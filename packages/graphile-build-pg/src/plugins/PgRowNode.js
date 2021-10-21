@@ -174,10 +174,8 @@ export default (async function PgRowNode(builder, { subscriptions }) {
                           resolveInfo.rootValue.liveRecord;
                         const nodeId = args[nodeIdFieldName];
                         try {
-                          const {
-                            Type,
-                            identifiers,
-                          } = getTypeAndIdentifiersFromNodeId(nodeId);
+                          const { Type, identifiers } =
+                            getTypeAndIdentifiersFromNodeId(nodeId);
                           if (Type !== TableType) {
                             throw new Error("Mismatched type");
                           }
@@ -185,14 +183,14 @@ export default (async function PgRowNode(builder, { subscriptions }) {
                             throw new Error("Invalid ID");
                           }
 
-                          const parsedResolveInfoFragment = parseResolveInfo(
-                            resolveInfo
-                          );
+                          const parsedResolveInfoFragment =
+                            parseResolveInfo(resolveInfo);
                           parsedResolveInfoFragment.args = args; // Allow overriding via makeWrapResolversPlugin
-                          const resolveData = getDataFromParsedResolveInfoFragment(
-                            parsedResolveInfoFragment,
-                            TableType
-                          );
+                          const resolveData =
+                            getDataFromParsedResolveInfoFragment(
+                              parsedResolveInfoFragment,
+                              TableType
+                            );
                           const query = queryFromResolveData(
                             sqlFullTableName,
                             undefined,

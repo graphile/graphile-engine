@@ -411,9 +411,8 @@ export default (function PgTablesPlugin(
                           TableType
                         ),
                         resolve(data, _args, resolveContext, resolveInfo) {
-                          const safeAlias = getSafeAliasFromResolveInfo(
-                            resolveInfo
-                          );
+                          const safeAlias =
+                            getSafeAliasFromResolveInfo(resolveInfo);
                           const record = handleNullRow(
                             data[safeAlias],
                             data.__identifiers
@@ -492,9 +491,8 @@ export default (function PgTablesPlugin(
                           )
                         ),
                         resolve(data, _args, resolveContext, resolveInfo) {
-                          const safeAlias = getSafeAliasFromResolveInfo(
-                            resolveInfo
-                          );
+                          const safeAlias =
+                            getSafeAliasFromResolveInfo(resolveInfo);
                           const liveRecord =
                             resolveInfo.rootValue &&
                             resolveInfo.rootValue.liveRecord;
@@ -543,9 +541,8 @@ export default (function PgTablesPlugin(
                           new GraphQLList(new GraphQLNonNull(EdgeType))
                         ),
                         resolve(data, _args, _context, resolveInfo) {
-                          const safeAlias = getSafeAliasFromResolveInfo(
-                            resolveInfo
-                          );
+                          const safeAlias =
+                            getSafeAliasFromResolveInfo(resolveInfo);
                           return data.data.map(entry => ({
                             ...entry,
                             ...entry[safeAlias],
@@ -637,10 +634,8 @@ export default (function PgTablesPlugin(
           pgRegisterGqlInputTypeByTypeId(
             arrayTablePgType.id,
             (_set, modifier) => {
-              const RelevantTableInputType = pgGetGqlInputTypeByTypeIdAndModifier(
-                tablePgType.id,
-                modifier
-              );
+              const RelevantTableInputType =
+                pgGetGqlInputTypeByTypeIdAndModifier(tablePgType.id, modifier);
               if (RelevantTableInputType) {
                 return new GraphQLList(RelevantTableInputType);
               }

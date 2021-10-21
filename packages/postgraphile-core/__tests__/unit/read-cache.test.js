@@ -39,9 +39,8 @@ test("when no readCache flag, persistentMemoizeWithKey should be undefined", asy
   expect(output).toBe(expectedOutput);
   expect(graphileBuild.getBuilder).toHaveBeenCalledTimes(1);
   // check persistentMemoizeWithKey, the actual "result" of readCache flag
-  const {
-    persistentMemoizeWithKey,
-  } = graphileBuild.getBuilder.mock.calls[0][1];
+  const { persistentMemoizeWithKey } =
+    graphileBuild.getBuilder.mock.calls[0][1];
   expect(persistentMemoizeWithKey).toBeUndefined();
 });
 
@@ -63,9 +62,8 @@ describe("When readCache is String", () => {
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(graphileBuild.getBuilder).toHaveBeenCalledTimes(1);
     // check persistentMemoizeWithKey, the actual "result" of readCache flag
-    const {
-      persistentMemoizeWithKey,
-    } = graphileBuild.getBuilder.mock.calls[0][1];
+    const { persistentMemoizeWithKey } =
+      graphileBuild.getBuilder.mock.calls[0][1];
     expect(typeof persistentMemoizeWithKey).toBe("function");
     expect(persistentMemoizeWithKey("__test")).toEqual(true);
     expect(() => persistentMemoizeWithKey("unknown_key")).toThrow();
@@ -105,9 +103,8 @@ describe("When readCache is Object", () => {
     expect(output).toBe(expectedOutput);
     expect(graphileBuild.getBuilder).toHaveBeenCalledTimes(1);
     // check persistentMemoizeWithKey, the actual "result" of readCache flag
-    const {
-      persistentMemoizeWithKey,
-    } = graphileBuild.getBuilder.mock.calls[0][1];
+    const { persistentMemoizeWithKey } =
+      graphileBuild.getBuilder.mock.calls[0][1];
     expect(typeof persistentMemoizeWithKey).toBe("function");
     expect(persistentMemoizeWithKey("__test")).toEqual(true);
     expect(() => persistentMemoizeWithKey("unknown_key")).toThrow();

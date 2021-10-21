@@ -301,9 +301,7 @@ export const newInflector = (
         _foreignSchema: ?string
       ) {
         return camelCase(
-          `${this.pluralize(
-            this.tableName(table, schema)
-          )}-by-${detailedKeys
+          `${this.pluralize(this.tableName(table, schema))}-by-${detailedKeys
             .map(key => this.column(key.column, key.table, key.schema))
             .join("-and-")}`
         );

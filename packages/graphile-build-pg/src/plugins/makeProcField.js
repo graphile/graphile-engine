@@ -252,12 +252,8 @@ export default function makeProcField(
     pgPrepareAndRun,
   } = build;
 
-  const {
-    inputs,
-    makeSqlFunctionCall,
-    outputArgNames,
-    outputArgTypes,
-  } = procFieldDetails(proc, build, options);
+  const { inputs, makeSqlFunctionCall, outputArgNames, outputArgTypes } =
+    procFieldDetails(proc, build, options);
   let args = inputs;
 
   /**

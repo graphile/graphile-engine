@@ -62,10 +62,8 @@ const plugin: PostGraphilePlugin = {
         incomingOptions.subscriptionEventEmitterMaxListeners
       );
     }
-    const {
-      simpleSubscriptions,
-      subscriptionAuthorizationFunction,
-    } = incomingOptions;
+    const { simpleSubscriptions, subscriptionAuthorizationFunction } =
+      incomingOptions;
     const pubsub = new PubSub({
       eventEmitter,
     });
