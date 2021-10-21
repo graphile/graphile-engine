@@ -2,7 +2,7 @@
 import * as MockReq from "mock-req";
 // @ts-ignore We don't have types for this, but we don't care
 import * as MockRes from "mock-res";
-import { HttpRequestHandler } from "postgraphile";
+import type { HttpRequestHandler } from "postgraphile";
 import * as pg from "pg";
 import { ServerResponse, ClientRequest } from "http";
 
