@@ -71,16 +71,16 @@ export const runQuery = function runGraphQLQuery(
       _body: body,
       body,
       ...reqOptions,
-    });
+    }) as any;
     req.end();
-    const res = new MockRes();
+    const res = new MockRes() as any;
     res.setHeader = () => {};
     res.on("error", (e: Error) => {
       reject(e);
     });
     res.on("finish", () => {
       resolve(
-        new Promise((innerResolve, innerReject) => {
+        new Promise<void>((innerResolve, innerReject) => {
           try {
             const json = res._getJSON();
             const checkResult = Promise.resolve().then(() =>
