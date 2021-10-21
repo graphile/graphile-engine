@@ -75,6 +75,7 @@ export const runQuery = function runGraphQLQuery(
     req.end();
     const res = new MockRes() as any;
     res.setHeader = () => {};
+    res.on("data", () => {});
     res.on("error", (e: Error) => {
       reject(e);
     });
