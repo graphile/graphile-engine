@@ -5,7 +5,7 @@ import type {
   Plugin,
   SchemaBuilder,
 } from "graphile-build";
-import type { GraphQLFieldConfig, GraphQLInputFieldConfig } from "graphql";
+import type { GraphQLFieldConfig, GraphQLInputFieldConfig, GraphQLType } from "graphql";
 
 export interface NullabilityOpts {
   /**
@@ -32,30 +32,25 @@ export default function makeChangeNullabilityPlugin(
   return (builder: SchemaBuilder, _options: Options) => {
     function applyNullability(
       build: Build,
-      type: any,
+      type: GraphQLType,
       allNullabilities: boolean[]
-    ): any {
+    ): GraphQLType {
       const { GraphQLNonNull, GraphQLList } = build.graphql;
       const [nullability, ...rest] = allNullabilities;
       const nullableType = type instanceof GraphQLNonNull ? type.ofType : type;
-      let inner = null;
-      if (nullableType instanceof GraphQLList) {
-        inner = new GraphQLList(
-          applyNullability(build, nullableType.ofType, rest)
-        );
-      } else {
-        if (rest.length > 0) {
-          throw new Error(`Too many booleans passed`);
-        }
-        inner = nullableType;
+      if (rest.length > 0 && !(nullableType instanceof GraphQLList)) {
+        throw new Error(`There were too many booleans for the number of lists in the type`);
       }
+      const inner = nullableType instanceof GraphQLList
+        ? new GraphQLList(applyNullability(build, nullableType.ofType, rest))
+        : nullableType;
       return nullability ? inner : new GraphQLNonNull(inner);
     }
     function applyTypeNullability(
       build: Build,
-      type: any,
+      type: GraphQLType,
       shouldBeNullable: boolean | boolean[]
-    ): any {
+    ): GraphQLType {
       const allNullabilities: boolean[] =
         Array.isArray(shouldBeNullable)
           ? shouldBeNullable
@@ -95,13 +90,13 @@ export default function makeChangeNullabilityPlugin(
         if (shouldApplyNullabilities.args) {
           Object.entries(shouldApplyNullabilities.args).forEach(
             ([argName, argShouldBeNullable]) => {
-              if (!field.args || !field.args[argName]) {
+              const arg = field.args ? field.args[argName] : null;
+              if (!arg) {
                 console.warn(
-                  `warning: makeChangeNullabilityPlugin. For ${typeName} > ${fieldName}: can't apply nullability rule for non-existing arg ${argName}`
+                  `Warning: makeChangeNullabilityPlugin cannot apply rule - field ${typeName}.${fieldName} has no argument '${argName}'`
                 );
                 return;
               }
-              const arg = field.args[argName];
               arg.type = applyTypeNullability(
                 build,
                 arg.type,
@@ -112,7 +107,7 @@ export default function makeChangeNullabilityPlugin(
         }
       } catch (err) {
         throw new Error(
-          `makeChangeNullabilityPlugin. For ${typeName} > ${fieldName}: ${err.message}`
+          `Error occurred whilst processing makeChangeNullabilityPlugin rule for ${typeName}.${fieldName}: ${err.message}`
         );
       }
       return field;
