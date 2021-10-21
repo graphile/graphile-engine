@@ -255,6 +255,7 @@ end
                             attr.type.domainHasDefault) &&
                           !attr.tags.notNull) ||
                         attr.hasDefault ||
+                        attr.tags.hasDefault ||
                         attr.identity === "d",
                       pgGetGqlInputTypeByTypeIdAndModifier(
                         attr.typeId,
