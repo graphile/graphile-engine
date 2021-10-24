@@ -51,7 +51,7 @@
     "jest-serializer-graphql-schema": "4.10.0"
   },
   "peerDependencies": {
-    "graphql": ">=0.9 <0.14 || ^14.0.2 || ^15.4.0"
+    "graphql": ">=0.9 <0.14 || ^14.0.2 || ^15.4.0 || ^16.0.0-rc.6"
   },
   "files": [
     "node8plus",
