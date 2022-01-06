@@ -546,7 +546,7 @@ function enumTables(introspectionResults) {
       const data = allData.filter(row => row[col.name] != null);
       if (data.length < 1) {
         throw new Error(
-          `Enum table "${klass.namespaceName}"."${klass.name}" contains no entries for enum constraint '${constraint.name}'.`
+          `Enum table "${klass.namespaceName}"."${klass.name}" contains no visible entries for enum constraint '${constraint.name}'. Check that the table contains at least one row and that the rows are not hidden by row-level security policies.`
         );
       }
 
