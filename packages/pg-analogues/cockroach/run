@@ -22,6 +22,13 @@ sleep 2
 ./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING sql.defaults.default_int_size = 4;"
 ./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING sql.defaults.serial_normalization = sql_sequence_cached;"
 ./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING sql.defaults.propagate_input_ordering.enabled = true;"
+./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING kv.range_merge.queue_interval = '50ms';"
+./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING kv.raft_log.disable_synchronization_unsafe = true;"
+./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING jobs.retention_time = '15s';"
+./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING jobs.registry.interval.cancel = '180s';"
+./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING jobs.registry.interval.gc = '30s';"
+./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING sql.stats.automatic_collection.enabled = false;"
+./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "SET CLUSTER SETTING kv.range_split.by_load_merge_delay = '5s';"
 ./cockroach.LATEST sql --certs-dir=certs --host=localhost -e "create database pggql_test;"
 
 # Continue running
