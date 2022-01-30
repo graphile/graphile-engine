@@ -629,6 +629,7 @@ export default function makeProcField(
               }
             )}`,
             isMutationInput: true,
+            ...payloadTypeScope,
           }
         );
         args = {
