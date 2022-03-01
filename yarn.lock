@@ -5339,9 +5339,9 @@ graphql-ws@^5.1.2:
   integrity sha512-Okp3gE3vq9OoeqsYVbmzKvPcvlinKNXrfVajH7D3ul1UdCg2+K2zVYbWKmqxehkAZ+GKVfngK5fzyXSsfpe+pA==
 
 "graphql@>=0.6 <17", "graphql@>=0.9 <0.14 || ^14.0.2 || ^15.4.0 || ^16.0.0-rc.6", "graphql@^0.6.0 || ^0.7.0 || ^0.8.0-b || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.2 || ^15.0.0", graphql@^16.0.0-rc.6:
-  version "16.0.0-rc.6"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.0.0-rc.6.tgz#5de863dfef5c38e2b72e4da7d669adecdea992d1"
-  integrity sha512-DNmMCH2V6DM4QXnOsIjLH5mj8+pdwXQ+SpuQTo4LeSJTKOXX+kuajyE7f5kREdtNEUzklt4SvMh18asLvyEH5w==
+  version "16.3.0"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.3.0.tgz#a91e24d10babf9e60c706919bb182b53ccdffc05"
+  integrity sha512-xm+ANmA16BzCT5pLjuXySbQVFwH3oJctUVdy81w1sV0vBU0KgDdBGtxQOUd5zqOBk/JayAFeG8Dlmeq74rjm/A==
 
 growly@^1.3.0:
   version "1.3.0"
