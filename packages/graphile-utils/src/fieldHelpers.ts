@@ -88,7 +88,7 @@ export function makeFieldHelpers<TSource>(
       return build.pgAddStartEndCursor(rows[0]);
     } else {
       const liveRecord =
-        resolveInfo.rootValue && resolveInfo.rootValue.liveRecord;
+        resolveInfo.rootValue && (resolveInfo.rootValue as any).liveRecord;
       if (
         build.options.subscriptions &&
         !isConnection &&

@@ -232,7 +232,7 @@ function fieldTreeFromAST<T extends SelectionNode>(
           const newTreeRoot: ResolveTree = {
             name,
             alias,
-            args,
+            args: args as any, // GraphQL v16 compat
             fieldsByTypeName: isCompositeType(fieldGqlType)
               ? {
                   [fieldGqlType.name]: {},

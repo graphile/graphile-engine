@@ -39,7 +39,6 @@ import type {
   StringValueNode,
   TypeNode,
   ValueNode,
-  GraphQLList,
   GraphQLEnumType,
   GraphQLDirective,
   InputObjectTypeExtensionNode,
@@ -676,7 +675,7 @@ export default function makeExtendSchemaPlugin(
       return null;
     } else if (value.kind === "ListValue") {
       // This is used in directives, so we cannot assume the type is known.
-      const childType: GraphQLList<GraphQLType> | null =
+      const childType: GraphQLType | null =
         type && graphql.isListType(type) ? type.ofType : null;
       return value.values.map(value => getValue(value, childType));
     } else if (value.kind === "GraphileEmbed") {
