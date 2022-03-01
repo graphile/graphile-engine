@@ -28,5 +28,4 @@ interface Node {
   """
   id: ID!
 }
-
 `;

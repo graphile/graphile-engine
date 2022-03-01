@@ -33,7 +33,6 @@ interface Node {
 type Dummy0 {
   n: Int!
 }
-
 `;
 
 exports[`generated schema n = 0, n = 3 2`] = `
@@ -69,5 +68,4 @@ interface Node {
 type Dummy3 {
   n: Int!
 }
-
 `;

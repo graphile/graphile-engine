@@ -90,7 +90,6 @@ enum DummyConnectionSortBy {
   CAPS_ASC
   CAPS_DESC
 }
-
 `;
 
 exports[`no arguments 1`] = `

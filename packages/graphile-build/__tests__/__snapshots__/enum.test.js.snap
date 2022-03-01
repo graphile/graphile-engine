@@ -36,5 +36,4 @@ enum MyEnum {
   THREE @deprecated(reason: "We no longer support numbers smaller than PI")
   FOUR
 }
-
 `;
