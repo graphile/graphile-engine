@@ -104,7 +104,7 @@ export default function makeExtendSchemaPlugin(
   generator:
     | ExtensionDefinition
     | ((build: Build, schemaOptions: Options) => ExtensionDefinition),
-  uniqueId = String(Math.random()).substr(2)
+  uniqueId = String(Math.random()).slice(2)
 ): Plugin {
   let graphql: Build["graphql"];
   return (builder: SchemaBuilder, schemaOptions: Options): void => {

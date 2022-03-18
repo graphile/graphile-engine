@@ -687,7 +687,7 @@ export default (function PgTypesPlugin(
         map: f => {
           if (f[0] === "(" && f[f.length - 1] === ")") {
             const [x, y] = f
-              .substr(1, f.length - 2)
+              .slice(1, -1)
               .split(",")
               .map(f => parseFloat(f));
             return { x, y };
@@ -1434,7 +1434,7 @@ end`;
         map: f => {
           if (f[0] === "{" && f[f.length - 1] === "}") {
             const [A, B, C] = f
-              .substr(1, f.length - 2)
+              .slice(1, -1)
               .split(",")
               .map(f => parseFloat(f));
             // Lines have the form Ax + By + C = 0.
@@ -1484,7 +1484,7 @@ end`;
         map: f => {
           if (f[0] === "[" && f[f.length - 1] === "]") {
             const [x1, y1, x2, y2] = f
-              .substr(1, f.length - 2)
+              .slice(1, -1)
               .replace(/[()]/g, "")
               .split(",")
               .map(f => parseFloat(f));
@@ -1532,7 +1532,7 @@ end`;
         map: f => {
           if (f[0] === "(" && f[f.length - 1] === ")") {
             const [x1, y1, x2, y2] = f
-              .substr(1, f.length - 2)
+              .slice(1, -1)
               .replace(/[()]/g, "")
               .split(",")
               .map(f => parseFloat(f));
@@ -1602,7 +1602,7 @@ end`;
           }
           if (isOpen !== null) {
             const xsAndYs = f
-              .substr(1, f.length - 2)
+              .slice(1, -1)
               .replace(/[()]/g, "")
               .split(",")
               .map(f => parseFloat(f));
@@ -1655,7 +1655,7 @@ end`;
         map: f => {
           if (f[0] === "(" && f[f.length - 1] === ")") {
             const xsAndYs = f
-              .substr(1, f.length - 2)
+              .slice(1, -1)
               .replace(/[()]/g, "")
               .split(",")
               .map(f => parseFloat(f));
@@ -1701,7 +1701,7 @@ end`;
         map: f => {
           if (f[0] === "<" && f[f.length - 1] === ">") {
             const [x, y, r] = f
-              .substr(1, f.length - 2)
+              .slice(1, -1)
               .replace(/[()]/g, "")
               .split(",")
               .map(f => parseFloat(f));
