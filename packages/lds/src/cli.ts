@@ -74,10 +74,10 @@ async function main() {
       let topicJSON: string;
       let sub: boolean;
       if (message.startsWith("SUB ")) {
-        topicJSON = message.substr(4);
+        topicJSON = message.slice(4);
         sub = true;
       } else if (message.startsWith("UNSUB ")) {
-        topicJSON = message.substr(6);
+        topicJSON = message.slice(6);
         sub = false;
       } else {
         console.error("Unknown command", message);

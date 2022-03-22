@@ -9,7 +9,7 @@ export const parseTags = (str: string) => {
       if (!match) {
         return { ...prev, text: curr };
       }
-      const key = match[0].substr(1).trim();
+      const key = match[0].slice(1).trim();
       const value = match[0] === curr ? true : curr.replace(match[0], "");
       return {
         ...prev,

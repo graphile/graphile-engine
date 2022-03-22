@@ -50,7 +50,7 @@ function parse(arrOrNot, errorPrefix = "Error") {
       }
       if (str[0] === ":") {
         const perms = str
-          .substr(1)
+          .slice(1)
           .split("")
           .map(p => aliases[p]);
         const bad = perms.find(p => !p);

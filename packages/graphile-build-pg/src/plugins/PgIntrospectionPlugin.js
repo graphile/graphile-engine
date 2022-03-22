@@ -245,7 +245,7 @@ const removeQuotes = str => {
         `We failed to parse a quoted identifier '${str}'. Please avoid putting quotes or commas in smart comment identifiers (or file a PR to fix the parser).`
       );
     }
-    return trimmed.substr(1, trimmed.length - 2);
+    return trimmed.slice(1, -1);
   } else {
     // PostgreSQL lower-cases unquoted columns, so we should too.
     return trimmed.toLowerCase();

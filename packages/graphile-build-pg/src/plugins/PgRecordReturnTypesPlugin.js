@@ -71,7 +71,7 @@ export default (function PgRecordReturnTypesPlugin(builder) {
           ? inflection.functionMutationName(proc)
           : computed
           ? inflection.computedColumn(
-              proc.name.substr(firstArgType.name.length + 1),
+              proc.name.slice(firstArgType.name.length + 1),
               proc
             )
           : inflection.functionQueryName(proc);
