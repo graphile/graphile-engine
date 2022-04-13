@@ -11,6 +11,7 @@ sponsor](https://graphile.org/sponsor/).
 - Chad Furman
 - The Guild
 - Fanatics
+- Dovetail
 - Enzuzo
 
 ## Leaders
@@ -20,13 +21,12 @@ sponsor](https://graphile.org/sponsor/).
 - Qwick
 - domonda
 - Jack Dinker
+- Politics Rewired
 - DocIQ
 - nigelrmtaylor
-- Politics Rewired
 - Principia Mentis
 - HR-ON
 - Luxor Labs
-- Dovetail
 - PostHog
 - Taiste
 - Axinom
@@ -34,6 +34,7 @@ sponsor](https://graphile.org/sponsor/).
 - Nathanael Beisiegel
 - William Baxter
 - SuperRare Labs
+- IaSQL
 - latch.bio
 
 ## Supporters
