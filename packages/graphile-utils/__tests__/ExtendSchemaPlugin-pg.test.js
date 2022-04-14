@@ -836,3 +836,49 @@ it("allows to retrieve array scalar values", async () => {
     pgClient.release();
   }
 });
+
+it("allows to retrieve enum values", async () => {
+  const schema = await createPostGraphileSchema(pgPool, ["graphile_utils"], {
+    disableDefaultMutations: true,
+    appendPlugins: [
+      makeExtendSchemaPlugin(build => {
+        const { pgSql: sql } = build;
+        return {
+          typeDefs: gql`
+            enum Enum {
+              ENUM
+            }
+            extend type User {
+              myCustomEnum: Enum! @pgQuery(
+                fragment: ${embed(sql.fragment`'ENUM'::text`)}
+              )
+            }
+          `,
+        };
+      }),
+    ],
+  });
+  expect(schema).toMatchSnapshot();
+  const pgClient = await pgPool.connect();
+  try {
+    const { data, errors } = await graphql(
+      schema,
+      `
+        query {
+          user: userById(id: 1) {
+            myCustomEnum
+          }
+        }
+      `,
+      null,
+      { pgClient },
+      {}
+    );
+    expect(errors).toBeFalsy();
+    expect(data).toBeTruthy();
+    expect(data.user).toBeTruthy();
+    expect(data.user.myCustomEnum).toEqual("ENUM");
+  } finally {
+    pgClient.release();
+  }
+});

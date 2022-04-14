@@ -784,7 +784,7 @@ export default function makeExtendSchemaPlugin(
     const Self: GraphQLNamedType = SelfGeneric as any;
     const {
       pgSql: sql,
-      graphql: { isScalarType, getNamedType },
+      graphql: { isLeafType, getNamedType },
     } = build;
     function augmentResolver(
       resolver: AugmentedGraphQLFieldResolver<TSource, any>,
@@ -885,13 +885,13 @@ export default function makeExtendSchemaPlugin(
             scope.pgFieldIntrospection.kind === "class"
               ? scope.pgFieldIntrospection
               : null;
-          const isScalar = isScalarType(getNamedType(type));
+          const isLeaf = isLeafType(getNamedType(type));
 
           const generateImplicitResolverIfPossible = () => {
             if (
               directives.pgQuery &&
               ((table && directives.pgQuery.source) ||
-                (isScalar && directives.pgQuery.fragment))
+                (isLeaf && directives.pgQuery.fragment))
             ) {
               return (
                 data: any,
@@ -1062,7 +1062,7 @@ export default function makeExtendSchemaPlugin(
                     };
                   }
                 );
-              } else if (isScalar && directives.pgQuery.fragment) {
+              } else if (isLeaf && directives.pgQuery.fragment) {
                 fieldContext.addDataGenerator(
                   (parsedResolveInfoFragment: any) => {
                     return {
