@@ -146,7 +146,7 @@ insert into b.types values (
   'feed.dead.beef',
   'b.guid_fn', 
   'b.guid_fn(b.guid)', 
-  '!',
+  '>>=',
   '*(integer,integer)', 
   'b.types', 
   'int', 
