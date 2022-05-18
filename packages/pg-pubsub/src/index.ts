@@ -163,7 +163,7 @@ const plugin: PostGraphilePlugin = {
         client = await pgPool.connect();
         client.once("error", async e => {
           // eslint-disable-next-line no-console
-          console.error(`Error occurred in subscriptions client; retrying...`);
+          console.error("Error occurred in subscriptions client; retrying...");
           // eslint-disable-next-line no-console
           console.error(e);
           releaseClient(client);
