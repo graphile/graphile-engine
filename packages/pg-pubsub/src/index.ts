@@ -161,6 +161,16 @@ const plugin: PostGraphilePlugin = {
       let client: pg.PoolClient;
       try {
         client = await pgPool.connect();
+        client.once("error", async e => {
+          // eslint-disable-next-line no-console
+          console.error(`Error occurred in subscriptions client; retrying...`);
+          // eslint-disable-next-line no-console
+          console.error(e);
+          releaseClient(client);
+          if (!pgPool.ending) {
+            setupClient();
+          }
+        });
       } catch (e) {
         // Exponential back-off
         const delay = Math.floor(
