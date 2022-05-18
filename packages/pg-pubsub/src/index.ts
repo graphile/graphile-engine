@@ -68,9 +68,6 @@ const plugin: PostGraphilePlugin = {
       eventEmitter,
     });
 
-    const handleError = function () {
-      // noop
-    };
     const handleNotification = function (msg: {
       channel: string;
       payload?: string;
@@ -89,7 +86,6 @@ const plugin: PostGraphilePlugin = {
     };
     let listeningClient: pg.PoolClient | null;
     const cleanClient = function (client: pg.PoolClient) {
-      client.removeListener("error", handleError);
       client.removeListener("notification", handleNotification);
       clearInterval(client["keepAliveInterval"]);
       delete client["keepAliveInterval"];
@@ -165,7 +161,7 @@ const plugin: PostGraphilePlugin = {
       let client: pg.PoolClient;
       try {
         client = await pgPool.connect();
-        client.addListener("error", handleError);
+        client.on("error", () => {});
       } catch (e) {
         // Exponential back-off
         const delay = Math.floor(
