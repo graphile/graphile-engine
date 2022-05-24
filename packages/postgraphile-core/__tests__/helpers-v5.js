@@ -7,6 +7,7 @@ if (process.env.DEBUG) {
 }
 
 import { promises as fsp } from "fs";
+import { formatSQLForDebugging } from "graphile-build-pg";
 import {
   getOperationAST,
   parse,
@@ -77,8 +78,7 @@ export async function runTestQuery(
     const queries = [];
     const oldQuery = pgClient.query;
     pgClient.query = function (...args) {
-      const query = args.text || args[0];
-      queries.push(query);
+      queries.push(args[0].text ? args[0] : { text: args[0], values: args[1] });
       return oldQuery.apply(this, args);
     };
     try {
@@ -309,6 +309,16 @@ function makePayloadSnapshotSafe(payload, replacements) {
   return makeResultSnapshotSafe(p, replacements);
 }
 
+// This regexp extracted from https://github.com/chalk/ansi-regex MIT license
+// Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
+// Copyright (c) Benjie (https://twitter.com/benjie)
+export const ANSI_REGEXP =
+  // eslint-disable-next-line no-control-regex, no-useless-escape
+  /[\u001B\u009B][[\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\d\/#&.:=?%@~_]+)*|[a-zA-Z\d]+(?:;[-a-zA-Z\d\/#&.:=?%@~_]*)*)?\u0007)|(?:(?:\d{1,4}(?:;\d{0,4})*)?[\dA-PR-TZcf-nq-uy=><~]))/g;
+function stripAnsi(str) {
+  return str.replace(ANSI_REGEXP, "");
+}
+
 /**
  * Build the snapshot for the given mode ('only') and then assert it matches
  * (or store it).
@@ -356,7 +366,7 @@ export const assertSnapshotsMatch = async (only, props) => {
   } else if (only === "sql") {
     const sqlFileName = basePath + (ext || "") + ".sql";
     const formattedQueries = queries
-      .map(q => makeSQLSnapshotSafe(q.text))
+      .map(q => makeSQLSnapshotSafe(stripAnsi(formatSQLForDebugging(q.text))))
       .join("\n\n");
     await snapshot(formattedQueries, sqlFileName);
   } else {
