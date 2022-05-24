@@ -231,7 +231,7 @@ export function query(
       const val = values[i];
       if (Array.isArray(val)) {
         const nodes: SQLQuery = val.map(enforceValidNode);
-        for (let item of nodes) {
+        for (const item of nodes) {
           items.push(item);
         }
       } else {
@@ -316,7 +316,7 @@ export function join(items: Array<SQL>, rawSeparator = ""): SQLQuery {
       currentItems.push(...itemsToAppend);
     } else {
       currentItems.push(sepNode);
-      for (let item of itemsToAppend) {
+      for (const item of itemsToAppend) {
         currentItems.push(item);
       }
     }
