@@ -213,9 +213,9 @@ export function query(
       const val = values[i];
       if (Array.isArray(val)) {
         const nodes: SQLQuery = val.map(enforceValidNode);
-        nodes.forEach(function(item: any) {
+        for (let item of nodes) {
             items.push(item);
-        });
+        }
       } else {
         const node: SQLNode = enforceValidNode(val);
         items.push(node);
@@ -298,9 +298,9 @@ export function join(items: Array<SQL>, rawSeparator = ""): SQLQuery {
       currentItems.push(...itemsToAppend);
     } else {
       currentItems.push(sepNode);
-      itemsToAppend.forEach(function(item: any) {
-          currentItems.push(item)
-      });
+      for (let item of itemsToAppend) {
+        currentItems.push(item);
+      }
     }
   }
   return currentItems;
