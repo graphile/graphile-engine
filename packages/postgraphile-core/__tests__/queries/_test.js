@@ -49,7 +49,17 @@ exports.assertSnapshotsMatch = assertSnapshotsMatch;
 exports.runTestQuery = async (source, config, options) => {
   const schema = await withPgClient(async pgClient => {
     // A selection of omit/rename comments on the d schema
+    const serverVersionNum = await getServerVersionNum(pgClient);
+    if (serverVersionNum < 110000 && config.pg11) {
+      return null;
+    }
+
     await pgClient.query(await dSchemaComments());
+
+    if (config.ignoreRBAC === false) {
+      await pgClient.query("set role postgraphile_test_authenticator");
+    }
+
     return createPostGraphileSchema(
       pgClient,
       config.schema ?? ["a", "b", "c"],
@@ -60,6 +70,7 @@ exports.runTestQuery = async (source, config, options) => {
         setofFunctionsContainNulls: config.setofFunctionsContainNulls,
         simpleCollections: config.simpleCollections,
         graphileBuildOptions: config.graphileBuildOptions,
+        ignoreRBAC: config.ignoreRBAC,
         appendPlugins: [
           ExtendedPlugin,
           config.ToyCategoriesPlugin ? ToyCategoriesPlugin : null,
@@ -67,20 +78,21 @@ exports.runTestQuery = async (source, config, options) => {
       }
     );
   });
+  if (!schema) {
+    return null;
+  }
   const onConnect = async pgClient => {
-    // Add data to the client instance we are using.
+    // Load test data
     await pgClient.query(await kitchenSinkData());
     const serverVersionNum = await getServerVersionNum(pgClient);
     if (serverVersionNum >= 110000) {
       await pgClient.query(await pg11Data());
     }
-    const contextValue = {};
-    await pgClient.query("savepoint test");
-    // if (gqlSchema === gqlSchemas.rbac) {
-    //   await pgClient.query(
-    //     "select set_config('role', 'postgraphile_test_visitor', true), set_config('jwt.claims.user_id', '3', true)"
-    //   );
-    // }
+    if (config.ignoreRBAC === false) {
+      await pgClient.query(
+        "select set_config('role', 'postgraphile_test_visitor', true), set_config('jwt.claims.user_id', '3', true)"
+      );
+    }
   };
   return runTestQuery(schema, source, config, {
     ...options,

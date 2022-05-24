@@ -211,7 +211,6 @@ export async function runTestQuery(
     } finally {
       //eslint-disable-next-line require-atomic-updates
       pgClient.query = oldQuery;
-      await pgClient.query("rollback to savepoint test");
     }
   });
 }
