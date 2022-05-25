@@ -6,7 +6,7 @@ if (process.env.DEBUG) {
   jest.setTimeout(30000);
 }
 
-import { promises as fsp } from "fs";
+import { readFile as readFileRaw, writeFile as writeFileRaw } from "fs";
 import { formatSQLForDebugging } from "graphile-build-pg";
 import {
   getOperationAST,
@@ -28,6 +28,24 @@ import jsonwebtoken from "jsonwebtoken";
  * we'll do the default behaviour of comparing to existing snapshots.
  */
 export const UPDATE_SNAPSHOTS = process.env.UPDATE_SNAPSHOTS === "1";
+
+function readFile(filename, encoding) {
+  return new Promise((resolve, reject) => {
+    readFileRaw(filename, encoding, (err, res) => {
+      if (err) reject(err);
+      else resolve(res);
+    });
+  });
+}
+
+function writeFile(filename, data) {
+  return new Promise((resolve, reject) => {
+    writeFileRaw(filename, data, (err, res) => {
+      if (err) reject(err);
+      else resolve(res);
+    });
+  });
+}
 
 /** Sorts two GraphQLError paths. */
 const pathCompare = (path1, path2) => {
@@ -224,14 +242,14 @@ export async function runTestQuery(
 async function snapshot(actual, filePath) {
   let expected = null;
   try {
-    expected = await fsp.readFile(filePath, "utf8");
+    expected = await readFile(filePath, "utf8");
   } catch (e) {
     /* noop */
   }
   if (expected == null || UPDATE_SNAPSHOTS) {
     if (expected !== actual) {
       console.warn(`Updated snapshot in '${filePath}'`);
-      await fsp.writeFile(filePath, actual);
+      await writeFile(filePath, actual);
     }
   } else {
     expect(actual).toEqual(expected);
