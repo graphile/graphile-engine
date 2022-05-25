@@ -20,6 +20,7 @@ import { isAsyncIterable } from "iterall";
 import JSON5 from "json5";
 import { relative } from "path";
 import { withPgClient } from "./helpers";
+import jsonwebtoken from "jsonwebtoken";
 
 /**
  * We go beyond what Jest snapshots allow; so we have to manage it ourselves.
@@ -282,6 +283,19 @@ function makeResultSnapshotSafe(data, replacements) {
     }
     const keys = Object.keys(data);
     return keys.reduce((memo, key) => {
+      if (key === "jwtToken" && typeof data[key] === "string") {
+        try {
+          const content = jsonwebtoken.decode(data[key]);
+          if (typeof content.iat === "number") {
+            content.iat = "<number>";
+          }
+
+          memo[key] = `JWT<${JSON5.stringify(content)} (unverified)>`;
+          return memo;
+        } catch (e) {
+          // ignore
+        }
+      }
       memo[key] = makeResultSnapshotSafe(data[key], replacements);
       return memo;
     }, {});

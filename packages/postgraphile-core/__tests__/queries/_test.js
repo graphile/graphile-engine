@@ -32,6 +32,9 @@ const pg11Data = () => readFile(`${__dirname}/../pg11-data.sql`, "utf8");
 const dSchemaComments = () =>
   readFile(`${__dirname}/../kitchen-sink-d-schema-comments.sql`, "utf8");
 
+const SHARED_JWT_SECRET =
+  "This is static for the tests, use a better one if you set one!";
+
 const ExtendedPlugin = makeExtendSchemaPlugin({
   typeDefs: gql`
     extend type Query {
@@ -71,6 +74,9 @@ exports.runTestQuery = async (source, config, options) => {
         simpleCollections: config.simpleCollections,
         graphileBuildOptions: config.graphileBuildOptions,
         ignoreRBAC: config.ignoreRBAC,
+        jwtPgTypeIdentifier: config.jwtPgTypeIdentifier,
+        jwtSecret:
+          config.jwtSecret === true ? SHARED_JWT_SECRET : config.jwtSecret,
         appendPlugins: [
           ExtendedPlugin,
           config.ToyCategoriesPlugin ? ToyCategoriesPlugin : null,
