@@ -313,7 +313,9 @@ export function join(items: Array<SQL>, rawSeparator = ""): SQLQuery {
       ? rawItem.map(enforceValidNode)
       : [enforceValidNode(rawItem)];
     if (i === 0 || !separator) {
-      currentItems.push(...itemsToAppend);
+      for (const itemToAppend of itemsToAppend) {
+        currentItems.push(itemToAppend);
+      }
     } else {
       currentItems.push(sepNode);
       for (const item of itemsToAppend) {
