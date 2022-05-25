@@ -23,6 +23,8 @@ declare module "graphile-build" {
   }
 }
 
+const noop = () => {};
+
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const debugSubscriptions = createDebugger("postgraphile:subscriptions");
@@ -86,6 +88,7 @@ const plugin: PostGraphilePlugin = {
     };
     let listeningClient: pg.PoolClient | null;
     const cleanClient = function (client: pg.PoolClient) {
+      client.removeListener("error", noop);
       client.removeListener("notification", handleNotification);
       clearInterval(client["keepAliveInterval"]);
       delete client["keepAliveInterval"];
@@ -161,7 +164,7 @@ const plugin: PostGraphilePlugin = {
       let client: pg.PoolClient;
       try {
         client = await pgPool.connect();
-        client.on("error", () => {});
+        client.on("error", noop);
       } catch (e) {
         // Exponential back-off
         const delay = Math.floor(
