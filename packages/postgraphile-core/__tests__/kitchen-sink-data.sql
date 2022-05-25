@@ -303,3 +303,16 @@ insert into geometry.geom(
   '((1,3),(3,4),(4,1))',
   '<(10, 10), 7>'
 );
+
+
+--------------------------------------------------------------------------------
+
+alter sequence ranges.range_test_id_seq restart with 934;
+insert into ranges.range_test(
+  num, int8, ts, tstz
+) values (
+  numrange(-1234567890123456789.123456789012, 1111111111111111111.111111111111),
+  int8range( -98765432109876543, 22222222222222222),
+  tsrange( '2019-01-10 21:45:56.356022'::timestamp, null),
+  tstzrange('2019-01-10 21:45:56.356022+00'::timestamptz, null)
+) on conflict do nothing;
