@@ -283,7 +283,7 @@ function makeResultSnapshotSafe(data, replacements) {
     }
     const keys = Object.keys(data);
     return keys.reduce((memo, key) => {
-      if (key === "jwtToken" && typeof data[key] === "string") {
+      if (key.startsWith("jwt") && typeof data[key] === "string") {
         try {
           const content = jsonwebtoken.decode(data[key]);
           if (typeof content.iat === "number") {
