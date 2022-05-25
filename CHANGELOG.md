@@ -3,7 +3,14 @@
 We use PostGraphile's GitHub releases tab to log our changes in detail, but
 this auto-generated changelog helps us to produce that list, and it may be
 helpful to you also.
-# [](https://github.com/graphile/graphile-engine/compare/v4.12.2...v) (2021-10-21)
+# [](https://github.com/graphile/graphile-engine/compare/v4.12.2...v) (2022-05-25)
+
+
+### Bug Fixes
+
+* **pg-sql2:** remove another spread ([#796](https://github.com/graphile/graphile-engine/issues/796)) ([dadd261](https://github.com/graphile/graphile-engine/commit/dadd2615e75253165c1e7110fdadb12b42047543))
+* **pg-sql2:** use loop not spread, fixes call stack size exceeded ([#793](https://github.com/graphile/graphile-engine/issues/793)) ([b4d6c38](https://github.com/graphile/graphile-engine/commit/b4d6c38c61cdb3c8a8f7f67a719c5cde1eeee3e9))
+* **pubsub:** listen for PG client error to prevent crashes ([#791](https://github.com/graphile/graphile-engine/issues/791)) ([e0b107a](https://github.com/graphile/graphile-engine/commit/e0b107a0329c37024a237b7388c7711bb592700f))
 
 
 
