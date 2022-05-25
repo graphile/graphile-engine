@@ -315,4 +315,4 @@ insert into ranges.range_test(
   int8range( -98765432109876543, 22222222222222222),
   tsrange( '2019-01-10 21:45:56.356022'::timestamp, null),
   tstzrange('2019-01-10 21:45:56.356022+00'::timestamptz, null)
-) on conflict do nothing;
+);
