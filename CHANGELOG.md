@@ -3,7 +3,11 @@
 We use PostGraphile's GitHub releases tab to log our changes in detail, but
 this auto-generated changelog helps us to produce that list, and it may be
 helpful to you also.
-# [](https://github.com/graphile/graphile-engine/compare/v4.12.2...v) (2022-05-25)
+# [](https://github.com/graphile/graphile-engine/compare/v4.12.3...v) (2022-05-25)
+
+
+
+## [4.12.3](https://github.com/graphile/graphile-engine/compare/v4.12.2...v4.12.3) (2022-05-25)
 
 
 ### Bug Fixes
