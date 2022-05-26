@@ -15,12 +15,16 @@ import {
   validateSchema,
   execute,
   subscribe,
+  lexicographicSortSchema,
+  printSchema,
 } from "graphql";
 import { isAsyncIterable } from "iterall";
 import JSON5 from "json5";
-import { relative } from "path";
-import { withPgClient } from "./helpers";
+import { withPgClient, getServerVersionNum } from "./helpers";
 import jsonwebtoken from "jsonwebtoken";
+import { createPostGraphileSchema } from "..";
+import { makeExtendSchemaPlugin, gql } from "graphile-utils";
+import ToyCategoriesPlugin from "./integration/ToyCategoriesPlugin";
 
 /**
  * We go beyond what Jest snapshots allow; so we have to manage it ourselves.
@@ -28,6 +32,9 @@ import jsonwebtoken from "jsonwebtoken";
  * we'll do the default behaviour of comparing to existing snapshots.
  */
 export const UPDATE_SNAPSHOTS = process.env.UPDATE_SNAPSHOTS === "1";
+
+const SHARED_JWT_SECRET =
+  "This is static for the tests, use a better one if you set one!";
 
 function readFile(filename, encoding) {
   return new Promise((resolve, reject) => {
@@ -405,4 +412,68 @@ export const assertSnapshotsMatch = async (only, props) => {
       `Unexpected argument to assertSnapshotsMatch; expected result|sql, received '${only}'`
     );
   }
+};
+
+const ExtendedPlugin = makeExtendSchemaPlugin({
+  typeDefs: gql`
+    extend type Query {
+      extended: Boolean
+    }
+  `,
+  resolvers: {
+    Query: {
+      extended: () => true,
+    },
+  },
+});
+
+const dSchemaComments = () =>
+  readFile(`${__dirname}/kitchen-sink-d-schema-comments.sql`, "utf8");
+
+const isNotNullish = t => t != null;
+
+const makeSchema = config => {
+  return withPgClient(async pgClient => {
+    // A selection of omit/rename comments on the d schema
+    const serverVersionNum = await getServerVersionNum(pgClient);
+    if (serverVersionNum < 110000 && config.pg11) {
+      return null;
+    }
+
+    await pgClient.query(await dSchemaComments());
+
+    if (config.ignoreRBAC === false) {
+      await pgClient.query("set role postgraphile_test_authenticator");
+    }
+
+    return createPostGraphileSchema(
+      pgClient,
+      config.schema ?? ["a", "b", "c"],
+      {
+        subscriptions: config.subscriptions,
+        classicIds: config.classicIds,
+        dynamicJson: config.dynamicJson,
+        setofFunctionsContainNulls: config.setofFunctionsContainNulls,
+        simpleCollections: config.simpleCollections,
+        graphileBuildOptions: config.graphileBuildOptions,
+        ignoreRBAC: config.ignoreRBAC,
+        jwtPgTypeIdentifier: config.jwtPgTypeIdentifier,
+        jwtSecret:
+          config.jwtSecret === true ? SHARED_JWT_SECRET : config.jwtSecret,
+        appendPlugins: [
+          ExtendedPlugin,
+          config.ToyCategoriesPlugin ? ToyCategoriesPlugin : null,
+        ].filter(isNotNullish),
+      }
+    );
+  });
+};
+exports.makeSchema = makeSchema;
+
+exports.testSchema = async (path, config) => {
+  const schema = await makeSchema(config);
+  const sortedSchema = lexicographicSortSchema(schema);
+  const basePath = path.replace(/\.test\.js/, "");
+  const filePath = basePath + ".schema.graphql";
+  await snapshot(printSchema(sortedSchema), filePath);
 };
