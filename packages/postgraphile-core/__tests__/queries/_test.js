@@ -49,8 +49,9 @@ const ExtendedPlugin = makeExtendSchemaPlugin({
 });
 
 exports.assertSnapshotsMatch = assertSnapshotsMatch;
-exports.runTestQuery = async (source, config, options) => {
-  const schema = await withPgClient(async pgClient => {
+
+const makeSchema = config => {
+  return withPgClient(async pgClient => {
     // A selection of omit/rename comments on the d schema
     const serverVersionNum = await getServerVersionNum(pgClient);
     if (serverVersionNum < 110000 && config.pg11) {
@@ -84,6 +85,11 @@ exports.runTestQuery = async (source, config, options) => {
       }
     );
   });
+};
+exports.makeSchema = makeSchema;
+
+exports.runTestQuery = async (source, config, options) => {
+  const schema = await makeSchema(config);
   if (!schema) {
     return null;
   }
