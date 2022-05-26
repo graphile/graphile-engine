@@ -1,3 +1,6 @@
+## expect(errors).toBeFalsy();
+#> schema: ["network_types"]
+#> graphileBuildOptions: { pgUseCustomNetworkScalars: true }
 query {
   inetTest: allNetworks(condition: { inet: "192.168.0.0" }) { ...networkConnection }
   cidrTest: allNetworks(condition: { cidr: "192.168.0.0/16" }) { ...networkConnection }
