@@ -2,6 +2,7 @@
 ## expect(errors).toBeFalsy();
 #> schema: ["a", "b", "c"]
 #> subscriptions: true
+#> requiresPg: 90500
 query {
   allPosts(first: 1) {
     nodes {
