@@ -436,7 +436,7 @@ const makeSchema = config => {
   return withPgClient(async pgClient => {
     // A selection of omit/rename comments on the d schema
     const serverVersionNum = await getServerVersionNum(pgClient);
-    if (serverVersionNum < 110000 && config.pg11) {
+    if (config.requiresPg && serverVersionNum < config.requiresPg) {
       return null;
     }
 

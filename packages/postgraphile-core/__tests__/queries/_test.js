@@ -21,6 +21,9 @@ exports.assertSnapshotsMatch = assertSnapshotsMatch;
 exports.runTestQuery = async (source, config, options) => {
   const schema = await makeSchema(config);
   if (!schema) {
+    console.log(
+      "Skipping test because there was no schema (could be that this test isn't supported on this version of PG)"
+    );
     return null;
   }
   const onConnect = async pgClient => {
