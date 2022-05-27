@@ -107,7 +107,12 @@ ${assertions
   .map(assertion => {
     return `\
 it(${JSON.stringify(assertion.trim())}, async () => {
-  const { data, payloads, errors, queries } = await result;
+  const resultValue = await result;
+  if (!resultValue) {
+    console.log("Test skipped");
+    return;
+  }
+  const { data, payloads, errors, queries } = resultValue;
   ${assertion}
 });`;
   })

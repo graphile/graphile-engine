@@ -367,7 +367,11 @@ export const assertSnapshotsMatch = async (only, props) => {
   if (basePath === path) {
     throw new Error(`Failed to trim .test.graphql from '${path}'`);
   }
-  const { data, payloads, queries, errors, extensions } = await result;
+  const resultValue = await result;
+  if (resultValue === null) {
+    return;
+  }
+  const { data, payloads, queries, errors, extensions } = resultValue;
   const replacements = { uuid: new Map(), uuidCounter: 1 };
   if (only === "result") {
     const resultFileName = basePath + (ext || "") + ".json5";
