@@ -462,6 +462,7 @@ const makeSchema = config => {
         graphileBuildOptions: config.graphileBuildOptions,
         ignoreRBAC: config.ignoreRBAC,
         jwtPgTypeIdentifier: config.jwtPgTypeIdentifier,
+        viewUniqueKey: config.viewUniqueKey,
         jwtSecret:
           config.jwtSecret === true ? SHARED_JWT_SECRET : config.jwtSecret,
         appendPlugins: [
