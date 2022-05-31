@@ -358,8 +358,8 @@ create function b.compound_type_set_mutation(object c.compound_type) returns set
 create function b.compound_type_array_mutation(object c.compound_type) returns c.compound_type[] as $$ select ARRAY[object, (null, null, null, null, null, null, null, null)::c.compound_type, (object.a + 1, object.b, object.c, object.d, object.e, object.f, object.g, object.foo_bar)::c.compound_type]; $$ language sql volatile;
 create function c.table_query(id int) returns a.post as $$ select * from a.post where id = $1 $$ language sql stable;
 create function c.table_mutation(id int) returns a.post as $$ select * from a.post where id = $1 $$ language sql;
-create function c.table_set_query() returns setof c.person as $$ select * from c.person $$ language sql stable;
-create function c.table_set_query_plpgsql() returns setof c.person as $$ begin return query select * from c.person; end $$ language plpgsql stable;
+create function c.table_set_query() returns setof c.person as $$ select * from c.person order by id asc $$ language sql stable;
+create function c.table_set_query_plpgsql() returns setof c.person as $$ begin return query select * from c.person order by id asc; end $$ language plpgsql stable;
 comment on function c.table_set_query() is E'@sortable\n@filterable';
 create function c.table_set_mutation() returns setof c.person as $$ select * from c.person order by id asc $$ language sql;
 create function c.int_set_query(x int, y int, z int) returns setof integer as $$ values (1), (2), (3), (4), (x), (y), (z) $$ language sql stable;
