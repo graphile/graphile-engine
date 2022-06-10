@@ -12,7 +12,7 @@ sponsor](https://graphile.org/sponsor/).
 - The Guild
 - Qwick
 - Fanatics
-- GraphCDN
+- Stellate
 - Dovetail
 - Enzuzo
 
@@ -21,9 +21,9 @@ sponsor](https://graphile.org/sponsor/).
 - Robert Claypool
 - Joe Dennis
 - domonda
+- nigelrmtaylor
 - Jack Dinker
 - DocIQ
-- nigelrmtaylor
 - Politics Rewired
 - Principia Mentis
 - Ian Stewart
@@ -33,9 +33,9 @@ sponsor](https://graphile.org/sponsor/).
 - Axinom
 - Taiste
 - Notably
-- William Baxter
 - Nathanael Beisiegel
 - SuperRare Labs
+- William Baxter
 - latch.bio
 - IaSQL
 
@@ -49,8 +49,8 @@ sponsor](https://graphile.org/sponsor/).
 - Matt Bretl
 - svarmony
 - James Rascoe
-- Mark
 - Simon Elliott
+- Mark
 - CJ Lazell
 - Mansoor Razzaq
 - Keith Layne
@@ -69,3 +69,5 @@ sponsor](https://graphile.org/sponsor/).
 - IFCHOR GROUP
 - CartoLab
 - Zentered
+- Nicolas Penot
+- Gamma Peak
