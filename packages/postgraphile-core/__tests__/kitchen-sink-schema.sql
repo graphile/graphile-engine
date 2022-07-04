@@ -975,6 +975,7 @@ create table smart_comment_relations.buildings (
   is_primary boolean not null default true
 );
 
+comment on table smart_comment_relations.streets is E'@unique name';
 comment on table smart_comment_relations.buildings is E'@foreignKey (name) references streets (name)|@fieldName namedAfterStreet|@foreignFieldName buildingsNamedAfterStreet|@foreignSimpleFieldName buildingsNamedAfterStreetList';
 
 -- Only one primary building
