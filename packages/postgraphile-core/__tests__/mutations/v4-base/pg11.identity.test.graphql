@@ -1,6 +1,6 @@
 ## expect(errors).toBeFalsy();
 #> schema: ["pg11"]
-# graphileBuildOptions: { pgUseCustomNetworkScalars: true, }
+#> requiresPg: 110000
 mutation {
   a: createAlwaysAsIdentity(input:{
     alwaysAsIdentity: {
