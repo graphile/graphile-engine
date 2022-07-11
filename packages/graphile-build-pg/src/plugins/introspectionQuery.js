@@ -12,9 +12,14 @@ function makeIntrospectionQuery(
   options: {
     pgLegacyFunctionsOnly?: boolean,
     pgIgnoreRBAC?: boolean,
+    pgUsePartitionParents?: boolean,
   } = {}
 ): string {
-  const { pgLegacyFunctionsOnly = false, pgIgnoreRBAC = true } = options;
+  const {
+    pgLegacyFunctionsOnly = false,
+    pgIgnoreRBAC = true,
+    pgUsePartitionParents = false,
+  } = options;
   const unionRBAC = `
     union all
       select pg_roles.oid _oid, pg_roles.*
@@ -187,7 +192,11 @@ with
       rel.relpersistence in ('p') and
       -- We don't want classes that will clash with GraphQL (treat them as private)
       rel.relname not like E'\\\\_\\\\_%' and
-      rel.relkind in ('r', 'v', 'm', 'c', 'f') and
+      ${
+        pgUsePartitionParents
+          ? "rel.relkind in ('r', 'v', 'm', 'c', 'f', 'p') and not rel.relispartition"
+          : "rel.relkind in ('r', 'v', 'm', 'c', 'f')"
+      } and
       ($2 is true or not exists(
         select 1
         from pg_catalog.pg_depend
