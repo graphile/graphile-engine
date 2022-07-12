@@ -114,6 +114,7 @@ export interface PostGraphileCoreOptions {
   subscriptions?: boolean;
   live?: boolean;
   ownerConnectionString?: string;
+  usePartitionParents?: boolean;
 }
 
 type PgConfig = Pool | PoolClient | string;
@@ -234,6 +235,7 @@ export const getPostGraphileBuilder = async (
     subscriptions: inSubscriptions = false, // TODO:v5: Change to 'true' in v5
     live = false,
     ownerConnectionString,
+    usePartitionParents = false,
   } = options;
   const subscriptions = live || inSubscriptions;
 
@@ -406,6 +408,7 @@ export const getPostGraphileBuilder = async (
     pgIgnoreIndexes: ignoreIndexes,
     pgHideIndexWarnings: hideIndexWarnings,
     pgOwnerConnectionString: ownerConnectionString,
+    pgUsePartitionParents: usePartitionParents,
 
     /*
      * `subscriptions` acts as a feature flag telling us to fetch all the
