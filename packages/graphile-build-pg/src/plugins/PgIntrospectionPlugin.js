@@ -657,7 +657,7 @@ export default (async function PgIntrospectionPlugin(
     pgIgnoreRBAC = true,
     pgSkipInstallingWatchFixtures = false,
     pgOwnerConnectionString,
-    pgUsePartitionParents = false,
+    pgUsePartitionedParent = false,
   }
 ) {
   /**
@@ -682,7 +682,7 @@ export default (async function PgIntrospectionPlugin(
           const introspectionQuery = makeIntrospectionQuery(serverVersionNum, {
             pgLegacyFunctionsOnly,
             pgIgnoreRBAC,
-            pgUsePartitionParents,
+            pgUsePartitionedParent,
           });
           const { rows } = await pgClient.query(introspectionQuery, [
             schemas,

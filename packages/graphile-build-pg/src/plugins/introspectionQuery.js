@@ -12,13 +12,13 @@ function makeIntrospectionQuery(
   options: {
     pgLegacyFunctionsOnly?: boolean,
     pgIgnoreRBAC?: boolean,
-    pgUsePartitionParents?: boolean,
+    pgUsePartitionedParent?: boolean,
   } = {}
 ): string {
   const {
     pgLegacyFunctionsOnly = false,
     pgIgnoreRBAC = true,
-    pgUsePartitionParents = false,
+    pgUsePartitionedParent = false,
   } = options;
   const unionRBAC = `
     union all
@@ -193,7 +193,7 @@ with
       -- We don't want classes that will clash with GraphQL (treat them as private)
       rel.relname not like E'\\\\_\\\\_%' and
       ${
-        pgUsePartitionParents
+        pgUsePartitionedParent
           ? "rel.relkind in ('r', 'v', 'm', 'c', 'f', 'p') and not rel.relispartition"
           : "rel.relkind in ('r', 'v', 'm', 'c', 'f')"
       } and
