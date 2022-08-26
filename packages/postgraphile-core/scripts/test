@@ -46,11 +46,11 @@ echo "Database reset successfully ✅"
 
 # Now run the tests
 if [ $SERVER_VERSION_NUM -ge 110000 ]; then
-  jest --forceExit -i $@
+  yarn jest --forceExit -i $@
 elif [ $SERVER_VERSION_NUM -ge 90500 ]; then
-  jest --forceExit -i -t "^((?!pg11).)*$" $@
+  yarn jest --forceExit -i -t "^((?!pg11).)*$" $@
 else
-  jest --forceExit -i -t "^((?!pg11|json-overflow).)*$" $@
+  yarn jest --forceExit -i -t "^((?!pg11|json-overflow).)*$" $@
 fi;
 
 # Finally re-populate the database to aid debugging

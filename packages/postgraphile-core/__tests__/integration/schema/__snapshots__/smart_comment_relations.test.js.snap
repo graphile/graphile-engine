@@ -578,6 +578,16 @@ input DeleteStreetByIdInput {
   id: Int!
 }
 
+"""All input for the \`deleteStreetByName\` mutation."""
+input DeleteStreetByNameInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  name: String!
+}
+
 """All input for the \`deleteStreet\` mutation."""
 input DeleteStreetInput {
   """
@@ -902,6 +912,14 @@ type Mutation {
     input: DeleteStreetByIdInput!
   ): DeleteStreetPayload
 
+  """Deletes a single \`Street\` using a unique key."""
+  deleteStreetByName(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStreetByNameInput!
+  ): DeleteStreetPayload
+
   """Deletes a single \`StreetProperty\` using its globally unique id."""
   deleteStreetProperty(
     """
@@ -996,6 +1014,14 @@ type Mutation {
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
     input: UpdateStreetByIdInput!
+  ): UpdateStreetPayload
+
+  """Updates a single \`Street\` using a unique key and a patch."""
+  updateStreetByName(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStreetByNameInput!
   ): UpdateStreetPayload
 
   """
@@ -1639,6 +1665,7 @@ type Query implements Node {
     nodeId: ID!
   ): Street
   streetById(id: Int!): Street
+  streetByName(name: String!): Street
 
   """Reads a single \`StreetProperty\` using its globally unique \`ID\`."""
   streetProperty(
@@ -2204,6 +2231,21 @@ input UpdateStreetByIdInput {
   """
   clientMutationId: String
   id: Int!
+
+  """
+  An object where the defined keys will be set on the \`Street\` being updated.
+  """
+  streetPatch: StreetPatch!
+}
+
+"""All input for the \`updateStreetByName\` mutation."""
+input UpdateStreetByNameInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  name: String!
 
   """
   An object where the defined keys will be set on the \`Street\` being updated.
@@ -2891,6 +2933,16 @@ input DeleteStreetByIdInput {
   id: Int!
 }
 
+"""All input for the \`deleteStreetByName\` mutation."""
+input DeleteStreetByNameInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  name: String!
+}
+
 """All input for the \`deleteStreet\` mutation."""
 input DeleteStreetInput {
   """
@@ -3215,6 +3267,14 @@ type Mutation {
     input: DeleteStreetByIdInput!
   ): DeleteStreetPayload
 
+  """Deletes a single \`Street\` using a unique key."""
+  deleteStreetByName(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStreetByNameInput!
+  ): DeleteStreetPayload
+
   """Deletes a single \`StreetProperty\` using its globally unique id."""
   deleteStreetProperty(
     """
@@ -3309,6 +3369,14 @@ type Mutation {
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
     input: UpdateStreetByIdInput!
+  ): UpdateStreetPayload
+
+  """Updates a single \`Street\` using a unique key and a patch."""
+  updateStreetByName(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStreetByNameInput!
   ): UpdateStreetPayload
 
   """
@@ -3920,6 +3988,7 @@ type Query implements Node {
     nodeId: ID!
   ): Street
   streetById(id: Int!): Street
+  streetByName(name: String!): Street
 
   """Reads a single \`StreetProperty\` using its globally unique \`ID\`."""
   streetProperty(
@@ -4482,6 +4551,21 @@ input UpdateStreetByIdInput {
   """
   clientMutationId: String
   id: Int!
+
+  """
+  An object where the defined keys will be set on the \`Street\` being updated.
+  """
+  streetPatch: StreetPatch!
+}
+
+"""All input for the \`updateStreetByName\` mutation."""
+input UpdateStreetByNameInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  name: String!
 
   """
   An object where the defined keys will be set on the \`Street\` being updated.
@@ -5175,6 +5259,16 @@ input DeleteStreetByIdInput {
   id: Int!
 }
 
+"""All input for the \`deleteStreetByName\` mutation."""
+input DeleteStreetByNameInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  name: String!
+}
+
 """All input for the \`deleteStreet\` mutation."""
 input DeleteStreetInput {
   """
@@ -5499,6 +5593,14 @@ type Mutation {
     input: DeleteStreetByIdInput!
   ): DeleteStreetPayload
 
+  """Deletes a single \`Street\` using a unique key."""
+  deleteStreetByName(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStreetByNameInput!
+  ): DeleteStreetPayload
+
   """Deletes a single \`StreetProperty\` using its globally unique id."""
   deleteStreetProperty(
     """
@@ -5593,6 +5695,14 @@ type Mutation {
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
     input: UpdateStreetByIdInput!
+  ): UpdateStreetPayload
+
+  """Updates a single \`Street\` using a unique key and a patch."""
+  updateStreetByName(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStreetByNameInput!
   ): UpdateStreetPayload
 
   """
@@ -6236,6 +6346,7 @@ type Query implements Node {
     nodeId: ID!
   ): Street
   streetById(id: Int!): Street
+  streetByName(name: String!): Street
 
   """Reads a single \`StreetProperty\` using its globally unique \`ID\`."""
   streetProperty(
@@ -6801,6 +6912,21 @@ input UpdateStreetByIdInput {
   """
   clientMutationId: String
   id: Int!
+
+  """
+  An object where the defined keys will be set on the \`Street\` being updated.
+  """
+  streetPatch: StreetPatch!
+}
+
+"""All input for the \`updateStreetByName\` mutation."""
+input UpdateStreetByNameInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  name: String!
 
   """
   An object where the defined keys will be set on the \`Street\` being updated.
@@ -7446,6 +7572,16 @@ input DeleteStreetByIdInput {
   id: Int!
 }
 
+"""All input for the \`deleteStreetByName\` mutation."""
+input DeleteStreetByNameInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  name: String!
+}
+
 """All input for the \`deleteStreet\` mutation."""
 input DeleteStreetInput {
   """
@@ -7754,6 +7890,14 @@ type Mutation {
     input: DeleteStreetByIdInput!
   ): DeleteStreetPayload
 
+  """Deletes a single \`Street\` using a unique key."""
+  deleteStreetByName(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStreetByNameInput!
+  ): DeleteStreetPayload
+
   """Deletes a single \`StreetProperty\` using its globally unique id."""
   deleteStreetProperty(
     """
@@ -7832,6 +7976,14 @@ type Mutation {
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
     input: UpdateStreetByIdInput!
+  ): UpdateStreetPayload
+
+  """Updates a single \`Street\` using a unique key and a patch."""
+  updateStreetByName(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStreetByNameInput!
   ): UpdateStreetPayload
 
   """
@@ -8456,6 +8608,7 @@ type Query implements Node {
     nodeId: ID!
   ): Street
   streetById(id: Int!): Street
+  streetByName(name: String!): Street
 
   """Reads a single \`StreetProperty\` using its globally unique \`ID\`."""
   streetProperty(
@@ -8964,6 +9117,21 @@ input UpdateStreetByIdInput {
   """
   clientMutationId: String
   id: Int!
+
+  """
+  An object where the defined keys will be set on the \`Street\` being updated.
+  """
+  streetPatch: StreetPatch!
+}
+
+"""All input for the \`updateStreetByName\` mutation."""
+input UpdateStreetByNameInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  name: String!
 
   """
   An object where the defined keys will be set on the \`Street\` being updated.
@@ -9643,6 +9811,16 @@ input DeleteStreetByIdInput {
   id: Int!
 }
 
+"""All input for the \`deleteStreetByName\` mutation."""
+input DeleteStreetByNameInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  name: String!
+}
+
 """All input for the \`deleteStreet\` mutation."""
 input DeleteStreetInput {
   """
@@ -9959,6 +10137,14 @@ type Mutation {
     input: DeleteStreetByIdInput!
   ): DeleteStreetPayload
 
+  """Deletes a single \`Street\` using a unique key."""
+  deleteStreetByName(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStreetByNameInput!
+  ): DeleteStreetPayload
+
   """Deletes a single \`StreetProperty\` using its globally unique id."""
   deleteStreetProperty(
     """
@@ -10045,6 +10231,14 @@ type Mutation {
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
     input: UpdateStreetByIdInput!
+  ): UpdateStreetPayload
+
+  """Updates a single \`Street\` using a unique key and a patch."""
+  updateStreetByName(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStreetByNameInput!
   ): UpdateStreetPayload
 
   """
@@ -10675,6 +10869,7 @@ type Query implements Node {
     nodeId: ID!
   ): Street
   streetById(id: Int!): Street
+  streetByName(name: String!): Street
 
   """Reads a single \`StreetProperty\` using its globally unique \`ID\`."""
   streetProperty(
@@ -11221,6 +11416,21 @@ input UpdateStreetByIdInput {
   """
   clientMutationId: String
   id: Int!
+
+  """
+  An object where the defined keys will be set on the \`Street\` being updated.
+  """
+  streetPatch: StreetPatch!
+}
+
+"""All input for the \`updateStreetByName\` mutation."""
+input UpdateStreetByNameInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  name: String!
 
   """
   An object where the defined keys will be set on the \`Street\` being updated.
@@ -11885,6 +12095,16 @@ input DeleteStreetByIdInput {
   id: Int!
 }
 
+"""All input for the \`deleteStreetByName\` mutation."""
+input DeleteStreetByNameInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  name: String!
+}
+
 """All input for the \`deleteStreet\` mutation."""
 input DeleteStreetInput {
   """
@@ -12198,6 +12418,14 @@ type Mutation {
     input: DeleteStreetByIdInput!
   ): DeleteStreetPayload
 
+  """Deletes a single \`Street\` using a unique key."""
+  deleteStreetByName(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStreetByNameInput!
+  ): DeleteStreetPayload
+
   """Deletes a single \`StreetProperty\` using its globally unique id."""
   deleteStreetProperty(
     """
@@ -12292,6 +12520,14 @@ type Mutation {
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
     input: UpdateStreetByIdInput!
+  ): UpdateStreetPayload
+
+  """Updates a single \`Street\` using a unique key and a patch."""
+  updateStreetByName(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStreetByNameInput!
   ): UpdateStreetPayload
 
   """
@@ -12909,6 +13145,7 @@ type Query implements Node {
     nodeId: ID!
   ): Street
   streetById(id: Int!): Street
+  streetByName(name: String!): Street
 
   """Reads a single \`StreetProperty\` using its globally unique \`ID\`."""
   streetProperty(
@@ -13413,6 +13650,21 @@ input UpdateStreetByIdInput {
   """
   clientMutationId: String
   id: Int!
+
+  """
+  An object where the defined keys will be set on the \`Street\` being updated.
+  """
+  streetPatch: StreetPatch!
+}
+
+"""All input for the \`updateStreetByName\` mutation."""
+input UpdateStreetByNameInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  name: String!
 
   """
   An object where the defined keys will be set on the \`Street\` being updated.

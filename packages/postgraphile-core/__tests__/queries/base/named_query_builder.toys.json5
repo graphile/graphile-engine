@@ -1,0 +1,26 @@
+{
+  t1: {
+    categories: [
+      {
+        name: "Dinosaurs",
+      },
+      {
+        name: "Military",
+      },
+    ],
+  },
+  t2: {
+    categories: [
+      {
+        name: "Dinosaurs",
+      },
+    ],
+  },
+  t3: {
+    categories: [
+      {
+        name: "Military",
+      },
+    ],
+  },
+}

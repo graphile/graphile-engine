@@ -27,3 +27,6 @@ insert into pg11.types values
   );
 
 alter sequence pg11.types_id_seq restart with 15;
+
+alter table pg11.always_as_identity alter column id restart with 1;
+alter table pg11.by_default_as_identity alter column id restart with 1;
