@@ -156,6 +156,8 @@ insert into b.types values (
   ARRAY[1, 2, 2098288669218571760]
 );
 
+alter sequence b.types_id_seq restart with 1;
+
 insert into c.edge_case values
   (default, 20, 1),
   (true, null, 2),
@@ -316,3 +318,6 @@ insert into ranges.range_test(
   tsrange( '2019-01-10 21:45:56.356022'::timestamp, null),
   tstzrange('2019-01-10 21:45:56.356022+00'::timestamptz, null)
 );
+
+alter sequence c.issue756_id_seq restart with 1;
+alter sequence inheritence.file_id_seq restart with 1;
