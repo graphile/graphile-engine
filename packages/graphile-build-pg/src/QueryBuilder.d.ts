@@ -51,6 +51,7 @@ export default class QueryBuilder {
   public offset(offsetGen: NumberGen): void;
   public first(first: number): void;
   public last(last: number): void;
+  public distinctOn(exprGen: SQLGen): void;
 
   // ----------------------------------------
 

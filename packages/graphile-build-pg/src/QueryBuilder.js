@@ -106,6 +106,7 @@ class QueryBuilder {
     offset: ?NumberGen,
     first: ?number,
     last: ?number,
+    distinctOn: Array<SQLGen>,
     beforeLock: {
       [string]: Array<() => void> | null,
     },
@@ -133,6 +134,7 @@ class QueryBuilder {
     offset: ?number,
     first: ?number,
     last: ?number,
+    distinctOn: Array<SQLGen>,
     cursorComparator: ?CursorComparator,
   };
   lockContext: {
@@ -170,6 +172,7 @@ class QueryBuilder {
       last: false,
       limit: false,
       offset: false,
+      distinctOn: false,
     };
     this.finalized = false;
     this.selectedIdentifiers = false;
@@ -192,6 +195,7 @@ class QueryBuilder {
       offset: null,
       first: null,
       last: null,
+      distinctOn: [],
       beforeLock: {
         // As a performance optimisation, we're going to list a number of lock
         // types so that V8 doesn't need to mutate the object too much
@@ -231,6 +235,7 @@ class QueryBuilder {
       offset: null,
       first: null,
       last: null,
+      distinctOn: [],
       cursorComparator: null,
     };
     this._children = new Map();
@@ -511,6 +516,10 @@ ${sql.join(
     }
     this.data.last = last;
   }
+  distinctOn(exprGen: SQLGen) {
+    this.checkLock("distinctOn");
+    this.data.distinctOn.push(exprGen);
+  }
 
   // ----------------------------------------
 
@@ -744,7 +753,14 @@ ${sql.join(
         : this.buildSelectFields();
 
     let fragment = sql.fragment`\
-select ${useAsterisk ? sql.fragment`${this.getTableAlias()}.*` : fields}
+select ${
+      this.compiledData.distinctOn.length &&
+      sql.fragment`distinct on (${sql.join(
+        this.compiledData.distinctOn,
+        ", "
+      )})`
+    }
+${useAsterisk ? sql.fragment`${this.getTableAlias()}.*` : fields}
 ${
   this.compiledData.from &&
   sql.fragment`from ${this.compiledData.from[0]} as ${this.getTableAlias()}`
@@ -868,6 +884,14 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
       this.locks[type] = isDev ? new Error("Initally locked here").stack : true;
       this.compiledData[type] = data;
     } else if (type === "orderBy") {
+      // Add distinct to existing order by to avoid `SELECT DISTINCT ON expressions must match initial ORDER BY expressions`
+      if (this.data[type].length) {
+        this.data["distinctOn"].forEach(d => {
+          if (!this.data[type].find(([a]) => a === d)) {
+            this.data[type].unshift([d, undefined, undefined]);
+          }
+        });
+      }
       this.compiledData[type] = this.data[type].map(([a, b, c]) => [
         callIfNecessary(a, context),
         b,
@@ -894,6 +918,8 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
       this.compiledData[type] = this.data[type];
     } else if (type === "last") {
       this.compiledData[type] = this.data[type];
+    } else if (type === "distinctOn") {
+      this.compiledData[type] = callIfNecessaryArray(this.data[type], context);
     } else {
       throw new Error(`Wasn't expecting to lock '${type}'`);
     }
@@ -925,6 +951,7 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
     this.lock("limit");
     this.lock("first");
     this.lock("last");
+    this.lock("distinctOn");
     // We must execute select after orderBy otherwise we cannot generate a cursor
     this.lock("fixedSelectExpression");
     this.lock("selectCursor");
