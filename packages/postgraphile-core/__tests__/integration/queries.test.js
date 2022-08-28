@@ -62,6 +62,7 @@ beforeAll(() => {
       enumTables,
       geometry,
     ] = await Promise.all([
+      // normal
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         appendPlugins: [
@@ -79,10 +80,12 @@ beforeAll(() => {
           }),
         ],
       }),
+      //classicIds
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         classicIds: true,
       }),
+      //dynamicJson
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         dynamicJson: true,
@@ -93,29 +96,36 @@ beforeAll(() => {
         pgColumnFilter: attr => attr.name !== "headline",
         setofFunctionsContainNulls: false,
       }),
+      // viewUniqueKey
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         viewUniqueKey: "testviewid",
         setofFunctionsContainNulls: true,
       }),
+      // d schema
       createPostGraphileSchema(pgClient, ["d"], {}),
+      //simpleCollections
       createPostGraphileSchema(pgClient, ["a", "b", "c"], {
         subscriptions: true,
         simpleCollections: "both",
       }),
+      // orderByNullsLast
       createPostGraphileSchema(pgClient, ["a"], {
         subscriptions: true,
         graphileBuildOptions: {
           orderByNullsLast: true,
         },
       }),
+      // smartCommentRelations
       createPostGraphileSchema(pgClient, ["smart_comment_relations"], {}),
       createPostGraphileSchema(pgClient, ["large_bigint"], {}),
+      // network_types
       createPostGraphileSchema(pgClient, ["network_types"], {
         graphileBuildOptions: {
           pgUseCustomNetworkScalars: true,
         },
       }),
+      // pg11
       serverVersionNum >= 110000
         ? createPostGraphileSchema(pgClient, ["pg11"], {
             graphileBuildOptions: {
@@ -127,9 +137,11 @@ beforeAll(() => {
         subscriptions: true,
         appendPlugins: [ToyCategoriesPlugin],
       }),
+      //enum tables
       createPostGraphileSchema(pgClient, ["enum_tables"], {
         subscriptions: true,
       }),
+      //geometry
       createPostGraphileSchema(pgClient, ["geometry"], {
         subscriptions: true,
         graphileBuildOptions: {

@@ -44,17 +44,23 @@ beforeAll(() => {
       enumTables,
       geometry,
     ] = await Promise.all([
+      // gqlSchema
       createPostGraphileSchema(pgClient, ["a", "b", "c"]),
+      // dSchema
       createPostGraphileSchema(pgClient, ["d"]),
+      // inheritenceSchema
       createPostGraphileSchema(pgClient, ["inheritence"]),
+      // pg11Schema
       serverVersionNum >= 110000
         ? createPostGraphileSchema(pgClient, ["pg11"])
         : null,
+      // useCustomNetworkScalarsSchema
       createPostGraphileSchema(pgClient, ["network_types"], {
         graphileBuildOptions: {
           pgUseCustomNetworkScalars: true,
         },
       }),
+      // pg11UseCustomNetworkScalarsSchema
       serverVersionNum >= 110000
         ? createPostGraphileSchema(pgClient, ["pg11"], {
             graphileBuildOptions: {
@@ -62,7 +68,9 @@ beforeAll(() => {
             },
           })
         : null,
+      // enumTables
       createPostGraphileSchema(pgClient, ["enum_tables"]),
+      // geometry
       createPostGraphileSchema(pgClient, ["geometry"], {
         graphileBuildOptions: {
           pgGeometricTypes: true,
@@ -90,7 +98,7 @@ beforeAll(() => {
   // Execute all of the mutations in parallel. We will not wait for them to
   // resolve or reject. The tests will do that.
   //
-  // All of our mutations get there own Postgres client instance. Queries share
+  // All of our mutations get their own Postgres client instance. Queries share
   // a client instance.
   mutationResults = mutationFileNames.map(async fileName => {
     // Wait for the schema to resolve. We need the schema to be introspected

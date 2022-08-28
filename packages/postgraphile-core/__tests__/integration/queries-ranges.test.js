@@ -1,6 +1,7 @@
 const { graphql } = require("graphql");
 const { withPgClient } = require("../helpers");
 const { createPostGraphileSchema } = require("../..");
+const { readdirSync, readFile: rawReadFile } = require("fs");
 
 let schema;
 
@@ -11,22 +12,27 @@ beforeAll(async () => {
   );
 });
 
+function readFile(filename, encoding) {
+  return new Promise((resolve, reject) => {
+    rawReadFile(filename, encoding, (err, res) => {
+      if (err) reject(err);
+      else resolve(res);
+    });
+  });
+}
+const kitchenSinkData = () =>
+  readFile(`${__dirname}/../kitchen-sink-data.sql`, "utf8");
+
 test("numeric range", () =>
   withPgClient(async pgClient => {
-    const {
-      rows: [row],
-    } = await pgClient.query(
-      "insert into ranges.range_test (num) values (numrange($1, $2)) returning *",
-      ["-1234567890123456789.123456789012", "1111111111111111111.111111111111"]
-    );
+    await pgClient.query(await kitchenSinkData());
     const result = await graphql(
       schema,
-      "query ($id: Int!) {rangeTestById(id:$id) {num{start {value inclusive} end { value inclusive } }}}",
+      "{rangeTestById(id: 934) {num{start {value inclusive} end { value inclusive } }}}",
       null,
       {
         pgClient: pgClient,
-      },
-      { id: row.id }
+      }
     );
     expect(result.errors).toBeFalsy();
     expect(result.data.rangeTestById.num).toEqual({
@@ -43,20 +49,14 @@ test("numeric range", () =>
 
 test("bigint range", () =>
   withPgClient(async pgClient => {
-    const {
-      rows: [row],
-    } = await pgClient.query(
-      "insert into ranges.range_test (int8) values (int8range($1, $2)) returning *",
-      ["-98765432109876543", "22222222222222222"]
-    );
+    await pgClient.query(await kitchenSinkData());
     const result = await graphql(
       schema,
-      "query ($id: Int!) {rangeTestById(id:$id) {int8{start {value inclusive} end { value inclusive } }}}",
+      "{rangeTestById(id:934) {int8{start {value inclusive} end { value inclusive } }}}",
       null,
       {
         pgClient: pgClient,
-      },
-      { id: row.id }
+      }
     );
     expect(result.errors).toBeFalsy();
     expect(result.data.rangeTestById.int8).toEqual({
@@ -73,20 +73,14 @@ test("bigint range", () =>
 
 test("ts range", () =>
   withPgClient(async pgClient => {
-    const {
-      rows: [row],
-    } = await pgClient.query(
-      "insert into ranges.range_test (ts) values (tsrange($1::timestamp, null)) returning *",
-      ["2019-01-10 21:45:56.356022"]
-    );
+    await pgClient.query(await kitchenSinkData());
     const result = await graphql(
       schema,
-      "query ($id: Int!) {rangeTestById(id:$id) {ts{start {value inclusive} }}}",
+      "{rangeTestById(id:934) {ts{start {value inclusive} }}}",
       null,
       {
         pgClient: pgClient,
-      },
-      { id: row.id }
+      }
     );
     expect(result.errors).toBeFalsy();
     expect(result.data.rangeTestById.ts).toEqual({
@@ -99,20 +93,14 @@ test("ts range", () =>
 
 test("tstz range", () =>
   withPgClient(async pgClient => {
-    const {
-      rows: [row],
-    } = await pgClient.query(
-      "insert into ranges.range_test (tstz) values (tstzrange($1::timestamptz, null)) returning *",
-      ["2019-01-10 21:45:56.356022+00"]
-    );
+    await pgClient.query(await kitchenSinkData());
     const result = await graphql(
       schema,
-      "query ($id: Int!) {rangeTestById(id:$id) {tstz{start {value inclusive} }}}",
+      "{rangeTestById(id:934) {tstz{start {value inclusive} }}}",
       null,
       {
         pgClient: pgClient,
-      },
-      { id: row.id }
+      }
     );
     expect(result.errors).toBeFalsy();
     expect(result.data.rangeTestById.tstz).toEqual({
