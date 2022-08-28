@@ -754,11 +754,12 @@ ${sql.join(
 
     let fragment = sql.fragment`\
 select ${
-      this.compiledData.distinctOn.length &&
-      sql.fragment`distinct on (${sql.join(
-        this.compiledData.distinctOn,
-        ", "
-      )})`
+      this.compiledData.distinctOn.length
+      ? sql.fragment`distinct on (${sql.join(
+          this.compiledData.distinctOn,
+          ", "
+        )})`
+      : sql.blank
     }
 ${useAsterisk ? sql.fragment`${this.getTableAlias()}.*` : fields}
 ${
