@@ -21,7 +21,7 @@ exports.test =
       countByPath[testPath] = i;
       const sorted = lexicographicSortSchema(schema);
       const printed = printSchema(sorted);
-      const filePath = `${testPath.replace(/\.[jt]s$/, "")}.${i}.graphql`;
+      const filePath = `${testPath.replace(/\.test\.[jt]s$/, "")}.${i}.graphql`;
       return snapshot(printed, filePath);
       await finalCheck(schema);
     });
