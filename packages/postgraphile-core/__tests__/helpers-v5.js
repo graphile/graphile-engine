@@ -17,6 +17,7 @@ import {
   subscribe,
   lexicographicSortSchema,
   printSchema,
+  GraphQLSchema,
 } from "graphql";
 import { isAsyncIterable } from "iterall";
 import JSON5 from "json5";
@@ -262,6 +263,7 @@ async function snapshot(actual, filePath) {
     expect(actual).toEqual(expected);
   }
 }
+exports.snapshot = snapshot;
 
 const sqlSnapshotAliases = new Map();
 

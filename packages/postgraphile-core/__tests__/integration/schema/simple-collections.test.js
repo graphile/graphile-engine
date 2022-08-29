@@ -2,7 +2,7 @@ const core = require("./core");
 
 test(
   "prints a schema with both simple collections and relay connections",
-  core.test("c", {
+  core.test(__filename, "c", {
     simpleCollections: "both",
     setofFunctionsContainNulls: false,
   })
@@ -10,7 +10,7 @@ test(
 
 test(
   "prints a schema with only simple collections",
-  core.test("c", {
+  core.test(__filename, "c", {
     simpleCollections: "only",
     setofFunctionsContainNulls: false,
   })
@@ -19,6 +19,7 @@ test(
 test(
   "schema with simple collections by default, but relay for people",
   core.test(
+    __filename,
     "simple_collections",
     {
       simpleCollections: "only",
@@ -34,6 +35,7 @@ test(
 test(
   "simple collection for computed column",
   core.test(
+    __filename,
     "simple_collections",
     {
       simpleCollections: "omit",
@@ -49,6 +51,7 @@ test(
 test(
   "simple collection for relation",
   core.test(
+    __filename,
     "simple_collections",
     {
       simpleCollections: "omit",

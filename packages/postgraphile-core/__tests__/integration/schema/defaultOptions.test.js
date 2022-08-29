@@ -1,7 +1,12 @@
 const core = require("./core");
 
-test("prints a schema with the default options", core.test(["a", "b", "c"]));
+test(
+  "prints a schema with the default options",
+  core.test(__filename, ["a", "b", "c"])
+);
 test(
   "should be same with subscriptions option set",
-  core.test(["a", "b", "c"], { subscriptions: true })
+  core.test(__filename, ["a", "b", "c"], {
+    subscriptions: true,
+  })
 );

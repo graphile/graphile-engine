@@ -11,13 +11,14 @@ const offerViewComment = comment => pgClient =>
 
 test(
   "prints a schema for smart_comment_relations",
-  core.test(["smart_comment_relations"], {})
+  core.test(__filename, ["smart_comment_relations"], {})
 );
 
 test("referencing non-existent table (throws error)", async () => {
   let error;
   try {
     await core.test(
+      __filename,
       ["smart_comment_relations"],
       {},
       offerViewComment(`@name offers
@@ -36,6 +37,7 @@ test("referencing non-existent table (throws error)", async () => {
 test(
   "referencing hidden table (ignored)",
   core.test(
+    __filename,
     ["smart_comment_relations"],
     {},
     offerViewComment(`@name offers
@@ -59,6 +61,7 @@ Array [
 test(
   "referencing other view (no columns)",
   core.test(
+    __filename,
     ["smart_comment_relations"],
     {},
     offerViewComment(
@@ -78,6 +81,7 @@ test(
 test(
   "referencing other view (specifying columns, no PK)",
   core.test(
+    __filename,
     ["smart_comment_relations"],
     {},
     pgClient =>
@@ -106,6 +110,7 @@ comment on view smart_comment_relations.offer_view is E'@name offers
 test(
   "view with fake unique constraint",
   core.test(
+    __filename,
     ["smart_comment_relations"],
     {},
     pgClient =>
@@ -133,6 +138,7 @@ comment on view smart_comment_relations.offer_view is E'@name offers
 test(
   "view with fake unique constraints and primary key",
   core.test(
+    __filename,
     ["smart_comment_relations"],
     {},
     pgClient =>
