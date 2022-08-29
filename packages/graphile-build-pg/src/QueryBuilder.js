@@ -889,7 +889,7 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
       if (this.data[type].length) {
         this.data["distinctOn"].forEach(d => {
           if (!this.data[type].find(([a]) => a === d)) {
-            this.data[type].unshift([d, undefined, undefined]);
+            this.data[type].unshift([d, true, undefined]);
           }
         });
       }

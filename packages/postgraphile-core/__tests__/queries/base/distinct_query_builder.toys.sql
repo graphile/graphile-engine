@@ -15,7 +15,7 @@ with __local_0__ as (
     select distinct on (__local_1__."color") __local_1__.*
     from "distinct_query_builder"."toys" as __local_1__
     where (TRUE) and (TRUE)
-    order by __local_1__."color" DESC,
+    order by __local_1__."color" ASC,
     __local_1__."id" ASC
   ) __local_1__
 ),
@@ -48,7 +48,7 @@ with __local_0__ as (
     select distinct on (__local_1__."name") __local_1__.*
     from "distinct_query_builder"."toys" as __local_1__
     where (TRUE) and (TRUE)
-    order by __local_1__."name" DESC,
+    order by __local_1__."name" ASC,
     __local_1__."id" ASC
   ) __local_1__
 ),
