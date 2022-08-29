@@ -1,41 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`omit create on column 1`] = `
-"""All input for the create \`Film\` mutation."""
-input CreateFilmInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-
-  """The \`Film\` to be created by this mutation."""
-  film: FilmInput!
-}
-
-"""The output of our create \`Film\` mutation."""
-type CreateFilmPayload {
-  """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
-  """
-  clientMutationId: String
-
-  """The \`Film\` that was created by this mutation."""
-  film: Film
-
-  """An edge for our \`Film\`. May be used by Relay 1."""
-  filmEdge(
-    """The method to use when ordering \`Film\`."""
-    orderBy: [FilmsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): FilmsEdge
-
-  """
-  Our root query field type. Allows us to run any query from our mutation payload.
-  """
-  query: Query
-}
-
+exports[`omit create on table 1`] = `
 """All input for the create \`Person\` mutation."""
 input CreatePersonInput {
   """
@@ -576,12 +541,6 @@ input FilmCondition {
   title: String
 }
 
-"""An input for mutations affecting \`Film\`"""
-input FilmInput {
-  code: Int!
-  title: String
-}
-
 """Represents an update to a \`Film\`. Fields that are set will be updated."""
 input FilmPatch {
   code: Int
@@ -689,14 +648,6 @@ type LoginPayload {
 The root mutation type which contains root level fields which mutate data.
 """
 type Mutation {
-  """Creates a single \`Film\`."""
-  createFilm(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: CreateFilmInput!
-  ): CreateFilmPayload
-
   """Creates a single \`Person\`."""
   createPerson(
     """
@@ -1780,6 +1731,7 @@ input TvShowCondition {
 input TvShowInput {
   code: Int!
   studioId: Int
+  title: String
 }
 
 """

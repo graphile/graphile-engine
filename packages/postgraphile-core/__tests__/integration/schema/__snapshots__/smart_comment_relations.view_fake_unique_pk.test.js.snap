@@ -1,37 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`prints a schema for smart_comment_relations 1`] = `
+exports[`view with fake unique constraints and primary key 1`] = `
 type Building implements Node {
   floors: Int!
-
-  """Reads and enables pagination through a set of \`House\`."""
-  housesByBuildingId(
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: HouseCondition
-
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """The method to use when ordering \`House\`."""
-    orderBy: [HousesOrderBy!] = [PRIMARY_KEY_ASC]
-  ): HousesConnection!
   id: Int!
   isPrimary: Boolean!
   name: String!
@@ -682,8 +653,6 @@ type DeleteStreetPropertyPayload {
 }
 
 type House implements Node {
-  """Reads a single \`Building\` that is related to this \`House\`."""
-  buildingByBuildingId: Building
   buildingId: Int
   buildingName: String
   floors: Int
@@ -692,19 +661,10 @@ type House implements Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-
-  """Reads a single \`Property\` that is related to this \`House\`."""
-  propertyByPropertyId: Property
   propertyId: Int!
   propertyNameOrNumber: String!
-
-  """Reads a single \`Street\` that is related to this \`House\`."""
-  streetByStreetId: Street
   streetId: Int!
   streetName: String!
-
-  """Reads a single \`StreetProperty\` that is related to this \`House\`."""
-  streetPropertyByStreetIdAndPropertyId: StreetProperty
 }
 
 """
@@ -1300,35 +1260,6 @@ type Property implements Node {
     """The method to use when ordering \`Building\`."""
     orderBy: [BuildingsOrderBy!] = [PRIMARY_KEY_ASC]
   ): BuildingsConnection!
-
-  """Reads and enables pagination through a set of \`House\`."""
-  housesByPropertyId(
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: HouseCondition
-
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """The method to use when ordering \`House\`."""
-    orderBy: [HousesOrderBy!] = [PRIMARY_KEY_ASC]
-  ): HousesConnection!
   id: Int!
   nameOrNumber: String!
 
@@ -1620,6 +1551,9 @@ type Query implements Node {
     nodeId: ID!
   ): House
   houseByStreetIdAndPropertyId(propertyId: Int!, streetId: Int!): House
+  houseByStreetIdAndPropertyNameOrNumber(propertyNameOrNumber: String!, streetId: Int!): House
+  houseByStreetNameAndBuildingName(buildingName: String!, streetName: String!): House
+  houseByStreetNameAndPropertyId(propertyId: Int!, streetName: String!): House
 
   """Fetches an object given its globally unique \`ID\`."""
   node(
@@ -1706,35 +1640,6 @@ type Street implements Node {
     """The method to use when ordering \`Building\`."""
     orderBy: [BuildingsOrderBy!] = [PRIMARY_KEY_ASC]
   ): BuildingsConnection!
-
-  """Reads and enables pagination through a set of \`House\`."""
-  housesByStreetId(
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: HouseCondition
-
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """The method to use when ordering \`House\`."""
-    orderBy: [HousesOrderBy!] = [PRIMARY_KEY_ASC]
-  ): HousesConnection!
   id: Int!
   name: String!
 
@@ -1868,38 +1773,6 @@ enum StreetPropertiesOrderBy {
 
 type StreetProperty implements Node {
   currentOwner: String
-
-  """Reads a single \`House\` that is related to this \`StreetProperty\`."""
-  houseByStreetIdAndPropertyId: House
-
-  """Reads and enables pagination through a set of \`House\`."""
-  housesByStreetIdAndPropertyId(
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: HouseCondition
-
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """The method to use when ordering \`House\`."""
-    orderBy: [HousesOrderBy!] = [PRIMARY_KEY_ASC]
-  ): HousesConnection! @deprecated(reason: "Please use houseByStreetIdAndPropertyId instead")
 
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.

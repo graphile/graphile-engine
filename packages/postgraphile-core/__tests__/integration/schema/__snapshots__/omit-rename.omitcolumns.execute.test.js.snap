@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`omit create on column 1`] = `
+exports[`omit execute on computed column 1`] = `
 """All input for the create \`Film\` mutation."""
 input CreateFilmInput {
   """
@@ -1030,7 +1030,6 @@ type Person implements Node {
   firstName: String
   id: Int!
   lastName: String
-  name: String
 
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
@@ -1780,6 +1779,7 @@ input TvShowCondition {
 input TvShowInput {
   code: Int!
   studioId: Int
+  title: String
 }
 
 """

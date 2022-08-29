@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`omit create on column 1`] = `
+exports[`omit update on column 1`] = `
 """All input for the create \`Film\` mutation."""
 input CreateFilmInput {
   """
@@ -1780,6 +1780,7 @@ input TvShowCondition {
 input TvShowInput {
   code: Int!
   studioId: Int
+  title: String
 }
 
 """
@@ -1788,7 +1789,6 @@ Represents an update to a \`TvShow\`. Fields that are set will be updated.
 input TvShowPatch {
   code: Int
   studioId: Int
-  title: String
 }
 
 """A connection to a list of \`TvShow\` values."""

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`omit create on column 1`] = `
+exports[`omit delete on table 1`] = `
 """All input for the create \`Film\` mutation."""
 input CreateFilmInput {
   """
@@ -257,54 +257,6 @@ type CreateTvShowPayload {
 
 """A location in a connection that can be used for resuming pagination."""
 scalar Cursor
-
-"""All input for the \`deleteFilmByCode\` mutation."""
-input DeleteFilmByCodeInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-  code: Int!
-}
-
-"""All input for the \`deleteFilm\` mutation."""
-input DeleteFilmInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-
-  """
-  The globally unique \`ID\` which will identify a single \`Film\` to be deleted.
-  """
-  nodeId: ID!
-}
-
-"""The output of our delete \`Film\` mutation."""
-type DeleteFilmPayload {
-  """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
-  """
-  clientMutationId: String
-  deletedFilmId: ID
-
-  """The \`Film\` that was deleted by this mutation."""
-  film: Film
-
-  """An edge for our \`Film\`. May be used by Relay 1."""
-  filmEdge(
-    """The method to use when ordering \`Film\`."""
-    orderBy: [FilmsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): FilmsEdge
-
-  """
-  Our root query field type. Allows us to run any query from our mutation payload.
-  """
-  query: Query
-}
 
 """All input for the \`deletePersonById\` mutation."""
 input DeletePersonByIdInput {
@@ -744,22 +696,6 @@ type Mutation {
     """
     input: CreateTvShowInput!
   ): CreateTvShowPayload
-
-  """Deletes a single \`Film\` using its globally unique id."""
-  deleteFilm(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: DeleteFilmInput!
-  ): DeleteFilmPayload
-
-  """Deletes a single \`Film\` using a unique key."""
-  deleteFilmByCode(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: DeleteFilmByCodeInput!
-  ): DeleteFilmPayload
 
   """Deletes a single \`Person\` using its globally unique id."""
   deletePerson(
@@ -1780,6 +1716,7 @@ input TvShowCondition {
 input TvShowInput {
   code: Int!
   studioId: Int
+  title: String
 }
 
 """

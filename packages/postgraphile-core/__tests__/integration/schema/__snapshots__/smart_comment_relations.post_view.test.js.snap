@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`prints a schema for smart_comment_relations 1`] = `
+exports[`referencing other view (no columns) 1`] = `
 type Building implements Node {
   floors: Int!
 

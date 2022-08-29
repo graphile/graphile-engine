@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`prints a schema for smart_comment_relations 1`] = `
+exports[`referencing other view (specifying columns, no PK) 1`] = `
 type Building implements Node {
   floors: Int!
 
@@ -238,7 +238,7 @@ type CreatePostPayload {
   """An edge for our \`Post\`. May be used by Relay 1."""
   postEdge(
     """The method to use when ordering \`Post\`."""
-    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
+    orderBy: [PostsOrderBy!] = [NATURAL]
   ): PostsEdge
 
   """
@@ -462,54 +462,6 @@ type DeleteOfferPayload {
 
   """Reads a single \`Post\` that is related to this \`Offer\`."""
   postByPostId: Post
-
-  """
-  Our root query field type. Allows us to run any query from our mutation payload.
-  """
-  query: Query
-}
-
-"""All input for the \`deletePostById\` mutation."""
-input DeletePostByIdInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-  id: String!
-}
-
-"""All input for the \`deletePost\` mutation."""
-input DeletePostInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-
-  """
-  The globally unique \`ID\` which will identify a single \`Post\` to be deleted.
-  """
-  nodeId: ID!
-}
-
-"""The output of our delete \`Post\` mutation."""
-type DeletePostPayload {
-  """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
-  """
-  clientMutationId: String
-  deletedPostViewId: ID
-
-  """The \`Post\` that was deleted by this mutation."""
-  post: Post
-
-  """An edge for our \`Post\`. May be used by Relay 1."""
-  postEdge(
-    """The method to use when ordering \`Post\`."""
-    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PostsEdge
 
   """
   Our root query field type. Allows us to run any query from our mutation payload.
@@ -864,22 +816,6 @@ type Mutation {
     input: DeleteOfferByIdInput!
   ): DeleteOfferPayload
 
-  """Deletes a single \`Post\` using its globally unique id."""
-  deletePost(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: DeletePostInput!
-  ): DeletePostPayload
-
-  """Deletes a single \`Post\` using a unique key."""
-  deletePostById(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: DeletePostByIdInput!
-  ): DeletePostPayload
-
   """Deletes a single \`Property\` using its globally unique id."""
   deleteProperty(
     """
@@ -967,22 +903,6 @@ type Mutation {
     """
     input: UpdateOfferByIdInput!
   ): UpdateOfferPayload
-
-  """Updates a single \`Post\` using its globally unique id and a patch."""
-  updatePost(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: UpdatePostInput!
-  ): UpdatePostPayload
-
-  """Updates a single \`Post\` using a unique key and a patch."""
-  updatePostById(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: UpdatePostByIdInput!
-  ): UpdatePostPayload
 
   """Updates a single \`Property\` using its globally unique id and a patch."""
   updateProperty(
@@ -1141,13 +1061,8 @@ type PageInfo {
   startCursor: Cursor
 }
 
-type Post implements Node {
-  id: String!
-
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
+type Post {
+  id: String
 
   """Reads and enables pagination through a set of \`Offer\`."""
   offersByPostId(
@@ -1189,11 +1104,6 @@ input PostCondition {
 
 """An input for mutations affecting \`Post\`"""
 input PostInput {
-  id: String!
-}
-
-"""Represents an update to a \`Post\`. Fields that are set will be updated."""
-input PostPatch {
   id: String
 }
 
@@ -1228,8 +1138,6 @@ enum PostsOrderBy {
   ID_ASC
   ID_DESC
   NATURAL
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
 }
 
 """A connection to a list of \`Property\` values."""
@@ -1517,7 +1425,7 @@ type Query implements Node {
     offset: Int
 
     """The method to use when ordering \`Post\`."""
-    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
+    orderBy: [PostsOrderBy!] = [NATURAL]
   ): PostsConnection
 
   """Reads and enables pagination through a set of \`Property\`."""
@@ -1638,13 +1546,6 @@ type Query implements Node {
     nodeId: ID!
   ): Offer
   offerById(id: Int!): Offer
-
-  """Reads a single \`Post\` using its globally unique \`ID\`."""
-  post(
-    """The globally unique \`ID\` to be used in selecting a single \`Post\`."""
-    nodeId: ID!
-  ): Post
-  postById(id: String!): Post
 
   """Reads a single \`Property\` using its globally unique \`ID\`."""
   property(
@@ -2099,63 +2000,6 @@ type UpdateOfferPayload {
 
   """Reads a single \`Post\` that is related to this \`Offer\`."""
   postByPostId: Post
-
-  """
-  Our root query field type. Allows us to run any query from our mutation payload.
-  """
-  query: Query
-}
-
-"""All input for the \`updatePostById\` mutation."""
-input UpdatePostByIdInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-  id: String!
-
-  """
-  An object where the defined keys will be set on the \`Post\` being updated.
-  """
-  postPatch: PostPatch!
-}
-
-"""All input for the \`updatePost\` mutation."""
-input UpdatePostInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-
-  """
-  The globally unique \`ID\` which will identify a single \`Post\` to be updated.
-  """
-  nodeId: ID!
-
-  """
-  An object where the defined keys will be set on the \`Post\` being updated.
-  """
-  postPatch: PostPatch!
-}
-
-"""The output of our update \`Post\` mutation."""
-type UpdatePostPayload {
-  """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
-  """
-  clientMutationId: String
-
-  """The \`Post\` that was updated by this mutation."""
-  post: Post
-
-  """An edge for our \`Post\`. May be used by Relay 1."""
-  postEdge(
-    """The method to use when ordering \`Post\`."""
-    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PostsEdge
 
   """
   Our root query field type. Allows us to run any query from our mutation payload.

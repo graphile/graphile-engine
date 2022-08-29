@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`omit create on column 1`] = `
+exports[`omit many on constraint and table 1`] = `
 """All input for the create \`Film\` mutation."""
 input CreateFilmInput {
   """
@@ -1036,35 +1036,6 @@ type Person implements Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-
-  """Reads and enables pagination through a set of \`Post\`."""
-  posts(
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PostCondition
-
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """The method to use when ordering \`Post\`."""
-    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PostsConnection!
 }
 
 """
@@ -1542,35 +1513,6 @@ type Studio implements Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-
-  """Reads and enables pagination through a set of \`TvShow\`."""
-  tvShowsByStudioId(
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: TvShowCondition
-
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """The method to use when ordering \`TvShow\`."""
-    orderBy: [TvShowsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): TvShowsConnection!
 }
 
 """
@@ -1731,35 +1673,6 @@ type TvShow implements Node {
   studioByStudioId: Studio
   studioId: Int
   title: String
-
-  """Reads and enables pagination through a set of \`TvEpisode\`."""
-  tvEpisodesByShowId(
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: TvEpisodeCondition
-
-    """Only read the first \`n\` values of the set."""
-    first: Int
-
-    """Only read the last \`n\` values of the set."""
-    last: Int
-
-    """
-    Skip the first \`n\` values from our \`after\` cursor, an alternative to cursor
-    based pagination. May not be used with \`last\`.
-    """
-    offset: Int
-
-    """The method to use when ordering \`TvEpisode\`."""
-    orderBy: [TvEpisodesOrderBy!] = [PRIMARY_KEY_ASC]
-  ): TvEpisodesConnection!
 }
 
 """
@@ -1780,6 +1693,7 @@ input TvShowCondition {
 input TvShowInput {
   code: Int!
   studioId: Int
+  title: String
 }
 
 """

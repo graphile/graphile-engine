@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`omit create on column 1`] = `
+exports[`omit read on column 1`] = `
 """All input for the create \`Film\` mutation."""
 input CreateFilmInput {
   """
@@ -1730,7 +1730,6 @@ type TvShow implements Node {
   """Reads a single \`Studio\` that is related to this \`TvShow\`."""
   studioByStudioId: Studio
   studioId: Int
-  title: String
 
   """Reads and enables pagination through a set of \`TvEpisode\`."""
   tvEpisodesByShowId(
@@ -1788,7 +1787,6 @@ Represents an update to a \`TvShow\`. Fields that are set will be updated.
 input TvShowPatch {
   code: Int
   studioId: Int
-  title: String
 }
 
 """A connection to a list of \`TvShow\` values."""

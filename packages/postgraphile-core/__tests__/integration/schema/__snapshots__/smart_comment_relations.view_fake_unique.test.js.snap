@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`prints a schema for smart_comment_relations 1`] = `
+exports[`view with fake unique constraint 1`] = `
 type Building implements Node {
   floors: Int!
 
@@ -238,7 +238,7 @@ type CreatePostPayload {
   """An edge for our \`Post\`. May be used by Relay 1."""
   postEdge(
     """The method to use when ordering \`Post\`."""
-    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
+    orderBy: [PostsOrderBy!] = [NATURAL]
   ): PostsEdge
 
   """
@@ -479,20 +479,6 @@ input DeletePostByIdInput {
   id: String!
 }
 
-"""All input for the \`deletePost\` mutation."""
-input DeletePostInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-
-  """
-  The globally unique \`ID\` which will identify a single \`Post\` to be deleted.
-  """
-  nodeId: ID!
-}
-
 """The output of our delete \`Post\` mutation."""
 type DeletePostPayload {
   """
@@ -508,7 +494,7 @@ type DeletePostPayload {
   """An edge for our \`Post\`. May be used by Relay 1."""
   postEdge(
     """The method to use when ordering \`Post\`."""
-    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
+    orderBy: [PostsOrderBy!] = [NATURAL]
   ): PostsEdge
 
   """
@@ -864,14 +850,6 @@ type Mutation {
     input: DeleteOfferByIdInput!
   ): DeleteOfferPayload
 
-  """Deletes a single \`Post\` using its globally unique id."""
-  deletePost(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: DeletePostInput!
-  ): DeletePostPayload
-
   """Deletes a single \`Post\` using a unique key."""
   deletePostById(
     """
@@ -967,14 +945,6 @@ type Mutation {
     """
     input: UpdateOfferByIdInput!
   ): UpdateOfferPayload
-
-  """Updates a single \`Post\` using its globally unique id and a patch."""
-  updatePost(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: UpdatePostInput!
-  ): UpdatePostPayload
 
   """Updates a single \`Post\` using a unique key and a patch."""
   updatePostById(
@@ -1141,13 +1111,8 @@ type PageInfo {
   startCursor: Cursor
 }
 
-type Post implements Node {
-  id: String!
-
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
+type Post {
+  id: String
 
   """Reads and enables pagination through a set of \`Offer\`."""
   offersByPostId(
@@ -1189,7 +1154,7 @@ input PostCondition {
 
 """An input for mutations affecting \`Post\`"""
 input PostInput {
-  id: String!
+  id: String
 }
 
 """Represents an update to a \`Post\`. Fields that are set will be updated."""
@@ -1228,8 +1193,6 @@ enum PostsOrderBy {
   ID_ASC
   ID_DESC
   NATURAL
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
 }
 
 """A connection to a list of \`Property\` values."""
@@ -1517,7 +1480,7 @@ type Query implements Node {
     offset: Int
 
     """The method to use when ordering \`Post\`."""
-    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
+    orderBy: [PostsOrderBy!] = [NATURAL]
   ): PostsConnection
 
   """Reads and enables pagination through a set of \`Property\`."""
@@ -1638,12 +1601,6 @@ type Query implements Node {
     nodeId: ID!
   ): Offer
   offerById(id: Int!): Offer
-
-  """Reads a single \`Post\` using its globally unique \`ID\`."""
-  post(
-    """The globally unique \`ID\` to be used in selecting a single \`Post\`."""
-    nodeId: ID!
-  ): Post
   postById(id: String!): Post
 
   """Reads a single \`Property\` using its globally unique \`ID\`."""
@@ -2121,25 +2078,6 @@ input UpdatePostByIdInput {
   postPatch: PostPatch!
 }
 
-"""All input for the \`updatePost\` mutation."""
-input UpdatePostInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-
-  """
-  The globally unique \`ID\` which will identify a single \`Post\` to be updated.
-  """
-  nodeId: ID!
-
-  """
-  An object where the defined keys will be set on the \`Post\` being updated.
-  """
-  postPatch: PostPatch!
-}
-
 """The output of our update \`Post\` mutation."""
 type UpdatePostPayload {
   """
@@ -2154,7 +2092,7 @@ type UpdatePostPayload {
   """An edge for our \`Post\`. May be used by Relay 1."""
   postEdge(
     """The method to use when ordering \`Post\`."""
-    orderBy: [PostsOrderBy!] = [PRIMARY_KEY_ASC]
+    orderBy: [PostsOrderBy!] = [NATURAL]
   ): PostsEdge
 
   """

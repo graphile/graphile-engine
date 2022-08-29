@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`prints a schema to test PG11-specific features with default options 1`] = `
+exports[`prints a schema to test PG11-specific features with custom network scalars 1`] = `
 """A connection to a list of \`AlwaysAsIdentity\` values."""
 type AlwaysAsIdentitiesConnection {
   """
@@ -150,6 +150,9 @@ input ByDefaultAsIdentityPatch {
   id: Int
   t: String
 }
+
+"""An IPv4 or IPv6 CIDR address."""
+scalar CidrAddress
 
 enum Color {
   BLUE
@@ -584,6 +587,12 @@ input IntervalInput {
   years: Int
 }
 
+"""A 6-byte MAC address."""
+scalar MacAddress
+
+"""An 8-byte MAC address."""
+scalar MacAddress8
+
 """
 The root mutation type which contains root level fields which mutate data.
 """
@@ -754,11 +763,11 @@ type Mutation {
 }
 
 type Network implements Node {
-  cidr: String
+  cidr: CidrAddress
   id: Int!
   inet: InternetAddress
-  macaddr: String
-  macaddr8: String
+  macaddr: MacAddress
+  macaddr8: MacAddress8
 
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
@@ -771,7 +780,7 @@ A condition to be used against \`Network\` object types. All fields are tested f
 """
 input NetworkCondition {
   """Checks for equality with the object’s \`cidr\` field."""
-  cidr: String
+  cidr: CidrAddress
 
   """Checks for equality with the object’s \`id\` field."""
   id: Int
@@ -780,30 +789,30 @@ input NetworkCondition {
   inet: InternetAddress
 
   """Checks for equality with the object’s \`macaddr\` field."""
-  macaddr: String
+  macaddr: MacAddress
 
   """Checks for equality with the object’s \`macaddr8\` field."""
-  macaddr8: String
+  macaddr8: MacAddress8
 }
 
 """An input for mutations affecting \`Network\`"""
 input NetworkInput {
-  cidr: String
+  cidr: CidrAddress
   id: Int
   inet: InternetAddress
-  macaddr: String
-  macaddr8: String
+  macaddr: MacAddress
+  macaddr8: MacAddress8
 }
 
 """
 Represents an update to a \`Network\`. Fields that are set will be updated.
 """
 input NetworkPatch {
-  cidr: String
+  cidr: CidrAddress
   id: Int
   inet: InternetAddress
-  macaddr: String
-  macaddr8: String
+  macaddr: MacAddress
+  macaddr8: MacAddress8
 }
 
 """A connection to a list of \`Network\` values."""

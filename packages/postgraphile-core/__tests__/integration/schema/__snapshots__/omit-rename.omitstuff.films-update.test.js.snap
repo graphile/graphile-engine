@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`omit create on column 1`] = `
+exports[`omit update on table 1`] = `
 """All input for the create \`Film\` mutation."""
 input CreateFilmInput {
   """
@@ -582,12 +582,6 @@ input FilmInput {
   title: String
 }
 
-"""Represents an update to a \`Film\`. Fields that are set will be updated."""
-input FilmPatch {
-  code: Int
-  title: String
-}
-
 """A connection to a list of \`Film\` values."""
 type FilmsConnection {
   """
@@ -852,22 +846,6 @@ type Mutation {
     """
     input: LoginInput!
   ): LoginPayload
-
-  """Updates a single \`Film\` using its globally unique id and a patch."""
-  updateFilm(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: UpdateFilmInput!
-  ): UpdateFilmPayload
-
-  """Updates a single \`Film\` using a unique key and a patch."""
-  updateFilmByCode(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: UpdateFilmByCodeInput!
-  ): UpdateFilmPayload
 
   """Updates a single \`Person\` using its globally unique id and a patch."""
   updatePerson(
@@ -1780,6 +1758,7 @@ input TvShowCondition {
 input TvShowInput {
   code: Int!
   studioId: Int
+  title: String
 }
 
 """
@@ -1828,63 +1807,6 @@ enum TvShowsOrderBy {
   STUDIO_ID_DESC
   TITLE_ASC
   TITLE_DESC
-}
-
-"""All input for the \`updateFilmByCode\` mutation."""
-input UpdateFilmByCodeInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-  code: Int!
-
-  """
-  An object where the defined keys will be set on the \`Film\` being updated.
-  """
-  filmPatch: FilmPatch!
-}
-
-"""All input for the \`updateFilm\` mutation."""
-input UpdateFilmInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-
-  """
-  An object where the defined keys will be set on the \`Film\` being updated.
-  """
-  filmPatch: FilmPatch!
-
-  """
-  The globally unique \`ID\` which will identify a single \`Film\` to be updated.
-  """
-  nodeId: ID!
-}
-
-"""The output of our update \`Film\` mutation."""
-type UpdateFilmPayload {
-  """
-  The exact same \`clientMutationId\` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
-  """
-  clientMutationId: String
-
-  """The \`Film\` that was updated by this mutation."""
-  film: Film
-
-  """An edge for our \`Film\`. May be used by Relay 1."""
-  filmEdge(
-    """The method to use when ordering \`Film\`."""
-    orderBy: [FilmsOrderBy!] = [PRIMARY_KEY_ASC]
-  ): FilmsEdge
-
-  """
-  Our root query field type. Allows us to run any query from our mutation payload.
-  """
-  query: Query
 }
 
 """All input for the \`updatePersonById\` mutation."""

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`prints a schema with the default options 1`] = `
+exports[`prints a schema from non-root role, with RBAC ignored 1`] = `
 """All input for the \`add1Mutation\` mutation."""
 input Add1MutationInput {
   arg0: Int!
