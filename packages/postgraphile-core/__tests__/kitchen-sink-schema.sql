@@ -13,6 +13,7 @@ drop schema if exists
   large_bigint,
   network_types,
   named_query_builder,
+  distinct_query_builder,
   enum_tables,
   geometry
 cascade;
@@ -1136,6 +1137,16 @@ create table named_query_builder.toy_categories (
   toy_id int not null references named_query_builder.toys,
   category_id int not null references named_query_builder.categories,
   approved boolean not null
+);
+
+--------------------------------------------------------------------------------
+
+create schema distinct_query_builder;
+
+create table distinct_query_builder.toys (
+  id serial primary key,
+  name text not null,
+  color text not null
 );
 
 --------------------------------------------------------------------------------

@@ -276,6 +276,13 @@ insert into named_query_builder.toy_categories(toy_id, category_id, approved) va
   (4, 2, true),
   (1, 3, false);
 
+
+insert into distinct_query_builder.toys (id, name, color) values
+  (1, 'Rex', 'green'),
+  (2, 'Toy Soldiers', 'green'),
+  (3, 'Dino-Rocket Launcher', 'red'),
+  (4, 'History of Dinosaurs book', 'red');
+
 --------------------------------------------------------------------------------
 alter sequence enum_tables.letter_descriptions_id_seq restart with 101;
 insert into enum_tables.letter_descriptions(letter, letter_via_view, description) values

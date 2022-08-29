@@ -1,0 +1,46 @@
+{
+  t1: {
+    nodes: [
+      {
+        name: "Dino-Rocket Launcher",
+        color: "red",
+      },
+      {
+        name: "Rex",
+        color: "green",
+      },
+    ],
+  },
+  t2: {
+    nodes: [
+      {
+        name: "Toy Soldiers",
+      },
+      {
+        name: "Rex",
+      },
+      {
+        name: "History of Dinosaurs book",
+      },
+      {
+        name: "Dino-Rocket Launcher",
+      },
+    ],
+  },
+  t3: {
+    nodes: [
+      {
+        name: "Rex",
+      },
+      {
+        name: "Toy Soldiers",
+      },
+      {
+        name: "Dino-Rocket Launcher",
+      },
+      {
+        name: "History of Dinosaurs book",
+      },
+    ],
+  },
+}

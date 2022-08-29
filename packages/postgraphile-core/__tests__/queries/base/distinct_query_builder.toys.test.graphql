@@ -1,0 +1,22 @@
+## expect(errors).toBeFalsy();
+#> schema: ["distinct_query_builder"]
+#> subscriptions: true
+#> DistinctOnPlugin: true
+{
+  t1: allToys(distinct: "color") {
+    nodes {
+      name
+      color
+    }
+  }
+  t2: allToys(distinct: "name") {
+    nodes {
+      name
+    }
+  }
+  t3: allToys {
+    nodes {
+      name
+    }
+  }
+}

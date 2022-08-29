@@ -24,6 +24,7 @@ import { withPgClient, getServerVersionNum } from "./helpers";
 import jsonwebtoken from "jsonwebtoken";
 import { createPostGraphileSchema } from "..";
 import { makeExtendSchemaPlugin, gql } from "graphile-utils";
+import DistinctOnPlugin from "./integration/DistinctOnPlugin";
 import ToyCategoriesPlugin from "./integration/ToyCategoriesPlugin";
 
 /**
@@ -468,6 +469,7 @@ const makeSchema = config => {
         appendPlugins: [
           ExtendedPlugin,
           config.ToyCategoriesPlugin ? ToyCategoriesPlugin : null,
+          config.DistinctOnPlugin ? DistinctOnPlugin : null,
         ].filter(isNotNullish),
       }
     );
