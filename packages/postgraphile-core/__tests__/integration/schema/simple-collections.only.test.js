@@ -1,9 +1,9 @@
 const core = require("./core");
 
 test(
-  "prints a schema with both simple collections and relay connections",
+  "prints a schema with only simple collections",
   core.test(__filename, "c", {
-    simpleCollections: "both",
+    simpleCollections: "only",
     setofFunctionsContainNulls: false,
   })
 );

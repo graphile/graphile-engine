@@ -1,13 +1,13 @@
 const core = require("./core");
 
 test(
-  "omit create on column",
+  "omit read on table",
   core.test(
     __filename,
     ["d"],
     {},
     `
-comment on column d.tv_shows.title is E'@omit create';
+comment on table d.films is E'@omit read,all,update,create,delete,many';
 `
   )
 );
