@@ -8,6 +8,6 @@ test("Simple schema print (no ordering)", () =>
     const schema = await createPostGraphileSchema(client, ["a", "b", "c"], {
       subscriptions: true,
     });
-    const filePath = `${__filename.replace(/\.[jt]s$/, "")}.graphql`;
+    const filePath = `${__filename.replace(/\.test\.[jt]s$/, "")}.graphql`;
     return snapshot(printSchema(schema), filePath);
   }));
