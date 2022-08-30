@@ -3,6 +3,7 @@ import * as sql from "pg-sql2";
 import type { SQL } from "pg-sql2";
 import isSafeInteger from "lodash/isSafeInteger";
 import chunk from "lodash/chunk";
+import isEqual from "lodash/isEqual";
 import type { PgClass, PgType } from "./plugins/PgIntrospectionPlugin";
 
 // eslint-disable-next-line flowtype/no-weak-types
@@ -886,18 +887,15 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
       this.compiledData[type] = data;
     } else if (type === "orderBy") {
       // Add distinct to existing order by to avoid `SELECT DISTINCT ON expressions must match initial ORDER BY expressions`
-      if (this.data[type].length) {
-        this.data["distinctOn"].forEach(d => {
-          if (!this.data[type].find(([a]) => a === d)) {
-            this.data[type].unshift([d, true, undefined]);
-          }
-        });
-      }
-      this.compiledData[type] = this.data[type].map(([a, b, c]) => [
-        callIfNecessary(a, context),
-        b,
-        c,
-      ]);
+      // Convert distinct fields to order by applying ascending and using existing order by for matching fields
+      const distinctAsOrderBy = this.data["distinctOn"].map(
+        d => this.data[type].find(([a]) => isEqual(a, d)) ?? [d, true, null]
+      );
+
+      // Create a union of the distinct and order by fields
+      this.compiledData[type] = [
+        ...new Set([...distinctAsOrderBy, ...this.data[type]]),
+      ].map(([a, b, c]) => [callIfNecessary(a, context), b, c]);
     } else if (type === "from") {
       if (this.data.from) {
         const f = this.data.from;

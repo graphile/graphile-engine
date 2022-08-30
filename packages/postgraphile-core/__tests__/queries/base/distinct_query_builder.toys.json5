@@ -14,16 +14,16 @@
   t2: {
     nodes: [
       {
-        name: "Dino-Rocket Launcher",
-      },
-      {
-        name: "History of Dinosaurs book",
-      },
-      {
         name: "Rex",
       },
       {
         name: "Toy Soldiers",
+      },
+      {
+        name: "Dino-Rocket Launcher",
+      },
+      {
+        name: "History of Dinosaurs book",
       },
     ],
   },

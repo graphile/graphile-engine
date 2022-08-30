@@ -3,7 +3,7 @@ module.exports = builder => {
     "GraphQLObjectType:fields:field:args",
     (args, build, context) => {
       const {
-        graphql: { GraphQLString },
+        graphql: { GraphQLString, GraphQLList },
         pgSql: sql,
       } = build;
 
@@ -20,14 +20,13 @@ module.exports = builder => {
       addArgDataGenerator(({ distinct }) => {
         return {
           pgQuery: queryBuilder => {
-            if (!distinct) {
-              return;
-            }
-            const id = sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
-              distinct
-            )}`;
+            distinct?.map(field => {
+              const id = sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
+                field
+              )}`;
 
-            queryBuilder.distinctOn(id);
+              queryBuilder.distinctOn(id);
+            });
           },
         };
       });
@@ -36,7 +35,7 @@ module.exports = builder => {
         args,
         {
           distinct: {
-            type: GraphQLString,
+            type: new GraphQLList(GraphQLString),
           },
         },
         "test"

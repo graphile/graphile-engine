@@ -45,11 +45,14 @@ with __local_0__ as (
     )
   ) as "@nodes"
   from (
-    select distinct on (__local_1__."name") __local_1__.*
+    select distinct on (
+      __local_1__."id",
+      __local_1__."name"
+    ) __local_1__.*
     from "distinct_query_builder"."toys" as __local_1__
     where (TRUE) and (TRUE)
-    order by __local_1__."name" ASC,
-    __local_1__."id" ASC
+    order by __local_1__."id" ASC,
+    __local_1__."name" ASC
   ) __local_1__
 ),
 __local_2__ as (
