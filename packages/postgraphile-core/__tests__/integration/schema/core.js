@@ -1,9 +1,12 @@
-const { lexicographicSortSchema } = require("graphql");
+const { lexicographicSortSchema, printSchema } = require("graphql");
 const { withPgClient } = require("../../helpers");
 const { createPostGraphileSchema } = require("../../..");
+const { snapshot } = require("../../helpers-v5");
+
+let countByPath = Object.create(null);
 
 exports.test =
-  (schemas, options, setup, finalCheck = () => {}) =>
+  (testPath, schemas, options, setup, finalCheck = async () => {}) =>
   () =>
     withPgClient(async client => {
       if (setup) {
@@ -14,6 +17,11 @@ exports.test =
         }
       }
       const schema = await createPostGraphileSchema(client, schemas, options);
-      expect(lexicographicSortSchema(schema)).toMatchSnapshot();
+      const i = testPath in countByPath ? countByPath[testPath] + 1 : 1;
+      countByPath[testPath] = i;
+      const sorted = lexicographicSortSchema(schema);
+      const printed = printSchema(sorted);
+      const filePath = `${testPath.replace(/\.test\.[jt]s$/, "")}.${i}.graphql`;
+      await snapshot(printed, filePath);
       await finalCheck(schema);
     });

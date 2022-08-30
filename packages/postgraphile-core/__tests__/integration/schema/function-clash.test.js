@@ -13,6 +13,7 @@ afterAll(() => {
 test(
   "raises an error when a function tries to overwrite a CRUD mutation",
   core.test(
+    __filename,
     ["a", "b", "c"],
     {},
     pgClient => {
