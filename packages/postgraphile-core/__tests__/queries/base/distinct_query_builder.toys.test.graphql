@@ -5,18 +5,23 @@
 {
   t1: allToys(distinct: ["color"]) {
     nodes {
+      id
       name
       color
     }
   }
   t2: allToys(distinct: ["id", "name"]) {
     nodes {
+      id
       name
+      color
     }
   }
   t3: allToys {
     nodes {
+      id
       name
+      color
     }
   }
 }

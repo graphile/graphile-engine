@@ -21,6 +21,9 @@ module.exports = builder => {
         return {
           pgQuery: queryBuilder => {
             distinct?.map(field => {
+              // THIS IS AN EXAMPLE FOR THE TESTS. DO NOT USE THIS IN REAL PRODUCTION CODE!
+              // Instead you should use an enum to indicate the allowed identifiers; otherwise
+              // you risk interacting with the system columns and maybe worse.
               const id = sql.fragment`${queryBuilder.getTableAlias()}.${sql.identifier(
                 field
               )}`;
