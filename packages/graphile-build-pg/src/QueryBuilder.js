@@ -3,8 +3,8 @@ import * as sql from "pg-sql2";
 import type { SQL } from "pg-sql2";
 import isSafeInteger from "lodash/isSafeInteger";
 import chunk from "lodash/chunk";
-import isEqual from "lodash/isEqual";
 import type { PgClass, PgType } from "./plugins/PgIntrospectionPlugin";
+import { arraysMatch } from "./utils";
 
 // eslint-disable-next-line flowtype/no-weak-types
 type GraphQLContext = any;
@@ -214,6 +214,7 @@ class QueryBuilder {
         last: [],
         limit: [],
         offset: [],
+        distinctOn: [],
       },
       cursorComparator: null,
       liveConditions: [],
@@ -756,11 +757,11 @@ ${sql.join(
     let fragment = sql.fragment`\
 select ${
       this.compiledData.distinctOn.length
-      ? sql.fragment`distinct on (${sql.join(
-          this.compiledData.distinctOn,
-          ", "
-        )})`
-      : sql.blank
+        ? sql.fragment`distinct on (${sql.join(
+            this.compiledData.distinctOn,
+            ", "
+          )})`
+        : sql.blank
     }
 ${useAsterisk ? sql.fragment`${this.getTableAlias()}.*` : fields}
 ${
@@ -886,16 +887,29 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
       this.locks[type] = isDev ? new Error("Initally locked here").stack : true;
       this.compiledData[type] = data;
     } else if (type === "orderBy") {
-      // Add distinct to existing order by to avoid `SELECT DISTINCT ON expressions must match initial ORDER BY expressions`
-      // Convert distinct fields to order by applying ascending and using existing order by for matching fields
-      const distinctAsOrderBy = this.data["distinctOn"].map(
-        d => this.data[type].find(([a]) => isEqual(a, d)) ?? [d, true, null]
-      );
+      if (this.data["distinctOn"].length) {
+        // Add distinct to existing order by to avoid `SELECT DISTINCT ON expressions must match initial ORDER BY expressions`
+        // Convert distinct fields to order by applying ascending and using existing order by for matching fields
+        const distinctAsOrderBy = this.data["distinctOn"].map(
+          d =>
+            this.data[type].find(
+              ([a]) =>
+                a === d ||
+                (Array.isArray(a) && Array.isArray(d) && arraysMatch(a, d))
+            ) ?? [d, true, null]
+        );
 
-      // Create a union of the distinct and order by fields
-      this.compiledData[type] = [
-        ...new Set([...distinctAsOrderBy, ...this.data[type]]),
-      ].map(([a, b, c]) => [callIfNecessary(a, context), b, c]);
+        // Create a union of the distinct and order by fields
+        this.compiledData[type] = [
+          ...new Set([...distinctAsOrderBy, ...this.data[type]]),
+        ].map(([a, b, c]) => [callIfNecessary(a, context), b, c]);
+      } else {
+        this.compiledData[type] = this.data[type].map(([a, b, c]) => [
+          callIfNecessary(a, context),
+          b,
+          c,
+        ]);
+      }
     } else if (type === "from") {
       if (this.data.from) {
         const f = this.data.from;

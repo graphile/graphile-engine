@@ -4,6 +4,8 @@ with __local_0__ as (
       json_build_object(
         '__identifiers'::text,
         json_build_array(__local_1__."id"),
+        'id'::text,
+        (__local_1__."id"),
         'name'::text,
         (__local_1__."name"),
         'color'::text,
@@ -39,8 +41,12 @@ with __local_0__ as (
       json_build_object(
         '__identifiers'::text,
         json_build_array(__local_1__."id"),
+        'id'::text,
+        (__local_1__."id"),
         'name'::text,
-        (__local_1__."name")
+        (__local_1__."name"),
+        'color'::text,
+        (__local_1__."color")
       )
     )
   ) as "@nodes"
@@ -52,7 +58,8 @@ with __local_0__ as (
     from "distinct_query_builder"."toys" as __local_1__
     where (TRUE) and (TRUE)
     order by __local_1__."id" ASC,
-    __local_1__."name" ASC
+    __local_1__."name" ASC,
+    __local_1__."id" ASC
   ) __local_1__
 ),
 __local_2__ as (
@@ -75,8 +82,12 @@ with __local_0__ as (
       json_build_object(
         '__identifiers'::text,
         json_build_array(__local_1__."id"),
+        'id'::text,
+        (__local_1__."id"),
         'name'::text,
-        (__local_1__."name")
+        (__local_1__."name"),
+        'color'::text,
+        (__local_1__."color")
       )
     )
   ) as "@nodes"

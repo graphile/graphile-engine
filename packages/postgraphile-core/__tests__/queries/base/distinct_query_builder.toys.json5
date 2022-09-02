@@ -2,10 +2,12 @@
   t1: {
     nodes: [
       {
+        id: 1,
         name: "Rex",
         color: "green",
       },
       {
+        id: 3,
         name: "Dino-Rocket Launcher",
         color: "red",
       },
@@ -14,32 +16,48 @@
   t2: {
     nodes: [
       {
+        id: 1,
         name: "Rex",
+        color: "green",
       },
       {
+        id: 2,
         name: "Toy Soldiers",
+        color: "green",
       },
       {
+        id: 3,
         name: "Dino-Rocket Launcher",
+        color: "red",
       },
       {
+        id: 4,
         name: "History of Dinosaurs book",
+        color: "red",
       },
     ],
   },
   t3: {
     nodes: [
       {
+        id: 1,
         name: "Rex",
+        color: "green",
       },
       {
+        id: 2,
         name: "Toy Soldiers",
+        color: "green",
       },
       {
+        id: 3,
         name: "Dino-Rocket Launcher",
+        color: "red",
       },
       {
+        id: 4,
         name: "History of Dinosaurs book",
+        color: "red",
       },
     ],
   },
