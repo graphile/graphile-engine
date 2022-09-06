@@ -24,4 +24,12 @@
       color
     }
   }
+  t4: allToys(distinct: ["color"]) {
+    totalCount
+    nodes {
+      id
+      name
+      color
+    }
+  }
 }

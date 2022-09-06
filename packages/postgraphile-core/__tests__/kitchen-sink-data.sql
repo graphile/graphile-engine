@@ -276,7 +276,6 @@ insert into named_query_builder.toy_categories(toy_id, category_id, approved) va
   (4, 2, true),
   (1, 3, false);
 
-
 insert into distinct_query_builder.toys (id, name, color) values
   (1, 'Rex', 'green'),
   (2, 'Toy Soldiers', 'green'),

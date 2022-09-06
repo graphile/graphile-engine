@@ -265,6 +265,16 @@ class QueryBuilder {
       this.lock("limit");
       this.lock("offset");
     });
+    this.beforeLock("distinctOn", () => {
+      this.lock("selectCursor");
+      this.lock("cursorComparator");
+    });
+    this.beforeLock("selectCursor", () => {
+      this.lock("distinctOn");
+    });
+    this.beforeLock("cursorComparator", () => {
+      this.lock("distinctOn");
+    });
     this.lockContext = Object.freeze({
       queryBuilder: this,
     });
