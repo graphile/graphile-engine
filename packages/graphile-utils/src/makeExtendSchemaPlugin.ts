@@ -20,6 +20,7 @@ import type {
   GraphQLType,
   GraphQLNamedType,
   GraphQLOutputType,
+  GraphQLScalarType,
 
   // Config:
   GraphQLEnumValueConfigMap,
@@ -84,7 +85,7 @@ export interface EnumResolver {
 }
 
 export interface Resolvers<TSource = any, TContext = any> {
-  [key: string]: ObjectResolver<TSource, TContext> | EnumResolver;
+  [key: string]: ObjectResolver<TSource, TContext> | EnumResolver | GraphQLScalarType;
 }
 
 export interface ExtensionDefinition {
