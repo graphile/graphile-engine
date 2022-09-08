@@ -905,7 +905,13 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
             this.data[type].find(
               ([a]) =>
                 a === d ||
-                (Array.isArray(a) && Array.isArray(d) && arraysMatch(a, d))
+                (Array.isArray(a) &&
+                  Array.isArray(d) &&
+                  arraysMatch(
+                    a,
+                    d,
+                    (v1, v2) => JSON.stringify(v1) === JSON.stringify(v2)
+                  ))
             ) ?? [d, true, null]
         );
 

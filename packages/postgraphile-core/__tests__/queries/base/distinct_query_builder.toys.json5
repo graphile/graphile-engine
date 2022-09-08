@@ -76,4 +76,18 @@
       },
     ],
   },
+  t5: {
+    nodes: [
+      {
+        id: 3,
+        name: "Dino-Rocket Launcher",
+        color: "red",
+      },
+      {
+        id: 1,
+        name: "Rex",
+        color: "green",
+      },
+    ],
+  },
 }

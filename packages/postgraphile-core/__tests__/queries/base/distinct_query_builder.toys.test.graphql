@@ -32,4 +32,11 @@
       color
     }
   }
+  t5: allToys(distinct: ["color"], orderBy: COLOR_DESC) {
+    nodes {
+      id
+      name
+      color
+    }
+  }
 }
