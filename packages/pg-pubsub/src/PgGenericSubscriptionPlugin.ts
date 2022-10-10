@@ -174,11 +174,11 @@ const PgGenericSubscriptionPlugin: Plugin = function (
               topic: {
                 type: new GraphQLNonNull(GraphQLString),
               },
-              immediate: {
+              initialEvent: {
                 defaultValue: false,
-                type: GraphQLBoolean,
+                type: new GraphQLNonNull(GraphQLBoolean),
                 description:
-                  "If true, this subscription will immediately yield data",
+                  "If true, this subscription will trigger an event as soon as it initiates.",
               },
             },
             subscribe: async (_parent, args, _context, _resolveInfo) => {
@@ -226,7 +226,7 @@ const PgGenericSubscriptionPlugin: Plugin = function (
                   }
                 });
               }
-              if (args.immediate) {
+              if (args.initialEvent) {
                 return withInitialValue(null, asyncIterator);
               } else {
                 return asyncIterator;
