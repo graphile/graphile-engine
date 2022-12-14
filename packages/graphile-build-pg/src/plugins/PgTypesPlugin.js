@@ -423,7 +423,7 @@ export default (function PgTypesPlugin(
             )
           ) {
             throw new Error(
-              "Invalid UUID, expected 32 hexadecimal characters, optionally with hypens"
+              "Invalid UUID, expected 32 hexadecimal characters, optionally with hyphens"
             );
           }
           return string;
