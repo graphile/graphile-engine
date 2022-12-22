@@ -41,7 +41,7 @@
     "chalk": "^2.4.2",
     "debug": "^4.1.1",
     "graphile-build": "4.12.3",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "lodash": ">=4 <5",
     "lru-cache": ">=4 <5",
     "pg-sql2": "4.12.3"
