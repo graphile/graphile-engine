@@ -1,6 +1,6 @@
 {
   "name": "postgraphile-core",
-  "version": "4.12.3",
+  "version": "4.13.0",
   "description": "",
   "main": "node8plus/index.js",
   "scripts": {
@@ -19,8 +19,8 @@
     "url": "https://github.com/graphile/graphile-engine/issues"
   },
   "dependencies": {
-    "graphile-build": "4.12.3",
-    "graphile-build-pg": "4.12.3",
+    "graphile-build": "4.13.0",
+    "graphile-build-pg": "4.13.0",
     "tslib": "^2.0.1"
   },
   "devDependencies": {
