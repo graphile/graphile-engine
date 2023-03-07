@@ -1,5 +1,5 @@
 import pg from "pg";
-import { graphql } from "graphql";
+import { graphql, lexicographicSortSchema } from "graphql";
 import { createPostGraphileSchema } from "postgraphile-core";
 import {
   makeExtendSchemaPlugin,
@@ -65,7 +65,7 @@ it("allows adding a condition to a Relay connection", async () => {
     disableDefaultMutations: true,
     appendPlugins: [PetsCountPlugin],
   });
-  expect(schema).toMatchSnapshot();
+  expect(lexicographicSortSchema(schema)).toMatchSnapshot();
   const pgClient = await pgPool.connect();
   try {
     const { data, errors } = await graphql(
@@ -104,7 +104,7 @@ it("allows adding a condition to a simple collection", async () => {
     simpleCollections: "both",
     appendPlugins: [PetsCountPlugin],
   });
-  expect(schema).toMatchSnapshot();
+  expect(lexicographicSortSchema(schema)).toMatchSnapshot();
   const pgClient = await pgPool.connect();
   try {
     const { data, errors } = await graphql(
