@@ -2234,6 +2234,48 @@ input ComplexInput {
 `;
 
 exports[`allows adding a simple mutation field to PG schema 1`] = `
+input RegisterUserInput {
+  name: String!
+  email: String!
+  bio: String
+}
+
+type RegisterUserPayload {
+  user: User
+}
+
+type User implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  name: String!
+  email: String!
+  bio: String
+  renamedComplexColumn: [Complex]
+  createdAt: Datetime!
+}
+
+"""An object with a globally unique \`ID\`."""
+interface Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+}
+
+type Complex {
+  numberInt: Int
+  stringText: String
+}
+
+"""
+A point in time as described by the [ISO
+8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone.
+"""
+scalar Datetime
+
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
   """
@@ -2324,14 +2366,6 @@ type Query implements Node {
     """The globally unique \`ID\` to be used in selecting a single \`User\`."""
     nodeId: ID!
   ): User
-}
-
-"""An object with a globally unique \`ID\`."""
-interface Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
 }
 
 """A connection to a list of \`Pet\` values."""
@@ -2438,30 +2472,6 @@ type UsersConnection {
   totalCount: Int!
 }
 
-type User implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  id: Int!
-  name: String!
-  email: String!
-  bio: String
-  renamedComplexColumn: [Complex]
-  createdAt: Datetime!
-}
-
-type Complex {
-  numberInt: Int
-  stringText: String
-}
-
-"""
-A point in time as described by the [ISO
-8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone.
-"""
-scalar Datetime
-
 """A \`User\` edge in the connection."""
 type UsersEdge {
   """A cursor for use in pagination."""
@@ -2529,16 +2539,6 @@ type Mutation {
     """
     input: RegisterUserInput!
   ): RegisterUserPayload
-}
-
-type RegisterUserPayload {
-  user: User
-}
-
-input RegisterUserInput {
-  name: String!
-  email: String!
-  bio: String
 }
 
 `;

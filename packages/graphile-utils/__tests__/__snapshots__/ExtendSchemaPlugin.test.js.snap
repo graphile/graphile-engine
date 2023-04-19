@@ -213,6 +213,20 @@ type Query {
 `;
 
 exports[`supports defining a more complex mutation 1`] = `
+input EchoInput {
+  text: String!
+  int: Int
+  float: Float!
+  intList: [Int!]
+}
+
+type EchoOutput {
+  text: String!
+  int: Int
+  float: Float!
+  intList: [Int!]
+}
+
 """The root query type which gives access points into the data universe."""
 type Query {
   """
@@ -228,20 +242,6 @@ The root mutation type which contains root level fields which mutate data.
 type Mutation {
   """Gives you back what you put in"""
   echo(input: EchoInput): EchoOutput
-}
-
-type EchoOutput {
-  text: String!
-  int: Int
-  float: Float!
-  intList: [Int!]
-}
-
-input EchoInput {
-  text: String!
-  int: Int
-  float: Float!
-  intList: [Int!]
 }
 
 `;
@@ -321,18 +321,6 @@ type Subscription {
 `;
 
 exports[`supports defining new types 1`] = `
-"""The root query type which gives access points into the data universe."""
-type Query {
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
-
-  """Gives you back what you put in"""
-  echo(input: EchoInput, enum: EchoCount = FOREVER): EchoOutput
-}
-
 type EchoOutput {
   text: String!
   int: Int
@@ -353,6 +341,18 @@ input EchoInput {
   float: Float!
   count: EchoCount = FOREVER
   intList: [Int!]
+}
+
+"""The root query type which gives access points into the data universe."""
+type Query {
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
+
+  """Gives you back what you put in"""
+  echo(input: EchoInput, enum: EchoCount = FOREVER): EchoOutput
 }
 
 `;
@@ -395,27 +395,14 @@ Object {
 `;
 
 exports[`supports interfaces and unions 1`] = `
-"""The root query type which gives access points into the data universe."""
-type Query {
-  """
-  Exposes the root query type nested one level down. This is helpful for Relay 1
-  which can only query top level fields if they are in a particular form.
-  """
-  query: Query!
-  abc: [ABC!]
-  named: [Named!]
+interface Named {
+  name: String!
+  nameLanguage: String
 }
-
-union ABC = A | B | C
 
 type A implements Named {
   name: String!
   a: Int!
-  nameLanguage: String
-}
-
-interface Named {
-  name: String!
   nameLanguage: String
 }
 
@@ -427,6 +414,25 @@ type B implements Named {
 
 type C {
   c: Int!
+}
+
+type D implements Named {
+  name: String!
+  d: Int!
+  nameLanguage: String
+}
+
+union ABC = A | B | C
+
+"""The root query type which gives access points into the data universe."""
+type Query {
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
+  abc: [ABC!]
+  named: [Named!]
 }
 
 `;
@@ -462,6 +468,12 @@ Object {
       "__typename": "B",
       "b": 2,
       "name": "B-two",
+      "nameLanguage": "en",
+    },
+    Object {
+      "__typename": "D",
+      "d": 3,
+      "name": "D-three",
       "nameLanguage": "en",
     },
   ],
