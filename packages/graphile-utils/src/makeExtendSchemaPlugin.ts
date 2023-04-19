@@ -44,6 +44,7 @@ import type {
   GraphQLDirective,
   InputObjectTypeExtensionNode,
   InterfaceTypeExtensionNode,
+  TypeDefinitionNode,
 } from "graphql";
 import { GraphileEmbed } from "./gql";
 
@@ -480,14 +481,24 @@ export default function makeExtendSchemaPlugin(
     builder.hook("GraphQLSchema", (schema, build, _context) => {
       const {
         [`ExtendSchemaPlugin_${uniqueId}_typeExtensions`]: typeExtensions,
+        [`ExtendSchemaPlugin_${uniqueId}_newTypes`]: newTypeDefinitions,
       } = build;
+      const newTypes = newTypeDefinitions.map(
+        ({ definition }: { definition: TypeDefinitionNode }) =>
+          build.getTypeByName(definition.name.value)
+      );
+
       return {
         ...schema,
         directives: [
           ...(schema.directives || build.graphql.specifiedDirectives || []),
           ...typeExtensions.GraphQLSchema.directives,
         ],
-        types: [...(schema.types || []), ...typeExtensions.GraphQLSchema.types],
+        types: [
+          ...(schema.types || []),
+          ...typeExtensions.GraphQLSchema.types,
+          ...newTypes,
+        ],
       };
     });
 
