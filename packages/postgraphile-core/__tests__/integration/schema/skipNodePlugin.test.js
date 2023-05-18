@@ -3,7 +3,7 @@ const { NodePlugin } = require("graphile-build");
 
 test(
   "prints a schema with the NodePlugin skipped",
-  core.test(["a", "b", "c"], {
+  core.test(__filename, ["a", "b", "c"], {
     skipPlugins: [NodePlugin],
   })
 );

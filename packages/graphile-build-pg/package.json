@@ -1,6 +1,6 @@
 {
   "name": "graphile-build-pg",
-  "version": "4.12.3",
+  "version": "4.13.0",
   "description": "Build a GraphQL schema by reflection over a PostgreSQL schema. Easy to customize since it's built with plugins on graphile-build",
   "main": "node8plus/index.js",
   "types": "node8plus/index.d.ts",
@@ -40,11 +40,11 @@
     "@graphile/lru": "4.11.0",
     "chalk": "^2.4.2",
     "debug": "^4.1.1",
-    "graphile-build": "4.12.3",
-    "jsonwebtoken": "^8.5.1",
+    "graphile-build": "4.13.0",
+    "jsonwebtoken": "^9.0.0",
     "lodash": ">=4 <5",
     "lru-cache": ">=4 <5",
-    "pg-sql2": "4.12.3"
+    "pg-sql2": "4.13.0"
   },
   "peerDependencies": {
     "pg": ">=6.1.0 <9"

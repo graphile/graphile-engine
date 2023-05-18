@@ -1,0 +1,18 @@
+## expect(errors).toBeFalsy();
+#> schema: ["a", "b", "c"]
+#> subscriptions: true
+query {
+  a: allPeople {
+    totalCount
+  }
+  b: allPeople {
+    nodes {
+      friends {
+        totalCount
+      }
+    }
+  }
+  c: tableSetQuery {
+    totalCount
+  }
+}

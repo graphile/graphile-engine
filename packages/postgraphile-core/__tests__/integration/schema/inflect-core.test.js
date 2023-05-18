@@ -3,7 +3,7 @@ const { makeAddInflectorsPlugin } = require("graphile-utils");
 
 test(
   "prints a schema with the core types inflected",
-  core.test(["a", "b", "c"], {
+  core.test(__filename, ["a", "b", "c"], {
     appendPlugins: [
       makeAddInflectorsPlugin(
         ({ builtin, inputType }) => ({

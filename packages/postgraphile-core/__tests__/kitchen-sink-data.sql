@@ -156,6 +156,8 @@ insert into b.types values (
   ARRAY[1, 2, 2098288669218571760]
 );
 
+alter sequence b.types_id_seq restart with 1;
+
 insert into c.edge_case values
   (default, 20, 1),
   (true, null, 2),
@@ -303,3 +305,19 @@ insert into geometry.geom(
   '((1,3),(3,4),(4,1))',
   '<(10, 10), 7>'
 );
+
+
+--------------------------------------------------------------------------------
+
+alter sequence ranges.range_test_id_seq restart with 934;
+insert into ranges.range_test(
+  num, int8, ts, tstz
+) values (
+  numrange(-1234567890123456789.123456789012, 1111111111111111111.111111111111),
+  int8range( -98765432109876543, 22222222222222222),
+  tsrange( '2019-01-10 21:45:56.356022'::timestamp, null),
+  tstzrange('2019-01-10 21:45:56.356022+00'::timestamptz, null)
+);
+
+alter sequence c.issue756_id_seq restart with 1;
+alter sequence inheritence.file_id_seq restart with 1;

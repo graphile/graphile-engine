@@ -358,8 +358,8 @@ create function b.compound_type_set_mutation(object c.compound_type) returns set
 create function b.compound_type_array_mutation(object c.compound_type) returns c.compound_type[] as $$ select ARRAY[object, (null, null, null, null, null, null, null, null)::c.compound_type, (object.a + 1, object.b, object.c, object.d, object.e, object.f, object.g, object.foo_bar)::c.compound_type]; $$ language sql volatile;
 create function c.table_query(id int) returns a.post as $$ select * from a.post where id = $1 $$ language sql stable;
 create function c.table_mutation(id int) returns a.post as $$ select * from a.post where id = $1 $$ language sql;
-create function c.table_set_query() returns setof c.person as $$ select * from c.person $$ language sql stable;
-create function c.table_set_query_plpgsql() returns setof c.person as $$ begin return query select * from c.person; end $$ language plpgsql stable;
+create function c.table_set_query() returns setof c.person as $$ select * from c.person order by id asc $$ language sql stable;
+create function c.table_set_query_plpgsql() returns setof c.person as $$ begin return query select * from c.person order by id asc; end $$ language plpgsql stable;
 comment on function c.table_set_query() is E'@sortable\n@filterable';
 create function c.table_set_mutation() returns setof c.person as $$ select * from c.person order by id asc $$ language sql;
 create function c.int_set_query(x int, y int, z int) returns setof integer as $$ values (1), (2), (3), (4), (x), (y), (z) $$ language sql stable;
@@ -370,7 +370,7 @@ create function a.return_void_mutation() returns void as $$ begin return; end; $
 
 create function c.person_first_name(person c.person) returns text as $$ select split_part(person.person_full_name, ' ', 1) $$ language sql stable;
 comment on function c.person_first_name(c.person) is E'@sortable';
-create function c.person_friends(person c.person) returns setof c.person as $$ select friend.* from c.person as friend where friend.id in (person.id + 1, person.id + 2) $$ language sql stable;
+create function c.person_friends(person c.person) returns setof c.person as $$ select friend.* from c.person as friend where friend.id in (person.id + 1, person.id + 2) order by friend.id asc $$ language sql stable;
 comment on function c.person_friends(c.person) is E'@sortable';
 create function c.person_first_post(person c.person) returns a.post as $$ select * from a.post where a.post.author_id = person.id order by id asc limit 1 $$ language sql stable;
 create function c.compound_type_computed_field(compound_type c.compound_type) returns integer as $$ select compound_type.a + compound_type.foo_bar $$ language sql stable;
@@ -599,7 +599,7 @@ create function c.func_out_table(out c.person) as $$
 $$ language sql stable;
 
 create function c.func_out_table_setof(out c.person) returns setof c.person as $$
-  select * from c.person;
+  select * from c.person order by person.id asc;
 $$ language sql stable;
 
 create function c.func_out_out_compound_type(i1 int, out o1 int, out o2 c.compound_type) as $$
@@ -975,6 +975,7 @@ create table smart_comment_relations.buildings (
   is_primary boolean not null default true
 );
 
+comment on table smart_comment_relations.streets is E'@unique name';
 comment on table smart_comment_relations.buildings is E'@foreignKey (name) references streets (name)|@fieldName namedAfterStreet|@foreignFieldName buildingsNamedAfterStreet|@foreignSimpleFieldName buildingsNamedAfterStreetList';
 
 -- Only one primary building
