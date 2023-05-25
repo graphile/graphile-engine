@@ -1023,9 +1023,8 @@ end`;
             );
 
             gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = baseType;
-            gqlInputTypeByTypeIdAndModifier[type.id][
-              typeModifierKey
-            ] = baseInputType;
+            gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] =
+              baseInputType;
             shouldSkipAddType = true;
           } else {
             const baseType = getGqlTypeByTypeIdAndModifier(
@@ -1037,21 +1036,19 @@ end`;
               typeModifier
             );
             // Hack stolen from: https://github.com/graphile/postgraphile/blob/ade728ed8f8e3ecdc5fdad7d770c67aa573578eb/src/graphql/schema/type/aliasGqlType.ts#L16
-            gqlTypeByTypeIdAndModifier[type.id][
-              typeModifierKey
-            ] = Object.assign(Object.create(baseType), {
-              name: inflection.domainType(type),
-              description: type.description,
-            });
-            if (baseInputType && baseInputType !== baseType) {
-              gqlInputTypeByTypeIdAndModifier[type.id][
-                typeModifierKey
-              ] = Object.assign(Object.create(baseInputType), {
-                name: inflection.inputType(
-                  gqlTypeByTypeIdAndModifier[type.id][typeModifierKey]
-                ),
+            gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] =
+              Object.assign(Object.create(baseType), {
+                name: inflection.domainType(type),
                 description: type.description,
               });
+            if (baseInputType && baseInputType !== baseType) {
+              gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] =
+                Object.assign(Object.create(baseInputType), {
+                  name: inflection.inputType(
+                    gqlTypeByTypeIdAndModifier[type.id][typeModifierKey]
+                  ),
+                  description: type.description,
+                });
             }
           }
         }
