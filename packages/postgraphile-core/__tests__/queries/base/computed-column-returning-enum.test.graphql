@@ -1,0 +1,14 @@
+## expect(errors).toBeFalsy();
+#> schema: ["computed_column_enum"]
+#> subscriptions: true
+{
+  allApplicants(condition: { nextStage: HIRED, nameLength: OK }) {
+    nodes {
+      id
+      firstName
+      lastName
+      stage
+      nextStage
+    }
+  }
+}

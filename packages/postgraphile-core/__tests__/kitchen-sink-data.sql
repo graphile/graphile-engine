@@ -321,3 +321,12 @@ insert into ranges.range_test(
 
 alter sequence c.issue756_id_seq restart with 1;
 alter sequence inheritence.file_id_seq restart with 1;
+
+--------------------------------------------------------------------------------
+
+insert into computed_column_enum.applicants(
+  id, first_name, last_name, stage
+) values 
+  (1, 'John', 'Doe', 'round 2'),
+  (2, 'David', 'Bowie', 'round 2'),
+  (3, 'John', 'Lennon', 'round 1');

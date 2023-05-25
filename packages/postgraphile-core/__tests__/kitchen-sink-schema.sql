@@ -14,7 +14,8 @@ drop schema if exists
   network_types,
   named_query_builder,
   enum_tables,
-  geometry
+  geometry,
+  computed_column_enum
 cascade;
 drop extension if exists tablefunc;
 drop extension if exists intarray;
@@ -1238,3 +1239,51 @@ create table geometry.geom (
   polygon polygon,
   circle circle
 );
+
+--------------------------------------------------------------------------------
+
+create schema computed_column_enum;
+
+create table computed_column_enum.stage_options (
+  type text primary key
+);
+comment on table computed_column_enum.stage_options is E'@enum';
+insert into computed_column_enum.stage_options (type) values ('pending'), ('round 1'), ('round 2'), ('rejected'), ('hired');
+
+create table computed_column_enum.applicants (
+  id int,
+  first_name text,
+  last_name text,
+  stage text references computed_column_enum.stage_options (type)
+);
+
+--- follow the convention of [enum_name]_enum_domain
+create domain computed_column_enum.stage_options_enum_domain as text;
+
+create or replace function computed_column_enum.applicants_next_stage(
+  a computed_column_enum.applicants
+) returns computed_column_enum.stage_options_enum_domain
+as $$
+  select (case when a.stage = 'round 2' then 'hired' 
+    else 'rejected' end)::computed_column_enum.stage_options_enum_domain;
+$$ language sql stable;
+comment on function computed_column_enum.applicants_next_stage is E'@filterable';
+
+create table computed_column_enum.length_status (
+  type text primary key
+);
+comment on table computed_column_enum.length_status is E'@enum';
+insert into computed_column_enum.length_status (type) values ('ok'), ('too_short');
+
+--- use an @enum tag this time
+create domain computed_column_enum.length as text;
+comment on domain computed_column_enum.length is E'@enum length_status';
+
+create or replace function computed_column_enum.applicants_name_length(
+  a computed_column_enum.applicants
+) returns computed_column_enum.length
+as $$
+  select (case when length(a.last_name) < 4 then 'too_short' 
+    else 'ok' end)::computed_column_enum.length;
+$$ language sql stable;
+comment on function computed_column_enum.applicants_name_length is E'@filterable';

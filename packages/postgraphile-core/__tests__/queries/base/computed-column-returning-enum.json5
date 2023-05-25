@@ -1,0 +1,13 @@
+{
+  allApplicants: {
+    nodes: [
+      {
+        id: 2,
+        firstName: "David",
+        lastName: "Bowie",
+        stage: "ROUND_2",
+        nextStage: "HIRED",
+      },
+    ],
+  },
+}
