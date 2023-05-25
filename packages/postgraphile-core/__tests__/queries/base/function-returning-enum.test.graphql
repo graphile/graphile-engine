@@ -1,5 +1,5 @@
 ## expect(errors).toBeFalsy();
-#> schema: ["computed_column_enum"]
+#> schema: ["function_returning_enum"]
 #> subscriptions: true
 {
   allApplicants(condition: { nextStage: HIRED, nameLength: OK }) {
@@ -11,4 +11,5 @@
       nextStage
     }
   }
+  textLength(text: "hello", minLength: 3)
 }

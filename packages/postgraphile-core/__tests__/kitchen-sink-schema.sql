@@ -15,7 +15,7 @@ drop schema if exists
   named_query_builder,
   enum_tables,
   geometry,
-  computed_column_enum
+  function_returning_enum
 cascade;
 drop extension if exists tablefunc;
 drop extension if exists intarray;
@@ -1242,48 +1242,64 @@ create table geometry.geom (
 
 --------------------------------------------------------------------------------
 
-create schema computed_column_enum;
+create schema function_returning_enum;
 
-create table computed_column_enum.stage_options (
+create table function_returning_enum.stage_options (
   type text primary key
 );
-comment on table computed_column_enum.stage_options is E'@enum';
-insert into computed_column_enum.stage_options (type) values ('pending'), ('round 1'), ('round 2'), ('rejected'), ('hired');
+comment on table function_returning_enum.stage_options is E'@enum';
+insert into function_returning_enum.stage_options (type) values ('pending'), ('round 1'), ('round 2'), ('rejected'), ('hired');
 
-create table computed_column_enum.applicants (
+create table function_returning_enum.applicants (
   id int,
   first_name text,
   last_name text,
-  stage text references computed_column_enum.stage_options (type)
+  stage text references function_returning_enum.stage_options (type)
 );
 
 --- follow the convention of [enum_name]_enum_domain
-create domain computed_column_enum.stage_options_enum_domain as text;
+create domain function_returning_enum.stage_options_enum_domain as text;
 
-create or replace function computed_column_enum.applicants_next_stage(
-  a computed_column_enum.applicants
-) returns computed_column_enum.stage_options_enum_domain
+create or replace function function_returning_enum.applicants_next_stage(
+  a function_returning_enum.applicants
+) returns function_returning_enum.stage_options_enum_domain
 as $$
   select (case when a.stage = 'round 2' then 'hired' 
-    else 'rejected' end)::computed_column_enum.stage_options_enum_domain;
+    else 'rejected' end)::function_returning_enum.stage_options_enum_domain;
 $$ language sql stable;
-comment on function computed_column_enum.applicants_next_stage is E'@filterable';
+comment on function function_returning_enum.applicants_next_stage is E'@filterable';
 
-create table computed_column_enum.length_status (
+create table function_returning_enum.length_status (
   type text primary key
 );
-comment on table computed_column_enum.length_status is E'@enum';
-insert into computed_column_enum.length_status (type) values ('ok'), ('too_short');
+comment on table function_returning_enum.length_status is E'@enum';
+insert into function_returning_enum.length_status (type) values ('ok'), ('too_short');
 
 --- use an @enum tag this time
-create domain computed_column_enum.length as text;
-comment on domain computed_column_enum.length is E'@enum length_status';
+create domain function_returning_enum.length as text;
+comment on domain function_returning_enum.length is E'@enum length_status';
 
-create or replace function computed_column_enum.applicants_name_length(
-  a computed_column_enum.applicants
-) returns computed_column_enum.length
+create or replace function function_returning_enum.applicants_name_length(
+  a function_returning_enum.applicants
+) returns function_returning_enum.length
 as $$
   select (case when length(a.last_name) < 4 then 'too_short' 
-    else 'ok' end)::computed_column_enum.length;
+    else 'ok' end)::function_returning_enum.length;
 $$ language sql stable;
-comment on function computed_column_enum.applicants_name_length is E'@filterable';
+
+create or replace function function_returning_enum.text_length(
+  text text,
+  min_length int
+) returns function_returning_enum.length
+as $$
+  select (case when length(text) < min_length then 'too_short' 
+    else 'ok' end)::function_returning_enum.length;
+$$ language sql stable;
+
+create or replace function function_returning_enum.applicants_name_length(
+  a function_returning_enum.applicants
+) returns function_returning_enum.length
+as $$
+  select function_returning_enum.text_length(a.last_name, 4)::function_returning_enum.length;
+$$ language sql stable;
+comment on function function_returning_enum.applicants_name_length is E'@filterable';

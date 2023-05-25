@@ -13,7 +13,7 @@ with __local_0__ as (
         '@nextStage'::text,
         (
           select to_json(__local_2__) as "value"
-          from "computed_column_enum"."applicants_next_stage"(__local_1__) as __local_2__
+          from "function_returning_enum"."applicants_next_stage"(__local_1__) as __local_2__
           where (TRUE) and (TRUE)
         )
       )
@@ -21,12 +21,12 @@ with __local_0__ as (
   ) as "@nodes"
   from (
     select __local_1__.*
-    from "computed_column_enum"."applicants" as __local_1__
+    from "function_returning_enum"."applicants" as __local_1__
     where (
-      "computed_column_enum"."applicants_name_length"(__local_1__) = $1
+      "function_returning_enum"."applicants_name_length"(__local_1__) = $1
     )
     and (
-      "computed_column_enum"."applicants_next_stage"(__local_1__) = $2
+      "function_returning_enum"."applicants_next_stage"(__local_1__) = $2
     ) and (TRUE) and (TRUE)
   ) __local_1__
 ),
@@ -43,3 +43,10 @@ select coalesce(
   ),
   '[]'::json
 ) as "data"
+
+select to_json(__local_0__) as "value"
+from "function_returning_enum"."text_length"(
+  $1,
+  $2
+) as __local_0__
+where (TRUE) and (TRUE)

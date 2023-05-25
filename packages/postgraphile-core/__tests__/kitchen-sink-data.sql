@@ -324,7 +324,7 @@ alter sequence inheritence.file_id_seq restart with 1;
 
 --------------------------------------------------------------------------------
 
-insert into computed_column_enum.applicants(
+insert into function_returning_enum.applicants(
   id, first_name, last_name, stage
 ) values 
   (1, 'John', 'Doe', 'round 2'),
