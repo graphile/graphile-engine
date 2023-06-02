@@ -1360,7 +1360,7 @@ Original error: ${e.message}
       }
       return build.extend(build, {
         pgIntrospectionResultsByKind: introspectionResultsByKind,
-        pgMakeFakeEnumIdentifier: fakeEnumIdentifier,
+        getPgFakeEnumIdentifier: fakeEnumIdentifier,
       });
     },
     ["PgIntrospection"],
