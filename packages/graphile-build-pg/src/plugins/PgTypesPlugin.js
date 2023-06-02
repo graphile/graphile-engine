@@ -755,7 +755,7 @@ export default (function PgTypesPlugin(
           }
         }
 
-        let shouldSkipAddType;
+        let shouldSkipAddType = false;
 
         // Enums
         if (
