@@ -755,6 +755,7 @@ export default (function PgTypesPlugin(
           }
         }
 
+        // cf https://github.com/graphile/graphile-engine/pull/748#discussion_r650828353
         let shouldSkipAddType = false;
 
         // Enums
