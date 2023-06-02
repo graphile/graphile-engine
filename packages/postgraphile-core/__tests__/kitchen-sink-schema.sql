@@ -1260,7 +1260,7 @@ create table function_returning_enum.applicants (
 --- follow the convention of [enum_name]_enum_domain
 create domain function_returning_enum.stage_options_enum_domain as text;
 
-create or replace function function_returning_enum.applicants_next_stage(
+create function function_returning_enum.applicants_next_stage(
   a function_returning_enum.applicants
 ) returns function_returning_enum.stage_options_enum_domain
 as $$
@@ -1279,15 +1279,7 @@ insert into function_returning_enum.length_status (type) values ('ok'), ('too_sh
 create domain function_returning_enum.length as text;
 comment on domain function_returning_enum.length is E'@enum length_status';
 
-create or replace function function_returning_enum.applicants_name_length(
-  a function_returning_enum.applicants
-) returns function_returning_enum.length
-as $$
-  select (case when length(a.last_name) < 4 then 'too_short' 
-    else 'ok' end)::function_returning_enum.length;
-$$ language sql stable;
-
-create or replace function function_returning_enum.text_length(
+create function function_returning_enum.text_length(
   text text,
   min_length int
 ) returns function_returning_enum.length
@@ -1296,7 +1288,7 @@ as $$
     else 'ok' end)::function_returning_enum.length;
 $$ language sql stable;
 
-create or replace function function_returning_enum.applicants_name_length(
+create function function_returning_enum.applicants_name_length(
   a function_returning_enum.applicants
 ) returns function_returning_enum.length
 as $$
