@@ -11,4 +11,22 @@
     ],
   },
   textLength: "OK",
+  applicantsByStage: {
+    nodes: [
+      {
+        id: 1,
+        firstName: "John",
+        lastName: "Doe",
+        stage: "ROUND_2",
+        nextStage: "HIRED",
+      },
+      {
+        id: 2,
+        firstName: "David",
+        lastName: "Bowie",
+        stage: "ROUND_2",
+        nextStage: "HIRED",
+      },
+    ],
+  },
 }

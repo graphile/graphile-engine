@@ -1295,3 +1295,10 @@ as $$
   select function_returning_enum.text_length(a.last_name, 4)::function_returning_enum.length;
 $$ language sql stable;
 comment on function function_returning_enum.applicants_name_length is E'@filterable';
+
+create function function_returning_enum.applicants_by_stage(
+  wanted_stage function_returning_enum.stage_options_enum_domain
+) returns setof function_returning_enum.applicants
+as $$ 
+  select * from function_returning_enum.applicants a where a.stage = wanted_stage;
+$$ language sql stable;

@@ -12,4 +12,13 @@
     }
   }
   textLength(text: "hello", minLength: 3)
+  applicantsByStage(wantedStage: ROUND_2) {
+    nodes {
+      id
+      firstName
+      lastName
+      stage
+      nextStage
+    }
+  }
 }
