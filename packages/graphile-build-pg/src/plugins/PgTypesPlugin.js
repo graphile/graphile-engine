@@ -5,6 +5,8 @@ import makeGraphQLJSONType from "../GraphQLJSON";
 
 import { parseInterval } from "../postgresInterval";
 
+const ENUM_DOMAIN_SUFFIX = "_enum_domain";
+
 function indent(str) {
   return "  " + str.replace(/\n/g, "\n  ");
 }
@@ -1000,14 +1002,16 @@ end`;
           type.domainBaseTypeId
         ) {
           // might be used as an enum alias: #1500
-          if (
-            type.name.endsWith("_enum_domain") ||
-            (type.tags && type.tags.enum)
-          ) {
-            const underlyingEnumTypeName = type.name.endsWith("_enum_domain")
-              ? type.name.replace("_enum_domain", "")
-              : type.tags.enum;
-
+          const tagEnumName =
+            type.tags && typeof type.tags.enum === "string"
+              ? type.tags.enum
+              : null;
+          const truncatedTypeName =
+            !tagEnumName && type.name.endsWith(ENUM_DOMAIN_SUFFIX)
+              ? type.name.slice(0, type.name.length - ENUM_DOMAIN_SUFFIX.length)
+              : null;
+          const underlyingEnumTypeName = tagEnumName || truncatedTypeName;
+          if (underlyingEnumTypeName !== null) {
             const baseTypeId = getPgFakeEnumIdentifier(
               type.namespaceName,
               underlyingEnumTypeName
