@@ -9,6 +9,9 @@
       lastName
       stage
       nextStage
+      favoritePet
+      petFood
+      nameLength
     }
   }
   textLength(text: "hello", minLength: 3)
@@ -19,6 +22,21 @@
       lastName
       stage
       nextStage
+      favoritePet
+      petFood
+      nameLength
+    }
+  }
+  applicantsByFavoritePet(pet: CAT) {
+    nodes {
+      id
+      firstName
+      lastName
+      stage
+      nextStage
+      favoritePet
+      petFood
+      nameLength
     }
   }
 }

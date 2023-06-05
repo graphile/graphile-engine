@@ -1250,10 +1250,17 @@ create table function_returning_enum.stage_options (
 comment on table function_returning_enum.stage_options is E'@enum';
 insert into function_returning_enum.stage_options (type) values ('pending'), ('round 1'), ('round 2'), ('rejected'), ('hired');
 
+create type function_returning_enum.animal_type as enum (
+  'CAT',
+  'DOG',
+  'FISH'
+);
+
 create table function_returning_enum.applicants (
   id int,
   first_name text,
   last_name text,
+  favorite_pet function_returning_enum.animal_type,
   stage text references function_returning_enum.stage_options (type)
 );
 
@@ -1302,3 +1309,23 @@ create function function_returning_enum.applicants_by_stage(
 as $$ 
   select * from function_returning_enum.applicants a where a.stage = wanted_stage;
 $$ language sql stable;
+
+create function function_returning_enum.applicants_by_favorite_pet(
+  pet function_returning_enum.animal_type
+) returns setof function_returning_enum.applicants
+as $$ 
+  select * from function_returning_enum.applicants a where a.favorite_pet = pet;
+$$ language sql stable;
+
+create function function_returning_enum.applicants_pet_food(
+  a function_returning_enum.applicants
+) returns function_returning_enum.animal_type
+as $$
+  select (case 
+    when a.favorite_pet = 'FISH' then null 
+    when a.favorite_pet = 'CAT' then 'FISH'
+    when a.favorite_pet = 'DOG' then 'CAT'
+    else null
+    end)::function_returning_enum.animal_type;
+$$ language sql stable;
+comment on function function_returning_enum.applicants_pet_food is E'@filterable';
