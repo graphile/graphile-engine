@@ -212,15 +212,10 @@ export type PgEntity =
 const fakeEnumIdentifier = (
   namespaceName: string,
   name: string,
-  constraint?: PgConstraint,
+  identifierExtra = "",
   list = false
 ) => {
-  const constraintIdent = constraint
-    ? constraint.type === "p"
-      ? ""
-      : `_${constraint.name}`
-    : "";
-  const baseEnumIdentifier = `FAKE_ENUM_${namespaceName}_${name}${constraintIdent}`;
+  const baseEnumIdentifier = `FAKE_ENUM_${namespaceName}_${name}${identifierExtra}`;
   if (list) {
     return `${baseEnumIdentifier}_list`;
   } else {
@@ -578,7 +573,7 @@ function enumTables(introspectionResults) {
         id: fakeEnumIdentifier(
           klass.namespaceName,
           klass.name,
-          constraint,
+          constraintIdent,
           true
         ),
         name: `_${klass.name}${constraintIdent}`,
@@ -606,7 +601,7 @@ function enumTables(introspectionResults) {
         id: fakeEnumIdentifier(
           klass.namespaceName,
           klass.name,
-          constraint,
+          constraintIdent,
           false
         ),
         name: `${klass.name}${constraintIdent}`,
