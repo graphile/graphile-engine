@@ -1027,6 +1027,18 @@ end`;
               typeModifierKey
             );
 
+            if (!baseType || !baseInputType) {
+              if (tagEnumName) {
+                throw new Error(
+                  `The domain ${type.name} uses '@enum ${tagEnumName}' to references its underlying enum type, but no type named ${tagEnumName} could be found.`
+                );
+              } else {
+                throw new Error(
+                  `The domain ${type.name} references the enum type ${underlyingEnumTypeName}, but no such type could be found.`
+                );
+              }
+            }
+
             gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = baseType;
             gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] =
               baseInputType;
