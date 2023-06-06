@@ -12,6 +12,8 @@
       favoritePet
       petFood
       nameLength
+      transportation
+      favoritePetTransportation
     }
   }
   textLength(text: "hello", minLength: 3)
@@ -25,6 +27,8 @@
       favoritePet
       petFood
       nameLength
+      transportation
+      favoritePetTransportation
     }
   }
   applicantsByFavoritePet(pet: CAT) {
@@ -37,6 +41,22 @@
       favoritePet
       petFood
       nameLength
+      transportation
+      favoritePetTransportation
+    }
+  }
+  applicantsByTransportation(transportation: CAR) {
+    nodes {
+      id
+      firstName
+      lastName
+      stage
+      nextStage
+      favoritePet
+      petFood
+      nameLength
+      transportation
+      favoritePetTransportation
     }
   }
 }

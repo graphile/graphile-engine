@@ -1256,12 +1256,21 @@ create type function_returning_enum.animal_type as enum (
   'FISH'
 );
 
+
+create table function_returning_enum.enum_table (
+  transportation text not null constraint transportation_enum unique
+);
+
+comment on constraint transportation_enum on function_returning_enum.enum_table is E'@enum';
+insert into function_returning_enum.enum_table (transportation) values ('CAR'), ('BIKE'), ('SUBWAY');
+
 create table function_returning_enum.applicants (
   id int,
   first_name text,
   last_name text,
   favorite_pet function_returning_enum.animal_type,
-  stage text references function_returning_enum.stage_options (type)
+  stage text references function_returning_enum.stage_options (type),
+  transportation text references function_returning_enum.enum_table (transportation)
 );
 
 --- follow the convention of [enum_name]_enum_domain
@@ -1329,3 +1338,26 @@ as $$
     end)::function_returning_enum.animal_type;
 $$ language sql stable;
 comment on function function_returning_enum.applicants_pet_food is E'@filterable';
+
+create domain function_returning_enum.transportation as text;
+comment on domain function_returning_enum.transportation is E'@enum enum_table_transportation_enum';
+
+create function function_returning_enum.applicants_by_transportation(
+  transportation function_returning_enum.transportation
+) returns setof function_returning_enum.applicants
+as $$ 
+  select * from function_returning_enum.applicants a where a.transportation = transportation;
+$$ language sql stable;
+
+create function function_returning_enum.applicants_favorite_pet_transportation(
+  a function_returning_enum.applicants
+) returns function_returning_enum.transportation
+as $$
+  select (case 
+    when a.favorite_pet = 'FISH' then 'SUBWAY' 
+    when a.favorite_pet = 'CAT' then 'CAR'
+    when a.favorite_pet = 'DOG' then 'BIKE'
+    else null
+    end)::function_returning_enum.transportation;
+$$ language sql stable;
+comment on function function_returning_enum.applicants_favorite_pet_transportation is E'@filterable';

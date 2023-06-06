@@ -325,8 +325,8 @@ alter sequence inheritence.file_id_seq restart with 1;
 --------------------------------------------------------------------------------
 
 insert into function_returning_enum.applicants(
-  id, first_name, last_name, stage, favorite_pet
+  id, first_name, last_name, stage, favorite_pet, transportation
 ) values 
-  (1, 'John', 'Doe', 'round 2', 'CAT' ),
-  (2, 'David', 'Bowie', 'round 2', 'DOG'),
-  (3, 'John', 'Lennon', 'round 1', 'CAT');
+  (1, 'John', 'Doe', 'round 2', 'CAT', 'BIKE' ),
+  (2, 'David', 'Bowie', 'round 2', 'DOG', 'SUBWAY'),
+  (3, 'John', 'Lennon', 'round 1', 'CAT', 'CAR');
