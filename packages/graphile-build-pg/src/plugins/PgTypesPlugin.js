@@ -5,6 +5,8 @@ import makeGraphQLJSONType from "../GraphQLJSON";
 
 import { parseInterval } from "../postgresInterval";
 
+const ENUM_DOMAIN_SUFFIX = "_enum_domain";
+
 function indent(str) {
   return "  " + str.replace(/\n/g, "\n  ");
 }
@@ -30,6 +32,7 @@ export default (function PgTypesPlugin(
     build => {
       const {
         pgIntrospectionResultsByKind: introspectionResultsByKind,
+        getPgFakeEnumIdentifier,
         getTypeByName,
         pgSql: sql,
         inflection,
@@ -753,6 +756,10 @@ export default (function PgTypesPlugin(
               gqlInputType;
           }
         }
+
+        // cf https://github.com/graphile/graphile-engine/pull/748#discussion_r650828353
+        let shouldSkipAddType = false;
+
         // Enums
         if (
           !gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] &&
@@ -994,30 +1001,72 @@ end`;
           type.type === "d" &&
           type.domainBaseTypeId
         ) {
-          const baseType = getGqlTypeByTypeIdAndModifier(
-            type.domainBaseTypeId,
-            typeModifier
-          );
-          const baseInputType = getGqlInputTypeByTypeIdAndModifier(
-            type.domainBaseTypeId,
-            typeModifier
-          );
-          // Hack stolen from: https://github.com/graphile/postgraphile/blob/ade728ed8f8e3ecdc5fdad7d770c67aa573578eb/src/graphql/schema/type/aliasGqlType.ts#L16
-          gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = Object.assign(
-            Object.create(baseType),
-            {
-              name: inflection.domainType(type),
-              description: type.description,
+          // might be used as an enum alias: https://github.com/graphile/postgraphile/issues/1500
+          const tagEnumName =
+            type.tags && typeof type.tags.enum === "string"
+              ? type.tags.enum
+              : null;
+          const truncatedTypeName =
+            !tagEnumName && type.name.endsWith(ENUM_DOMAIN_SUFFIX)
+              ? type.name.slice(0, type.name.length - ENUM_DOMAIN_SUFFIX.length)
+              : null;
+          const underlyingEnumTypeName = tagEnumName || truncatedTypeName;
+          if (underlyingEnumTypeName !== null) {
+            const baseTypeId = getPgFakeEnumIdentifier(
+              type.namespaceName,
+              underlyingEnumTypeName
+            );
+
+            const baseType = getGqlTypeByTypeIdAndModifier(
+              baseTypeId,
+              typeModifierKey
+            );
+
+            const baseInputType = getGqlInputTypeByTypeIdAndModifier(
+              baseTypeId,
+              typeModifierKey
+            );
+
+            if (!baseType || !baseInputType) {
+              if (tagEnumName) {
+                throw new Error(
+                  `The domain ${type.name} uses '@enum ${tagEnumName}' to references its underlying enum type, but no type named ${tagEnumName} could be found.`
+                );
+              } else {
+                throw new Error(
+                  `The domain ${type.name} references the enum type ${underlyingEnumTypeName}, but no such type could be found.`
+                );
+              }
             }
-          );
-          if (baseInputType && baseInputType !== baseType) {
+
+            gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] = baseType;
             gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] =
-              Object.assign(Object.create(baseInputType), {
-                name: inflection.inputType(
-                  gqlTypeByTypeIdAndModifier[type.id][typeModifierKey]
-                ),
+              baseInputType;
+            shouldSkipAddType = true;
+          } else {
+            const baseType = getGqlTypeByTypeIdAndModifier(
+              type.domainBaseTypeId,
+              typeModifier
+            );
+            const baseInputType = getGqlInputTypeByTypeIdAndModifier(
+              type.domainBaseTypeId,
+              typeModifier
+            );
+            // Hack stolen from: https://github.com/graphile/postgraphile/blob/ade728ed8f8e3ecdc5fdad7d770c67aa573578eb/src/graphql/schema/type/aliasGqlType.ts#L16
+            gqlTypeByTypeIdAndModifier[type.id][typeModifierKey] =
+              Object.assign(Object.create(baseType), {
+                name: inflection.domainType(type),
                 description: type.description,
               });
+            if (baseInputType && baseInputType !== baseType) {
+              gqlInputTypeByTypeIdAndModifier[type.id][typeModifierKey] =
+                Object.assign(Object.create(baseInputType), {
+                  name: inflection.inputType(
+                    gqlTypeByTypeIdAndModifier[type.id][typeModifierKey]
+                  ),
+                  description: type.description,
+                });
+            }
           }
         }
 
@@ -1076,9 +1125,13 @@ end`;
               gqlTypeByTypeIdAndModifier[type.id][typeModifierKey];
           }
         }
-        addType(
-          getNamedType(gqlTypeByTypeIdAndModifier[type.id][typeModifierKey])
-        );
+        // if its a domain type substituting for an enum table,
+        // adding it creates a duplicate
+        if (!shouldSkipAddType) {
+          addType(
+            getNamedType(gqlTypeByTypeIdAndModifier[type.id][typeModifierKey])
+          );
+        }
         return gqlTypeByTypeIdAndModifier[type.id][typeModifierKey];
       };
 
