@@ -75,30 +75,6 @@
   applicantsByTransportation: {
     nodes: [
       {
-        id: 1,
-        firstName: "John",
-        lastName: "Doe",
-        stage: "ROUND_2",
-        nextStage: "HIRED",
-        favoritePet: "CAT",
-        petFood: "FISH",
-        nameLength: "TOO_SHORT",
-        transportation: "BIKE",
-        favoritePetTransportation: "CAR",
-      },
-      {
-        id: 2,
-        firstName: "David",
-        lastName: "Bowie",
-        stage: "ROUND_2",
-        nextStage: "HIRED",
-        favoritePet: "DOG",
-        petFood: "CAT",
-        nameLength: "OK",
-        transportation: "SUBWAY",
-        favoritePetTransportation: "BIKE",
-      },
-      {
         id: 3,
         firstName: "John",
         lastName: "Lennon",

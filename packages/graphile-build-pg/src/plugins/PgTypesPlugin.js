@@ -1001,7 +1001,7 @@ end`;
           type.type === "d" &&
           type.domainBaseTypeId
         ) {
-          // might be used as an enum alias: #1500
+          // might be used as an enum alias: https://github.com/graphile/postgraphile/issues/1500
           const tagEnumName =
             type.tags && typeof type.tags.enum === "string"
               ? type.tags.enum

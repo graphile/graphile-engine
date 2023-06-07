@@ -1346,7 +1346,7 @@ create function function_returning_enum.applicants_by_transportation(
   transportation function_returning_enum.transportation
 ) returns setof function_returning_enum.applicants
 as $$ 
-  select * from function_returning_enum.applicants a where a.transportation = transportation;
+  select * from function_returning_enum.applicants a where a.transportation = applicants_by_transportation.transportation;
 $$ language sql stable;
 
 create function function_returning_enum.applicants_favorite_pet_transportation(
