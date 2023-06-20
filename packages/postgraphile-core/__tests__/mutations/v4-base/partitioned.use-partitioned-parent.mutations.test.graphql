@@ -1,0 +1,78 @@
+## expect(errors).toBeFalsy();
+#> schema: ["partitioned"]
+#> usePartitionedParent: true
+mutation {
+  createWarehouse(input: { warehouse: { id: 1000, location: "Memphis, TN" } }) {
+    warehouse {
+      id
+      location
+    }
+  }
+
+  createItem(input: { item: { id: 2000, description: "Laptop" } }) {
+    item {
+      id
+      description
+    }
+  }
+
+  createStock(
+    input: { stock: { itemId: 2000, amount: 10, warehouseId: 1000 } }
+  ) {
+    stock {
+      itemId
+      amount
+      warehouseId
+    }
+  }
+
+  updateWarehouseById(
+    input: { id: 1000, warehousePatch: { location: "Nashville, TN" } }
+  ) {
+    warehouse {
+      id
+      location
+    }
+  }
+
+  updateItemById(input: { id: 2000, itemPatch: { description: "TV" } }) {
+    item {
+      id
+      description
+    }
+  }
+
+  updateStockByItemIdAndWarehouseId(
+    input: { itemId: 2000, warehouseId: 1000, stockPatch: { amount: 2 } }
+  ) {
+    stock {
+      itemId
+      amount
+      warehouseId
+    }
+  }
+
+  deleteStockByItemIdAndWarehouseId(
+    input: { itemId: 2000, warehouseId: 1000 }
+  ) {
+    stock {
+      itemId
+      amount
+      warehouseId
+    }
+  }
+
+  deleteWarehouseById(input: { id: 1000 }) {
+    warehouse {
+      id
+      location
+    }
+  }
+
+  deleteItemById(input: { id: 2000 }) {
+    item {
+      id
+      description
+    }
+  }
+}

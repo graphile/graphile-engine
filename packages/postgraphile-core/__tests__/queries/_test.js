@@ -16,6 +16,9 @@ const kitchenSinkData = () =>
 
 const pg11Data = () => readFile(`${__dirname}/../pg11-data.sql`, "utf8");
 
+const partitionedData = () =>
+  readFile(`${__dirname}/../partitioned-data.sql`, "utf8");
+
 exports.assertSnapshotsMatch = assertSnapshotsMatch;
 
 exports.runTestQuery = async (source, config, options) => {
@@ -30,6 +33,9 @@ exports.runTestQuery = async (source, config, options) => {
     // Load test data
     await pgClient.query(await kitchenSinkData());
     const serverVersionNum = await getServerVersionNum(pgClient);
+    if (serverVersionNum >= 100000) {
+      await pgClient.query(await partitionedData());
+    }
     if (serverVersionNum >= 110000) {
       await pgClient.query(await pg11Data());
     }

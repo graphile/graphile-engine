@@ -1,0 +1,370 @@
+{
+  allItems: {
+    nodes: [
+      {
+        id: 1,
+        description: "Hair dryer",
+        stocksByItemId: {
+          nodes: [
+            {
+              amount: 50,
+              warehouseByWarehouseId: {
+                id: 1,
+                location: "Carmel, IN",
+              },
+            },
+            {
+              amount: 3,
+              warehouseByWarehouseId: {
+                id: 2,
+                location: "Cincinnati, OH",
+              },
+            },
+            {
+              amount: 92,
+              warehouseByWarehouseId: {
+                id: 3,
+                location: "Chicago, IL",
+              },
+            },
+          ],
+        },
+      },
+      {
+        id: 2,
+        description: "Capacitor",
+        stocksByItemId: {
+          nodes: [
+            {
+              amount: 20,
+              warehouseByWarehouseId: {
+                id: 1,
+                location: "Carmel, IN",
+              },
+            },
+            {
+              amount: 7,
+              warehouseByWarehouseId: {
+                id: 2,
+                location: "Cincinnati, OH",
+              },
+            },
+            {
+              amount: 9,
+              warehouseByWarehouseId: {
+                id: 3,
+                location: "Chicago, IL",
+              },
+            },
+          ],
+        },
+      },
+      {
+        id: 3,
+        description: "Wagon",
+        stocksByItemId: {
+          nodes: [
+            {
+              amount: 2,
+              warehouseByWarehouseId: {
+                id: 1,
+                location: "Carmel, IN",
+              },
+            },
+            {
+              amount: 9,
+              warehouseByWarehouseId: {
+                id: 2,
+                location: "Cincinnati, OH",
+              },
+            },
+            {
+              amount: 0,
+              warehouseByWarehouseId: {
+                id: 3,
+                location: "Chicago, IL",
+              },
+            },
+          ],
+        },
+      },
+      {
+        id: 4,
+        description: "Fan",
+        stocksByItemId: {
+          nodes: [
+            {
+              amount: 56,
+              warehouseByWarehouseId: {
+                id: 1,
+                location: "Carmel, IN",
+              },
+            },
+            {
+              amount: 30,
+              warehouseByWarehouseId: {
+                id: 2,
+                location: "Cincinnati, OH",
+              },
+            },
+            {
+              amount: 101,
+              warehouseByWarehouseId: {
+                id: 3,
+                location: "Chicago, IL",
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+  allStocks: {
+    nodes: [
+      {
+        amount: 50,
+        itemByItemId: {
+          id: 1,
+          description: "Hair dryer",
+        },
+        warehouseByWarehouseId: {
+          id: 1,
+          location: "Carmel, IN",
+        },
+      },
+      {
+        amount: 3,
+        itemByItemId: {
+          id: 1,
+          description: "Hair dryer",
+        },
+        warehouseByWarehouseId: {
+          id: 2,
+          location: "Cincinnati, OH",
+        },
+      },
+      {
+        amount: 92,
+        itemByItemId: {
+          id: 1,
+          description: "Hair dryer",
+        },
+        warehouseByWarehouseId: {
+          id: 3,
+          location: "Chicago, IL",
+        },
+      },
+      {
+        amount: 20,
+        itemByItemId: {
+          id: 2,
+          description: "Capacitor",
+        },
+        warehouseByWarehouseId: {
+          id: 1,
+          location: "Carmel, IN",
+        },
+      },
+      {
+        amount: 7,
+        itemByItemId: {
+          id: 2,
+          description: "Capacitor",
+        },
+        warehouseByWarehouseId: {
+          id: 2,
+          location: "Cincinnati, OH",
+        },
+      },
+      {
+        amount: 9,
+        itemByItemId: {
+          id: 2,
+          description: "Capacitor",
+        },
+        warehouseByWarehouseId: {
+          id: 3,
+          location: "Chicago, IL",
+        },
+      },
+      {
+        amount: 2,
+        itemByItemId: {
+          id: 3,
+          description: "Wagon",
+        },
+        warehouseByWarehouseId: {
+          id: 1,
+          location: "Carmel, IN",
+        },
+      },
+      {
+        amount: 9,
+        itemByItemId: {
+          id: 3,
+          description: "Wagon",
+        },
+        warehouseByWarehouseId: {
+          id: 2,
+          location: "Cincinnati, OH",
+        },
+      },
+      {
+        amount: 0,
+        itemByItemId: {
+          id: 3,
+          description: "Wagon",
+        },
+        warehouseByWarehouseId: {
+          id: 3,
+          location: "Chicago, IL",
+        },
+      },
+      {
+        amount: 56,
+        itemByItemId: {
+          id: 4,
+          description: "Fan",
+        },
+        warehouseByWarehouseId: {
+          id: 1,
+          location: "Carmel, IN",
+        },
+      },
+      {
+        amount: 30,
+        itemByItemId: {
+          id: 4,
+          description: "Fan",
+        },
+        warehouseByWarehouseId: {
+          id: 2,
+          location: "Cincinnati, OH",
+        },
+      },
+      {
+        amount: 101,
+        itemByItemId: {
+          id: 4,
+          description: "Fan",
+        },
+        warehouseByWarehouseId: {
+          id: 3,
+          location: "Chicago, IL",
+        },
+      },
+    ],
+  },
+  allWarehouses: {
+    nodes: [
+      {
+        id: 1,
+        location: "Carmel, IN",
+        stocksByWarehouseId: {
+          nodes: [
+            {
+              amount: 50,
+              itemByItemId: {
+                id: 1,
+                description: "Hair dryer",
+              },
+            },
+            {
+              amount: 20,
+              itemByItemId: {
+                id: 2,
+                description: "Capacitor",
+              },
+            },
+            {
+              amount: 2,
+              itemByItemId: {
+                id: 3,
+                description: "Wagon",
+              },
+            },
+            {
+              amount: 56,
+              itemByItemId: {
+                id: 4,
+                description: "Fan",
+              },
+            },
+          ],
+        },
+      },
+      {
+        id: 2,
+        location: "Cincinnati, OH",
+        stocksByWarehouseId: {
+          nodes: [
+            {
+              amount: 3,
+              itemByItemId: {
+                id: 1,
+                description: "Hair dryer",
+              },
+            },
+            {
+              amount: 7,
+              itemByItemId: {
+                id: 2,
+                description: "Capacitor",
+              },
+            },
+            {
+              amount: 9,
+              itemByItemId: {
+                id: 3,
+                description: "Wagon",
+              },
+            },
+            {
+              amount: 30,
+              itemByItemId: {
+                id: 4,
+                description: "Fan",
+              },
+            },
+          ],
+        },
+      },
+      {
+        id: 3,
+        location: "Chicago, IL",
+        stocksByWarehouseId: {
+          nodes: [
+            {
+              amount: 92,
+              itemByItemId: {
+                id: 1,
+                description: "Hair dryer",
+              },
+            },
+            {
+              amount: 9,
+              itemByItemId: {
+                id: 2,
+                description: "Capacitor",
+              },
+            },
+            {
+              amount: 0,
+              itemByItemId: {
+                id: 3,
+                description: "Wagon",
+              },
+            },
+            {
+              amount: 101,
+              itemByItemId: {
+                id: 4,
+                description: "Fan",
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+}

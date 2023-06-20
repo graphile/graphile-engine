@@ -1,0 +1,82 @@
+## expect(errors).toBeFalsy();
+#> schema: ["partitioned"]
+#> usePartitionedParent: false
+{
+  allItem0S {
+    nodes {
+      id
+      description
+    }
+  }
+  allItem1S {
+    nodes {
+      id
+      description
+    }
+  }
+  allItem2S {
+    nodes {
+      id
+      description
+    }
+  }
+
+  allStock0S {
+    nodes {
+      amount
+      itemId
+      warehouseByWarehouseId {
+        id
+        location
+      }
+    }
+  }
+  allStock1S {
+    nodes {
+      amount
+      itemId
+      warehouseByWarehouseId {
+        id
+        location
+      }
+    }
+  }
+  allStock2S {
+    nodes {
+      amount
+      itemId
+      warehouseByWarehouseId {
+        id
+        location
+      }
+    }
+  }
+  allStock3S {
+    nodes {
+      amount
+      itemId
+      warehouseByWarehouseId {
+        id
+        location
+      }
+    }
+  }
+  allStock4S {
+    nodes {
+      amount
+      itemId
+      warehouseByWarehouseId {
+        id
+        location
+      }
+    }
+  }
+
+  allWarehouses {
+    nodes {
+      id
+      location
+    }
+  }
+}
+
