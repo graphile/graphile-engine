@@ -43,7 +43,7 @@
     "debug": "^4.1.1",
     "graphile-build": "4.6.0",
     "graphql-iso-date": "^3.6.0",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "lodash": ">=4 <5",
     "pg-sql2": "4.6.0-alpha.0",
     "postgres-interval": "^1.2.0"
