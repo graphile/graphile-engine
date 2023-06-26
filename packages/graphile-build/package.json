@@ -38,7 +38,7 @@
     "lodash": ">=4 <5",
     "lru-cache": "^5.0.0",
     "pluralize": "^7.0.0",
-    "semver": "^6.0.0"
+    "semver": "^7.5.2"
   },
   "engines": {
     "node": ">=8.6"
