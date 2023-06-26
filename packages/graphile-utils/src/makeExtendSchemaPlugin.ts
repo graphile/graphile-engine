@@ -479,6 +479,7 @@ export default function makeExtendSchemaPlugin(
     });
 
     builder.hook("GraphQLSchema", (schema, build, _context) => {
+      const { inflection } = build;
       const {
         [`ExtendSchemaPlugin_${uniqueId}_typeExtensions`]: typeExtensions,
         [`ExtendSchemaPlugin_${uniqueId}_newTypes`]: newTypeDefinitions,
@@ -497,6 +498,11 @@ export default function makeExtendSchemaPlugin(
         types: [
           ...(schema.types || []),
           ...typeExtensions.GraphQLSchema.types,
+          ...[
+            build.getTypeByName(inflection.builtin("Query")),
+            build.getTypeByName(inflection.builtin("Mutation")),
+            build.getTypeByName(inflection.builtin("Subscription")),
+          ].filter(_ => _),
           ...newTypes,
         ],
       };
