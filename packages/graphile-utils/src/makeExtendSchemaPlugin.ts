@@ -497,12 +497,12 @@ export default function makeExtendSchemaPlugin(
         ],
         types: [
           ...(schema.types || []),
-          ...typeExtensions.GraphQLSchema.types,
           ...[
             build.getTypeByName(inflection.builtin("Query")),
             build.getTypeByName(inflection.builtin("Mutation")),
             build.getTypeByName(inflection.builtin("Subscription")),
           ].filter(_ => _),
+          ...typeExtensions.GraphQLSchema.types,
           ...newTypes,
         ],
       };
