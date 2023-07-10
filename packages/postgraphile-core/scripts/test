@@ -51,8 +51,8 @@ echo "Database reset successfully ✅"
 # Now run the tests
 if [ $SERVER_VERSION_NUM -ge 110000 ]; then
   yarn jest --forceExit -i $@
-elif [ $SERVER_VERSION_NUM -lt 100000 ] && [ $SERVER_VERSION_NUM -ge 90500 ]; then
-  yarn jest --forceExit -i -t "^((?!partitioned).)*$" $@
+elif [ $SERVER_VERSION_NUM -ge 100000 ]; then
+  yarn jest --forceExit -i -t "^((?!pg11).)*$" $@
 elif [ $SERVER_VERSION_NUM -ge 90500 ]; then
   yarn jest --forceExit -i -t "^((?!pg11|partitioned).)*$" $@
 else
