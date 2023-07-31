@@ -12,6 +12,7 @@ sponsor](https://graphile.org/sponsor/).
 - Netflix
 - Chad Furman
 - Stellate
+- Accenture
 
 ## Leaders
 
@@ -29,14 +30,16 @@ sponsor](https://graphile.org/sponsor/).
 - Notably
 - Taiste
 - latch.bio
-- Ayog Healthcare
 - Severin Ibarluzea
 - BairesDev
 - FOLX Health
+- Two Bit Solutions
+- Beacon
+- Ndustrial
+- dimply
 
 ## Supporters
 
-- Postlight
 - HR-ON
 - stlbucket
 - Sam Levin
@@ -48,7 +51,6 @@ sponsor](https://graphile.org/sponsor/).
 - CJ Lazell
 - Daniel Einspanjer
 - Mansoor Razzaq
-- Mark
 - Alvin Ali Khaled
 - Keith Layne
 - Paul Melnikow
@@ -65,8 +67,13 @@ sponsor](https://graphile.org/sponsor/).
 - JYC
 - Ben Periton
 - SpaceFill
+- Vizcom
 - Nate Smith
 - The Outbound Collective
 - Charlie Hadden
 - Kiron Open Higher Education
 - Antonio Angelino
+- urtho
+- Andrew Joseph
+- Old Grammar
+- Spear AI
