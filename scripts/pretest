@@ -68,6 +68,10 @@ if [ $SERVER_VERSION_NUM -ge 110000 ]; then
   psql -Xqv ON_ERROR_STOP=1 -f packages/postgraphile-core/__tests__/pg11-schema.sql "$TEST_DATABASE_URL"
 fi;
 
+if [ $SERVER_VERSION_NUM -ge 100000 ]; then
+  psql -Xqv ON_ERROR_STOP=1 -f packages/postgraphile-core/__tests__/partitioned-schema.sql "$TEST_DATABASE_URL"
+fi;
+
 psql -Xqv ON_ERROR_STOP=1 "$TEST_DATABASE_URL" <<HERE
 DROP DATABASE IF EXISTS lds_test;
 CREATE DATABASE lds_test;

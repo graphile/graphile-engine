@@ -1,0 +1,59 @@
+{
+  createWarehouse: {
+    warehouse: {
+      id: 1000,
+      location: "Memphis, TN",
+    },
+  },
+  createItem: {
+    item: {
+      id: 2000,
+      description: "Laptop",
+    },
+  },
+  createStock: {
+    stock: {
+      itemId: 2000,
+      amount: 10,
+      warehouseId: 1000,
+    },
+  },
+  updateWarehouseById: {
+    warehouse: {
+      id: 1000,
+      location: "Nashville, TN",
+    },
+  },
+  updateItemById: {
+    item: {
+      id: 2000,
+      description: "TV",
+    },
+  },
+  updateStockByItemIdAndWarehouseId: {
+    stock: {
+      itemId: 2000,
+      amount: 2,
+      warehouseId: 1000,
+    },
+  },
+  deleteStockByItemIdAndWarehouseId: {
+    stock: {
+      itemId: 2000,
+      amount: 2,
+      warehouseId: 1000,
+    },
+  },
+  deleteWarehouseById: {
+    warehouse: {
+      id: 1000,
+      location: "Nashville, TN",
+    },
+  },
+  deleteItemById: {
+    item: {
+      id: 2000,
+      description: "TV",
+    },
+  },
+}

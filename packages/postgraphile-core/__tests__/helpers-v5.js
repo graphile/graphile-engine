@@ -471,6 +471,7 @@ const makeSchema = config => {
           ExtendedPlugin,
           config.ToyCategoriesPlugin ? ToyCategoriesPlugin : null,
         ].filter(isNotNullish),
+        usePartitionedParent: config.usePartitionedParent,
       }
     );
   });

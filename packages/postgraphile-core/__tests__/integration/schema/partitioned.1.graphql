@@ -1,0 +1,2898 @@
+"""All input for the create `Item0` mutation."""
+input CreateItem0Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Item0` to be created by this mutation."""
+  item0: Item0Input!
+}
+
+"""The output of our create `Item0` mutation."""
+type CreateItem0Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Item0` that was created by this mutation."""
+  item0: Item0
+
+  """An edge for our `Item0`. May be used by Relay 1."""
+  item0Edge(
+    """The method to use when ordering `Item0`."""
+    orderBy: [Item0SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Item0SEdge
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the create `Item1` mutation."""
+input CreateItem1Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Item1` to be created by this mutation."""
+  item1: Item1Input!
+}
+
+"""The output of our create `Item1` mutation."""
+type CreateItem1Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Item1` that was created by this mutation."""
+  item1: Item1
+
+  """An edge for our `Item1`. May be used by Relay 1."""
+  item1Edge(
+    """The method to use when ordering `Item1`."""
+    orderBy: [Item1SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Item1SEdge
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the create `Item2` mutation."""
+input CreateItem2Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Item2` to be created by this mutation."""
+  item2: Item2Input!
+}
+
+"""The output of our create `Item2` mutation."""
+type CreateItem2Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Item2` that was created by this mutation."""
+  item2: Item2
+
+  """An edge for our `Item2`. May be used by Relay 1."""
+  item2Edge(
+    """The method to use when ordering `Item2`."""
+    orderBy: [Item2SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Item2SEdge
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the create `Stock0` mutation."""
+input CreateStock0Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Stock0` to be created by this mutation."""
+  stock0: Stock0Input!
+}
+
+"""The output of our create `Stock0` mutation."""
+type CreateStock0Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Stock0` that was created by this mutation."""
+  stock0: Stock0
+
+  """An edge for our `Stock0`. May be used by Relay 1."""
+  stock0Edge(
+    """The method to use when ordering `Stock0`."""
+    orderBy: [Stock0SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock0SEdge
+
+  """Reads a single `Warehouse` that is related to this `Stock0`."""
+  warehouseByWarehouseId: Warehouse
+}
+
+"""All input for the create `Stock1` mutation."""
+input CreateStock1Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Stock1` to be created by this mutation."""
+  stock1: Stock1Input!
+}
+
+"""The output of our create `Stock1` mutation."""
+type CreateStock1Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Stock1` that was created by this mutation."""
+  stock1: Stock1
+
+  """An edge for our `Stock1`. May be used by Relay 1."""
+  stock1Edge(
+    """The method to use when ordering `Stock1`."""
+    orderBy: [Stock1SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock1SEdge
+
+  """Reads a single `Warehouse` that is related to this `Stock1`."""
+  warehouseByWarehouseId: Warehouse
+}
+
+"""All input for the create `Stock2` mutation."""
+input CreateStock2Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Stock2` to be created by this mutation."""
+  stock2: Stock2Input!
+}
+
+"""The output of our create `Stock2` mutation."""
+type CreateStock2Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Stock2` that was created by this mutation."""
+  stock2: Stock2
+
+  """An edge for our `Stock2`. May be used by Relay 1."""
+  stock2Edge(
+    """The method to use when ordering `Stock2`."""
+    orderBy: [Stock2SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock2SEdge
+
+  """Reads a single `Warehouse` that is related to this `Stock2`."""
+  warehouseByWarehouseId: Warehouse
+}
+
+"""All input for the create `Stock3` mutation."""
+input CreateStock3Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Stock3` to be created by this mutation."""
+  stock3: Stock3Input!
+}
+
+"""The output of our create `Stock3` mutation."""
+type CreateStock3Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Stock3` that was created by this mutation."""
+  stock3: Stock3
+
+  """An edge for our `Stock3`. May be used by Relay 1."""
+  stock3Edge(
+    """The method to use when ordering `Stock3`."""
+    orderBy: [Stock3SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock3SEdge
+
+  """Reads a single `Warehouse` that is related to this `Stock3`."""
+  warehouseByWarehouseId: Warehouse
+}
+
+"""All input for the create `Stock4` mutation."""
+input CreateStock4Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Stock4` to be created by this mutation."""
+  stock4: Stock4Input!
+}
+
+"""The output of our create `Stock4` mutation."""
+type CreateStock4Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Stock4` that was created by this mutation."""
+  stock4: Stock4
+
+  """An edge for our `Stock4`. May be used by Relay 1."""
+  stock4Edge(
+    """The method to use when ordering `Stock4`."""
+    orderBy: [Stock4SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock4SEdge
+
+  """Reads a single `Warehouse` that is related to this `Stock4`."""
+  warehouseByWarehouseId: Warehouse
+}
+
+"""All input for the create `Warehouse` mutation."""
+input CreateWarehouseInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Warehouse` to be created by this mutation."""
+  warehouse: WarehouseInput!
+}
+
+"""The output of our create `Warehouse` mutation."""
+type CreateWarehousePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Warehouse` that was created by this mutation."""
+  warehouse: Warehouse
+
+  """An edge for our `Warehouse`. May be used by Relay 1."""
+  warehouseEdge(
+    """The method to use when ordering `Warehouse`."""
+    orderBy: [WarehousesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): WarehousesEdge
+}
+
+"""A location in a connection that can be used for resuming pagination."""
+scalar Cursor
+
+"""All input for the `deleteItem0ById` mutation."""
+input DeleteItem0ByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""All input for the `deleteItem0` mutation."""
+input DeleteItem0Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Item0` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""The output of our delete `Item0` mutation."""
+type DeleteItem0Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  deletedItem0Id: ID
+
+  """The `Item0` that was deleted by this mutation."""
+  item0: Item0
+
+  """An edge for our `Item0`. May be used by Relay 1."""
+  item0Edge(
+    """The method to use when ordering `Item0`."""
+    orderBy: [Item0SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Item0SEdge
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `deleteItem1ById` mutation."""
+input DeleteItem1ByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""All input for the `deleteItem1` mutation."""
+input DeleteItem1Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Item1` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""The output of our delete `Item1` mutation."""
+type DeleteItem1Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  deletedItem1Id: ID
+
+  """The `Item1` that was deleted by this mutation."""
+  item1: Item1
+
+  """An edge for our `Item1`. May be used by Relay 1."""
+  item1Edge(
+    """The method to use when ordering `Item1`."""
+    orderBy: [Item1SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Item1SEdge
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `deleteItem2ById` mutation."""
+input DeleteItem2ByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""All input for the `deleteItem2` mutation."""
+input DeleteItem2Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Item2` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""The output of our delete `Item2` mutation."""
+type DeleteItem2Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  deletedItem2Id: ID
+
+  """The `Item2` that was deleted by this mutation."""
+  item2: Item2
+
+  """An edge for our `Item2`. May be used by Relay 1."""
+  item2Edge(
+    """The method to use when ordering `Item2`."""
+    orderBy: [Item2SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Item2SEdge
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `deleteStock0ByItemIdAndWarehouseId` mutation."""
+input DeleteStock0ByItemIdAndWarehouseIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  itemId: Int!
+  warehouseId: Int!
+}
+
+"""All input for the `deleteStock0` mutation."""
+input DeleteStock0Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Stock0` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""The output of our delete `Stock0` mutation."""
+type DeleteStock0Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  deletedStock0Id: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Stock0` that was deleted by this mutation."""
+  stock0: Stock0
+
+  """An edge for our `Stock0`. May be used by Relay 1."""
+  stock0Edge(
+    """The method to use when ordering `Stock0`."""
+    orderBy: [Stock0SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock0SEdge
+
+  """Reads a single `Warehouse` that is related to this `Stock0`."""
+  warehouseByWarehouseId: Warehouse
+}
+
+"""All input for the `deleteStock1ByItemIdAndWarehouseId` mutation."""
+input DeleteStock1ByItemIdAndWarehouseIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  itemId: Int!
+  warehouseId: Int!
+}
+
+"""All input for the `deleteStock1` mutation."""
+input DeleteStock1Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Stock1` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""The output of our delete `Stock1` mutation."""
+type DeleteStock1Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  deletedStock1Id: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Stock1` that was deleted by this mutation."""
+  stock1: Stock1
+
+  """An edge for our `Stock1`. May be used by Relay 1."""
+  stock1Edge(
+    """The method to use when ordering `Stock1`."""
+    orderBy: [Stock1SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock1SEdge
+
+  """Reads a single `Warehouse` that is related to this `Stock1`."""
+  warehouseByWarehouseId: Warehouse
+}
+
+"""All input for the `deleteStock2ByItemIdAndWarehouseId` mutation."""
+input DeleteStock2ByItemIdAndWarehouseIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  itemId: Int!
+  warehouseId: Int!
+}
+
+"""All input for the `deleteStock2` mutation."""
+input DeleteStock2Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Stock2` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""The output of our delete `Stock2` mutation."""
+type DeleteStock2Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  deletedStock2Id: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Stock2` that was deleted by this mutation."""
+  stock2: Stock2
+
+  """An edge for our `Stock2`. May be used by Relay 1."""
+  stock2Edge(
+    """The method to use when ordering `Stock2`."""
+    orderBy: [Stock2SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock2SEdge
+
+  """Reads a single `Warehouse` that is related to this `Stock2`."""
+  warehouseByWarehouseId: Warehouse
+}
+
+"""All input for the `deleteStock3ByItemIdAndWarehouseId` mutation."""
+input DeleteStock3ByItemIdAndWarehouseIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  itemId: Int!
+  warehouseId: Int!
+}
+
+"""All input for the `deleteStock3` mutation."""
+input DeleteStock3Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Stock3` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""The output of our delete `Stock3` mutation."""
+type DeleteStock3Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  deletedStock3Id: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Stock3` that was deleted by this mutation."""
+  stock3: Stock3
+
+  """An edge for our `Stock3`. May be used by Relay 1."""
+  stock3Edge(
+    """The method to use when ordering `Stock3`."""
+    orderBy: [Stock3SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock3SEdge
+
+  """Reads a single `Warehouse` that is related to this `Stock3`."""
+  warehouseByWarehouseId: Warehouse
+}
+
+"""All input for the `deleteStock4ByItemIdAndWarehouseId` mutation."""
+input DeleteStock4ByItemIdAndWarehouseIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  itemId: Int!
+  warehouseId: Int!
+}
+
+"""All input for the `deleteStock4` mutation."""
+input DeleteStock4Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Stock4` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""The output of our delete `Stock4` mutation."""
+type DeleteStock4Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  deletedStock4Id: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Stock4` that was deleted by this mutation."""
+  stock4: Stock4
+
+  """An edge for our `Stock4`. May be used by Relay 1."""
+  stock4Edge(
+    """The method to use when ordering `Stock4`."""
+    orderBy: [Stock4SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock4SEdge
+
+  """Reads a single `Warehouse` that is related to this `Stock4`."""
+  warehouseByWarehouseId: Warehouse
+}
+
+"""All input for the `deleteWarehouseById` mutation."""
+input DeleteWarehouseByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""All input for the `deleteWarehouse` mutation."""
+input DeleteWarehouseInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Warehouse` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""The output of our delete `Warehouse` mutation."""
+type DeleteWarehousePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  deletedWarehouseId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Warehouse` that was deleted by this mutation."""
+  warehouse: Warehouse
+
+  """An edge for our `Warehouse`. May be used by Relay 1."""
+  warehouseEdge(
+    """The method to use when ordering `Warehouse`."""
+    orderBy: [WarehousesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): WarehousesEdge
+}
+
+type Item0 implements Node {
+  description: String!
+  id: Int!
+
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+}
+
+"""
+A condition to be used against `Item0` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input Item0Condition {
+  """Checks for equality with the object’s `description` field."""
+  description: String
+
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+}
+
+"""An input for mutations affecting `Item0`"""
+input Item0Input {
+  description: String!
+  id: Int!
+}
+
+"""
+Represents an update to a `Item0`. Fields that are set will be updated.
+"""
+input Item0Patch {
+  description: String
+  id: Int
+}
+
+"""A connection to a list of `Item0` values."""
+type Item0SConnection {
+  """
+  A list of edges which contains the `Item0` and cursor to aid in pagination.
+  """
+  edges: [Item0SEdge!]!
+
+  """A list of `Item0` objects."""
+  nodes: [Item0]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Item0` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Item0` edge in the connection."""
+type Item0SEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Item0` at the end of the edge."""
+  node: Item0
+}
+
+"""Methods to use when ordering `Item0`."""
+enum Item0SOrderBy {
+  DESCRIPTION_ASC
+  DESCRIPTION_DESC
+  ID_ASC
+  ID_DESC
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+type Item1 implements Node {
+  description: String!
+  id: Int!
+
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+}
+
+"""
+A condition to be used against `Item1` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input Item1Condition {
+  """Checks for equality with the object’s `description` field."""
+  description: String
+
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+}
+
+"""An input for mutations affecting `Item1`"""
+input Item1Input {
+  description: String!
+  id: Int!
+}
+
+"""
+Represents an update to a `Item1`. Fields that are set will be updated.
+"""
+input Item1Patch {
+  description: String
+  id: Int
+}
+
+"""A connection to a list of `Item1` values."""
+type Item1SConnection {
+  """
+  A list of edges which contains the `Item1` and cursor to aid in pagination.
+  """
+  edges: [Item1SEdge!]!
+
+  """A list of `Item1` objects."""
+  nodes: [Item1]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Item1` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Item1` edge in the connection."""
+type Item1SEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Item1` at the end of the edge."""
+  node: Item1
+}
+
+"""Methods to use when ordering `Item1`."""
+enum Item1SOrderBy {
+  DESCRIPTION_ASC
+  DESCRIPTION_DESC
+  ID_ASC
+  ID_DESC
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+type Item2 implements Node {
+  description: String!
+  id: Int!
+
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+}
+
+"""
+A condition to be used against `Item2` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input Item2Condition {
+  """Checks for equality with the object’s `description` field."""
+  description: String
+
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+}
+
+"""An input for mutations affecting `Item2`"""
+input Item2Input {
+  description: String!
+  id: Int!
+}
+
+"""
+Represents an update to a `Item2`. Fields that are set will be updated.
+"""
+input Item2Patch {
+  description: String
+  id: Int
+}
+
+"""A connection to a list of `Item2` values."""
+type Item2SConnection {
+  """
+  A list of edges which contains the `Item2` and cursor to aid in pagination.
+  """
+  edges: [Item2SEdge!]!
+
+  """A list of `Item2` objects."""
+  nodes: [Item2]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Item2` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Item2` edge in the connection."""
+type Item2SEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Item2` at the end of the edge."""
+  node: Item2
+}
+
+"""Methods to use when ordering `Item2`."""
+enum Item2SOrderBy {
+  DESCRIPTION_ASC
+  DESCRIPTION_DESC
+  ID_ASC
+  ID_DESC
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+The root mutation type which contains root level fields which mutate data.
+"""
+type Mutation {
+  """Creates a single `Item0`."""
+  createItem0(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateItem0Input!
+  ): CreateItem0Payload
+
+  """Creates a single `Item1`."""
+  createItem1(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateItem1Input!
+  ): CreateItem1Payload
+
+  """Creates a single `Item2`."""
+  createItem2(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateItem2Input!
+  ): CreateItem2Payload
+
+  """Creates a single `Stock0`."""
+  createStock0(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateStock0Input!
+  ): CreateStock0Payload
+
+  """Creates a single `Stock1`."""
+  createStock1(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateStock1Input!
+  ): CreateStock1Payload
+
+  """Creates a single `Stock2`."""
+  createStock2(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateStock2Input!
+  ): CreateStock2Payload
+
+  """Creates a single `Stock3`."""
+  createStock3(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateStock3Input!
+  ): CreateStock3Payload
+
+  """Creates a single `Stock4`."""
+  createStock4(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateStock4Input!
+  ): CreateStock4Payload
+
+  """Creates a single `Warehouse`."""
+  createWarehouse(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateWarehouseInput!
+  ): CreateWarehousePayload
+
+  """Deletes a single `Item0` using its globally unique id."""
+  deleteItem0(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteItem0Input!
+  ): DeleteItem0Payload
+
+  """Deletes a single `Item0` using a unique key."""
+  deleteItem0ById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteItem0ByIdInput!
+  ): DeleteItem0Payload
+
+  """Deletes a single `Item1` using its globally unique id."""
+  deleteItem1(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteItem1Input!
+  ): DeleteItem1Payload
+
+  """Deletes a single `Item1` using a unique key."""
+  deleteItem1ById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteItem1ByIdInput!
+  ): DeleteItem1Payload
+
+  """Deletes a single `Item2` using its globally unique id."""
+  deleteItem2(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteItem2Input!
+  ): DeleteItem2Payload
+
+  """Deletes a single `Item2` using a unique key."""
+  deleteItem2ById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteItem2ByIdInput!
+  ): DeleteItem2Payload
+
+  """Deletes a single `Stock0` using its globally unique id."""
+  deleteStock0(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStock0Input!
+  ): DeleteStock0Payload
+
+  """Deletes a single `Stock0` using a unique key."""
+  deleteStock0ByItemIdAndWarehouseId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStock0ByItemIdAndWarehouseIdInput!
+  ): DeleteStock0Payload
+
+  """Deletes a single `Stock1` using its globally unique id."""
+  deleteStock1(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStock1Input!
+  ): DeleteStock1Payload
+
+  """Deletes a single `Stock1` using a unique key."""
+  deleteStock1ByItemIdAndWarehouseId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStock1ByItemIdAndWarehouseIdInput!
+  ): DeleteStock1Payload
+
+  """Deletes a single `Stock2` using its globally unique id."""
+  deleteStock2(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStock2Input!
+  ): DeleteStock2Payload
+
+  """Deletes a single `Stock2` using a unique key."""
+  deleteStock2ByItemIdAndWarehouseId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStock2ByItemIdAndWarehouseIdInput!
+  ): DeleteStock2Payload
+
+  """Deletes a single `Stock3` using its globally unique id."""
+  deleteStock3(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStock3Input!
+  ): DeleteStock3Payload
+
+  """Deletes a single `Stock3` using a unique key."""
+  deleteStock3ByItemIdAndWarehouseId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStock3ByItemIdAndWarehouseIdInput!
+  ): DeleteStock3Payload
+
+  """Deletes a single `Stock4` using its globally unique id."""
+  deleteStock4(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStock4Input!
+  ): DeleteStock4Payload
+
+  """Deletes a single `Stock4` using a unique key."""
+  deleteStock4ByItemIdAndWarehouseId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteStock4ByItemIdAndWarehouseIdInput!
+  ): DeleteStock4Payload
+
+  """Deletes a single `Warehouse` using its globally unique id."""
+  deleteWarehouse(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteWarehouseInput!
+  ): DeleteWarehousePayload
+
+  """Deletes a single `Warehouse` using a unique key."""
+  deleteWarehouseById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteWarehouseByIdInput!
+  ): DeleteWarehousePayload
+
+  """Updates a single `Item0` using its globally unique id and a patch."""
+  updateItem0(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateItem0Input!
+  ): UpdateItem0Payload
+
+  """Updates a single `Item0` using a unique key and a patch."""
+  updateItem0ById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateItem0ByIdInput!
+  ): UpdateItem0Payload
+
+  """Updates a single `Item1` using its globally unique id and a patch."""
+  updateItem1(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateItem1Input!
+  ): UpdateItem1Payload
+
+  """Updates a single `Item1` using a unique key and a patch."""
+  updateItem1ById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateItem1ByIdInput!
+  ): UpdateItem1Payload
+
+  """Updates a single `Item2` using its globally unique id and a patch."""
+  updateItem2(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateItem2Input!
+  ): UpdateItem2Payload
+
+  """Updates a single `Item2` using a unique key and a patch."""
+  updateItem2ById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateItem2ByIdInput!
+  ): UpdateItem2Payload
+
+  """Updates a single `Stock0` using its globally unique id and a patch."""
+  updateStock0(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStock0Input!
+  ): UpdateStock0Payload
+
+  """Updates a single `Stock0` using a unique key and a patch."""
+  updateStock0ByItemIdAndWarehouseId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStock0ByItemIdAndWarehouseIdInput!
+  ): UpdateStock0Payload
+
+  """Updates a single `Stock1` using its globally unique id and a patch."""
+  updateStock1(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStock1Input!
+  ): UpdateStock1Payload
+
+  """Updates a single `Stock1` using a unique key and a patch."""
+  updateStock1ByItemIdAndWarehouseId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStock1ByItemIdAndWarehouseIdInput!
+  ): UpdateStock1Payload
+
+  """Updates a single `Stock2` using its globally unique id and a patch."""
+  updateStock2(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStock2Input!
+  ): UpdateStock2Payload
+
+  """Updates a single `Stock2` using a unique key and a patch."""
+  updateStock2ByItemIdAndWarehouseId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStock2ByItemIdAndWarehouseIdInput!
+  ): UpdateStock2Payload
+
+  """Updates a single `Stock3` using its globally unique id and a patch."""
+  updateStock3(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStock3Input!
+  ): UpdateStock3Payload
+
+  """Updates a single `Stock3` using a unique key and a patch."""
+  updateStock3ByItemIdAndWarehouseId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStock3ByItemIdAndWarehouseIdInput!
+  ): UpdateStock3Payload
+
+  """Updates a single `Stock4` using its globally unique id and a patch."""
+  updateStock4(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStock4Input!
+  ): UpdateStock4Payload
+
+  """Updates a single `Stock4` using a unique key and a patch."""
+  updateStock4ByItemIdAndWarehouseId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateStock4ByItemIdAndWarehouseIdInput!
+  ): UpdateStock4Payload
+
+  """Updates a single `Warehouse` using its globally unique id and a patch."""
+  updateWarehouse(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateWarehouseInput!
+  ): UpdateWarehousePayload
+
+  """Updates a single `Warehouse` using a unique key and a patch."""
+  updateWarehouseById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateWarehouseByIdInput!
+  ): UpdateWarehousePayload
+}
+
+"""An object with a globally unique `ID`."""
+interface Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+}
+
+"""Information about pagination in a connection."""
+type PageInfo {
+  """When paginating forwards, the cursor to continue."""
+  endCursor: Cursor
+
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: Cursor
+}
+
+"""The root query type which gives access points into the data universe."""
+type Query implements Node {
+  """Reads and enables pagination through a set of `Item0`."""
+  allItem0S(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: Item0Condition
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """The method to use when ordering `Item0`."""
+    orderBy: [Item0SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Item0SConnection
+
+  """Reads and enables pagination through a set of `Item1`."""
+  allItem1S(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: Item1Condition
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """The method to use when ordering `Item1`."""
+    orderBy: [Item1SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Item1SConnection
+
+  """Reads and enables pagination through a set of `Item2`."""
+  allItem2S(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: Item2Condition
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """The method to use when ordering `Item2`."""
+    orderBy: [Item2SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Item2SConnection
+
+  """Reads and enables pagination through a set of `Stock0`."""
+  allStock0S(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: Stock0Condition
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """The method to use when ordering `Stock0`."""
+    orderBy: [Stock0SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock0SConnection
+
+  """Reads and enables pagination through a set of `Stock1`."""
+  allStock1S(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: Stock1Condition
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """The method to use when ordering `Stock1`."""
+    orderBy: [Stock1SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock1SConnection
+
+  """Reads and enables pagination through a set of `Stock2`."""
+  allStock2S(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: Stock2Condition
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """The method to use when ordering `Stock2`."""
+    orderBy: [Stock2SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock2SConnection
+
+  """Reads and enables pagination through a set of `Stock3`."""
+  allStock3S(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: Stock3Condition
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """The method to use when ordering `Stock3`."""
+    orderBy: [Stock3SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock3SConnection
+
+  """Reads and enables pagination through a set of `Stock4`."""
+  allStock4S(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: Stock4Condition
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """The method to use when ordering `Stock4`."""
+    orderBy: [Stock4SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock4SConnection
+
+  """Reads and enables pagination through a set of `Warehouse`."""
+  allWarehouses(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: WarehouseCondition
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """The method to use when ordering `Warehouse`."""
+    orderBy: [WarehousesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): WarehousesConnection
+
+  """Reads a single `Item0` using its globally unique `ID`."""
+  item0(
+    """The globally unique `ID` to be used in selecting a single `Item0`."""
+    nodeId: ID!
+  ): Item0
+  item0ById(id: Int!): Item0
+
+  """Reads a single `Item1` using its globally unique `ID`."""
+  item1(
+    """The globally unique `ID` to be used in selecting a single `Item1`."""
+    nodeId: ID!
+  ): Item1
+  item1ById(id: Int!): Item1
+
+  """Reads a single `Item2` using its globally unique `ID`."""
+  item2(
+    """The globally unique `ID` to be used in selecting a single `Item2`."""
+    nodeId: ID!
+  ): Item2
+  item2ById(id: Int!): Item2
+
+  """Fetches an object given its globally unique `ID`."""
+  node(
+    """The globally unique `ID`."""
+    nodeId: ID!
+  ): Node
+
+  """
+  The root query type must be a `Node` to work well with Relay 1 mutations. This just resolves to `query`.
+  """
+  nodeId: ID!
+
+  """
+  Exposes the root query type nested one level down. This is helpful for Relay 1
+  which can only query top level fields if they are in a particular form.
+  """
+  query: Query!
+
+  """Reads a single `Stock0` using its globally unique `ID`."""
+  stock0(
+    """The globally unique `ID` to be used in selecting a single `Stock0`."""
+    nodeId: ID!
+  ): Stock0
+  stock0ByItemIdAndWarehouseId(itemId: Int!, warehouseId: Int!): Stock0
+
+  """Reads a single `Stock1` using its globally unique `ID`."""
+  stock1(
+    """The globally unique `ID` to be used in selecting a single `Stock1`."""
+    nodeId: ID!
+  ): Stock1
+  stock1ByItemIdAndWarehouseId(itemId: Int!, warehouseId: Int!): Stock1
+
+  """Reads a single `Stock2` using its globally unique `ID`."""
+  stock2(
+    """The globally unique `ID` to be used in selecting a single `Stock2`."""
+    nodeId: ID!
+  ): Stock2
+  stock2ByItemIdAndWarehouseId(itemId: Int!, warehouseId: Int!): Stock2
+
+  """Reads a single `Stock3` using its globally unique `ID`."""
+  stock3(
+    """The globally unique `ID` to be used in selecting a single `Stock3`."""
+    nodeId: ID!
+  ): Stock3
+  stock3ByItemIdAndWarehouseId(itemId: Int!, warehouseId: Int!): Stock3
+
+  """Reads a single `Stock4` using its globally unique `ID`."""
+  stock4(
+    """The globally unique `ID` to be used in selecting a single `Stock4`."""
+    nodeId: ID!
+  ): Stock4
+  stock4ByItemIdAndWarehouseId(itemId: Int!, warehouseId: Int!): Stock4
+
+  """Reads a single `Warehouse` using its globally unique `ID`."""
+  warehouse(
+    """The globally unique `ID` to be used in selecting a single `Warehouse`."""
+    nodeId: ID!
+  ): Warehouse
+  warehouseById(id: Int!): Warehouse
+}
+
+type Stock0 implements Node {
+  amount: Int!
+  itemId: Int!
+
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+
+  """Reads a single `Warehouse` that is related to this `Stock0`."""
+  warehouseByWarehouseId: Warehouse
+  warehouseId: Int!
+}
+
+"""
+A condition to be used against `Stock0` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input Stock0Condition {
+  """Checks for equality with the object’s `amount` field."""
+  amount: Int
+
+  """Checks for equality with the object’s `itemId` field."""
+  itemId: Int
+
+  """Checks for equality with the object’s `warehouseId` field."""
+  warehouseId: Int
+}
+
+"""An input for mutations affecting `Stock0`"""
+input Stock0Input {
+  amount: Int!
+  itemId: Int!
+  warehouseId: Int!
+}
+
+"""
+Represents an update to a `Stock0`. Fields that are set will be updated.
+"""
+input Stock0Patch {
+  amount: Int
+  itemId: Int
+  warehouseId: Int
+}
+
+"""A connection to a list of `Stock0` values."""
+type Stock0SConnection {
+  """
+  A list of edges which contains the `Stock0` and cursor to aid in pagination.
+  """
+  edges: [Stock0SEdge!]!
+
+  """A list of `Stock0` objects."""
+  nodes: [Stock0]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Stock0` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Stock0` edge in the connection."""
+type Stock0SEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Stock0` at the end of the edge."""
+  node: Stock0
+}
+
+"""Methods to use when ordering `Stock0`."""
+enum Stock0SOrderBy {
+  AMOUNT_ASC
+  AMOUNT_DESC
+  ITEM_ID_ASC
+  ITEM_ID_DESC
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+  WAREHOUSE_ID_ASC
+  WAREHOUSE_ID_DESC
+}
+
+type Stock1 implements Node {
+  amount: Int!
+  itemId: Int!
+
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+
+  """Reads a single `Warehouse` that is related to this `Stock1`."""
+  warehouseByWarehouseId: Warehouse
+  warehouseId: Int!
+}
+
+"""
+A condition to be used against `Stock1` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input Stock1Condition {
+  """Checks for equality with the object’s `amount` field."""
+  amount: Int
+
+  """Checks for equality with the object’s `itemId` field."""
+  itemId: Int
+
+  """Checks for equality with the object’s `warehouseId` field."""
+  warehouseId: Int
+}
+
+"""An input for mutations affecting `Stock1`"""
+input Stock1Input {
+  amount: Int!
+  itemId: Int!
+  warehouseId: Int!
+}
+
+"""
+Represents an update to a `Stock1`. Fields that are set will be updated.
+"""
+input Stock1Patch {
+  amount: Int
+  itemId: Int
+  warehouseId: Int
+}
+
+"""A connection to a list of `Stock1` values."""
+type Stock1SConnection {
+  """
+  A list of edges which contains the `Stock1` and cursor to aid in pagination.
+  """
+  edges: [Stock1SEdge!]!
+
+  """A list of `Stock1` objects."""
+  nodes: [Stock1]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Stock1` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Stock1` edge in the connection."""
+type Stock1SEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Stock1` at the end of the edge."""
+  node: Stock1
+}
+
+"""Methods to use when ordering `Stock1`."""
+enum Stock1SOrderBy {
+  AMOUNT_ASC
+  AMOUNT_DESC
+  ITEM_ID_ASC
+  ITEM_ID_DESC
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+  WAREHOUSE_ID_ASC
+  WAREHOUSE_ID_DESC
+}
+
+type Stock2 implements Node {
+  amount: Int!
+  itemId: Int!
+
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+
+  """Reads a single `Warehouse` that is related to this `Stock2`."""
+  warehouseByWarehouseId: Warehouse
+  warehouseId: Int!
+}
+
+"""
+A condition to be used against `Stock2` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input Stock2Condition {
+  """Checks for equality with the object’s `amount` field."""
+  amount: Int
+
+  """Checks for equality with the object’s `itemId` field."""
+  itemId: Int
+
+  """Checks for equality with the object’s `warehouseId` field."""
+  warehouseId: Int
+}
+
+"""An input for mutations affecting `Stock2`"""
+input Stock2Input {
+  amount: Int!
+  itemId: Int!
+  warehouseId: Int!
+}
+
+"""
+Represents an update to a `Stock2`. Fields that are set will be updated.
+"""
+input Stock2Patch {
+  amount: Int
+  itemId: Int
+  warehouseId: Int
+}
+
+"""A connection to a list of `Stock2` values."""
+type Stock2SConnection {
+  """
+  A list of edges which contains the `Stock2` and cursor to aid in pagination.
+  """
+  edges: [Stock2SEdge!]!
+
+  """A list of `Stock2` objects."""
+  nodes: [Stock2]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Stock2` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Stock2` edge in the connection."""
+type Stock2SEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Stock2` at the end of the edge."""
+  node: Stock2
+}
+
+"""Methods to use when ordering `Stock2`."""
+enum Stock2SOrderBy {
+  AMOUNT_ASC
+  AMOUNT_DESC
+  ITEM_ID_ASC
+  ITEM_ID_DESC
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+  WAREHOUSE_ID_ASC
+  WAREHOUSE_ID_DESC
+}
+
+type Stock3 implements Node {
+  amount: Int!
+  itemId: Int!
+
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+
+  """Reads a single `Warehouse` that is related to this `Stock3`."""
+  warehouseByWarehouseId: Warehouse
+  warehouseId: Int!
+}
+
+"""
+A condition to be used against `Stock3` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input Stock3Condition {
+  """Checks for equality with the object’s `amount` field."""
+  amount: Int
+
+  """Checks for equality with the object’s `itemId` field."""
+  itemId: Int
+
+  """Checks for equality with the object’s `warehouseId` field."""
+  warehouseId: Int
+}
+
+"""An input for mutations affecting `Stock3`"""
+input Stock3Input {
+  amount: Int!
+  itemId: Int!
+  warehouseId: Int!
+}
+
+"""
+Represents an update to a `Stock3`. Fields that are set will be updated.
+"""
+input Stock3Patch {
+  amount: Int
+  itemId: Int
+  warehouseId: Int
+}
+
+"""A connection to a list of `Stock3` values."""
+type Stock3SConnection {
+  """
+  A list of edges which contains the `Stock3` and cursor to aid in pagination.
+  """
+  edges: [Stock3SEdge!]!
+
+  """A list of `Stock3` objects."""
+  nodes: [Stock3]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Stock3` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Stock3` edge in the connection."""
+type Stock3SEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Stock3` at the end of the edge."""
+  node: Stock3
+}
+
+"""Methods to use when ordering `Stock3`."""
+enum Stock3SOrderBy {
+  AMOUNT_ASC
+  AMOUNT_DESC
+  ITEM_ID_ASC
+  ITEM_ID_DESC
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+  WAREHOUSE_ID_ASC
+  WAREHOUSE_ID_DESC
+}
+
+type Stock4 implements Node {
+  amount: Int!
+  itemId: Int!
+
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+
+  """Reads a single `Warehouse` that is related to this `Stock4`."""
+  warehouseByWarehouseId: Warehouse
+  warehouseId: Int!
+}
+
+"""
+A condition to be used against `Stock4` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input Stock4Condition {
+  """Checks for equality with the object’s `amount` field."""
+  amount: Int
+
+  """Checks for equality with the object’s `itemId` field."""
+  itemId: Int
+
+  """Checks for equality with the object’s `warehouseId` field."""
+  warehouseId: Int
+}
+
+"""An input for mutations affecting `Stock4`"""
+input Stock4Input {
+  amount: Int!
+  itemId: Int!
+  warehouseId: Int!
+}
+
+"""
+Represents an update to a `Stock4`. Fields that are set will be updated.
+"""
+input Stock4Patch {
+  amount: Int
+  itemId: Int
+  warehouseId: Int
+}
+
+"""A connection to a list of `Stock4` values."""
+type Stock4SConnection {
+  """
+  A list of edges which contains the `Stock4` and cursor to aid in pagination.
+  """
+  edges: [Stock4SEdge!]!
+
+  """A list of `Stock4` objects."""
+  nodes: [Stock4]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Stock4` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Stock4` edge in the connection."""
+type Stock4SEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Stock4` at the end of the edge."""
+  node: Stock4
+}
+
+"""Methods to use when ordering `Stock4`."""
+enum Stock4SOrderBy {
+  AMOUNT_ASC
+  AMOUNT_DESC
+  ITEM_ID_ASC
+  ITEM_ID_DESC
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+  WAREHOUSE_ID_ASC
+  WAREHOUSE_ID_DESC
+}
+
+"""All input for the `updateItem0ById` mutation."""
+input UpdateItem0ByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+
+  """
+  An object where the defined keys will be set on the `Item0` being updated.
+  """
+  item0Patch: Item0Patch!
+}
+
+"""All input for the `updateItem0` mutation."""
+input UpdateItem0Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Item0` being updated.
+  """
+  item0Patch: Item0Patch!
+
+  """
+  The globally unique `ID` which will identify a single `Item0` to be updated.
+  """
+  nodeId: ID!
+}
+
+"""The output of our update `Item0` mutation."""
+type UpdateItem0Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Item0` that was updated by this mutation."""
+  item0: Item0
+
+  """An edge for our `Item0`. May be used by Relay 1."""
+  item0Edge(
+    """The method to use when ordering `Item0`."""
+    orderBy: [Item0SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Item0SEdge
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `updateItem1ById` mutation."""
+input UpdateItem1ByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+
+  """
+  An object where the defined keys will be set on the `Item1` being updated.
+  """
+  item1Patch: Item1Patch!
+}
+
+"""All input for the `updateItem1` mutation."""
+input UpdateItem1Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Item1` being updated.
+  """
+  item1Patch: Item1Patch!
+
+  """
+  The globally unique `ID` which will identify a single `Item1` to be updated.
+  """
+  nodeId: ID!
+}
+
+"""The output of our update `Item1` mutation."""
+type UpdateItem1Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Item1` that was updated by this mutation."""
+  item1: Item1
+
+  """An edge for our `Item1`. May be used by Relay 1."""
+  item1Edge(
+    """The method to use when ordering `Item1`."""
+    orderBy: [Item1SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Item1SEdge
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `updateItem2ById` mutation."""
+input UpdateItem2ByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+
+  """
+  An object where the defined keys will be set on the `Item2` being updated.
+  """
+  item2Patch: Item2Patch!
+}
+
+"""All input for the `updateItem2` mutation."""
+input UpdateItem2Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Item2` being updated.
+  """
+  item2Patch: Item2Patch!
+
+  """
+  The globally unique `ID` which will identify a single `Item2` to be updated.
+  """
+  nodeId: ID!
+}
+
+"""The output of our update `Item2` mutation."""
+type UpdateItem2Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Item2` that was updated by this mutation."""
+  item2: Item2
+
+  """An edge for our `Item2`. May be used by Relay 1."""
+  item2Edge(
+    """The method to use when ordering `Item2`."""
+    orderBy: [Item2SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Item2SEdge
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `updateStock0ByItemIdAndWarehouseId` mutation."""
+input UpdateStock0ByItemIdAndWarehouseIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  itemId: Int!
+
+  """
+  An object where the defined keys will be set on the `Stock0` being updated.
+  """
+  stock0Patch: Stock0Patch!
+  warehouseId: Int!
+}
+
+"""All input for the `updateStock0` mutation."""
+input UpdateStock0Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Stock0` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Stock0` being updated.
+  """
+  stock0Patch: Stock0Patch!
+}
+
+"""The output of our update `Stock0` mutation."""
+type UpdateStock0Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Stock0` that was updated by this mutation."""
+  stock0: Stock0
+
+  """An edge for our `Stock0`. May be used by Relay 1."""
+  stock0Edge(
+    """The method to use when ordering `Stock0`."""
+    orderBy: [Stock0SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock0SEdge
+
+  """Reads a single `Warehouse` that is related to this `Stock0`."""
+  warehouseByWarehouseId: Warehouse
+}
+
+"""All input for the `updateStock1ByItemIdAndWarehouseId` mutation."""
+input UpdateStock1ByItemIdAndWarehouseIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  itemId: Int!
+
+  """
+  An object where the defined keys will be set on the `Stock1` being updated.
+  """
+  stock1Patch: Stock1Patch!
+  warehouseId: Int!
+}
+
+"""All input for the `updateStock1` mutation."""
+input UpdateStock1Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Stock1` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Stock1` being updated.
+  """
+  stock1Patch: Stock1Patch!
+}
+
+"""The output of our update `Stock1` mutation."""
+type UpdateStock1Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Stock1` that was updated by this mutation."""
+  stock1: Stock1
+
+  """An edge for our `Stock1`. May be used by Relay 1."""
+  stock1Edge(
+    """The method to use when ordering `Stock1`."""
+    orderBy: [Stock1SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock1SEdge
+
+  """Reads a single `Warehouse` that is related to this `Stock1`."""
+  warehouseByWarehouseId: Warehouse
+}
+
+"""All input for the `updateStock2ByItemIdAndWarehouseId` mutation."""
+input UpdateStock2ByItemIdAndWarehouseIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  itemId: Int!
+
+  """
+  An object where the defined keys will be set on the `Stock2` being updated.
+  """
+  stock2Patch: Stock2Patch!
+  warehouseId: Int!
+}
+
+"""All input for the `updateStock2` mutation."""
+input UpdateStock2Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Stock2` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Stock2` being updated.
+  """
+  stock2Patch: Stock2Patch!
+}
+
+"""The output of our update `Stock2` mutation."""
+type UpdateStock2Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Stock2` that was updated by this mutation."""
+  stock2: Stock2
+
+  """An edge for our `Stock2`. May be used by Relay 1."""
+  stock2Edge(
+    """The method to use when ordering `Stock2`."""
+    orderBy: [Stock2SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock2SEdge
+
+  """Reads a single `Warehouse` that is related to this `Stock2`."""
+  warehouseByWarehouseId: Warehouse
+}
+
+"""All input for the `updateStock3ByItemIdAndWarehouseId` mutation."""
+input UpdateStock3ByItemIdAndWarehouseIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  itemId: Int!
+
+  """
+  An object where the defined keys will be set on the `Stock3` being updated.
+  """
+  stock3Patch: Stock3Patch!
+  warehouseId: Int!
+}
+
+"""All input for the `updateStock3` mutation."""
+input UpdateStock3Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Stock3` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Stock3` being updated.
+  """
+  stock3Patch: Stock3Patch!
+}
+
+"""The output of our update `Stock3` mutation."""
+type UpdateStock3Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Stock3` that was updated by this mutation."""
+  stock3: Stock3
+
+  """An edge for our `Stock3`. May be used by Relay 1."""
+  stock3Edge(
+    """The method to use when ordering `Stock3`."""
+    orderBy: [Stock3SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock3SEdge
+
+  """Reads a single `Warehouse` that is related to this `Stock3`."""
+  warehouseByWarehouseId: Warehouse
+}
+
+"""All input for the `updateStock4ByItemIdAndWarehouseId` mutation."""
+input UpdateStock4ByItemIdAndWarehouseIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  itemId: Int!
+
+  """
+  An object where the defined keys will be set on the `Stock4` being updated.
+  """
+  stock4Patch: Stock4Patch!
+  warehouseId: Int!
+}
+
+"""All input for the `updateStock4` mutation."""
+input UpdateStock4Input {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Stock4` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Stock4` being updated.
+  """
+  stock4Patch: Stock4Patch!
+}
+
+"""The output of our update `Stock4` mutation."""
+type UpdateStock4Payload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Stock4` that was updated by this mutation."""
+  stock4: Stock4
+
+  """An edge for our `Stock4`. May be used by Relay 1."""
+  stock4Edge(
+    """The method to use when ordering `Stock4`."""
+    orderBy: [Stock4SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock4SEdge
+
+  """Reads a single `Warehouse` that is related to this `Stock4`."""
+  warehouseByWarehouseId: Warehouse
+}
+
+"""All input for the `updateWarehouseById` mutation."""
+input UpdateWarehouseByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+
+  """
+  An object where the defined keys will be set on the `Warehouse` being updated.
+  """
+  warehousePatch: WarehousePatch!
+}
+
+"""All input for the `updateWarehouse` mutation."""
+input UpdateWarehouseInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Warehouse` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Warehouse` being updated.
+  """
+  warehousePatch: WarehousePatch!
+}
+
+"""The output of our update `Warehouse` mutation."""
+type UpdateWarehousePayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """The `Warehouse` that was updated by this mutation."""
+  warehouse: Warehouse
+
+  """An edge for our `Warehouse`. May be used by Relay 1."""
+  warehouseEdge(
+    """The method to use when ordering `Warehouse`."""
+    orderBy: [WarehousesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): WarehousesEdge
+}
+
+type Warehouse implements Node {
+  id: Int!
+  location: String!
+
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+
+  """Reads and enables pagination through a set of `Stock0`."""
+  stock0SByWarehouseId(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: Stock0Condition
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """The method to use when ordering `Stock0`."""
+    orderBy: [Stock0SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock0SConnection!
+
+  """Reads and enables pagination through a set of `Stock1`."""
+  stock1SByWarehouseId(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: Stock1Condition
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """The method to use when ordering `Stock1`."""
+    orderBy: [Stock1SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock1SConnection!
+
+  """Reads and enables pagination through a set of `Stock2`."""
+  stock2SByWarehouseId(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: Stock2Condition
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """The method to use when ordering `Stock2`."""
+    orderBy: [Stock2SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock2SConnection!
+
+  """Reads and enables pagination through a set of `Stock3`."""
+  stock3SByWarehouseId(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: Stock3Condition
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """The method to use when ordering `Stock3`."""
+    orderBy: [Stock3SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock3SConnection!
+
+  """Reads and enables pagination through a set of `Stock4`."""
+  stock4SByWarehouseId(
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: Stock4Condition
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """The method to use when ordering `Stock4`."""
+    orderBy: [Stock4SOrderBy!] = [PRIMARY_KEY_ASC]
+  ): Stock4SConnection!
+}
+
+"""
+A condition to be used against `Warehouse` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input WarehouseCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `location` field."""
+  location: String
+}
+
+"""An input for mutations affecting `Warehouse`"""
+input WarehouseInput {
+  id: Int!
+  location: String!
+}
+
+"""
+Represents an update to a `Warehouse`. Fields that are set will be updated.
+"""
+input WarehousePatch {
+  id: Int
+  location: String
+}
+
+"""A connection to a list of `Warehouse` values."""
+type WarehousesConnection {
+  """
+  A list of edges which contains the `Warehouse` and cursor to aid in pagination.
+  """
+  edges: [WarehousesEdge!]!
+
+  """A list of `Warehouse` objects."""
+  nodes: [Warehouse]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Warehouse` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Warehouse` edge in the connection."""
+type WarehousesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Warehouse` at the end of the edge."""
+  node: Warehouse
+}
+
+"""Methods to use when ordering `Warehouse`."""
+enum WarehousesOrderBy {
+  ID_ASC
+  ID_DESC
+  LOCATION_ASC
+  LOCATION_DESC
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}

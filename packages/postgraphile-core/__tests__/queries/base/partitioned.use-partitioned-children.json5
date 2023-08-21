@@ -1,0 +1,159 @@
+{
+  allItem0S: {
+    nodes: [
+      {
+        id: 2,
+        description: "Capacitor",
+      },
+      {
+        id: 4,
+        description: "Fan",
+      },
+    ],
+  },
+  allItem1S: {
+    nodes: [
+      {
+        id: 3,
+        description: "Wagon",
+      },
+    ],
+  },
+  allItem2S: {
+    nodes: [
+      {
+        id: 1,
+        description: "Hair dryer",
+      },
+    ],
+  },
+  allStock0S: {
+    nodes: [
+      {
+        amount: 50,
+        itemId: 1,
+        warehouseByWarehouseId: {
+          id: 1,
+          location: "Carmel, IN",
+        },
+      },
+      {
+        amount: 20,
+        itemId: 2,
+        warehouseByWarehouseId: {
+          id: 1,
+          location: "Carmel, IN",
+        },
+      },
+      {
+        amount: 2,
+        itemId: 3,
+        warehouseByWarehouseId: {
+          id: 1,
+          location: "Carmel, IN",
+        },
+      },
+      {
+        amount: 56,
+        itemId: 4,
+        warehouseByWarehouseId: {
+          id: 1,
+          location: "Carmel, IN",
+        },
+      },
+    ],
+  },
+  allStock1S: {
+    nodes: [
+      {
+        amount: 3,
+        itemId: 1,
+        warehouseByWarehouseId: {
+          id: 2,
+          location: "Cincinnati, OH",
+        },
+      },
+      {
+        amount: 92,
+        itemId: 1,
+        warehouseByWarehouseId: {
+          id: 3,
+          location: "Chicago, IL",
+        },
+      },
+      {
+        amount: 7,
+        itemId: 2,
+        warehouseByWarehouseId: {
+          id: 2,
+          location: "Cincinnati, OH",
+        },
+      },
+      {
+        amount: 9,
+        itemId: 2,
+        warehouseByWarehouseId: {
+          id: 3,
+          location: "Chicago, IL",
+        },
+      },
+      {
+        amount: 9,
+        itemId: 3,
+        warehouseByWarehouseId: {
+          id: 2,
+          location: "Cincinnati, OH",
+        },
+      },
+      {
+        amount: 0,
+        itemId: 3,
+        warehouseByWarehouseId: {
+          id: 3,
+          location: "Chicago, IL",
+        },
+      },
+      {
+        amount: 30,
+        itemId: 4,
+        warehouseByWarehouseId: {
+          id: 2,
+          location: "Cincinnati, OH",
+        },
+      },
+      {
+        amount: 101,
+        itemId: 4,
+        warehouseByWarehouseId: {
+          id: 3,
+          location: "Chicago, IL",
+        },
+      },
+    ],
+  },
+  allStock2S: {
+    nodes: [],
+  },
+  allStock3S: {
+    nodes: [],
+  },
+  allStock4S: {
+    nodes: [],
+  },
+  allWarehouses: {
+    nodes: [
+      {
+        id: 1,
+        location: "Carmel, IN",
+      },
+      {
+        id: 2,
+        location: "Cincinnati, OH",
+      },
+      {
+        id: 3,
+        location: "Chicago, IL",
+      },
+    ],
+  },
+}
