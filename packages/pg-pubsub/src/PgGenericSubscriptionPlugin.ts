@@ -1,6 +1,6 @@
 import debugFactory from "debug";
 import { Plugin } from "graphile-build";
-import { GraphQLFieldConfig } from "graphql";
+import { GraphQLBoolean, GraphQLFieldConfig } from "graphql";
 import { PubSub } from "graphql-subscriptions";
 
 const debug = debugFactory("pg-pubsub");
@@ -11,6 +11,38 @@ const nodeIdFromDbNode = (dbNode: any) => base64(JSON.stringify(dbNode));
 function isPubSub(pubsub: any): pubsub is PubSub {
   return !!pubsub;
 }
+
+const withInitialValue = <T>(
+  initialVal: T,
+  asyncIterator: AsyncIterator<T>
+): AsyncIterable<T> => {
+  return {
+    [Symbol.asyncIterator]: async function* (): AsyncIterator<T> {
+      yield initialVal;
+
+      /* TODO: when we can upgrade to Node 10.3+ we can replace the below with simply:
+      for await (const val of asyncIterator) {
+        yield val;
+      }
+      */
+      try {
+        while (true) {
+          const next = await asyncIterator.next();
+          if (next.done) {
+            return next.value;
+          } else {
+            yield next.value;
+          }
+        }
+      } finally {
+        // Terminate the previous iterator
+        if (typeof asyncIterator.return === "function") {
+          asyncIterator.return();
+        }
+      }
+    },
+  };
+};
 
 const PgGenericSubscriptionPlugin: Plugin = function (
   builder,
@@ -142,6 +174,12 @@ const PgGenericSubscriptionPlugin: Plugin = function (
               topic: {
                 type: new GraphQLNonNull(GraphQLString),
               },
+              initialEvent: {
+                defaultValue: false,
+                type: new GraphQLNonNull(GraphQLBoolean),
+                description:
+                  "If true, this subscription will trigger an event as soon as it initiates.",
+              },
             },
             subscribe: async (_parent, args, _context, _resolveInfo) => {
               const { pgClient } = _context;
@@ -188,7 +226,11 @@ const PgGenericSubscriptionPlugin: Plugin = function (
                   }
                 });
               }
-              return asyncIterator;
+              if (args.initialEvent) {
+                return withInitialValue(null, asyncIterator);
+              } else {
+                return asyncIterator;
+              }
             },
             resolve: async (payload, _args, _context, _resolveInfo) => {
               const result = { ...payload };
