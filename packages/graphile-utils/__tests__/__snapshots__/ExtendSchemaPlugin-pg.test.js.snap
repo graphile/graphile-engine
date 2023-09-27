@@ -2531,14 +2531,14 @@ type Mutation {
   ): RegisterUserPayload
 }
 
-type RegisterUserPayload {
-  user: User
-}
-
 input RegisterUserInput {
   name: String!
   email: String!
   bio: String
+}
+
+type RegisterUserPayload {
+  user: User
 }
 
 `;

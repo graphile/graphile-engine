@@ -230,14 +230,14 @@ type Mutation {
   echo(input: EchoInput): EchoOutput
 }
 
-type EchoOutput {
+input EchoInput {
   text: String!
   int: Int
   float: Float!
   intList: [Int!]
 }
 
-input EchoInput {
+type EchoOutput {
   text: String!
   int: Int
   float: Float!
@@ -406,16 +406,14 @@ type Query {
   named: [Named!]
 }
 
-union ABC = A | B | C
+interface Named {
+  name: String!
+  nameLanguage: String
+}
 
 type A implements Named {
   name: String!
   a: Int!
-  nameLanguage: String
-}
-
-interface Named {
-  name: String!
   nameLanguage: String
 }
 
@@ -428,6 +426,14 @@ type B implements Named {
 type C {
   c: Int!
 }
+
+type D implements Named {
+  name: String!
+  d: Int!
+  nameLanguage: String
+}
+
+union ABC = A | B | C
 
 `;
 
@@ -462,6 +468,12 @@ Object {
       "__typename": "B",
       "b": 2,
       "name": "B-two",
+      "nameLanguage": "en",
+    },
+    Object {
+      "__typename": "D",
+      "d": 3,
+      "name": "D-three",
       "nameLanguage": "en",
     },
   ],

@@ -817,6 +817,12 @@ it("supports interfaces and unions", async () => {
           c: Int!
         }
 
+        # A child type that has no explicit references
+        type D implements Named {
+          name: String!
+          d: Int!
+        }
+
         union ABC = A | B | C
         extend type Query {
           abc: [ABC!]
@@ -832,6 +838,9 @@ it("supports interfaces and unions", async () => {
         extend type B {
           nameLanguage: String
         }
+        extend type D {
+          nameLanguage: String
+        }
       `,
       resolvers: {
         Query: {
@@ -843,6 +852,7 @@ it("supports interfaces and unions", async () => {
           named: () => [
             { name: "A-one", a: 1, nameLanguage: "en" },
             { name: "B-two", b: 2, nameLanguage: "en" },
+            { name: "D-three", d: 3, nameLanguage: "en" },
           ],
         },
         ABC: {
@@ -857,6 +867,7 @@ it("supports interfaces and unions", async () => {
           __resolveType(obj) {
             if (obj.a != null) return "A";
             if (obj.b != null) return "B";
+            if (obj.d != null) return "D";
             return null;
           },
         },
@@ -893,6 +904,9 @@ it("supports interfaces and unions", async () => {
           }
           ... on B {
             b
+          }
+          ... on D {
+            d
           }
         }
       }
