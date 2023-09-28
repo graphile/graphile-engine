@@ -63,6 +63,7 @@ export function makeFieldHelpers<TSource>(
       resolveData,
       {
         withPaginationAsFields: isConnection,
+        useAsterisk: table ? table.canUseAsterisk : false,
       },
       (sqlBuilder: QueryBuilder) => {
         if (
