@@ -3,7 +3,14 @@
 We use PostGraphile's GitHub releases tab to log our changes in detail, but
 this auto-generated changelog helps us to produce that list, and it may be
 helpful to you also.
-# [](https://github.com/graphile/graphile-engine/compare/v4.13.0...v) (2023-01-12)
+# [](https://github.com/graphile/graphile-engine/compare/v4.13.0...v) (2023-10-05)
+
+
+### Features
+
+* **pg-pubsub:** add option to immediately get a result on listen ([#812](https://github.com/graphile/graphile-engine/issues/812)) ([12712f0](https://github.com/graphile/graphile-engine/commit/12712f01596753213712051008064108fc6e437c))
+* **pg:** Adds support for using partitioned table parents ([#801](https://github.com/graphile/graphile-engine/issues/801)) ([4deb984](https://github.com/graphile/graphile-engine/commit/4deb984c9c4c8eb1aaf3d69ed9a9deec45f5432d))
+* **pg:** use table enums in functions via domain ([#832](https://github.com/graphile/graphile-engine/issues/832)) ([35905be](https://github.com/graphile/graphile-engine/commit/35905bebab2341519f3e36dc59e455206b11dde0))
 
 
 
