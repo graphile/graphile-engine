@@ -39,4 +39,47 @@
       color
     }
   }
+  t6: allToys(distinct: ["color"], orderBy: [NAME_ASC, COLOR_DESC], first: 1) {
+    totalCount
+    nodes {
+      id
+      name
+      color
+    }
+    pageInfo {
+      endCursor
+    }
+  }
+  t7: allToys(
+    distinct: ["color"]
+    orderBy: [NAME_ASC, COLOR_DESC]
+    first: 1
+    after: "WyJuYW1lX2FzYyIsImNvbG9yX2Rlc2MiLFsicmVkIiwiRGluby1Sb2NrZXQgTGF1bmNoZXIiLDNdXQ==" # cursor from t6
+  ) {
+    totalCount
+    nodes {
+      id
+      name
+      color
+    }
+    pageInfo {
+      endCursor
+    }
+  }
+  t8: allToys(
+    distinct: ["color"]
+    orderBy: [NAME_ASC, COLOR_DESC]
+    last: 1
+    before: "WyJuYW1lX2FzYyIsImNvbG9yX2Rlc2MiLFsicmVkIiwiSGlzdG9yeSBvZiBEaW5vc2F1cnMgYm9vayIsNF1d" # cursor from t7
+  ) {
+    totalCount
+    nodes {
+      id
+      name
+      color
+    }
+    pageInfo {
+      endCursor
+    }
+  }
 }
