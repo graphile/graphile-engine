@@ -601,6 +601,10 @@ ${sql.join(
         throw new Error("Cannot combine 'last' and 'offset'");
       } else {
         if (this.compiledData.orderBy.length > 0) {
+          if (this.compiledData.distinctOn.length > 0) {
+            // TODO: improve this
+            throw new Error(`'distinctOn' cannot be combined with 'last'`);
+          }
           flip = true;
           limit = this.compiledData.last;
         } else {
@@ -620,9 +624,31 @@ ${sql.join(
   getFinalLimit() {
     return this.getFinalLimitAndOffset().limit;
   }
+  _orderByExpressionsAndDirections: Array<
+    [sql.SQL, boolean, boolean | null]
+  > | null = null;
   getOrderByExpressionsAndDirections() {
     this.lock("orderBy");
-    return this.compiledData.orderBy;
+    if (!this._orderByExpressionsAndDirections) {
+      const orderBy: Array<[sql.SQL, boolean, boolean | null]> = [];
+      const remainingOrderBy = [...this.compiledData.orderBy];
+      for (const distinctExpression of this.compiledData.distinctOn) {
+        const relevantOrderByIndex = remainingOrderBy.findIndex(o =>
+          sql.isEquivalent(o[0], distinctExpression)
+        );
+        if (relevantOrderByIndex >= 0) {
+          orderBy.push(remainingOrderBy[relevantOrderByIndex]);
+          remainingOrderBy.splice(relevantOrderByIndex, 1);
+        } else {
+          orderBy.push([distinctExpression, true, null]);
+        }
+      }
+      for (const orderSpec of remainingOrderBy) {
+        orderBy.push(orderSpec);
+      }
+      this._orderByExpressionsAndDirections = orderBy;
+    }
+    return this._orderByExpressionsAndDirections;
   }
   getSelectFieldsCount() {
     this.lockEverything();
@@ -766,22 +792,7 @@ ${sql.join(
           })} as object`
         : this.buildSelectFields();
 
-    const orderBy: Array<[sql.SQL, boolean, boolean | null]> = [];
-    const remainingOrderBy = [...this.compiledData.orderBy];
-    for (const distinctExpression of this.compiledData.distinctOn) {
-      const relevantOrderByIndex = remainingOrderBy.findIndex(o =>
-        sql.isEquivalent(o[0], distinctExpression)
-      );
-      if (relevantOrderByIndex >= 0) {
-        orderBy.push(remainingOrderBy[relevantOrderByIndex]);
-        remainingOrderBy.splice(relevantOrderByIndex, 1);
-      } else {
-        orderBy.push([distinctExpression, true, null]);
-      }
-    }
-    for (const orderSpec of remainingOrderBy) {
-      orderBy.push(orderSpec);
-    }
+    const orderBy = this.getOrderByExpressionsAndDirections();
 
     let fragment = sql.fragment`\
 select ${
