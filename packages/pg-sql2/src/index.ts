@@ -1,6 +1,7 @@
 import * as debugFactory from "debug";
 import { QueryConfig } from "pg";
 import LRU from "@graphile/lru";
+import { inspect } from "util";
 
 const debug = debugFactory("pg-sql2");
 
@@ -324,6 +325,71 @@ export function join(items: Array<SQL>, rawSeparator = ""): SQLQuery {
     }
   }
   return currentItems;
+}
+
+export function arraysMatch<T>(
+  array1: ReadonlyArray<T>,
+  array2: ReadonlyArray<T>,
+  comparator?: (val1: T, val2: T) => boolean
+): boolean {
+  if (array1 === array2) return true;
+  const l = array1.length;
+  if (l !== array2.length) {
+    return false;
+  }
+  for (let i = 0; i < l; i++) {
+    if (
+      comparator ? !comparator(array1[i]!, array2[i]!) : array1[i] !== array2[i]
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function isEquivalent(
+  sql1: SQL,
+  sql2: SQL,
+  options?: {
+    symbolSubstitutes?: Map<symbol, symbol>;
+  }
+): boolean {
+  if (sql1 === sql2) {
+    return true;
+  } else if (Array.isArray(sql1)) {
+    if (!Array.isArray(sql2)) {
+      return false;
+    }
+    return arraysMatch(sql1, sql2, (a, b) => isEquivalent(a, b, options));
+  } else if (Array.isArray(sql2)) {
+    return false;
+  } else {
+    switch (sql1.type) {
+      case "RAW": {
+        if (sql2.type !== sql1.type) {
+          return false;
+        }
+        return sql1.text === sql2.text;
+      }
+      case "VALUE": {
+        if (sql2.type !== sql1.type) {
+          return false;
+        }
+        return sql1.value === sql2.value;
+      }
+      case "IDENTIFIER": {
+        if (sql2.type !== sql1.type) {
+          return false;
+        }
+        return arraysMatch(sql1.names, sql2.names);
+      }
+      default: {
+        const never: never = sql1;
+        console.error(`Unhandled node type: ${inspect(never)}`);
+        return false;
+      }
+    }
+  }
 }
 
 // Copied from https://github.com/brianc/node-postgres/blob/860cccd53105f7bc32fed8b1de69805f0ecd12eb/lib/client.js#L285-L302
