@@ -4,7 +4,6 @@ import type { SQL } from "pg-sql2";
 import isSafeInteger from "lodash/isSafeInteger";
 import chunk from "lodash/chunk";
 import type { PgClass, PgType } from "./plugins/PgIntrospectionPlugin";
-import { arraysMatch } from "./utils";
 
 // eslint-disable-next-line flowtype/no-weak-types
 type GraphQLContext = any;
@@ -268,6 +267,9 @@ class QueryBuilder {
     this.beforeLock("distinctOn", () => {
       this.lock("selectCursor");
       this.lock("cursorComparator");
+    });
+    this.beforeLock("orderBy", () => {
+      this.lock("distinctOn");
     });
     this.beforeLock("selectCursor", () => {
       this.lock("distinctOn");
@@ -764,6 +766,23 @@ ${sql.join(
           })} as object`
         : this.buildSelectFields();
 
+    const orderBy: Array<[sql.SQL, boolean, boolean | null]> = [];
+    const remainingOrderBy = [...this.compiledData.orderBy];
+    for (const distinctExpression of this.compiledData.distinctOn) {
+      const relevantOrderByIndex = remainingOrderBy.findIndex(o =>
+        sql.isEquivalent(o[0], distinctExpression)
+      );
+      if (relevantOrderByIndex >= 0) {
+        orderBy.push(remainingOrderBy[relevantOrderByIndex]);
+        remainingOrderBy.splice(relevantOrderByIndex, 1);
+      } else {
+        orderBy.push([distinctExpression, true, null]);
+      }
+    }
+    for (const orderSpec of remainingOrderBy) {
+      orderBy.push(orderSpec);
+    }
+
     let fragment = sql.fragment`\
 select ${
       this.compiledData.distinctOn.length
@@ -781,9 +800,9 @@ ${
 ${this.compiledData.join.length && sql.join(this.compiledData.join, " ")}
 where ${this.buildWhereClause(true, true, options)}
 ${
-  this.compiledData.orderBy.length
+  orderBy.length
     ? sql.fragment`order by ${sql.join(
-        this.compiledData.orderBy.map(
+        orderBy.map(
           ([expr, ascending, nullsFirst]) =>
             sql.fragment`${expr} ${
               Number(ascending) ^ Number(flip)
@@ -897,35 +916,11 @@ order by (row_number() over (partition by 1)) desc`; /* We don't need to factor 
       this.locks[type] = isDev ? new Error("Initally locked here").stack : true;
       this.compiledData[type] = data;
     } else if (type === "orderBy") {
-      if (this.data["distinctOn"].length) {
-        // Add distinct to existing order by to avoid `SELECT DISTINCT ON expressions must match initial ORDER BY expressions`
-        // Convert distinct fields to order by applying ascending and using existing order by for matching fields
-        const distinctAsOrderBy = this.data["distinctOn"].map(
-          d =>
-            this.data[type].find(
-              ([a]) =>
-                a === d ||
-                (Array.isArray(a) &&
-                  Array.isArray(d) &&
-                  arraysMatch(
-                    a,
-                    d,
-                    (v1, v2) => JSON.stringify(v1) === JSON.stringify(v2)
-                  ))
-            ) ?? [d, true, null]
-        );
-
-        // Create a union of the distinct and order by fields
-        this.compiledData[type] = [
-          ...new Set([...distinctAsOrderBy, ...this.data[type]]),
-        ].map(([a, b, c]) => [callIfNecessary(a, context), b, c]);
-      } else {
-        this.compiledData[type] = this.data[type].map(([a, b, c]) => [
-          callIfNecessary(a, context),
-          b,
-          c,
-        ]);
-      }
+      this.compiledData[type] = this.data[type].map(([a, b, c]) => [
+        callIfNecessary(a, context),
+        b,
+        c,
+      ]);
     } else if (type === "from") {
       if (this.data.from) {
         const f = this.data.from;
