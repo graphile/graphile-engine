@@ -70,8 +70,8 @@ Example usage:
 
 ```js
 const {
-	parseResolveInfo,
-	simplifyParsedResolveInfoFragmentWithType
+  parseResolveInfo,
+  simplifyParsedResolveInfoFragmentWithType
 } = require('graphql-parse-resolve-info');
 // or import { parseResolveInfo, simplifyParsedResolveInfoFragmentWithType } from 'graphql-parse-resolve-info';
 
@@ -84,9 +84,9 @@ new GraphQLObjectType({
       resolve(data, args, context, resolveInfo) {
         const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
         const { fields } = simplifyParsedResolveInfoFragmentWithType(
-					parsedResolveInfoFragment,
-					ComplexType
-				);
+          parsedResolveInfoFragment,
+          ComplexType
+        );
         console.dir(fields);
         ...
       }
@@ -112,8 +112,8 @@ Example usage:
 
 ```js
 const {
-	parseResolveInfo,
-	simplifyParsedResolveInfoFragmentWithType
+  parseResolveInfo,
+  simplifyParsedResolveInfoFragmentWithType
 } = require('graphql-parse-resolve-info');
 
 new GraphQLObjectType({
@@ -126,9 +126,9 @@ new GraphQLObjectType({
         const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
 
         const { fields } = simplifyParsedResolveInfoFragmentWithType(
-					parsedResolveInfoFragment,
-					ComplexType
-				);
+          parsedResolveInfoFragment,
+          ComplexType
+        );
         ...
       }
     }
