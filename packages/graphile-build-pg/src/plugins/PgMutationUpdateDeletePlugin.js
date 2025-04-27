@@ -196,6 +196,9 @@ returning *`;
                 const TablePatch = getTypeByName(
                   inflection.patchType(Table.name)
                 );
+                if (mode === "update" && !TablePatch) {
+                  return memo;
+                }
                 const PayloadType = newWithHooks(
                   GraphQLObjectType,
                   {
@@ -329,7 +332,7 @@ returning *`;
                             type: new GraphQLNonNull(GraphQLID),
                           },
                         },
-                        mode === "update"
+                        mode === "update" && TablePatch
                           ? {
                               [inflection.patchField(
                                 inflection.tableFieldName(table)
@@ -482,7 +485,7 @@ returning *`;
                             type: GraphQLString,
                           },
                         },
-                        mode === "update"
+                        mode === "update" && TablePatch
                           ? {
                               [inflection.patchField(
                                 inflection.tableFieldName(table)

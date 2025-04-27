@@ -15,7 +15,8 @@ drop schema if exists
   named_query_builder,
   enum_tables,
   geometry,
-  function_returning_enum
+  function_returning_enum,
+  no_fields
 cascade;
 drop extension if exists tablefunc;
 drop extension if exists intarray;
@@ -1361,3 +1362,10 @@ as $$
     end)::function_returning_enum.transportation;
 $$ language sql stable;
 comment on function function_returning_enum.applicants_favorite_pet_transportation is E'@filterable';
+
+--------------------------------------------------------------------------------
+
+create schema no_fields;
+create table no_fields.citation (
+  id integer primary key generated always as identity
+);
