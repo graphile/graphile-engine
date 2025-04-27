@@ -3,10 +3,11 @@ echo "Enter OTP code:"
 read otp
 export NPM_CONFIG_OTP=$otp
 function next2latest {
+  echo $1
+  npm info $1 dist-tags.latest
   V=$(npm info $1 dist-tags.next | xargs)
   npm dist-tags add $1@$V latest
 }
-next2latest graphile
 next2latest pg-sql2
 next2latest jest-serializer-graphql-schema
 next2latest @graphile/lru
