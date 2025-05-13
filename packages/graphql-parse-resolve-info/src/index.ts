@@ -352,7 +352,7 @@ export function simplifyParsedResolveInfoFragmentWithType(
   type: GraphQLType
 ) {
   const { fieldsByTypeName } = parsedResolveInfoFragment;
-  const fields = {};
+  const fields: ResolveTree = {};
   const strippedType = getNamedType(type);
   if (isCompositeType(strippedType)) {
     Object.assign(fields, fieldsByTypeName[strippedType.name]);
