@@ -1,4 +1,3 @@
-import * as assert from "assert";
 import {
   getNamedType,
   isCompositeType,
@@ -270,7 +269,9 @@ function fieldTreeFromAST<T extends SelectionNode>(
       if (DEBUG_ENABLED)
         debug("%s[%d] Fragment spread '%s'", depth, instance, name);
       const fragment = fragments[name];
-      assert(fragment, 'unknown fragment "' + name + '"');
+      if (!fragment) {
+        throw new Error('unknown fragment "' + name + '"');
+      }
       let fragmentType: GraphQLNamedType | null | undefined = parentType;
       if (fragment.typeCondition) {
         fragmentType = getType(resolveInfo, fragment.typeCondition);
