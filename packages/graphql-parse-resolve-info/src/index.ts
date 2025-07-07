@@ -23,8 +23,8 @@ import * as debugFactory from "debug";
 type mixed = Record<string, any> | string | number | boolean | undefined | null;
 
 export interface FieldsByTypeName {
-  [str: string]: {
-    [str: string]: ResolveTree;
+  [typeName: string]: {
+    [responseName: string]: ResolveTree;
   };
 }
 
@@ -350,17 +350,32 @@ function getType(
 export function simplifyParsedResolveInfoFragmentWithType(
   parsedResolveInfoFragment: ResolveTree,
   type: GraphQLType
-) {
+): ResolveTree & { fields: { [responseName: string]: ResolveTree } } {
   const { fieldsByTypeName } = parsedResolveInfoFragment;
-  const fields = {};
+  const fields: { [responseName: string]: ResolveTree } = Object.create(null);
   const strippedType = getNamedType(type);
   if (isCompositeType(strippedType)) {
-    Object.assign(fields, fieldsByTypeName[strippedType.name]);
+    if (fieldsByTypeName[strippedType.name]) {
+      Object.assign(fields, fieldsByTypeName[strippedType.name]);
+    }
     if (strippedType instanceof GraphQLObjectType) {
       const objectType: GraphQLObjectType = strippedType;
-      // GraphQL ensures that the subfields cannot clash, so it's safe to simply overwrite them
+      // GraphQL ensures that the subfields cannot clash, so it's safe to
+      // simply merge them.
       for (const anInterface of objectType.getInterfaces()) {
-        Object.assign(fields, fieldsByTypeName[anInterface.name]);
+        const interfaceFields = fieldsByTypeName[anInterface.name];
+        if (!interfaceFields) continue;
+        for (const responseName of Object.keys(interfaceFields)) {
+          const interfaceField = interfaceFields[responseName];
+          if (fields[responseName]) {
+            fields[responseName] = recursiveMerge(
+              fields[responseName],
+              interfaceField
+            );
+          } else {
+            fields[responseName] = interfaceField;
+          }
+        }
       }
     }
   }
@@ -368,6 +383,37 @@ export function simplifyParsedResolveInfoFragmentWithType(
     ...parsedResolveInfoFragment,
     fields,
   };
+}
+
+function recursiveMerge(treeA: ResolveTree, treeB: ResolveTree): ResolveTree {
+  const result: ResolveTree = {
+    // GraphQL ensures that the subfields cannot clash, so the name, alias and
+    // args will definitely line up, and the fieldsByTypeName can be merged.
+    ...treeA,
+    fieldsByTypeName: Object.create(null),
+  };
+
+  for (const tree of [treeA, treeB]) {
+    for (const typeName of Object.keys(tree.fieldsByTypeName)) {
+      if (!result.fieldsByTypeName[typeName]) {
+        result.fieldsByTypeName[typeName] = Object.create(null);
+      }
+      const targetFields = result.fieldsByTypeName[typeName];
+      const sourceFields = tree.fieldsByTypeName[typeName];
+      for (const responseName of Object.keys(sourceFields)) {
+        if (!targetFields[responseName]) {
+          targetFields[responseName] = sourceFields[responseName];
+        } else {
+          targetFields[responseName] = recursiveMerge(
+            targetFields[responseName],
+            sourceFields[typeName]
+          );
+        }
+      }
+    }
+  }
+
+  return result;
 }
 
 export const parse = parseResolveInfo;
