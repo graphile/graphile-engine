@@ -12,17 +12,17 @@ sponsor](https://graphile.org/sponsor/).
 ## Leaders
 
 - Robert Claypool
-- Principia Mentis
 - nigelrmtaylor
+- Principia Mentis
 - Trigger.dev
 - Axinom
 - Taiste
 - BairesDev
-- Cintra
 - Two Bit Solutions
+- Apollo
 - Dimply
 - Ndustrial
-- Apollo
+- Cintra
 - Beacon
 - deliver.media
 - Ravio
@@ -41,12 +41,12 @@ sponsor](https://graphile.org/sponsor/).
 - nullachtvierzehn
 - Zymego
 - garpulon
+- Vizcom
 - Ether
-- Nate Smith
 - The Outbound Collective
 - Charlie Hadden
-- Vizcom
 - Kiron Open Higher Education
+- Nate Smith
 - Andrew Joseph
 - SIED 70 - TE 70
 - Peter C. Romano
@@ -58,3 +58,4 @@ sponsor](https://graphile.org/sponsor/).
 - Jody Hoon-Starr
 - Justin Carrus
 - WorkOS
+- Malachi Bergman
