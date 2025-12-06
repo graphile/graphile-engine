@@ -7,6 +7,7 @@
 [![Package on npm](https://img.shields.io/npm/v/graphile-build.svg?style=flat)](https://www.npmjs.com/package/graphile-build)
 ![MIT license](https://img.shields.io/npm/l/graphile-build.svg)
 [![Follow](https://img.shields.io/badge/twitter-@GraphileHQ-blue.svg)](https://twitter.com/GraphileHQ)
+[![kandi X-Ray](https://kandi.openweaver.com/badges/xray.svg)](https://kandi.openweaver.com/javascript/graphile/graphile-engine)
 
 Graphile Engine enables you to build high-performance easily-extensible GraphQL schemas by combining plugins.
 
