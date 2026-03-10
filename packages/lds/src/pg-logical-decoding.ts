@@ -17,6 +17,7 @@ declare module "pg" {
 interface Keys {
   keynames: Array<string>;
   keytypes: Array<string>;
+  keytypeoids: Array<number>;
   keyvalues: Array<any>;
 }
 
@@ -34,7 +35,8 @@ export interface InsertChange extends Change {
 
   // https://github.com/eulerto/wal2json/blob/f81bf7af09324da656be87dfd53d20741c01e1e0/wal2json.c#L969
   columnnames: Array<string>;
-  columntypes: Array<string>;
+  columntypes: Array<string>; // with `include-types` option (default true)
+  columntypeoids: Array<number>; // with `include-type-oids` option (default false)
   columnvalues: Array<any>;
 }
 
@@ -43,7 +45,8 @@ export interface UpdateChange extends Change {
 
   // https://github.com/eulerto/wal2json/blob/f81bf7af09324da656be87dfd53d20741c01e1e0/wal2json.c#L973
   columnnames: Array<string>;
-  columntypes: Array<string>;
+  columntypes: Array<string>; // with `include-types` option (default true)
+  columntypeoids: Array<number>; // with `include-type-oids` option (default false)
   columnvalues: Array<any>;
 
   // https://github.com/eulerto/wal2json/blob/f81bf7af09324da656be87dfd53d20741c01e1e0/wal2json.c#L992-L1003
@@ -57,16 +60,26 @@ export interface DeleteChange extends Change {
   oldkeys: Keys;
 }
 
+const parse = (value: any, typeOid: number) => {
+  if (value === null) return null;
+  // wal2json always outputs `bool`s as boolean, not as string, irregardless of `numeric-data-types-as-string`.
+  if (typeOid === pg.types.builtins.BOOL) return value;
+  // FIXME: this should use `client.getTypeParser` or have some other non-global option to configure type parsing
+  const parser = pg.types.getTypeParser(typeOid, "text");
+  return parser(value);
+};
+
 export const changeToRecord = (change: InsertChange | UpdateChange) => {
-  const { columnnames, columnvalues } = change;
-  return columnnames.reduce((memo, name, i) => {
-    memo[name] = columnvalues[i];
+  const { columnnames, columnvalues, columntypeoids } = change;
+  return columnnames.reduce<Record<string, any>>((memo, name, i) => {
+    memo[name] = parse(columnvalues[i], columntypeoids[i]);
     return memo;
   }, {});
 };
 
 export const changeToPk = (change: UpdateChange | DeleteChange) => {
-  return change.oldkeys.keyvalues;
+  const { keyvalues, keytypeoids } = change.oldkeys;
+  return keyvalues.map((value, i) => parse(value, keytypeoids[i]));
 };
 
 interface Payload {
@@ -173,7 +186,7 @@ export default class PgLogicalDecoding extends EventEmitter {
     await this.trackSelf(client);
     try {
       const { rows } = await client.query({
-        text: `SELECT lsn, data FROM pg_catalog.pg_logical_slot_get_changes($1, $2, $3, 'add-tables', $4::text)`,
+        text: `SELECT lsn, data FROM pg_catalog.pg_logical_slot_get_changes($1, $2, $3, 'add-tables', $4::text, 'include-types', 'f', 'include-type-oids', 't', 'numeric-data-types-as-string', 't')`,
         values: [this.slotName, uptoLsn, uptoNchanges, this.tablePattern],
         rowMode: "array",
       });
