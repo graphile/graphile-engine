@@ -94,9 +94,12 @@ const toLsnData = ([lsn, data]: [string, string]): Payload => ({
   data: JSON.parse(data),
 });
 
-interface Options {
+export interface LdsOptions {
+  /** The 'add-tables' wal2json parameter. Defaults to `*.*`. */
   tablePattern?: string;
+  /** The [replication slot](https://www.postgresql.org/docs/current/logicaldecoding-explanation.html#LOGICALDECODING-REPLICATION-SLOTS) identifier. Defaults to `postgraphile`. */
   slotName?: string;
+  /** Whether `.createSlot()` should create a temporary replication slot which will be limited to the `client` session and gets cleaned up automatically. Defaults to `false`. */
   temporary?: boolean;
 }
 
@@ -108,7 +111,7 @@ export default class PgLogicalDecoding extends EventEmitter {
   private pool: pg.Pool | null;
   private client: Promise<pg.PoolClient> | null;
 
-  constructor(connectionString: string, options?: Options) {
+  constructor(connectionString: string, options?: LdsOptions) {
     super();
     this.connectionString = connectionString;
     const {
