@@ -1,9 +1,5 @@
 /* eslint-disable no-console,curly */
-import PgLogicalDecoding, {
-  changeToRecord,
-  changeToPk,
-  LdsOptions,
-} from "./pg-logical-decoding";
+import PgLogicalDecoding, { LdsOptions } from "./pg-logical-decoding";
 import FatalError from "./fatal-error";
 
 export interface Options extends LdsOptions {
@@ -108,23 +104,24 @@ export default async function subscribeToLogicalDecoding(
                 _: "insertC",
                 schema,
                 table,
-                data: changeToRecord(change),
+                data: client.changeToRecord(change),
               };
               callback(announcement);
             } else if (change.kind === "update") {
+              const data = client.changeToRecord(change);
               const rowAnnouncement: UpdateRowAnnouncement = {
                 _: "update",
                 schema,
                 table,
-                keys: changeToPk(change),
-                data: changeToRecord(change),
+                keys: client.changeToPk(change),
+                data,
               };
               callback(rowAnnouncement);
               const collectionAnnouncement: UpdateCollectionAnnouncement = {
                 _: "updateC",
                 schema,
                 table,
-                data: changeToRecord(change),
+                data,
               };
               callback(collectionAnnouncement);
             } else if (change.kind === "delete") {
@@ -132,7 +129,7 @@ export default async function subscribeToLogicalDecoding(
                 _: "delete",
                 schema,
                 table,
-                keys: changeToPk(change),
+                keys: client.changeToPk(change),
               };
               callback(announcement);
             } else {

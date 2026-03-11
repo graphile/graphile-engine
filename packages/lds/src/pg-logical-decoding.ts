@@ -60,27 +60,7 @@ export interface DeleteChange extends Change {
   oldkeys: Keys;
 }
 
-const parse = (value: any, typeOid: number) => {
-  if (value === null) return null;
-  // wal2json always outputs `bool`s as boolean, not as string, irregardless of `numeric-data-types-as-string`.
-  if (typeOid === pg.types.builtins.BOOL) return value;
-  // FIXME: this should use `client.getTypeParser` or have some other non-global option to configure type parsing
-  const parser = pg.types.getTypeParser(typeOid, "text");
-  return parser(value);
-};
-
-export const changeToRecord = (change: InsertChange | UpdateChange) => {
-  const { columnnames, columnvalues, columntypeoids } = change;
-  return columnnames.reduce<Record<string, any>>((memo, name, i) => {
-    memo[name] = parse(columnvalues[i], columntypeoids[i]);
-    return memo;
-  }, {});
-};
-
-export const changeToPk = (change: UpdateChange | DeleteChange) => {
-  const { keyvalues, keytypeoids } = change.oldkeys;
-  return keyvalues.map((value, i) => parse(value, keytypeoids[i]));
-};
+const id = <T>(value: T): T => value;
 
 interface Payload {
   lsn: string;
@@ -101,6 +81,8 @@ export interface LdsOptions {
   slotName?: string;
   /** Whether `.createSlot()` should create a temporary replication slot which will be limited to the `client` session and gets cleaned up automatically. Defaults to `false`. */
   temporary?: boolean;
+  /** (Custom) [type parsers](https://node-postgres.com/features/queries#types) to deserialise the wal2json column string values. Pass `pg.types` to get the default type parsing. Defaults to `undefined`, that is raw values will get emitted. */
+  types?: pg.CustomTypesConfig;
 }
 
 export default class PgLogicalDecoding extends EventEmitter {
@@ -110,6 +92,7 @@ export default class PgLogicalDecoding extends EventEmitter {
   private tablePattern: string;
   private pool: pg.Pool | null;
   private client: Promise<pg.PoolClient> | null;
+  private readonly parse: (value: any, typeOid: number) => any;
 
   constructor(connectionString: string, options?: LdsOptions) {
     super();
@@ -118,10 +101,20 @@ export default class PgLogicalDecoding extends EventEmitter {
       tablePattern = "*.*",
       slotName = "postgraphile",
       temporary = false,
+      types,
     } = options || {};
     this.tablePattern = tablePattern;
     this.slotName = slotName;
     this.temporary = temporary;
+    this.parse = types
+      ? (value: any, typeOid: number) => {
+          if (value === null) return null;
+          // wal2json always outputs `bool`s as boolean, not as string, irregardless of `numeric-data-types-as-string`.
+          if (typeOid === pg.types.builtins.BOOL) return value;
+          const parser = types.getTypeParser(typeOid, "text");
+          return parser(value);
+        }
+      : id;
     // We just use the pool to get better error handling
     this.pool = new pg.Pool({
       connectionString: this.connectionString,
@@ -206,6 +199,23 @@ export default class PgLogicalDecoding extends EventEmitter {
       }
       throw e;
     }
+  }
+
+  public changeToRecord(
+    change: InsertChange | UpdateChange
+  ): Record<string, any> {
+    const { columnnames, columnvalues, columntypeoids } = change;
+    return columnnames.reduce<Record<string, any>>((memo, name, i) => {
+      memo[name] = this.parse(columnvalues[i], columntypeoids[i]);
+      return memo;
+    }, {});
+  }
+
+  public changeToPk(change: UpdateChange | DeleteChange): any[] {
+    const { keyvalues, keytypeoids } = change.oldkeys;
+    return this.parse == id
+      ? keyvalues
+      : keyvalues.map((value, i) => this.parse(value, keytypeoids[i]));
   }
 
   public async close() {
