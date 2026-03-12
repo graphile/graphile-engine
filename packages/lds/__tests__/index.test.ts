@@ -28,11 +28,12 @@ test("gets expected data, cleans up, doesn't receive data after cleanup", async 
   await sub.close();
   expect(mockCallback).toHaveBeenCalledTimes(4);
   // Now run a new mutation, and expect the mockCallback not to have been called
-  await withClient(DATABASE_URL, pgClient =>
-    pgClient.query(
+  await withClient(DATABASE_URL, async pgClient => {
+    await pgClient.query(
       "insert into app_public.foo(name) values ('temp') returning id"
-    )
-  );
+    );
+    await sleep(100);
+  });
   expect(mockCallback).toHaveBeenCalledTimes(4);
 
   const {
