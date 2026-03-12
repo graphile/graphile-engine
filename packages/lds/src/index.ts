@@ -1,15 +1,10 @@
 /* eslint-disable no-console,curly */
-import PgLogicalDecoding, {
-  changeToRecord,
-  changeToPk,
-} from "./pg-logical-decoding";
+import PgLogicalDecoding, { LdsOptions } from "./pg-logical-decoding";
 import FatalError from "./fatal-error";
 
-export interface Options {
-  slotName?: string;
-  tablePattern?: string;
+export interface Options extends LdsOptions {
+  /** Number of milliseconds between polls. Defaults to `200`. */
   sleepDuration?: number;
-  temporary?: boolean;
 }
 
 const DROP_STALE_SLOTS_INTERVAL = 15 * 60 * 1000;
@@ -57,18 +52,9 @@ export default async function subscribeToLogicalDecoding(
   callback: AnnounceCallback,
   options: Options = {}
 ): Promise<LDSubscription> {
-  const {
-    slotName = "postgraphile",
-    tablePattern = "*.*",
-    sleepDuration = 200,
-    temporary = false,
-  } = options;
+  const { sleepDuration = 200 } = options;
   let lastLsn: string | null = null;
-  const client = new PgLogicalDecoding(connectionString, {
-    tablePattern,
-    slotName,
-    temporary,
-  });
+  const client = new PgLogicalDecoding(connectionString, options);
 
   // We must do this before we create the temporary slot, since errors will release a temporary slot immediately
   await client.dropStaleSlots();
@@ -81,7 +67,7 @@ export default async function subscribeToLogicalDecoding(
     } else if (e.code === "42710") {
       // Slot already exists; ignore.
     } else if (e.code === "42602") {
-      throw new FatalError(`Invalid slot name '${slotName}'?`, e);
+      throw new FatalError(`Invalid slot name '${client.slotName}'?`, e);
     } else {
       console.error(
         "An unhandled error occurred when attempting to create the replication slot:"
@@ -118,23 +104,24 @@ export default async function subscribeToLogicalDecoding(
                 _: "insertC",
                 schema,
                 table,
-                data: changeToRecord(change),
+                data: client.changeToRecord(change),
               };
               callback(announcement);
             } else if (change.kind === "update") {
+              const data = client.changeToRecord(change);
               const rowAnnouncement: UpdateRowAnnouncement = {
                 _: "update",
                 schema,
                 table,
-                keys: changeToPk(change),
-                data: changeToRecord(change),
+                keys: client.changeToPk(change),
+                data,
               };
               callback(rowAnnouncement);
               const collectionAnnouncement: UpdateCollectionAnnouncement = {
                 _: "updateC",
                 schema,
                 table,
-                data: changeToRecord(change),
+                data,
               };
               callback(collectionAnnouncement);
             } else if (change.kind === "delete") {
@@ -142,7 +129,7 @@ export default async function subscribeToLogicalDecoding(
                 _: "delete",
                 schema,
                 table,
-                keys: changeToPk(change),
+                keys: client.changeToPk(change),
               };
               callback(announcement);
             } else {
@@ -151,7 +138,7 @@ export default async function subscribeToLogicalDecoding(
           }
         }
       }
-      if (!temporary && nextStaleCheck < Date.now()) {
+      if (!client.temporary && nextStaleCheck < Date.now()) {
         // Roughly every 15 minutes, drop stale slots.
         nextStaleCheck = Date.now() + DROP_STALE_SLOTS_INTERVAL;
         client.dropStaleSlots().catch(e => {

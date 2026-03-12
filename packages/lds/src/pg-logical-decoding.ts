@@ -16,7 +16,8 @@ declare module "pg" {
  */
 interface Keys {
   keynames: Array<string>;
-  keytypes: Array<string>;
+  keytypes?: Array<string>; // with `include-types` option (default true)
+  keytypeoids?: Array<number>; // with `include-type-oids` option (default false)
   keyvalues: Array<any>;
 }
 
@@ -34,7 +35,8 @@ export interface InsertChange extends Change {
 
   // https://github.com/eulerto/wal2json/blob/f81bf7af09324da656be87dfd53d20741c01e1e0/wal2json.c#L969
   columnnames: Array<string>;
-  columntypes: Array<string>;
+  columntypes?: Array<string>; // with `include-types` option (default true)
+  columntypeoids?: Array<number>; // with `include-type-oids` option (default false)
   columnvalues: Array<any>;
 }
 
@@ -43,7 +45,8 @@ export interface UpdateChange extends Change {
 
   // https://github.com/eulerto/wal2json/blob/f81bf7af09324da656be87dfd53d20741c01e1e0/wal2json.c#L973
   columnnames: Array<string>;
-  columntypes: Array<string>;
+  columntypes?: Array<string>; // with `include-types` option (default true)
+  columntypeoids?: Array<number>; // with `include-type-oids` option (default false)
   columnvalues: Array<any>;
 
   // https://github.com/eulerto/wal2json/blob/f81bf7af09324da656be87dfd53d20741c01e1e0/wal2json.c#L992-L1003
@@ -57,18 +60,6 @@ export interface DeleteChange extends Change {
   oldkeys: Keys;
 }
 
-export const changeToRecord = (change: InsertChange | UpdateChange) => {
-  const { columnnames, columnvalues } = change;
-  return columnnames.reduce((memo, name, i) => {
-    memo[name] = columnvalues[i];
-    return memo;
-  }, {});
-};
-
-export const changeToPk = (change: UpdateChange | DeleteChange) => {
-  return change.oldkeys.keyvalues;
-};
-
 interface Payload {
   lsn: string;
   data: {
@@ -81,37 +72,67 @@ const toLsnData = ([lsn, data]: [string, string]): Payload => ({
   data: JSON.parse(data),
 });
 
-interface Options {
+export interface LdsOptions {
+  /** The 'add-tables' wal2json parameter. Defaults to `*.*`. */
   tablePattern?: string;
+  /** The [replication slot](https://www.postgresql.org/docs/current/logicaldecoding-explanation.html#LOGICALDECODING-REPLICATION-SLOTS) identifier. Defaults to `postgraphile`. */
   slotName?: string;
+  /** Whether `.createSlot()` should create a temporary replication slot which will be limited to the `client` session and gets cleaned up automatically. Defaults to `false`. */
   temporary?: boolean;
+  /** (Custom) [type parsers](https://node-postgres.com/features/queries#types) to deserialise the wal2json column string values. Pass `pg.types` to get the default type parsing. Defaults to `undefined`, that is raw values will get emitted. */
+  types?: pg.CustomTypesConfig;
+  /** Extra [parameters to be passed to wal2json](https://github.com/eulerto/wal2json?tab=readme-ov-file#parameters). Use e.g. `{'numeric-data-types-as-string', 't'}` to make the type parsers apply to numeric values. */
+  params?: Partial<Record<string, string>>;
 }
 
 export default class PgLogicalDecoding extends EventEmitter {
   public readonly slotName: string;
   public readonly temporary: boolean;
-  private connectionString: string;
-  private tablePattern: string;
+  private readonly getChangesQueryText: string;
+  private readonly parse: (value: any, typeOid: number) => any;
   private pool: pg.Pool | null;
   private client: Promise<pg.PoolClient> | null;
 
-  constructor(connectionString: string, options?: Options) {
+  constructor(connectionString: string, options?: LdsOptions) {
     super();
-    this.connectionString = connectionString;
     const {
       tablePattern = "*.*",
       slotName = "postgraphile",
       temporary = false,
+      types,
+      params,
     } = options || {};
-    this.tablePattern = tablePattern;
     this.slotName = slotName;
     this.temporary = temporary;
+    const parametersSql = Object.entries({
+      "add-tables": tablePattern != "*.*" ? tablePattern : null,
+      "include-types": "f", // type names are unnecessary
+      "include-type-oids": types ? "t" : null,
+      "numeric-data-types-as-string": types ? "t" : null,
+      ...params,
+    })
+      .flatMap(entry => (typeof entry[1] == "string" ? entry : []))
+      .map(pg.Client.prototype.escapeLiteral)
+      .join(", ");
+    this.getChangesQueryText = `SELECT lsn, data FROM pg_catalog.pg_logical_slot_get_changes($1, $2, $3, ${parametersSql})`;
+    this.parse = types
+      ? (value: any, typeOid: number) => {
+          if (value === null) return null;
+          // wal2json always outputs `bool`s as boolean
+          if (typeof value === "boolean") return value; // assert: typeOid === pg.types.builtins.BOOL
+          // wal2json outputs numeric data as numbers, unless `numeric-data-types-as-string` is set
+          if (typeof value === "number") return value;
+          const parser = types.getTypeParser(typeOid, "text");
+          return parser(value);
+        }
+      : (value, _) => value;
     // We just use the pool to get better error handling
     this.pool = new pg.Pool({
-      connectionString: this.connectionString,
+      connectionString,
       max: 1,
     });
     this.pool.on("error", this.onPoolError);
+    this.client = null;
   }
 
   public async dropStaleSlots() {
@@ -172,9 +193,9 @@ export default class PgLogicalDecoding extends EventEmitter {
     const client = await this.getClient();
     await this.trackSelf(client);
     try {
-      const { rows } = await client.query({
-        text: `SELECT lsn, data FROM pg_catalog.pg_logical_slot_get_changes($1, $2, $3, 'add-tables', $4::text)`,
-        values: [this.slotName, uptoLsn, uptoNchanges, this.tablePattern],
+      const { rows } = await client.query<[lsn: string, data: string]>({
+        text: this.getChangesQueryText,
+        values: [this.slotName, uptoLsn, uptoNchanges],
         rowMode: "array",
       });
       return rows.map(toLsnData);
@@ -190,6 +211,31 @@ export default class PgLogicalDecoding extends EventEmitter {
       }
       throw e;
     }
+  }
+
+  public changeToRecord(
+    change: InsertChange | UpdateChange
+  ): Record<string, any> {
+    const { columnnames, columnvalues, columntypeoids } = change;
+    return columnnames.reduce<Record<string, any>>(
+      columntypeoids
+        ? (memo, name, i) => {
+            memo[name] = this.parse(columnvalues[i], columntypeoids[i]);
+            return memo;
+          }
+        : (memo, name, i) => {
+            memo[name] = columnvalues[i];
+            return memo;
+          },
+      {}
+    );
+  }
+
+  public changeToPk(change: UpdateChange | DeleteChange): any[] {
+    const { keyvalues, keytypeoids } = change.oldkeys;
+    return keytypeoids
+      ? keyvalues.map((value, i) => this.parse(value, keytypeoids[i]))
+      : keyvalues;
   }
 
   public async close() {

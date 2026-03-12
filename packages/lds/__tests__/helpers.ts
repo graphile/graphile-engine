@@ -1,5 +1,5 @@
 import * as pg from "pg";
-import PgLogicalDecoding from "../src/pg-logical-decoding";
+import PgLogicalDecoding, { LdsOptions } from "../src/pg-logical-decoding";
 
 export const DATABASE_URL = process.env.LDS_TEST_DATABASE_URL || "lds_test";
 export { PoolClient } from "pg";
@@ -46,12 +46,14 @@ export async function withLdAndClient<T = void>(
 }
 
 export async function withLd<T = void>(
-  callback: (ld: PgLogicalDecoding) => Promise<T>
+  callback: (ld: PgLogicalDecoding) => Promise<T>,
+  options?: LdsOptions
 ): Promise<T> {
   const slotName = "get_ld";
   const ld = new PgLogicalDecoding(DATABASE_URL, {
     slotName,
     temporary: true,
+    ...options,
   });
   await ld.createSlot();
   try {

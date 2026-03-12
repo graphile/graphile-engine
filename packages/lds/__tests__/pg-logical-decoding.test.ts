@@ -1,5 +1,13 @@
-import PgLogicalDecoding from "../src/pg-logical-decoding";
-import { tryDropSlot, DATABASE_URL, query, withLdAndClient } from "./helpers";
+import * as assert from "assert";
+import * as pg from "pg";
+import PgLogicalDecoding, { LdsOptions } from "../src/pg-logical-decoding";
+import {
+  tryDropSlot,
+  DATABASE_URL,
+  query,
+  withLdAndClient,
+  withLd,
+} from "./helpers";
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -271,3 +279,90 @@ test("multiple notifications", () =>
     const changes3 = await ld.getChanges();
     expect(changes3.length).toEqual(0);
   }));
+
+describe("parse results for", () => {
+  async function getUpdate(options: LdsOptions) {
+    const {
+      rows: [{ id }],
+    } = await query(
+      `insert into app_public.foo(name) values ('john doe') returning id;`
+    );
+    return withLd(async ld => {
+      await query(
+        `update app_public.foo set name = 'jane doe' where id = $1;`,
+        [id]
+      );
+      const rows = await ld.getChanges();
+      const change = rows[0].data.change[0];
+      assert.strictEqual(change.kind, "update" as const);
+      return {
+        id,
+        keys: ld.changeToPk(change),
+        data: ld.changeToRecord(change),
+        change,
+      };
+    }, options);
+  }
+
+  test("options without `types` should contain raw wal2json output", async () => {
+    const { id, keys, data } = await getUpdate({});
+    expect(keys).toEqual([id]);
+    expect(data).toEqual({
+      id,
+      name: "jane doe",
+      created_at: expect.any(String), // .stringMatching(isoDateRegex)
+      updated_at: expect.any(String), // .stringMatching(isoDateRegex)
+    });
+  });
+  test("options with `types` set to pg-types should parse output", async () => {
+    const getTypeParser = jest.fn(pg.types.getTypeParser); // like jest.spyOn(pg.types, "getTypeParser") but not globally shared
+    const { id, keys, data } = await getUpdate({
+      types: { getTypeParser },
+    });
+    expect(keys).toEqual([id]);
+    expect(data.name).toEqual("jane doe");
+    expect(data.created_at).toEqual(expect.any(Date));
+    expect(data.updated_at).toEqual(expect.any(Date));
+    expect(getTypeParser).toHaveBeenCalledTimes(5);
+    expect(getTypeParser.mock.calls).toEqual([
+      // in changeToPk (id)
+      [pg.types.builtins.INT4, "text"],
+      // in changeToRecord (id, name, created_at, updated_at)
+      [pg.types.builtins.INT4, "text"],
+      [pg.types.builtins.TEXT, "text"],
+      [pg.types.builtins.TIMESTAMPTZ, "text"],
+      [pg.types.builtins.TIMESTAMPTZ, "text"],
+    ]);
+  });
+  test("options with `include-type-oids` overwritten should not have been parsed by `types`", async () => {
+    const getTypeParser = jest.fn();
+    const { id, keys } = await getUpdate({
+      types: { getTypeParser },
+      params: { "include-type-oids": "f" },
+    });
+    expect(keys).toEqual([String(id)]); // `numeric-data-types-as-string` still enabled
+    expect(getTypeParser).not.toHaveBeenCalled();
+  });
+  test("options with `types` set to pg-types should ignore numbers in output", async () => {
+    const { id, keys, data } = await getUpdate({
+      types: pg.types,
+      params: { "numeric-data-types-as-string": "f" },
+    });
+    expect(keys).toEqual([id]);
+    expect(data.name).toEqual("jane doe");
+    expect(data.created_at).toEqual(expect.any(Date));
+  });
+  test("options with `include-pk` and `include-types` set the change should have the respective properties", async () => {
+    const { change } = await getUpdate({
+      params: { "include-pk": "t", "include-types": "t" },
+    });
+    expect(change.columntypes).toEqual([
+      "integer",
+      "text",
+      "timestamp with time zone",
+      "timestamp with time zone",
+    ]);
+    expect(change).toHaveProperty("pk");
+    expect((change as any).pk.pknames).toEqual(["id"]);
+  });
+});
